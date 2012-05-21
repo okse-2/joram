@@ -132,11 +132,29 @@
     </s1>
 
     <s1 name="Thanks">
-      <s2 name="YourKit">
+    <table width="100%">
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://www.yourkit.com/">
+      <img src="images/partners/yourkit.jpg" alt="YourKit logo" border="0" height="110" width="210"/></a>
+      </td>
+      <td>
         <p>Thanks to the people at <a href="http://www.yourkit.com/">YourKit</a> for providing us a free license
-        for their <a href="http://www.yourkit.com/">Java profiler</a>. It will be very useful in optimizing future
-        releases of Joram.</p>
-      </s2>
+        for <a href="http://www.yourkit.com/">YourKit Java profiler</a> the industry leader in Java Profiling.</p>
+        <p>It will be very useful in optimizing future releases of Joram.</p>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://http://www.jetbrains.com/idea/">
+      <img src="images/partners/intellijidea-269x139.jpg" alt="IntelliJ IDEA logo" border="0" height="115" width="210"/></a>
+      </td>
+      <td>
+        <p>Thanks to the people at <a href="http://http://www.jetbrains.com">JetBrains</a> for providing us a
+        free license for their <a href="http://http://www.jetbrains.com/idea/">Intelligent Java IDE</a>.</p>
+      </td>
+    </tr>
+    </table>		
     </s1>
 
     <s1 name="Initial partners">
