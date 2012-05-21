@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -90,8 +90,14 @@ abstract class MessageConsumerListener implements ReplyListener {
   
   private String selector;
   
+  private String destName;
+  
+  public final String getDestName() {
+    return destName;
+  }
+  
   private String targetName;
-
+  
   /**
    * The identifier of the subscription request.
    */ 
@@ -135,6 +141,7 @@ abstract class MessageConsumerListener implements ReplyListener {
   MessageConsumerListener(boolean queueMode,
                           boolean durable,
                           String selector,
+                          String destName,
                           String targetName,
                           MessageListener listener,
                           int queueMessageReadMax,
@@ -145,7 +152,7 @@ abstract class MessageConsumerListener implements ReplyListener {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "MessageConsumerListener(" + queueMode +
-                 ',' + durable + ',' + selector + ',' + targetName + 
+                 ',' + durable + ',' + selector + ',' + destName  + ',' + targetName + 
                  ',' + listener + ',' + queueMessageReadMax + 
                  ',' + topicActivationThreshold +
                  ',' + topicPassivationThreshold +
@@ -153,6 +160,7 @@ abstract class MessageConsumerListener implements ReplyListener {
     this.queueMode = queueMode;
     this.durable = durable;
     this.selector = selector;
+    this.destName = destName;
     this.targetName = targetName;
     this.listener = listener;
     this.queueMessageReadMax = queueMessageReadMax;

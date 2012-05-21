@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -281,13 +281,15 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
       if (messageListener == null) {
         sess.removeMessageListener(mcl, true);
         mcl = null;
-      } else throw new IllegalStateException(
-      "Message listener not null");
+      } else {
+        throw new IllegalStateException("Message listener already exist");
+      }
     } else {
       if (messageListener != null) {
         mcl = sess.addMessageListener(new SingleSessionConsumer(queueMode,
                                                                 durableSubscriber,
                                                                 selector,
+                                                                dest.getAdminName(),
                                                                 targetName,
                                                                 sess,
                                                                 messageListener));
@@ -430,13 +432,13 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     }
   }
 
-  void activateMessageInput() throws JMSException {
-    if (mcl != null) 
-      mcl.activateMessageInput();
-  }
-
-  void passivateMessageInput() throws JMSException {
-    if (mcl != null) 
-      mcl.passivateMessageInput();
-  }
+//  void activateMessageInput() throws JMSException {
+//    if (mcl != null) 
+//      mcl.activateMessageInput();
+//  }
+//
+//  void passivateMessageInput() throws JMSException {
+//    if (mcl != null) 
+//      mcl.passivateMessageInput();
+//  }
 }

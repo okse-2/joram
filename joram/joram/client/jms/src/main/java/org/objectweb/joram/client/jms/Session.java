@@ -83,7 +83,7 @@ import fr.dyade.aaa.common.Debug;
 public class Session implements javax.jms.Session {
 
   public static Logger logger = Debug.getLogger(Session.class.getName());
-
+  public static Logger trace = Debug.getLogger(Session.class.getName() + ".Message");
   /**
    * Status of the session
    */
@@ -1719,7 +1719,10 @@ public class Session implements javax.jms.Session {
               prepareAck(targetName, msgId, queueMode);
             }
             msg.session = this;
-            //Add in interception...
+            if (trace.isLoggable(BasicLevel.INFO))
+              trace.log(BasicLevel.INFO,
+                         this + " handling message=" + msg + ", from=" + mc.dest + '/' + mc.targetName);
+            // Executes IN interceptors
             if ((inInterceptors != null) && (!inInterceptors.isEmpty())) {
               for (Iterator it = inInterceptors.iterator(); it.hasNext();) {
                 MessageInterceptor interceptor = (MessageInterceptor) it.next();
@@ -1731,7 +1734,7 @@ public class Session implements javax.jms.Session {
                   interceptor.handle(msg, this);
                 } catch (Throwable t) {
                   if (logger.isLoggable(BasicLevel.WARN))
-                    logger.log(BasicLevel.WARN, "Warning while interception (continue anyway...)", t);
+                    logger.log(BasicLevel.WARN, "Error during interception (continue anyway...)", t);
                 }
               }
             }
@@ -1985,8 +1988,8 @@ public class Session implements javax.jms.Session {
   /**
    * Called by onMessages()
    */
-  void onMessage(org.objectweb.joram.shared.messages.Message momMsg, MessageConsumerListener mcl)
-      throws JMSException {
+  void onMessage(org.objectweb.joram.shared.messages.Message momMsg,
+                 MessageConsumerListener mcl) throws JMSException {
     String msgId = momMsg.id;
 
     if (!autoAck)
@@ -2003,7 +2006,26 @@ public class Session implements javax.jms.Session {
       return;
     }
     msg.session = this;
-    
+    if (trace.isLoggable(BasicLevel.INFO))
+      trace.log(BasicLevel.INFO,
+                 this + " handling message=" + msg + ", from=" + mcl.getDestName() + '/' + mcl.getTargetName());
+    // Executes IN interceptors
+    if ((inInterceptors != null) && (!inInterceptors.isEmpty())) {
+      for (Iterator it = inInterceptors.iterator(); it.hasNext();) {
+        MessageInterceptor interceptor = (MessageInterceptor) it.next();
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
+                     "Intercepting the message after receiving by " + interceptor.getClass().getName());
+
+        try {
+          interceptor.handle(msg, this);
+        } catch (Throwable t) {
+          if (logger.isLoggable(BasicLevel.WARN))
+            logger.log(BasicLevel.WARN, "Error during interception (continue anyway...)", t);
+        }
+      }
+    }
+
     try {
       if (messageListener == null) {
         // Standard JMS (MessageConsumer)
@@ -2078,6 +2100,9 @@ public class Session implements javax.jms.Session {
         throw mE;
       }
     }
+    if (trace.isLoggable(BasicLevel.INFO))
+      trace.log(BasicLevel.INFO,
+                 this + " sending message=" + joramMsg + ", to=" + dest);
     //Add out interception...
     if ((outInterceptors != null) && (!outInterceptors.isEmpty())) {
       for (Iterator it = outInterceptors.iterator(); it.hasNext();) {
