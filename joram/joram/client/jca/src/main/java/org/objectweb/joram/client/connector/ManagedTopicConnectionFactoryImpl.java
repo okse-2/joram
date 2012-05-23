@@ -38,6 +38,7 @@ import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.SecurityException;
 
+import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XATopicHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
@@ -47,6 +48,9 @@ import org.objectweb.joram.client.jms.local.XATopicLocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATopicTcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * A <code>ManagedTopicConnectionFactoryImpl</code> instance manages
@@ -55,6 +59,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryImpl {
 
   private static final long serialVersionUID = 1L;
+  
+  public static Logger logger = Debug.getLogger(ManagedTopicConnectionFactoryImpl.class.getName());
 
   /**
    * Constructs a <code>ManagedTopicConnectionFactoryImpl</code> instance.
@@ -71,9 +77,8 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
    * @exception ResourceException  Never thrown.
    */
   public Object createConnectionFactory(ConnectionManager cxManager) throws ResourceException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " createConnectionFactory(" + cxManager + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createConnectionFactory(" + cxManager + ")");
 
     return new OutboundTopicConnectionFactory(this, cxManager);
   }
@@ -85,8 +90,8 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
    * @exception ResourceException  Never thrown.
    */
   public Object createConnectionFactory() throws ResourceException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createConnectionFactory()");
 
     OutboundConnectionFactory factory =
       new OutboundTopicConnectionFactory(this, DefaultConnectionManager.getRef());
@@ -155,8 +160,10 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
   		}
   	}
 
-  	if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-  		AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createFactory factory = " + factory);
+  	((AbstractConnectionFactory) factory).setCnxJMXBeanBaseName(ra.jmxRootName+"#"+ra.getName());
+  	
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+  		logger.log(BasicLevel.DEBUG, this + " createFactory factory = " + factory);
   	
   	return factory;
   }
@@ -169,9 +176,8 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
  			 cnx = ((XATopicConnectionFactory) factory).createXATopicConnection(userName, password);
  		 else
  			 cnx = factory.createXAConnection(userName, password);
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                      this + " createXAConnection cnx = " + cnx);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, this + " createXAConnection cnx = " + cnx);
     } catch (IllegalStateException exc) {
       if (out != null)
         out.print("Could not access the JORAM server: " + exc);
