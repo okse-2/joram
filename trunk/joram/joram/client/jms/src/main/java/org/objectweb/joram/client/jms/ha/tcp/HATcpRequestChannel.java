@@ -39,6 +39,8 @@ import org.objectweb.joram.shared.security.Identity;
 public class HATcpRequestChannel implements RequestChannel {
 
   private ReliableTcpClient tcpClient;
+  
+  private Identity identity = null;
 
   /**
    * Creates a <code>HATcpConnection</code> instance.
@@ -57,6 +59,7 @@ public class HATcpRequestChannel implements RequestChannel {
          params, 
          identity,
          "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+    this.identity = identity;
   }
   
   public HATcpRequestChannel() {
@@ -133,5 +136,9 @@ public class HATcpRequestChannel implements RequestChannel {
 
   public void closing() {
     tcpClient.stopReconnections();
+  }
+  
+  public Identity getIdentity() {
+    return identity;
   }
 }

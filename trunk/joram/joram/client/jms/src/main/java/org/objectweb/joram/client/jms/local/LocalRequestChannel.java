@@ -176,4 +176,8 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
   public void closing() {
     // Nothing to do.
   }
+  
+  public Identity getIdentity() {
+    return identity;
+  }
 }

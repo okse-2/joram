@@ -132,4 +132,8 @@ public class HALocalRequestChannel implements RequestChannel {
   public void closing() {
     // Nothing to do.
   }
+  
+  public Identity getIdentity() {
+    return identity;
+  }
 }

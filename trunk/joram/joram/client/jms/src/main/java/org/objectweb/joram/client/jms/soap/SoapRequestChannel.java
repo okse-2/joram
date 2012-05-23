@@ -409,4 +409,8 @@ public class SoapRequestChannel implements RequestChannel {
   public void closing() {
     closing = true;
   }
+
+  public Identity getIdentity() {
+    return identity;
+  }
 }
