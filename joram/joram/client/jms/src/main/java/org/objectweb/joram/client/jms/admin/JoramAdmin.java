@@ -745,6 +745,10 @@ public class JoramAdmin implements AdminItf, JoramAdminMBean {
   }
 
   transient protected String JMXBaseName = null;
+  
+  public String getJMXBaseName() {
+    return JMXBaseName;
+  }
 
   public void registerMBean(String base) {
     JMXBaseName = base;
