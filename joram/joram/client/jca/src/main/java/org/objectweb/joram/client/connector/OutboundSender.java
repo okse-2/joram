@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2012 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -28,32 +29,34 @@ import javax.jms.MessageProducer;
 import javax.jms.Queue;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>OutboundSender</code> instance wraps a JMS producer
  * for a component involved in PTP outbound messaging. 
  */
-public class OutboundSender extends OutboundProducer
-                            implements javax.jms.QueueSender
-{
+public class OutboundSender extends OutboundProducer implements javax.jms.QueueSender {
+  
+  public static Logger logger = Debug.getLogger(OutboundSender.class.getName());
+  
   /**
    * Constructs an <code>OutboundSender</code> instance.
    */
   OutboundSender(MessageProducer producer, OutboundSession session) {
     super(producer, session);
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    "OutboundSender(" + producer + 
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "OutboundSender(" + producer + 
                                     ", " + session + ")");
   }
 
  
   /** Delegates the call to the wrapped producer. */
   public Queue getQueue() throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " getQueue() = " + producer.getDestination());
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " getQueue() = " + producer.getDestination());
 
     checkValidity();
     return (Queue) producer.getDestination();
@@ -66,9 +69,8 @@ public class OutboundSender extends OutboundProducer
                    int priority,
                    long timeToLive)
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " send(" + queue + 
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " send(" + queue + 
                                     ", " + message + 
                                     ", " + deliveryMode + 
                                     ", " + priority + 
@@ -81,10 +83,8 @@ public class OutboundSender extends OutboundProducer
   /** Delegates the call to the wrapped producer. */
   public void send(Queue queue, Message message) 
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " send(" + queue + 
-                                    ", " + message + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " send(" + queue + ", " + message + ")");
 
     checkValidity();
     producer.send(queue, message);
