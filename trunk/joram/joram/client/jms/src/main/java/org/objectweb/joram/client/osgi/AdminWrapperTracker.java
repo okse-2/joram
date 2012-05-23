@@ -23,7 +23,6 @@
 package org.objectweb.joram.client.osgi;
 
 import org.objectweb.joram.client.jms.admin.AdminItf;
-import org.objectweb.joram.client.jms.admin.AdminWrapper;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.osgi.framework.BundleContext;
