@@ -26,16 +26,21 @@ package org.objectweb.joram.client.connector;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
+import javax.jms.TopicConnectionFactory;
 import javax.resource.spi.ConnectionManager;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>OutboundTopicConnectionFactory</code> instance is used for
  * getting a PubSub connection to an underlying JORAM server.
  */
-public class OutboundTopicConnectionFactory extends OutboundConnectionFactory implements
-    javax.jms.TopicConnectionFactory {
+public class OutboundTopicConnectionFactory extends OutboundConnectionFactory implements TopicConnectionFactory {
+  
+  public static Logger logger = Debug.getLogger(OutboundTopicConnectionFactory.class.getName());
   
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
@@ -50,10 +55,8 @@ public class OutboundTopicConnectionFactory extends OutboundConnectionFactory im
                                  ConnectionManager cxManager) {
     super(mcf, cxManager);
     
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    "OutboundTopicConnectionFactory(" + mcf + 
-                                    ", " + cxManager + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "OutboundTopicConnectionFactory(" + mcf + ", " + cxManager + ")");
   }
 
 
@@ -67,8 +70,8 @@ public class OutboundTopicConnectionFactory extends OutboundConnectionFactory im
    * @exception JMSException           Generic exception.
    */
   public javax.jms.TopicConnection createTopicConnection() throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createTopicConnection()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createTopicConnection()");
     
     return createTopicConnection(mcf.getUserName(), mcf.getPassword());
   }
@@ -85,10 +88,8 @@ public class OutboundTopicConnectionFactory extends OutboundConnectionFactory im
   public javax.jms.TopicConnection createTopicConnection(String userName, String password)
     throws JMSException {
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " createTopicConnection(" + userName + 
-                                    ", " + password + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createTopicConnection(" + userName + ", " + password + ")");
 
     try {
       TopicConnectionRequest cxRequest =
@@ -96,9 +97,8 @@ public class OutboundTopicConnectionFactory extends OutboundConnectionFactory im
 
       Object o = cxManager.allocateConnection(mcf, cxRequest);
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " createTopicConnection TopicConnection = " + o);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createTopicConnection TopicConnection = " + o);
 
       return (javax.jms.TopicConnection) o;
     } catch (javax.resource.spi.SecurityException exc) {

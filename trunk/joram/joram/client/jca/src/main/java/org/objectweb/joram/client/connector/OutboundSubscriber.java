@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2012 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -27,14 +28,18 @@ import javax.jms.MessageConsumer;
 import javax.jms.Topic;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>OutboundSubscriber</code> instance wraps a JMS PubSub consumer
  * for a component involved in outbound messaging. 
  */
-public class OutboundSubscriber extends OutboundConsumer
-                              implements javax.jms.TopicSubscriber
-{
+public class OutboundSubscriber extends OutboundConsumer implements javax.jms.TopicSubscriber {
+  
+  public static Logger logger = Debug.getLogger(OutboundSubscriber.class.getName());
+  
   /** Topic instance to consume messages from. */
   private Topic topic;
   /** NoLocal parameter. */
@@ -52,9 +57,8 @@ public class OutboundSubscriber extends OutboundConsumer
     this.topic = topic;
     this.noLocal = noLocal;
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    "OutboundSubscriber(" + topic +
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "OutboundSubscriber(" + topic +
                                     ", " + noLocal +
                                     ", " + consumer +
                                     ", " + session + ")");
@@ -63,8 +67,8 @@ public class OutboundSubscriber extends OutboundConsumer
 
   /** Returns the consumer's topic. */
   public Topic getTopic() throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getTopic()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " getTopic()");
     
     checkValidity();
     return topic;
@@ -72,8 +76,8 @@ public class OutboundSubscriber extends OutboundConsumer
 
   /** Returns the noLocal parameter. */
   public boolean getNoLocal() throws JMSException {
-   if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getNoLocal()");
+   if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " getNoLocal()");
 
     checkValidity();
     return noLocal;

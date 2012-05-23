@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2012 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -24,29 +25,31 @@ package org.objectweb.joram.client.connector;
 
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
+import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
-import javax.jms.Session;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>OutboundTopicSession</code> instance wraps a JMS TopicSession
  * (XA or not) for a component involved in PubSub outbound messaging.
  */
-public class OutboundTopicSession extends OutboundSession
-                                  implements javax.jms.TopicSession
-{
+public class OutboundTopicSession extends OutboundSession implements javax.jms.TopicSession {
+  
+  public static Logger logger = Debug.getLogger(OutboundTopicSession.class.getName());
+  
   /**
    * Constructs an <code>OutboundTopicSession</code> instance.
    */
   OutboundTopicSession(Session sess, OutboundConnection cnx) {
     super(sess, cnx);
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    "OutboundTopicSession(" + sess +
-                                    ", " + cnx + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "OutboundTopicSession(" + sess + ", " + cnx + ")");
   }
 
   /**
@@ -57,10 +60,8 @@ public class OutboundTopicSession extends OutboundSession
                        boolean transacted) {
     super(sess, cnx, transacted);
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    "OutboundTopicSession(" + sess +
-                                    ", " + cnx + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "OutboundTopicSession(" + sess + ", " + cnx + ")");
   }
 
   /**
@@ -68,9 +69,8 @@ public class OutboundTopicSession extends OutboundSession
    */
   public javax.jms.TopicPublisher createPublisher(Topic topic)
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " createPublisher(" + topic + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createPublisher(" + topic + ")");
 
     checkValidity();
     return new OutboundPublisher(sess.createProducer(topic), this);
@@ -83,9 +83,8 @@ public class OutboundTopicSession extends OutboundSession
                                           String selector,
                                           boolean noLocal)
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " createSubscriber(" + topic + 
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createSubscriber(" + topic + 
                                     ", " + selector + 
                                     ", " + noLocal + ")");
 
@@ -99,10 +98,8 @@ public class OutboundTopicSession extends OutboundSession
    */
   public TopicSubscriber createSubscriber(Topic topic, String selector)
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " createSubscriber(" + topic + 
-                                    ", " + selector + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createSubscriber(" + topic + ", " + selector + ")");
 
     checkValidity();
     MessageConsumer cons = sess.createConsumer(topic, selector);
@@ -114,9 +111,8 @@ public class OutboundTopicSession extends OutboundSession
    */
   public TopicSubscriber createSubscriber(Topic topic) 
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " createSubscriber(" + topic + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createSubscriber(" + topic + ")");
 
     checkValidity();
     return new OutboundSubscriber(topic,

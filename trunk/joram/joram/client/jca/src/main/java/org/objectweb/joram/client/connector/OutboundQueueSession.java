@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2012 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -27,23 +28,25 @@ import javax.jms.Queue;
 import javax.jms.Session;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>OutboundQueueSession</code> instance wraps a JMS QueueSession
  * (XA or not) for a component involved in PTP outbound messaging.
  */
-public class OutboundQueueSession extends OutboundSession
-                                  implements javax.jms.QueueSession
-{
+public class OutboundQueueSession extends OutboundSession implements javax.jms.QueueSession {
+  
+  public static Logger logger = Debug.getLogger(OutboundQueueSession.class.getName());
+  
   /**
    * Constructs an <code>OutboundQueueSession</code> instance.
    */
   OutboundQueueSession(Session sess, OutboundConnection cnx) {
     super(sess, cnx);
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    "OutboundQueueSession(" + sess + 
-                                    ", " + cnx + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "OutboundQueueSession(" + sess + ", " + cnx + ")");
   }
 
   /**
@@ -53,10 +56,8 @@ public class OutboundQueueSession extends OutboundSession
                        OutboundConnection cnx,
                        boolean transacted) {
     super(sess, cnx, transacted);
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    "OutboundQueueSession(" + sess + 
-                                    ", " + cnx + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "OutboundQueueSession(" + sess + ", " + cnx + ")");
   }
 
   /**
@@ -64,8 +65,8 @@ public class OutboundQueueSession extends OutboundSession
    */
   public javax.jms.QueueSender createSender(Queue queue)
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createSender(" + queue + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createSender(" + queue + ")");
 
     checkValidity();
     return new OutboundSender(sess.createProducer(queue), this);
@@ -76,10 +77,8 @@ public class OutboundQueueSession extends OutboundSession
    */
   public javax.jms.QueueReceiver createReceiver(Queue queue, String selector)
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " createReceiver(" + queue + 
-                                    ", " + selector + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createReceiver(" + queue + ", " + selector + ")");
 
     checkValidity();
     return new OutboundReceiver(queue,
@@ -92,8 +91,8 @@ public class OutboundQueueSession extends OutboundSession
    */
   public javax.jms.QueueReceiver createReceiver(Queue queue)
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createReceiver(" + queue + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createReceiver(" + queue + ")");
 
     checkValidity();
     return new OutboundReceiver(queue, sess.createConsumer(queue), this);
