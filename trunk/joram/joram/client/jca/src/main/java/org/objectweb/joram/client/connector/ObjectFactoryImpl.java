@@ -28,12 +28,18 @@ import javax.naming.Name;
 import javax.naming.Reference;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * This class is a factory for building non managed outbound connection 
  * factories from their JNDI reference.
  */
 public class ObjectFactoryImpl implements javax.naming.spi.ObjectFactory {
+  
+  public static Logger logger = Debug.getLogger(ObjectFactoryImpl.class.getName());
+  
 	String cf =
 		"org.objectweb.joram.client.connector.OutboundConnectionFactory";
 	String qcf =
@@ -48,8 +54,8 @@ public class ObjectFactoryImpl implements javax.naming.spi.ObjectFactory {
 			Context ctx,
 			java.util.Hashtable env) throws Exception {
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getObjectInstance(" + obj + 
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " getObjectInstance(" + obj + 
                                     ", " + name +
                                     ", " + ctx +
                                     ", " + env + ")");
