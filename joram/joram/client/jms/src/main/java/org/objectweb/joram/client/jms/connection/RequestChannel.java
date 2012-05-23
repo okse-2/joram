@@ -26,6 +26,7 @@ import java.util.Timer;
 
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.security.Identity;
 
 public interface RequestChannel {
   
@@ -40,4 +41,6 @@ public interface RequestChannel {
   public void close();
 
   public void closing();
+  
+  public Identity getIdentity();
 }
