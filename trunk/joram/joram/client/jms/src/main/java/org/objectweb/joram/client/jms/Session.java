@@ -60,6 +60,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * Implements the <code>javax.jms.Session</code> interface.
@@ -80,7 +81,7 @@ import fr.dyade.aaa.common.Debug;
  * </ul>
  *  A session can create and service multiple message producers and consumers.
  */
-public class Session implements javax.jms.Session {
+public class Session implements javax.jms.Session, SessionMBean {
 
   public static Logger logger = Debug.getLogger(Session.class.getName());
   public static Logger trace = Debug.getLogger(Session.class.getName() + ".Message");
@@ -600,6 +601,35 @@ public class Session implements javax.jms.Session {
 //    outInterceptors = pOutInterceptors;
 //  }
 
+  public String getJMXBeanName() {
+    StringBuffer buf = new StringBuffer();
+    buf.append(cnx.getJMXBeanName());
+    buf.append(",session=").append(getClass().getSimpleName()).append("_").append(ident);
+    return buf.toString();
+  }
+
+  public String registerMBean() {
+    String JMXBeanName = getJMXBeanName();
+    try {
+      MXWrapper.registerMBean(this, JMXBeanName);
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Session.registerMBean: " + JMXBeanName, e);
+    }
+
+    return JMXBeanName;
+  }
+
+  public void unregisterMBean() {
+    try {
+      logger.log(BasicLevel.FATAL, "Session.unregisterMBean: " + getJMXBeanName());//NTA tmp
+      MXWrapper.unregisterMBean(getJMXBeanName());
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Destination.unregisterMBean: " + getJMXBeanName(), e);
+    }
+  }
+  
   /**
    * Opens a session.
    *
@@ -661,6 +691,8 @@ public class Session implements javax.jms.Session {
     //add interceptors...
     inInterceptors = cnx.getInInterceptors();
     outInterceptors = cnx.getOutInterceptors();
+    
+    registerMBean();
   }
 
   /**
@@ -672,10 +704,14 @@ public class Session implements javax.jms.Session {
     this.status = status;
   }
 
-  boolean isStarted() {
+  public boolean isStarted() {
     return (status == Status.START);
   }
 
+  public String getStatus() {
+    return Status.toString(status);
+  }
+  
   /**
    * Sets the session mode.
    */
@@ -685,6 +721,10 @@ public class Session implements javax.jms.Session {
     this.sessionMode = sessionMode;
   }
 
+  public String getSessionMode() {
+    return SessionMode.toString(sessionMode);
+  }
+  
   /**
    * Sets the request status.
    */
@@ -692,6 +732,10 @@ public class Session implements javax.jms.Session {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Session.setRequestStatus(" + RequestStatus.toString(requestStatus) + ')');
     this.requestStatus = requestStatus;
+  }
+  
+  public String getRequestStatus() {
+    return RequestStatus.toString(requestStatus);
   }
   
   /**
@@ -1383,6 +1427,7 @@ public class Session implements javax.jms.Session {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Session.close()");
     closer.close();
+    unregisterMBean();
   }
 
   /**
