@@ -23,10 +23,10 @@
  */
 package org.objectweb.joram.client.jms;
 
-import javax.jms.JMSException;
 import javax.jms.IllegalStateException;
-
-import org.objectweb.joram.client.jms.connection.RequestChannel;
+import javax.jms.InvalidDestinationException;
+import javax.jms.InvalidSelectorException;
+import javax.jms.JMSException;
 
 /**
  * Implements the <code>javax.jms.TopicConnection</code> interface.
@@ -36,15 +36,9 @@ public class TopicConnection extends Connection implements javax.jms.TopicConnec
   /**
    * Creates a <code>TopicConnection</code> instance.
    *
-   * @param factoryParameters  The factory parameters.
-   * @param requestChannel     The actual connection to wrap.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
    */
-  public TopicConnection(FactoryParameters factoryParameters,
-                         RequestChannel requestChannel) throws JMSException {
-    super(factoryParameters, requestChannel);
+  public TopicConnection() {
+    super();
   }
 
   /**

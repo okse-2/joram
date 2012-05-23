@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -26,9 +26,6 @@ package org.objectweb.joram.client.jms;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-
-import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 /**
  * Connection used within global transactions; an instance of this class
@@ -42,17 +39,9 @@ public class XAConnection extends Connection
 
   /**
    * Creates a <code>XAConnection</code> instance.
-   *
-   * @param factoryParameters  The factory parameters.
-   * @param requestChannel     The actual connection to wrap.
-   *
-   * @exception JMSSecurityException   If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
    */
-  public XAConnection(FactoryParameters factoryParameters,
-                      RequestChannel requestChannel)
-    throws JMSException {
-    super(factoryParameters, requestChannel);
+  public XAConnection() {
+    super();
     rm = new XAResourceMngr(this);
   }
 
@@ -64,8 +53,7 @@ public class XAConnection extends Connection
    */
   public javax.jms.Session
          createSession(boolean transacted, int acknowledgeMode)
-         throws JMSException
-  {
+         throws JMSException {
     return super.createSession(transacted, acknowledgeMode);
   }
 
@@ -74,8 +62,7 @@ public class XAConnection extends Connection
    *
    * @exception IllegalStateException  If the connection is closed.
    */
-  public javax.jms.XASession createXASession() throws JMSException
-  {
+  public javax.jms.XASession createXASession() throws JMSException {
     checkClosed();
     Session s = new Session(this, true, 0, getRequestMultiplexer());
     XASession xas = new XASession(this, s, rm);

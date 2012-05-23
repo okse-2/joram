@@ -23,10 +23,10 @@
  */
 package org.objectweb.joram.client.jms;
 
-import javax.jms.JMSException;
 import javax.jms.IllegalStateException;
-
-import org.objectweb.joram.client.jms.connection.RequestChannel;
+import javax.jms.InvalidDestinationException;
+import javax.jms.InvalidSelectorException;
+import javax.jms.JMSException;
 
 /**
  * Implements the <code>javax.jms.QueueConnection</code> interface.
@@ -34,16 +34,9 @@ import org.objectweb.joram.client.jms.connection.RequestChannel;
 public class QueueConnection extends Connection implements javax.jms.QueueConnection {
   /**
    * Creates a <code>QueueConnection</code> instance.
-   *
-   * @param factoryParameters  The factory parameters.
-   * @param requestChannel     The actual connection to wrap.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
    */
-  public QueueConnection(FactoryParameters factoryParameters,
-                         RequestChannel requestChannel) throws JMSException {
-    super(factoryParameters, requestChannel);
+  public QueueConnection() {
+    super();
   }
 
   /**

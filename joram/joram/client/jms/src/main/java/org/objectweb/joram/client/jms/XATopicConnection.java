@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -26,8 +26,6 @@ package org.objectweb.joram.client.jms;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
-import org.objectweb.joram.client.jms.connection.RequestChannel;
-
 /**
  * Implements the <code>javax.jms.XATopicConnection</code> interface.
  */
@@ -38,16 +36,9 @@ public class XATopicConnection extends TopicConnection implements javax.jms.XATo
 
   /**
    * Creates an <code>XATopicConnection</code> instance.
-   *
-   * @param factoryParameters  The factory parameters.
-   * @param requestChannel     The actual connection to wrap.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
    */
-  public XATopicConnection(FactoryParameters factoryParameters,
-                           RequestChannel requestChannel) throws JMSException {
-    super(factoryParameters, requestChannel);
+  public XATopicConnection() {
+    super();
     rm = new XAResourceMngr(this);
   }
 
