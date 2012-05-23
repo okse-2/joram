@@ -38,6 +38,7 @@ import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.SecurityException;
 
+import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAQueueHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
@@ -47,6 +48,9 @@ import org.objectweb.joram.client.jms.local.XAQueueLocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XAQueueTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * A <code>ManagedQueueConnectionFactoryImpl</code> instance manages
@@ -55,6 +59,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryImpl {
 
   private static final long serialVersionUID = 1L;
+  
+  public static Logger logger = Debug.getLogger(ManagedQueueConnectionFactoryImpl.class.getName());
 
   /**
    * Constructs a <code>ManagedQueueConnectionFactoryImpl</code> instance.
@@ -72,8 +78,8 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
    */
   public Object createConnectionFactory(ConnectionManager cxManager)
     throws ResourceException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory(" + cxManager + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createConnectionFactory(" + cxManager + ")");
 
     return new OutboundQueueConnectionFactory(this, cxManager);
   }
@@ -86,8 +92,8 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
    */
   public Object createConnectionFactory()
     throws ResourceException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createConnectionFactory()");
 
     OutboundConnectionFactory factory =
       new OutboundQueueConnectionFactory(this, DefaultConnectionManager.getRef());
@@ -156,9 +162,11 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
   			}
   		}
   	}
+  	
+  	((AbstractConnectionFactory) factory).setCnxJMXBeanBaseName(ra.jmxRootName+"#"+ra.getName());
 
-  	if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-  		AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createFactory factory = " + factory);
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+  		logger.log(BasicLevel.DEBUG, this + " createFactory factory = " + factory);
   	
   	return factory;
   }
@@ -171,9 +179,8 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
  			 cnx = ((XAQueueConnectionFactory) factory).createXAQueueConnection(userName, password);
  		 else
  			 cnx = factory.createXAConnection(userName, password);
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                      this + " createXAConnection cnx = " + cnx);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, this + " createXAConnection cnx = " + cnx);
     } catch (IllegalStateException exc) {
       if (out != null)
         out.print("Could not access the JORAM server: " + exc);
