@@ -18,9 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
- *                 Abdenbi Benammour
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): Abdenbi Benammour
  */
 package org.objectweb.joram.client.jms;
 
@@ -44,10 +43,12 @@ import org.objectweb.joram.shared.client.CnxConnectRequest;
 import org.objectweb.joram.shared.client.CnxStartRequest;
 import org.objectweb.joram.shared.client.CnxStopRequest;
 import org.objectweb.joram.shared.client.ConsumerSubRequest;
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * Implements the <code>javax.jms.Connection</code> interface.
@@ -70,7 +71,7 @@ import fr.dyade.aaa.common.Debug;
  * typical to leave the connection in stopped mode until setup is complete.
  * A message producer can send messages while a connection is stopped.
  */
-public class Connection implements javax.jms.Connection {
+public class Connection implements javax.jms.Connection, ConnectionMBean {
   public static Logger logger = Debug.getLogger(Connection.class.getName());
   
   /**
@@ -172,6 +173,8 @@ public class Connection implements javax.jms.Connection {
 
   private String stringImage = null;
   private int hashCode;
+  
+  private Identity identity = null;
 
   /**
    * Creates a <code>Connection</code> instance.
@@ -182,13 +185,27 @@ public class Connection implements javax.jms.Connection {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public Connection(FactoryParameters factoryParameters,
-                    RequestChannel requestChannel) throws JMSException {
+  public Connection() {
     // AF: This method shouldn't be public but it is actually used by AbstractFactory
     // in admin package (merge in future in ConnectionFactory class).
     if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Connection.<init>");
+  }
+  
+  /**
+   * Open the <code>Connection</code>.
+   *
+   * @param factoryParameters  The factory parameters.
+   * @param requestChannel  The actual connection to wrap.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public void open(FactoryParameters factoryParameters,
+                    RequestChannel requestChannel) throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "Connection.<init>(" + factoryParameters + ',' + requestChannel + ')');
+                 "Connection.open(" + factoryParameters + ',' + requestChannel + ')');
     // We need to clone the FactoryParameter Object to avoid side-effect with
     // external modifications.
     this.factoryParameters = (FactoryParameters) factoryParameters.clone();
@@ -222,15 +239,63 @@ public class Connection implements javax.jms.Connection {
     hashCode = (proxyId.hashCode() & 0xFFFF0000) + key;
 
     mtpx.setDemultiplexerDaemonName(toString());
+    
+    identity = requestChannel.getIdentity();
+    registerMBean(JMXBeanBaseName);
   }
 
+ // base name of the MBean.
+ protected String JMXBeanBaseName = null;
+ 
+ public void setJMXBeanBaseName(String JMXBeanBaseName) {
+   this.JMXBeanBaseName = JMXBeanBaseName;
+ }
+
+ public String getJMXBeanName() {
+   StringBuffer buf = new StringBuffer();
+   buf.append(JMXBeanBaseName).append(":type=Connections,");
+   buf.append("name=").append((identity != null)?identity.getUserName():"null");
+   buf.append(" c" + key);
+   if (factoryParameters.getPort() < 0) {
+     buf.append(" [localhost]");
+   } else {
+     buf.append(" [" + factoryParameters.getHost()).append(" _ ").append(factoryParameters.getPort()).append("]");
+   }
+   return buf.toString();
+ }
+ 
+ public String registerMBean(String base) {
+   if (base == null) return null;
+   String JMXBeanName = getJMXBeanName();
+   try {
+      MXWrapper.registerMBean(this, JMXBeanName);
+   } catch (Exception e) {
+     if (logger.isLoggable(BasicLevel.DEBUG))
+       logger.log(BasicLevel.DEBUG, "Connection.registerMBean: " + JMXBeanName, e);
+   }
+   
+   return JMXBeanName;
+ }
+
+ public void unregisterMBean() {
+   if (JMXBeanBaseName == null)
+     return;
+
+   try {
+     MXWrapper.unregisterMBean(getJMXBeanName());
+   } catch (Exception e) {
+     if (logger.isLoggable(BasicLevel.DEBUG))
+       logger.log(BasicLevel.DEBUG, "Connection.unregisterMBean: " + JMXBeanBaseName + ":" + getJMXBeanName(), e);
+   }
+ }
+  
   private void setStatus(int status) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, stringImage + ".setStatus(" + Status.toString(status) + ')');
     this.status = status;
   }
 
-  boolean isStopped() {
+  public boolean isStopped() {
     return (status == Status.STOP);
   }
 
@@ -706,6 +771,8 @@ public class Connection implements javax.jms.Connection {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, stringImage + ".close()");
 
+    unregisterMBean();
+    
     closer.close();
   }
 
