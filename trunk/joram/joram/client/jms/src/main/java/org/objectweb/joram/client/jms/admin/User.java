@@ -284,13 +284,17 @@ public class User extends AdministeredObject implements UserMBean {
 
   // Object name of the MBean if it is registered.
   transient protected String JMXBeanName = null;
-
-  public String registerMBean(String base) {
-    int sid = Integer.parseInt(proxyId.substring(proxyId.indexOf('.') +1, proxyId.lastIndexOf('.')));
+  
+  public static String getJMXBeanName(String base, User user) {
+    int sid = Integer.parseInt(user.proxyId.substring(user.proxyId.indexOf('.') +1, user.proxyId.lastIndexOf('.')));
     StringBuffer buf = new StringBuffer();
     buf.append(base);
-    buf.append(":type=User,location=server#").append(sid).append(",name=").append(getName()).append('[').append(getProxyId()).append(']');
-    JMXBeanName = buf.toString();
+    buf.append(":type=User,location=server#").append(sid).append(",name=").append(user.getName()).append('[').append(user.getProxyId()).append(']');
+    return buf.toString();
+  }
+
+  public String registerMBean(String base) {
+    JMXBeanName = getJMXBeanName(base, this);
     
     try {
       MXWrapper.registerMBean(this, JMXBeanName);
