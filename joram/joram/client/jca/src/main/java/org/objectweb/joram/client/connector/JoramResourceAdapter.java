@@ -61,6 +61,7 @@ import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.osgi.JndiHelper;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -81,6 +82,8 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
 
   public static Logger logger = Debug.getLogger(JoramResourceAdapter.class.getName());
 
+  /** the jndi helper */
+  protected JndiHelper jndiHelper = null;
   /** <code>true</code> if the adapter has been started. */
   protected boolean started = false;
   /** <code>true</code> if the adapter has been stopped. */
@@ -173,6 +176,7 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
       setJmxServer((MBeanServer) array.get(0));
     }
     boundNames = new Vector<String>();
+    jndiHelper = new JndiHelper();
   }
 
   /**
@@ -183,6 +187,7 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
       logger.log(BasicLevel.INFO, "JORAM adapter instantiated.");
     setJmxServer(jmxServer);
     boundNames = new Vector<String>();
+    jndiHelper = new JndiHelper();
   }
 
   /**
@@ -334,6 +339,7 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
 
     if (! (spec instanceof ActivationSpecImpl))
       throw new ResourceException("Provided ActivationSpec instance is not a JORAM activation spec.");
+   
     ActivationSpecImpl specImpl = (ActivationSpecImpl) spec;
 
     if (! specImpl.getResourceAdapter().equals(this))
@@ -429,6 +435,7 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
       createUser(userName, password, identityClass);
 
       ConnectionFactory cf = getConnectionFactory(specImpl);
+      cf.setCnxJMXBeanBaseName(jmxRootName+"#"+getName());
       XAConnection cnx = cf.createXAConnection(userName, password);
       
       // set Exception listener
@@ -583,6 +590,7 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
           String password = specImpl.getPassword();
 
           cf = getConnectionFactory(specImpl);
+          cf.setCnxJMXBeanBaseName(jmxRootName+"#"+getName());
           connection = cf.createXAConnection(userName, password);
 
           connections.put(userName, connection);
@@ -648,8 +656,7 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
   /** Binds an object to the JNDI context. */
   protected void bind(String name, Object obj) {
     try {
-      Context ctx = new InitialContext();
-      ctx.rebind(name, obj);
+      jndiHelper.rebind(name, obj);
       if (! boundNames.contains(name))
         boundNames.add(name);
     } catch (Exception e) {
@@ -662,8 +669,7 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
   /** Unbinds an object from the JNDI context. */
   protected void unbind(String name) {
     try {
-      Context ctx = new InitialContext();
-      ctx.unbind(name);
+      jndiHelper.unbind(name);
       boundNames.remove(name);
     } catch (Exception exc) {}
   }
