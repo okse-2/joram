@@ -129,4 +129,33 @@ public class JndiHelper {
   		}
   	}
   }
+  
+  /**
+   * Lookup the jndi name
+   * 
+   * @param jndiName the jndi name
+   */
+  public Object lookup(String jndiName) throws NamingException {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "lookup(" + jndiName + ')');
+    Context ctx = null;
+    ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+    try {
+      try {
+        ctx = getInitialContext();
+        return ctx.lookup(jndiName);
+      } catch (IOException e) {
+        if (logmon.isLoggable(BasicLevel.WARN))
+          logmon.log(BasicLevel.WARN, "EXCEPTION:: lookup: " + jndiName, e);
+        throw new NamingException(e.getMessage());
+      }
+    } finally {
+      Thread.currentThread().setContextClassLoader(oldClassLoader);
+      // Closing the JNDI context.
+      try {
+        if (ctx != null)
+          ctx.close();
+      } catch (Exception exc) {}
+    }
+  }
 }
