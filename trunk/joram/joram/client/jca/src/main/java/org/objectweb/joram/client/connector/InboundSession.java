@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -34,6 +34,9 @@ import javax.resource.spi.work.WorkManager;
 import javax.transaction.xa.XAResource;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>InboundSession</code> instance is responsible for processing
@@ -42,8 +45,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 class InboundSession implements javax.jms.ServerSession,
                                 javax.resource.spi.work.Work,
-                                javax.jms.MessageListener
-{
+                                javax.jms.MessageListener {
+  
+  public static Logger logger = Debug.getLogger(InboundSession.class.getName());
+  
   /** <code>InboundConsumer</code> instance this session belongs to. */
   private InboundConsumer consumer;
 
@@ -78,9 +83,8 @@ class InboundSession implements javax.jms.ServerSession,
                  XAConnection cnx,
                  boolean transacted,
                  int ackMode) {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    "InboundSession(" + consumer +
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "InboundSession(" + consumer +
                                     "," + workManager +
                                     "," + endpointFactory +
                                     "," + cnx +
@@ -95,20 +99,16 @@ class InboundSession implements javax.jms.ServerSession,
       if (transacted) {
         session = cnx.createXASession();
         xaResource = ((XASession) session).getXAResource();
-        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-          AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                        "InboundSession xaResource = " + xaResource);
-      }
-      else {
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "InboundSession xaResource = " + xaResource);
+      } else {
         session = cnx.createSession(false, ackMode);
       }
 
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                      "InboundSession session = " + session);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "InboundSession session = " + session);
       session.setMessageListener(this);
-    }
-    catch (JMSException exc) {}
+    } catch (JMSException exc) {}
   }
 
 
@@ -118,8 +118,7 @@ class InboundSession implements javax.jms.ServerSession,
    *
    * @exception JMSException  Never thrown.
    */
-  public Session getSession() throws JMSException
-  {
+  public Session getSession() throws JMSException {
     return session;
   }
 
@@ -128,15 +127,12 @@ class InboundSession implements javax.jms.ServerSession,
    *
    * @exception JMSException  If submitting the processing work fails.
    */
-  public void start() throws JMSException
-  {
+  public void start() throws JMSException {
     try {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                      "ServerSession submits Work instance.");
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "ServerSession submits Work instance.");
       workManager.scheduleWork(this);
-    }
-    catch (Exception exc) {
+    } catch (Exception exc) {
       throw new JMSException("Can't start the adapter session for processing "
                              + "the delivered messages: " + exc);
     }
@@ -146,31 +142,26 @@ class InboundSession implements javax.jms.ServerSession,
   public void release() {
     try {
       session.close();
-    } catch (JMSException exc) {
-    }
+    } catch (JMSException exc) { }
   }
 
   /** Runs the wrapped session for processing the messages. */
-  public void run()
-  {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    "ServerSession runs wrapped Session.");
+  public void run() {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ServerSession runs wrapped Session.");
     session.run();
     consumer.releaseSession(this);
   }
 
   /** Forwards a processed message to an endpoint. */
   public void onMessage(javax.jms.Message message) {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " onMessage(" + message + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " onMessage(" + message + ")");
 
     MessageEndpoint endpoint = null;
     try {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                      "ServerSession passes message to listener.");
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "ServerSession passes message to listener.");
       endpoint = endpointFactory.createEndpoint(xaResource);
       ((javax.jms.MessageListener) endpoint).onMessage(message);
       endpoint.release();
@@ -181,8 +172,7 @@ class InboundSession implements javax.jms.ServerSession,
       } catch (Exception e) {
         // ignore the exception
       }
-      throw new java.lang.IllegalStateException("Could not get endpoint "
-                                                + "instance: " + exc);
+      throw new java.lang.IllegalStateException("Could not get endpoint instance: " + exc);
     }
   }
 }

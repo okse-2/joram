@@ -41,20 +41,23 @@ import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /** 
  * The <code>DefaultConnectionManager</code> class is the default connection
  * manager provided with JORAM resource adapter, which intercepts connections
  * requests coming from non managed client applications.
  */
-public class DefaultConnectionManager
-             implements javax.resource.spi.ConnectionManager,
-                        java.io.Serializable
-{
+public class DefaultConnectionManager implements javax.resource.spi.ConnectionManager, java.io.Serializable {
   /**
    * 
    */
   private static final long serialVersionUID = 1L;
+  
+  public static Logger logger = Debug.getLogger(DefaultConnectionManager.class.getName());
+  
   /**
    * Static reference to the local <code>DefaultConnectionManager</code>
    * instance.
@@ -80,9 +83,8 @@ public class DefaultConnectionManager
   public Object allocateConnection(ManagedConnectionFactory mcf,
                                    ConnectionRequestInfo cxRequest)
     throws ResourceException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " allocateConnection(" + mcf + "," + cxRequest + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " allocateConnection(" + mcf + "," + cxRequest + ")");
     
     String userName;
     String password;
@@ -129,9 +131,8 @@ public class DefaultConnectionManager
   }
 
   private void setFactoryParameters(AbstractConnectionFactory factory , ManagedConnectionFactoryImpl mcf) {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " setFactoryParameters(" + factory + "," + mcf + ")"); 
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " setFactoryParameters(" + factory + "," + mcf + ")"); 
     
     mcf.setParameters(factory);
   }
@@ -140,8 +141,7 @@ public class DefaultConnectionManager
    * Returns the reference to the <code>DefaultConnectionManager</code>
    * instance, creates it if needed.
    */
-  static DefaultConnectionManager getRef()
-  {
+  static DefaultConnectionManager getRef() {
     if (ref == null)
       ref = new DefaultConnectionManager();
 
