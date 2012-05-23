@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2012 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -28,14 +29,19 @@ import javax.jms.MessageProducer;
 import javax.jms.Topic;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>OutboundPublisher</code> instance wraps a JMS producer
  * for a component involved in PubSub outbound messaging. 
  */
 public class OutboundPublisher extends OutboundProducer
-                               implements javax.jms.TopicPublisher
-{
+                               implements javax.jms.TopicPublisher {
+  
+  public static Logger logger = Debug.getLogger(OutboundPublisher.class.getName());
+  
   /**
    * Constructs an <code>OutboundPublisher</code> instance.
    *
@@ -45,10 +51,8 @@ public class OutboundPublisher extends OutboundProducer
   OutboundPublisher(MessageProducer producer, OutboundSession session) {
     super(producer, session);
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    "OutboundPublisher(" + producer + 
-                                    ", " + session + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "OutboundPublisher(" + producer + ", " + session + ")");
   }
 
  
@@ -65,9 +69,8 @@ public class OutboundPublisher extends OutboundProducer
                       int priority,
                       long timeToLive)
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " publish(" + message +
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " publish(" + message +
                                     ", " + deliveryMode +
                                     ", " + priority +
                                     ", " + timeToLive + ")");
@@ -78,9 +81,8 @@ public class OutboundPublisher extends OutboundProducer
 
   /** Delegates the call to the wrapped producer. */
   public void publish(Message message) throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " publish(" + message + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " publish(" + message + ")");
 
     checkValidity();
     producer.send(message);
@@ -93,9 +95,8 @@ public class OutboundPublisher extends OutboundProducer
                       int priority,
                       long timeToLive)
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " publish(" + topic +
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " publish(" + topic +
                                     ", " + message +
                                     ", " + deliveryMode +
                                     ", " + priority +
@@ -107,9 +108,8 @@ public class OutboundPublisher extends OutboundProducer
 
   /** Delegates the call to the wrapped producer. */
   public void publish(Topic topic, Message message) throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " publish(" + topic +
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " publish(" + topic +
                                     ", " + message + ")");
 
     checkValidity();
