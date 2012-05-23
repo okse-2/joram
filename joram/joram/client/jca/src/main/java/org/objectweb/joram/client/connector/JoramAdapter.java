@@ -33,8 +33,6 @@ import javax.jms.Connection;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.management.MBeanServer;
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.ResourceAdapterInternalException;
 
@@ -42,6 +40,7 @@ import org.objectweb.joram.client.jms.ConnectionMetaData;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminItf;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -419,6 +418,8 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     			AgentServer.init(serverId, storage, null, clusterId);
     			AgentServer.start();
     			joramPort = AgentServer.getServiceArgs(AgentServer.getServerId(), TcpProxyService.class.getName());
+    			if (serverPort < 0 && joramPort != null && joramPort.length() > 0)
+    			  serverPort = new Integer(joramPort).intValue();
     			//TODO
     			//String jndiPort = AgentServer.getServiceArgs(AgentServer.getServerId(), JndiServer.class.getName());
     			
@@ -439,6 +440,8 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     		try {
 	        hostName = AgentServer.getHostname(serverId);
 	        joramPort = AgentServer.getServiceArgs(serverId, TcpProxyService.class.getName());
+	        if (serverPort < 0 && joramPort != null && joramPort.length() > 0)
+            serverPort = new Integer(joramPort).intValue();
         } catch (Exception e) { }
     	}
     }
@@ -546,6 +549,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
       	cf.getParameters().connectingTimer = connectingTimer;
 
       cf.setIdentityClassName(identityClass);
+      cf.setCnxJMXBeanBaseName(jmxRootName+"#"+getName());
       Connection cnx = cf.createConnection(rootName, rootPasswd);
       cnx.start();
       wrapper = new JoramAdmin(cnx);
@@ -599,7 +603,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
 
   public String getMBeanName() {
     StringBuffer strbuf = new StringBuffer();
-    strbuf.append(jmxRootName).append("#").append(name);
+    strbuf.append(jmxRootName).append("#").append(getName());
     strbuf.append(':');
     strbuf.append("type=JoramAdapter");
     return strbuf.toString();
@@ -896,7 +900,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     String[] names = new String[destinations.length];
     
     for (int i=0; i<destinations.length; i++) {
-      names[i] = destinations[i].registerMBean(jmxRootName+"#"+name);
+      names[i] = destinations[i].registerMBean(wrapper.getJMXBaseName());
     }
     return names;
   }
@@ -954,8 +958,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     Queue queue = null;
 
     try {
-      Context ctx = new InitialContext();
-      queue = (Queue) ctx.lookup(name);
+      queue = (Queue) jndiHelper.lookup(name);
     } catch (javax.naming.NamingException exc) {
       String shortName = removePrefix(name);
       queue = (Queue) wrapper.createQueue(serverId, shortName, className, prop);
@@ -969,7 +972,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
       bind(name, queue);
     }
 
-    return queue.registerMBean(jmxRootName);
+    return Destination.getJMXBeanName(wrapper.getJMXBaseName(), queue);
   }
 
   /**
@@ -1023,8 +1026,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     Topic topic = null;
 
     try {
-      Context ctx = new InitialContext();
-      topic = (Topic) ctx.lookup(name);
+      topic = (Topic) jndiHelper.lookup(name);
     } catch (javax.naming.NamingException exc) {
       String shortName = removePrefix(name);
       topic = (Topic) wrapper.createTopic(serverId, shortName, className, prop);
@@ -1037,8 +1039,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
 
       bind(name, topic);
     }
-
-    return topic.registerMBean(jmxRootName);
+    return Destination.getJMXBeanName(wrapper.getJMXBaseName(), topic);
   }
 
   /**
@@ -1049,10 +1050,14 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
    */
   public void removeDestination(String name) throws AdminException {
     try {
-      Context ctx = new InitialContext();
-      Destination dest = (Destination) ctx.lookup(name);
-      ctx.close();
-
+      Destination dest = (Destination) jndiHelper.lookup(name);
+      dest.setWrapper(wrapper);
+      try {
+        MXWrapper.unregisterMBean(dest.getJMXBeanName(wrapper.getJMXBaseName(), dest));
+      } catch (Exception e) {
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "unregisterMBean", e);
+      }
       dest.delete();
       unbind(name);
     } catch (Exception exc) {
@@ -1098,7 +1103,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     String[] names = new String[users.length];
     
     for (int i=0; i<users.length; i++) {
-      names[i] = users[i].registerMBean(jmxRootName+"#"+name);
+      names[i] = users[i].registerMBean(wrapper.getJMXBaseName());
     }
     return names;
   }
@@ -1176,7 +1181,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   		short serverId,
   		String identityClass) throws AdminException, ConnectException {
   	User user = wrapper.createUser(name, password, serverId, identityClass);
-  	return user.registerMBean(jmxRootName);
+  	return User.getJMXBeanName(wrapper.getJMXBaseName(), user);
   }
 
   /**
