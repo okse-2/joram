@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -39,8 +39,8 @@ import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.joram.client.jms.admin.AdminItf;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.AdminWrapper;
 import org.objectweb.joram.client.jms.admin.AdministeredObject;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.XmlSerializer;
@@ -198,7 +198,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * the script. if it is not defined the wrapper set at creation is used, if
    * none the static AdminModule connection is used.
    */
-  AdminWrapper wrapper = null;
+  AdminItf wrapper = null;
 
   /**
    * Returns the administration wrapper to use.
@@ -206,7 +206,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @return The wrapper to use.
    * @throws ConnectException if no wrapper is defined.
    */
-  protected final AdminWrapper getWrapper() throws ConnectException {
+  protected final AdminItf getWrapper() throws ConnectException {
     if ((wrapper != null) && (! wrapper.isClosed()))
       return wrapper;
     return AdminModule.getWrapper();
@@ -218,7 +218,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * 
    * @param wrapper The wrapper to use or null to unset.
    */
-  public void setWrapper(AdminWrapper wrapper) {
+  public void setWrapper(AdminItf wrapper) {
     this.wrapper = wrapper;
   }
 
