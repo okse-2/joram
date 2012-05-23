@@ -304,9 +304,22 @@ abstract class MessageConsumerListener implements ReplyListener {
    */
   public void close() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "MessageConsumerListener.close()");
+      logger.log(BasicLevel.DEBUG, "MessageConsumerListener.close()");
 
+    if (queueMode) {
+      // Out of the synchronized block because it could
+      // lead to a dead lock with
+      // the connection driver thread calling replyReceived.
+      ConsumerUnsetListRequest unsetLR = new ConsumerUnsetListRequest(
+          queueMode);
+      unsetLR.setTarget(targetName);
+      unsetLR.setCancelledRequestId(requestId);
+      rm.sendRequest(unsetLR);
+    }
+    // else useless for a topic 
+    // because the subscription
+    // is deleted (see MessageConsumer.close())
+    
     synchronized (this) {
       while (status == Status.ON_MSG) {
         try {
@@ -326,20 +339,6 @@ abstract class MessageConsumerListener implements ReplyListener {
 
       setStatus(Status.CLOSE);
     }
-    
-    if (queueMode) {
-      // Out of the synchronized block because it could
-      // lead to a dead lock with
-      // the connection driver thread calling replyReceived.
-      ConsumerUnsetListRequest unsetLR = new ConsumerUnsetListRequest(
-          queueMode);
-      unsetLR.setTarget(targetName);
-      unsetLR.setCancelledRequestId(requestId);
-      rm.sendRequest(unsetLR);
-    }
-    // else useless for a topic 
-    // because the subscription
-    // is deleted (see MessageConsumer.close())
   }
 
   private void acknowledge(int threshold) {
