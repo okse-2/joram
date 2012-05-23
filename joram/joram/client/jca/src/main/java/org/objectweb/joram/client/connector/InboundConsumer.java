@@ -23,7 +23,15 @@
  */
 package org.objectweb.joram.client.connector;
 
-import javax.jms.*;
+import java.util.Vector;
+
+import javax.jms.ConnectionConsumer;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+import javax.jms.ServerSession;
+import javax.jms.Session;
+import javax.jms.XAConnection;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.spi.CommException;
@@ -31,9 +39,10 @@ import javax.resource.spi.SecurityException;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.resource.spi.work.WorkManager;
 
-import java.util.Vector;
-
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 
 /**
@@ -41,8 +50,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * messages from a given JORAM destination and through a given JORAM
  * connection.
  */
-class InboundConsumer implements javax.jms.ServerSessionPool
-{
+class InboundConsumer implements javax.jms.ServerSessionPool {
+  
+  public static Logger logger = Debug.getLogger(InboundConsumer.class.getName());
+  
   /** Application server's <code>WorkManager</code> instance. */
   private WorkManager workManager;
   /** Application's endpoints factory. */
@@ -108,8 +119,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                   int maxMessages,
                   int ackMode,
                   boolean closeDurSub) throws ResourceException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "InboundConsumer(" + workManager +
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "InboundConsumer(" + workManager +
                                     ", " + endpointFactory +
                                     ", " + cnx +
                                     ", " + dest +
@@ -160,15 +171,12 @@ class InboundConsumer implements javax.jms.ServerSessionPool
       }
 
       cnx.start();
-    }
-    catch (JMSSecurityException exc) {
+    } catch (JMSSecurityException exc) {
       throw new SecurityException("Target destination not readble: "
                                   + exc);
-    }
-    catch (javax.jms.IllegalStateException exc) {
+    } catch (javax.jms.IllegalStateException exc) {
       throw new CommException("Connection with the JORAM server is lost.");
-    }
-    catch (JMSException exc) {
+    } catch (JMSException exc) {
       throw new ResourceException("Could not set asynchronous consumer: "
                                   + exc);
     }
@@ -182,8 +190,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
    */
   public ServerSession getServerSession()
     throws JMSException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getServerSession()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " getServerSession()");
 
     try {
       synchronized (pool) {
@@ -194,9 +202,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
               return newSession();
             }
             // Wait for a free ServerSession
-            if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-              AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-              "ServerSessionPool waits for a free ServerSession.");
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "ServerSessionPool waits for a free ServerSession.");
             pool.wait();
             return (ServerSession) pool.remove(0);
           }
@@ -211,10 +218,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
   }
 
   private InboundSession newSession() {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    "ServerSessionPool provides "
-                                    + "new ServerSession.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ServerSessionPool provides new ServerSession.");
     serverSessions++;
     return new InboundSession(this,
                               workManager,
@@ -226,8 +231,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
 
   /** Releases an <code>InboundSession</code> instance. */
   void releaseSession(InboundSession session) {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " releaseSession(" + session + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " releaseSession(" + session + ")");
 
     try {
       synchronized (pool) {
@@ -239,8 +244,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
 
   /** Closes the consumer. */
   void close() {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-          AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " close() unsubscribe subscription: "+ closeDurSub);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, this + " close() unsubscribe subscription: "+ closeDurSub);
 
       try {
           cnxConsumer.close();
