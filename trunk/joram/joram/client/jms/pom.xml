@@ -93,7 +93,8 @@
               org.objectweb.joram.client.jms.ha.tcp,
               org.objectweb.joram.client.jms.local,
               org.objectweb.joram.client.jms.soap,
-              org.objectweb.joram.client.jms.tcp</Export-Package>
+              org.objectweb.joram.client.jms.tcp,
+              org.objectweb.joram.client.osgi</Export-Package>
               <DynamicImport-Package>*</DynamicImport-Package>
           </instructions>
         </configuration>
