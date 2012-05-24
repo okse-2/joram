@@ -23,6 +23,7 @@
 package org.objectweb.joram.client.osgi;
 
 import java.net.ConnectException;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -228,12 +229,14 @@ public class DestinationMSF implements ManagedServiceFactory {
   		logmon.log(BasicLevel.DEBUG, "setDestinationDMQ(" + wrapper + ", " + dest + ", " + dmq + ", " +  + dmqSid +')');
   	Destination[] destinations = wrapper.getDestinations(dmqSid);
   	if (destinations != null) {
+  	  if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, "setDestinationDMQ : destinations = " + Arrays.toString(destinations));
   		for (int i = 0; i < destinations.length; i++) {
-  		  if (logmon.isLoggable(BasicLevel.DEBUG))
-  	      logmon.log(BasicLevel.DEBUG, "setDestinationDMQ destinations["+i+"] = " + destinations[i]);
-  			if (destinations[i] instanceof Queue && dmq.equals(destinations[i].getName())) {
+  			if (destinations[i] instanceof Queue && (dmq.equals(destinations[i].getName()) || dmq.equals(destinations[i].getAdminName()))) {
   				try {
   					dest.setDMQ((Queue) destinations[i]);
+  					if (logmon.isLoggable(BasicLevel.DEBUG))
+  					  logmon.log(BasicLevel.DEBUG, "setDestinationDMQ : the dmq " + destinations[i] +" is set on " + dest);
   					return;
   				} catch (InvalidDestinationException e) {
   					if (logmon.isLoggable(BasicLevel.DEBUG))
