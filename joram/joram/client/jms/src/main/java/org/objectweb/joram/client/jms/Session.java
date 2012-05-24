@@ -622,7 +622,6 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   public void unregisterMBean() {
     try {
-      logger.log(BasicLevel.FATAL, "Session.unregisterMBean: " + getJMXBeanName());//NTA tmp
       MXWrapper.unregisterMBean(getJMXBeanName());
     } catch (Exception e) {
       if (logger.isLoggable(BasicLevel.DEBUG))
