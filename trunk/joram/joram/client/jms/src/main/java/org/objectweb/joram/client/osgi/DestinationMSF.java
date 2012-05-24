@@ -229,6 +229,8 @@ public class DestinationMSF implements ManagedServiceFactory {
   	Destination[] destinations = wrapper.getDestinations(dmqSid);
   	if (destinations != null) {
   		for (int i = 0; i < destinations.length; i++) {
+  		  if (logmon.isLoggable(BasicLevel.DEBUG))
+  	      logmon.log(BasicLevel.DEBUG, "setDestinationDMQ destinations["+i+"] = " + destinations[i]);
   			if (destinations[i] instanceof Queue && dmq.equals(destinations[i].getName())) {
   				try {
   					dest.setDMQ((Queue) destinations[i]);
