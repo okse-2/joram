@@ -456,7 +456,7 @@ public class RequestMultiplexer {
             // of a closure or at the same time as an independant
             // close call).
             if (! isClosed()) {
-            	replyAllError(new MomExceptionReply(new MomException(exc.getMessage()))); //NTA tmp
+            	replyAllError(new MomExceptionReply(new MomException(exc.getMessage())));
             	
             	RequestMultiplexer.this.close();
             	
@@ -521,7 +521,6 @@ public class RequestMultiplexer {
         if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN, "Error during close", exc2);
       }
-      
       onException(exc);
     }
   }
