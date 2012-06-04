@@ -604,6 +604,7 @@ public class Session implements javax.jms.Session, SessionMBean {
   public String getJMXBeanName() {
     StringBuffer buf = new StringBuffer();
     buf.append(cnx.getJMXBeanName());
+    buf.append(",location=Session");
     buf.append(",session=").append(getClass().getSimpleName()).append("_").append(ident);
     return buf.toString();
   }
@@ -625,7 +626,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       MXWrapper.unregisterMBean(getJMXBeanName());
     } catch (Exception e) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Destination.unregisterMBean: " + getJMXBeanName(), e);
+        logger.log(BasicLevel.DEBUG, "Session.unregisterMBean: " + getJMXBeanName(), e);
     }
   }
   
