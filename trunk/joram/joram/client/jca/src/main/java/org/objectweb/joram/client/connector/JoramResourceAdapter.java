@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -84,10 +84,31 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
 
   /** the jndi helper */
   protected JndiHelper jndiHelper = null;
-  /** <code>true</code> if the adapter has been started. */
-  protected boolean started = false;
-  /** <code>true</code> if the adapter has been stopped. */
-  protected boolean stopped = false;
+  
+  public static class Status {
+    public static final int NONE = 0;
+    public static final int STARTING = 1;
+    public static final int STARTED = 2;
+    public static final int STOPPING = 3;
+    public static final int STOPPED = 4;
+
+    int value = NONE;
+
+    public static String[] info = {"none",
+                                   "starting", "started",
+                                   "stopping", "stopped"};
+  }
+
+  /** The resource adapter status. */
+  protected Status status;
+
+  public int getStatus() {
+    return status.value;
+  }
+
+  public String getStatusInfo() {
+    return Status.info[status.value];
+  }
   
   public void setJmxServer(MBeanServer jmxServer) {
     MXWrapper.setMXServer(new JMXServer(jmxServer));
@@ -177,6 +198,8 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
     }
     boundNames = new Vector<String>();
     jndiHelper = new JndiHelper();
+    
+    status = new Status();
   }
 
   /**
@@ -188,6 +211,8 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
     setJmxServer(jmxServer);
     boundNames = new Vector<String>();
     jndiHelper = new JndiHelper();
+    
+    status = new Status();
   }
 
   /**
@@ -202,9 +227,9 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
   }
     
   public synchronized void start() throws ResourceAdapterInternalException {
-    if (started)
+    if (getStatus() == Status.STARTED)
       throw new ResourceAdapterInternalException("Adapter already started.");
-    if (stopped)
+    if (getStatus() == Status.STOPPED)
       throw new ResourceAdapterInternalException("Adapter has been stopped.");
 
     if (workManager == null) {
@@ -214,12 +239,14 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
     if (logger.isLoggable(BasicLevel.INFO))
       logger.log(BasicLevel.INFO, "JORAM Resource adapter starting...");
 
+    status.value = Status.STARTING;
+    
     if (jndiName != null && jndiName.length() > 0) {
     	// bind RessourceAdapter
     	bind(jndiName, this);
     }
     
-    started = true;
+    status.value = Status.STARTED;
 
     if (logger.isLoggable(BasicLevel.INFO))
       logger.log(BasicLevel.INFO, "JORAM Resource adapter " + ConnectionMetaData.providerVersion + " successfully deployed.");
@@ -233,8 +260,10 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
     if (logger.isLoggable(BasicLevel.INFO))
       logger.log(BasicLevel.INFO, "JORAM Resource adapter stopping...");
 
-    if (! started || stopped)
+    if (getStatus() != Status.STARTED || getStatus() == Status.STOPPED)
       return;
+    
+    status.value = Status.STOPPING;
 
     // Unbinds the bound objects...
     while (! boundNames.isEmpty())
@@ -259,7 +288,8 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
         } catch (Exception exc) {}
       }
     }
-    stopped = true;
+
+    status.value = Status.STOPPED;
 
     if (logger.isLoggable(BasicLevel.INFO))
       logger.log(BasicLevel.INFO, "JORAM Resource adapter successfully stopped.");
@@ -332,9 +362,9 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
       logger.log(BasicLevel.DEBUG,
                  this + " endpointActivation(" + endpointFactory + ", " + spec + ")");
 
-    if (! started)
+    if (getStatus() != Status.STARTED)
       throw new IllegalStateException("Non started resource adapter.");
-    if (stopped)
+    if (getStatus() == Status.STOPPED)
       throw new IllegalStateException("Stopped resource adapter.");
 
     if (! (spec instanceof ActivationSpecImpl))
@@ -489,7 +519,7 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
   public synchronized void reconnect() throws Exception {
   	if (logger.isLoggable(BasicLevel.DEBUG))
   		logger.log(BasicLevel.DEBUG, "JoramResourceAdapter: reconnect()");
-  	if (!started || stopped)
+  	if (getStatus() != Status.STARTED || getStatus() == Status.STOPPED)
   		return;
     
     // consumers
@@ -527,7 +557,7 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  this + " endpointDeactivation(" + endpointFactory + ", " + spec + ")");
-    if (! started || stopped)
+    if (getStatus() != Status.STARTED || getStatus() == Status.STOPPED)
       return;
 
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -556,9 +586,9 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
       logger.log(BasicLevel.DEBUG,
                  this + " getXAResources(" + specs + ")");
 
-    if (! started)
+    if (getStatus() != Status.STARTED)
       throw new IllegalStateException("Non started resource adapter.");
-    if (stopped)
+    if (getStatus() == Status.STOPPED)
       throw new IllegalStateException("Stopped resource adapter.");
 
     ActivationSpecImpl specImpl;
