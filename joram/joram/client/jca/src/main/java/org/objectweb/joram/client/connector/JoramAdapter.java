@@ -40,7 +40,6 @@ import org.objectweb.joram.client.jms.ConnectionMetaData;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminItf;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -74,11 +73,6 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(JoramAdapter.class.getName());
-
-  /** <code>true</code> if the adapter has been started. */
-  private boolean started = false;
-  /** <code>true</code> if the adapter has been stopped. */
-  private boolean stopped = false;
   
   /** <code>true</code> if admin connection connection is active. */
   private boolean isActive = false;
@@ -88,7 +82,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   private JoramAdmin wrapper = null;
   private ServerDesc serverDesc = null;
   private ServiceRegistration registration;
-
+  
   // ------------------------------------------
   // --- JavaBean setter and getter methods ---
   // ------------------------------------------
@@ -377,7 +371,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     
   public synchronized void start() throws ResourceAdapterInternalException {
    super.start();
-   started = false;
+   status.value = Status.STARTING;
    
 //    // set HA mode if needed
 //    wrapper.setHa(isHa);
@@ -385,7 +379,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     if (logger.isLoggable(BasicLevel.INFO))
   		logger.log(BasicLevel.INFO, "JORAM adapter:: Start the Joram server : " + startJoramServer);
 
-    String joramPort = null; // just used for log information
+    String joramPort = null;
     if (startJoramServer) {
     	if (logger.isLoggable(BasicLevel.INFO))
     		logger.log(BasicLevel.INFO, "JORAM adapter starting deployment...");
@@ -505,7 +499,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     		logger.log(BasicLevel.INFO, "Server port is " + serverPort);
     }
 
-    started = true;
+    status.value = Status.STARTED;
 
     if (logger.isLoggable(BasicLevel.INFO))
       logger.log(BasicLevel.INFO, "JORAM adapter " + ConnectionMetaData.providerVersion + " successfully deployed.");
@@ -629,10 +623,14 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   	if (logger.isLoggable(BasicLevel.INFO))
   		logger.log(BasicLevel.INFO, "JORAM adapter stopping...");
 
-  	if (!started || stopped || 
+  	if (getStatus() != Status.STARTED || getStatus() == Status.STOPPED || 
   			AgentServer.getStatus() != AgentServer.Status.STARTED ||
-  			AgentServer.getStatus() != AgentServer.Status.STARTING)
+  			AgentServer.getStatus() != AgentServer.Status.STARTING) {
+  	  status.value = Status.STOPPED;
+  	  if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO, "JORAM adapter successfully stopped.");
   		return;
+  	}
 
   	super.stop();
 
@@ -659,23 +657,25 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   		}
   	}
 
-  	stopped = true;
+  	status.value = Status.STOPPED;
 
   	if (logger.isLoggable(BasicLevel.INFO))
   		logger.log(BasicLevel.INFO, "JORAM adapter successfully stopped.");
   }
   
-  public synchronized void reconnect() throws Exception {
+  public void reconnect() throws Exception {
   	if (logger.isLoggable(BasicLevel.DEBUG))
   		logger.log(BasicLevel.DEBUG, "JoramAdapter: reconnect()");
+  	
   	boolean connected = false;
-  	if (!started || stopped)
+  	if (getStatus() != Status.STARTED || getStatus() == Status.STOPPED || getStatus() == Status.STOPPING)
   		return;
-
+  	
   	try {
   		wrapper.getConfiguration();
   		connected = true;
   	} catch (Exception e1) {
+  	  if (getStatus() == Status.STOPPING || getStatus() == Status.STOPPED) return;
   		try {
 	    	adminDisconnect();
 	    } catch (Exception e) {
