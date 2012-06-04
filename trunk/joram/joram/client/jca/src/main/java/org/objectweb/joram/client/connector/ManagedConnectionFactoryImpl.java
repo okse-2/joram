@@ -129,11 +129,13 @@ public class ManagedConnectionFactoryImpl extends ManagedConnectionFactoryConfig
 
   	String hostName = getHostName();
   	int serverPort = getServerPort();
-  	if (isCollocated()) {
-  		hostName = "localhost";
-  		serverPort = -1;
-  	}
-
+//  	if (isCollocated()) {
+//  		hostName = "localhost";
+//  		serverPort = -1;
+//  	}
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " createFactory hostName = " + hostName + ", serverPort = " + serverPort);
+  	
   	if (isHa()) {
   		if (isCollocated()) {
   			if (getHAURL() != null) {
@@ -405,7 +407,11 @@ public class ManagedConnectionFactoryImpl extends ManagedConnectionFactoryConfig
     }
 
     this.ra = (JoramAdapter) ra;
-    if (isCollocated()) {
+    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " setResourceAdapter isCollocated = " + ((JoramAdapter) ra).collocated + ", serverPort = " + ((JoramAdapter) ra).getServerPort());
+    
+    if (((JoramAdapter) ra).collocated) {
       if (getServerPort() < 0) {
         setServerPort(((JoramAdapter) ra).getServerPort());
       }
