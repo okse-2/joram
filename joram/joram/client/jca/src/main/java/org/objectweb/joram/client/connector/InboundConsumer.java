@@ -30,6 +30,7 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.jms.ServerSession;
+import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 import javax.jms.XAConnection;
 import javax.resource.NotSupportedException;
@@ -43,6 +44,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 
 /**
@@ -50,7 +52,7 @@ import fr.dyade.aaa.common.Debug;
  * messages from a given JORAM destination and through a given JORAM
  * connection.
  */
-class InboundConsumer implements javax.jms.ServerSessionPool {
+public class InboundConsumer implements ServerSessionPool, InboundConsumerMBean {
   
   public static Logger logger = Debug.getLogger(InboundConsumer.class.getName());
   
@@ -107,7 +109,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool {
    *                                   is lost.
    * @exception ResourceException      Generic exception.
    */
-  InboundConsumer(WorkManager workManager,
+  public InboundConsumer(WorkManager workManager,
                   MessageEndpointFactory endpointFactory,
                   XAConnection cnx,
                   Destination dest,
@@ -169,16 +171,48 @@ class InboundConsumer implements javax.jms.ServerSessionPool {
                                                    this,
                                                    maxMessages);
       }
-
+      // start the connection
       cnx.start();
+      // register the MBean
+      registerMBean();
+      
     } catch (JMSSecurityException exc) {
-      throw new SecurityException("Target destination not readble: "
-                                  + exc);
+      throw new SecurityException("Target destination not readble: " + exc);
     } catch (javax.jms.IllegalStateException exc) {
       throw new CommException("Connection with the JORAM server is lost.");
     } catch (JMSException exc) {
-      throw new ResourceException("Could not set asynchronous consumer: "
-                                  + exc);
+      throw new ResourceException("Could not set asynchronous consumer: "+ exc);
+    }
+  }
+  
+  public String getJMXBeanName(XAConnection cnx) {
+    if (! (cnx instanceof org.objectweb.joram.client.jms.Connection)) return null;
+    StringBuffer buf = new StringBuffer();
+    buf.append(((org.objectweb.joram.client.jms.Connection) cnx).getJMXBeanName());
+    buf.append(",location=InboundConsumer");
+    buf.append(",InboundConsumer=").append(endpointFactory.getClass().getSimpleName()).append("@").append(endpointFactory.hashCode());
+    return buf.toString();
+  }
+
+  public String registerMBean() {
+    String JMXBeanName = getJMXBeanName(cnx);
+    try {
+      if (JMXBeanName != null)
+        MXWrapper.registerMBean(this, JMXBeanName);
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "InboundConsumer.registerMBean: " + JMXBeanName, e);
+    }
+
+    return JMXBeanName;
+  }
+
+  public void unregisterMBean() {
+    try {
+      MXWrapper.unregisterMBean(getJMXBeanName(cnx));
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "InboundConsumer.unregisterMBean: " + getJMXBeanName(cnx), e);
     }
   }
 
@@ -248,6 +282,13 @@ class InboundConsumer implements javax.jms.ServerSessionPool {
           logger.log(BasicLevel.DEBUG, this + " close() unsubscribe subscription: "+ closeDurSub);
 
       try {
+        cnx.setExceptionListener(null);
+      } catch (JMSException e) { }
+      
+      // unregister the MBean
+      unregisterMBean();
+      
+      try {
           cnxConsumer.close();
 
           if (closeDurSub) {
@@ -258,7 +299,79 @@ class InboundConsumer implements javax.jms.ServerSessionPool {
           }
 
           cnx.close();
+      } catch (JMSException exc) { }
+  }
+  
+  /* (non-Javadoc)
+   * @see org.objectweb.joram.client.connector.InboundConsumerMBean#getSubName()
+   */
+  public String getSubName() {
+    return subName;
+  }
+
+  /* (non-Javadoc)
+   * @see org.objectweb.joram.client.connector.InboundConsumerMBean#getTransacted()
+   */
+  public boolean getTransacted() {
+    return transacted;
+  }
+
+  /* (non-Javadoc)
+   * @see org.objectweb.joram.client.connector.InboundConsumerMBean#getMaxWorks()
+   */
+  public int getMaxWorks() {
+    return maxWorks;
+  }
+
+  /* (non-Javadoc) 
+   * @see org.objectweb.joram.client.connector.InboundConsumerMBean#getAckMode()
+   */
+  public String getAckMode() {
+    switch (ackMode) {
+    case Session.AUTO_ACKNOWLEDGE:
+      return "AUTO_ACKNOWLEDGE";
+    case Session.CLIENT_ACKNOWLEDGE:
+      return "CLIENT_ACKNOWLEDGE";
+    case Session.DUPS_OK_ACKNOWLEDGE:
+      return "DUPS_OK_ACKNOWLEDGE";
+    case Session.SESSION_TRANSACTED:
+      return "SESSION_TRANSACTED";
+    default:
+      return "unknown";
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.objectweb.joram.client.connector.InboundConsumerMBean#getCloseDurSub()
+   */
+  public boolean getCloseDurSub() {
+    return closeDurSub;
+  }
+
+  /* (non-Javadoc)
+   * @see org.objectweb.joram.client.connector.InboundConsumerMBean#getServerSessions()
+   */
+  public int getServerSessions() {
+    return serverSessions;
+  }
+  
+  /* (non-Javadoc)
+   * @see org.objectweb.joram.client.connector.InboundConsumerMBean#getPoolSize()
+   */
+  public int getPoolSize() {
+    return pool.size();
+  }
+  
+  public String[] getSessions() {
+    String[] sessionsName = new String[pool.size()];
+    for (int i = 0; i < pool.size(); i++) {
+      InboundSession sess = (InboundSession) pool.get(i);
+      try {
+      sessionsName[i] = sess.getSession().toString();
+      } catch (Exception e) {
+        sessionsName[i] = "unknown";
       }
-      catch (JMSException exc) {}
+    }
+    return sessionsName;
   }
 }

@@ -43,6 +43,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * An <code>OutboundConnection</code> instance is a handler for a physical
@@ -50,7 +51,7 @@ import fr.dyade.aaa.common.Debug;
  * transparently use this physical connection possibly within a transaction
  * (local or global).
  */
-public class OutboundConnection implements javax.jms.Connection {
+public class OutboundConnection implements Connection, OutboundConnectionMBean {
   
   public static Logger logger = Debug.getLogger(OutboundConnection.class.getName());
   
@@ -76,6 +77,8 @@ public class OutboundConnection implements javax.jms.Connection {
     this.managedCx = managedCx;
     this.xac = xac;
     sessions = new Vector();
+    
+    registerMBean();
   }
 
   /**
@@ -286,6 +289,8 @@ public class OutboundConnection implements javax.jms.Connection {
     }
 
     managedCx.closeHandle(this);
+    
+    unregisterMBean();
   }
 
   /**
@@ -311,5 +316,53 @@ public class OutboundConnection implements javax.jms.Connection {
 
   public String toString() {
     return "OutboundConnection[" + xac.toString() + "]";
+  }
+  
+  public String getJMXBeanName(XAConnection cnx) {
+    if (! (cnx instanceof org.objectweb.joram.client.jms.Connection)) return null;
+    StringBuffer buf = new StringBuffer();
+    buf.append(((org.objectweb.joram.client.jms.Connection) cnx).getJMXBeanName());
+    buf.append(",location=OutboundConnection");
+    buf.append(",OutboundConnection=").append("OutboundConnection@").append(hashCode());
+    return buf.toString();
+  }
+
+  public String registerMBean() {
+    String JMXBeanName = getJMXBeanName(xac);
+    try {
+      if (JMXBeanName != null)
+        MXWrapper.registerMBean(this, JMXBeanName);
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "OutboundConnection.registerMBean: " + JMXBeanName, e);
+    }
+
+    return JMXBeanName;
+  }
+
+  public void unregisterMBean() {
+    try {
+      MXWrapper.unregisterMBean(getJMXBeanName(xac));
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "OutboundConnection.unregisterMBean: " + getJMXBeanName(xac), e);
+    }
+  }
+
+  public int getNumberOfSession() {
+    return sessions.size();
+  }
+
+  public String[] getSessions() {
+    String[] sessTab = new String[sessions.size()];
+    for (int i = 0; i < sessions.size(); i++) {
+      OutboundSession outboundSess = (OutboundSession) sessions.get(i);
+      try {
+        sessTab[i] = outboundSess.sess.toString();
+      } catch (Exception e) {
+        sessTab[i] = "unknown";
+      }
+    }
+    return sessTab;
   }
 }
