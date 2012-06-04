@@ -101,8 +101,10 @@ public class DefaultConnectionManager implements javax.resource.spi.ConnectionMa
     }
     
     String hostName = ((ManagedConnectionFactoryImpl) mcf).getHostName();
-    int serverPort =
-      ((ManagedConnectionFactoryImpl) mcf).getServerPort().intValue();
+    int serverPort = ((ManagedConnectionFactoryImpl) mcf).getServerPort().intValue();
+    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " allocateConnection: hostName = " + hostName + ", serverPort = " + serverPort);
     
     try {
       if (cxRequest instanceof QueueConnectionRequest) {
