@@ -116,10 +116,10 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
 
   	String hostName = getHostName();
   	int serverPort = getServerPort();
-  	if (isCollocated()) {
-  		hostName = "localhost";
-  		serverPort = -1;
-  	}
+//  	if (isCollocated()) {
+//  		hostName = "localhost";
+//  		serverPort = -1;
+//  	}
 
   	if (isHa()) {
   		if (isCollocated()) {
