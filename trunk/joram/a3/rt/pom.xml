@@ -24,7 +24,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Export-Package>fr.dyade.aaa.agent,fr.dyade.aaa.agent.conf,fr.dyade.aaa.util</Export-Package>
+            <Export-Package>fr.dyade.aaa.agent,fr.dyade.aaa.agent.conf,fr.dyade.aaa.util,fr.dyade.aaa.ext</Export-Package>
             <Import-Package>com.scalagent.jmx,
               fr.dyade.aaa.common,
               fr.dyade.aaa.common.monitoring,
