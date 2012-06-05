@@ -1,5 +1,6 @@
 package alias;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -10,6 +11,7 @@ import java.util.logging.SimpleFormatter;
 import javax.naming.*;
 
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
 /**
@@ -33,7 +35,7 @@ public class ElasticityLoop {
 	public static final int minCapThreshold = 50;
 
 	/** Period of our elasticity loop in milliseconds. */
-	public static final Integer loopPeriod = 10000;
+	public static final Integer loopPeriod = 5000;
 
 	/** Rate at which reception rates are decreased (a percentage) */
 	private static int downRate = 20;
@@ -244,7 +246,12 @@ public class ElasticityLoop {
 		activeWorkers.add(worker);
 		rates.add(maxRate);
 		loads.add(0);
-		delivered.add(0);
+		try {
+			delivered.add(worker.getDeliveredMessages());
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.log(Level.SEVERE, "Couldn't get new worker's delivered messages.");
+		}
 
 		//Notify producers.
 		for(int i = 0; i < producers.size(); i++)

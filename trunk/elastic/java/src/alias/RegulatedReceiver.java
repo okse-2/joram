@@ -79,8 +79,7 @@ public class RegulatedReceiver {
 			rr.join(Constants.TIME_UNIT);
 
 
-			System.out.println("[RegulatedReceiver " + number + "]\t" + i + "\t" 
-					+ (System.currentTimeMillis() - rstart) );
+			System.out.println("[RegulatedReceiver " + number + "]\t" + (done ? "DONE" : "JOIN"));
 
 			if (done) {
 				wait = rstart + Constants.TIME_UNIT - System.currentTimeMillis();
