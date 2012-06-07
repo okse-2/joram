@@ -86,7 +86,7 @@ public class ActivationSpecImpl
   private String acknowledgeMode = AUTO_ACKNOWLEDGE;
 
   /** Maximum number of work instances to be submitted (0 for infinite). */
-  private String maxNumberOfWorks = "0";
+  private String maxNumberOfWorks = "10";
   
   /**
    * The maximum number of messages that can be assigned 
