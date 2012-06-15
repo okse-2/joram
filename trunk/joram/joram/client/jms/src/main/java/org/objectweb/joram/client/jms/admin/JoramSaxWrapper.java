@@ -472,6 +472,7 @@ public class JoramSaxWrapper extends DefaultHandler {
         className = atts.getValue(ATT_CLASSNAME);
         if (!isSet(className)) className = DFLT_CF;
         identityClass = atts.getValue(ATT_IDENTITYCLASS);
+        properties = null;
       } else if (rawName.equals(ELT_TCP)) {
         host = atts.getValue(ATT_HOST);
         if (!isSet(host)) host = DFLT_LISTEN_HOST;
@@ -573,6 +574,7 @@ public class JoramSaxWrapper extends DefaultHandler {
       } else if (rawName.equals(ELT_DESTINATION)) {
         type = atts.getValue(ATT_TYPE);
         name = atts.getValue(ATT_NAME);
+        properties = null;
         try {
           String value = atts.getValue(ATT_SERVERID);
           if (value == null)
@@ -590,6 +592,7 @@ public class JoramSaxWrapper extends DefaultHandler {
         dmq = atts.getValue(ATT_DMQ);
       } else if (rawName.equals(ELT_QUEUE)) {
         name = atts.getValue(ATT_NAME);
+        properties = null;
         try {
           String value = atts.getValue(ATT_SERVERID);
           if (value == null)
@@ -625,6 +628,7 @@ public class JoramSaxWrapper extends DefaultHandler {
         }
       } else if (rawName.equals(ELT_TOPIC)) {
         name = atts.getValue(ATT_NAME);
+        properties = null;
         try {
           String value = atts.getValue(ATT_SERVERID);
           if (value == null)
@@ -643,6 +647,7 @@ public class JoramSaxWrapper extends DefaultHandler {
         parent = atts.getValue(ATT_PARENT);
       } else if (rawName.equals(ELT_DMQUEUE)) {
         name = atts.getValue(ATT_NAME);
+        properties = null;
         try {
           String value = atts.getValue(ATT_SERVERID);
           if (value == null)
@@ -809,6 +814,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (isSet(name)){
         	  cfs.put(name, obj);
           }
+          // Configure parameters if any
+          ((AbstractConnectionFactory) obj).getParameters().setParameters(properties);
           //Add interceptors if any
           if ((inInterceptorClassname!=null) && (!inInterceptorClassname.isEmpty())) {
             for (Iterator it=inInterceptorClassname.iterator(); it.hasNext(); ) {
@@ -827,6 +834,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           className = null;
           obj = null;
           identityClass = null;
+          properties = null;
         } else if (rawName.equals(ELT_TCP)) {
           try {
             Class<?> clazz = Class.forName(className);
@@ -1067,6 +1075,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           } catch (NamingException exc) {
             logger.log(BasicLevel.ERROR,"",exc);
           }
+          properties = null;
         } else if (rawName.equals(ELT_CLUSTER_ELEMENT)) {
         } else if (rawName.equals(ELT_CLUSTER_CF)) {
           Map.Entry entries[] = new Map.Entry [cluster.size()];
