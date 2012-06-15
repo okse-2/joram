@@ -1766,7 +1766,7 @@ public class Session implements javax.jms.Session, SessionMBean {
             msg.session = this;
             if (trace.isLoggable(BasicLevel.INFO))
               trace.log(BasicLevel.INFO,
-                         this + " handling message=" + msg + ", from=" + mc.dest + '/' + mc.targetName);
+                         this + " handling message=" + msg + ", from=" + mc.dest.getAdminName() + '/' + mc.targetName);
             // Executes IN interceptors
             if ((inInterceptors != null) && (!inInterceptors.isEmpty())) {
               for (Iterator it = inInterceptors.iterator(); it.hasNext();) {
@@ -2147,7 +2147,7 @@ public class Session implements javax.jms.Session, SessionMBean {
     }
     if (trace.isLoggable(BasicLevel.INFO))
       trace.log(BasicLevel.INFO,
-                 this + " sending message=" + joramMsg + ", to=" + dest);
+                 this + " sending message=" + joramMsg + ", to=" + dest.getAdminName());
     //Add out interception...
     if ((outInterceptors != null) && (!outInterceptors.isEmpty())) {
       for (Iterator it = outInterceptors.iterator(); it.hasNext();) {
