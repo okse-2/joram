@@ -275,8 +275,6 @@ public class JoramSaxWrapper extends DefaultHandler {
   Hashtable queues = new Hashtable();
   /** Contains all topics defined in the current script */
   Hashtable topics = new Hashtable();
-  /** Contains all DMQ defined in the current script */
-  Hashtable dmqs = new Hashtable();
 
   /** Temporary set of cluster's elements */
   Hashtable cluster = new Hashtable();
@@ -906,11 +904,10 @@ public class JoramSaxWrapper extends DefaultHandler {
             getWrapper().setDefaultThreshold(serverId, threshold);
 
           if (isSet(dmq)) {
-            if (dmqs.containsKey(dmq)) {
-              getWrapper().setDefaultDMQ(serverId, (DeadMQueue) dmqs.get(dmq));
+            if (queues.containsKey(dmq)) {
+              getWrapper().setDefaultDMQ(serverId, (Queue) queues.get(dmq));
             } else {
-              logger.log(BasicLevel.ERROR,
-                         "Cannot set default DMQ, unknown DMQ: " + dmq);
+              logger.log(BasicLevel.ERROR, "Cannot set default DMQ, unknown DMQ: " + dmq);
             }
           }
         } else if (rawName.equals(ELT_USER)) {
@@ -927,11 +924,10 @@ public class JoramSaxWrapper extends DefaultHandler {
             user.setThreshold(threshold);
 
           if (isSet(dmq)) {
-            if (dmqs.containsKey(dmq)) {
-              user.setDMQ((DeadMQueue) dmqs.get(dmq));
+            if (queues.containsKey(dmq)) {
+              user.setDMQ((Queue) queues.get(dmq));
             } else {
-              logger.log(BasicLevel.ERROR,
-                         "User.create(), unknown DMQ: " + dmq);
+              logger.log(BasicLevel.ERROR, "User.create(), unknown DMQ: " + dmq);
             }
           }
           properties = null;
@@ -1050,7 +1046,8 @@ public class JoramSaxWrapper extends DefaultHandler {
             logger.log(BasicLevel.DEBUG,
                        "DeadMQueue.create(" + serverId + "," + name + ")");
 
-          DeadMQueue dmq = (DeadMQueue) getWrapper().createDeadMQueue(serverId, name);
+          Queue dmq = (Queue) getWrapper().createQueue(serverId, name);
+          properties = null;
 
           configureDestination(dmq);
 
@@ -1061,7 +1058,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           jndiName = null;
           // Register the DMQ in order to handle it later.
           if (isSet(name))
-            dmqs.put(name, dmq);
+            queues.put(name, dmq);
         } else if (rawName.equals(ELT_PROPERTY)) {
         } else if (rawName.equals(ELT_READER)) {
           readers.add(user);
@@ -1187,11 +1184,10 @@ public class JoramSaxWrapper extends DefaultHandler {
 
   void setDestinationDMQ(Destination dest, String dmq) throws Exception {
     if (isSet(dmq)) {
-      if (dmqs.containsKey(dmq)) {
-        dest.setDMQ((DeadMQueue) dmqs.get(dmq));
+      if (queues.containsKey(dmq)) {
+        dest.setDMQ((Queue) queues.get(dmq));
       } else  {
-        logger.log(BasicLevel.ERROR,
-                   "Destination.create(): Unknown DMQ: " + dmq);
+        logger.log(BasicLevel.ERROR, "Destination.create(): Unknown DMQ: " + dmq);
       }
     }
   }
