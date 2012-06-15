@@ -26,14 +26,15 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
-import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.jms.Topic;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
 
@@ -44,7 +45,6 @@ import framework.TestCase;
  *    
  */
 public class TestDmq1 extends TestCase {
-
 
   public static void main(String[] args) {
     new TestDmq1().run();
@@ -61,8 +61,8 @@ public class TestDmq1 extends TestCase {
       Context  ictx = new InitialContext();
       Queue queue = (Queue) ictx.lookup("queue");
       Topic topic = (Topic) ictx.lookup("topic");
-      DeadMQueue dmq =(DeadMQueue) ictx.lookup("dmq");
-      DeadMQueue dmq1 =(DeadMQueue) ictx.lookup("dmq1");
+      Queue dmq =(Queue) ictx.lookup("dmq");
+      Queue dmq1 =(Queue) ictx.lookup("dmq1");
       ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
       ictx.close();
 
@@ -83,39 +83,46 @@ public class TestDmq1 extends TestCase {
       MessageConsumer consumerq = sessioncq.createConsumer(queue);
       MessageConsumer consumert = sessioncq.createConsumer(topic);
 
-      // create a text message send to the queue by the pruducer 
-      TextMessage msg = sessionp.createTextMessage();
-      msg= sessionp.createTextMessage("message_q");
+      // create a text message send to the queue by the producer 
+      TextMessage msg = sessionp.createTextMessage("message_q");
       producer.send(queue,msg);
+      // create a text message send to the topic by the producer 
       msg= sessionp.createTextMessage("message_t");
       producer.send(topic,msg);
 
-      // the consumer receive the message from the dq
-      TextMessage msg1=(TextMessage)consumerq.receive(); 
+      // the consumer receive the message from the queue then rollback it 2 times
+      TextMessage msg1= (TextMessage) consumerq.receive(); 
       sessioncq.rollback();
-
-      msg1=(TextMessage) consumert.receive(); 
-      sessioncq.rollback();
-
       msg1=(TextMessage) consumerq.receive(); 
       sessioncq.rollback();
 
-      msg1=(TextMessage) consumert.receive(); 
+      // the consumer receive the message from the topic then rollback it 2 times
+      msg1= (TextMessage) consumert.receive(); 
+      sessioncq.rollback();
+      msg1= (TextMessage) consumert.receive(); 
       sessioncq.rollback();
 
-      msg1=(TextMessage) consumerq.receive(500);
-      assertEquals(null,msg1);
+      // the consumer try to receive a message from the queue
+      msg1= (TextMessage) consumerq.receive(500);
+      assertEquals(null, msg1);
+      
+      // the consumer try to receive a message from the topic
+      msg1= (TextMessage) consumert.receive(500); 
+      assertEquals(null ,msg1);
+      
+      msg1 = (TextMessage) consumerdq.receive(1000L);
+      assertTrue(msg1 != null);
+      if (msg1 != null) {
+        assertEquals("message_q",msg1.getText());
+        assertEquals(3, msg1.getIntProperty("JMSXDeliveryCount"));
+      }
 
-      msg1=(TextMessage) consumert.receive(500); 
-      assertEquals(null,msg1);
-
-      msg1 = (TextMessage) consumerdq.receive();
-      assertEquals("message_q",msg1.getText());
-      assertEquals(3, msg1.getIntProperty("JMSXDeliveryCount"));
-
-      msg1 = (TextMessage) consumerdq1.receive();
-      assertEquals("message_t",msg1.getText());
-      assertEquals(3, msg1.getIntProperty("JMSXDeliveryCount"));
+      msg1 = (TextMessage) consumerdq1.receive(1000L);
+      assertTrue(msg1 != null);
+      if (msg1 != null) {
+        assertEquals("message_t",msg1.getText());
+        assertEquals(3, msg1.getIntProperty("JMSXDeliveryCount"));
+      }
 
       cnxq.close();
       cnxdq.close();
@@ -134,42 +141,35 @@ public class TestDmq1 extends TestCase {
    *   use jndi
    */
   public void admin() throws Exception {
-    // conexion 
+    // connection 
     org.objectweb.joram.client.jms.admin.AdminModule.connect("localhost", 2560, "root", "root", 60);
-    // create a Queue   
-    org.objectweb.joram.client.jms.Queue queue =
-      (org.objectweb.joram.client.jms.Queue) org.objectweb.joram.client.jms.Queue.create("queue"); 
-    org.objectweb.joram.client.jms.Topic topic =
-      (org.objectweb.joram.client.jms.Topic) org.objectweb.joram.client.jms.Topic.create("topic"); 
 
-    DeadMQueue dmq = (DeadMQueue) DeadMQueue.create(0);
-    DeadMQueue dmq1 = (DeadMQueue) DeadMQueue.create(0);
-
-
-
-    // create a user
-    org.objectweb.joram.client.jms.admin.User user =
-      org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous");
-    org.objectweb.joram.client.jms.admin.User userdmq =
-      org.objectweb.joram.client.jms.admin.User.create("dmq", "dmq");
-
-
-    // set permissions
+    // create users
+    User user = User.create("anonymous", "anonymous");
+    User userdmq = User.create("dmq", "dmq");
+    
+    // create destinations   
+    Queue queue = Queue.create("queue"); 
     queue.setFreeReading();
     queue.setFreeWriting();
+    Topic topic = Topic.create("topic"); 
     topic.setFreeReading();
     topic.setFreeWriting();
+
+    // create DMQs
+    Queue dmq = (Queue) Queue.create(0);
+    dmq.setReader(userdmq);
+    dmq.setFreeWriting();
+    Queue dmq1 = (Queue) Queue.create(0);
+    dmq1.setReader(userdmq);
+    dmq1.setFreeWriting();
+
     queue.setDMQ(dmq);
     queue.setThreshold(2);
     user.setDMQ(dmq1);
     user.setThreshold(2);
-    dmq.setReader(userdmq);
-    dmq.setWriter(userdmq);
-    dmq1.setReader(userdmq);
-    dmq1.setWriter(userdmq);
 
-    javax.jms.ConnectionFactory cf =
-      org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create("localhost", 2560);
+    javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);
