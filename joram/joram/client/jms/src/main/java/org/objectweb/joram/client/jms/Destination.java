@@ -162,6 +162,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @return the symbolic name of the destination if any.
    */
   public final String getAdminName() {
+    if (adminName == null)
+      return agentId;
     return adminName;
   }
 
