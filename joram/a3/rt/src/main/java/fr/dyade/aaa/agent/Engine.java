@@ -951,7 +951,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     try {
       long start = 0L;
       long end = 0L;
-      boolean profiling = agentProfiling;
+      boolean profiling = false;
       
       main_loop:
         while (isRunning) {
@@ -1035,7 +1035,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
                          getName() + ": " + agent + ".react(" + msg.from + ", " + msg.getStamp() + ", " + msg.not + ")");
-            
+
             profiling = agentProfiling || agent.agentProfiling;
             if (profiling) {
               start = System.currentTimeMillis();
@@ -1045,7 +1045,11 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 //              // SDF generation
 //              strbuf.append("<react agentName=\"").append(agent.getAgentId()).append("\" notification=\"").append(StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp())).append("\" logpointer=\"10\" timestamp=\"").append(System.currentTimeMillis()).append("\">\n");
 //            }
-            
+
+            profiling = agentProfiling || agent.agentProfiling;
+            if (profiling)
+              start = System.currentTimeMillis();
+           
             try {
               agent.react(msg.from, msg.not);
               agent.reactNb += 1;
@@ -1091,10 +1095,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 //                                   "react " + agent.getAgentId() + ' ' + StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp()));
 
           // Agent profiling
-          if (profiling) {
+          if (profiling && (agent != null)) {
             end  = System.currentTimeMillis();
-            if (agent != null)
-              agent.commitTime += (end - start);
+            agent.commitTime += (end - start);
             commitTime += (end - start);
           }
         }
@@ -1124,6 +1127,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ": commit()");
     
+    if (agent != null) agent.save();
     AgentServer.getTransaction().begin();
     // Suppress the processed notification from message queue ..
     qin.pop();
@@ -1135,7 +1139,6 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     // then saves changes.
     dispatch();
     // Saves the agent state then commit the transaction.
-    if (agent != null) agent.save();
     AgentServer.getTransaction().commit(false);
     // The transaction has committed, then validate all messages.
     Channel.validate();
