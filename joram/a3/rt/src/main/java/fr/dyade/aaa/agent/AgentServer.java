@@ -273,6 +273,38 @@ public final class AgentServer {
     return getEngine().getAverageLoad15();
   }
   
+  /**
+   * Returns true if the agent profiling is on.
+   * 
+   * @see fr.dyade.aaa.agent.EngineMBean#isAgentProfiling()
+   */
+  public static boolean isAgentProfiling() {
+    return engine.isAgentProfiling();
+  }
+  
+  /**
+   * Sets the agent profiling.
+   * 
+   * @see fr.dyade.aaa.agent.EngineMBean#setAgentProfiling(boolean)
+   */
+  public static void setAgentProfiling(boolean agentProfiling) {
+    engine.setAgentProfiling(agentProfiling);
+  }
+  
+  /**
+   * @return the reactTime
+   */
+  public static long getReactTime() {
+    return engine.getReactTime();
+  }
+
+  /**
+   * @return the commitTime
+   */
+  public static long getCommitTime() {
+    return engine.getCommitTime();
+  }
+
   /** Static reference to the transactional monitor. */
   static Transaction transaction = null;
 
