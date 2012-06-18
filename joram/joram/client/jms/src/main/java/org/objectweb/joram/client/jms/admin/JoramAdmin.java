@@ -91,25 +91,37 @@ public class JoramAdmin implements AdminItf, JoramAdminMBean {
    */
   public void exit() {
     try {
-      Iterator mbeans = MXWrapper.queryNames(JMXBaseName + ":type=User,location=*,name=*").iterator();
+      Iterator<String> mbeans = MXWrapper.queryNames(JMXBaseName + ":type=User,location=*,name=*").iterator();
       while (mbeans.hasNext()) {
-        String name = (String) mbeans.next();
-        System.out.println("unregisterMBean: " + name);
-        MXWrapper.unregisterMBean(name);
+        String name = mbeans.next();
+        try {
+          MXWrapper.unregisterMBean(name);
+        } catch (Exception exc) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "JoramAdmin.unregisterMBean: " + name,exc);
+        }
       }
 
       mbeans = MXWrapper.queryNames(JMXBaseName + ":type=Queue,location=*,name=*").iterator();
       while (mbeans.hasNext()) {
-        String name = (String) mbeans.next();
-        System.out.println("unregisterMBean: " + name);
-        MXWrapper.unregisterMBean(name);
+        String name = mbeans.next();
+        try {
+          MXWrapper.unregisterMBean(name);
+        } catch (Exception exc) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "JoramAdmin.unregisterMBean: " + name,exc);
+        }
       }
 
       mbeans = MXWrapper.queryNames(JMXBaseName + ":type=Topic,location=*,name=*").iterator();
       while (mbeans.hasNext()) {
-        String name = (String) mbeans.next();
-        System.out.println("unregisterMBean: " + name);
-        MXWrapper.unregisterMBean(name);
+        String name = mbeans.next();
+        try {
+          MXWrapper.unregisterMBean(name);
+        } catch (Exception exc) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "JoramAdmin.unregisterMBean: " + name,exc);
+        }
       }
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
