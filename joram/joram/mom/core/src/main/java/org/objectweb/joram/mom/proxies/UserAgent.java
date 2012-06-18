@@ -956,8 +956,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         try {
           MXWrapper.unregisterMBean(getSubMBeanName((String) subEntry.getKey()));
         } catch (Exception e1) {
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e1);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
         }
       }
       // Reinitializing the durable ones.
@@ -1656,8 +1656,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     try {
       MXWrapper.unregisterMBean(getSubMBeanName(subName));
     } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e);
     }
 
     // Acknowledging the request:
@@ -2144,8 +2144,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         try {
           MXWrapper.unregisterMBean(getSubMBeanName(subName));
         } catch (Exception e) {
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e);
         }
         TopicSubscription tSub = (TopicSubscription) topicsTable.get(sub
             .getTopicId());
@@ -2274,6 +2274,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
           ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
           if (sub != null) {
             sub.acknowledge(sar.getIds().iterator());
+            // TODO (AF): is it needed to save the proxy ?
+            // if (sub.getDurable())
             setSave();
           }
         }
@@ -2485,6 +2487,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       if (message.durableAcksCounter > 0) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> save message " + message);
+        // TODO (AF): The message saving does it need the proxy saving ?
         setSave();
         // Persisting the message.
         setMsgTxName(message);
@@ -2544,8 +2547,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
           try {
             MXWrapper.unregisterMBean(getSubMBeanName(name));
           } catch (Exception e1) {
-            if (logger.isLoggable(BasicLevel.WARN))
-              logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e1);
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
           }
           sub.delete();
 
@@ -2613,8 +2616,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         try {
           MXWrapper.unregisterMBean(getSubMBeanName(name));
         } catch (Exception e1) {
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e1);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
         }
         sub.delete();
 
@@ -3174,8 +3177,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       try {
         MXWrapper.unregisterMBean(getSubMBeanName(subName));
       } catch (Exception e) {
-        if (logger.isLoggable(BasicLevel.WARN))
-          logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e);
       }
     }
 
