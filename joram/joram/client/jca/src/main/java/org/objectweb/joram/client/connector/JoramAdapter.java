@@ -640,8 +640,8 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   	try {
   		MXWrapper.unregisterMBean(getMBeanName());
   	} catch (Exception e) {
-  		if (logger.isLoggable(BasicLevel.WARN))
-  			logger.log(BasicLevel.WARN, "unregisterMBean", e);
+  		if (logger.isLoggable(BasicLevel.DEBUG))
+  			logger.log(BasicLevel.DEBUG, "unregisterMBean: " + getMBeanName(), e);
   	}
 
   	if (startJoramServer) {
@@ -1055,14 +1055,13 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
       try {
         MXWrapper.unregisterMBean(dest.getJMXBeanName(wrapper.getJMXBaseName(), dest));
       } catch (Exception e) {
-        if (logger.isLoggable(BasicLevel.WARN))
-          logger.log(BasicLevel.WARN, "unregisterMBean", e);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "unregisterMBean: " + name, e);
       }
       dest.delete();
       unbind(name);
     } catch (Exception exc) {
-      logger.log(BasicLevel.WARN,
-                 "removeDestination failed: " + name, exc);
+      logger.log(BasicLevel.WARN, "removeDestination failed: " + name, exc);
       throw new AdminException("removeDestination(" + name + ") failed.");
     }
   }
