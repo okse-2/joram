@@ -23,6 +23,7 @@
 package org.objectweb.joram.client.osgi;
 
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -221,6 +222,45 @@ public class ConnectionFactoryMSF implements ManagedServiceFactory {
 		String outInterceptorClassname = (String) properties.get(OUTINTERCEPTORCLASS);
 		if (isSet(outInterceptorClassname))
 			cf.getParameters().addOutInterceptor(outInterceptorClassname);
+		
+		// remove the reserved word, and set factory parameters
+		Properties prop = new Properties();
+		Enumeration keys = properties.keys();
+		while (keys.hasMoreElements()) {
+      String key = (String) keys.nextElement();
+      if (key.equals(CLASSNAME))
+        continue;
+      else if (key.equals(HOST))
+        continue;
+      else if (key.equals(PORT))
+        continue;
+      else if (key.equals(RELIABLECLASS))
+        continue;
+      else if (key.equals(TIMEOUT))
+        continue;
+      else if (key.equals(IDENTITYCLASS))
+        continue;
+      else if (key.equals(ININTERCEPTORCLASS))
+        continue;
+      else if (key.equals(OUTINTERCEPTORCLASS))
+        continue;
+      else if (key.equals(JNDINAME))
+        continue;
+      else if (key.equals(URL))
+        continue;
+      else if (key.equals(NAME))
+        continue;
+      else if (key.equals("service.pid"))
+        continue;
+      else if (key.equals("service.factoryPid"))
+        continue;
+      else if (key.startsWith("jonas"))
+        continue;
+      // add property
+      prop.put(key, properties.get(key));
+    }
+		// set factory parameters
+		cf.getParameters().setParameters(prop);
 		   
 		final String jndiName = (String) properties.get(JNDINAME);
 		final AbstractConnectionFactory cff = cf;
