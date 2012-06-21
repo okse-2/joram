@@ -52,7 +52,7 @@ public class ReconfTest11 extends ReconfTestBase {
   public void run() {
     try {
       String network = System.getProperty("Network", SimpleNetwork.class.getName());
-      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true" });
+      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false" });
 
       Thread.sleep(1000L);
       
@@ -75,7 +75,7 @@ public class ReconfTest11 extends ReconfTestBase {
       System.out.println("trace1: " + AdminModule.getConfiguration());
       
       deployAgentServer((short) 1, "./s1");
-      startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true",
+      startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
 
       Queue q0 = checkQueue((short) 0);
@@ -90,7 +90,7 @@ public class ReconfTest11 extends ReconfTestBase {
       System.out.println("trace2: " + AdminModule.getConfiguration());
       
       deployAgentServer((short) 2, "./s2");
-      startAgentServer((short) 2, new String[] { "-DNTNoLockFile=true",
+      startAgentServer((short) 2, new String[] { "-DTransaction.UseLockFile=false",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });
       
       Queue q2 = checkQueue((short) 2);
@@ -112,7 +112,7 @@ public class ReconfTest11 extends ReconfTestBase {
       System.out.println("trace4: " + AdminModule.getConfiguration());
       
       deployAgentServer((short) 4, "./s4");
-      startAgentServer((short) 4, new String[] { "-DNTNoLockFile=true",
+      startAgentServer((short) 4, new String[] { "-DTransaction.UseLockFile=false",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s4/a3servers.xml" });
       
       Queue q4 = checkQueue((short) 4);

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <config>
   <domain name="D0" network="fr.dyade.aaa.agent.SimpleNetwork"/>
-  <property name="NTNoLockFile" value="true" />
+  <property name="Transaction.UseLockFile" value="false" />
   <server id="0" name="s0" hostname="localhost">
      <network domain="D0" port="27300"/>
      <service class="fr.dyade.aaa.agent.AdminProxy" args="7890"/>
