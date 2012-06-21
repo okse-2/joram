@@ -45,7 +45,7 @@ public class ReconfTest7 extends ReconfTestBase {
   public void run() {
     try {
       String network = HttpNetwork.class.getName();
-      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true" });
+      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false" });
 
       AdminModule.connect("localhost", 2560, "root", "root", 60);
       User.create("anonymous", "anonymous", 0);
@@ -64,7 +64,7 @@ public class ReconfTest7 extends ReconfTestBase {
       
       AdminModule.addServer(1, "localhost", "D0", 17770, "s1");
       deployAgentServer((short) 1, "./s1");
-      startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true",
+      startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
       
       checkQueue((short) 0);     
