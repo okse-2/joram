@@ -130,7 +130,7 @@ public class test8 extends TestCase {
     public void react(AgentId from, Notification not) {
       try {
         if (not instanceof StartNot) {
-          String[] jvmargs = { "-DNTNoLockFile=true", "-Dcom.sun.management.jmxremote" };
+          String[] jvmargs = { "-DTransaction.UseLockFile=false", "-Dcom.sun.management.jmxremote" };
           System.out.println("start " + remote + " - " + bounce);
           startAgentServer(remote, jvmargs);
         } else if (not instanceof StopNot) {
