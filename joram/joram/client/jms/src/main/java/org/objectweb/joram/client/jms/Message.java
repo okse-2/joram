@@ -889,7 +889,7 @@ public class Message implements javax.jms.Message {
     return momMsg;
   }
 
-  public String toString() {
+  public final String toString() {
       StringBuffer strbuf = new StringBuffer();
       toString(strbuf);
       return strbuf.toString();
@@ -917,9 +917,12 @@ public class Message implements javax.jms.Message {
       }
       strbuf.append(",JMSTimestamp=").append(getJMSTimestamp());
       strbuf.append(",JMSType=").append(getJMSType());
+      if (momMsg.body != null)
+        strbuf.append(",size=").append(momMsg.body.length);
       strbuf.append(')');
     } catch (JMSException exc) {
       // Should never happened
+      logger.log(BasicLevel.ERROR, "Message.toString()", exc);
     }
   }
 }
