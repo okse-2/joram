@@ -494,6 +494,7 @@
     <antcall target="sub.Sub"/>
     <antcall target="sub.Sub2"/>
     <antcall target="sub.Sub3"/>
+  	<antcall target="sub.Sub4"/>
   </target>
   
   <target name="tests.monitoring"
@@ -5341,6 +5342,17 @@
     <antcall target="test.run" inheritAll="true">
       <param name="testid" value="sub.Sub3"/>
       <param name="className" value="joram.sub.Sub3"/>
+      <param name="a3conf" value="sub/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	
+  <target name="sub.Sub4" depends="init.a3props,compile"
+          description=" --> test about creation of subscriber">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="sub.Sub4"/>
+      <param name="className" value="joram.sub.Sub4"/>
       <param name="a3conf" value="sub/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
