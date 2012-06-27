@@ -293,7 +293,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     return durable;
   }
 
-  /** Returns <code>true</code> if the subscription is active. */
+  /** Returns the maximum number of messages per request if the subscription is active. */
   public int getActive() {
     return active;
   }
@@ -305,6 +305,15 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    */
   public int getPendingMessageCount() {
     return messageIds.size();
+  }
+  
+  /**
+   * Returns the number of messages delivered and waiting for acknowledge.
+   *
+   * @return The number of messages delivered and waiting for acknowledge.
+   */
+  public int getDeliveredMessageCount() {
+    return deliveredIds.size();
   }
 
   /**
@@ -426,6 +435,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   }
 
   void setActive(int active) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "setActive(" + active + ')');
     this.active = active;
   }
 
@@ -566,14 +577,24 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     int prior;
     Vector deliverables = new Vector();
     DMQManager dmqManager = null;
-
+    boolean isActive = true;
+    
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "deliver -> messageIds.size() = " + messageIds.size());
+      logger.log(BasicLevel.DEBUG, "deliver -> messageIds = " + messageIds.size() + ", active = " + active + ", deliveredIds = " + deliveredIds.size());
     
     // Delivering to a listener.
     if (toListener) {
       // Browsing the identifiers of the messages to deliver.
       while (! messageIds.isEmpty()) {
+        
+        if (active < deliverables.size()) {
+          // passivate 
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "passivate, active = " + active + " < deliverables = " + deliverables.size());
+          isActive = false;
+          break;
+        }
+        
         id = (String) messageIds.remove(0);
         save();
         message = (Message) messagesTable.get(id);
@@ -715,8 +736,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         deliverables.add(keptMsg.getFullMessage().clone());
 
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger
-              .log(BasicLevel.DEBUG, this + ": message " + keptMsg.getId() + " added for delivery.");
+          logger.log(BasicLevel.DEBUG, this + ": message " + keptMsg.getId() + " added for delivery.");
       } else {
         i++;
       }
@@ -733,6 +753,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
                                                     deliverables,
                                                     name,
                                                     false);
+      // set The activity: false if the subscription is 
+      // passivate by the clientSubscription.
+      if (!isActive)
+        consM.setActive(false);
+      
       if (! toListener) requestId = -1;
 
       return consM;
