@@ -48,6 +48,11 @@ public class Subscription {
    * Number of pending messages for this subscription.
    */
   private int messageCount;
+  
+  /**
+   * Number of pending acks for this subscription.
+   */
+  private int ackCount;
 
   /**
    * True if the subscription is durable.
@@ -60,10 +65,12 @@ public class Subscription {
   public Subscription(String name,
                       String topicId,
                       int messageCount,
+                      int ackCount,
                       boolean durable) {
     this.name = name;
     this.topicId = topicId;
     this.messageCount = messageCount;
+    this.ackCount = ackCount;
     this.durable = durable;
   }
 
@@ -93,6 +100,15 @@ public class Subscription {
   public final int getMessageCount() {
     return messageCount;
   }
+  
+  /**
+   * Returns the number of messages delivered and waiting for acknowledge.
+   *
+   * @return The number of messages delivered and waiting for acknowledge.
+   */
+  public final int getDeliveredMessageCount() {
+    return ackCount;
+  }
 
   /**
    * Returns true if the subscription is durable, false otherwise.
@@ -115,6 +131,8 @@ public class Subscription {
     buff.append(topicId);
     buff.append(",messageCount=");
     buff.append(messageCount);
+    buff.append(",ackCount=");
+    buff.append(ackCount);
     buff.append(",durable=");
     buff.append(durable);
     buff.append(")");

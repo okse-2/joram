@@ -566,11 +566,12 @@ public class User extends AdministeredObject implements UserMBean {
     String[] subNames = reply.getSubNames();
     String[] topicIds = reply.getTopicIds();
     int[] messageCounts = reply.getMessageCounts();
+    int[] ackCounts = reply.getDeliveredMessageCount();
     boolean[] durable = reply.getDurable();
 
     Subscription[] res = new Subscription[subNames.length];
     for (int i = 0; i < res.length; i++) {
-      res[i] = new Subscription(subNames[i], topicIds[i], messageCounts[i], durable[i]);
+      res[i] = new Subscription(subNames[i], topicIds[i], messageCounts[i], ackCounts[i], durable[i]);
     }
     return res;
   }
@@ -596,7 +597,7 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public Subscription getSubscription(String subName) throws AdminException, ConnectException {
     GetSubscriptionRep reply = (GetSubscriptionRep) doRequest(new GetSubscription(proxyId, subName));
-    Subscription sub = new Subscription(subName, reply.getTopicId(), reply.getMessageCount(), reply.getDurable());
+    Subscription sub = new Subscription(subName, reply.getTopicId(), reply.getMessageCount(), reply.getDeliveredMessageCount(), reply.getDurable());
 
     return sub;
   }
