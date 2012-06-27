@@ -369,9 +369,7 @@ abstract class MessageConsumerListener implements ReplyListener {
   public synchronized boolean replyReceived(AbstractJmsReply reply) 
     throws AbortedRequestException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "MessageConsumerListener.replyReceived(" + 
-        reply + ')');
+      logger.log(BasicLevel.DEBUG, "MessageConsumerListener.replyReceived(" + reply + ')');
     
     if (status == Status.CLOSE)
       throw new AbortedRequestException();
@@ -386,6 +384,13 @@ abstract class MessageConsumerListener implements ReplyListener {
       // 2- increment messageCount (synchronized)
       messageCount += cm.getMessageCount();
       
+      // verify the server activity
+      if (!cm.isActive()) {
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "MessageConsumerListener.replyReceived: the server passivate.");
+        topicMsgInputPassivated = true;
+      }
+          
       pushMessages(cm);
     } catch (StoppedQueueException exc) {
       throw new AbortedRequestException();
