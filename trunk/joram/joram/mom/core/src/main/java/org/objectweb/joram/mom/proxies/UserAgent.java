@@ -2886,6 +2886,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     String[] subNames = new String[subsTable.size()];
     String[] topicIds = new String[subsTable.size()];
     int[] messageCounts = new int[subsTable.size()];
+    int[] ackCounts = new int[subsTable.size()];
     boolean[] durable = new boolean[subsTable.size()];
     int i = 0;
     while (subsIterator.hasNext()) {
@@ -2894,11 +2895,12 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       ClientSubscription cs = (ClientSubscription) subEntry.getValue();
       topicIds[i] = cs.getTopicId().toString();
       messageCounts[i] = cs.getPendingMessageCount();
+      ackCounts[i] = cs.getDeliveredMessageCount();
       durable[i] = cs.getDurable();
       i++;
     }
     GetSubscriptionsRep reply = new GetSubscriptionsRep(
-      subNames, topicIds, messageCounts, durable);
+      subNames, topicIds, messageCounts, ackCounts, durable);
     replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
   }
 
@@ -2936,7 +2938,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     }
     if (cs != null) {
       GetSubscriptionRep reply = new GetSubscriptionRep(cs.getTopicId().toString(),
-          cs.getPendingMessageCount(), cs.getDurable());
+          cs.getPendingMessageCount(), cs.getDeliveredMessageCount(), cs.getDurable());
       replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
     } else {
       replyToTopic(new org.objectweb.joram.shared.admin.AdminReply(false, "Subscription not found: "

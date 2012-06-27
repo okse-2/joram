@@ -109,6 +109,13 @@ public interface ClientSubscriptionMBean {
    * @return The number of pending message for the subscription.
    */
   public int getPendingMessageCount();
+  
+  /**
+   * Returns the number of messages delivered and waiting for acknowledge.
+   *
+   * @return The number of messages delivered and waiting for acknowledge.
+   */
+  public int getDeliveredMessageCount();
 
   /**
    * Returns the list of message's identifiers for the subscription.
