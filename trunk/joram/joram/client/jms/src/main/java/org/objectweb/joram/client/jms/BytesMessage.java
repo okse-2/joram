@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -79,8 +79,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public long getBodyLength() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't get not readable message's"
-                                            + " size.");
+      throw new MessageNotReadableException("Can't get not readable message's  size.");
     return momMsg.body.length;
   } 
 
@@ -654,6 +653,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
         new MessageFormatException("The message body could not be serialized.");
       jExc.setLinkedException(exc);
       throw jExc;
-    } 
+    }
   } 
 }
