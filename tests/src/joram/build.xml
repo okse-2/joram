@@ -349,6 +349,7 @@
     <antcall target="noreg.test58"/>
     <antcall target="noreg.test59"/>
     <antcall target="noreg.test60"/>
+  	<antcall target="noreg.test61"/>
   </target>
 
   <target name="tests.xa"
@@ -4104,6 +4105,17 @@
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="jvmargs" value=""/>
     </antcall>
+  </target>
+	
+	<target name="noreg.test61" depends="init.a3props,compile"
+	        description=" --> Disable the mechanism of pre-requesting of the messages [JORAM-33]">
+	  <antcall target="test.run" inheritAll="true">
+	    <param name="className" value="joram.noreg.Test61"/>
+	    <param name="testid" value="noreg.test61"/>
+	    <param name="jndiconf" value="noreg/jndi.properties"/>
+	    <param name="a3conf" value="noreg/a3servers1.xml"/>
+	    <param name="jvmargs" value=""/>
+	  </antcall>
   </target>
 
   <!-- end noreg -->
