@@ -217,7 +217,7 @@ abstract class MessageConsumerListener implements ReplyListener {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> messageCount = " + messageCount);
         // Consume in advance (default is one message in advance)
-        if (messageCount < queueMessageReadMax
+        if ((messageCount < queueMessageReadMax || (queueMessageReadMax == 0))
             && receiveStatus == ReceiveStatus.CONSUMING_REPLY) {
           subscribe = true;
           if (ackMode == javax.jms.Session.DUPS_OK_ACKNOWLEDGE) {
@@ -231,9 +231,12 @@ abstract class MessageConsumerListener implements ReplyListener {
           }
         }
       }
+      // out of the synchronized block
       if (subscribe) {
-        // out of the synchronized block
-        subscribe(toAck);
+        if (queueMessageReadMax == 0)
+          subscribe(toAck, 1);
+        else 
+          subscribe(toAck, queueMessageReadMax);
       }
     } else {
       synchronized (this) {
@@ -269,7 +272,10 @@ abstract class MessageConsumerListener implements ReplyListener {
       logger.log(
         BasicLevel.DEBUG, "MessageConsumerListener.start()");
     if (status == Status.INIT) {
-      subscribe(null);
+      if (queueMessageReadMax == 0)
+        subscribe(null, 1);
+      else
+        subscribe(null, queueMessageReadMax);
       setStatus(Status.RUN);
     } else {
       // Should not happen
@@ -277,10 +283,9 @@ abstract class MessageConsumerListener implements ReplyListener {
     }
   }
 
-  private void subscribe(String[] toAck) throws JMSException {
+  private void subscribe(String[] toAck, int msgCount) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "MessageConsumerListener.subscribe()");
+      logger.log(BasicLevel.DEBUG, "MessageConsumerListener.subscribe()");
     
     ConsumerSetListRequest req = 
       new ConsumerSetListRequest(
@@ -288,7 +293,7 @@ abstract class MessageConsumerListener implements ReplyListener {
         selector, 
         queueMode,
         toAck,
-        queueMessageReadMax);
+        msgCount);
     
     // Change the receive status before sending
     // the request. subscribe() is not synchronized
@@ -446,8 +451,12 @@ abstract class MessageConsumerListener implements ReplyListener {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" +  msg + ')');
     
+    // if queueMessageReadMax == 0 (disable the mechanism of pre-requesting of the messages), 
+    // consume the next message after onMessage.
+    if (queueMessageReadMax > 0) {
     // Consume one message
     decreaseMessageCount(ackMode);
+    }
 
     try {
       listener.onMessage(msg);
@@ -462,6 +471,11 @@ abstract class MessageConsumerListener implements ReplyListener {
       exc.setLinkedException(re);
       throw exc;
     } 
+    
+    if (queueMessageReadMax == 0) {
+      // Consume one message
+      decreaseMessageCount(ackMode);
+    }
   }
   
   public abstract void onMessage(Message msg,
