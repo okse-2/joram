@@ -71,7 +71,7 @@ import fr.dyade.aaa.common.Debug;
  *     &lt;property name="pathToConf"&gt;your_path/conf&lt;/property&gt;
  *     &lt;!--  properties  --&gt;
  *     &lt;property name="Transaction"&gt;fr.dyade.aaa.util.NTransaction&lt;/property&gt;
- *     &lt;property name="Transaction.UseLockFile"&gt;true&lt;/property&gt;
+ *     &lt;property name="Transaction.UseLockFile"&gt;false&lt;/property&gt;
  *   &lt;/configuration&gt;
  *  &lt;/configadmin&gt;
  * </pre></blockquote>
