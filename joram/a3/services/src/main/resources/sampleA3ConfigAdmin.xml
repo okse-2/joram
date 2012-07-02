@@ -34,6 +34,6 @@
     
     <!--  overall properties  -->
     <property name="Transaction">fr.dyade.aaa.util.NTransaction</property>
-    <property name="NTNoLockFile">true</property>
+    <property name="Transaction.UseLockFile">false</property>
   </configuration>
 </configadmin>
