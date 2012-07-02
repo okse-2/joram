@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -143,11 +143,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
    * @exception JMSException  If the stream could not be prepared for the
    *              writing operation.
    */
-  private void prepareWrite() throws JMSException
-  {
+  private void prepareWrite() throws JMSException {
     if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+      throw new MessageNotWriteableException("Can't write a value as the message body is read-only.");
     if (prepared) {
       prepared = false;
       outputBuffer = new ByteArrayOutputStream();
