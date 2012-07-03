@@ -41,7 +41,7 @@ public class Activator implements BundleActivator {
           new String[] {"list",       "create",
                         "delete",     "addUser",
                         "queueLoad",  "subscriptionLoad",
-                        "info"});
+                        "info",       "lsMsg"});
     this.bundleContext = context;
     bundleContext.registerService(MOMCommands.class,
         new MOMCommandsImpl(bundleContext), prop);

@@ -25,18 +25,8 @@ package org.ow2.joram.shell.mom.commands;
 public interface MOMCommands {
   
   /**
-   * Stops the JORAM server
-   */
-  public void stop();
-  
-  /**
-   * Starts the JORAM server
-   */
-  public void start();
-  
-  /**
-   * List items of the category given
-   * @param category Category of items to list: destination, queue, topic, user
+   * List items of the given category
+   * @param category Category of item to list: destination, queue, topic, user
    */
   public void list(String[] category);
 
@@ -47,8 +37,8 @@ public interface MOMCommands {
   public void create(String[] args);
   
    /**
-   * Delete a destination
-   * @param args
+   * Delete a destination or a user
+   * @param args {category, name}
    */
   public void delete(String[] args);
 
@@ -70,6 +60,16 @@ public interface MOMCommands {
    */
   public void subscriptionLoad(String[] args);
   
+  /**
+   * Display info about the JORAM server
+   * @param args ???
+   */
   public void info(String[] args);
   
+  /**
+   * Display messages in queue
+   * @param args {queue name, message range}
+   */
+  public void lsMsg(String[] args);
+ 
 }

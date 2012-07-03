@@ -36,8 +36,10 @@ public class ShellDisplay {
     int nbRow = table.length;
     int nbCol = table[0].length;
     for(int i = 1; i < nbRow; i++)
-      if(table[i].length != nbCol)
+      if(table[i].length != nbCol) {
+        System.err.println("Error: Invalid table.");
         return;
+      }
     boolean lineheader = header;
     
     //Determines the maximum width of each column
