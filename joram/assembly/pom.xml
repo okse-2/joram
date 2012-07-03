@@ -223,5 +223,22 @@
       <artifactId>org.osgi.compendium</artifactId>
       <type>jar</type>
     </dependency>
+    
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>shell-mom</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>shell-jndi</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>shell-a3</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
   </dependencies>
 </project>
