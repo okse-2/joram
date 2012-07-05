@@ -1749,7 +1749,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     if (req.getQueueMode()) {
       AgentId qId = AgentId.fromString(req.getTarget());
       Vector ids = req.getIds();
-      sendNot(qId, new DenyRequest(activeCtxId, req.getRequestId(), ids));
+      DenyRequest dr = new DenyRequest(activeCtxId, req.getRequestId(), ids);
+      if (req.isRedelivered())
+        dr.setRedelivered(true);
+      sendNot(qId, dr);
 
       // Acknowledging the request unless forbidden:
       if (!req.getDoNotAck())
@@ -1761,7 +1764,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       if (sub == null)
         return;
 
-      sub.deny(req.getIds().iterator());
+      sub.deny(req.getIds().iterator(), req.isRedelivered());
 
       // Launching a delivery sequence:
       ConsumerMessages consM = sub.deliver();
@@ -1810,7 +1813,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     if (req.getQueueMode()) {
       AgentId qId = AgentId.fromString(req.getTarget());
       String id = req.getId();
-      sendNot(qId, new DenyRequest(activeCtxId, req.getRequestId(), id));
+      DenyRequest denyRequest = new DenyRequest(activeCtxId, req.getRequestId(), id);
+      denyRequest.setRedelivered(req.isRedelivered());
+      sendNot(qId, denyRequest);
 
       // Acknowledging the request, unless forbidden:
       if (!req.getDoNotAck())
@@ -1824,7 +1829,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
 
       Vector<String> ids = new Vector<String>();
       ids.add(req.getId());
-      sub.deny(ids.iterator());
+      sub.deny(ids.iterator(), req.isRedelivered());
 
       // Launching a delivery sequence:
       ConsumerMessages consM = sub.deliver();
@@ -1939,7 +1944,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       subName = subs.nextElement();
       sub = (ClientSubscription) subsTable.get(subName);
       if (sub != null) {
-        sub.deny(req.getSubIds(subName).iterator());
+        sub.deny(req.getSubIds(subName).iterator(), false);
 
         consM = sub.deliver();
         if (consM != null && activeCtx.getActivated())
