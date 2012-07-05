@@ -76,7 +76,7 @@ public class ConnectionClose5 extends TestCase {
   		exc.printStackTrace();
   		error(exc);
   	} finally {
-  		stopAgentServer((short)0);
+//  		stopAgentServer((short)0);
   		endTest();     
   	}
   }
