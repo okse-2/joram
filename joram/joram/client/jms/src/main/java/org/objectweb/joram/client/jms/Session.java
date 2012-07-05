@@ -1710,6 +1710,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> acks = " + acks + ')');
       SessDenyRequest deny = new SessDenyRequest(target, acks.getIds(), acks.getQueueMode());
+      deny.setRedelivered(true);
       if (acks.getQueueMode()) {
         requestor.request(deny);
       } else {
@@ -2007,10 +2008,11 @@ public class Session implements javax.jms.Session, SessionMBean {
    * but no concurrent call except a close which first stops
    * SessionDaemon.
    */
-  private void denyMessage(String targetName, String msgId, boolean queueMode) throws JMSException {
+  private void denyMessage(String targetName, String msgId, boolean queueMode, boolean redelivered) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Session.denyMessage(" + targetName + ',' + msgId + ',' + queueMode + ')');
+      logger.log(BasicLevel.DEBUG, "Session.denyMessage(" + targetName + ',' + msgId + ',' + queueMode + ',' + redelivered + ')');
     ConsumerDenyRequest cdr = new ConsumerDenyRequest(targetName, msgId, queueMode);
+    cdr.setRedelivered(redelivered);
     if (queueMode) {
       requestor.request(cdr);
     } else {
@@ -2047,7 +2049,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       // Catching a JMSException means that the building of the Joram
       // message went wrong: denying the message:
       if (autoAck)
-        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode());
+        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode(), true);
       return;
     }
     msg.session = this;
@@ -2084,7 +2086,7 @@ public class Session implements javax.jms.Session, SessionMBean {
         logger.log(BasicLevel.DEBUG, "", exc);
 
       if (autoAck || mcl.isClosed()) {
-        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode());
+        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode(), false);
       }
       return;
     }
@@ -2093,7 +2095,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       // The session has been recovered by the
       // listener thread.
       if (autoAck) {
-        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode());
+        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode(), false);
       } else {
         doRecover();
         recover = false;
