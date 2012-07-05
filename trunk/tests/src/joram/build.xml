@@ -246,6 +246,7 @@
     <antcall target="client.cnxtime_2.osgi"/>
     <antcall target="client.noloss_1"/>
     <antcall target="client.noloss_2"/>
+  	<antcall target="client.ClientTest25"/>
   </target>
 
   <target name="tests.connection"
@@ -1922,7 +1923,7 @@
 	      <param name="testid" value="client.close5"/>
 	      <param name="jndiconf" value="client/jndi.properties"/>
 	      <param name="a3conf" value="client/a3servers.xml"/>
-	      <param name="jvmargs" value=""/>
+	    	<param name="jvmargs" value="-Dosgi.shell.telnet.port=7890"/>
 	      <param name="args" value=""/>
 	    	<param name="manifest.mf" value="joram/client/manifest.mf"/>
 	    	<param name="include.classes" value="joram/client/Exit*.class"/>
@@ -2074,6 +2075,19 @@
     </antcall>
   </target>
 
+  <target name="client.ClientTest25" depends="init.a3props,compile"
+          description=" --> test the redelivered message value.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.client.ClientTest25"/>
+      <param name="jndiconf" value="client/jndi.properties"/>
+      <param name="a3conf" value="client/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="testid" value="client.ClientTest25"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	
   <target name="client.rollback" depends="init.a3props,compile"
           description=" --> test rollback : 1) when closing consumer, 2) when closing session, 3) when closing connection">
     <antcall target="test.run" inheritAll="true">
