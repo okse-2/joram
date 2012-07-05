@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -39,6 +39,22 @@ public class DenyRequest extends AbstractRequestNot {
   /** Vector of message identifiers. */
   private Vector msgIds = null;
 
+  /** true if the message has already been delivered.  */
+  private boolean redelivered = false;
+  
+  /**
+   * @return the redelivered
+   */
+  public boolean isRedelivered() {
+    return redelivered;
+  }
+
+  /**
+   * @param redelivered the redelivered to set
+   */
+  public void setRedelivered(boolean redelivered) {
+    this.redelivered = redelivered;
+  }
 
   /**
    * Constructs an <code>DenyRequest</code> instance.
@@ -98,6 +114,7 @@ public class DenyRequest extends AbstractRequestNot {
     super.toString(output);
     output.append(",msgId=").append(msgId);
     output.append(",msgIds=").append(msgIds);
+    output.append(",isRedelivered=").append(redelivered);
     output.append(')');
 
     return output;
