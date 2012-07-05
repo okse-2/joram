@@ -792,9 +792,12 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
   /**
    * Denies messages.
+   * 
+   * @param denies all ids of the messages to deny
+   * @param redelivered true if redelivered.
    */
-  void deny(Iterator<String> denies) {
-    deny(denies, true);
+  void deny(Iterator<String> denies, boolean redelivered) {
+    deny(denies, true, redelivered);
   }
 
   /**
@@ -804,8 +807,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * @param remove true to remove messages from deliveredIds map. Must be false
    *          when denies iterates over deliveredIds map keys, to avoid a
    *          ConcurrentModificationException.
+   * @param redelivered true if redelivered.
    */
-  private void deny(Iterator<String> denies, boolean remove) {
+  private void deny(Iterator<String> denies, boolean remove, boolean redelivered) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ".deny(" + denies + ')');
     String id;
@@ -876,7 +880,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         }
         
         messageIds.add(i, id);
-        deniedMsgs.put(id, new Integer(deliveryAttempts));
+        if (redelivered)
+          deniedMsgs.put(id, new Integer(deliveryAttempts));
       }
     }
 
