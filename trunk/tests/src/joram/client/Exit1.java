@@ -27,7 +27,6 @@ import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import framework.TestCase;
 
@@ -39,7 +38,8 @@ public class Exit1 implements MessageInterceptor {
 		logger.log(BasicLevel.DEBUG, "TestCase.killAgentServer: interceptor.Exit1 = " + m);
 
 		
-		TestCase.killAgentServer(AgentServer.getServerId());
+//		TestCase.killAgentServer(AgentServer.getServerId());
+		TestCase.stopAgentServerExt(7890);
 //		System.exit(0);
 
 		return true;
