@@ -1937,7 +1937,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       queueName = (String) queues.nextElement();
       qId = AgentId.fromString(queueName);
       ids = req.getQueueIds(queueName);
-      sendNot(qId, new DenyRequest(activeCtxId, req.getRequestId(), ids));
+      DenyRequest deny =  new DenyRequest(activeCtxId, req.getRequestId(), ids);
+      deny.setRedelivered(true);
+      sendNot(qId, deny);
     }
 
     String subName;
@@ -1947,7 +1949,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       subName = subs.nextElement();
       sub = (ClientSubscription) subsTable.get(subName);
       if (sub != null) {
-        sub.deny(req.getSubIds(subName).iterator(), false);
+        sub.deny(req.getSubIds(subName).iterator(), true);
 
         consM = sub.deliver();
         if (consM != null && activeCtx.getActivated())
