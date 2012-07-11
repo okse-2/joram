@@ -1925,6 +1925,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
    * in a given transaction.
    */
   private void doReact(XACnxRollback req) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "doReact(" + req + ')');
+    
     Xid xid = new Xid(req.getBQ(), req.getFI(), req.getGTI());
 
     String queueName;
@@ -1962,10 +1965,12 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       SessAckRequest ack;
       while (! acks.isEmpty()) {
         ack = (SessAckRequest) acks.remove(0);
-        doReact(new SessDenyRequest(ack.getTarget(),
-                                    ack.getIds(),
-                                    ack.getQueueMode(),
-                                    true));
+        SessDenyRequest deny = new SessDenyRequest(ack.getTarget(),
+            ack.getIds(),
+            ack.getQueueMode(),
+            true);
+        deny.setRedelivered(true);
+        doReact(deny);
       }
     }
 
