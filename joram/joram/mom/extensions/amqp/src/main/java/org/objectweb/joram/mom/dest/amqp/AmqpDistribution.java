@@ -92,7 +92,7 @@ public class AmqpDistribution implements DistributionHandler {
   
   private long updatePeriod = 5000L;
 
-  public void init(Properties properties) {
+  public void init(Properties properties, boolean firstTime) {
     amqpQueue = properties.getProperty(QUEUE_NAME_PROP);
     if (amqpQueue == null) {
       logger.log(BasicLevel.ERROR, "The amqp queue name property " + QUEUE_NAME_PROP + " must be specified.");

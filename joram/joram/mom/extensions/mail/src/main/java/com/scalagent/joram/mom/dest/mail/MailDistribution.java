@@ -58,7 +58,7 @@ public class MailDistribution implements DistributionHandler {
     sendJavaMail(message);
   }
 
-  public void init(Properties properties) {
+  public void init(Properties properties, boolean firstTime) {
     smtpServer = properties.getProperty("smtpServer", smtpServer);
     to = properties.getProperty("to", to);
     cc = properties.getProperty("cc", cc);

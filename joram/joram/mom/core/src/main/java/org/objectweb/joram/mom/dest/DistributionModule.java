@@ -43,21 +43,21 @@ public class DistributionModule {
   
   private boolean isAsyncDistribution = false;
 
-  public DistributionModule(String className, Properties properties) {
+  public DistributionModule(String className, Properties properties, boolean firstTime) {
     try {
       distributionHandler = (DistributionHandler) Class.forName(className).newInstance();
     } catch (Exception exc) {
       logger.log(BasicLevel.ERROR, "DistributionModule: can't create distribution handler.", exc);
     }
-    setProperties(properties);
+    setProperties(properties, firstTime);
   }
 
   /**
    * Resets the distribution properties.
    */
-  public void setProperties(Properties properties) {
+  public void setProperties(Properties properties, boolean firstTime) {
     if (distributionHandler != null) {
-      distributionHandler.init(properties);
+      distributionHandler.init(properties, firstTime);
     }
     
     if (properties.containsKey(DistributionQueue.ASYNC_DISTRIBUTION_OPTION)) {
