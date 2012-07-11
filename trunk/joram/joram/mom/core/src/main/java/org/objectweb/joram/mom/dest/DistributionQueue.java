@@ -135,7 +135,7 @@ public class DistributionQueue extends Queue {
         throw new RequestException(exc.getMessage());
       }
     } else {
-      distributionModule.setProperties(properties);
+      distributionModule.setProperties(properties,firstTime);
       
     	if (distributionDaemon == null && isAsyncDistribution) {
     		// start distributionDaemon
@@ -173,7 +173,7 @@ public class DistributionQueue extends Queue {
   public void initialize(boolean firstTime) {
     super.initialize(firstTime);
     if (distributionModule == null) {
-      distributionModule = new DistributionModule(distributionClassName, properties);
+      distributionModule = new DistributionModule(distributionClassName, properties, firstTime);
     }
     if (properties != null)
     	isAsyncDistribution = isAsyncDistribution(properties);

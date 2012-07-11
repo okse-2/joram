@@ -67,7 +67,7 @@ public class JMSDistribution implements DistributionHandler {
   
   private long updatePeriod = 5000L;
 
-  public void init(Properties properties) {
+  public void init(Properties properties, boolean firstTime) {
     destName = properties.getProperty(DESTINATION_NAME_PROP);
     if (destName == null) {
       throw new IllegalArgumentException("Missing Destination JNDI name.");
