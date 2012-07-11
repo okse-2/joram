@@ -29,7 +29,7 @@ public class NotificationDistributionHandler implements DistributionHandler {
   private AgentId remoteDestinationID = null;
 
   /** @see DistributionHandler#init(Properties) */
-  public void init(Properties properties) {
+  public void init(Properties properties, boolean firstTime) {
     remoteDestinationID = AgentId.fromString(properties.getProperty("remoteAgentID"));
 
     if (logger.isLoggable(BasicLevel.INFO))
