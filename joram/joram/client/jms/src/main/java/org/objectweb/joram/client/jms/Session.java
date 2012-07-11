@@ -247,6 +247,13 @@ public class Session implements javax.jms.Session, SessionMBean {
    * thread.
    */
   private boolean recover;
+  
+  /**
+   * Indicates that the session has been close by a message listener.
+   * Doesn't need to be volatile because it is only used by the SessionDaemon
+   * thread.
+   */
+  private boolean toClose;
 
   /**
    * Status of the session: STOP, START, CLOSE
@@ -1426,7 +1433,11 @@ public class Session implements javax.jms.Session, SessionMBean {
   public void close() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Session.close()");
-    closer.close();
+    
+    if (daemon != null && daemon.isCurrentThread())
+      toClose = true;
+    else
+      closer.close();
     unregisterMBean();
   }
 
@@ -1446,7 +1457,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       if (status == Status.CLOSE)
         return;
     }
-
+    
     // Don't synchronize the consumer closure because
     // it could deadlock with message listeners or
     // client threads still using the session.
@@ -2095,7 +2106,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       // The session has been recovered by the
       // listener thread.
       if (autoAck) {
-        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode(), false);
+        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode(), true);
       } else {
         doRecover();
         recover = false;
@@ -2104,6 +2115,11 @@ public class Session implements javax.jms.Session, SessionMBean {
       if (autoAck) {
         mcl.ack(msgId, acknowledgeMode);
       }
+    }
+    
+    if (toClose) {
+      doClose();
+      toClose = false;
     }
   }
 
