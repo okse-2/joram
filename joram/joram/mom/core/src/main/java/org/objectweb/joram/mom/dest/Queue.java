@@ -652,6 +652,8 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
           entries.remove();
           if (not.isRedelivered())
             message.setRedelivered();
+          else
+            message.setDeliveryCount(message.getDeliveryCount()-1);
 
           // If message considered as undeliverable, adding
           // it to the list of dead messages:
@@ -690,6 +692,8 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
       if (not.isRedelivered())
         message.setRedelivered();
+      else
+        message.setDeliveryCount(message.getDeliveryCount()-1);
 
 
       if (logger.isLoggable(BasicLevel.DEBUG))
