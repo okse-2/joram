@@ -40,17 +40,17 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import framework.TestCase;
 
 /**
- * When closing a session the messages delivered but not consumed by the client must not be set to redelivered.
+ * When closing a session the messages delivered but not consumed by the client must not be set to redelivered and JMSXDeliveryCount = 1.
  * 
  * Test: first with a queue and second with a topic.
  * - producer send 5 messages on destination.
  * - a MessageConsumer (listener mode) receive the message (in queue mode set QueueMessageReadMax=5).
  * - on first message received we close the consumer session.
  * - create a new session (CLIENT_ACKNOWLEDGE)
- * - received messages and verify the redelivered value expected false.
+ * - received messages and verify the redelivered value expected false and JMSXDeliveryCount = 2.
  * - close the session and forgot the acknowledge.
  * - create a new session
- * - received messages and verify the redelivered value expected true.
+ * - received messages and verify the redelivered value expected true and JMSXDeliveryCount = 2.
  * 
  * @see JORAM-41.
  */
@@ -129,9 +129,11 @@ public class ClientTest25 extends TestCase {
       int i = 0;
       public void onMessage(Message msg) {
         try {
-          System.out.println("on message " + ((TextMessage)msg).getText() + ", isRedelivered = " + msg.getJMSRedelivered());
-          if (i == 0)
+          System.out.println("on message " + ((TextMessage)msg).getText() + ", isRedelivered = " + msg.getJMSRedelivered() + ", JMSXDeliveryCount = " + msg.getObjectProperty("JMSXDeliveryCount"));
+          if (i == 0) {
             assertEquals("the JMSRedelivered is bad.", false, msg.getJMSRedelivered());
+            assertEquals("Bad value for JMSXDeliveryCount.", 1, msg.getObjectProperty("JMSXDeliveryCount"));
+          }
           i++;
           Thread.sleep(1000);
           synchronized (lock) {
@@ -147,6 +149,7 @@ public class ClientTest25 extends TestCase {
       lock.wait(60000);
     }
     recSession.close();
+
     
     System.out.println("new session CLIENT_ACKNOWLEDGE ...");
     
@@ -162,9 +165,11 @@ public class ClientTest25 extends TestCase {
       int i= 0;
       public void onMessage(Message msg) {
         try {
-          System.out.println("on message " + ((TextMessage)msg).getText() + ", isRedelivered = " + msg.getJMSRedelivered());
-          if (i == 0)
+          System.out.println("on message " + ((TextMessage)msg).getText() + ", isRedelivered = " + msg.getJMSRedelivered() + ", JMSXDeliveryCount = " + msg.getObjectProperty("JMSXDeliveryCount"));
+          if (i == 0) {
             assertEquals("the JMSRedelivered is bad.", false, msg.getJMSRedelivered());
+            assertEquals("Bad value for JMSXDeliveryCount.", 1, msg.getObjectProperty("JMSXDeliveryCount"));
+          }
           i++;
           Thread.sleep(1000);
           synchronized (lock) {
@@ -192,9 +197,11 @@ public class ClientTest25 extends TestCase {
       int i = 0;
       public void onMessage(Message msg) {
         try {
-          System.out.println("on message " + ((TextMessage)msg).getText() + ", isRedelivered = " + msg.getJMSRedelivered());
-          if (i == 0)
+          System.out.println("on message " + ((TextMessage)msg).getText() + ", isRedelivered = " + msg.getJMSRedelivered() + ", JMSXDeliveryCount = " + msg.getObjectProperty("JMSXDeliveryCount"));
+          if (i == 0) {
             assertEquals("the JMSRedelivered is bad.", true, msg.getJMSRedelivered());
+            assertEquals("Bad value for JMSXDeliveryCount.", 2, msg.getObjectProperty("JMSXDeliveryCount"));
+          }
           i++;
         } catch(JMSException exc) {}
       }
