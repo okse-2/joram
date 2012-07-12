@@ -24,7 +24,6 @@ package org.ow2.joram.shell.mom;
 
 import java.util.Hashtable;
 
-import org.apache.felix.service.command.CommandProcessor;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.ow2.joram.shell.mom.commands.MOMCommands;
@@ -36,14 +35,14 @@ public class Activator implements BundleActivator {
 
   public void start(BundleContext context) throws Exception {
     Hashtable<String, Object> prop = new Hashtable<String, Object>();
-      prop.put(CommandProcessor.COMMAND_SCOPE, MOMCommandsImpl.NAMESPACE);
-      prop.put(CommandProcessor.COMMAND_FUNCTION,
-          new String[] {"list",       "create",
-                        "delete",     "addUser",
-                        "queueLoad",  "subscriptionLoad",
-                        "info",       "lsMsg"});
+      //CommandProcessor.COMMAND_SCOPE="osgi.command.scope"
+      prop.put("osgi.command.scope",
+          MOMCommandsImpl.NAMESPACE);
+      //CommandProcessor.COMMAND_FUNCTION="osgi.command.function"
+      prop.put("osgi.command.function",
+          MOMCommandsImpl.COMMANDS);
     this.bundleContext = context;
-    bundleContext.registerService(MOMCommands.class,
+    bundleContext.registerService(MOMCommands.class.getCanonicalName(),
         new MOMCommandsImpl(bundleContext), prop);
   }
 

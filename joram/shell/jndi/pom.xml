@@ -31,14 +31,8 @@
 	
 	<dependencies>
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.main</artifactId>
-      <version>${felix.main.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.gogo.runtime</artifactId>
-      <version>${felix.gogo.runtime.version}</version>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ow2.joram</groupId>

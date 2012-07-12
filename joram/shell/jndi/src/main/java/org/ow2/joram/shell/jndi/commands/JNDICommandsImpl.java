@@ -34,6 +34,13 @@ import fr.dyade.aaa.jndi2.impl.NamingContextMBean;
 public class JNDICommandsImpl implements JNDICommands {
   
   private static final int TIMEOUT = 1000;
+
+  public static final String NAMESPACE = "joram:jndi";
+  public static final String[] COMMANDS = new String[] {
+    "getNamingContext", "getStrOwnerId",
+    "setStrOwnerId", "createSubcontext",
+    "destroySubcontext", "lookup",
+    "unbind"};
   
   private BundleContext bundleContext;
   private ServiceTracker tracker;
@@ -42,8 +49,8 @@ public class JNDICommandsImpl implements JNDICommands {
   public JNDICommandsImpl(BundleContext bundleContext) {
     this.bundleContext = bundleContext;
     this.tracker = new ServiceTracker(this.bundleContext,
-                                                NamingContextMBean.class,
-                                                null);
+                                      NamingContextMBean.class.getCanonicalName(),
+                                      null);
     this.tracker.open();
   }
 
