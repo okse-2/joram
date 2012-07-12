@@ -4,9 +4,7 @@
 
   <artifactId>shell-mom</artifactId>
   <packaging>bundle</packaging>
-  <!-- version : major.minor.build -->
   <name>JORAM :: shell :: mom</name>
-  <url>http://maven.apache.org</url>
   
   <parent>
    <groupId>org.ow2.joram</groupId>
@@ -30,35 +28,22 @@
 			</plugin>
 		</plugins>
 	</build>
-	
-	<properties>
-	  <!-- to prevent [WARNING] Using platform encoding -->
-	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	  <felix.version>4.0.2</felix.version>
-	  <joram.version>5.8.0-SNAPSHOT</joram.version>
-	</properties>
-	
+
 	<dependencies>
-<!--		<dependency>
-		  <groupId>org.apache.felix</groupId>
-		  <artifactId>org.apache.felix.framework</artifactId>
-		  </dependency> -->
-		<dependency>
-		  <groupId>org.apache.felix</groupId>
-		  <artifactId>org.apache.felix.main</artifactId>
-		  </dependency>
-		<dependency>
-		  <groupId>org.apache.felix</groupId>
-		  <artifactId>org.apache.felix.shell</artifactId>
-		  </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.main</artifactId>
+      <version>${felix.main.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.gogo.runtime</artifactId>
-      <version>0.6.0</version>
+      <version>${felix.gogo.runtime.version}</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.joram</groupId>
       <artifactId>joram-mom-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
  	</dependencies>
   
