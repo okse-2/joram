@@ -24,6 +24,7 @@ package org.ow2.joram.shell.mom.commands;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +40,7 @@ import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.UserAgentMBean;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.ow2.joram.shell.ShellDisplay;
 
@@ -62,17 +64,17 @@ public class MOMCommandsImpl implements MOMCommands {
   public MOMCommandsImpl(BundleContext context) {
     this.bundleContext = context;
     this.destinationTracker = new ServiceTracker
-                (bundleContext, DestinationMBean.class, null);
+                (bundleContext, DestinationMBean.class.getCanonicalName(), null);
     this.queueTracker = new ServiceTracker
-                (bundleContext, QueueMBean.class,       null);
+                (bundleContext, QueueMBean.class.getCanonicalName(),       null);
     this.topicTracker = new ServiceTracker
-                (bundleContext, TopicMBean.class,       null);
+                (bundleContext, TopicMBean.class.getCanonicalName(),       null);
     this.userTracker = new ServiceTracker
-                (bundleContext, UserAgentMBean.class,   null);
+                (bundleContext, UserAgentMBean.class.getCanonicalName(),   null);
     this.adminTracker = new ServiceTracker
-                (bundleContext, AdminTopicMBean.class,  null);
+                (bundleContext, AdminTopicMBean.class.getCanonicalName(),  null);
     this.clientSubTracker = new ServiceTracker
-                (bundleContext, ClientSubscriptionMBean.class,  null);
+                (bundleContext, ClientSubscriptionMBean.class.getCanonicalName(),  null);
 
     destinationTracker.open();
     queueTracker.open();
@@ -82,11 +84,32 @@ public class MOMCommandsImpl implements MOMCommands {
     clientSubTracker.open();
   }
   
+  public static String[] COMMANDS =
+      new String[] {"list",       "create",
+                    "delete",     "addUser",
+                    "queueLoad",  "subscriptionLoad",
+                    "info",       "lsMsg",
+                    "ping",       "deleteMsg",
+                    "sendMsg",    "receiveMsg",
+                    "help"};
+  
+  //TODO: retrieve help from file (easier to maintain)
+  /**
+   * Print the descrption of the given command
+   */
+  public static void help() {
+    System.out.println("Usage: help <cmd>");
+    Arrays.sort(COMMANDS);
+    System.out.println("Commands: "+COMMANDS[0]);
+    for(int i =1; i<COMMANDS.length; i++)
+      System.out.println("          "+COMMANDS[i]);
+ }  
+
   /**
    * Print the descrption of the given command
    * @param command Name of the command to describe
    */
-  private static void help(String command) {
+  public static void help(String command) {
     StringBuffer buf = new StringBuffer();
     String fullCommand = "["+NAMESPACE+":]"+command;
     buf.append("Usage: ").append(fullCommand).append(" ");
@@ -94,24 +117,50 @@ public class MOMCommandsImpl implements MOMCommands {
       buf.append("<category> [username]");
       buf.append("\n\tPossible categories: destination, topic, queue, user, subscription");
       buf.append("\n\tNB: For the subscription category, you must provide the user name.");     
+
     } else if(command.equals("create")) {
       buf.append("<topic|queue> <name> [option...]\n");
       buf.append("Options: -sid <server id>\tSpecifies on which server the destination is to be created\n");
       buf.append("                         \tDefault: This server\n");
       buf.append("         -ext <extension>\tSpecifies which extension class to instanciate\n");
       buf.append("                         \tDefault: None");
+
     } else if(command.equals("queueLoad")) {
       buf.append("<queueName>");
+
     } else if(command.equals("subscriptionLoad")) {
       buf.append("<userName> <subscriptionName>");
+
     } else if(command.equals("delete")) {
       buf.append("<topic|queue|user> <name>");
+
     } else if(command.equals("addUser")) {
       buf.append("[name]");
+    
     } else if(command.equals("info")) {
       buf.append("<queue|topic> <name>");
+      buf.append("\n       ").append(fullCommand).append(" ");
+      buf.append("subscription <username> <subscription name>");
+   
     } else if(command.equals("lsMsg")) {
-      buf.append("<queue> [[first msg idx]:[last msg idx]]");
+      buf.append("queue <queue name> [[first msg idx]:[last msg idx]]");
+      buf.append("\n       ").append(fullCommand).append(" ");
+      buf.append("subscription <username> <subscription name> [[first msg idx]:[last msg idx]]");
+   
+    } else if(command.equals("deleteMsg")) {
+     buf.append("queue <queue name> <msg id>");
+     buf.append("\n       ").append(fullCommand).append(" ");
+     buf.append("subscription <username> <subscription name> <msg id>");
+   
+    } else if(command.equals("receiveMsg")) {
+     buf.append("<queue name> [options]");
+     buf.append("Options: -n <x>\tReceive only <x> messages");
+     buf.append("         -t <x>\tTimes out after <x> seconds");
+   
+    } else if(command.equals("sendMsg")) {
+     buf.append("(queue/topic) <destination name> <text>");
+    } else if(command.equals("ping")) {
+      buf.append("\nChecks whether a JoramAdminTopic exists.");
     } else {
       System.err.println("Unknown command: "+command);
       return;
@@ -120,6 +169,10 @@ public class MOMCommandsImpl implements MOMCommands {
   }
 
   public void list(String[] args) {
+    if(args.length==0) {
+      help("list");
+      return;
+    }
     String category = args[0];
     if(category.equals("destination")
     || category.equals("queue")
@@ -286,6 +339,12 @@ public class MOMCommandsImpl implements MOMCommands {
       type=DestinationConstants.TOPIC_TYPE;
     }  else if(args[0].equals("queue")) {
       type=DestinationConstants.QUEUE_TYPE;
+    }  else if(args[0].equals("user")) {
+      String[] newArgs = new String[args.length-1];
+      for (int i = 1; i < args.length; i++) {
+        newArgs[i-1] = args[i];
+      }
+      addUser(newArgs);
     } else {
       help("create");
       return;
@@ -370,7 +429,11 @@ public class MOMCommandsImpl implements MOMCommands {
     }
   }
   
-  public void addUser(String[] args) {
+  /**
+   * Add a new user to the servers
+   * @param args parameters of the command
+   */
+  private void addUser(String[] args) {
     String userName = null;
     Scanner s = new Scanner(System.in);
     if(args.length==0) {
@@ -458,6 +521,14 @@ public class MOMCommandsImpl implements MOMCommands {
     return null;
   }
   
+  private AdminTopicMBean findAdminTopic() {
+    try {
+      return (AdminTopicMBean) adminTracker.waitForService(TIMEOUT);
+    } catch (InterruptedException e) {
+      return null;
+    }
+  }
+  
   public void subscriptionLoad(String[] args) {
     if(args.length != 2) {
       help("subscriptionLoad");
@@ -488,7 +559,7 @@ public class MOMCommandsImpl implements MOMCommands {
   }
   
   public void info(String[] args) {
-    if(args.length!=2) {
+    if(args.length<2) {
       help("info");
       return;
     }
@@ -498,6 +569,8 @@ public class MOMCommandsImpl implements MOMCommands {
       infoTopic(destName);
     } else if(category.equals("queue")) {
       infoQueue(destName);
+    } else if(category.equals("subscription")) {
+      infoSubscription(args[1], args[2]);
     } else {
       System.err.println("Error: Unknown category.");
       help("info");
@@ -537,20 +610,62 @@ public class MOMCommandsImpl implements MOMCommands {
     System.out.println("Messages received : "+dest.getNbMsgsReceiveSinceCreation());
   }
 
+  private void infoSubscription(String userName, String subName) {
+    ClientSubscriptionMBean sub = findClientSubscription(userName, subName);
+    if(sub == null) {
+      System.err.println("Error: Subscription not found.");
+    }
+    System.out.println("Subscription name        : "+sub.getName());
+    System.out.println("Nb of pending messages   : "+sub.getPendingMessageCount());
+    System.out.println("Nb of delivered messages : "+sub.getNbMsgsDeliveredSinceCreation());
+    System.out.println("Nb of DMQ messages       : "+sub.getNbMsgsSentToDMQSinceCreation());
+ }
+  
   public void lsMsg(String[] args) {
-    if(args.length < 1 || args.length > 2) {
+    //Argument parsing (includes messages retrieval)
+    if(args.length < 2) {
       help("lsMsg");
       return;
     }
-    QueueMBean queue = findQueue(args[0]);
-    if(queue == null) {
-      System.err.println("Error: Could not find a queue with the name \""+args[0]+"\"");
+    
+    String category = args[0].toLowerCase();
+    String range = null;
+    List<MessageView> msgs = null;
+    if(category.equals("queue")) {
+      if(args.length > 3) {
+        help("lsMsg");
+        return;
+      }
+      String queueName = args[1];
+      if(args.length==3)
+        range = args[2];
+      //messages retrieval
+      msgs = getQueueMessages(queueName);
+    } else if(category.equals("subscription")) {
+      if(args.length > 4 || args.length < 3) {
+        help("lsMsg");
+        return;
+      }
+      String userName = args[1];
+      String subName = args[2];
+      if(args.length==4)
+        range = args[3];
+      //messages retrieval
+      msgs = getSubscriptionMessages(userName, subName);
+    } else {
+      System.err.println("Error: Unknown category: "+category);
       return;
     }
-    List<MessageView> msgs = queue.getMessagesView();
-    if(args.length==2) {
-      if(args[1].matches("\\d*:\\d*")) {
-        String[] parts = args[1].split(":",2);
+    
+    if(msgs == null) {
+      System.err.println("Error: "+category+" not found.");
+      return;
+    }
+    
+    //Range parsing
+    if(range!=null) {
+      if(range.matches("\\d*:\\d*")) {
+        String[] parts = range.split(":",2);
         int start = parts[0].length()!=0?Integer.parseInt(parts[0]):0;
         int end = parts[1].length()!=0?Integer.parseInt(parts[1]):msgs.size()-1;
         msgs=getMessageRange(msgs, start, end);
@@ -559,6 +674,8 @@ public class MOMCommandsImpl implements MOMCommands {
         return;
       }
     }
+    
+    //Data formatting
     String[][] table = new String[msgs.size()+1][];
     table[0] =
         new String[]{"Msg ID","Type","Creation date","Text","Expiration Date",
@@ -601,14 +718,53 @@ public class MOMCommandsImpl implements MOMCommands {
     ShellDisplay.displayTable(table, true);
   }
   
+  public void ping() {
+    AdminTopicMBean adminTopic = findAdminTopic();
+    System.out.println(adminTopic==null?"KO":"OK");
+  }  
+
+  public void deleteMsg(String[] args) {
+    System.err.println("Error: Not yet implemented.");
+    help("deleteMsg");
+ }
+  
+  public void sendMsg(String[] args) {
+    System.err.println("Error: Not yet implemented.");  
+    help("sendMsg");
+  }
+  
+  public void receiveMsg(String[] args) {
+    System.err.println("Error: Not yet implemented.");
+    help("receiveMsg");
+  }
+
+  private List<MessageView> getQueueMessages(String queueName) {
+    QueueMBean queue = findQueue(queueName);
+    if(queue == null)
+      return null;
+    List<MessageView> msgs = queue.getMessagesView();
+    return msgs==null?new ArrayList<MessageView>():msgs;
+  }
+  
+  private List<MessageView> getSubscriptionMessages(String userName, String subscriptionName) {
+    ClientSubscriptionMBean sub = findClientSubscription(userName, subscriptionName);
+    if(sub==null)
+      return null;
+    List<MessageView> msgs = sub.getMessagesView();
+    return msgs==null?new ArrayList<MessageView>():msgs;
+  }
+  
   private List<MessageView> getMessageRange(List<MessageView> msgs, int start, int end) {
-    if(start<0 || end > msgs.size() || start > end)
+    if(start<0 || end >= msgs.size() || start > end)
       return msgs;
     List<MessageView> res = new ArrayList<MessageView>();
     for(int i = start; i<=end; i++)
       res.add(msgs.get(i));
     return res;
   }
+  
+  
+  
   
   public static void main(String[] args) {
     help("list");

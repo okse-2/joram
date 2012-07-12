@@ -43,12 +43,6 @@ public interface MOMCommands {
   public void delete(String[] args);
 
   /**
-   * Add a new user to the servers
-   * @param args parameters of the command
-   */
-  public void addUser(String[] args);
-
-  /**
    * Check the pending count of a queue
    * @param args parameters of the command
    */
@@ -61,7 +55,7 @@ public interface MOMCommands {
   public void subscriptionLoad(String[] args);
   
   /**
-   * Display info about the JORAM server
+   * Display info about a destination (topic & subscription, queue)
    * @param args ???
    */
   public void info(String[] args);
@@ -71,5 +65,28 @@ public interface MOMCommands {
    * @param args {queue name, message range}
    */
   public void lsMsg(String[] args);
+  
+  /**
+   * Ping
+   */
+  public void ping();
+  
+  /**
+   * Delete (a) message(s) in a destination
+   * @param args
+   */
+  public void deleteMsg(String[] args);
+  
+  /**
+   * Send a new message in a destination
+   * @param args
+   */
+  public void sendMsg(String[] args);
+  
+  /**
+   * Receive (a) message(s) from a destination
+   * @param args
+   */
+  public void receiveMsg(String[] args);
  
 }

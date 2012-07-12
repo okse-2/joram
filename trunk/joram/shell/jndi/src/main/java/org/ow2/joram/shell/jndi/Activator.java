@@ -24,7 +24,6 @@ package org.ow2.joram.shell.jndi;
 
 import java.util.Hashtable;
 
-import org.apache.felix.service.command.CommandProcessor;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.ow2.joram.shell.jndi.commands.JNDICommands;
@@ -37,17 +36,14 @@ public class Activator implements BundleActivator {
   
   public void start(BundleContext context) throws Exception {
     Hashtable<String, Object> prop = new Hashtable<String, Object>();
-    prop.put(CommandProcessor.COMMAND_SCOPE, "joram:jndi");
-    prop.put(CommandProcessor.COMMAND_FUNCTION,
-        new String[] {"getNamingContext",
-                      "getStrOwnerId",
-                      "setStrOwnerId",
-                      "createSubcontext",
-                      "destroySubcontext",
-                      "lookup",
-                      "unbind"});
+    //CommandProcessor.COMMAND_SCOPE="osgi.command.scope"
+    prop.put("osgi.command.scope",
+        JNDICommandsImpl.NAMESPACE);
+    //CommandProcessor.COMMAND_FUNCTION="osgi.command.function"
+    prop.put("osgi.command.function",
+        JNDICommandsImpl.COMMANDS);
     this.bundleContext = context;
-    bundleContext.registerService(JNDICommands.class,
+    bundleContext.registerService(JNDICommands.class.getCanonicalName(),
         new JNDICommandsImpl(bundleContext), prop);
   }
 
