@@ -179,6 +179,17 @@
       <artifactId>org.apache.felix.main</artifactId>
       <version>${felix.main.version}</version>
     </dependency>
+    
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+      <version>${felix.gogo.runtime.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.gogo.command</artifactId>
+      <version>${felix.gogo.command.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>javax.activation</groupId>
