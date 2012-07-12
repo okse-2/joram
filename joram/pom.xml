@@ -183,10 +183,12 @@
     <commons-dbcp.version>1.2.2</commons-dbcp.version>
     <mysql-connector-java.version>5.1.6</mysql-connector-java.version>
     <connector.version>1.0.3</connector.version>
-    <felix.main.version>3.2.2</felix.main.version>
+    <felix.main.version>4.0.2</felix.main.version>
     <felix.shell.version>1.4.2</felix.shell.version>
     <felix.remote.version>1.1.2</felix.remote.version>
     <felix.tui.version>1.4.1</felix.tui.version>
+    <felix.gogo.runtime.version>0.6.0</felix.gogo.runtime.version>
+    <felix.gogo.command.version>0.12.0</felix.gogo.command.version>
     <maven.bundle.plugin.version>2.3.5</maven.bundle.plugin.version>
     <!-- to prevent [WARNING] Using platform encoding -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
