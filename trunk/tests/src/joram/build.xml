@@ -247,6 +247,7 @@
     <antcall target="client.noloss_1"/>
     <antcall target="client.noloss_2"/>
   	<antcall target="client.ClientTest25"/>
+  	<antcall target="client.ClientTest26"/>
   </target>
 
   <target name="tests.connection"
@@ -2084,6 +2085,19 @@
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="testid" value="client.ClientTest25"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	
+  <target name="client.ClientTest26" depends="init.a3props,compile"
+          description=" --> test the redelivered message value after recover.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.client.ClientTest26"/>
+      <param name="jndiconf" value="client/jndi.properties"/>
+      <param name="a3conf" value="client/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="testid" value="client.ClientTest26"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -4210,6 +4224,16 @@
 	    <param name="jvmargs" value=""/>
 	  </antcall>
 	</target>
+	
+  <target name="xa.test6" depends="init.a3props,compile"
+          description=" --> test rollback : on receive , check JMSRedelivered">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.xa.Test6"/>
+      <param name="jndiconf" value="xa/jndi.properties"/>
+      <param name="a3conf" value="xa/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
 
   <!-- end test xa -->
 
