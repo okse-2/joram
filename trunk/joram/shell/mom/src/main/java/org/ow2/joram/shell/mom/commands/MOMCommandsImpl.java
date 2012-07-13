@@ -93,7 +93,7 @@ public class MOMCommandsImpl implements MOMCommands {
                     "sendMsg",    "receiveMsg",
                     "help"};
   
-  //TODO: retrieve help from file (easier to maintain)
+  //TODO: retrieve help from file?
   /**
    * Print the descrption of the given command
    */
@@ -110,56 +110,57 @@ public class MOMCommandsImpl implements MOMCommands {
    * @param command Name of the command to describe
    */
   public static void help(String command) {
-    StringBuffer buf = new StringBuffer();
+    //Checks whether the command name contains the namespace
+    if(command.length()>NAMESPACE.length()
+        && command.substring(0, NAMESPACE.length()).equalsIgnoreCase(NAMESPACE)) {
+      //If so, remove the namespace part
+      command = command.substring(NAMESPACE.length()+1, command.length());
+    }
     String fullCommand = "["+NAMESPACE+":]"+command;
+    StringBuffer buf = new StringBuffer();
     buf.append("Usage: ").append(fullCommand).append(" ");
-    if(command.equals("list")) {
+    if(command.equalsIgnoreCase("list")) {
       buf.append("<category> [username]");
       buf.append("\n\tPossible categories: destination, topic, queue, user, subscription");
       buf.append("\n\tNB: For the subscription category, you must provide the user name.");     
-
-    } else if(command.equals("create")) {
-      buf.append("<topic|queue> <name> [option...]\n");
+    } else if(command.equalsIgnoreCase("help")) {
+      buf.append("<command>");     
+      buf.append("\nShows this help.");
+    } else if(command.equalsIgnoreCase("create")) {
+      buf.append("<topic|queue> <name> [option...]");
+      buf.append("\nOr     ").append(fullCommand).append(" ");
+      buf.append("user [<name>]\n");
       buf.append("Options: -sid <server id>\tSpecifies on which server the destination is to be created\n");
       buf.append("                         \tDefault: This server\n");
       buf.append("         -ext <extension>\tSpecifies which extension class to instanciate\n");
       buf.append("                         \tDefault: None");
-
-    } else if(command.equals("queueLoad")) {
+    } else if(command.equalsIgnoreCase("queueLoad")) {
       buf.append("<queueName>");
-
-    } else if(command.equals("subscriptionLoad")) {
+    } else if(command.equalsIgnoreCase("subscriptionLoad")) {
       buf.append("<userName> <subscriptionName>");
-
-    } else if(command.equals("delete")) {
+    } else if(command.equalsIgnoreCase("delete")) {
       buf.append("<topic|queue|user> <name>");
-
-    } else if(command.equals("addUser")) {
+    } else if(command.equalsIgnoreCase("addUser")) {
       buf.append("[name]");
-    
-    } else if(command.equals("info")) {
+    } else if(command.equalsIgnoreCase("info")) {
       buf.append("<queue|topic> <name>");
       buf.append("\n       ").append(fullCommand).append(" ");
       buf.append("subscription <username> <subscription name>");
-   
-    } else if(command.equals("lsMsg")) {
+    } else if(command.equalsIgnoreCase("lsMsg")) {
       buf.append("queue <queue name> [[first msg idx]:[last msg idx]]");
       buf.append("\n       ").append(fullCommand).append(" ");
       buf.append("subscription <username> <subscription name> [[first msg idx]:[last msg idx]]");
-   
-    } else if(command.equals("deleteMsg")) {
-     buf.append("queue <queue name> <msg id>");
-     buf.append("\n       ").append(fullCommand).append(" ");
-     buf.append("subscription <username> <subscription name> <msg id>");
-   
-    } else if(command.equals("receiveMsg")) {
-     buf.append("<queue name> [options]");
-     buf.append("Options: -n <x>\tReceive only <x> messages");
-     buf.append("         -t <x>\tTimes out after <x> seconds");
-   
-    } else if(command.equals("sendMsg")) {
-     buf.append("(queue/topic) <destination name> <text>");
-    } else if(command.equals("ping")) {
+    } else if(command.equalsIgnoreCase("deleteMsg")) {
+      buf.append("queue <queue name> <msg id>");
+      buf.append("\n       ").append(fullCommand).append(" ");
+      buf.append("subscription <username> <subscription name> <msg id>");
+    } else if(command.equalsIgnoreCase("receiveMsg")) {
+      buf.append("<queue name> [options]");
+      buf.append("Options: -n <x>\tReceive only <x> messages");
+      buf.append("         -t <x>\tTimes out after <x> seconds");
+    } else if(command.equalsIgnoreCase("sendMsg")) {
+      buf.append("(queue/topic) <destination name> <text>");
+    } else if(command.equalsIgnoreCase("ping")) {
       buf.append("\nChecks whether a JoramAdminTopic exists.");
     } else {
       System.err.println("Unknown command: "+command);
@@ -767,7 +768,12 @@ public class MOMCommandsImpl implements MOMCommands {
   
   
   public static void main(String[] args) {
-    help("list");
-    help("create");
+    Scanner s = new Scanner(System.in);
+    String cmd = null;
+    System.out.print("Command? "); System.out.flush();
+    while(!(cmd=s.nextLine()).equalsIgnoreCase("exit")) {
+      help(cmd);
+      System.out.print("Command? "); System.out.flush();
+    }
   }
 }
