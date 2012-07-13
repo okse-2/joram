@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+  <property name="Transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
+  <property name="AMQP.heartbeat" value="5"/>
+
+  <server id="0" name="s0" hostname="localhost">
+     <service class="org.ow2.joram.mom.amqp.AMQPService" args="5672"/>
+  </server>
+</config>
