@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -925,8 +925,12 @@ public final class NTransaction extends AbstractTransaction implements NTransact
           if ((old.type == Operation.SAVE) || (old.type == Operation.CREATE))
             logMemorySize -= old.value.length;
 
-          if ((old.type == Operation.CREATE) && (op.type == Operation.DELETE))
-            op.type = Operation.NOOP;
+          if (old.type == Operation.CREATE) {
+            if (op.type == Operation.DELETE)
+              op.type = Operation.NOOP;
+            else if (op.type == Operation.SAVE)
+              op.type = Operation.CREATE;
+          }
           old.free();
         }
       }
