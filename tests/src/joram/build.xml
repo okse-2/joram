@@ -195,12 +195,13 @@
     <antcall target="recovery.test2"/>
     <antcall target="recovery.test3"/>
     <antcall target="recovery.test4"/>
-    <!--antcall target="recovery.test5"/-->
+    <antcall target="recovery.test5"/>
     <antcall target="recovery.reliable-test"/>
     <antcall target="recovery.test6"/>
     <antcall target="recovery.test7"/>
     <antcall target="recovery.test8"/>
     <antcall target="recovery.test9"/>
+    <antcall target="recovery.test10"/>
   </target>
 
   <target name="tests.dist"
@@ -360,6 +361,9 @@
     <antcall target="xa.test2"/>
     <antcall target="xa.test3"/>
     <antcall target="xa.test4"/>
+    <antcall target="xa.test5"/>
+    <antcall target="xa.test6"/>
+    <antcall target="xa.test7"/>
   </target>
 
   <target name="tests.bridge.jms" description=" --> launch all bridge tests">
@@ -637,8 +641,8 @@
       -  in specific target.
      -->
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
-    <property name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
-    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <property name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+    <property name="transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
   </target>
 
   <target name="test.start">
@@ -1398,7 +1402,7 @@
   <!-- fin test ha -->
 
   <!-- test recovery -->
-  <target name="recovery.test1" depends="compile"
+  <target name="recovery.test1" depends="init.a3props,compile"
           description=" --> test recovery with queue and kill servers after send message and before receive">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Recover_1"/>
@@ -1409,7 +1413,7 @@
     </antcall>
   </target>
 
-  <target name="recovery.test2" depends="compile"
+  <target name="recovery.test2" depends="init.a3props,compile"
           description=" --> test recovery with queue and kill server before ack all messages">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Recover_2"/>
@@ -1420,7 +1424,7 @@
     </antcall>
   </target>
 
-  <target name="recovery.test3" depends="compile"
+  <target name="recovery.test3" depends="init.a3props,compile"
           description=" --> test recovery with topic and kill servers after send message and before receive">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Recover_3"/>
@@ -1431,7 +1435,7 @@
     </antcall>
   </target>
 
-  <target name="recovery.test4" depends="compile"
+  <target name="recovery.test4" depends="init.a3props,compile"
           description=" --> test recovery with topic and kill server before ack all messages">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Recover_4"/>
@@ -1443,7 +1447,7 @@
   </target>
   
   <!-- Commented as transaction properties are not restored properly for now. -->
-  <!--target name="recovery.test5" depends="compile"
+  <target name="recovery.test5" depends="init.a3props,compile"
           description=" -> Check transaction properties after a restart of the agent server.">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Recover_5"/>
@@ -1452,9 +1456,9 @@
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
-  </target-->
+  </target>
 
-  <target name="recovery.reliable-test" depends="compile"
+  <target name="recovery.reliable-test" depends="init.a3props,compile"
           description=" --> Test recovery : kill server during receive">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.ReliableTest"/>
@@ -1475,7 +1479,7 @@
     </antcall>
   </target>
 
-  <target name="recovery.test7" depends="compile"
+  <target name="recovery.test7" depends="init.a3props,compile"
           description=" --> test recovery with 1 server and a durablesubscriber.">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Test7"/>
@@ -1548,6 +1552,17 @@
       <param name="jndiconf" value="recovery/jndi.properties"/>
       <param name="a3conf" value="recovery/a3servers4.xml"/>
       <param name="jvmargs" value="-DMsgSize=10240"/>
+    </antcall>
+  </target>
+
+  <target name="recovery.test10" depends="init.a3props,compile"
+          description=" --> test ..">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.recovery.Test10"/>
+      <param name="testid" value="recovery.test10"/>
+      <param name="jndiconf" value="recovery/jndi.properties"/>
+      <param name="a3conf" value="recovery/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
     </antcall>
   </target>
 
@@ -4226,7 +4241,7 @@
 	</target>
 	
   <target name="xa.test6" depends="init.a3props,compile"
-          description=" --> test rollback : on receive , check JMSRedelivered">
+          description=" --> test rollback : on receive , check JMSRedelivered (JORAM-41)">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.xa.Test6"/>
       <param name="jndiconf" value="xa/jndi.properties"/>
@@ -4234,6 +4249,16 @@
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
+
+	<target name="xa.test7" depends="init.a3props,compile"
+	          description=" --> test the persistence behavior with denied messages (JORAM-59)">
+	  <antcall target="test.run" inheritAll="true">
+	    <param name="className" value="joram.xa.Test7"/>
+	    <param name="jndiconf" value="xa/jndi.properties"/>
+	    <param name="a3conf" value="xa/a3servers1.xml"/>
+	    <param name="jvmargs" value=""/>
+	  </antcall>
+	</target>
 
   <!-- end test xa -->
 
@@ -6071,16 +6096,42 @@
   </target>
 	
 	<target name="amqp.queue" depends="init.a3props,compile"
-		          description=" --> test AMQP queue declaration">
-		    <antcall target="test.run" inheritAll="true">
-		      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
-		      <param name="testid" value="amqp.QueueTest"/>
-		      <param name="className" value="joram.amqp.QueueTest"/>
-		      <param name="jndiconf" value=""/>
-		      <param name="a3conf" value="amqp/a3servers.xml"/>
-		      <param name="jvmargs" value=""/>
-		      <param name="args" value=""/>
-		    </antcall>
-		  </target>
-  
+		      description=" --> test AMQP queue declaration">
+		<antcall target="test.run" inheritAll="true">
+		  <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+		  <param name="testid" value="amqp.QueueTest"/>
+		  <param name="className" value="joram.amqp.QueueTest"/>
+		  <param name="jndiconf" value=""/>
+		  <param name="a3conf" value="amqp/a3servers.xml"/>
+		  <param name="jvmargs" value=""/>
+		  <param name="args" value=""/>
+		</antcall>
+	</target>
+	
+  <target name="tJMS.test1" depends="init.a3props,compile"
+          description=" --> test the tJMSInput / tJMSOutput code">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="tJMS.test1"/>
+      <param name="className" value="joram.talend.tJMSTest1"/>
+      <param name="jndiconf" value="talend/jndi.properties"/>
+      <param name="a3conf" value="talend/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	
+  <target name="tMOM.test1" depends="init.a3props,compile"
+          description=" --> test the tMOMInput / tMOMOutput code">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="tMOM.test1"/>
+      <param name="className" value="joram.talend.tMOMTest1"/>
+      <param name="jndiconf" value="talend/jndi.properties"/>
+      <param name="a3conf" value="talend/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
 </project>
