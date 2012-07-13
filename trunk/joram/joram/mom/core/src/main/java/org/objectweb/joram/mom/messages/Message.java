@@ -350,6 +350,9 @@ public final class Message implements Serializable, MessageView {
     return msg;
   }
 
+  /**
+   * Method used to save the initial state of the message.
+   */
   public void save() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message.save:" + txname);
@@ -382,24 +385,32 @@ public final class Message implements Serializable, MessageView {
     }
   }
 
+  /**
+   * Method used to save the header of a message after modification.
+   * The body of a message should never be saved.
+   */
   public void saveHeader() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message.saveHeader:" + txname);
 
-    if (!isPersistent())
-      return;
+    if (!isPersistent()) return;
+    
     if (soft) {
       byte[] body = msg.body;
       // sets the body to null to not save it
       msg.body = null;
       try {
-        AgentServer.getTransaction().create(this, txname);
+        AgentServer.getTransaction().save(this, txname);
       } catch (IOException exc) {
         logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
       }
       msg.body = body;
     } else {
-      save();
+      try {
+        AgentServer.getTransaction().save(this, txname);
+      } catch (IOException exc) {
+        logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
+      }
     }
   }
 
@@ -407,8 +418,8 @@ public final class Message implements Serializable, MessageView {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message.delete:" + txname);
 
-    if (!isPersistent())
-      return;
+    if (!isPersistent()) return;
+    
     AgentServer.getTransaction().delete(txname);
     if (soft) {
       AgentServer.getTransaction().delete(txname + "B");
