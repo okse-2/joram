@@ -9,7 +9,7 @@
     <property name="lib.dir" location="${ship.dir}/lib"/>
     <property name="run.dir" location="../../run"/>
     <property name="conf.dir" location="../../config"/>
-    <property name="felix.dir" location="${ship.dir}/bin"/>
+    <property name="felix.dir" location="/home/thibaut/bin/felix-framework-4.0.2/bin/"/>
     <property name="bundle.dir" location="${ship.dir}/bundle" />
   	
   	<!-- Project classpath needed for execution -->
@@ -70,7 +70,7 @@
     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/server${sid}"/>
     <copy file="${a3.conf}" tofile="${run.dir}/server${sid}/a3servers.xml"/>
     <copy file="${osgi.conf}" tofile="${run.dir}/server${sid}/config.properties"/>
-    <copy file="${monit.conf}" tofile="${run.dir}/server${sid}/MonitoringConfig.xml"/>
+    <!--copy file="${monit.conf}" tofile="${run.dir}/server${sid}/MonitoringConfig.xml"/-->
   </target>
 
   <target name="simple_init" depends="init">
@@ -96,6 +96,16 @@
       <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
       <param name="osgi.conf" value="${conf.dir}/config.properties"/>
       <param name="monit.conf" value="${conf.dir}/MonitoringConfig_0.xml"/>
+    </antcall>
+  </target>
+	
+  <!-- Start a single server with the shell commands -->
+  <target name="shell_server" depends="init"
+          description="--> Starts a single server with the shell commands">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+      <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
+      <param name="osgi.conf" value="${conf.dir}/config_shell.properties"/>     
     </antcall>
   </target>
   
