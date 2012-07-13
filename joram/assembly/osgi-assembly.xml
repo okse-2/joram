@@ -39,6 +39,8 @@
         <include>org.apache.felix:org.apache.felix.shell.remote</include>
         <include>org.apache.felix:org.apache.felix.shell.tui</include>
         <include>org.apache.felix:org.apache.felix.gogo.runtime</include>
+        <include>org.apache.felix:org.apache.felix.gogo.command</include>
+        <include>org.apache.felix:org.apache.felix.gogo.shell</include>
         <include>org.osgi:org.osgi.compendium</include>
         <include>org.ow2.joram:joram-mom-amqp</include>
         <include>org.ow2.joram:shell-mom</include>
