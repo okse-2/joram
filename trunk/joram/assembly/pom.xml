@@ -190,6 +190,11 @@
       <artifactId>org.apache.felix.gogo.command</artifactId>
       <version>${felix.gogo.command.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.gogo.shell</artifactId>
+      <version>${felix.gogo.shell.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>javax.activation</groupId>
