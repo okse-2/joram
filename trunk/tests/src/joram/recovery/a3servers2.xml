@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <config>
   <property name="Transaction" value="fr.dyade.aaa.util.NTransaction" />
+  <property name="Transaction.UseLockFile" value="false" />
+  
   <property name="NTLogFileSize" value="33" />
   <property name="NTLogThresholdOperation" value="32768" />
   <property name="NTLogMemoryCapacity" value="500" />
