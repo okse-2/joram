@@ -49,7 +49,7 @@ public class DistributionHandlerTest2 implements DistributionHandler {
     addMessage(msg);
   }
 
-  public void init(Properties props) {
+  public void init(Properties props, boolean FirstTime) {
   }
 
   private static synchronized void addMessage(Message msg) {
