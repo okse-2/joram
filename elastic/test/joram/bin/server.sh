@@ -27,6 +27,10 @@ CLASSPATH=$CLASSPATH:$JORAM_BIN/felix.jar
 
 mkdir $RUN_DIR
 mkdir $SERVER_RUN_DIR
+
+# Clean $SERVER_RUN_DIR
+rm -rf $SERVER_RUN_DIR/s$1 $SERVER_RUN_DIR/felix-cache
+
 cp $CONFIG_DIR/a3config.dtd $SERVER_RUN_DIR/a3config.dtd
 cp $CONFIG_DIR/a3debug.cfg $SERVER_RUN_DIR/a3debug.cfg
 cp $CONFIG_DIR/a3servers.xml $SERVER_RUN_DIR/a3servers.xml

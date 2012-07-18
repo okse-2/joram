@@ -136,7 +136,7 @@ public class AliasInQueue extends Queue {
 		return null;
 	}
 
-
+	/*
 	public void react(AgentId from, Notification not) throws Exception {
 		if (logger.isLoggable(BasicLevel.DEBUG))
 			logger.log(BasicLevel.DEBUG, "AliasInQueue.react(" + from + ',' + not + ')');
@@ -147,6 +147,7 @@ public class AliasInQueue extends Queue {
 			super.react(from, not);
 		}
 	}
+	*/
 
 	protected void handleExpiredNot(AgentId from, ExpiredNot not) {
 		if (logger.isLoggable(BasicLevel.DEBUG)) {
@@ -234,10 +235,16 @@ public class AliasInQueue extends Queue {
 			if (!destinations.contains(dest)) {
 				destinations.add(dest);
 				metrics.add(new Long(0l));
-				weights.add(new Long(1l));
+				
+				long newWeight = Long.MIN_VALUE;
+				for (long w : weights) {
+					if (w > newWeight)
+						newWeight = w;
+				}
+				weights.add(newWeight);
 			}
 			replyToTopic(new AdminReply(true, null),
-					not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());			
+					not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
 		} else if (adminRequest instanceof DelRemoteDestination) {
 			// The AQ should have at least one remote destination
 			if (destinations.size() > 1) {
@@ -268,7 +275,7 @@ public class AliasInQueue extends Queue {
 			
 			int[] newWeights = ((SendDestinationsWeights) adminRequest).getWeights();
 			String weightStr = "";
-			for (int i = 0; i < destinations.size(); i++) {
+			for (int i = 0; i < newWeights.length; i++) {
 				weightStr = weightStr + " " + newWeights[i];
 				weights.set(i,(long)newWeights[i]);
 			}
@@ -297,9 +304,9 @@ public class AliasInQueue extends Queue {
 
 	private void sendNot(Notification not) {
 		Channel.sendTo(destinations.get(currentDestination),not);
-		if (--weightLeft == 0) {
+		if (--weightLeft <= 0) {
 			currentDestination = (currentDestination + 1) % destinations.size();
-			weightLeft = weights.get(currentDestination); 
+			weightLeft = weights.get(currentDestination);
 		}
 	}
 

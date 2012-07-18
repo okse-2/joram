@@ -36,7 +36,7 @@ for i in range(1,len(sys.argv)):
     if wId == 1:
         csv = open(fname,"r")
         csv.readline() # Skip first line.
-        cells = csv.readline()
+        cells = csv.readline().split(SP)
         t0 = datetime.strptime(cells[datei],TF)
         csv.close()
         break
@@ -68,7 +68,7 @@ for i in range(1,len(sys.argv)):
     ratef = open("rates/rates%d.dat" % resId,"w")
     loadf = open("loads/loads%d.dat" % resId,"w")
     lrecv = 0
-    for j in range(1,MAX_RND):
+    for j in range(1,min(MAX_RND,len(lines))):
         cells = lines[j].split(SP)
         if len(cells) != length:
             break
