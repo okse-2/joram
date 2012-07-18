@@ -1,4 +1,7 @@
-#!/bin/bash
+SERVP1=10.0.0.2
+SERVP2=10.0.0.3
+SERVW1=10.0.0.4
+HOST=molecule
 
 echo "BUILDING.."
 echo "JORAM"
@@ -15,30 +18,41 @@ rm -rf joram/classes joram/ship
 cp -rf ../java/classes joram
 cp -rf ../../joram/ship joram
 cp bundles/* joram/ship/bundle
+cp -rf ../java/aws joram/ship
 
-echo "DEPLOYING VMS.."
-for i in {0..2}
-do
-	ssh vm$i killall -9 java
-	ssh vm$i rm -rf joram *.log
-	scp -r joram vm$i:. > /dev/null
-done
+echo "DEPLOYING..."
+ssh $SERVP1 killall -9 java
+ssh $SERVP1 rm -rf joram *.log
+scp -r joram $SERVP1: > /dev/null
 
-echo "RUNNING SERVERS.."
-ssh vm0 "nohup joram/bin/server.sh 0 > /dev/null &"
-ssh vm1 "nohup joram/bin/server.sh 1 > /dev/null &"
-ssh vm1 "nohup joram/bin/server.sh 2 > /dev/null &"
-ssh vm2 "nohup joram/bin/server.sh 3 > /dev/null &"
-ssh vm2 "nohup joram/bin/server.sh 4 > /dev/null &"
+ssh $SERVP2 killall -9 java
+ssh $SERVP2 rm -rf joram *.log
+scp -r joram $SERVP2: > /dev/null
+
+ssh $SERVW1 killall -9 java
+ssh $SERVW1 rm -rf joram *.log
+scp -r joram $SERVW1: > /dev/null
+
+
+scp -r joram $HOST:joram-factory/pack > /dev/null
+
+echo "PUBLISHING IMAGE..." 
+scp scripts/pub-joram-image.sh $HOST:joram-factory > /dev/null
+ssh $HOST joram-factory/pub-joram-image.sh
+
+echo "RUNNING SERVERS..."
+ssh $SERVP1 "nohup joram/bin/server.sh 101 > /dev/null &"
+ssh $SERVP2 "nohup joram/bin/server.sh 102 > /dev/null &"
+ssh $SERVW1 "nohup joram/bin/server.sh 1 > /dev/null &"
 
 echo "ADMINISTRATING.."
-ssh vm0 "nohup joram/bin/client.sh alias.Admin &"
+ssh $SERVP1 "nohup joram/bin/client.sh elasticity.eval.Setup &"
 
 echo "LAUNCHING CLIENTS.."
-ssh vm1 "nohup joram/bin/client.sh alias.RegulatedReceiver 1 > receiver1.log &"
-ssh vm1 "nohup joram/bin/client.sh alias.RegulatedReceiver 2 > receiver2.log &"
-ssh vm2 "nohup joram/bin/client.sh alias.RegulatedReceiver 3 > receiver3.log &"
-ssh vm2 "nohup joram/bin/client.sh alias.RegulatedReceiver 4 > receiver4.log &"
-ssh vm0 "nohup joram/bin/client.sh alias.ElasticityLoop &> elasticity.log &"
-ssh vm0 "nohup joram/bin/client.sh alias.RegulatedSender > sender.log &"
-echo "DONE."
+ssh $SERVW1 "nohup joram/bin/client.sh elasticity.eval.Worker 1 > worker1.log &"
+
+ssh $SERVP1 "nohup joram/bin/client.sh elasticity.eval.Producer 1 > producer1.log &"
+ssh $SERVP2 "nohup joram/bin/client.sh elasticity.eval.Producer 2 > producer2.log &"
+
+ssh $SERVP1 "nohup joram/bin/client.sh elasticity.loop.ControlLoop > elasticity.log &"
+
