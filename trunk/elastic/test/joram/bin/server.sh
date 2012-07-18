@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 # Definition of environment variables
-JORAM_HOME=/home/ubuntu/joram
-JAVA_HOME=/home/ubuntu/jdk1.7.0_02
+JORAM_HOME=/root/joram
+JAVA_HOME=/root/jdk1.7.0_02
 
 # Test the argument number
 if [ -z $1 ]
@@ -31,6 +31,8 @@ cp $CONFIG_DIR/a3config.dtd $SERVER_RUN_DIR/a3config.dtd
 cp $CONFIG_DIR/a3debug.cfg $SERVER_RUN_DIR/a3debug.cfg
 cp $CONFIG_DIR/a3servers.xml $SERVER_RUN_DIR/a3servers.xml
 cp $CONFIG_DIR/config.properties $SERVER_RUN_DIR/config.properties
-cp $CONFIG_DIR/MonitoringConfig$1.xml $SERVER_RUN_DIR/MonitoringConfig.xml
 
-cd $SERVER_RUN_DIR; exec "${JAVA_HOME}"/bin/java  -Dosgi.shell.telnet.port=1600$1 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -Dfr.dyade.aaa.agent.AgentServer.id=$1 -classpath $CLASSPATH org.apache.felix.main.Main
+sed -e "s/NUM/$1/g" -e "s/RAND/$RANDOM/g" $CONFIG_DIR/MonitoringConfig.template > $SERVER_RUN_DIR/MonitoringConfig.xml
+
+PORT=$((16400+$1))
+cd $SERVER_RUN_DIR; exec "${JAVA_HOME}"/bin/java  -Dosgi.shell.telnet.port=$PORT -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -Dfr.dyade.aaa.agent.AgentServer.id=$1 -classpath $CLASSPATH org.apache.felix.main.Main

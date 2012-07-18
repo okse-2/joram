@@ -1,0 +1,3780 @@
+Jul 04, 2012 8:05:17 AM alias.JoramManager init
+INFO: [JM] Done pre-provisioning 0 vms.
+Jul 04, 2012 8:05:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 8:05:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 116
+Jul 04, 2012 8:05:28 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 12
+Jul 04, 2012 8:05:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 157
+Jul 04, 2012 8:05:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 342
+Jul 04, 2012 8:05:41 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 34
+Jul 04, 2012 8:05:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 8:05:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 918
+Jul 04, 2012 8:05:51 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 92
+Jul 04, 2012 8:06:01 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 8:06:01 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 960
+Jul 04, 2012 8:06:01 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 96
+Jul 04, 2012 8:06:11 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 39
+Jul 04, 2012 8:06:11 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 1164
+Jul 04, 2012 8:06:11 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 12
+Jul 04, 2012 8:06:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1
+Jul 04, 2012 8:06:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 1500
+Jul 04, 2012 8:06:21 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 15
+Jul 04, 2012 8:06:31 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 9
+Jul 04, 2012 8:06:31 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 1757
+Jul 04, 2012 8:06:31 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 18
+Jul 04, 2012 8:06:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 8:06:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2011
+Jul 04, 2012 8:06:41 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 20
+Jul 04, 2012 8:06:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 8:06:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2216
+Jul 04, 2012 8:06:51 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 22
+Jul 04, 2012 8:07:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 8:07:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2484
+Jul 04, 2012 8:07:02 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 25
+Jul 04, 2012 8:07:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 61
+Jul 04, 2012 8:07:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2741
+Jul 04, 2012 8:07:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 27
+Jul 04, 2012 8:07:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 8:07:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 3045
+Jul 04, 2012 8:07:22 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 30
+Jul 04, 2012 8:07:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 31
+Jul 04, 2012 8:07:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 3246
+Jul 04, 2012 8:07:32 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 32
+Jul 04, 2012 8:07:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 28
+Jul 04, 2012 8:07:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 3500
+Jul 04, 2012 8:07:42 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 35
+Jul 04, 2012 8:07:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 256
+Jul 04, 2012 8:07:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 3500
+Jul 04, 2012 8:07:52 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 35
+Jul 04, 2012 8:08:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 233
+Jul 04, 2012 8:08:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4000
+Jul 04, 2012 8:08:02 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40
+Jul 04, 2012 8:08:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 8:08:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4461
+Jul 04, 2012 8:08:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 45
+Jul 04, 2012 8:08:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 8:08:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4497
+Jul 04, 2012 8:08:22 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 45
+Jul 04, 2012 8:08:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 268
+Jul 04, 2012 8:08:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4542
+Jul 04, 2012 8:08:32 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 45
+Jul 04, 2012 8:08:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 377
+Jul 04, 2012 8:08:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000
+Jul 04, 2012 8:08:42 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50
+Jul 04, 2012 8:08:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 416
+Jul 04, 2012 8:08:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5153
+Jul 04, 2012 8:08:52 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52
+Jul 04, 2012 8:09:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 735
+Jul 04, 2012 8:09:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5188
+Jul 04, 2012 8:09:02 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52
+Jul 04, 2012 8:09:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1408
+Jul 04, 2012 8:09:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5159
+Jul 04, 2012 8:09:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52
+Jul 04, 2012 8:09:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2398
+Jul 04, 2012 8:09:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000
+Jul 04, 2012 8:09:23 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50
+Jul 04, 2012 8:09:23 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Started adding a new worker...
+Jul 04, 2012 8:09:25 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] runInstanceRequest sent successfully..
+Jul 04, 2012 8:09:26 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:27 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:29 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:30 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:31 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:32 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:34 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:35 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:37 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:39 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:40 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:43 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:44 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:45 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:47 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:48 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:09:49 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: running
+Jul 04, 2012 8:09:49 AM alias.JoramManager addWorker
+INFO: [JM] Runned new VM, ip: 10.0.0.5
+Jul 04, 2012 8:09:49 AM alias.JoramManager addServer
+INFO: [JM] Added new server logically..
+Jul 04, 2012 8:09:49 AM alias.JoramManager addServer
+INFO: [JM] Started new server remotely..
+Jul 04, 2012 8:10:18 AM alias.JoramManager addServer
+INFO: [JM] Created new worker on new server..
+Jul 04, 2012 8:10:18 AM alias.JoramManager addServer
+INFO: [JM] Started client remotely..
+Jul 04, 2012 8:10:18 AM alias.ElasticityLoopV2 testScaleUp
+INFO: JoramManager is done..
+Jul 04, 2012 8:10:18 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #0.0.1027
+Jul 04, 2012 8:10:18 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #1.1.1026
+Jul 04, 2012 8:10:18 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Added new worker successfully.
+Jul 04, 2012 8:10:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 16731 0
+Jul 04, 2012 8:10:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 23425 0
+Jul 04, 2012 8:10:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 15303 265
+Jul 04, 2012 8:10:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5075 3745
+Jul 04, 2012 8:10:28 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4060 3745
+Jul 04, 2012 8:10:28 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 37
+Jul 04, 2012 8:10:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 14625 90
+Jul 04, 2012 8:10:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 4050
+Jul 04, 2012 8:10:38 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 4050
+Jul 04, 2012 8:10:38 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 41
+Jul 04, 2012 8:10:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 13632 55
+Jul 04, 2012 8:10:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5090 4205
+Jul 04, 2012 8:10:48 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4072 4205
+Jul 04, 2012 8:10:48 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 42
+Jul 04, 2012 8:10:58 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 12647 300
+Jul 04, 2012 8:10:58 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5130 4000
+Jul 04, 2012 8:10:58 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4104 4000
+Jul 04, 2012 8:10:58 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 40
+Jul 04, 2012 8:11:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 11956 50
+Jul 04, 2012 8:11:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5081 4500
+Jul 04, 2012 8:11:09 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4064 4500
+Jul 04, 2012 8:11:09 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 45
+Jul 04, 2012 8:11:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 11066 453
+Jul 04, 2012 8:11:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5148 4500
+Jul 04, 2012 8:11:19 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4118 4500
+Jul 04, 2012 8:11:19 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 45
+Jul 04, 2012 8:11:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 10760 0
+Jul 04, 2012 8:11:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5051 5062
+Jul 04, 2012 8:11:29 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4040 5062
+Jul 04, 2012 8:11:29 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 51
+Jul 04, 2012 8:11:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 9893 13
+Jul 04, 2012 8:11:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5193
+Jul 04, 2012 8:11:39 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5193
+Jul 04, 2012 8:11:39 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 52
+Jul 04, 2012 8:11:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 8935 485
+Jul 04, 2012 8:11:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5209
+Jul 04, 2012 8:11:49 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5209
+Jul 04, 2012 8:11:49 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 52
+Jul 04, 2012 8:11:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 8089 1211
+Jul 04, 2012 8:11:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5036
+Jul 04, 2012 8:11:59 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5036
+Jul 04, 2012 8:11:59 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 50
+Jul 04, 2012 8:12:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 7933 1983
+Jul 04, 2012 8:12:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5000
+Jul 04, 2012 8:12:09 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5000
+Jul 04, 2012 8:12:09 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 50
+Jul 04, 2012 8:12:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 7408 2771
+Jul 04, 2012 8:12:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5196 5000
+Jul 04, 2012 8:12:19 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50
+Jul 04, 2012 8:12:19 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Started adding a new worker...
+Jul 04, 2012 8:12:21 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] runInstanceRequest sent successfully..
+Jul 04, 2012 8:12:22 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:23 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:24 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:26 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:27 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:28 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:29 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:31 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:32 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:33 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:34 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:36 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:12:37 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: running
+Jul 04, 2012 8:12:37 AM alias.JoramManager addWorker
+INFO: [JM] Runned new VM, ip: 10.0.0.6
+Jul 04, 2012 8:12:37 AM alias.JoramManager addServer
+INFO: [JM] Added new server logically..
+Jul 04, 2012 8:12:37 AM alias.JoramManager addServer
+INFO: [JM] Started new server remotely..
+Jul 04, 2012 8:13:04 AM alias.JoramManager addServer
+INFO: [JM] Created new worker on new server..
+Jul 04, 2012 8:13:04 AM alias.JoramManager addServer
+INFO: [JM] Started client remotely..
+Jul 04, 2012 8:13:04 AM alias.ElasticityLoopV2 testScaleUp
+INFO: JoramManager is done..
+Jul 04, 2012 8:13:04 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #0.0.1027
+Jul 04, 2012 8:13:04 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #1.1.1026
+Jul 04, 2012 8:13:04 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Added new worker successfully.
+Jul 04, 2012 8:13:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 9847 5338 0
+Jul 04, 2012 8:13:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 22304 22044 0
+Jul 04, 2012 8:13:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 8575 4064 580
+Jul 04, 2012 8:13:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5298 3431
+Jul 04, 2012 8:13:14 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 4238 3431
+Jul 04, 2012 8:13:14 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 42 34
+Jul 04, 2012 8:13:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 8220 3544 0
+Jul 04, 2012 8:13:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5158 4007
+Jul 04, 2012 8:13:24 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 4126 4007
+Jul 04, 2012 8:13:24 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 41 40
+Jul 04, 2012 8:13:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 7050 2735 0
+Jul 04, 2012 8:13:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5271 5000 4014
+Jul 04, 2012 8:13:35 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4216 4000 4014
+Jul 04, 2012 8:13:35 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 40 40
+Jul 04, 2012 8:13:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 6108 2144 432
+Jul 04, 2012 8:13:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5229 5000 4048
+Jul 04, 2012 8:13:45 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4183 4000 4048
+Jul 04, 2012 8:13:45 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 40 40
+Jul 04, 2012 8:13:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 5507 1050 310
+Jul 04, 2012 8:13:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5052 4500
+Jul 04, 2012 8:13:55 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5052 4500
+Jul 04, 2012 8:13:55 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 51 45
+Jul 04, 2012 8:14:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 4388 805 452
+Jul 04, 2012 8:14:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5435 4217
+Jul 04, 2012 8:14:05 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5435 4217
+Jul 04, 2012 8:14:05 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 54 42
+Jul 04, 2012 8:14:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3464 1231 249
+Jul 04, 2012 8:14:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5033 5013 4283
+Jul 04, 2012 8:14:15 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4026 5013 4283
+Jul 04, 2012 8:14:15 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 50 43
+Jul 04, 2012 8:14:26 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2182 1247 382
+Jul 04, 2012 8:14:26 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5467 5000 4500
+Jul 04, 2012 8:14:26 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4373 5000 4500
+Jul 04, 2012 8:14:26 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 44 50 45
+Jul 04, 2012 8:14:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1921 1222 415
+Jul 04, 2012 8:14:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5003 4500
+Jul 04, 2012 8:14:36 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 45
+Jul 04, 2012 8:14:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1476 943 339
+Jul 04, 2012 8:14:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5299 4549
+Jul 04, 2012 8:14:46 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53 45
+Jul 04, 2012 8:14:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1520 1101 0
+Jul 04, 2012 8:14:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5198 4839
+Jul 04, 2012 8:14:56 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 52 48
+Jul 04, 2012 8:15:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1115 1332 48
+Jul 04, 2012 8:15:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5260 5000 4612
+Jul 04, 2012 8:15:07 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 46
+Jul 04, 2012 8:15:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1236 1353 404
+Jul 04, 2012 8:15:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5240 5000 4500
+Jul 04, 2012 8:15:17 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 45
+Jul 04, 2012 8:15:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2164 1397 425
+Jul 04, 2012 8:15:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5004 4500
+Jul 04, 2012 8:15:27 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5004 4500
+Jul 04, 2012 8:15:27 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 50 45
+Jul 04, 2012 8:15:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1385 1980 619
+Jul 04, 2012 8:15:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5343 5121
+Jul 04, 2012 8:15:37 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53 51
+Jul 04, 2012 8:15:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1784 2465 457
+Jul 04, 2012 8:15:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5153 5379
+Jul 04, 2012 8:15:47 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5000 4122 5379
+Jul 04, 2012 8:15:47 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 41 54
+Jul 04, 2012 8:15:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2062 2226 1270
+Jul 04, 2012 8:15:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5118 5000 4993
+Jul 04, 2012 8:15:57 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4094 4000 4993
+Jul 04, 2012 8:15:57 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 40 50
+Jul 04, 2012 8:16:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1635 2080 2953
+Jul 04, 2012 8:16:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5371 5000 5007
+Jul 04, 2012 8:16:08 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5371 4000 4005
+Jul 04, 2012 8:16:08 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 40 40
+Jul 04, 2012 8:16:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3663 2048 2774
+Jul 04, 2012 8:16:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5011 5000 5000
+Jul 04, 2012 8:16:18 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 50
+Jul 04, 2012 8:16:18 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Started adding a new worker...
+Jul 04, 2012 8:16:19 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] runInstanceRequest sent successfully..
+Jul 04, 2012 8:16:20 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:21 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:22 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:23 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:25 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:26 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:27 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:29 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:30 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:31 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:32 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:33 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:35 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:16:36 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: running
+Jul 04, 2012 8:16:36 AM alias.JoramManager addWorker
+INFO: [JM] Runned new VM, ip: 10.0.0.7
+Jul 04, 2012 8:16:36 AM alias.JoramManager addServer
+INFO: [JM] Added new server logically..
+Jul 04, 2012 8:16:36 AM alias.JoramManager addServer
+INFO: [JM] Started new server remotely..
+Jul 04, 2012 8:17:16 AM alias.JoramManager addServer
+INFO: [JM] Created new worker on new server..
+Jul 04, 2012 8:17:16 AM alias.JoramManager addServer
+INFO: [JM] Started client remotely..
+Jul 04, 2012 8:17:16 AM alias.ElasticityLoopV2 testScaleUp
+INFO: JoramManager is done..
+Jul 04, 2012 8:17:16 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #0.0.1027
+Jul 04, 2012 8:17:16 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #1.1.1026
+Jul 04, 2012 8:17:16 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Added new worker successfully.
+Jul 04, 2012 8:17:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 8038 6313 6947 0
+Jul 04, 2012 8:17:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 29000 29074 29000 0
+Jul 04, 2012 8:17:26 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 7249 5460 6578 1442
+Jul 04, 2012 8:17:26 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5405 5292 3573
+Jul 04, 2012 8:17:26 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 4324 4233 3573
+Jul 04, 2012 8:17:26 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 43 42 36
+Jul 04, 2012 8:17:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 6893 5636 6284 0
+Jul 04, 2012 8:17:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5196 5021 5194 5155
+Jul 04, 2012 8:17:37 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4156 4016 4155 5155
+Jul 04, 2012 8:17:37 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 40 42 52
+Jul 04, 2012 8:17:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 6445 5023 5703 1091
+Jul 04, 2012 8:17:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5304 5000 5014 4772
+Jul 04, 2012 8:17:47 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4243 4000 4011 4772
+Jul 04, 2012 8:17:47 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 40 40 48
+Jul 04, 2012 8:17:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 5923 4035 5418 1742
+Jul 04, 2012 8:17:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5382 5085 5057
+Jul 04, 2012 8:17:57 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 4305 4068 5057
+Jul 04, 2012 8:17:57 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 43 41 51
+Jul 04, 2012 8:18:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 5623 4107 4575 1496
+Jul 04, 2012 8:18:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5087 5118 5196 5443
+Jul 04, 2012 8:18:08 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4069 4094 4156 5443
+Jul 04, 2012 8:18:08 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 41 42 54
+Jul 04, 2012 8:18:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 4829 3608 4174 2964
+Jul 04, 2012 8:18:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5413 5000 5219 5000
+Jul 04, 2012 8:18:18 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 50 50
+Jul 04, 2012 8:18:18 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Started adding a new worker...
+Jul 04, 2012 8:18:19 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] runInstanceRequest sent successfully..
+Jul 04, 2012 8:18:21 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:22 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:23 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:24 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:26 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:27 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:28 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:29 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:30 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:32 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:33 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:34 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:18:35 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: running
+Jul 04, 2012 8:18:35 AM alias.JoramManager addWorker
+INFO: [JM] Runned new VM, ip: 10.0.0.8
+Jul 04, 2012 8:18:36 AM alias.JoramManager addServer
+INFO: [JM] Added new server logically..
+Jul 04, 2012 8:18:36 AM alias.JoramManager addServer
+INFO: [JM] Started new server remotely..
+Jul 04, 2012 8:19:07 AM alias.JoramManager addServer
+INFO: [JM] Created new worker on new server..
+Jul 04, 2012 8:19:07 AM alias.JoramManager addServer
+INFO: [JM] Started client remotely..
+Jul 04, 2012 8:19:07 AM alias.ElasticityLoopV2 testScaleUp
+INFO: JoramManager is done..
+Jul 04, 2012 8:19:07 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #0.0.1027
+Jul 04, 2012 8:19:07 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #1.1.1026
+Jul 04, 2012 8:19:07 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Added new worker successfully.
+Jul 04, 2012 8:19:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 4800 3670 4490 3276 0
+Jul 04, 2012 8:19:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 24500 24584 24500 24500 0
+Jul 04, 2012 8:19:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 4369 2346 3236 2122 1019
+Jul 04, 2012 8:19:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5416 5433 5500 3485
+Jul 04, 2012 8:19:18 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 4332 4346 4400 3485
+Jul 04, 2012 8:19:18 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 43 43 44 35
+Jul 04, 2012 8:19:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3197 2148 3031 1863 19
+Jul 04, 2012 8:19:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5067 5000 4515
+Jul 04, 2012 8:19:28 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4400 4000 4053 5000 4515
+Jul 04, 2012 8:19:28 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 44 40 41 50 45
+Jul 04, 2012 8:19:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2302 713 1980 1365 0
+Jul 04, 2012 8:19:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5130 5126 4519
+Jul 04, 2012 8:19:38 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5500 5130 5126 4519
+Jul 04, 2012 8:19:38 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 55 51 51 45
+Jul 04, 2012 8:19:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 736 462 1149 1127 18
+Jul 04, 2012 8:19:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5285 5000 5370 5374 4481
+Jul 04, 2012 8:19:49 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 54 54 45
+Jul 04, 2012 8:19:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 593 118 998 966 0
+Jul 04, 2012 8:19:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5215 5000 5000 5000 3642
+Jul 04, 2012 8:19:59 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 50 50 36
+Jul 04, 2012 8:20:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 536 118 270 172 0
+Jul 04, 2012 8:20:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5000 5321 5265 3602
+Jul 04, 2012 8:20:09 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 53 53 36
+Jul 04, 2012 8:20:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 49 336 331 0
+Jul 04, 2012 8:20:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5048 4500 5179 5235 3532
+Jul 04, 2012 8:20:20 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 4
+Jul 04, 2012 8:20:20 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 8:20:20 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 45 52 52 28
+Jul 04, 2012 8:20:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 349 49 888 531 0
+Jul 04, 2012 8:20:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4952 4959 5000 5000 2771
+Jul 04, 2012 8:20:30 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 8:20:30 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 50 50 21
+Jul 04, 2012 8:20:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 807 331 999 281 0
+Jul 04, 2012 8:20:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 4972 5164 5371 2232
+Jul 04, 2012 8:20:41 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 8:20:41 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 52 54 14
+Jul 04, 2012 8:20:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 894 1070 1595 1419 0
+Jul 04, 2012 8:20:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5069 5336 5129 1542
+Jul 04, 2012 8:20:51 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 8:20:51 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 51 53 51 7
+Jul 04, 2012 8:21:01 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1965 1254 2471 2328 0
+Jul 04, 2012 8:21:01 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5338 5066 5018 840
+Jul 04, 2012 8:21:01 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Cancelled scaling down plan.
+Jul 04, 2012 8:21:01 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5000 5338 4052 4014 3532
+Jul 04, 2012 8:21:01 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53 41 40 35
+Jul 04, 2012 8:21:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2517 1845 1318 1159 23
+Jul 04, 2012 8:21:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5298 5162 5434 5482 3802
+Jul 04, 2012 8:21:12 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4238 5162 5434 5482 3802
+Jul 04, 2012 8:21:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 52 54 55 38
+Jul 04, 2012 8:21:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1435 2254 2156 2059 0
+Jul 04, 2012 8:21:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5202 5000 5000 5000 3966
+Jul 04, 2012 8:21:22 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5202 4000 4000 4000 3966
+Jul 04, 2012 8:21:22 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 40 40 40 40
+Jul 04, 2012 8:21:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2484 1666 1694 1417 143
+Jul 04, 2012 8:21:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5331 5083 5001 4571
+Jul 04, 2012 8:21:32 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5331 5083 5001 4571
+Jul 04, 2012 8:21:32 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 53 51 50 46
+Jul 04, 2012 8:21:43 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1788 2282 1649 1492 330
+Jul 04, 2012 8:21:43 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5165 5169 5417 5499 4842
+Jul 04, 2012 8:21:43 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5165 4135 5417 5499 4842
+Jul 04, 2012 8:21:43 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 41 54 55 48
+Jul 04, 2012 8:21:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1944 1251 1956 2008 33
+Jul 04, 2012 8:21:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5335 5000 5000 5000 5158
+Jul 04, 2012 8:21:53 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5335 5000 5000 4000 5158
+Jul 04, 2012 8:21:53 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 50 40 52
+Jul 04, 2012 8:22:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2453 969 2159 1265 918
+Jul 04, 2012 8:22:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5427 5260 5255 4589
+Jul 04, 2012 8:22:04 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5427 4208 5255 4589
+Jul 04, 2012 8:22:04 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 54 42 53 46
+Jul 04, 2012 8:22:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1377 2066 1635 1928 846
+Jul 04, 2012 8:22:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5411 5073 5240 5245 5411
+Jul 04, 2012 8:22:14 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5411 4058 5240 5245 5411
+Jul 04, 2012 8:22:14 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 41 52 52 54
+Jul 04, 2012 8:22:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2111 1124 1948 2188 1266
+Jul 04, 2012 8:22:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5089 5145 5000 5000 5000
+Jul 04, 2012 8:22:24 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4071 5145 5000 4000 5000
+Jul 04, 2012 8:22:24 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 51 50 40 50
+Jul 04, 2012 8:22:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1452 1941 2364 1595 1807
+Jul 04, 2012 8:22:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5155 5355 5500 5500 5500
+Jul 04, 2012 8:22:35 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5155 5355 4400 5500 5500
+Jul 04, 2012 8:22:35 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 54 44 55 55
+Jul 04, 2012 8:22:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1810 2359 1863 2596 2448
+Jul 04, 2012 8:22:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5345 5106 5000 5000 5000
+Jul 04, 2012 8:22:45 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5345 4084 5000 4000 4000
+Jul 04, 2012 8:22:45 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 41 50 40 40
+Jul 04, 2012 8:22:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2736 2102 2713 1638 1787
+Jul 04, 2012 8:22:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5125 5394 5497 5500 5500
+Jul 04, 2012 8:22:56 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4100 4315 4397 5500 5500
+Jul 04, 2012 8:22:56 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 43 44 55 55
+Jul 04, 2012 8:23:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2608 2041 2620 2896 3406
+Jul 04, 2012 8:23:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5375 5000 5003 5000 5000
+Jul 04, 2012 8:23:06 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 50 50 50
+Jul 04, 2012 8:23:06 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Started adding a new worker...
+Jul 04, 2012 8:23:07 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] runInstanceRequest sent successfully..
+Jul 04, 2012 8:23:09 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:10 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:11 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:13 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:14 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:15 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:16 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:18 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:19 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:20 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:21 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:22 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:24 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:25 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:26 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:23:27 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: running
+Jul 04, 2012 8:23:27 AM alias.JoramManager addWorker
+INFO: [JM] Runned new VM, ip: 10.0.0.9
+Jul 04, 2012 8:23:28 AM alias.JoramManager addServer
+INFO: [JM] Added new server logically..
+Jul 04, 2012 8:23:28 AM alias.JoramManager addServer
+INFO: [JM] Started new server remotely..
+Jul 04, 2012 8:24:07 AM alias.JoramManager addServer
+INFO: [JM] Created new worker on new server..
+Jul 04, 2012 8:24:07 AM alias.JoramManager addServer
+INFO: [JM] Started client remotely..
+Jul 04, 2012 8:24:07 AM alias.ElasticityLoopV2 testScaleUp
+INFO: JoramManager is done..
+Jul 04, 2012 8:24:07 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #0.0.1027
+Jul 04, 2012 8:24:07 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #1.1.1026
+Jul 04, 2012 8:24:07 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Added new worker successfully.
+Jul 04, 2012 8:24:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 5086 4808 5394 5712 6801 0
+Jul 04, 2012 8:24:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 30578 31000 30971 30752 30174 0
+Jul 04, 2012 8:24:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 4728 4771 5479 5231 6137 2080
+Jul 04, 2012 8:24:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5316 5005 5029 5248 5326 2500
+Jul 04, 2012 8:24:18 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 50 50 50 25
+Jul 04, 2012 8:24:18 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Started adding a new worker...
+Jul 04, 2012 8:24:19 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] runInstanceRequest sent successfully..
+Jul 04, 2012 8:24:20 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:22 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:23 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:24 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:26 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:27 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:28 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:29 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:30 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:32 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:33 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:34 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:35 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:37 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:38 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:39 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:24:40 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: running
+Jul 04, 2012 8:24:40 AM alias.JoramManager addWorker
+INFO: [JM] Runned new VM, ip: 10.0.0.10
+Jul 04, 2012 8:24:41 AM alias.JoramManager addServer
+INFO: [JM] Added new server logically..
+Jul 04, 2012 8:24:41 AM alias.JoramManager addServer
+INFO: [JM] Started new server remotely..
+Jul 04, 2012 8:25:20 AM alias.JoramManager addServer
+INFO: [JM] Created new worker on new server..
+Jul 04, 2012 8:25:20 AM alias.JoramManager addServer
+INFO: [JM] Started client remotely..
+Jul 04, 2012 8:25:20 AM alias.ElasticityLoopV2 testScaleUp
+INFO: JoramManager is done..
+Jul 04, 2012 8:25:20 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #0.0.1027
+Jul 04, 2012 8:25:20 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #1.1.1026
+Jul 04, 2012 8:25:20 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Added new worker successfully.
+Jul 04, 2012 8:25:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 4557 4328 5064 5516 6856 0 0
+Jul 04, 2012 8:25:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 31265 31495 31500 30971 30702 18000 0
+Jul 04, 2012 8:25:31 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3290 3296 4494 5036 6117 0 1490
+Jul 04, 2012 8:25:31 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5341 5006 5000 5029 5298 2480 3333
+Jul 04, 2012 8:25:31 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4272 4004 4000 4023 4238 2480 3333
+Jul 04, 2012 8:25:31 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 43 40 40 40 42 25 33
+Jul 04, 2012 8:25:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3292 2338 3509 3967 5064 0 0
+Jul 04, 2012 8:25:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5194 5494 5500 5455 5198 2500 5002
+Jul 04, 2012 8:25:42 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4155 4395 4400 4364 4158 2500 5002
+Jul 04, 2012 8:25:42 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 44 44 44 42 25 50
+Jul 04, 2012 8:25:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2275 1952 2839 3131 4172 80 365
+Jul 04, 2012 8:25:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5306 5105 5000 5045 5302 2506 4665
+Jul 04, 2012 8:25:52 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4244 5105 4000 4036 4241 2506 4665
+Jul 04, 2012 8:25:52 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 51 40 40 42 25 47
+Jul 04, 2012 8:26:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1189 1263 1434 1721 2933 0 0
+Jul 04, 2012 8:26:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5250 5395 5500 5500 5270 2504 5070
+Jul 04, 2012 8:26:03 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5250 5395 5500 5500 4216 2504 5070
+Jul 04, 2012 8:26:03 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 54 55 55 42 25 51
+Jul 04, 2012 8:26:13 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 250 969 1254 1661 1887 245 372
+Jul 04, 2012 8:26:13 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5250 5056 5000 5000 5230 2010 4208
+Jul 04, 2012 8:26:13 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 51 50 50 52 20 42
+Jul 04, 2012 8:26:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 108 213 64 181 813 0 0
+Jul 04, 2012 8:26:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5092 5444 5500 5500 5298 2050 4192
+Jul 04, 2012 8:26:24 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 54 55 55 53 21 42
+Jul 04, 2012 8:26:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 165 287 684 651 472 55 180
+Jul 04, 2012 8:26:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4408 4683 4500 5000 5202 1782 3530
+Jul 04, 2012 8:26:34 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 44 47 45 50 52 18 35
+Jul 04, 2012 8:26:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 296 268 209 666 310 0 0
+Jul 04, 2012 8:26:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4258 4817 5000 5000 5468 1783 3430
+Jul 04, 2012 8:26:45 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 43 48 50 50 55 18 34
+Jul 04, 2012 8:26:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 395 88 378 239 432 0 0
+Jul 04, 2012 8:26:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4242 5000 4624 4875 5032 1770 3415
+Jul 04, 2012 8:26:56 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 6
+Jul 04, 2012 8:26:56 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 8:26:56 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 50 46 49 50 18 27
+Jul 04, 2012 8:27:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 100 113 844 451 86 0 0
+Jul 04, 2012 8:27:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4500 5000 4376 5125 5380 1810 2710
+Jul 04, 2012 8:27:06 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 8:27:06 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 45 50 44 51 54 18 20
+Jul 04, 2012 8:27:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 125 169 627 711 582 175 0
+Jul 04, 2012 8:27:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4500 4882 4546 5000 5120 1805 2160
+Jul 04, 2012 8:27:17 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 8:27:17 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 45 49 45 50 51 18 14
+Jul 04, 2012 8:27:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 63 259 221 742 0 0
+Jul 04, 2012 8:27:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4700 5118 4954 5500 5500 2155 1590
+Jul 04, 2012 8:27:27 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 8:27:27 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 47 51 50 55 55 22 7
+Jul 04, 2012 8:27:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 165 223 0 511 1239 0 0
+Jul 04, 2012 8:27:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4800 5215 5229 5147 5000 2210 695
+Jul 04, 2012 8:27:38 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 8:27:38 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 48 52 52 51 50 22 1
+Jul 04, 2012 8:27:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 575 668 254 346 782 0 0
+Jul 04, 2012 8:27:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5285 5271 5353 5500 2215 110
+Jul 04, 2012 8:27:48 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removing worker:6
+Jul 04, 2012 8:27:49 AM alias.JoramManager delWorker
+INFO: [JM] Deleted worker.
+Jul 04, 2012 8:27:49 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removed extra worker successfully.
+Jul 04, 2012 8:27:49 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53 53 54 55 22
+Jul 04, 2012 8:28:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 570 870 1738 1729 1412 0
+Jul 04, 2012 8:28:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 6000 6308 5580 6000 6500 2865
+Jul 04, 2012 8:28:02 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 60 63 56 60 65 29
+Jul 04, 2012 8:28:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 300 823 874 1216 1876 426
+Jul 04, 2012 8:28:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5192 5420 5500 5349 2133
+Jul 04, 2012 8:28:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 52 54 55 53 21
+Jul 04, 2012 8:28:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 460 748 967 1629 1987 0
+Jul 04, 2012 8:28:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5493 5248 5026 5151 2387
+Jul 04, 2012 8:28:23 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 52 50 52 24
+Jul 04, 2012 8:28:33 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 650 1268 1009 1246 1930 0
+Jul 04, 2012 8:28:33 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5181 5007 5252 5474 5337 2618
+Jul 04, 2012 8:28:33 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 53 55 53 26
+Jul 04, 2012 8:28:43 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 162 1048 1215 1771 2137 37
+Jul 04, 2012 8:28:43 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5319 5273 5042 5000 5163 2417
+Jul 04, 2012 8:28:43 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5319 5273 5042 5000 4130 2417
+Jul 04, 2012 8:28:43 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 53 50 50 41 24
+Jul 04, 2012 8:28:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 835 1673 1210 1271 739 0
+Jul 04, 2012 8:28:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5188 5227 5458 5498 5435 2645
+Jul 04, 2012 8:28:54 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 52 55 55 54 26
+Jul 04, 2012 8:29:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1219 1835 1316 1771 1167 0
+Jul 04, 2012 8:29:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5312 5000 5000 5002 5065 2612
+Jul 04, 2012 8:29:04 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 50 50 51 26
+Jul 04, 2012 8:29:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1519 1931 1560 2097 1245 0
+Jul 04, 2012 8:29:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5377 5246 5146 5046 2600
+Jul 04, 2012 8:29:15 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5000 5377 5246 4116 5046 2600
+Jul 04, 2012 8:29:15 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 54 52 41 50 26
+Jul 04, 2012 8:29:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1021 2373 2082 1430 1824 330
+Jul 04, 2012 8:29:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5123 5254 5354 5454 2754
+Jul 04, 2012 8:29:25 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5500 4098 4203 5354 5454 2754
+Jul 04, 2012 8:29:25 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 41 42 54 55 28
+Jul 04, 2012 8:29:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2547 1832 1567 2237 2331 0
+Jul 04, 2012 8:29:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5396 5106 5034 5000 3180
+Jul 04, 2012 8:29:36 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5396 5106 4027 4000 3180
+Jul 04, 2012 8:29:36 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 54 51 40 40 32
+Jul 04, 2012 8:29:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1852 3358 2243 1303 1650 0
+Jul 04, 2012 8:29:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5104 5394 5466 5500 3819
+Jul 04, 2012 8:29:46 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5500 4083 4315 5466 5500 3819
+Jul 04, 2012 8:29:46 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 41 43 55 55 38
+Jul 04, 2012 8:29:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2366 2116 1804 2384 2702 164
+Jul 04, 2012 8:29:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5372 5200 5042 5000 3890
+Jul 04, 2012 8:29:57 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 4297 5200 4033 4000 3890
+Jul 04, 2012 8:29:57 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 43 52 40 40 39
+Jul 04, 2012 8:30:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1671 2224 2829 2080 2152 412
+Jul 04, 2012 8:30:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5128 5300 5458 5500 4546
+Jul 04, 2012 8:30:07 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5500 4102 4240 4366 4400 4546
+Jul 04, 2012 8:30:07 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 41 42 44 44 45
+Jul 04, 2012 8:30:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3280 2002 2591 1672 1968 0
+Jul 04, 2012 8:30:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5099 5000 5000 5000 5443
+Jul 04, 2012 8:30:18 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 4079 4000 5000 5000 5443
+Jul 04, 2012 8:30:18 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 41 40 50 50 54
+Jul 04, 2012 8:30:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2293 970 1380 1951 2285 1478
+Jul 04, 2012 8:30:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5339 5401 5500 5500 5487 5011
+Jul 04, 2012 8:30:28 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4271 5401 5500 5500 4389 5011
+Jul 04, 2012 8:30:28 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 43 54 55 55 44 50
+Jul 04, 2012 8:30:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1901 1821 2543 2743 1871 990
+Jul 04, 2012 8:30:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5161 5140 5000 5000 5013 5500
+Jul 04, 2012 8:30:39 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5161 5140 4000 4000 5013 5500
+Jul 04, 2012 8:30:39 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 51 40 40 50 55
+Jul 04, 2012 8:30:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1965 1625 1351 2072 2160 2606
+Jul 04, 2012 8:30:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5280 5360 5500 5500 5439 5000
+Jul 04, 2012 8:30:49 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5280 5360 5500 4400 4351 4000
+Jul 04, 2012 8:30:49 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 54 55 44 44 40
+Jul 04, 2012 8:30:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2967 2985 2775 1944 1772 1333
+Jul 04, 2012 8:30:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5220 5052 5000 5000 5061 5404
+Jul 04, 2012 8:30:59 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4176 4041 4000 5000 5061 5404
+Jul 04, 2012 8:30:59 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 40 40 50 51 54
+Jul 04, 2012 8:31:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2941 2021 1874 2211 2377 2457
+Jul 04, 2012 8:31:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5071 5448 5435 5360 5206 5096
+Jul 04, 2012 8:31:10 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4056 4358 5435 4288 4164 4076
+Jul 04, 2012 8:31:10 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 44 54 43 42 41
+Jul 04, 2012 8:31:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2445 2693 3738 2570 2287 2110
+Jul 04, 2012 8:31:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5429 5000 5065 5140 5294 5222
+Jul 04, 2012 8:31:20 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 50 50 50 25
+Jul 04, 2012 8:31:20 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Started adding a new worker...
+Jul 04, 2012 8:31:22 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] runInstanceRequest sent successfully..
+Jul 04, 2012 8:31:23 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:24 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:25 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:27 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:28 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:29 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:30 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:31 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:33 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:34 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:35 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:37 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:38 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:39 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:40 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:42 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:43 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:44 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:31:45 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: running
+Jul 04, 2012 8:31:45 AM alias.JoramManager addWorker
+INFO: [JM] Runned new VM, ip: 10.0.0.11
+Jul 04, 2012 8:31:46 AM alias.JoramManager addServer
+INFO: [JM] Added new server logically..
+Jul 04, 2012 8:31:46 AM alias.JoramManager addServer
+INFO: [JM] Started new server remotely..
+Jul 04, 2012 8:32:17 AM alias.JoramManager addServer
+INFO: [JM] Created new worker on new server..
+Jul 04, 2012 8:32:17 AM alias.JoramManager addServer
+INFO: [JM] Started client remotely..
+Jul 04, 2012 8:32:17 AM alias.ElasticityLoopV2 testScaleUp
+INFO: JoramManager is done..
+Jul 04, 2012 8:32:17 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #0.0.1027
+Jul 04, 2012 8:32:17 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #1.1.1026
+Jul 04, 2012 8:32:17 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Added new worker successfully.
+Jul 04, 2012 8:32:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 7030 7255 8350 7623 7790 121 10
+Jul 04, 2012 8:32:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 28500 28500 28500 28500 28500 19199 0
+Jul 04, 2012 8:32:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 7475 6812 7875 7185 7628 110 3649
+Jul 04, 2012 8:32:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5010 5500 5497 5388 5130 2579 2337
+Jul 04, 2012 8:32:28 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4008 4400 4397 4310 4104 2579 1869
+Jul 04, 2012 8:32:28 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 44 44 43 41 26 19
+Jul 04, 2012 8:32:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 7345 8020 9120 8088 7660 0 795
+Jul 04, 2012 8:32:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5490 5035 5003 5112 5370 3467 5320
+Jul 04, 2012 8:32:39 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4392 4028 4002 4089 4296 3467 5320
+Jul 04, 2012 8:32:39 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 44 40 40 41 43 35 53
+Jul 04, 2012 8:32:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 7382 7422 8430 7553 6906 0 1325
+Jul 04, 2012 8:32:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5213 5465 5500 5500 5442 3903 5343
+Jul 04, 2012 8:32:49 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4170 4372 4400 4400 4353 3903 5343
+Jul 04, 2012 8:32:49 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 44 44 44 44 39 53
+Jul 04, 2012 8:33:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 6720 6900 7746 6822 7195 35 2185
+Jul 04, 2012 8:33:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5287 5316 5163 5121 5058 4570 5436
+Jul 04, 2012 8:33:00 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4229 4252 4130 4096 4046 4570 4348
+Jul 04, 2012 8:33:00 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 43 41 41 40 46 43
+Jul 04, 2012 8:33:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 5875 6517 7330 6433 6515 461 1837
+Jul 04, 2012 8:33:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5184 5337 5379 5500 4888 5104
+Jul 04, 2012 8:33:10 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4400 4147 4269 4303 4400 4888 5104
+Jul 04, 2012 8:33:10 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 44 41 43 43 44 49 51
+Jul 04, 2012 8:33:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 5539 5582 6653 5463 5620 475 2085
+Jul 04, 2012 8:33:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5102 5500 5390 5413 5233 5172 5460
+Jul 04, 2012 8:33:21 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4081 4400 4312 4330 4186 5172 4368
+Jul 04, 2012 8:33:21 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 44 43 43 42 52 44
+Jul 04, 2012 8:33:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 4765 5292 6310 5428 5440 756 1803
+Jul 04, 2012 8:33:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5398 5077 5110 5087 5267 5363 5077
+Jul 04, 2012 8:33:32 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4318 4061 4088 4069 4213 5363 5077
+Jul 04, 2012 8:33:32 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 43 41 41 41 42 54 51
+Jul 04, 2012 8:33:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 4235 4467 5350 4068 4241 1680 2050
+Jul 04, 2012 8:33:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5164 5423 5500 5500 5386 5137 5423
+Jul 04, 2012 8:33:42 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4131 4338 4400 4400 4308 5137 4338
+Jul 04, 2012 8:33:42 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 43 44 44 43 51 43
+Jul 04, 2012 8:33:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3530 3795 5066 4308 4060 1790 1397
+Jul 04, 2012 8:33:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5336 5322 5037 5000 5114 5436 5361
+Jul 04, 2012 8:33:53 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4268 4257 4029 4000 4091 5436 5361
+Jul 04, 2012 8:33:53 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 43 43 40 40 41 54 54
+Jul 04, 2012 8:34:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2750 3442 3930 2808 2965 2734 2245
+Jul 04, 2012 8:34:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5434 5178 5463 5500 5500 5064 5139
+Jul 04, 2012 8:34:03 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 50 50 50 25 23
+Jul 04, 2012 8:34:03 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Started adding a new worker...
+Jul 04, 2012 8:34:05 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] runInstanceRequest sent successfully..
+Jul 04, 2012 8:34:06 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:07 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:09 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:10 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:11 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:12 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:14 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:15 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:16 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:17 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:18 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:20 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:21 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:22 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:23 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:25 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:26 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:27 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:28 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:30 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:31 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:32 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:33 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:35 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:36 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:37 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:39 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:40 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:41 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:34:42 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: running
+Jul 04, 2012 8:34:42 AM alias.JoramManager addWorker
+INFO: [JM] Runned new VM, ip: 10.0.0.12
+Jul 04, 2012 8:34:43 AM alias.JoramManager addServer
+INFO: [JM] Added new server logically..
+Jul 04, 2012 8:34:43 AM alias.JoramManager addServer
+INFO: [JM] Started new server remotely..
+Jul 04, 2012 8:35:19 AM alias.JoramManager addServer
+INFO: [JM] Created new worker on new server..
+Jul 04, 2012 8:35:19 AM alias.JoramManager addServer
+INFO: [JM] Started client remotely..
+Jul 04, 2012 8:35:19 AM alias.ElasticityLoopV2 testScaleUp
+INFO: JoramManager is done..
+Jul 04, 2012 8:35:19 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #0.0.1027
+Jul 04, 2012 8:35:19 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #1.1.1026
+Jul 04, 2012 8:35:19 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Added new worker successfully.
+Jul 04, 2012 8:35:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 6409 6992 7715 6653 6375 110 8 0
+Jul 04, 2012 8:35:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 37855 38000 38000 38000 38000 23669 21344 0
+Jul 04, 2012 8:35:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 6238 6112 6818 6068 6312 0 0 2520
+Jul 04, 2012 8:35:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5224 5500 5372 5256 5134 2526 2141 2500
+Jul 04, 2012 8:35:30 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4179 4400 4297 4204 4107 2526 2141 2000
+Jul 04, 2012 8:35:30 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 44 43 42 41 25 21 20
+Jul 04, 2012 8:35:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 5870 6638 7410 6078 6030 0 179 1140
+Jul 04, 2012 8:35:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5487 5111 5128 5244 5366 3150 2515 3948
+Jul 04, 2012 8:35:41 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4389 4088 4102 4195 4292 3150 2515 3948
+Jul 04, 2012 8:35:41 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 44 41 41 42 43 32 25 39
+Jul 04, 2012 8:35:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 5368 5857 6430 5303 5265 0 0 367
+Jul 04, 2012 8:35:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5296 5389 5500 5500 5431 3535 2980 5201
+Jul 04, 2012 8:35:51 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4236 4311 4400 4400 4344 3535 2980 5201
+Jul 04, 2012 8:35:51 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 43 44 44 43 35 30 52
+Jul 04, 2012 8:36:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 4740 4690 5531 4820 4995 215 0 80
+Jul 04, 2012 8:36:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5204 5422 5235 5106 5069 3620 3250 5351
+Jul 04, 2012 8:36:02 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4163 4337 4188 4084 4055 3620 3250 5351
+Jul 04, 2012 8:36:02 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 42 43 42 41 41 36 33 54
+Jul 04, 2012 8:36:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3570 4392 4995 3808 3630 92 55 573
+Jul 04, 2012 8:36:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5078 5265 5394 5500 3661 3270 5325
+Jul 04, 2012 8:36:12 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4400 4062 4212 4315 4400 3661 3270 5325
+Jul 04, 2012 8:36:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 44 41 42 43 44 37 33 53
+Jul 04, 2012 8:36:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2986 3007 3408 2483 2955 25 0 780
+Jul 04, 2012 8:36:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5037 5500 5465 5352 5024 3839 3365 5175
+Jul 04, 2012 8:36:23 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4029 4400 4372 4281 4019 3839 3365 5175
+Jul 04, 2012 8:36:23 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 44 44 43 40 38 34 52
+Jul 04, 2012 8:36:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1515 2379 3115 2158 1765 55 0 505
+Jul 04, 2012 8:36:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5463 5000 5035 5148 5476 3691 3400 5500
+Jul 04, 2012 8:36:34 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5463 4000 4028 4118 5476 3691 3400 5500
+Jul 04, 2012 8:36:34 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 40 40 41 55 37 34 55
+Jul 04, 2012 8:36:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1617 647 1265 404 1794 40 175 585
+Jul 04, 2012 8:36:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5111 5500 5500 5396 5110 3809 3235 5000
+Jul 04, 2012 8:36:44 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 55 55 54 51 38 32 50
+Jul 04, 2012 8:36:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 985 805 1341 418 1110 0 65 247
+Jul 04, 2012 8:36:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5389 5081 5000 5104 5390 3470 2894 5198
+Jul 04, 2012 8:36:55 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 51 50 51 54 35 29 52
+Jul 04, 2012 8:37:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 329 102 649 218 484 80 182 227
+Jul 04, 2012 8:37:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5419 5500 4976 5500 3030 2606 4742
+Jul 04, 2012 8:37:05 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 54 55 50 55 30 26 47
+Jul 04, 2012 8:37:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 282 451 101 150 200 0 0 0
+Jul 04, 2012 8:37:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 4500 5500 4508 5181 2825 2531 4519
+Jul 04, 2012 8:37:16 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 7
+Jul 04, 2012 8:37:16 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 8:37:16 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 45 55 45 52 28 25 36
+Jul 04, 2012 8:37:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 0 577 252 715 0 0 66
+Jul 04, 2012 8:37:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5490 5053 5000 4516 5319 2872 2476 3541
+Jul 04, 2012 8:37:27 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 8:37:27 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 51 50 45 53 29 25 27
+Jul 04, 2012 8:37:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 806 415 126 134 239 208 248 0
+Jul 04, 2012 8:37:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4966 4947 5500 4440 5500 2853 2493 2859
+Jul 04, 2012 8:37:37 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 8:37:37 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 49 55 44 55 29 25 18
+Jul 04, 2012 8:37:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 413 0 140 0 748 0 0 0
+Jul 04, 2012 8:37:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5096 5037 5500 4736 5214 2886 2540 1807
+Jul 04, 2012 8:37:48 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 8:37:48 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 50 55 47 52 29 25 9
+Jul 04, 2012 8:37:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 482 368 1052 360 759 0 0 0
+Jul 04, 2012 8:37:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5448 5065 5000 4324 5286 3190 2750 992
+Jul 04, 2012 8:37:59 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 8:37:59 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 51 50 43 53 32 28 1
+Jul 04, 2012 8:38:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 837 140 713 137 1105 3 0 0
+Jul 04, 2012 8:38:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5312 5398 5500 4898 5394 3374 2814 100
+Jul 04, 2012 8:38:09 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removing worker:7
+Jul 04, 2012 8:38:10 AM alias.JoramManager delWorker
+INFO: [JM] Deleted worker.
+Jul 04, 2012 8:38:10 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removed extra worker successfully.
+Jul 04, 2012 8:38:10 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 54 55 49 54 34 28
+Jul 04, 2012 8:38:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 525 604 1280 461 807 0 0
+Jul 04, 2012 8:38:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 6880 6500 6500 6102 7026 4223 3649
+Jul 04, 2012 8:38:23 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 69 65 65 61 70 42 36
+Jul 04, 2012 8:38:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1064 431 1408 348 1738 0 135
+Jul 04, 2012 8:38:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5308 5184 5000 5000 5080 3287 2747
+Jul 04, 2012 8:38:34 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 52 50 50 51 33 27
+Jul 04, 2012 8:38:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 878 408 920 0 840 0 0
+Jul 04, 2012 8:38:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5189 5316 5500 4937 5411 3400 2842
+Jul 04, 2012 8:38:44 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 53 55 49 54 34 28
+Jul 04, 2012 8:38:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 875 507 1373 443 1214 120 146
+Jul 04, 2012 8:38:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5311 5139 5018 4563 5089 3129 2617
+Jul 04, 2012 8:38:55 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 51 50 46 51 31 26
+Jul 04, 2012 8:39:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 849 241 543 25 908 0 253
+Jul 04, 2012 8:39:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5361 5482 4932 5500 3378 2541
+Jul 04, 2012 8:39:05 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 54 55 49 55 34 25
+Jul 04, 2012 8:39:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1167 0 407 312 1046 324 0
+Jul 04, 2012 8:39:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5440 5500 4552 5199 3083 2595
+Jul 04, 2012 8:39:16 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 54 55 46 52 31 26
+Jul 04, 2012 8:39:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 178 531 921 71 501 0 102
+Jul 04, 2012 8:39:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 4605 5000 4516 5301 3116 2405
+Jul 04, 2012 8:39:27 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 46 50 45 53 31 24
+Jul 04, 2012 8:39:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 496 0 0 0 776 0 0
+Jul 04, 2012 8:39:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5142 4951 5435 4480 5000 3102 2447
+Jul 04, 2012 8:39:37 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 50 54 45 50 31 24
+Jul 04, 2012 8:39:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 254 830 324 0 162 111 96
+Jul 04, 2012 8:39:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5358 4504 5065 4507 5500 2846 2323
+Jul 04, 2012 8:39:47 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 45 51 45 55 28 23
+Jul 04, 2012 8:39:58 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 22 0 0 0 312 0 0
+Jul 04, 2012 8:39:58 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 4889 5458 4509 5245 2791 2228
+Jul 04, 2012 8:39:58 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 6
+Jul 04, 2012 8:39:58 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 8:39:58 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 49 55 45 52 28 18
+Jul 04, 2012 8:40:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 60 258 437 169 369 170 0
+Jul 04, 2012 8:40:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 4611 5042 4245 5255 2771 1800
+Jul 04, 2012 8:40:08 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 8:40:08 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 46 50 42 53 28 13
+Jul 04, 2012 8:40:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 47 0 0 217 284 0 0
+Jul 04, 2012 8:40:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 4870 5449 4259 5175 2853 1305
+Jul 04, 2012 8:40:19 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 8:40:19 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 49 54 43 52 29 9
+Jul 04, 2012 8:40:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 181 339 329 32 623 179 0
+Jul 04, 2012 8:40:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 4640 5051 4449 5325 3021 990
+Jul 04, 2012 8:40:30 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 8:40:30 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 46 51 44 53 30 4
+Jul 04, 2012 8:40:40 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 385 355 464 37 438 194 0
+Jul 04, 2012 8:40:40 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5248 4990 5500 4551 5500 3000 405
+Jul 04, 2012 8:40:40 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 8:40:40 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 55 46 55 30 1
+Jul 04, 2012 8:40:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 641 245 0 0 958 0 0
+Jul 04, 2012 8:40:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5252 5000 5354 4542 5000 3204 100
+Jul 04, 2012 8:40:51 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removing worker:6
+Jul 04, 2012 8:40:52 AM alias.JoramManager delWorker
+INFO: [JM] Deleted worker.
+Jul 04, 2012 8:40:52 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removed extra worker successfully.
+Jul 04, 2012 8:40:52 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 54 45 50 32
+Jul 04, 2012 8:41:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 971 805 639 0 578 0
+Jul 04, 2012 8:41:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 6500 6000 6646 5895 7000 4155
+Jul 04, 2012 8:41:04 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 65 60 66 59 70 42
+Jul 04, 2012 8:41:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 896 201 1021 666 1008 229
+Jul 04, 2012 8:41:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5415 5242 4199 5000 3050
+Jul 04, 2012 8:41:15 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 54 52 42 50 31
+Jul 04, 2012 8:41:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 996 655 1054 352 948 139
+Jul 04, 2012 8:41:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5085 5258 4864 5500 3571
+Jul 04, 2012 8:41:25 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 51 53 49 55 36
+Jul 04, 2012 8:41:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 996 270 874 32 810 0
+Jul 04, 2012 8:41:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5455 5000 5081 3399
+Jul 04, 2012 8:41:36 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 55 50 51 34
+Jul 04, 2012 8:41:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 566 663 1349 782 558 0
+Jul 04, 2012 8:41:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5018 5045 4500 5419 3095
+Jul 04, 2012 8:41:47 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 50 45 54 31
+Jul 04, 2012 8:41:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1003 270 899 0 751 0
+Jul 04, 2012 8:41:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5029 5482 5500 4877 5188 3410
+Jul 04, 2012 8:41:57 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 55 49 52 34
+Jul 04, 2012 8:42:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 656 697 1304 607 333 0
+Jul 04, 2012 8:42:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5471 5020 5000 4623 5312 3080
+Jul 04, 2012 8:42:08 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 50 46 53 31
+Jul 04, 2012 8:42:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1103 300 729 397 730 0
+Jul 04, 2012 8:42:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5072 5480 5500 4500 5158 3415
+Jul 04, 2012 8:42:18 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 55 55 45 52 34
+Jul 04, 2012 8:42:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 836 761 1194 667 278 0
+Jul 04, 2012 8:42:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5428 5003 5000 4500 5342 3080
+Jul 04, 2012 8:42:29 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 50 50 45 53 31
+Jul 04, 2012 8:42:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1243 335 779 126 792 0
+Jul 04, 2012 8:42:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5497 5500 4750 5086 3415
+Jul 04, 2012 8:42:39 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 55 48 51 34
+Jul 04, 2012 8:42:50 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 826 591 1304 487 163 0
+Jul 04, 2012 8:42:50 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5002 5000 4750 5414 3080
+Jul 04, 2012 8:42:50 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 50 48 54 31
+Jul 04, 2012 8:43:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1178 365 549 160 792 0
+Jul 04, 2012 8:43:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5110 5498 5500 4842 5233 3275
+Jul 04, 2012 8:43:00 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 55 55 48 52 33
+Jul 04, 2012 8:43:11 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 671 461 1059 87 288 0
+Jul 04, 2012 8:43:11 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5390 5000 5000 4658 5267 3125
+Jul 04, 2012 8:43:11 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 50 50 47 53 31
+Jul 04, 2012 8:43:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1369 260 559 97 802 0
+Jul 04, 2012 8:43:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5500 4946 5311 3125
+Jul 04, 2012 8:43:21 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 55 49 53 31
+Jul 04, 2012 8:43:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 706 545 1229 87 423 0
+Jul 04, 2012 8:43:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5001 5000 4554 5189 3105
+Jul 04, 2012 8:43:32 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 50 46 52 31
+Jul 04, 2012 8:43:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1407 165 659 122 711 0
+Jul 04, 2012 8:43:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5007 5499 5500 4938 5295 3125
+Jul 04, 2012 8:43:42 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 55 49 53 31
+Jul 04, 2012 8:43:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 791 568 1304 57 448 0
+Jul 04, 2012 8:43:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5493 5043 5000 4562 5205 3105
+Jul 04, 2012 8:43:53 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 50 46 52 31
+Jul 04, 2012 8:44:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1276 130 699 147 543 0
+Jul 04, 2012 8:44:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5118 5457 5500 4999 5431 3120
+Jul 04, 2012 8:44:03 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 55 55 50 54 31
+Jul 04, 2012 8:44:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 811 512 934 132 568 0
+Jul 04, 2012 8:44:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5382 5186 5000 4501 5069 3110
+Jul 04, 2012 8:44:14 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 52 50 45 51 31
+Jul 04, 2012 8:44:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1165 245 729 135 487 0
+Jul 04, 2012 8:44:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5225 5314 5500 4818 5351 3110
+Jul 04, 2012 8:44:24 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 53 55 48 54 31
+Jul 04, 2012 8:44:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 901 436 964 0 593 67
+Jul 04, 2012 8:44:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5275 5139 5000 4659 5149 2977
+Jul 04, 2012 8:44:34 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 51 50 47 51 30
+Jul 04, 2012 8:44:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1489 265 714 147 574 0
+Jul 04, 2012 8:44:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5361 5500 5023 5243 3143
+Jul 04, 2012 8:44:45 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 54 55 50 52 31
+Jul 04, 2012 8:44:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 861 797 1154 177 428 0
+Jul 04, 2012 8:44:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5063 5000 4500 5257 3110
+Jul 04, 2012 8:44:56 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 51 50 45 53 31
+Jul 04, 2012 8:45:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1268 230 749 127 513 0
+Jul 04, 2012 8:45:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5183 5437 5500 4970 5500 3115
+Jul 04, 2012 8:45:06 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 54 55 50 55 31
+Jul 04, 2012 8:45:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1051 767 781 147 758 0
+Jul 04, 2012 8:45:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5317 5115 5000 4530 5000 3115
+Jul 04, 2012 8:45:17 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 51 50 45 50 31
+Jul 04, 2012 8:45:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1224 268 729 152 431 0
+Jul 04, 2012 8:45:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5215 5385 5500 5000 5500 3100
+Jul 04, 2012 8:45:27 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 54 55 50 55 31
+Jul 04, 2012 8:45:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1265 210 306 0 752 0
+Jul 04, 2012 8:45:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5285 5390 5262 4592 5000 3112
+Jul 04, 2012 8:45:38 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 54 53 46 50 31
+Jul 04, 2012 8:45:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 556 549 660 277 302 0
+Jul 04, 2012 8:45:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5483 5110 5238 4408 5500 3110
+Jul 04, 2012 8:45:48 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 51 52 44 55 31
+Jul 04, 2012 8:45:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 600 0 307 555 811 0
+Jul 04, 2012 8:45:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5017 5190 5322 4092 5000 2979
+Jul 04, 2012 8:45:59 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 52 53 41 50 30
+Jul 04, 2012 8:46:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 555 121 493 296 299 554
+Jul 04, 2012 8:46:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5310 5178 4408 5500 2585
+Jul 04, 2012 8:46:09 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 53 52 44 55 26
+Jul 04, 2012 8:46:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 481 181 279 513 436 0
+Jul 04, 2012 8:46:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5000 5379 4111 5000 2881
+Jul 04, 2012 8:46:20 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 54 41 50 29
+Jul 04, 2012 8:46:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 47 230 444 76 498 0
+Jul 04, 2012 8:46:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5121 4351 5000 2822
+Jul 04, 2012 8:46:30 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 5
+Jul 04, 2012 8:46:30 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 8:46:30 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 51 44 50 23
+Jul 04, 2012 8:46:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 556 251 281 31 369 173
+Jul 04, 2012 8:46:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5000 5374 4196 5000 2297
+Jul 04, 2012 8:46:41 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 8:46:41 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 54 42 50 17
+Jul 04, 2012 8:46:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 125 251 424 217 299 0
+Jul 04, 2012 8:46:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5126 4342 5000 1712
+Jul 04, 2012 8:46:51 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 8:46:51 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 51 43 50 11
+Jul 04, 2012 8:47:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 632 286 291 159 217 0
+Jul 04, 2012 8:47:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5000 5408 4286 5024 1210
+Jul 04, 2012 8:47:02 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 8:47:02 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 54 43 50 6
+Jul 04, 2012 8:47:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 290 286 675 532 897 47
+Jul 04, 2012 8:47:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5092 4214 4976 578
+Jul 04, 2012 8:47:12 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 8:47:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 51 42 50 1
+Jul 04, 2012 8:47:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 645 0 303 501 793 0
+Jul 04, 2012 8:47:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5286 5425 4214 5018 177
+Jul 04, 2012 8:47:23 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removing worker:5
+Jul 04, 2012 8:47:24 AM alias.JoramManager delWorker
+INFO: [JM] Deleted worker.
+Jul 04, 2012 8:47:24 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removed extra worker successfully.
+Jul 04, 2012 8:47:24 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53 54 42 50
+Jul 04, 2012 8:47:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 745 854 1289 97 446
+Jul 04, 2012 8:47:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 6969 6214 6075 5786 6482
+Jul 04, 2012 8:47:36 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 70 62 61 58 65
+Jul 04, 2012 8:47:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1350 934 1044 0 665
+Jul 04, 2012 8:47:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5031 5040 5000 4320 5000
+Jul 04, 2012 8:47:47 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 50 43 50
+Jul 04, 2012 8:47:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1257 418 735 50 287
+Jul 04, 2012 8:47:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5030 5460 5500 4525 5467
+Jul 04, 2012 8:47:57 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 55 45 55
+Jul 04, 2012 8:48:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 594 453 654 109 686
+Jul 04, 2012 8:48:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5470 5006 5000 4155 5033
+Jul 04, 2012 8:48:07 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 50 42 50
+Jul 04, 2012 8:48:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 292 0 175 385 446
+Jul 04, 2012 8:48:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5188 5500 3855 5031
+Jul 04, 2012 8:48:18 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 4
+Jul 04, 2012 8:48:18 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 8:48:18 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 52 55 39 40
+Jul 04, 2012 8:48:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 332 150 637 225 223
+Jul 04, 2012 8:48:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5476 5306 5000 4145 4469
+Jul 04, 2012 8:48:28 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 8:48:28 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 53 50 41 30
+Jul 04, 2012 8:48:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1239 0 441 363 223
+Jul 04, 2012 8:48:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5024 5268 5121 4000 3000
+Jul 04, 2012 8:48:39 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 8:48:39 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53 51 40 20
+Jul 04, 2012 8:48:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1095 980 747 298 0
+Jul 04, 2012 8:48:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5196 5232 5379 4500 2433
+Jul 04, 2012 8:48:49 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 8:48:49 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 52 54 45 10
+Jul 04, 2012 8:49:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1674 1357 1702 703 38
+Jul 04, 2012 8:49:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5304 5029 5000 4500 1067
+Jul 04, 2012 8:49:00 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 8:49:00 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 50 45 1
+Jul 04, 2012 8:49:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2424 1895 2222 555 0
+Jul 04, 2012 8:49:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5471 5478 5267 148
+Jul 04, 2012 8:49:10 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Cancelled scaling down plan.
+Jul 04, 2012 8:49:10 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5471 4382 5267 5031
+Jul 04, 2012 8:49:10 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 55 44 53 50
+Jul 04, 2012 8:49:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1109 2270 1522 723 173
+Jul 04, 2012 8:49:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5022 5233 4852
+Jul 04, 2012 8:49:20 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5500 4000 5022 5233 4852
+Jul 04, 2012 8:49:20 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 40 50 52 49
+Jul 04, 2012 8:49:31 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1449 923 1018 432 340
+Jul 04, 2012 8:49:31 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5307 5142 5022 4500
+Jul 04, 2012 8:49:31 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53 51 50 45
+Jul 04, 2012 8:49:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 540 680 627 173 88
+Jul 04, 2012 8:49:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5399 5193 5358 4978 4435
+Jul 04, 2012 8:49:41 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 52 54 50 44
+Jul 04, 2012 8:49:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 354 292 662 483 103
+Jul 04, 2012 8:49:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5101 5045 5000 4500 4065
+Jul 04, 2012 8:49:52 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 50 50 45 41
+Jul 04, 2012 8:50:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 421 415 0 268 78
+Jul 04, 2012 8:50:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 4955 5272 4500 4130
+Jul 04, 2012 8:50:02 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 4
+Jul 04, 2012 8:50:02 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 8:50:02 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 53 45 33
+Jul 04, 2012 8:50:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 69 315 242 418 93
+Jul 04, 2012 8:50:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5228 4500 3370
+Jul 04, 2012 8:50:12 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 8:50:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 52 45 25
+Jul 04, 2012 8:50:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 479 0 462 485 0
+Jul 04, 2012 8:50:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5406 5200 4500 2603
+Jul 04, 2012 8:50:23 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 8:50:23 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 54 52 45 17
+Jul 04, 2012 8:50:33 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 603 885 792 273 20
+Jul 04, 2012 8:50:33 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5380 5094 5300 5000 1765
+Jul 04, 2012 8:50:33 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 8:50:33 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 51 53 50 8
+Jul 04, 2012 8:50:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1494 1332 1722 493 0
+Jul 04, 2012 8:50:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5120 5000 5000 5000 915
+Jul 04, 2012 8:50:44 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 8:50:44 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 50 50 50 1
+Jul 04, 2012 8:50:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2589 1530 1882 1237 0
+Jul 04, 2012 8:50:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5500 5399 120
+Jul 04, 2012 8:50:54 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Cancelled scaling down plan.
+Jul 04, 2012 8:50:54 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5500 5500 5399 4130
+Jul 04, 2012 8:50:54 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 55 55 54 41
+Jul 04, 2012 8:51:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 754 2000 1857 1193 203
+Jul 04, 2012 8:51:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5000 5101 3867
+Jul 04, 2012 8:51:04 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 50 51 39
+Jul 04, 2012 8:51:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 574 1159 1574 1052 53
+Jul 04, 2012 8:51:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5398 5234 5068 3730
+Jul 04, 2012 8:51:15 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 54 52 51 37
+Jul 04, 2012 8:51:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 346 1395 1082 423 0
+Jul 04, 2012 8:51:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5306 5102 5266 5432 3763
+Jul 04, 2012 8:51:25 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 51 53 54 38
+Jul 04, 2012 8:51:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 304 1387 1152 308 198
+Jul 04, 2012 8:51:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5194 5000 5000 5000 3237
+Jul 04, 2012 8:51:35 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 50 50 32
+Jul 04, 2012 8:51:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 429 410 492 224 0
+Jul 04, 2012 8:51:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5339 5032 3413
+Jul 04, 2012 8:51:46 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 4
+Jul 04, 2012 8:51:46 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 8:51:46 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 53 50 27
+Jul 04, 2012 8:51:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 1175 1067 343 160
+Jul 04, 2012 8:51:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5184 5000 5161 4968 2468
+Jul 04, 2012 8:51:56 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 8:51:56 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 52 50 20
+Jul 04, 2012 8:52:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 689 1410 1292 383 123
+Jul 04, 2012 8:52:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4816 5050 5000 5000 2119
+Jul 04, 2012 8:52:07 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 8:52:07 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 48 51 50 50 14
+Jul 04, 2012 8:52:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 729 1375 1341 512 0
+Jul 04, 2012 8:52:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5450 5408 5311 1673
+Jul 04, 2012 8:52:17 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 8:52:17 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 54 53 7
+Jul 04, 2012 8:52:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 734 2410 2037 998 0
+Jul 04, 2012 8:52:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5092 5189 775
+Jul 04, 2012 8:52:27 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Cancelled scaling down plan.
+Jul 04, 2012 8:52:27 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5500 4000 4073 5189 3413
+Jul 04, 2012 8:52:27 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 40 41 52 34
+Jul 04, 2012 8:52:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1739 1545 1262 1483 0
+Jul 04, 2012 8:52:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5091 5000 5000 3425
+Jul 04, 2012 8:52:38 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 51 50 50 34
+Jul 04, 2012 8:52:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1374 725 724 1420 288
+Jul 04, 2012 8:52:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5409 5301 5023 3127
+Jul 04, 2012 8:52:48 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 54 53 50 31
+Jul 04, 2012 8:52:58 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 975 1520 977 753 0
+Jul 04, 2012 8:52:58 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5242 5000 5199 5477 3093
+Jul 04, 2012 8:52:58 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 52 55 31
+Jul 04, 2012 8:53:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 769 1040 1132 1553 0
+Jul 04, 2012 8:53:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5258 5000 5000 5000 3160
+Jul 04, 2012 8:53:08 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 50 50 32
+Jul 04, 2012 8:53:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 789 565 653 748 0
+Jul 04, 2012 8:53:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5441 5217 3160
+Jul 04, 2012 8:53:19 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 54 52 32
+Jul 04, 2012 8:53:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 339 670 647 778 63
+Jul 04, 2012 8:53:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5059 5283 3087
+Jul 04, 2012 8:53:29 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 51 53 31
+Jul 04, 2012 8:53:40 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 864 623 564 563 0
+Jul 04, 2012 8:53:40 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5265 5036 5000 2928
+Jul 04, 2012 8:53:40 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53 50 50 29
+Jul 04, 2012 8:53:50 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 771 496 208 694 0
+Jul 04, 2012 8:53:50 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5035 5235 5464 5252 3197
+Jul 04, 2012 8:53:50 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 52 55 53 32
+Jul 04, 2012 8:54:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 123 652 802 556 0
+Jul 04, 2012 8:54:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5363 5000 5000 5248 2909
+Jul 04, 2012 8:54:00 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 50 50 52 29
+Jul 04, 2012 8:54:11 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 816 461 323 662 0
+Jul 04, 2012 8:54:11 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5102 5496 5379 5321 3181
+Jul 04, 2012 8:54:11 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 55 54 53 32
+Jul 04, 2012 8:54:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 467 872 948 953 0
+Jul 04, 2012 8:54:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5004 5121 5179 2980
+Jul 04, 2012 8:54:21 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 51 52 30
+Jul 04, 2012 8:54:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 981 636 988 981 0
+Jul 04, 2012 8:54:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5175 5127 3245
+Jul 04, 2012 8:54:32 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 52 51 32
+Jul 04, 2012 8:54:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1283 1422 1043 1031 66
+Jul 04, 2012 8:54:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5164 5000 5325 5373 3311
+Jul 04, 2012 8:54:42 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 53 54 33
+Jul 04, 2012 8:54:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1426 1172 1364 1712 282
+Jul 04, 2012 8:54:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5336 5168 5000 5000 3249
+Jul 04, 2012 8:54:53 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 52 50 50 32
+Jul 04, 2012 8:55:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2012 1415 1433 1724 0
+Jul 04, 2012 8:55:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5025 5332 5500 5431 3816
+Jul 04, 2012 8:55:03 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4020 5332 5500 5431 3816
+Jul 04, 2012 8:55:03 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 53 55 54 38
+Jul 04, 2012 8:55:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 941 2221 2449 2680 178
+Jul 04, 2012 8:55:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5475 5000 5000 5069 3684
+Jul 04, 2012 8:55:14 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5475 4000 4000 4055 3684
+Jul 04, 2012 8:55:14 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 40 40 41 37
+Jul 04, 2012 8:55:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2248 1542 1890 2071 97
+Jul 04, 2012 8:55:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5304 5198 4500
+Jul 04, 2012 8:55:24 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5500 5304 4158 4500
+Jul 04, 2012 8:55:24 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 55 53 42 45
+Jul 04, 2012 8:55:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1440 2465 2480 1736 483
+Jul 04, 2012 8:55:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5381 5000 5196 5302 5000
+Jul 04, 2012 8:55:34 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5381 4000 4156 5302 5000
+Jul 04, 2012 8:55:34 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 40 42 53 50
+Jul 04, 2012 8:55:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2613 2035 2144 2594 703
+Jul 04, 2012 8:55:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5119 5140 5010 5000 5000
+Jul 04, 2012 8:55:45 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4095 4112 4008 4000 5000
+Jul 04, 2012 8:55:45 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 41 40 40 50
+Jul 04, 2012 8:55:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2456 1856 1944 2552 1889
+Jul 04, 2012 8:55:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5042 5360 5490 5388 5172
+Jul 04, 2012 8:55:55 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4033 5360 5490 4310 5172
+Jul 04, 2012 8:55:55 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 54 55 43 52
+Jul 04, 2012 8:56:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1868 3005 2832 2179 2249
+Jul 04, 2012 8:56:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5458 5000 5000 5112 5328
+Jul 04, 2012 8:56:06 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5458 4000 4000 4089 4262
+Jul 04, 2012 8:56:06 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 40 40 41 43
+Jul 04, 2012 8:56:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3475 2383 2553 2059 2425
+Jul 04, 2012 8:56:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5357 5219 5000 5000
+Jul 04, 2012 8:56:16 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 50 50 50
+Jul 04, 2012 8:56:16 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Started adding a new worker...
+Jul 04, 2012 8:56:17 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] runInstanceRequest sent successfully..
+Jul 04, 2012 8:56:18 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:20 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:21 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:22 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:23 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:25 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:26 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:27 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:28 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:30 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:31 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:32 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:33 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:34 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:36 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:37 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:38 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:56:39 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: running
+Jul 04, 2012 8:56:39 AM alias.JoramManager addWorker
+INFO: [JM] Runned new VM, ip: 10.0.0.13
+Jul 04, 2012 8:56:40 AM alias.JoramManager addServer
+INFO: [JM] Added new server logically..
+Jul 04, 2012 8:56:40 AM alias.JoramManager addServer
+INFO: [JM] Started new server remotely..
+Jul 04, 2012 8:57:17 AM alias.JoramManager addServer
+INFO: [JM] Created new worker on new server..
+Jul 04, 2012 8:57:17 AM alias.JoramManager addServer
+INFO: [JM] Started client remotely..
+Jul 04, 2012 8:57:17 AM alias.ElasticityLoopV2 testScaleUp
+INFO: JoramManager is done..
+Jul 04, 2012 8:57:17 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #0.0.1027
+Jul 04, 2012 8:57:17 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #1.1.1026
+Jul 04, 2012 8:57:17 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Added new worker successfully.
+Jul 04, 2012 8:57:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 6073 5481 5276 4648 5448 500
+Jul 04, 2012 8:57:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 31000 30722 30781 31000 31000 0
+Jul 04, 2012 8:57:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 5593 4713 4389 3904 4958 2595
+Jul 04, 2012 8:57:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5886 5883 5706 5500 2908
+Jul 04, 2012 8:57:29 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 50 50 50 29
+Jul 04, 2012 8:57:29 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Started adding a new worker...
+Jul 04, 2012 8:57:30 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] runInstanceRequest sent successfully..
+Jul 04, 2012 8:57:32 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:33 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:34 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:35 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:37 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:38 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:39 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:40 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:42 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:43 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:44 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:46 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:47 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:48 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:49 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:51 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:52 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:53 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:54 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:56 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:57 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:58 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:57:59 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 8:58:01 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: running
+Jul 04, 2012 8:58:01 AM alias.JoramManager addWorker
+INFO: [JM] Runned new VM, ip: 10.0.0.14
+Jul 04, 2012 8:58:01 AM alias.JoramManager addServer
+INFO: [JM] Added new server logically..
+Jul 04, 2012 8:58:01 AM alias.JoramManager addServer
+INFO: [JM] Started new server remotely..
+Jul 04, 2012 8:58:38 AM alias.JoramManager addServer
+INFO: [JM] Created new worker on new server..
+Jul 04, 2012 8:58:38 AM alias.JoramManager addServer
+INFO: [JM] Started client remotely..
+Jul 04, 2012 8:58:38 AM alias.ElasticityLoopV2 testScaleUp
+INFO: JoramManager is done..
+Jul 04, 2012 8:58:38 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #0.0.1027
+Jul 04, 2012 8:58:38 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #1.1.1026
+Jul 04, 2012 8:58:38 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Added new worker successfully.
+Jul 04, 2012 8:58:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 5198 4115 4145 3535 4566 33 400
+Jul 04, 2012 8:58:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 34500 34415 34349 34470 34500 22303 0
+Jul 04, 2012 8:58:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 4153 3076 3277 2803 3628 0 1520
+Jul 04, 2012 8:58:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5426 5384 5324 5500 2424 3000
+Jul 04, 2012 8:58:49 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4400 4340 4307 4259 4400 2424 3000
+Jul 04, 2012 8:58:49 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 44 43 43 43 44 24 30
+Jul 04, 2012 8:58:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3211 2773 2760 2088 2560 0 34
+Jul 04, 2012 8:58:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5367 5194 5384 5500 5418 2705 4713
+Jul 04, 2012 8:58:59 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4293 4155 4307 4400 4334 2705 4713
+Jul 04, 2012 8:58:59 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 43 42 43 44 43 27 47
+Jul 04, 2012 8:59:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2638 1498 1767 1144 2144 0 34
+Jul 04, 2012 8:59:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5133 5479 5223 5314 5213 2855 4787
+Jul 04, 2012 8:59:10 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4106 5479 5223 5314 4170 2855 4787
+Jul 04, 2012 8:59:10 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 55 52 53 42 29 48
+Jul 04, 2012 8:59:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 993 1333 1275 833 573 95 0
+Jul 04, 2012 8:59:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5021 5277 5186 5369 2480 4370
+Jul 04, 2012 8:59:21 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 53 52 54 25 44
+Jul 04, 2012 8:59:31 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 523 353 560 246 350 0 291
+Jul 04, 2012 8:59:31 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5500 5278 4564 2275 3630
+Jul 04, 2012 8:59:31 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 55 53 46 23 36
+Jul 04, 2012 8:59:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 224 525 308 0 0 100
+Jul 04, 2012 8:59:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5088 5000 5000 4722 4584 2075 3500
+Jul 04, 2012 8:59:42 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 50 50 47 46 21 35
+Jul 04, 2012 8:59:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 0 0 68 0 0 197
+Jul 04, 2012 8:59:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5080 4993 5090 4500 4615 2110 3240
+Jul 04, 2012 8:59:52 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 6
+Jul 04, 2012 8:59:52 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 8:59:52 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 50 51 45 46 21 26
+Jul 04, 2012 9:00:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 318 566 276 103 306 22 219
+Jul 04, 2012 9:00:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4832 4726 4985 4500 4237 2040 2760
+Jul 04, 2012 9:00:03 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 9:00:03 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 48 47 50 45 42 20 19
+Jul 04, 2012 9:00:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 133 203 235 68 13 0 0
+Jul 04, 2012 9:00:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5281 5425 5000 5000 2265 2305
+Jul 04, 2012 9:00:14 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 9:00:14 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 53 54 50 50 23 13
+Jul 04, 2012 9:00:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 103 0 155 0 0 0 10
+Jul 04, 2012 9:00:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5328 5499 4671 4500 2080 1195
+Jul 04, 2012 9:00:24 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 9:00:24 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53 55 47 45 21 6
+Jul 04, 2012 9:00:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 178 363 675 298 225 155 0
+Jul 04, 2012 9:00:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5172 5001 4829 4778 2155 670
+Jul 04, 2012 9:00:35 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 9:00:35 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 52 50 48 48 22 1
+Jul 04, 2012 9:00:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 683 413 700 230 373 0 0
+Jul 04, 2012 9:00:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5350 5318 4722 2355 100
+Jul 04, 2012 9:00:45 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removing worker:6
+Jul 04, 2012 9:00:46 AM alias.JoramManager delWorker
+INFO: [JM] Deleted worker.
+Jul 04, 2012 9:00:46 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removed extra worker successfully.
+Jul 04, 2012 9:00:46 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 54 53 47 24
+Jul 04, 2012 9:00:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 873 1553 1210 953 648 0
+Jul 04, 2012 9:00:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 6500 6000 6650 6182 6000 3110
+Jul 04, 2012 9:00:59 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 65 60 67 62 60 31
+Jul 04, 2012 9:01:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1433 1423 1400 433 308 13
+Jul 04, 2012 9:01:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5500 5500 5095 2485
+Jul 04, 2012 9:01:09 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 55 55 51 25
+Jul 04, 2012 9:01:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1058 1388 1735 953 298 0
+Jul 04, 2012 9:01:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5000 5000 5405 2570
+Jul 04, 2012 9:01:20 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 50 50 54 26
+Jul 04, 2012 9:01:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1153 913 1374 595 298 0
+Jul 04, 2012 9:01:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5310 5178 5000 2605
+Jul 04, 2012 9:01:30 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 53 52 50 26
+Jul 04, 2012 9:01:40 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1218 1563 1540 513 228 92
+Jul 04, 2012 9:01:40 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5495 5000 5190 5322 5500 2580
+Jul 04, 2012 9:01:40 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 52 53 55 26
+Jul 04, 2012 9:01:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1188 1096 1576 836 288 0
+Jul 04, 2012 9:01:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5005 5293 5125 5000 5000 2635
+Jul 04, 2012 9:01:51 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53 51 50 50 26
+Jul 04, 2012 9:02:01 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1417 1600 1385 535 473 0
+Jul 04, 2012 9:02:01 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5195 5207 5375 5500 5271 2844
+Jul 04, 2012 9:02:01 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 52 54 55 53 28
+Jul 04, 2012 9:02:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 927 1226 1770 929 77 0
+Jul 04, 2012 9:02:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5305 5131 5000 5000 5229 2548
+Jul 04, 2012 9:02:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 51 50 50 52 25
+Jul 04, 2012 9:02:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1619 1063 1151 138 50 198
+Jul 04, 2012 9:02:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5117 5369 5500 5500 5291 2268
+Jul 04, 2012 9:02:22 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 54 55 55 53 23
+Jul 04, 2012 9:02:33 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 872 1218 1786 532 590 76
+Jul 04, 2012 9:02:33 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5383 5177 5000 5000 4709 2500
+Jul 04, 2012 9:02:33 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 52 50 50 47 25
+Jul 04, 2012 9:02:43 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 790 1194 1326 424 0 0
+Jul 04, 2012 9:02:43 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5420 5323 5500 5500 5392 2508
+Jul 04, 2012 9:02:43 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 53 55 55 54 25
+Jul 04, 2012 9:02:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1163 555 931 662 166 0
+Jul 04, 2012 9:02:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5080 5500 5270 4759 4760 2344
+Jul 04, 2012 9:02:54 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 55 53 48 48 23
+Jul 04, 2012 9:03:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 656 1212 932 0 0 0
+Jul 04, 2012 9:03:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5230 5076 4820 2305
+Jul 04, 2012 9:03:05 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 52 51 48 23
+Jul 04, 2012 9:03:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 752 536 776 74 284 5
+Jul 04, 2012 9:03:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5500 4957 4528 2080
+Jul 04, 2012 9:03:15 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 55 50 45 21
+Jul 04, 2012 9:03:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 159 509 865 463 298 0
+Jul 04, 2012 9:03:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5000 4708 4500 2197
+Jul 04, 2012 9:03:25 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 50 47 45 22
+Jul 04, 2012 9:03:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 271 23 544 209 364 86
+Jul 04, 2012 9:03:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5271 4553 4000 2036
+Jul 04, 2012 9:03:36 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 53 46 40 20
+Jul 04, 2012 9:03:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 475 595 250 0 0
+Jul 04, 2012 9:03:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5337 5000 5229 4857 4476 2068
+Jul 04, 2012 9:03:46 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 52 49 45 21
+Jul 04, 2012 9:03:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 151 439 168 526 335 168
+Jul 04, 2012 9:03:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5163 4985 5180 4136 4024 1932
+Jul 04, 2012 9:03:57 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 52 41 40 19
+Jul 04, 2012 9:04:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 353 22 608 323 0 0
+Jul 04, 2012 9:04:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4827 5015 4820 4454 3964 1915
+Jul 04, 2012 9:04:07 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 48 50 48 45 40 19
+Jul 04, 2012 9:04:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 184 194 490 258 356 7
+Jul 04, 2012 9:04:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5173 5252 5047 4500 4036 2017
+Jul 04, 2012 9:04:18 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 5
+Jul 04, 2012 9:04:18 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 9:04:18 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 53 50 45 40 16
+Jul 04, 2012 9:04:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 154 420 561 131 0 0
+Jul 04, 2012 9:04:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4924 4748 4953 4500 3975 1515
+Jul 04, 2012 9:04:28 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 9:04:28 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 49 47 50 45 40 12
+Jul 04, 2012 9:04:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 279 92 391 140 380 0
+Jul 04, 2012 9:04:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5076 5363 5113 4511 4025 1327
+Jul 04, 2012 9:04:39 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 9:04:39 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 54 51 45 40 8
+Jul 04, 2012 9:04:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 427 428 81 101 0 0
+Jul 04, 2012 9:04:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4679 4637 5387 4489 3994 720
+Jul 04, 2012 9:04:49 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 9:04:49 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 47 46 54 45 40 4
+Jul 04, 2012 9:05:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 160 497 535 0 0 0
+Jul 04, 2012 9:05:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5174 5012 5000 4395 4000 400
+Jul 04, 2012 9:05:00 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 9:05:00 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 50 44 40 1
+Jul 04, 2012 9:05:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 773 0 38 252 0 0
+Jul 04, 2012 9:05:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4647 5200 5500 4605 4124 100
+Jul 04, 2012 9:05:10 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removing worker:5
+Jul 04, 2012 9:05:11 AM alias.JoramManager delWorker
+INFO: [JM] Deleted worker.
+Jul 04, 2012 9:05:11 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removed extra worker successfully.
+Jul 04, 2012 9:05:11 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 46 52 55 46 41
+Jul 04, 2012 9:05:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 818 869 538 0
+Jul 04, 2012 9:05:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 6409 5788 6000 5500 5124
+Jul 04, 2012 9:05:23 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 64 58 60 55 51
+Jul 04, 2012 9:05:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 48 237 962 177 433
+Jul 04, 2012 9:05:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5091 5163 5000 4500 3758
+Jul 04, 2012 9:05:34 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 52 50 45 38
+Jul 04, 2012 9:05:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 754 323 482 171 216
+Jul 04, 2012 9:05:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4500 4837 4981 4424 3597
+Jul 04, 2012 9:05:44 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 45 48 50 44 36
+Jul 04, 2012 9:05:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 516 874 0 0
+Jul 04, 2012 9:05:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5299 5000 5019 4335 3875
+Jul 04, 2012 9:05:55 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 50 43 39
+Jul 04, 2012 9:06:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 445 259 311 0 381
+Jul 04, 2012 9:06:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4701 4589 5105 4304 3528
+Jul 04, 2012 9:06:05 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 4
+Jul 04, 2012 9:06:05 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 9:06:05 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 47 46 51 43 28
+Jul 04, 2012 9:06:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 20 205 74 0 0
+Jul 04, 2012 9:06:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4995 4911 5370 4267 3181
+Jul 04, 2012 9:06:15 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 9:06:15 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 49 54 43 21
+Jul 04, 2012 9:06:26 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 386 1 494 132 0
+Jul 04, 2012 9:06:26 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5005 5272 4525 4170 2114
+Jul 04, 2012 9:06:26 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 9:06:26 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53 45 42 14
+Jul 04, 2012 9:06:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 329 752 34 269 0
+Jul 04, 2012 9:06:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 4728 5500 4500 1531
+Jul 04, 2012 9:06:36 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 9:06:36 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 47 55 45 7
+Jul 04, 2012 9:06:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 548 1003 633 0
+Jul 04, 2012 9:06:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5400 5000 5000 4500 784
+Jul 04, 2012 9:06:47 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 9:06:47 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 50 50 45 1
+Jul 04, 2012 9:06:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 322 119 675 674 0
+Jul 04, 2012 9:06:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5100 5380 5242 4500 147
+Jul 04, 2012 9:06:57 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removing worker:4
+Jul 04, 2012 9:06:58 AM alias.JoramManager delWorker
+INFO: [JM] Deleted worker.
+Jul 04, 2012 9:06:58 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removed extra worker successfully.
+Jul 04, 2012 9:06:58 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 54 52 45
+Jul 04, 2012 9:07:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1044 807 916 0
+Jul 04, 2012 9:07:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 6500 6620 6521 6205
+Jul 04, 2012 9:07:10 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 65 66 65 62
+Jul 04, 2012 9:07:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 680 741 669 0
+Jul 04, 2012 9:07:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5297 5000 5237 4778
+Jul 04, 2012 9:07:20 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 52 48
+Jul 04, 2012 9:07:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 879 622 780 304
+Jul 04, 2012 9:07:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5203 5000 5000 4517
+Jul 04, 2012 9:07:30 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 50 45
+Jul 04, 2012 9:07:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 685 0 658 318
+Jul 04, 2012 9:07:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5425 5068 4500
+Jul 04, 2012 9:07:41 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 54 51 45
+Jul 04, 2012 9:07:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 806 495 328 0
+Jul 04, 2012 9:07:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5075 5312 4394
+Jul 04, 2012 9:07:51 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 51 53 44
+Jul 04, 2012 9:08:01 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 334 363 413
+Jul 04, 2012 9:08:01 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5283 5000 5120 4106
+Jul 04, 2012 9:08:01 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 3
+Jul 04, 2012 9:08:01 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 9:08:01 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 51 33
+Jul 04, 2012 9:08:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 136 435 627 0
+Jul 04, 2012 9:08:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5217 5000 5000 3447
+Jul 04, 2012 9:08:12 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 9:08:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 50 25
+Jul 04, 2012 9:08:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 350 13 423 0
+Jul 04, 2012 9:08:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5500 5234 2806
+Jul 04, 2012 9:08:22 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 9:08:22 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 52 16
+Jul 04, 2012 9:08:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 883 951 575 0
+Jul 04, 2012 9:08:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5000 5266 1714
+Jul 04, 2012 9:08:32 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 9:08:32 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 53 8
+Jul 04, 2012 9:08:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 910 1557 1923 0
+Jul 04, 2012 9:08:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5500 5000 5000 902
+Jul 04, 2012 9:08:42 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 9:08:42 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 55 50 50 1
+Jul 04, 2012 9:08:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2538 1851 1981 0
+Jul 04, 2012 9:08:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5041 5000 150
+Jul 04, 2012 9:08:53 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Cancelled scaling down plan.
+Jul 04, 2012 9:08:53 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 5041 5000 4106
+Jul 04, 2012 9:08:53 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 50 50 41
+Jul 04, 2012 9:09:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1161 1545 1556 0
+Jul 04, 2012 9:09:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5459 5375 4100
+Jul 04, 2012 9:09:03 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 55 54 41
+Jul 04, 2012 9:09:13 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 153 1106 1168 0
+Jul 04, 2012 9:09:13 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5284 5000 5125 3306
+Jul 04, 2012 9:09:13 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 51 33
+Jul 04, 2012 9:09:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 53 511 1014 197
+Jul 04, 2012 9:09:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4716 5004 5000 3075
+Jul 04, 2012 9:09:24 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 47 50 50 31
+Jul 04, 2012 9:09:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 246 61 133 46
+Jul 04, 2012 9:09:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4500 5496 5348 3000
+Jul 04, 2012 9:09:34 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 3
+Jul 04, 2012 9:09:34 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 9:09:34 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 45 55 53 24
+Jul 04, 2012 9:09:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 31 457 329 0
+Jul 04, 2012 9:09:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4313 4500 4652 2215
+Jul 04, 2012 9:09:44 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 9:09:44 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 43 45 47 18
+Jul 04, 2012 9:09:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 90 667 71 0
+Jul 04, 2012 9:09:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4687 5000 5000 1800
+Jul 04, 2012 9:09:54 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 9:09:54 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 47 50 50 12
+Jul 04, 2012 9:10:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 325 13 478 0
+Jul 04, 2012 9:10:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4500 5248 4500 1207
+Jul 04, 2012 9:10:05 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 9:10:05 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 45 52 45 6
+Jul 04, 2012 9:10:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 355 15 0
+Jul 04, 2012 9:10:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4871 5252 5460 727
+Jul 04, 2012 9:10:15 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 9:10:15 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 49 53 55 1
+Jul 04, 2012 9:10:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 460 366 0
+Jul 04, 2012 9:10:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4839 5000 5040 90
+Jul 04, 2012 9:10:25 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removing worker:3
+Jul 04, 2012 9:10:26 AM alias.JoramManager delWorker
+INFO: [JM] Deleted worker.
+Jul 04, 2012 9:10:26 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removed extra worker successfully.
+Jul 04, 2012 9:10:26 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 48 50 50
+Jul 04, 2012 9:10:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 504 770 1108
+Jul 04, 2012 9:10:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5790 6000 6000
+Jul 04, 2012 9:10:38 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 58 60 60
+Jul 04, 2012 9:10:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 215 477 919
+Jul 04, 2012 9:10:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5030 5000
+Jul 04, 2012 9:10:49 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50 50
+Jul 04, 2012 9:10:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 438 126 208
+Jul 04, 2012 9:10:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4721 5470 5431
+Jul 04, 2012 9:10:59 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 2
+Jul 04, 2012 9:10:59 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 9:10:59 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 47 55 43
+Jul 04, 2012 9:11:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 437 466
+Jul 04, 2012 9:11:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4865 5000 4069
+Jul 04, 2012 9:11:09 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 9:11:09 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 49 50 33
+Jul 04, 2012 9:11:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 124 642 556
+Jul 04, 2012 9:11:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5199 5000 3500
+Jul 04, 2012 9:11:19 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 9:11:19 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 22
+Jul 04, 2012 9:11:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 544 1073 0
+Jul 04, 2012 9:11:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5215 5000 2775
+Jul 04, 2012 9:11:30 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 9:11:30 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50 11
+Jul 04, 2012 9:11:40 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1692 1434 101
+Jul 04, 2012 9:11:40 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5244 1225
+Jul 04, 2012 9:11:40 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 9:11:40 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 52 1
+Jul 04, 2012 9:11:50 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3141 3075 0
+Jul 04, 2012 9:11:50 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5256 235
+Jul 04, 2012 9:11:50 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Cancelled scaling down plan.
+Jul 04, 2012 9:11:50 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4000 4204 5431
+Jul 04, 2012 9:11:50 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 40 42 54
+Jul 04, 2012 9:12:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1415 2296 151
+Jul 04, 2012 9:12:00 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5108 5000 4765
+Jul 04, 2012 9:12:00 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 5108 4000 4765
+Jul 04, 2012 9:12:00 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51 40 48
+Jul 04, 2012 9:12:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 760 917 259
+Jul 04, 2012 9:12:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5373 5000 4500
+Jul 04, 2012 9:12:10 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 54 50 45
+Jul 04, 2012 9:12:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 121 419 400
+Jul 04, 2012 9:12:21 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5019 4500 3500
+Jul 04, 2012 9:12:21 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 2
+Jul 04, 2012 9:12:21 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 9:12:21 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 45 28
+Jul 04, 2012 9:12:31 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 20 0 0
+Jul 04, 2012 9:12:31 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4974 4743 3099
+Jul 04, 2012 9:12:31 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 9:12:31 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 47 21
+Jul 04, 2012 9:12:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 306 0 0
+Jul 04, 2012 9:12:41 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5026 4566 2174
+Jul 04, 2012 9:12:41 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 9:12:41 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 46 14
+Jul 04, 2012 9:12:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 238 59 15
+Jul 04, 2012 9:12:51 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5192 4691 1400
+Jul 04, 2012 9:12:51 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 9:12:51 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 47 7
+Jul 04, 2012 9:13:01 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 578 144 18
+Jul 04, 2012 9:13:01 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5308 5000 827
+Jul 04, 2012 9:13:01 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 9:13:01 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50 1
+Jul 04, 2012 9:13:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1066 301 0
+Jul 04, 2012 9:13:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5000 118
+Jul 04, 2012 9:13:12 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removing worker:2
+Jul 04, 2012 9:13:12 AM alias.JoramManager delWorker
+INFO: [JM] Deleted worker.
+Jul 04, 2012 9:13:12 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removed extra worker successfully.
+Jul 04, 2012 9:13:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50
+Jul 04, 2012 9:13:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1398 1089
+Jul 04, 2012 9:13:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 6500 6000
+Jul 04, 2012 9:13:24 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 65 60
+Jul 04, 2012 9:13:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1703 1137
+Jul 04, 2012 9:13:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5299
+Jul 04, 2012 9:13:35 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 53
+Jul 04, 2012 9:13:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1669 978
+Jul 04, 2012 9:13:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5201
+Jul 04, 2012 9:13:45 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 52
+Jul 04, 2012 9:13:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1329 986
+Jul 04, 2012 9:13:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5238 5000
+Jul 04, 2012 9:13:55 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 50
+Jul 04, 2012 9:14:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 862 868
+Jul 04, 2012 9:14:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5262 5000
+Jul 04, 2012 9:14:05 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 53 50
+Jul 04, 2012 9:14:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 830 76
+Jul 04, 2012 9:14:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 5000
+Jul 04, 2012 9:14:15 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 50
+Jul 04, 2012 9:14:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 229 27
+Jul 04, 2012 9:14:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 4568
+Jul 04, 2012 9:14:25 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 1
+Jul 04, 2012 9:14:25 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 9:14:25 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 37
+Jul 04, 2012 9:14:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 237 0
+Jul 04, 2012 9:14:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 3681
+Jul 04, 2012 9:14:36 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 9:14:36 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 27
+Jul 04, 2012 9:14:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 848 0
+Jul 04, 2012 9:14:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 3228
+Jul 04, 2012 9:14:46 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 9:14:46 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 18
+Jul 04, 2012 9:14:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1760 0
+Jul 04, 2012 9:14:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5000 2251
+Jul 04, 2012 9:14:56 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 9:14:56 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50 9
+Jul 04, 2012 9:15:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 3394 0
+Jul 04, 2012 9:15:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5103 1172
+Jul 04, 2012 9:15:06 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Cancelled scaling down plan.
+Jul 04, 2012 9:15:06 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4082 4568
+Jul 04, 2012 9:15:06 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 46
+Jul 04, 2012 9:15:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2264 0
+Jul 04, 2012 9:15:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5158 3812
+Jul 04, 2012 9:15:16 AM alias.ElasticityLoopV2 regulateRates
+FINE: Regulated rates: 4126 3812
+Jul 04, 2012 9:15:16 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 41 38
+Jul 04, 2012 9:15:26 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 770 50
+Jul 04, 2012 9:15:26 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5239 3788
+Jul 04, 2012 9:15:26 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 38
+Jul 04, 2012 9:15:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 26
+Jul 04, 2012 9:15:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4858 3001
+Jul 04, 2012 9:15:37 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 1
+Jul 04, 2012 9:15:37 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 9:15:37 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 49 24
+Jul 04, 2012 9:15:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 59 0
+Jul 04, 2012 9:15:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4642 2340
+Jul 04, 2012 9:15:47 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 9:15:47 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 46 18
+Jul 04, 2012 9:15:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 48 0
+Jul 04, 2012 9:15:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4937 1995
+Jul 04, 2012 9:15:57 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 9:15:57 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 49 12
+Jul 04, 2012 9:16:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 652 0
+Jul 04, 2012 9:16:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 4563 1227
+Jul 04, 2012 9:16:07 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 9:16:07 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 46 6
+Jul 04, 2012 9:16:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 917 0
+Jul 04, 2012 9:16:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5165 702
+Jul 04, 2012 9:16:17 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 9:16:17 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 52 1
+Jul 04, 2012 9:16:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 1796 0
+Jul 04, 2012 9:16:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 5139 142
+Jul 04, 2012 9:16:27 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removing worker:1
+Jul 04, 2012 9:16:28 AM alias.JoramManager delWorker
+INFO: [JM] Deleted worker.
+Jul 04, 2012 9:16:28 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removed extra worker successfully.
+Jul 04, 2012 9:16:28 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51
+Jul 04, 2012 9:16:40 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 2599
+Jul 04, 2012 9:16:40 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 6196
+Jul 04, 2012 9:16:40 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 50
+Jul 04, 2012 9:16:40 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Started adding a new worker...
+Jul 04, 2012 9:16:41 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] runInstanceRequest sent successfully..
+Jul 04, 2012 9:16:42 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:43 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:44 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:46 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:47 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:48 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:49 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:51 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:52 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:53 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:54 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:56 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:57 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:58 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:16:59 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:17:00 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:17:02 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:17:03 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:17:04 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:17:05 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:17:07 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:17:08 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: pending
+Jul 04, 2012 9:17:09 AM alias.JoramAmazonVMs runInstance
+INFO: [VM] state: running
+Jul 04, 2012 9:17:09 AM alias.JoramManager addWorker
+INFO: [JM] Runned new VM, ip: 10.0.0.15
+Jul 04, 2012 9:17:09 AM alias.JoramManager addServer
+INFO: [JM] Added new server logically..
+Jul 04, 2012 9:17:09 AM alias.JoramManager addServer
+INFO: [JM] Started new server remotely..
+Jul 04, 2012 9:17:38 AM alias.JoramManager addServer
+INFO: [JM] Created new worker on new server..
+Jul 04, 2012 9:17:38 AM alias.JoramManager addServer
+INFO: [JM] Started client remotely..
+Jul 04, 2012 9:17:38 AM alias.ElasticityLoopV2 testScaleUp
+INFO: JoramManager is done..
+Jul 04, 2012 9:17:38 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #0.0.1027
+Jul 04, 2012 9:17:38 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Sent to producer #1.1.1026
+Jul 04, 2012 9:17:38 AM alias.ElasticityLoopV2 testScaleUp
+INFO: Added new worker successfully.
+Jul 04, 2012 9:17:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 607 0
+Jul 04, 2012 9:17:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 29500 0
+Jul 04, 2012 9:17:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 0
+Jul 04, 2012 9:17:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2405 2032
+Jul 04, 2012 9:17:48 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Elected worker to remove: 1
+Jul 04, 2012 9:17:48 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 1
+Jul 04, 2012 9:17:48 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 24 16
+Jul 04, 2012 9:17:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 0
+Jul 04, 2012 9:17:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2274 1326
+Jul 04, 2012 9:17:59 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 2
+Jul 04, 2012 9:17:59 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 23 12
+Jul 04, 2012 9:18:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 0
+Jul 04, 2012 9:18:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2122 1301
+Jul 04, 2012 9:18:09 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 3
+Jul 04, 2012 9:18:09 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 21 8
+Jul 04, 2012 9:18:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 97 0
+Jul 04, 2012 9:18:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2199 871
+Jul 04, 2012 9:18:19 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 4
+Jul 04, 2012 9:18:19 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 22 4
+Jul 04, 2012 9:18:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 26
+Jul 04, 2012 9:18:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2428 470
+Jul 04, 2012 9:18:29 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Trying to remove extra worker, 5
+Jul 04, 2012 9:18:29 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 24 1
+Jul 04, 2012 9:18:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0 0
+Jul 04, 2012 9:18:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2466 148
+Jul 04, 2012 9:18:39 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removing worker:1
+Jul 04, 2012 9:18:40 AM alias.JoramManager delWorker
+INFO: [JM] Deleted worker.
+Jul 04, 2012 9:18:40 AM alias.ElasticityLoopV2 testScaleDown
+INFO: Removed extra worker successfully.
+Jul 04, 2012 9:18:40 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 25
+Jul 04, 2012 9:18:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:18:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2961
+Jul 04, 2012 9:18:52 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 30
+Jul 04, 2012 9:19:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:19:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 2012
+Jul 04, 2012 9:19:02 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 20
+Jul 04, 2012 9:19:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 130
+Jul 04, 2012 9:19:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 1633
+Jul 04, 2012 9:19:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 16
+Jul 04, 2012 9:19:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:19:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 1642
+Jul 04, 2012 9:19:22 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 16
+Jul 04, 2012 9:19:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:19:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 1243
+Jul 04, 2012 9:19:32 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 12
+Jul 04, 2012 9:19:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:19:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 1012
+Jul 04, 2012 9:19:42 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 10
+Jul 04, 2012 9:19:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:19:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 763
+Jul 04, 2012 9:19:52 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 76
+Jul 04, 2012 9:20:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:20:02 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 512
+Jul 04, 2012 9:20:02 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 51
+Jul 04, 2012 9:20:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:20:12 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 236
+Jul 04, 2012 9:20:12 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 24
+Jul 04, 2012 9:20:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:20:22 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:20:22 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:20:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:20:32 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:20:32 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:20:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:20:42 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:20:42 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:20:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:20:52 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:20:52 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:21:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:21:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:21:03 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:21:13 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:21:13 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:21:13 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:21:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:21:23 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:21:23 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:21:33 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:21:33 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:21:33 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:21:43 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:21:43 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:21:43 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:21:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:21:53 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:21:53 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:22:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:22:03 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:22:03 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:22:13 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:22:13 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:22:13 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:22:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:22:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:22:24 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:22:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:22:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:22:34 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:22:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:22:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:22:44 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:22:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:22:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:22:54 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:23:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:23:04 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:23:04 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:23:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:23:14 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:23:14 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:23:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:23:24 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:23:24 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:23:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:23:34 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:23:34 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:23:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:23:44 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:23:44 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:23:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:23:54 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:23:54 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:24:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:24:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:24:05 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:24:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:24:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:24:15 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:24:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:24:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:24:25 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:24:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:24:35 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:24:35 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:24:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:24:45 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:24:45 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:24:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:24:55 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:24:55 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:25:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:25:05 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:25:05 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:25:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:25:15 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:25:15 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:25:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:25:25 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:25:25 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:25:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:25:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:25:36 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:25:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:25:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:25:46 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:25:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:25:56 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:25:56 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:26:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:26:06 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:26:06 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:26:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:26:16 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:26:16 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:26:26 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:26:26 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:26:26 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:26:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:26:36 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:26:36 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:26:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:26:46 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:26:46 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:26:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:26:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:26:57 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:27:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:27:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:27:07 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:27:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:27:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:27:17 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:27:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:27:27 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:27:27 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:27:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:27:37 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:27:37 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:27:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:27:47 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:27:47 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:27:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:27:57 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:27:57 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:28:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:28:07 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:28:07 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:28:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:28:17 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:28:17 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:28:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:28:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:28:28 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:28:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:28:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:28:38 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:28:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:28:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:28:48 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:28:58 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:28:58 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:28:58 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:29:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:29:08 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:29:08 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:29:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:29:18 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:29:18 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:29:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:29:28 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:29:28 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:29:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:29:38 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:29:38 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:29:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:29:48 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:29:48 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:29:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:29:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:29:59 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:30:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:30:09 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:30:09 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:30:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:30:19 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:30:19 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:30:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:30:29 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:30:29 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:30:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:30:39 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:30:39 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:30:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:30:49 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:30:49 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:30:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:30:59 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:30:59 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:31:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:31:10 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:31:10 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:31:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:31:20 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:31:20 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1
+Jul 04, 2012 9:31:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored loads: 0
+Jul 04, 2012 9:31:30 AM alias.ElasticityLoopV2 monitorWorkers
+FINE: Monitored rates: 0
+Jul 04, 2012 9:31:30 AM alias.ElasticityLoopV2 sendWeights
+FINE: Computed weights: 1

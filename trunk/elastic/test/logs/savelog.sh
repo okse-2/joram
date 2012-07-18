@@ -1,6 +1,6 @@
 #/bin/bash
 
-LOGDIR=suite5/$1
+LOGDIR=suite7/$1
 
 if [ -d $LOGDIR ];
 then
@@ -10,10 +10,9 @@ else
 	mkdir $LOGDIR
 fi
 
-scp vm0:joram/run/alias.ElasticityLoop.log $LOGDIR
+scp 10.0.0.2:joram/run/alias.ElasticityLoop.log $LOGDIR
 
-for i in {0..2}
+for i in {2..20}
 do
-	scp vm$i:*.log $LOGDIR/
-	scp vm$i:joram/run/server*/*.csv $LOGDIR
+	scp 10.0.0.$i:joram/run/server*/*.csv $LOGDIR
 done

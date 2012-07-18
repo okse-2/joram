@@ -1,6 +1,6 @@
-#!/bin/bash
+#/bin/bash
 
-for i in {0..2}
+for i in {2..4}
 do
-	ssh vm$i killall -9 java
+	ssh 10.0.0.$i killall -9 java
 done
