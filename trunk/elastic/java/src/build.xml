@@ -8,6 +8,7 @@
     <property name="obj.dir" location="../classes"/>
     <property name="lib.dir" location="${ship.dir}/lib"/>
     <property name="bundle.dir" location="${ship.dir}/bundle" />
+    <property name="aws.dir" location="../aws" />
   	
     <!-- Project classpath needed for execution -->
     <path id="project.class.path">
@@ -16,6 +17,9 @@
          <include name="*.jar"/>
       </fileset>
       <fileset dir="${bundle.dir}">
+         <include name="*.jar"/>
+      </fileset>
+      <fileset dir="${aws.dir}">
          <include name="*.jar"/>
       </fileset>
       <pathelement path="${obj.dir}"/>
@@ -43,7 +47,6 @@
            verbose="${verbose}"
            includeantruntime="false">
       <classpath refid="project.class.path"/>
-      <include name="**/*.java"/>
     </javac>
   </target>
 </project>
