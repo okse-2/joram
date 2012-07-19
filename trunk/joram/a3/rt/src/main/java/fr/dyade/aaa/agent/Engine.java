@@ -1038,7 +1038,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
             profiling = agentProfiling || agent.agentProfiling;
             if (profiling) {
-              start = System.currentTimeMillis();
+              start = System.nanoTime();
             }
             
 //            if (AgentServer.sdf != null) {
@@ -1048,13 +1048,13 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
             profiling = agentProfiling || agent.agentProfiling;
             if (profiling)
-              start = System.currentTimeMillis();
+              start = System.nanoTime();
            
             try {
               agent.react(msg.from, msg.not);
               agent.reactNb += 1;
               if (profiling) {
-                end  = System.currentTimeMillis();
+                end  = System.nanoTime();
                 agent.reactTime += (end - start);
                 reactTime += (end - start);
                 start = end;
@@ -1096,7 +1096,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
           // Agent profiling
           if (profiling && (agent != null)) {
-            end  = System.currentTimeMillis();
+            end  = System.nanoTime();
             agent.commitTime += (end - start);
             commitTime += (end - start);
           }
