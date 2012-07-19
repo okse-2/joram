@@ -107,12 +107,27 @@ public interface EngineMBean {
    * @return the reactTime
    */
   public long getReactTime();
+  
+  /**
+   * Reset the reaction time for this engine.
+   */
+  public void resetReactTime();
 
   /**
    * Returns the total commit time calculated for this engine.
    * @return the commitTime
    */
   public long getCommitTime();
+  
+  /**
+   * Reset the commit time for this engine.
+   */
+  public void resetCommitTime();
+  
+  /**
+   * Reset react and commit time for this engine.
+   */
+  public void resetTimer();
 
   /**
    * Returns the load averages for the last minute.
