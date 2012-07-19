@@ -917,7 +917,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   }
 
   /**
-   * Time consumned during agent's reaction.
+   * Time consumed during agent's reaction.
    */
   private long reactTime = 0L;
 
@@ -927,9 +927,16 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   public long getReactTime() {
     return reactTime;
   }
+  
+  /**
+   * reset the reactTime
+   */
+  public void resetReactTime(){
+  	reactTime = 0;
+  }
 
   /**
-   * Time consumned during reaction commit.
+   * Time consumed during reaction commit.
    */
   private long commitTime;
 
@@ -938,6 +945,21 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    */
   public long getCommitTime() {
     return commitTime;
+  }
+  
+  /**
+   * reset the commitTime
+   */
+  public void resetCommitTime(){
+  	commitTime = 0;
+  }
+  
+  /**
+   * Reset reactTime and commitTime
+   */
+  public void resetTimer(){
+  	resetReactTime();
+  	resetCommitTime();
   }
 
   protected void onTimeOut() throws Exception {}

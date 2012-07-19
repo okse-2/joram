@@ -84,10 +84,25 @@ public interface AgentMBean {
    * @return the reactTime
    */
   public long getReactTime();
+  
+  /**
+   * Reset the reaction time for this agent.
+   */
+  public void resetReactTime();
 
   /**
    * Returns the total commit time calculated for this agent.
    * @return the commitTime
    */
   public long getCommitTime();
+  
+  /**
+   * Reset the commit time for this agent.
+   */
+  public void resetCommitTime();
+  
+  /**
+   * Reset react and commit time for this agent.
+   */
+  public void resetTimer();
 }

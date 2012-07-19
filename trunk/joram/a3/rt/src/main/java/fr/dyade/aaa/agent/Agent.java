@@ -117,6 +117,13 @@ public abstract class Agent implements AgentMBean, Serializable {
   public long getReactTime() {
     return reactTime;
   }
+  
+  /**
+   * reset the reactTime
+   */
+  public void resetReactTime(){
+  	reactTime = 0;
+  }
 
   transient long commitTime = 0L;
 
@@ -126,6 +133,21 @@ public abstract class Agent implements AgentMBean, Serializable {
   public long getCommitTime() {
     return commitTime;
   }  
+  
+  /**
+   * reset the commitTime
+   */
+  public void resetCommitTime(){
+  	commitTime = 0;
+  }
+  
+  /**
+   * Reset reactTime and commitTime
+   */
+  public void resetTimer(){
+  	resetReactTime();
+  	resetCommitTime();
+  }
   
   /**
    * Sets the <code>updated</code> field to <code>false</code> so that the
