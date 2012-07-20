@@ -116,7 +116,7 @@ public class ClientTest26 extends TestCase {
 
               if (message.getBooleanProperty("last") == false) {
                 System.out.println("first message isRedelivered = " + message.getJMSRedelivered());
-                assertEquals("received first message twice.", true, message.getJMSRedelivered());
+                assertEquals("received first message, redelivered must be false", false, message.getJMSRedelivered());
               } else {
                 if (message.getJMSRedelivered() == false) {
                   // received second message
