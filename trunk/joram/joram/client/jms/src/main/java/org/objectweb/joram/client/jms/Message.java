@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -114,6 +114,9 @@ public class Message implements javax.jms.Message {
    *              reason.
    */
   public void acknowledge() throws JMSException {
+    if (session.getAcknowledgeMode() == Session.INDIVIDUAL_ACKNOWLEDGE)
+      session.acknowledge((org.objectweb.joram.client.jms.Destination)getJMSDestination(), getJMSMessageID());
+    
     if ((session == null) ||
         session.getTransacted() ||
         (session.getAcknowledgeMode() != javax.jms.Session.CLIENT_ACKNOWLEDGE))
