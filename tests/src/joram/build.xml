@@ -249,6 +249,7 @@
     <antcall target="client.noloss_2"/>
   	<antcall target="client.ClientTest25"/>
   	<antcall target="client.ClientTest26"/>
+  	<antcall target="client.IndividualAcknowledge"/>
   </target>
 
   <target name="tests.connection"
@@ -2113,6 +2114,19 @@
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="testid" value="client.ClientTest26"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	
+  <target name="client.IndividualAcknowledge" depends="init.a3props,compile"
+          description=" --> test the individual ack.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.client.IndividualAcknowledge"/>
+      <param name="jndiconf" value="client/jndi.properties"/>
+      <param name="a3conf" value="client/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="testid" value="client.IndividualAcknowledge"/>
       <param name="args" value=""/>
     </antcall>
   </target>
