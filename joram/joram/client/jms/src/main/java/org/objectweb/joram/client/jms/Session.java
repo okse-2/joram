@@ -85,6 +85,9 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   public static Logger logger = Debug.getLogger(Session.class.getName());
   public static Logger trace = Debug.getLogger(Session.class.getName() + ".Message");
+  
+  public static int INDIVIDUAL_ACKNOWLEDGE = 4;
+  
   /**
    * Status of the session
    */
@@ -642,7 +645,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    *
    * @param cnx  The connection the session belongs to.
    * @param transacted  <code>true</code> for a transacted session.
-   * @param acknowledgeMode  1 (auto), 2 (client) or 3 (dups ok).
+   * @param acknowledgeMode  1 (auto), 2 (client), 3 (dups ok), 4 (individual).
    *
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
@@ -652,6 +655,7 @@ public class Session implements javax.jms.Session, SessionMBean {
         && acknowledgeMode != javax.jms.Session.AUTO_ACKNOWLEDGE
         && acknowledgeMode != javax.jms.Session.CLIENT_ACKNOWLEDGE
         && acknowledgeMode != javax.jms.Session.DUPS_OK_ACKNOWLEDGE
+        && acknowledgeMode != INDIVIDUAL_ACKNOWLEDGE
         && !(cnx instanceof XAQueueConnection)
         && !(cnx instanceof XATopicConnection)
         && !(cnx instanceof XAConnection))
@@ -665,8 +669,8 @@ public class Session implements javax.jms.Session, SessionMBean {
     requestor = new Requestor(mtpx);
     receiveRequestor = new Requestor(mtpx);
 
-    autoAck = !transacted && acknowledgeMode != javax.jms.Session.CLIENT_ACKNOWLEDGE;
-
+    autoAck = !transacted && !(acknowledgeMode == javax.jms.Session.CLIENT_ACKNOWLEDGE || acknowledgeMode == INDIVIDUAL_ACKNOWLEDGE);
+    
     consumers = new Vector();
     producers = new Vector();
     browsers = new Vector();
@@ -1689,6 +1693,30 @@ public class Session implements javax.jms.Session, SessionMBean {
       String target = (String) targets.nextElement();
       MessageAcks acks = (MessageAcks) deliveries.remove(target);
       mtpx.sendRequest(new SessAckRequest(target, acks.getIds(), acks.getQueueMode()));
+    }
+  }
+
+  /**
+   * Method acknowledging one received message.
+   * Called by Message.
+   */
+  synchronized void acknowledge(Destination dest, String msgId) throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Session.acknowledge(" + dest + ", " + msgId + ')');
+    checkClosed();
+    if (acknowledgeMode == INDIVIDUAL_ACKNOWLEDGE) {
+      Enumeration targets = deliveries.keys();
+      while (targets.hasMoreElements()) {
+        String target = (String) targets.nextElement();
+        if (target.equals(dest.getAdminName()) || target.equals(dest.getName())) {
+          MessageAcks acks = (MessageAcks) deliveries.get(target);
+          acks.remove(msgId);
+          Vector ackToSend = new Vector();
+          ackToSend.add(msgId);
+          mtpx.sendRequest(new SessAckRequest(dest.getName(), ackToSend, dest.isQueue()));
+          return;
+        }
+      }
     }
   }
 
