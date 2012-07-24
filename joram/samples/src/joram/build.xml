@@ -9,7 +9,7 @@
     <property name="lib.dir" location="${ship.dir}/lib"/>
     <property name="run.dir" location="../../run"/>
     <property name="conf.dir" location="../../config"/>
-    <property name="felix.dir" location="/home/thibaut/bin/felix-framework-4.0.2/bin/"/>
+    <property name="felix.dir" location="${ship.dir}/bin/"/>
     <property name="bundle.dir" location="${ship.dir}/bundle" />
   	
   	<!-- Project classpath needed for execution -->
@@ -87,6 +87,16 @@
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
   </target>
+
+  <target name="server_nofork" depends="server_init">
+    <java classname="org.apache.felix.main.Main"
+          failonerror="no" fork="no"
+          dir="${run.dir}/server${sid}">
+      <classpath path="${felix.class.path}"/>
+      <jvmarg line="-Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=${sid} -Dcom.sun.management.jmxremote"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+    </java>
+  </target>
   
   <!-- Start a single server in NullTransaction mode -->
   <target name="single_server" depends="init"
@@ -102,7 +112,7 @@
   <!-- Start a single server with the shell commands -->
   <target name="shell_server" depends="init"
           description="--> Starts a single server with the shell commands">
-    <antcall target="server">
+    <antcall target="server_nofork">
       <param name="sid" value="0"/>
       <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
       <param name="osgi.conf" value="${conf.dir}/config_shell.properties"/>     
@@ -341,6 +351,15 @@
   <target name="subscriber" depends="simple_init"
     description="--> Starts a subscriber client">
     <java classname="classic.Subscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+	
+  <!-- Runs the classic subscriber client -->
+  <target name="waiting_subscriber" depends="simple_init"
+    description="--> Starts a subscriber client, waiting for instruction to read a new message">
+    <java classname="classic.WaitingSubscriber" failonerror="no" fork="no"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
     </java>
