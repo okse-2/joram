@@ -134,6 +134,9 @@ public class AcquisitionModule implements ReliableTransmitter {
 
   /** The task used to launch a new acquisition. */
   private AcquisitionTask acquisitionTask;
+  
+  /** The number of transmitted messages */
+  private static long transmitCounter = 0;
 
   /**
    * Tells if acquisition is done on-demand using the acquisition task or with a
@@ -221,6 +224,15 @@ public class AcquisitionModule implements ReliableTransmitter {
    */
   public void setExpiration(long expiration) {
     this.expiration = expiration;
+  }
+  
+  /**
+   * Returns the number of transmitted messages
+   * 
+   * @return the number of transmitted messages
+   */
+  public static long getCount(){
+  	return transmitCounter;
   }
 
   /**
@@ -457,6 +469,7 @@ public class AcquisitionModule implements ReliableTransmitter {
    */
   public void transmit(Message message, String messageId) {
     if (message != null) {
+    	transmitCounter ++;
       Channel.sendTo(destination.getId(),
                      new AcquisitionNot(new ClientMessages(-1, -1, message), message.persistent, messageId));
     }
@@ -479,6 +492,7 @@ public class AcquisitionModule implements ReliableTransmitter {
    */
   public void transmit(List messages, boolean persistent, String messagesId) {
     if (messages != null && messages.size() > 0) {
+    	transmitCounter ++;
       Channel.sendTo(destination.getId(),
                      new AcquisitionNot(new ClientMessages(-1, -1, messages), persistent, messagesId));
     }

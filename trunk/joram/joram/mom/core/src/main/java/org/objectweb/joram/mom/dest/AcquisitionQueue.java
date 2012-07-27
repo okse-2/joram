@@ -55,6 +55,20 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
 
   /** The number of produced messages. */
   private long msgCount = 0;
+  
+  /** The threshold of messages send by the handler in the engine */
+  private long diff_max = 10;
+  private long diff_min = 0;
+  private String ACQ_QUEUE_MAX_MSG = "acquisition.max_msg";
+  private String ACQ_QUEUE_MIN_MSG = "acquisition.min_msg";
+  
+  /** The threshold of pending messages in the queue */
+  private long pending_max = 20;
+  private long pending_min = 10;
+  private String ACQ_QUEUE_MAX_PND = "acquisition.max_pnd";
+  private String ACQ_QUEUE_MIN_PND = "acquisition.min_pnd";
+  
+  private boolean pause = false;
 
   /** The acquisition class name. */
   private String acquisitionClassName;
@@ -80,6 +94,11 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
       logger.log(BasicLevel.DEBUG, "AcquisitionQueue.setProperties prop = " + properties);
     }
     this.properties = properties;
+    
+    diff_max = Long.parseLong(properties.getProperty(ACQ_QUEUE_MAX_MSG, String.valueOf(diff_max)));
+    diff_min = Long.parseLong(properties.getProperty(ACQ_QUEUE_MIN_MSG, String.valueOf(diff_min)));
+    pending_max = Long.parseLong(properties.getProperty(ACQ_QUEUE_MAX_PND, String.valueOf(pending_max)));
+    pending_min = Long.parseLong(properties.getProperty(ACQ_QUEUE_MIN_PND, String.valueOf(pending_min)));
 
     // Acquisition class name can only be set the first time.
     if (firstTime) {
@@ -109,7 +128,17 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     }
   }
 
-  public void react(AgentId from, Notification not) throws Exception {
+  public void react(AgentId from, Notification not) throws Exception { 	
+  	long diff = AcquisitionModule.getCount() - msgCount;
+  	int pending = getPendingMessageCount();
+  	if (!pause && ((diff >= diff_max) || (pending >= pending_max))){
+  		stopHandler(properties);
+  		pause = true;
+  	}
+  	else if (pause && (diff <= diff_min) && (pending <= pending_min)){
+  		startHandler(properties);
+  		pause = false;
+  	}
     if (not instanceof AcquisitionNot) {
       acquisitionNot((AcquisitionNot) not);
     } else {
