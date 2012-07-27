@@ -145,6 +145,7 @@ public class SCAdminOSGi implements SCAdminItf {
     argv.add("-D" + Activator.AGENT_SERVER_STORAGE_PROPERTY + "=s" + sid);
     argv.add("-XX:+UnlockDiagnosticVMOptions");
     argv.add("-XX:+UnsyncloadClass");
+    argv.add("-Dgosh.args=--nointeractive");// need with gogo
 
     // Main class
     argv.add("org.apache.felix.main.Main");
@@ -181,7 +182,8 @@ public class SCAdminOSGi implements SCAdminItf {
         daemon = new TelnetReaderDaemon(socket.getInputStream());
         daemon.start();
 
-        socket.getOutputStream().write("shutdown\n".getBytes());
+        // use stop 0 to shutdown ! (available in felix and gogo)
+        socket.getOutputStream().write("stop 0\n".getBytes());
         socket.getOutputStream().flush();
 
 
@@ -214,7 +216,8 @@ public class SCAdminOSGi implements SCAdminItf {
       daemon = new TelnetReaderDaemon(socket.getInputStream());
       daemon.start();
 
-      socket.getOutputStream().write("shutdown\n".getBytes());
+      // use stop 0 to shutdown ! (available in felix and gogo)
+      socket.getOutputStream().write("stop 0\n".getBytes());
       socket.getOutputStream().flush();
 
     } catch (Throwable exc) {
