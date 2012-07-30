@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,6 @@ import javax.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
-import org.objectweb.joram.client.jms.soap.SoapConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
@@ -90,12 +89,5 @@ class TcpBaseTest {
     String host = System.getProperty("hostname", "localhost");
     int port = Integer.getInteger("port", 16010).intValue();
     return TcpConnectionFactory.create(host, port);
-  }
-}
-
-class SoapBaseTest {
-  public static ConnectionFactory createConnectionFactory() throws Exception {
-    String host = System.getProperty("hostname", "localhost");
-    return SoapConnectionFactory.create(host, 8080, 30);
   }
 }
