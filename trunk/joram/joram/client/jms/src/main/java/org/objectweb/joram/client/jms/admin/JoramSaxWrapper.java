@@ -105,8 +105,6 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_HATCP = "hatcp";
   /** Syntaxic name for halocal element */
   static final String ELT_HALOCAL = "halocal";
-  /** Syntaxic name for soap element */
-  static final String ELT_SOAP = "soap";
   /** Syntaxic name for jndi element */
   static final String ELT_JNDI = "jndi";
   /** Syntaxic name for Server element */
@@ -490,30 +488,6 @@ public class JoramSaxWrapper extends DefaultHandler {
         url = atts.getValue(ATT_URL);
         reliableClass = atts.getValue(ATT_RELIABLECLASS);
       } else if (rawName.equals(ELT_HALOCAL)) {
-      } else if (rawName.equals(ELT_SOAP)) {
-        host = atts.getValue(ATT_HOST);
-        if (!isSet(host))
-          host = "localhost";
-        try {
-          // Get the listen port of server for administrator connection.
-          String value = atts.getValue(ATT_PORT);
-          if (value == null)
-            port = DFLT_LISTEN_PORT;
-          else
-            port = Integer.parseInt(value);
-        } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for port: " + atts.getValue(ATT_PORT));
-        }
-        try {
-          // Get the timeout attribute for this connection factory.
-          String value = atts.getValue(ATT_TIMEOUT);
-          if (value == null)
-            timeout = 60;
-          else
-            timeout = Integer.parseInt(value);
-        } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for cnxTimer: " + atts.getValue(ATT_CNXTIMER));
-        }
       } else if (rawName.equals(ELT_JNDI)) {
         jndiName = atts.getValue(ATT_NAME);
       } else if (rawName.equals(ELT_SERVER)) {
@@ -875,20 +849,6 @@ public class JoramSaxWrapper extends DefaultHandler {
             Class<?> clazz = Class.forName(className);
             Method methode = clazz.getMethod("create", new Class[0]);
             obj = methode.invoke(null, new Object[0]);
-          } catch (Throwable exc) {
-            logger.log(BasicLevel.ERROR,
-                       "JoramSaxWrapper: Cannot instantiate " + className, exc);
-            throw new SAXException(exc.getMessage());
-          }
-        } else if (rawName.equals(ELT_SOAP)) {
-          try {
-            Class<?> clazz = Class.forName(className);
-            Class<?>[] classParams = {new String().getClass(),
-                                    Integer.TYPE,
-                                    Integer.TYPE};
-            Method methode = clazz.getMethod("create", classParams);
-            Object[] objParams = {host, new Integer(port), new Integer(timeout)};
-            obj = methode.invoke(null, objParams);
           } catch (Throwable exc) {
             logger.log(BasicLevel.ERROR,
                        "JoramSaxWrapper: Cannot instantiate " + className, exc);

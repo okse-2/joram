@@ -43,7 +43,6 @@
               fr.dyade.aaa.common,
               fr.dyade.aaa.common.net,
               fr.dyade.aaa.common.stream,
-              fr.dyade.aaa.common.soap,
               fr.dyade.aaa.util.management,
               javax.jms,
               javax.management;resolution:=optional,
@@ -54,12 +53,6 @@
               javax.transaction,
               javax.transaction.xa,
               javax.xml.parsers,
-              org.apache.soap;resolution:=optional,
-              org.apache.soap.encoding;resolution:=optional,
-              org.apache.soap.encoding.soapenc;resolution:=optional,
-              org.apache.soap.rpc;resolution:=optional,
-              org.apache.soap.server;resolution:=optional,
-              org.apache.soap.util.xml;resolution:=optional,
               org.objectweb.joram.mom.dest;resolution:=optional,
               org.objectweb.joram.mom.notifications;resolution:=optional,
               org.objectweb.joram.mom.proxies;resolution:=optional,
@@ -92,7 +85,6 @@
               org.objectweb.joram.client.jms.ha.local,
               org.objectweb.joram.client.jms.ha.tcp,
               org.objectweb.joram.client.jms.local,
-              org.objectweb.joram.client.jms.soap,
               org.objectweb.joram.client.jms.tcp,
               org.objectweb.joram.client.osgi</Export-Package>
               <DynamicImport-Package>*</DynamicImport-Package>
@@ -120,10 +112,6 @@
       <groupId>org.ow2.joram</groupId>
       <artifactId>joram-mom-core</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>soap</groupId>
-      <artifactId>soap</artifactId>
     </dependency>
   </dependencies>
 

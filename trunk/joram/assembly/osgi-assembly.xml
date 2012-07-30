@@ -62,7 +62,6 @@
         <include>org.ow2.spec.ee:ow2-connector-1.5-spec</include>
         <include>org.ow2.jonas.osgi:monolog</include>
         <include>javax.mail:mail</include>
-        <include>soap:soap</include>
         <include>org.ow2.joram:joram-client-jca</include>
       </includes>
       <useProjectArtifact>false</useProjectArtifact>

@@ -1,6 +1,6 @@
 <!-- joramAdmin.dtd 
 
- Copyright (C) 2005 - ScalAgent Distributed Technologies
+ Copyright (C) 2005 - 2012 ScalAgent Distributed Technologies
 
  The contents of this file are subject to the Joram Public License,
  as defined by the file JORAM_LICENSE.TXT 
@@ -44,7 +44,7 @@
         password CDATA "root"
         identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
 
-<!ELEMENT ConnectionFactory (tcp | local | hatcp | halocal | soap | jndi)*>
+<!ELEMENT ConnectionFactory (tcp | local | hatcp | halocal | jndi)*>
 <!ATTLIST ConnectionFactory
 	class CDATA #REQUIRED
 	identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
@@ -64,12 +64,6 @@
 	reliableClass CDATA "org.objectweb.joram.client.jms.tcp.ReliableTcpClient">
 <!ELEMENT halocal EMPTY>
 <!ATTLIST halocal>
-
-<!ELEMENT soap EMPTY>
-<!ATTLIST soap
-	host    CDATA "localhost"
-	port    CDATA "8080"
-	timeout CDATA "60">
 
 <!ELEMENT jndi EMPTY>
 <!ATTLIST jndi

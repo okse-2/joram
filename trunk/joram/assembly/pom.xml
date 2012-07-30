@@ -213,10 +213,6 @@
       <artifactId>mail</artifactId>
     </dependency>
     <dependency>
-      <groupId>soap</groupId>
-      <artifactId>soap</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.ow2.joram</groupId>
       <artifactId>joram-client-jca</artifactId>
       <version>${project.version}</version>

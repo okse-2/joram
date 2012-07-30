@@ -33,7 +33,6 @@ import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
-import org.objectweb.joram.client.jms.soap.SoapConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -186,23 +185,6 @@ public class ConnectionFactoryMSF implements ManagedServiceFactory {
 		} else if (HALocalConnectionFactory.class.getName().equals(className)) {
 			// HALocalConnectionFactory
 			cf = HALocalConnectionFactory.create();
-			
-		} else if (SoapConnectionFactory.class.getName().equals(className)) {
-			// SoapConnectionFactory
-			String host = (String) properties.get(HOST);
-			if (!isSet(host))
-				host = AbstractConnectionFactory.getDefaultServerHost();
-			int port =-1;
-			String portStr = (String) properties.get(PORT);
-			if (!isSet(portStr))
-				port = AbstractConnectionFactory.getDefaultServerPort();
-			else	
-				port = new Integer(portStr).intValue();
-			int timeout = 60;
-			String timeoutStr = (String) properties.get(TIMEOUT);
-			if (isSet(timeoutStr))
-				timeout = new Integer(timeoutStr).intValue();
-			cf = SoapConnectionFactory.create(host, port, timeout);
 			
 		} else {
 			throw new ConfigurationException(CLASSNAME, "Unknown class : " + className); 

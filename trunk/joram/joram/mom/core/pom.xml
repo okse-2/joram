@@ -30,7 +30,6 @@
               org.objectweb.joram.mom.messages,
               org.objectweb.joram.mom.notifications,
               org.objectweb.joram.mom.proxies,
-              org.objectweb.joram.mom.proxies.soap,
               org.objectweb.joram.mom.proxies.tcp,
               org.objectweb.joram.mom.util</Export-Package>
             <Import-Package>
