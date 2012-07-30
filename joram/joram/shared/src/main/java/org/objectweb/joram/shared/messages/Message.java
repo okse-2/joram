@@ -413,17 +413,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
     }
   }
 
-  public Hashtable soapCode() {
-    Hashtable h = new Hashtable();
-    // AF: TODO
-    return h;
-  }
-
-  public static Message soapDecode(Hashtable h) {
-    // AF: TODO
-    return null;
-  }
-
   private static final short typeFlag = 0x0001;
   private static final short replyToIdFlag = 0x0002;
   private static final short replyToTypeFlag = 0x0004;

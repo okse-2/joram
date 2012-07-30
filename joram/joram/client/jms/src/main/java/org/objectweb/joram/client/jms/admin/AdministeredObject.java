@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -24,17 +24,16 @@
 package org.objectweb.joram.client.jms.admin;
 
 import java.io.Serializable;
+
 import javax.naming.NamingException;
 import javax.naming.Reference;
-
-import fr.dyade.aaa.common.soap.SoapObjectItf;
 
 
 /**
  * The <code>AdministeredObject</code> class is the parent class of all
  * JORAM administered objects.
  */
-public abstract class  AdministeredObject implements Serializable, javax.naming.Referenceable, SoapObjectItf {
+public abstract class  AdministeredObject implements Serializable, javax.naming.Referenceable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 

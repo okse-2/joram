@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -263,51 +263,6 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
    */
   public AbstractAdminMessage() {
     classid = getClassId();
-  }
-
-  /** ***** ***** ***** ***** ***** ***** ***** *****
-   * Interface needed for soap serialization
-   * ***** ***** ***** ***** ***** ***** ***** ***** */
-
-  /**
-   *
-   * @exception	IOException
-   */
-  public Hashtable soapCode() throws IOException {
-    Hashtable h = new Hashtable();
-    h.put("classname", getClass().getName());
-
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    writeTo(baos);
-    baos.flush();
-    h.put("bytecontent", baos.toByteArray());
-    baos.close();
-
-    return h;
-  }
-
-  /**
-   *
-   * @exception	ClassNotFound
-   * @exception	InstantiationException
-   * @exception	IllegalAccessException
-   * @exception	IOException
-   */
-  public static Object soapDecode(Hashtable h) throws Exception {
-    AbstractAdminMessage msg = null;
-    ByteArrayInputStream bais = null;
-
-    try {
-      String classname = (String) h.get("classname");
-      msg = (AbstractAdminMessage) Class.forName(classname).newInstance();
-      byte[] content = (byte[]) h.get("bytecontent");
-      bais = new ByteArrayInputStream(content);
-      msg.readFrom(bais);
-    } finally {
-      bais.close();
-    }
-
-    return msg;
   }
 
   /** ***** ***** ***** ***** ***** ***** ***** *****

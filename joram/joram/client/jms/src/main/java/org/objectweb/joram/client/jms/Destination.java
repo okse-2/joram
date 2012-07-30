@@ -920,22 +920,6 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
 
   /**
-   * Codes a <code>Destination</code> as a Hashtable for travelling through the
-   * SOAP protocol.
-   */
-  public Hashtable code() {
-    Hashtable h = new Hashtable();
-    h.put("agentId", getName());
-    h.put("type", new Byte(type));
-    return h;
-  }
-
-  public void decode(Hashtable h) {
-    agentId = (String) h.get("agentId");
-    type = ((Byte) h.get("type")).byteValue();
-  }
-  
-  /**
    * Administration method add interceptors.
    * 
    * @param interceptors list of string className interceptor (separate with ",")

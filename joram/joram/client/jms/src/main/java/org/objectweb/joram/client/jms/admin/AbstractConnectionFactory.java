@@ -523,37 +523,4 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
     setIdentityClassName((String) ref.get(prefix + ".identityClassName").getContent());
     params.fromReference(ref, prefix);
   }
-
-  /*
-   * SoapItf interface implementation.
-   */
-
-  /**
-   * Codes a <code>ConnectionFactory</code> as a Hashtable for traveling
-   * through the SOAP protocol.
-   */
-  public Hashtable code() {
-    return code(new Hashtable(), "cf");
-  }
-
-  public Hashtable code(Hashtable h, String prefix) {
-    if (reliableClass != null)
-      h.put(prefix + ".reliableClass", reliableClass);
-    h.put(prefix + ".identityClassName", identityClassName);
-    return params.code(h, prefix);
-  }
-
-  /**
-   * Implements the <code>decode</code> abstract method defined in the
-   * <code>fr.dyade.aaa.jndi2.soap.SoapObjectItf</code> interface.
-   */
-  public void decode(Hashtable h) {
-    decode(h, "cf");
-  }
-
-  public void decode(Hashtable h, String prefix) {
-    reliableClass = (String) h.get(prefix + ".reliableClass");
-    identityClassName = (String) h.get(prefix + ".identityClassName");
-    params.decode(h, prefix);
-  }
 }

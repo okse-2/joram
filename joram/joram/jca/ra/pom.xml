@@ -28,10 +28,6 @@
          <artifactId>ow2-connector-1.5-spec</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>soap</groupId>
-          <artifactId>soap</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>mysql</groupId>
           <artifactId>mysql-connector-java</artifactId>
         </exclusion>

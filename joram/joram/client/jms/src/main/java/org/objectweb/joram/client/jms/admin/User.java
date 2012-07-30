@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -821,24 +821,5 @@ public class User extends AdministeredObject implements UserMBean {
   public void fromReference(Reference ref) throws NamingException {
     name = (String) ref.get("user.name").getContent();
     proxyId = (String) ref.get("user.id").getContent();
-  }
-
-  /**
-   * Codes an <code>User</code> instance as a Hashtable for traveling 
-   * through the SOAP protocol.
-   */
-  public Hashtable code() {
-    Hashtable h = new Hashtable();
-    h.put("name", name);
-    h.put("proxyId", proxyId);
-    return h;
-  }
-
-  /**
-   * Decodes an <code>User</code> which traveled through the SOAP protocol.
-   */
-  public void decode(Hashtable h) {
-    name = (String) h.get("name");
-    proxyId = (String) h.get("proxyId");
   }
 }

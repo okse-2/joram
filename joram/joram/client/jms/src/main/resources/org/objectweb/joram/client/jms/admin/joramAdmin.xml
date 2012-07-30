@@ -27,9 +27,6 @@
     <hatcp url=""
            reliableClass=""/>
     <halocal/>
-    <soap host=""
-          port=""
-          timeout=""/>
     <jndi name=""/>
   </ConnectionFactory>
   
