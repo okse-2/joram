@@ -171,6 +171,7 @@ public class ElasticityService extends Service {
 		if (overloaded > 0) {
 			if (scalingDownAge >= 0) {
 				rates.set(last, scalingDownRate);
+				scalingDownAge = -1;
 				logger.log(Level.INFO,"Cancelled scaling down plan.");
 			}
 			return false;

@@ -1,7 +1,5 @@
 package elasticity.eval;
 
-import java.util.LinkedList;
-
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;

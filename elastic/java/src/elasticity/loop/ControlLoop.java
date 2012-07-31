@@ -61,11 +61,9 @@ public class ControlLoop {
 			try {
 				es.monitorWorkers();
 
-				if(es.testScaleDown())
-					continue;
-
-				if(es.testScaleUp())
-					continue;
+				if(!es.testScaleDown())
+					if(es.testScaleUp())
+						continue;
 
 				es.updateWeights();
 			} catch (Exception e) {

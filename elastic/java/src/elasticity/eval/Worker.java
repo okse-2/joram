@@ -2,6 +2,7 @@ package elasticity.eval;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.Queue;
 import javax.jms.Session;
@@ -62,7 +63,7 @@ class ReceiveRound extends Thread {
 			try {
 				receiver.receive();
 				count++;
-			} catch (Exception e) {}
+			} catch (JMSException e) {}
 		}
 		System.out.println("[Worker " + number + "]\t" + count);
 	}
