@@ -25,6 +25,7 @@ package org.objectweb.joram.mom.dest;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -223,7 +224,9 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     ClientMessages clientMessages = acquisitionModule.acquisitionNot(not, msgCount);
     if (clientMessages != null) {
       msgCount += clientMessages.getMessageCount();
-      addClientMessages(clientMessages);
+      try {
+        addClientMessages(clientMessages, false);
+      } catch (AccessException e) {/* never happens */}
     }
   }
 

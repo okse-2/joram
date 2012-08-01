@@ -71,6 +71,7 @@ import org.objectweb.joram.shared.admin.GetQueueMessageIds;
 import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
 import org.objectweb.joram.shared.admin.GetQueueMessageRep;
 import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
+import org.objectweb.joram.shared.admin.SetSyncExceptionOnFullDestRequest;
 import org.objectweb.joram.shared.admin.SetThresholdRequest;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.DestinationException;
@@ -420,22 +421,24 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       while (! persistedMsgs.isEmpty()) {
         persistedMsg = (Message) persistedMsgs.remove(0);
         consId = (AgentId) consumers.get(persistedMsg.getId());
-        
-        if (consId == null) {
-          if (!addMessage(persistedMsg)) {
-            persistedMsg.delete();
+
+        try {
+          if (consId == null) {
+            if (!addMessage(persistedMsg, false)) {
+              persistedMsg.delete();
+            }
+          } else if (isLocal(consId)) {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, " -> deny " + persistedMsg.getId());
+            consumers.remove(persistedMsg.getId());
+            contexts.remove(persistedMsg.getId());
+            if (!addMessage(persistedMsg, false)) {
+              persistedMsg.delete();
+            }
+          } else {
+            deliveredMsgs.put(persistedMsg.getId(), persistedMsg);
           }
-        } else if (isLocal(consId)) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, " -> deny " + persistedMsg.getId());
-          consumers.remove(persistedMsg.getId());
-          contexts.remove(persistedMsg.getId());
-          if (!addMessage(persistedMsg)) {
-            persistedMsg.delete();
-          }
-        } else {
-          deliveredMsgs.put(persistedMsg.getId(), persistedMsg);
-        }
+        } catch (AccessException e) {/*never happens*/}
       }
     }
   }
@@ -664,8 +667,10 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
             nbMsgsSentToDMQSinceCreation++;
             dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
           } else {
-            // Else, putting the message back into the deliverables list:
-            storeMessageHeader(message);
+            try {
+              // Else, putting the message back into the deliverables list:
+              storeMessageHeader(message, false);
+            } catch (AccessException e) { /* never happens */ }
           }
 
           if (logger.isLoggable(BasicLevel.DEBUG))
@@ -713,8 +718,10 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
       } else {
-        // Else, putting the message back into the deliverables list:
-        storeMessageHeader(message);
+        try {
+          // Else, putting the message back into the deliverables list:
+          storeMessageHeader(message, false);
+        } catch (AccessException e) {/* never happens */}
       }
 
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -807,6 +814,14 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     } else if (adminRequest instanceof SetNbMaxMsgRequest) {
       setSave(); // state change, so save.
       nbMaxMsg = ((SetNbMaxMsgRequest) adminRequest).getNbMaxMsg();
+
+      replyToTopic(new AdminReply(true, null),
+                   not.getReplyTo(),
+                   not.getRequestMsgId(),
+                   not.getReplyMsgId());
+    } else if (adminRequest instanceof SetSyncExceptionOnFullDestRequest) {
+      setSave(); // state change, so save.
+      syncExceptionOnFullDest = ((SetSyncExceptionOnFullDestRequest) adminRequest).isSyncExceptionOnFullDest();
 
       replyToTopic(new AdminReply(true, null),
                    not.getReplyTo(),
@@ -939,7 +954,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
    * <p>
    * This method stores the messages and launches a delivery sequence.
    */
-  protected void doClientMessages(AgentId from, ClientMessages not) {
+  protected void doClientMessages(AgentId from, ClientMessages not, boolean throwsExceptionOnFullDest) throws AccessException {
     receiving = true;
     ClientMessages cm = null;
     
@@ -988,7 +1003,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
 
         msg.order = arrivalsCounter++;
-        storeMessage(msg);
+        storeMessage(msg, throwsExceptionOnFullDest);
         if (msg.isPersistent()) setSave();
       }
     }
@@ -1051,8 +1066,10 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
           nbMsgsSentToDMQSinceCreation++;
           dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
         } else {
-          // Else, putting it back into the deliverables list:
-          storeMessageHeader(message);
+          try {
+            // Else, putting it back into the deliverables list:
+            storeMessageHeader(message, false);
+          } catch (AccessException e) {/* never happens */  }
         }
 
         if (logger.isLoggable(BasicLevel.WARN))
@@ -1130,9 +1147,11 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
    * Actually stores a message in the deliverables list.
    * 
    * @param msg The message to store.
+   * @param throwsExceptionOnFullDest true, can throws an exception on sending message on full destination
+   * @throws AccessException
    */
-  protected final synchronized void storeMessage(Message msg) {
-    if (addMessage(msg)) {
+  protected final synchronized void storeMessage(Message msg, boolean throwsExceptionOnFullDest) throws AccessException {
+    if (addMessage(msg, throwsExceptionOnFullDest)) {
       // Persisting the message.
       setMsgTxName(msg);
       msg.save();
@@ -1145,11 +1164,12 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
   /**
    * Actually stores a message header in the deliverables list.
    * 
-   * @param message
-   *          The message to store.
+   * @param message The message to store.
+   * @param throwsExceptionOnFullDest true, can throws an exception on sending message on full destination
+   * @throws AccessException
    */
-  protected final synchronized void storeMessageHeader(Message message) {
-    if (addMessage(message)) {
+  protected final synchronized void storeMessageHeader(Message message,  boolean throwsExceptionOnFullDest) throws AccessException {
+    if (addMessage(message, throwsExceptionOnFullDest)) {
       // Persisting the message.
       message.saveHeader();
       message.releaseFullMessage();
@@ -1158,16 +1178,41 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     }
   }
 
+  /** if true, throws an exception on sending message on full destination. */
+  private boolean syncExceptionOnFullDest = false;
+  
+  /**
+   * @return the syncExceptionOnFullDest
+   */
+  public boolean isSyncExceptionOnFullDest() {
+    return syncExceptionOnFullDest;
+  }
+
+  /**
+   * @param syncExceptionOnFullDest the syncExceptionOnFullDest to set
+   */
+  public void setSyncExceptionOnFullDest(boolean syncExceptionOnFullDest) {
+    this.syncExceptionOnFullDest = syncExceptionOnFullDest;
+  }
+
   /**
    * Adds a message in the list of messages to deliver.
    * 
-   * @param message
-   *          the message to add.
+   * @param message the message to add.
+   * @param throwsExceptionOnFullDest true, can throws an exception on sending message on full destination
    * @return true if the message has been added. false if the queue is full.
+   * @throws AccessException If syncExceptionOnFullDest and the queue isFull
    */
-  protected final synchronized boolean addMessage(Message message) {
+  protected final synchronized boolean addMessage(Message message, boolean throwsExceptionOnFullDest) throws AccessException {
 
-    if (nbMaxMsg > -1 && nbMaxMsg <= messages.size()) {
+    if (nbMaxMsg > -1 && nbMaxMsg <= (messages.size() + deliveredMsgs.size())) {
+      
+      if (throwsExceptionOnFullDest && isSyncExceptionOnFullDest()) {
+        if (logger.isLoggable(BasicLevel.INFO))
+          logger.log(BasicLevel.INFO, "addMessage " + message.getId() + " throws Exception: The queue \"" + getName() + "\" is full (syncExceptionOnFullDest).");
+        throw new AccessException("The queue \"" + getName() + "\" is full.");
+      }
+      
       DMQManager dmqManager = new DMQManager(dmqId, getId());
       nbMsgsSentToDMQSinceCreation++;
       dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.QUEUE_FULL);
@@ -1519,8 +1564,10 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
    * Adds the client messages in the queue.
    * 
    * @param clientMsgs client message notification.
+   * @param throwsExceptionOnFullDest true, can throws an exception on sending message on full destination
+   * @throws AccessException
    */
-  public void addClientMessages(ClientMessages clientMsgs) {
+  public void addClientMessages(ClientMessages clientMsgs, boolean throwsExceptionOnFullDest) throws AccessException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Queue.addClientMessage(" + clientMsgs + ')');
     
@@ -1555,7 +1602,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       	}
         
         // store message
-        storeMessage(msg);
+        storeMessage(msg, throwsExceptionOnFullDest);
       }
     }
     // Launching a delivery sequence:

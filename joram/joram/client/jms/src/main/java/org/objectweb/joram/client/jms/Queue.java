@@ -54,6 +54,7 @@ import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
 import org.objectweb.joram.shared.admin.GetQueueMessageRep;
 import org.objectweb.joram.shared.admin.SendDestinationsWeights;
 import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
+import org.objectweb.joram.shared.admin.SetSyncExceptionOnFullDestRequest;
 import org.objectweb.joram.shared.admin.SetThresholdRequest;
 
 /**
@@ -314,6 +315,20 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 		GetNumberReply reply = (GetNumberReply) doRequest(request);
 		return reply.getNumber();
 	}
+	
+	/**
+   * Admin method setting syncExceptionOnFull for this queue.
+   * <p>
+   * The request fails if the queue is deleted server side.
+   *
+   * @param syncExceptionOnFull  true, throws an exception on sending message on full destination.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void setSyncExceptionOnFull(boolean syncExceptionOnFull) throws ConnectException, AdminException {
+    doRequest(new SetSyncExceptionOnFullDestRequest(agentId, syncExceptionOnFull));
+  } 
 
 	/**
 	 * Monitoring method returning the number of pending messages on this queue.

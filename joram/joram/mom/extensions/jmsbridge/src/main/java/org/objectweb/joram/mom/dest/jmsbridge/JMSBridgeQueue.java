@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -175,7 +175,9 @@ public class JMSBridgeQueue extends Queue {
     clientMessages.addMessage(not.getMessage());
     // it come from bridge, so set destId for from 
     //(do not preProcess this ClientMessage).
-    super.doClientMessages(getId(), clientMessages);
+    try {
+      super.doClientMessages(getId(), clientMessages, false);
+    } catch (AccessException e) {/* never happens*/}
   }
 
   /**

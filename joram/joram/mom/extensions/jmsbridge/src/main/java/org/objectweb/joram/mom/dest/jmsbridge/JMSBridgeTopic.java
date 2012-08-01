@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -171,7 +171,7 @@ public class JMSBridgeTopic extends Topic {
   private void bridgeDeliveryNot(AgentId from, JMSBridgeDeliveryNot not) {
     ClientMessages clientMessages = new ClientMessages();
     clientMessages.addMessage(not.getMessage());
-    super.doClientMessages(getId(), clientMessages);
+    super.doClientMessages(getId(), clientMessages, false);
   }
 
   /**
