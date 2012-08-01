@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,7 @@ import java.util.Properties;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.PingNot;
 import org.objectweb.joram.mom.notifications.PongNot;
+import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -154,7 +155,9 @@ public class AliasQueue extends Queue {
         }
         Channel.sendTo(remoteDestinationID, new PingNot());
       }
-      addClientMessages(((ClientMessages) expiredNot));
+      try {
+        addClientMessages(((ClientMessages) expiredNot), false);
+      } catch (AccessException e) {/* never happens*/}
     } else {
       super.handleExpiredNot(from, not);
     }
@@ -166,7 +169,9 @@ public class AliasQueue extends Queue {
           + "' property refers to an unknown agent.");
 
       nbMsgsDeliverSinceCreation -= ((ClientMessages) uA.not).getMessageCount();
-      addClientMessages(((ClientMessages) uA.not));
+      try {
+        addClientMessages(((ClientMessages) uA.not), false);
+      } catch (AccessException e) {/* never happens */}
     } else {
       super.doUnknownAgent(uA);
     }

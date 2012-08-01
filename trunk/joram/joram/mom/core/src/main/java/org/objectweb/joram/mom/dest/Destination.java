@@ -654,7 +654,7 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       throw new AccessException("WRITE right not granted");
     }
 
-    doClientMessages(from, not);
+    doClientMessages(from, not, true);
 
     // For topic performance we must send reply after process ClientMessage. It results
     // in a best flow-control of sender allowing the handling of forwarded messages before
@@ -736,7 +736,10 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       }
     }
     
-    doClientMessages(from, theCM);
+    
+    try {
+      doClientMessages(from, theCM, false);
+    } catch (AccessException e) {/* never happens */}
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // for topic performance : must send reply after process ClientMessage
@@ -787,7 +790,7 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     return AdminTopic.isAdminTopicId(client) || client.equals(adminId);
   }
 
-  abstract protected void doClientMessages(AgentId from, ClientMessages not);
+  abstract protected void doClientMessages(AgentId from, ClientMessages not, boolean throwsExceptionOnFullDest) throws AccessException;
   abstract protected void doUnknownAgent(UnknownAgent not);
   abstract protected void doDeleteNot(DeleteNot not);
   

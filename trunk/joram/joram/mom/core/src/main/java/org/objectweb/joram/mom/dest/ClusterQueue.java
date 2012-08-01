@@ -449,11 +449,12 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     }
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.lBCycleLife(" + not + "), visitTable="
-          + clusters);
+      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.lBCycleLife(" + not + "), visitTable=" + clusters);
     ClientMessages cm = not.getClientMessages();
-    if (cm != null)
-      doClientMessages(from, cm);
+    try {
+      if (cm != null)
+        doClientMessages(from, cm, false);
+    } catch (AccessException e) {/* never happens */}
   }
 
   /**
@@ -491,7 +492,9 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
 
     ClientMessages cm = not.getClientMessages();
     if (cm != null) {
-      doClientMessages(from, cm);
+      try {
+        doClientMessages(from, cm, false);
+      } catch (AccessException e) { /* never happens */}
     }
   }
 

@@ -36,6 +36,7 @@ import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.SendDestinationsWeights;
+import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -156,7 +157,9 @@ public class AliasInQueue extends Queue {
 		Notification expiredNot = not.getExpiredNot();
 		if (expiredNot instanceof ClientMessages) {
 			nbMsgsDeliverSinceCreation -= ((ClientMessages) expiredNot).getMessageCount();
-			addClientMessages(((ClientMessages) expiredNot));
+			try {
+        addClientMessages(((ClientMessages) expiredNot), false);
+      } catch (AccessException e) {/* never happens */}
 
 			ClientMessages cm = new ClientMessages();
 			//cm.setExpiration(System.currentTimeMillis() + expiration);
@@ -184,7 +187,9 @@ public class AliasInQueue extends Queue {
 			logger.log(BasicLevel.ERROR, "Remote agent refers to an unknown agent.");
 
 			nbMsgsDeliverSinceCreation -= ((ClientMessages) uA.not).getMessageCount();
-			addClientMessages(((ClientMessages) uA.not));
+			try {
+        addClientMessages(((ClientMessages) uA.not), false);
+      } catch (AccessException e) {/* never happens */}
 		} else if (uA.not instanceof PingNot) {
 			logger.log(BasicLevel.ERROR, "Unknown agent. '" + REMOTE_AGENT_OPTION
 					+ "' property refers to an unknown agent.");

@@ -385,7 +385,7 @@ public class Topic extends Destination implements TopicMBean {
    * hierarchical son.
    */
   protected void topicForwardNot(AgentId from, TopicForwardNot not) {
-    doClientMessages(from, not.messages, not.fromCluster);
+    doClientMessages(from, not.messages, not.fromCluster, false);
   }
 
   /**
@@ -489,11 +489,11 @@ public class Topic extends Destination implements TopicMBean {
    * to the cluster fellows if any.It may finally send
    * <code>TopicMsgsReply</code> instances to the valid subscribers.
    */
-  protected void doClientMessages(AgentId from, ClientMessages not) {
-    doClientMessages(from, not, false);
+  protected void doClientMessages(AgentId from, ClientMessages not, boolean throwsExceptionOnFullDest) {
+    doClientMessages(from, not, false, throwsExceptionOnFullDest);
   }
 
-  private void doClientMessages(AgentId from, ClientMessages not, boolean fromCluster) {
+  private void doClientMessages(AgentId from, ClientMessages not, boolean fromCluster, boolean throwsExceptionOnFullDest) {
     ClientMessages clientMsgs = preProcess(from, not);
     if (clientMsgs != null) {
       // Forwarding the messages to the father or the cluster fellows, if any:
