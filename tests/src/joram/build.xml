@@ -250,6 +250,7 @@
   	<antcall target="client.ClientTest25"/>
   	<antcall target="client.ClientTest26"/>
   	<antcall target="client.IndividualAcknowledge"/>
+  	<antcall target="client.SyncExceptionOnFullQueue"/>
   </target>
 
   <target name="tests.connection"
@@ -2114,6 +2115,19 @@
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="testid" value="client.ClientTest26"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	
+  <target name="client.SyncExceptionOnFullQueue" depends="init.a3props,compile"
+          description=" --> test exception on send on full Queue.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.client.SyncExceptionOnFullQueue"/>
+      <param name="jndiconf" value="client/jndi.properties"/>
+      <param name="a3conf" value="client/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="testid" value="client.SyncExceptionOnFullQueue"/>
       <param name="args" value=""/>
     </antcall>
   </target>
