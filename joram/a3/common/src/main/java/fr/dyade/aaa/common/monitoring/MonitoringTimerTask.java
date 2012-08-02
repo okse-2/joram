@@ -55,6 +55,11 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
 
   Properties attlist = null;
   
+  /**
+   * Name use to register/unregister MBean
+   */
+  public String MBean_name = null;
+  
   public static Logger logger = Debug.getLogger(MonitoringTimerTask.class.getName());
   
   /**
@@ -66,6 +71,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
   public MonitoringTimerTask(long period, Properties attlist) {
     this.period = period;
     this.attlist = attlist;
+    
   }
   
   /**
