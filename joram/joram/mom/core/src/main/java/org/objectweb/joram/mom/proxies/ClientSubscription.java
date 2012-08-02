@@ -27,6 +27,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -375,7 +376,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
     if (denyDeliveredMessages) {
       // Denying all previously delivered messages:
-      deny(deliveredIds.keySet().iterator(), false);
+      HashSet h = new HashSet(deliveredIds.keySet());
+      deny(h.iterator(), false);
       deliveredIds.clear();
     }
   }
@@ -414,21 +416,26 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       logger.log(BasicLevel.DEBUG, this + ": reactivated.");
   }
 
-  /** De-activates the subscription, denies the non acknowledged messages. */  
-  void deactivate() {
+  /** 
+   * De-activates the subscription.
+   * @param denies denies the non acknowledged messages. 
+   */  
+  void deactivate(boolean denies) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ClientSubscription.deactivate()");
+      logger.log(BasicLevel.DEBUG, "ClientSubscription.deactivate(" + denies+ ')');
 
     unsetListener();
     unsetReceiver();
     active = 0;
    
-    // Denying all delivered messages:
-    deny(deliveredIds.keySet().iterator(), false);
-    deliveredIds.clear();
-    
-    // deliveredIds is persistent
-    save();
+    if (denies) {
+      // Denying all delivered messages:
+      HashSet h = new HashSet(deliveredIds.keySet());
+      deny(h.iterator(), false);
+      deliveredIds.clear();
+      // deliveredIds is persistent
+      save();
+    }
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ": deactivated.");
