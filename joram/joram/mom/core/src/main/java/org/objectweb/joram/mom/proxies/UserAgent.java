@@ -1616,7 +1616,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
 
     // De-activating the subscription:
     activeCtx.removeSubName(subName);
-    sub.deactivate();
+    sub.deactivate(false);
 
     // Acknowledging the request:
     doReply(new ServerReply(req));
@@ -2143,7 +2143,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
             "Deactivate subscription " + subName + ", topic id = " + sub.getTopicId());
 
       if (sub.getDurable()) {
-        sub.deactivate();
+        sub.deactivate(true);
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Durable subscription" + subName + " de-activated.");
