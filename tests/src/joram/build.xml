@@ -6215,5 +6215,22 @@
       <param name="args" value=""/>
     </antcall>
   </target>
-
+	
+	<!-- shell tests -->
+	<!-- shell tests: mom -->
+  <target name="shell.mom" depends="init.a3props,compile"
+          description=" -- > Tests the MOM shell commands">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="shell.mom"/>
+      <param name="className" value="joram.shell.mom.MOMCommandsTests"/>
+      <param name="a3conf" value="shell/a3servers.xml"/>
+      <param name="jvmargs" value="-Dosgi.shell.telnet.port=6666"/>
+      <param name="manifest.mf" value="joram/shell/mom/manifest.mf"/>
+      <param name="isOSGi" value="true"/>
+      <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+    	<param name="include.classes" value="joram/shell/mom/MOMTester.class"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
 </project>
