@@ -78,6 +78,12 @@ public interface MOMCommands {
   public void deleteMsg(String[] args);
   
   /**
+   * Clear a destination, deleting all pending messages
+   * @param args
+   */
+  public void clear(String[] args);
+  
+  /**
    * Send a new message in a destination
    * @param args
    */

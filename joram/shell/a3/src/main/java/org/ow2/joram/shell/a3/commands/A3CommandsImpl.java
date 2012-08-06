@@ -30,6 +30,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.EngineMBean;
+import fr.dyade.aaa.agent.PoolNetworkMBean;
 import fr.dyade.aaa.ext.NGTransactionMBean;
 
 public class A3CommandsImpl implements A3Commands {
@@ -66,6 +67,7 @@ public class A3CommandsImpl implements A3Commands {
   private BundleContext bundleContext;
   private ServiceTracker engineTracker;
   private ServiceTracker ngtTracker;
+  private ServiceTracker networkTracker;
 
   public A3CommandsImpl(BundleContext context) {
     this.bundleContext = context;
@@ -73,8 +75,11 @@ public class A3CommandsImpl implements A3Commands {
       (bundleContext, EngineMBean.class.getCanonicalName(), null);
     this.ngtTracker = new ServiceTracker
       (bundleContext, NGTransactionMBean.class.getCanonicalName(), null);
+    this.networkTracker = new ServiceTracker
+        (bundleContext, PoolNetworkMBean.class.getCanonicalName(), null);
     engineTracker.open();
     ngtTracker.open();
+    networkTracker.open();
   }
 
   public void engineLoad(String[] args) {
@@ -152,30 +157,56 @@ public class A3CommandsImpl implements A3Commands {
     }
   }
   
-  public void info() {
+  public void info(String[] args) {
     /*
      * nbWaitingMessages : Valeur absolue, instantannée
      * engineLoad1/5/15  : Moyenne de nbWaitingMessages sur 1/5/15 minutes => Plus pertinent
      * garbageRation     : (transaction), pas prioritaire.
      */
+    //Option parsing
+    boolean isEngine,isNet,isNgt,all;
+    isEngine = isNet = isNgt = all = false;
+    
+    for(String arg : args) {
+      isEngine |= arg.equals("-eng");
+      isNet |= arg.equals("-net");
+      isNgt |= arg.equals("-ngt");
+   }
+    
+    if(!(isEngine || isNet || isNgt))
+      all = true;
+    
     EngineMBean engine = getEngine();
-    NGTransactionMBean ngt = getNGTransaction();
-    if(engine!=null) {
-      System.out.println("Avg. engine load for the last min.   : "+engine.getAverageLoad1());
-      System.out.println("Avg. engine load for the last 5 min. : "+engine.getAverageLoad5());
-      System.out.println("Avg. engine load for the last 15 min.: "+engine.getAverageLoad15());
-      System.out.println("Number of waiting messages           : "+engine.getNbWaitingMessages());
-    } else {
+    if(engine!=null && (isEngine||all)) {
+      System.out.println("Engine: "+engine.getName());
+      System.out.println("\tAvg. load over the last min.    : "+engine.getAverageLoad1());
+      System.out.println("\tAvg. load over the last 5 min.  : "+engine.getAverageLoad5());
+      System.out.println("\tAvg. load over the last 15 min. : "+engine.getAverageLoad15());
+      System.out.println("\tNumber of waiting messages      : "+engine.getNbWaitingMessages());
+    } else if(engine==null){
       System.err.println("Error: Can't find A3 engine.");
 //      System.out.println("Avg. engine load for the last min.   : N/A");
 //      System.out.println("Avg. engine load for the last 5 min. : N/A");
 //      System.out.println("Avg. engine load for the last 15 min.: N/A");
 //      System.out.println("Number of waiting messages           : N/A");
     }
-    if(ngt!=null) {
-      System.out.println("Garbage ratio                         : "+ngt.getGarbageRatio());
+    PoolNetworkMBean net = isNet?getNetwork():null;
+    if(net!=null && (isNet||all)) {
+      System.out.println("Network: "+net.getName());
+      System.out.println("\tNb waiting messages             : "+net.getNbWaitingMessages());      
+      System.out.println("\tAvg. load over the last min.    : "+net.getAverageLoad1());      
+      System.out.println("\tAvg. load over the last 5 min.  : "+net.getAverageLoad1());      
+      System.out.println("\tAvg. load over the last 15 min. : "+net.getAverageLoad1());      
+    } else if(isNet && net==null) {
+      System.err.println("Error: Can't find the pool network service.");
     }
-    
+    NGTransactionMBean ngt = isNgt?getNGTransaction():null;
+    if(ngt!=null && (isNgt||all)) {
+      System.out.println("NG Transaction:");
+      System.out.println("\tGarbage ratio : "+ngt.getGarbageRatio());
+    } else if(isNgt && ngt==null) {
+      System.err.println("Error: Can't find the NG Transaction service.");
+    }
   }
   
   private EngineMBean getEngine() {
@@ -189,6 +220,14 @@ public class A3CommandsImpl implements A3Commands {
   private NGTransactionMBean getNGTransaction() {
     try {
       return (NGTransactionMBean) ngtTracker.waitForService(TIMEOUT);
+    } catch (InterruptedException e) {
+      return null;
+    }
+  }
+  
+  private PoolNetworkMBean getNetwork() {
+    try {
+      return (PoolNetworkMBean) networkTracker.waitForService(TIMEOUT);
     } catch (InterruptedException e) {
       return null;
     }

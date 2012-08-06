@@ -1923,6 +1923,19 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   }
   
   /**
+   * Retrieves an existing user
+   * 
+   * @param name  The name of the user
+   */
+  public static AgentId lookupUser(String name) {
+    AgentId proxId = null;
+    if (name != null && name.length() > 0) {
+      proxId = (AgentId) ref.proxiesTable.get(name);
+    }
+    return proxId;
+  }
+  
+  /**
    * Registers a newly created destination.
    * 
    * @param id    The unique identifier of the created destination.

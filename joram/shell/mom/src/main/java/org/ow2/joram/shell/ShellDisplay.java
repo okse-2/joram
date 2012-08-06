@@ -46,9 +46,15 @@ public class ShellDisplay {
     int[] maxWidth = new int[nbCol];
     for(int c = 0; c < nbCol; c++)
       for(int r = 0; r < nbRow; r++)
+        try {
         //If it's the first row or if the current value of column is a new maximum
         if(r==0 || maxWidth[c]<table[r][c].length())
           maxWidth[c]=table[r][c].length();
+        } catch(NullPointerException e) {
+          System.err.println("Null pointer exception");
+          System.err.println("table["+r+"]["+c+"] = " + table[r][c]==null?"null":table[r][c]);
+          return;
+        }
     
     //Prints the table
     for(int r = 0; r < nbRow; r++) {
