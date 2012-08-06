@@ -24,13 +24,18 @@ package org.ow2.joram.shell.mom;
 
 import java.util.Hashtable;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.ow2.joram.shell.mom.commands.MOMCommands;
 import org.ow2.joram.shell.mom.commands.MOMCommandsImpl;
 
+import fr.dyade.aaa.agent.Debug;
+
 public class Activator implements BundleActivator {
-  
+  public static Logger logger = Debug.getLogger(Activator.class.getName());
+
   private BundleContext bundleContext;
 
   public void start(BundleContext context) throws Exception {
@@ -42,8 +47,14 @@ public class Activator implements BundleActivator {
       prop.put("osgi.command.function",
           MOMCommandsImpl.COMMANDS);
     this.bundleContext = context;
-    bundleContext.registerService(MOMCommands.class.getCanonicalName(),
-        new MOMCommandsImpl(bundleContext), prop);
+    MOMCommandsImpl.init(bundleContext);
+    try {
+      bundleContext.registerService(MOMCommands.class.getCanonicalName(),
+          MOMCommandsImpl.getInstance(), prop);
+    } catch(Exception e) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, e);
+    }
   }
 
   public void stop(BundleContext context) throws Exception {

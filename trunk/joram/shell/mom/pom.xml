@@ -23,6 +23,7 @@
 						<Implementation-Version>${project.version}</Implementation-Version> 
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Activator>org.ow2.joram.shell.mom.Activator</Bundle-Activator>
+            <Export-Package>org.ow2.joram.shell.mom.commands</Export-Package>
 					</instructions>
 				</configuration>
 			</plugin>

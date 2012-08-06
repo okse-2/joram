@@ -25,15 +25,23 @@ import java.util.Properties;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.dest.AdminTopic.DestinationDesc;
+import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
+import org.objectweb.joram.shared.DestinationConstants;
+import org.objectweb.joram.shared.admin.ClearQueue;
+import org.objectweb.joram.shared.admin.ClearSubscription;
 import org.objectweb.joram.shared.admin.CreateUserRequest;
+import org.objectweb.joram.shared.admin.DeleteQueueMessage;
+import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
 import org.objectweb.joram.shared.admin.SetReader;
 import org.objectweb.joram.shared.admin.SetWriter;
+import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.common.Debug;
 
 /**
@@ -149,4 +157,77 @@ public class JoramHelper {
 
     return destId;
   }
+
+  /**
+   * Delete a message in a queue
+   * @param queueName Name of the queue
+   * @param msgId ID of the message to be deleted
+   * @return
+   */
+  public final static boolean deleteQueueMessage(String queueName, String msgId) {
+    DestinationDesc queueDesc;
+    try {
+      queueDesc = AdminTopic.lookupDest(queueName, DestinationConstants.QUEUE_TYPE);
+    } catch (RequestException e) {
+      return false;
+    }
+    if(queueDesc==null) return false;
+    DeleteQueueMessage req = new DeleteQueueMessage(queueDesc.getId().toString(), msgId);
+    FwdAdminRequestNot not = new FwdAdminRequestNot(req, null, null);
+    Channel.sendTo(queueDesc.getId(), not);
+    return true;
+  }
+  
+  /**
+   * Deletes a message in a subscription
+   * @param userName Subscriber's name
+   * @param subName Subscription name
+   * @param msgId ID of the message to be deleted
+   * @return
+   */
+  public final static boolean deleteSubMessage(String userName, String subName, String msgId) {
+    AgentId userId = AdminTopic.lookupUser(userName);
+    if(userId==null)
+      return false;
+    DeleteSubscriptionMessage req =
+        new DeleteSubscriptionMessage(userId.toString(), subName, msgId);
+    FwdAdminRequestNot not = new FwdAdminRequestNot(req, null, null);
+    Channel.sendTo(userId, not);
+    return true;
+  }
+  
+  /**
+   * Clears all pending message of a queue
+   * @param queueName Name of the queue
+   * @return
+   */
+  public final static boolean clearQueue(String queueName) {
+    DestinationDesc queueDesc;
+    try {
+      queueDesc = AdminTopic.lookupDest(queueName, DestinationConstants.QUEUE_TYPE);
+      if(queueDesc==null) return false;
+    } catch (RequestException e) {
+      return false;
+    }
+    ClearQueue req = new ClearQueue(queueDesc.getId().toString());
+    FwdAdminRequestNot not = new FwdAdminRequestNot(req, null, null);
+    Channel.sendTo(queueDesc.getId(), not);
+    return true;
+  }
+  
+  /**
+   * Clears all pending message of a subscription
+   * @param userName Subscriber's name
+   * @param subName Subscription name
+   * @return
+   */
+  public final static boolean clearSubscription(String userName, String subName) {
+    AgentId userId = AdminTopic.lookupUser(userName);
+    ClearSubscription req =
+        new ClearSubscription(userId.toString(), subName);
+    FwdAdminRequestNot not = new FwdAdminRequestNot(req, null, null);
+    Channel.sendTo(userId, not);
+    return true;
+  }
+
 }

@@ -36,6 +36,6 @@ public interface A3Commands {
   
   public void close();
   
-  public void info();
+  public void info(String[] args);
 
 }
