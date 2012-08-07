@@ -5515,6 +5515,17 @@
       <param name="args" value=""/>
     </antcall>
   </target>
+	
+  <target name="sub.Sub5" depends="init.a3props,compile"
+          description=" --> test about creation of subscriber">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="sub.Sub5"/>
+      <param name="className" value="joram.sub.Sub5"/>
+      <param name="a3conf" value="sub/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
   <!-- end SUB tests -->
 
   <target name="monitoring.TestT1" depends="init.a3props,compile"
