@@ -29,6 +29,7 @@ import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.Subscription;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.mom.dest.AdminTopic;
@@ -56,6 +57,8 @@ public class MOMTester implements BundleActivator {
   private final static short SID = 0;
   private final static String USER_NAME = "testuser";
   private final static String USER_PWD = "testpwd";
+  private final static String USER2_NAME = "testusertwo";
+  private final static String USER2_PWD = "testpwdtwo";
   private final static String NON_EXISTENT_USER = "nonExistentUser";
   private final static String NON_EXISTENT_QUEUE_NAME = "nonExistentQueue";
   private final static String QUEUE_NAME = "testQueue";
@@ -152,7 +155,7 @@ public class MOMTester implements BundleActivator {
         stdoutFile.close();
         logger.close();
         
-//        lock.delete();
+        lock.delete();
      } catch (IOException e) {
         log(e);
      }    
@@ -628,6 +631,7 @@ public class MOMTester implements BundleActivator {
       } catch (ConnectException e) {
         log(e);
       } catch (AdminException e) {
+        log(e);
         found = false;
       } catch (JMSException e) {
         log(e);
@@ -720,7 +724,6 @@ public class MOMTester implements BundleActivator {
     if(cmds==null) { log("ERROR: Couldn't retrieve MOM Commands service.");return;}
 
     //Normal case
-    /*
     try {
       User user = User.create(USER_NAME, USER_PWD);
       int before = user.getSubscription(SUB_NAME).getMessageCount();
@@ -736,7 +739,6 @@ public class MOMTester implements BundleActivator {
       } catch (InterruptedException e) {
         log("ERROR: [joram:mom:clear subscription] Interrupted");
       }
-      user = User.create(USER_NAME, USER_PWD);
       int after = user.getSubscription(SUB_NAME).getMessageCount();
       //Must wait 58s to get a correct value...
 //      for(int i = 0; i < 60; i++) {
@@ -753,7 +755,7 @@ public class MOMTester implements BundleActivator {
     } catch (Exception e) {
       log(e);
       return;
-    }*/
+    }
     
     //Error case: The user does not exist
     startStderrCapture();
@@ -835,16 +837,15 @@ public class MOMTester implements BundleActivator {
     //User
     //Normal case
     try {
-      User user = User.create(USER_NAME,USER_PWD,SID);
-//      cmds.delete(new String[]{"user",USER_NAME});
-      user.delete();
+      User.create(USER2_NAME,USER2_PWD,SID);
+      cmds.delete(new String[]{"user",USER2_NAME});
       try {
         Thread.sleep(TEMPORIZER);
       } catch (InterruptedException e) {
         log("ERROR: [joram:mom:delete user] Interrupted");
       }
       assertNull("[joram:mom:delete user] The user still exists.",
-          AdminTopic.lookupUser(USER_NAME));
+          AdminTopic.lookupUser(USER2_NAME));
     } catch (Exception e) {
       //TODO
       log(e);
