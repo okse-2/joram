@@ -3036,6 +3036,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
   }
 
   private void replyToTopic(AdminReply reply, AgentId replyTo, String requestMsgId, String replyMsgId) {
+    if (replyTo == null) // In some cases the request needs no response
+      return;
+    
     org.objectweb.joram.shared.messages.Message message = MessageHelper.createMessage(replyMsgId,
         requestMsgId, replyTo.toString(), DestinationConstants.TOPIC_TYPE);
     try {
