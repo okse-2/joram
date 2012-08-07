@@ -30,7 +30,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.EngineMBean;
-import fr.dyade.aaa.agent.PoolNetworkMBean;
+import fr.dyade.aaa.agent.NetworkMBean;
 import fr.dyade.aaa.ext.NGTransactionMBean;
 
 public class A3CommandsImpl implements A3Commands {
@@ -39,9 +39,12 @@ public class A3CommandsImpl implements A3Commands {
   private static final int TIMEOUT = 1000;
   
   // A3 Server default properties
-  public static final String AGENT_SERVER_ID_PROPERTY = "fr.dyade.aaa.agent.AgentServer.id";
-  public static final String AGENT_SERVER_CLUSTERID_PROPERTY = "fr.dyade.aaa.agent.AgentServer.clusterid";
-  public static final String AGENT_SERVER_STORAGE_PROPERTY = "fr.dyade.aaa.agent.AgentServer.storage";
+  public static final String AGENT_SERVER_ID_PROPERTY
+                                = "fr.dyade.aaa.agent.AgentServer.id";
+  public static final String AGENT_SERVER_CLUSTERID_PROPERTY 
+                                = "fr.dyade.aaa.agent.AgentServer.clusterid";
+  public static final String AGENT_SERVER_STORAGE_PROPERTY 
+                                = "fr.dyade.aaa.agent.AgentServer.storage";
   public static final String[] COMMANDS = new String[] {
                         "engineLoad",     "garbageRatio",
                         "restartServer",  "startServer",
@@ -76,7 +79,7 @@ public class A3CommandsImpl implements A3Commands {
     this.ngtTracker = new ServiceTracker
       (bundleContext, NGTransactionMBean.class.getCanonicalName(), null);
     this.networkTracker = new ServiceTracker
-        (bundleContext, PoolNetworkMBean.class.getCanonicalName(), null);
+        (bundleContext, NetworkMBean.class.getCanonicalName(), null);
     engineTracker.open();
     ngtTracker.open();
     networkTracker.open();
@@ -190,7 +193,7 @@ public class A3CommandsImpl implements A3Commands {
 //      System.out.println("Avg. engine load for the last 15 min.: N/A");
 //      System.out.println("Number of waiting messages           : N/A");
     }
-    PoolNetworkMBean net = isNet?getNetwork():null;
+    NetworkMBean net = isNet?getNetwork():null;
     if(net!=null && (isNet||all)) {
       System.out.println("Network: "+net.getName());
       System.out.println("\tNb waiting messages             : "+net.getNbWaitingMessages());      
@@ -225,9 +228,9 @@ public class A3CommandsImpl implements A3Commands {
     }
   }
   
-  private PoolNetworkMBean getNetwork() {
+  private NetworkMBean getNetwork() {
     try {
-      return (PoolNetworkMBean) networkTracker.waitForService(TIMEOUT);
+      return (NetworkMBean) networkTracker.waitForService(TIMEOUT);
     } catch (InterruptedException e) {
       return null;
     }
