@@ -47,7 +47,7 @@ import framework.TestCase;
  * - a MessageConsumer (listener mode) receive the message (in queue mode set QueueMessageReadMax=5).
  * - on first message received we close the consumer session.
  * - create a new session (CLIENT_ACKNOWLEDGE)
- * - received messages and verify the redelivered value expected false and JMSXDeliveryCount = 2.
+ * - received messages and verify the redelivered value expected false and JMSXDeliveryCount = 1.
  * - close the session and forgot the acknowledge.
  * - create a new session
  * - received messages and verify the redelivered value expected true and JMSXDeliveryCount = 2.
