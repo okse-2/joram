@@ -215,7 +215,7 @@ public class AsyncBridgeTest extends TestCase {
       Queue foreignQueue = Queue.create(1, "foreignQueue");
       foreignQueue.setFreeReading();
       foreignQueue.setFreeWriting();
-      user1.addInterceptorsIN("joram.bridge.SlowInterceptor");
+      user1.addInterceptorsIN("joram.bridgejms.SlowInterceptor");
       System.out.println("foreign queue = " + foreignQueue);
       
       // create The foreign connection factory
