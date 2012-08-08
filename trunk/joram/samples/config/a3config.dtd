@@ -23,7 +23,7 @@
  All Rights Reserved.
 -->
 
-<!ELEMENT config (domain | server | transient | property | cluster)*>
+<!ELEMENT config (domain | server | transient | property)*>
 <!ATTLIST config name CDATA "default">
 <!ELEMENT domain EMPTY>
 <!ATTLIST domain
@@ -57,7 +57,3 @@
 	sid  CDATA #REQUIRED
 	natHost CDATA #REQUIRED
 	natPort CDATA #REQUIRED>
-<!ELEMENT cluster (server | property)*>
-<!ATTLIST cluster
-	id CDATA #REQUIRED
-	name CDATA "">
