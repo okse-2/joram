@@ -42,14 +42,11 @@ public class A3CMLConfig implements Serializable {
   public Hashtable<Short, A3CMLServer> servers = null;
   /** Hashtable of all global properties */
   public Hashtable<String, A3CMLProperty> properties = null;
-  /** Hashtable of all clusters */
-  public Hashtable<Short, A3CMLCluster> clusters = null;
 
   public A3CMLConfig() {
     domains = new Hashtable<String, A3CMLDomain>();
     servers = new Hashtable<Short, A3CMLServer>();
     properties = new Hashtable<String, A3CMLProperty>();
-    clusters = new Hashtable<Short, A3CMLCluster>();
   }
 
   /**
@@ -105,123 +102,6 @@ public class A3CMLConfig implements Serializable {
     if (domain == null)
       throw new UnknownDomainException("Unknown domain " + name);
     return domain;
-  }
-
-  /**
-   * Adds a cluster.
-   *
-   * @param cluster 	The description of added cluster.
-   * @exception DuplicateClusterException
-   *			If the cluster already exist.
-   */
-  public final void addCluster(A3CMLCluster cluster) throws DuplicateClusterException {
-    Short id = new Short(cluster.sid);
-    if (clusters.containsKey(id))
-      throw new DuplicateClusterException("Duplicate cluster " + cluster.sid);
-    clusters.put(id, cluster);
-  }
-
-  /**
-   * Returns the description of a cluster.
-   *
-   * @param sid 	The cluster identifier.
-   * @return	 	The cluster description if exist.
-   * @exception UnknownClusterException
-   * 		 	If the cluster does not exist.
-   */
-  public final A3CMLCluster getCluster(short sid) throws UnknownClusterException {
-    A3CMLCluster cluster = (A3CMLCluster) clusters.get(new Short(sid));
-    if (cluster == null)
-      throw new UnknownClusterException("Unknown cluster id. #" + sid);
-    return cluster;
-  }
-  
-  /**
-   * Returns the description of a cluster.
-   *
-   * @param name 	The cluster name.
-   * @return	 	The cluster description if exist.
-   * @exception UnknownClusterException
-   * 		 	If the cluster does not exist.
-   */
-  public final A3CMLCluster getCluster(String name) throws UnknownClusterException {
-    for (Enumeration<A3CMLCluster> c = clusters.elements(); c.hasMoreElements(); ) {
-      A3CMLCluster cluster = c.nextElement();
-      if (cluster.name.equals(name)) return cluster;
-    }
-    throw new UnknownClusterException("Unknown cluster id for cluster " + name);
-  }
-
-  /**
-   * Gets a cluster identifier from its name.
-   *
-   * @param name 	The cluster name.
-   * @return	 	The cluster identifier.
-   * @exception UnknownClusterException
-   * 		 	If the cluster does not exist.
-   */
-  public short getClusterIdByName(String name) throws UnknownClusterException {
-    for (Enumeration<A3CMLCluster> c = clusters.elements(); c.hasMoreElements(); ) {
-      A3CMLCluster cluster = c.nextElement();
-      if (cluster.name.equals(name)) return cluster.sid;
-    }
-    throw new UnknownClusterException("Unknown cluster " + name);
-  }
-
-
-  /**
-   * Returns true if the configuration contains a cluster with specified name.
-   *
-   * @param name cluster name
-   * @return	 true if contain name; false otherwise.
-   */
-  public final boolean containsCluster(String name) {
-    try {
-      getClusterIdByName(name);
-    } catch (UnknownClusterException exc) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Returns true if the configuration contains a cluster with specified id.
-   *
-   * @param sid  cluster id
-   * @return	 true if contain sid; false otherwise.
-   */
-  public final boolean containsCluster(short sid) {
-    return clusters.containsKey(new Short(sid));
-  }
-
-  /**
-   * Removes a cluster.
-   *
-   * @param sid  	The unique cluster identifier.
-   * @return	 	The cluster description if exists.
-   * @exception UnknownClusterException
-   * 		 	If the server does not exist.
-   */
-  public final A3CMLCluster removeCluster(short sid) throws UnknownClusterException {
-    A3CMLCluster cluster = null;
-    Short id = new Short(sid);
-    if (clusters.containsKey(id))
-      cluster = (A3CMLCluster) clusters.remove(id);
-    else
-      throw new UnknownClusterException("Unknown cluster id. #" + sid);
-    return cluster;
-  }
-  
-  /**
-   * Remove a cluster.
-   *
-   * @param name 	The cluster name.
-   * @return	 	The cluster description if exists.
-   * @exception UnknownClusterException
-   *			If the server does not exist.
-   */
-  public final A3CMLCluster removeCluster(String name) throws UnknownClusterException {
-    return removeCluster(getClusterIdByName(name));
   }
 
   /**
@@ -345,31 +225,7 @@ public class A3CMLConfig implements Serializable {
    * 		 	If the server does not exist.
    */
   public final A3CMLServer getServer(short sid) throws UnknownServerException {
-    return getServer(sid, AgentServer.NULL_ID);
-  }
-
-  /**
-   * Returns the description of a server.
-   *
-   * @param sid 	The server identifier.
-   * @param cid 	The cluster identifier.
-   * @return	 	The server description if exist.
-   * @exception UnknownServerException
-   * 		 	If the server does not exist.
-   */
-  public final A3CMLServer getServer(short sid, short cid) throws UnknownServerException {
-    A3CMLServer server = null;
-    if (cid == AgentServer.NULL_ID)
-      server = (A3CMLServer) servers.get(new Short(sid));
-    else {
-      try {
-        A3CMLCluster cluster = getCluster(sid);
-        server = cluster.getServer(cid);
-      } catch (Exception exc) {
-        throw new UnknownServerException(exc.getMessage());
-      }
-    }
-    
+    A3CMLServer server = (A3CMLServer) servers.get(new Short(sid));
     if (server == null)
       throw new UnknownServerException("Unknown server id. #" + sid);
     return server;
@@ -434,20 +290,10 @@ public class A3CMLConfig implements Serializable {
   /**
    * Returns the specified property.
    */
-  public final A3CMLProperty getProperty(String name, short sid, short cid) 
-    throws Exception {
-    A3CMLProperty prop = null;
-    if (cid == AgentServer.NULL_ID) {
-      A3CMLServer server = getServer(sid);
-      prop = server.getProperty(name);
-    } else {
-      A3CMLCluster cluster = getCluster(sid);
-      A3CMLServer server = cluster.getServer(cid);
-      prop = server.getProperty(name);
-      if (prop == null)
-        prop = cluster.getProperty(name);
-    }
-    return prop;
+  public final A3CMLProperty getProperty(String name, short sid) 
+      throws Exception {
+    A3CMLServer server = getServer(sid);
+    return server.getProperty(name);
   }
 
   /**
@@ -977,7 +823,6 @@ public class A3CMLConfig implements Serializable {
     strBuf.append(",properties=").append(properties);
     strBuf.append(",domains=").append(domains);
     strBuf.append(",servers=").append(servers);
-    strBuf.append(",clusters=").append(clusters);
     strBuf.append(")");
 
     return strBuf.toString();
@@ -1022,8 +867,7 @@ public class A3CMLConfig implements Serializable {
 
       if (domains.equals(config.domains) &&
           servers.equals(config.servers) &&
-          properties.equals(config.properties) &&
-          clusters.equals(config.clusters))
+          properties.equals(config.properties))
         return true;
     }
     return false;
@@ -1035,7 +879,6 @@ public class A3CMLConfig implements Serializable {
     result = prime * result + ((domains == null) ? 0 : domains.hashCode());
     result = prime * result + ((properties == null) ? 0 : properties.hashCode());
     result = prime * result + ((servers == null) ? 0 : servers.hashCode());
-    result = prime * result + ((clusters == null) ? 0 : clusters.hashCode());
     return result;
   }
 

@@ -30,8 +30,6 @@ import java.util.Properties;
 import javax.naming.NamingException;
 
 import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
-import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -90,8 +88,6 @@ public class ConnectionFactoryMSF implements ManagedServiceFactory {
 	public static final String ININTERCEPTORCLASS = "inInterceptorClassname";
 	public static final String OUTINTERCEPTORCLASS = "outInterceptorClassname";
 	public static final String JNDINAME = "jndiName";
-	// if HA
-	public static final String URL = "url";
 	// unused 
 	public static final String NAME = "name";
 	
@@ -174,18 +170,6 @@ public class ConnectionFactoryMSF implements ManagedServiceFactory {
 			// LocalConnectionFactory
 			cf = LocalConnectionFactory.create();
 			
-		} else if (HATcpConnectionFactory.class.getName().equals(className)) {
-			// HATcpConnectionFactory
-			String url = (String) properties.get(URL);
-			String reliableClass = (String) properties.get(RELIABLECLASS);
-			if (!isSet(reliableClass))
-				reliableClass = "org.objectweb.joram.client.jms.tcp.ReliableTcpClient";
-			cf = HATcpConnectionFactory.create(url, reliableClass);
-			
-		} else if (HALocalConnectionFactory.class.getName().equals(className)) {
-			// HALocalConnectionFactory
-			cf = HALocalConnectionFactory.create();
-			
 		} else {
 			throw new ConfigurationException(CLASSNAME, "Unknown class : " + className); 
 		}
@@ -227,8 +211,6 @@ public class ConnectionFactoryMSF implements ManagedServiceFactory {
       else if (key.equals(OUTINTERCEPTORCLASS))
         continue;
       else if (key.equals(JNDINAME))
-        continue;
-      else if (key.equals(URL))
         continue;
       else if (key.equals(NAME))
         continue;

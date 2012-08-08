@@ -47,13 +47,8 @@ import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.shared.DestinationConstants;
-import org.objectweb.joram.shared.admin.AdminCommandConstant;
-import org.objectweb.joram.shared.admin.AdminCommandReply;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -104,21 +99,6 @@ public final class AdminModule {
     return wrapper;
   }
   
-  /** <code>true</code> if the underlying JORAM server is HA */
-  private static boolean isHa = false;
-
-  /**
-   * Tells that the server is an HA one. It allows to build the right connection
-   * factory needed to connect to the server.
-   * 
-   * @param isHa
-   * 
-   * @deprecated Only connect method with connection factory must be used with HA servers. 
-   */
-  public static void setHa(boolean isHa) {
-    AdminModule.isHa = isHa;
-  }
-
   public static Logger logger = Debug.getLogger(AdminModule.class.getName());
 
   /**
@@ -468,17 +448,8 @@ public final class AdminModule {
                                 int cnxTimer,
                                 String reliableClass,
                                 String identityClass) throws UnknownHostException, ConnectException, AdminException {
-    ConnectionFactory cf =null;
-
-    if (isHa) {
-      String urlHa = "hajoram://" + host + ":" + port;
-      cf = HATcpConnectionFactory.create(urlHa);
-
-    } else {
-      cf = TcpConnectionFactory.create(host, port, reliableClass);
-    }
+    ConnectionFactory cf = TcpConnectionFactory.create(host, port, reliableClass);
     cf.getParameters().connectingTimer = cnxTimer;
-
     doConnect(cf, name, password, identityClass);
   }
 
@@ -542,15 +513,7 @@ public final class AdminModule {
    */
   public static void doCollocatedConnect(String name, String password,
                                          String identityClass) throws ConnectException, AdminException {
-    if (isHa) {
-      doConnect(HALocalConnectionFactory.create(),
-                name, password,
-                identityClass);
-    } else {
-      doConnect(LocalConnectionFactory.create(),
-                name, password,
-                identityClass);
-    }
+    doConnect(LocalConnectionFactory.create(), name, password, identityClass);
   }
 
   /**

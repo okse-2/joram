@@ -130,11 +130,10 @@ public class A3CommandsImpl implements A3Commands {
   public void startServer() {
     short sid = getShortProperty(AGENT_SERVER_ID_PROPERTY, (short) 0);
     String path = getProperty(AGENT_SERVER_STORAGE_PROPERTY, "s"+sid);
-    short clusterId = getShortProperty(AGENT_SERVER_CLUSTERID_PROPERTY, AgentServer.NULL_ID);
     System.out.print("Server starting... "); System.out.flush();
     try {
       LoggerFactory f = null;
-      AgentServer.init(sid,path,f,clusterId);
+      AgentServer.init(sid,path,f);
       AgentServer.start();
     } catch (Exception e) {
       System.err.println("Error: "+e.getMessage());

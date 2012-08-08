@@ -46,10 +46,6 @@
       <artifactId>a3-common</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>jgroups</groupId>
-      <artifactId>jgroups-all</artifactId>
-    </dependency>
     
     <!-- Used for MySqlDBRepository. -->
     <dependency>

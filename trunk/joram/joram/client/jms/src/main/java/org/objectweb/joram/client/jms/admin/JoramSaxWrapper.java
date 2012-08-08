@@ -48,7 +48,6 @@ import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -91,8 +90,6 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_ADMINMODULE = "AdminModule";
   /** Syntaxic name for connect element */
   static final String ELT_CONNECT = "connect";
-  /** Syntaxic name for haConnect element */
-  static final String ELT_HACONNECT = "haConnect";
   /** Syntaxic name for collocatedConnect element */
   static final String ELT_COLLOCATEDCONNECT = "collocatedConnect";
   /** Syntaxic name for ConnectionFactory element */
@@ -101,10 +98,6 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_TCP = "tcp";
   /** Syntaxic name for local element */
   static final String ELT_LOCAL = "local";
-  /** Syntaxic name for hatcp element */
-  static final String ELT_HATCP = "hatcp";
-  /** Syntaxic name for halocal element */
-  static final String ELT_HALOCAL = "halocal";
   /** Syntaxic name for jndi element */
   static final String ELT_JNDI = "jndi";
   /** Syntaxic name for Server element */
@@ -424,33 +417,6 @@ public class JoramSaxWrapper extends DefaultHandler {
         identityClass = atts.getValue(ATT_IDENTITYCLASS);
         if (!isSet(identityClass))
           identityClass = SimpleIdentity.class.getName();
-      } else if (rawName.equals(ELT_HACONNECT)) {
-        // Get the ha url for administrator connection.
-        url = atts.getValue(ATT_URL);
-        if (!isSet(url))
-          throw new SAXException("URL for HA connection is not defined.");
-        // Get the username for administrator connection.
-        name = atts.getValue(ATT_NAME);
-        if (!isSet(name))
-          name = AbstractConnectionFactory.getDefaultRootLogin();
-        // Get the password for administrator connection.
-        password = atts.getValue(ATT_PASSWORD);
-        if (!isSet(password))
-          password = AbstractConnectionFactory.getDefaultRootPassword();
-        try {
-          // Get the CnxTimer attribute for administrator connection.
-          String value = atts.getValue(ATT_CNXTIMER);
-          if (value == null)
-            cnxTimer = 60;
-          else
-            cnxTimer = Integer.parseInt(value);
-        } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for cnxTimer: " + atts.getValue(ATT_CNXTIMER));
-        }
-        // Get identity class name.
-        identityClass = atts.getValue(ATT_IDENTITYCLASS);
-        if (!isSet(identityClass))
-          identityClass = SimpleIdentity.class.getName();
 
       } else if (rawName.equals(ELT_COLLOCATEDCONNECT)) {
         name = atts.getValue(ATT_NAME);
@@ -484,10 +450,6 @@ public class JoramSaxWrapper extends DefaultHandler {
         }
         reliableClass = atts.getValue(ATT_RELIABLECLASS);
       } else if (rawName.equals(ELT_LOCAL)) {
-      } else if (rawName.equals(ELT_HATCP)) {
-        url = atts.getValue(ATT_URL);
-        reliableClass = atts.getValue(ATT_RELIABLECLASS);
-      } else if (rawName.equals(ELT_HALOCAL)) {
       } else if (rawName.equals(ELT_JNDI)) {
         jndiName = atts.getValue(ATT_NAME);
       } else if (rawName.equals(ELT_SERVER)) {
@@ -748,18 +710,6 @@ public class JoramSaxWrapper extends DefaultHandler {
           cnx = cf.createConnection(name, password);
           cnx.start();
           wrapper = new AdminWrapper(cnx);
-        } else if (rawName.equals(ELT_HACONNECT)) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,
-                       "JoramSaxWrapper creates wrapper (HA): " + url + ',' + name);
-          
-          ConnectionFactory cf = HATcpConnectionFactory.create(url);
-          cf.getParameters().connectingTimer = cnxTimer;
-          cf.setIdentityClassName(identityClass);
-
-          cnx = cf.createConnection(name, password);
-          cnx.start();
-          wrapper = new AdminWrapper(cnx);
         } else if (rawName.equals(ELT_COLLOCATEDCONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
@@ -822,29 +772,6 @@ public class JoramSaxWrapper extends DefaultHandler {
             throw new SAXException(exc.getMessage());
           }
         } else if (rawName.equals(ELT_LOCAL)) {
-          try {
-            Class<?> clazz = Class.forName(className);
-            Method methode = clazz.getMethod("create", new Class[0]);
-            obj = methode.invoke(null, new Object[0]);
-          } catch (Throwable exc) {
-            logger.log(BasicLevel.ERROR,
-                       "JoramSaxWrapper: Cannot instantiate " + className, exc);
-            throw new SAXException(exc.getMessage());
-          }
-        } else if (rawName.equals(ELT_HATCP)) {
-          try {
-            Class<?> clazz = Class.forName(className);
-            Class<?>[] classParams = {new String().getClass(),
-                                    new String().getClass()};
-            Method methode = clazz.getMethod("create",classParams);
-            Object[] objParams = {url,reliableClass};
-            obj = methode.invoke(null,objParams);
-          } catch (Throwable exc) {
-            logger.log(BasicLevel.ERROR,
-                       "JoramSaxWrapper: Cannot instantiate " + className, exc);
-            throw new SAXException(exc.getMessage());
-          }
-        } else if (rawName.equals(ELT_HALOCAL)) {
           try {
             Class<?> clazz = Class.forName(className);
             Method methode = clazz.getMethod("create", new Class[0]);

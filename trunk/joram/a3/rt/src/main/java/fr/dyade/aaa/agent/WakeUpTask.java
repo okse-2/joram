@@ -75,10 +75,6 @@ public class WakeUpTask extends TimerTask {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Schedule wake up task, period=" + period);
 
-    // Don't schedule on HA slaves.
-    if (AgentServer.isHAServer() && !AgentServer.isMasterHAServer())
-      return;
-
     if (period > 0) {
       try {
         Timer timer = AgentServer.getTimer();

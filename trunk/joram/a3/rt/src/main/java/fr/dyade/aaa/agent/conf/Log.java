@@ -1,6 +1,6 @@
 package fr.dyade.aaa.agent.conf;
 
-import org.objectweb.util.monolog.api.*;
+import org.objectweb.util.monolog.api.Logger;
 
 public class Log {
 
