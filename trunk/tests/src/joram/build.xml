@@ -19,7 +19,6 @@
   <target name="tests.all"
            description=" --> launch all joram tests">
      <ant dir="." antfile="build.xml" target="tests.noperf.all"/>
-     <!-- ant dir="." antfile="build.xml" target="tests.ha"/-->
      <ant dir="." antfile="build.xml" target="tests.perf"/>
    </target>
   
@@ -175,19 +174,6 @@
     <antcall target="base.test_ExcpList_T"/>
 	<antcall target="base.test_Exceptions"/>
   </target>
-
-  <target name="tests.ha"
-          description=" --> launch all ha tests">
-    <antcall target="ha.test1"/>
-    <antcall target="ha.test2-1"/>
-    <antcall target="ha.test2-2"/>
-    <antcall target="ha.test3-1"/>
-    <antcall target="ha.test3-2"/>
-    <antcall target="ha.test4-1"/>
-    <antcall target="ha.test4-2"/>
-    <antcall target="ha.test5-1"/>
-    <antcall target="ha.test5-2"/>
-    </target>
 
   <target name="tests.recovery"
           description=" --> launch all recovery tests">
@@ -1236,172 +1222,6 @@
   </target>
 	
   <!-- end test base -->
-
-  <!-- test ha -->
-  <target name="ha.test1" depends="compile"
-          description=" --> test ha.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest"/>
-      <param name="testid" value="ha.test1"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs" value=""/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test2-1" depends="compile"
-          description=" --> test ha - colocated client with queue.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest2"/>
-      <param name="testid" value="ha.test2-1"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs" value="-Ddest=queue"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test2-2" depends="compile"
-          description=" --> test ha - colocated client with topic.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest2"/>
-      <param name="testid" value="ha.test2-2"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs" value="-Ddest=topic"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test3-1" depends="compile"
-          description=" --> test ha with important message load on queue.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest3"/>
-      <param name="testid" value="ha.test3-1"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs" value="-Ddest=queue"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test3-2" depends="compile"
-          description=" --> test ha with important message load on topic.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest3"/>
-      <param name="testid" value="ha.test3-2"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs" value="-Ddest=topic"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test4-1" depends="compile"
-          description=" --> test ha with a colocated client (Topic).">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest4"/>
-      <param name="testid" value="ha.test4-1"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs"
-             value="-DnbRound=100 -DmsgPerRound=50 -Dpause=1000 -Ddest=topic"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test4-2" depends="compile"
-          description=" --> test ha with a colocated client (Queue).">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest4"/>
-      <param name="testid" value="ha.test4-2"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs"
-             value="-DnbRound=50 -DmsgPerRound=25 -Dpause=1000 -Ddest=queue"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test4-1.long" depends="compile"
-          description=" --> test ha with a colocated client.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest4"/>
-      <param name="testid" value="ha.test4.long"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs"
-             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Ddest=topic"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test4-2.long" depends="compile"
-          description=" --> test ha with a colocated client.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest4"/>
-      <param name="testid" value="ha.test4.long"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs"
-             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Ddest=queue"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test5-1" depends="compile"
-          description=" --> test ha with a TCP client.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest5"/>
-      <param name="testid" value="ha.test5-1"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs"
-             value="-DnbRound=100 -DmsgPerRound=50 -Dpause=500 -Ddest=topic"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test5-2" depends="compile"
-          description=" --> test ha with a TCP client.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest5"/>
-      <param name="testid" value="ha.test5-2"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs"
-             value="-DnbRound=100 -DmsgPerRound=50 -Dpause=1000 -Ddest=queue"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test5-1.long" depends="compile"
-          description=" --> test ha with a TCP client.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest5"/>
-      <param name="testid" value="ha.test5.long"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs"
-             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Ddest=topic"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="ha.test5-2.long" depends="compile"
-          description=" --> test ha with a TCP client.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest5"/>
-      <param name="testid" value="ha.test5.long"/>
-      <param name="jndiconf" value="ha/jndi.properties"/>
-      <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs"
-             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Ddest=queue"/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-  <!-- fin test ha -->
 
   <!-- test recovery -->
   <target name="recovery.test1" depends="init.a3props,compile"
