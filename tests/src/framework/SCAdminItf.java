@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,18 +46,6 @@ public interface SCAdminItf {
    *          additional arguments given when launching the server
    */
   public void startAgentServer(short sid, String[] jvmargs) throws Exception;
-
-  /**
-   * Starts a new AgentServer.
-   * 
-   * @param sid
-   *          id of the server to start
-   * @param cid
-   *          cluster id of the server to start
-   * @param jvmargs
-   *          additional arguments given when launching the server
-   */
-  public void startAgentServer(short sid, short cid, String[] jvmargs) throws Exception;
 
   /**
    * Kills a given AgentServer. The server must have been started with this
