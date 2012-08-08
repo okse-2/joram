@@ -38,7 +38,6 @@ import org.objectweb.util.monolog.api.Logger;
 import org.objectweb.util.monolog.api.LoggerFactory;
 
 import fr.dyade.aaa.agent.conf.A3CML;
-import fr.dyade.aaa.agent.conf.A3CMLCluster;
 import fr.dyade.aaa.agent.conf.A3CMLConfig;
 import fr.dyade.aaa.agent.conf.A3CMLDomain;
 import fr.dyade.aaa.agent.conf.A3CMLNat;
@@ -47,7 +46,6 @@ import fr.dyade.aaa.agent.conf.A3CMLProperty;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 import fr.dyade.aaa.common.Configuration;
-import fr.dyade.aaa.common.monitoring.MonitoringTimerTask;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -315,29 +313,6 @@ public final class AgentServer {
     return transaction;
   }
 
-  private static JGroups jgroups = null;
-  private static short clusterId = NULL_ID;
-  
-  /**
-   * Test HA server.
-   * 
-   * @return true if the server is HA.
-   */
-  public static boolean isHAServer() {
-    return (jgroups != null);
-  }
-
-  /**
-   * Test if the server is a master (coordinator).
-   * 
-   * @return true if the server HA is a master.
-   */
-  public static boolean isMasterHAServer() {
-    if (jgroups != null)
-      return jgroups.isCoordinator();
-    return false;
-  }
-  
   /**
    * Static references to all messages consumers initialized in this
    * agent server (including <code>Engine</code>).
@@ -445,10 +420,6 @@ public final class AgentServer {
 
   public final static short getServerId() {
     return serverId;
-  }
-
-  public final static short getClusterId() {
-    return clusterId;
   }
 
   private static String name = null;
@@ -682,7 +653,7 @@ public final class AgentServer {
    * initialized.
    */
   private static void configure() throws Exception {
-    A3CMLServer root = getConfig().getServer(serverId, clusterId);
+    A3CMLServer root = getConfig().getServer(serverId);
     //Allocates the temporary descriptors hashtable for each server.
     servers = new ServersHT();
     // Initialized the descriptor of current server in order to permit
@@ -703,24 +674,6 @@ public final class AgentServer {
 
       ServerDesc desc = createServerDesc(server);
       addServerDesc(desc);
-    }
-
-    // for clusters
-    for (Enumeration<A3CMLCluster> c = getConfig().clusters.elements(); c.hasMoreElements();) {
-      A3CMLCluster cluster = c.nextElement();
-
-      for (Enumeration<A3CMLServer> s = cluster.servers.elements(); s.hasMoreElements();) {
-        A3CMLServer server = s.nextElement();
-        if (server.sid == root.sid) continue;
-
-        ServerDesc desc = servers.get(server.sid);
-        if (desc == null) {
-          desc = createServerDesc(server);
-          addServerDesc(desc);
-        } else {
-          desc.addSockAddr(server.hostname, server.port);
-        }
-      }
     }
 
     initServices(root, local);
@@ -747,17 +700,6 @@ public final class AgentServer {
     engine = Engine.newInstance();
     addConsumer("local", engine);
 
-    // if JGroups
-    if (clusterId > NULL_ID) {
-      jgroups = new JGroups();
-      if (engine instanceof HAEngine) {
-        jgroups.setEngine((HAEngine) engine);
-        ((HAEngine) engine).setJGroups(jgroups);
-      } else
-        logmon.log(BasicLevel.ERROR, getName() + ", createConsumers(" + root + ")\n" +
-                   "engine [" + engine + "] is not a HAEngine");
-    }
-
     // Search all directly accessible domains.
     for (Enumeration<A3CMLNetwork> n = root.networks.elements(); n.hasMoreElements();) {
       A3CMLNetwork network = n.nextElement();
@@ -769,11 +711,6 @@ public final class AgentServer {
         // Initializes it with domain description. Be careful, this array
         // is kept in consumer, don't reuse it!!
         consumer.init(domain.name, network.port, domain.getServersId());
-        if (consumer instanceof SimpleNetwork && jgroups != null) {
-          //NTA modify to SimpleHANetwork
-          ((SimpleNetwork) consumer).setJGroups(jgroups);
-          jgroups.setNetWork((SimpleNetwork) consumer);
-        }
 //         domain.consumer = consumer;
         addConsumer(network.domain, consumer);
       } catch (ClassNotFoundException exc) {
@@ -786,15 +723,14 @@ public final class AgentServer {
     }
   }
 
-  public static void initServerDesc(ServerDesc desc,
-                             A3CMLServer server) throws Exception {
+  public static void initServerDesc(ServerDesc desc, A3CMLServer server) throws Exception {
     desc.gateway = server.gateway;
     // For each server set the gateway to the real next destination of
     // messages; if the server is directly accessible: itself.
     if ((desc.gateway == -1) || (desc.gateway == server.sid)) {
       desc.gateway = server.sid;
       desc.updateSockAddr(desc.getHostname(), server.port);   
-      A3CMLServer current = getConfig().getServer(getServerId(),getClusterId());
+      A3CMLServer current = getConfig().getServer(getServerId());
       if (current.containsNat(server.sid)) {
         A3CMLNat nat = current.getNat(server.sid);
         desc.updateSockAddr(nat.host, nat.port);
@@ -833,7 +769,7 @@ public final class AgentServer {
     }
   }
   
-  private static void setProperties(short sid, short cid) throws Exception {
+  private static void setProperties(short sid) throws Exception {
     if (a3config == null) return;
 
     // add global properties
@@ -848,31 +784,7 @@ public final class AgentServer {
       }
     }
 
-    A3CMLServer server = null;
-    if (cid != NULL_ID) {
-      A3CMLCluster cluster = null;
-      cluster = a3config.getCluster(sid);
-
-      // add cluster properties
-      if (cluster != null 
-          && cluster.properties != null 
-          && cluster.properties.size() > 0) {
-        Enumeration<A3CMLProperty> e = cluster.properties.elements();
-        do {
-          A3CMLProperty p = e.nextElement();
-          Configuration.putProperty(p.name, p.value);
-
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       getName() + " : Adds cluster property: " +
-                       p.name + " = " + p.value);
-        } while (e.hasMoreElements());
-      }
-      if (cluster != null)
-        server = cluster.getServer(cid);
-    } else {
-      server = a3config.getServer(sid);
-    }
+    A3CMLServer server = a3config.getServer(sid);
 
     // add server properties
     if (server != null && server.properties != null) {
@@ -942,13 +854,8 @@ public final class AgentServer {
       throw new Exception("usage: java <main> sid storage");
     }
     String path = args[1];
-    short cid = NULL_ID;
-    try {
-      if (args.length == 3)
-      cid = (short) Integer.parseInt(args[2]);
-    } catch (NumberFormatException exc) {}
 
-    init(sid, path, null, cid);
+    init(sid, path, null);
 
     return 2;
   }
@@ -1037,33 +944,7 @@ public final class AgentServer {
   public static void init(short sid,
                           String path,
                           LoggerFactory loggerFactory) throws Exception {
-    init(sid, path, loggerFactory, NULL_ID);
-  }
-
- /**
-   * Initializes this agent server.
-   * <code>start</code> function is then called to start this agent server
-   * execution. Between the <code>init</code> and </code>start</code> calls,
-   * agents may be created and deployed, and notifications may be sent using
-   * the <code>Channel</code> <code>sendTo</code> function.
-   *
-   * @param sid		the server id
-   * @param path        the persistency directory.
-   * @param loggerFactory the monolog LoggerFactory;
-   * @param cid		the cluster id
-   * 	
-   *
-   * @exception Exception
-   *	unspecialized exception
-   */
-  public static void init(short sid,
-                          String path,
-                          LoggerFactory loggerFactory,
-                          short cid) throws Exception {
-    if (cid == NULL_ID)
-      name = new StringBuffer("AgentServer#").append(sid).toString();
-    else
-      name = new StringBuffer("AgentServer#").append(sid).append('.').append(cid).toString();
+    name = new StringBuffer("AgentServer#").append(sid).toString();
 
     if (loggerFactory != null) Debug.setLoggerFactory(loggerFactory);
     logmon = Debug.getLogger(AgentServer.class.getName() + ".#" + sid);
@@ -1183,11 +1064,8 @@ public final class AgentServer {
         }
       }
 
-      // if JGroups
-      if (cid > NULL_ID) clusterId = cid;
-      
       // set properties
-      setProperties(serverId, clusterId);
+      setProperties(serverId);
 
       if (transaction == null) {
         try {
@@ -1319,9 +1197,6 @@ public final class AgentServer {
       // initializes fixed agents
       engine.init();
 
-      // If the server is part of an HA group starts the JGroup component
-      if (jgroups != null) jgroups.init(sid);
-
       logmon.log(BasicLevel.WARN,
                  getName() + ", initialized at " + new Date());
 
@@ -1360,34 +1235,6 @@ public final class AgentServer {
     }
   }
 
-  // TODO (AF): Used only with JGroups !!
-  static String startConsumers() throws Exception {
-    StringBuffer errBuf = null;
-
-    // Now we can start all networks.
-    if (consumers != null) {
-      for (Enumeration<MessageConsumer> c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-        MessageConsumer cons = c.nextElement();
-        if (cons != null) {
-          try {
-            if (! (cons instanceof Engine)) {
-              cons.start();
-            }
-          } catch (IOException exc) {
-            if (errBuf == null) errBuf = new StringBuffer();
-            errBuf.append(cons.getName()).append(": ");
-            errBuf.append(exc.getMessage()).append('\n');
-            logmon.log(BasicLevel.FATAL,
-                       getName() + ", problem during " + cons.getName() + " starting", exc);
-          }
-        }
-      }
-    }
-
-    if (errBuf == null) return null;
-    return errBuf.toString();
-  }
-
   /**
    *  Causes this AgentServer to begin its execution. This method starts all
    * <code>MessageConsumer</code> (i.e. the engine and the network components).
@@ -1408,13 +1255,10 @@ public final class AgentServer {
     StringBuffer errBuf = null;
     try {
       try {
-        if (jgroups == null) {
           ServiceManager.start();
           // with osgi, ServiceManager start asynchronously, we can't save here.
           // ServiceManager.save(); //NTA
-          logmon.log(BasicLevel.INFO,
-                     getName() + ", ServiceManager started");
-        }
+          logmon.log(BasicLevel.INFO, getName() + ", ServiceManager started");
       } catch (Exception exc) {
         logmon.log(BasicLevel.FATAL,
                    getName() + ", can't start services", exc);
@@ -1427,9 +1271,7 @@ public final class AgentServer {
           MessageConsumer cons = c.nextElement();
           if (cons != null) {
             try {
-              if ((jgroups == null) || (cons instanceof Engine)) {
-                cons.start();
-              }
+              cons.start();
             } catch (IOException exc) {
               if (errBuf == null) errBuf = new StringBuffer();
               errBuf.append(cons.getName()).append(": ");
@@ -1565,9 +1407,6 @@ public final class AgentServer {
         timer.cancel();
       timer = null;
       
-      // If the server is part of an HA group stops the JGroup component
-      if (jgroups != null) jgroups.disconnect();
-
       // Stop all message consumers.
       if (consumers != null) {
         for (Enumeration<MessageConsumer> c=AgentServer.getConsumers(); c.hasMoreElements(); ) {

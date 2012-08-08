@@ -43,8 +43,6 @@ public class A3CML {
   static final String ELT_PROPERTY = "property";
   /** Syntaxic name for nat element */
   static final String ELT_NAT = "nat";
-  /** Syntaxic name for cluster element */
-  static final String ELT_CLUSTER = "cluster";
   /** Syntaxic name for id attribute */
   static final String ATT_ID = "id";
   /** Syntaxic name for name attribute */
@@ -126,45 +124,6 @@ public class A3CML {
       out.write("\n");
     }
 
-    // write all know cluster.
-    for (Enumeration e = config.clusters.elements();
-         e.hasMoreElements();) {
-      Object obj = e.nextElement();
-
-      if (obj instanceof A3CMLCluster) {
-        A3CMLCluster cluster = (A3CMLCluster) obj;
-        out.write(TAB + "<" + ELT_CLUSTER + " " + ATT_ID + "=\"");
-        out.write(Short.toString(cluster.sid));
-        out.write("\" " + ATT_NAME + "=\"");
-        out.write(cluster.name);
-        out.write("\">\n");
-
-        // write all cluster property
-        for (Enumeration e2 = cluster.properties.elements();
-             e2.hasMoreElements();) {
-          A3CMLProperty p = (A3CMLProperty) e2.nextElement();
-          out.write(TAB +
-                    "<" + ELT_PROPERTY + " " +
-                    ATT_NAME + "=\"");
-          out.write(p.name);
-          out.write("\" " +
-                    ATT_VALUE + "=\"");
-          out.write(p.value);
-          out.write("\"/>\n");
-        }
-        out.write("\n");
-        
-        for (Enumeration e2 = cluster.servers.elements();
-             e2.hasMoreElements();) {
-          Object o = e2.nextElement();
-          if (o instanceof A3CMLServer)
-            writeToXMLServer(o,out);
-        }
-        out.write(TAB + "</" + ELT_CLUSTER + ">\n");
-      }
-      out.write("\n");
-    }
-    
     out.write("</" + ELT_CONFIG + ">\n");
     out.flush();
   }

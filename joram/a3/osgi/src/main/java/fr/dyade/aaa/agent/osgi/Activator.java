@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,8 +36,6 @@ public class Activator implements BundleActivator {
 
   public static final String AGENT_SERVER_ID_PROPERTY = "fr.dyade.aaa.agent.AgentServer.id";
 
-  public static final String AGENT_SERVER_CLUSTERID_PROPERTY = "fr.dyade.aaa.agent.AgentServer.clusterid";
-
   public static final String AGENT_SERVER_STORAGE_PROPERTY = "fr.dyade.aaa.agent.AgentServer.storage";
 
   public static BundleContext context;
@@ -47,10 +45,8 @@ public class Activator implements BundleActivator {
 
     short sid = getShortProperty(AGENT_SERVER_ID_PROPERTY, (short) 0);
     String path = getProperty(AGENT_SERVER_STORAGE_PROPERTY, "s" + sid);
-    short cid = getShortProperty(AGENT_SERVER_CLUSTERID_PROPERTY, AgentServer.NULL_ID);
-
     try {
-      AgentServer.init(sid, path, null, cid);
+      AgentServer.init(sid, path, null);
     } catch (Exception exc) {
       System.out.println(AgentServer.getName() + "initialization failed: " + AgentServer.ERRORSTRING);
       System.out.println(exc.toString());

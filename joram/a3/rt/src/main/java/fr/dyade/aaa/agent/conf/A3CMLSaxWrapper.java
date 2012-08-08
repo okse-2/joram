@@ -81,11 +81,6 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
    * end element.
    */
   A3CMLNat nat = null;
-  /**
-   * Working attribute used during cluster' definition between  start and
-   * end element.
-   */
-  A3CMLCluster cluster = null;
 
   /**
    * Parses the xml file named <code>cfgFileName</code> and calls handler 
@@ -215,20 +210,6 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
         } catch (Exception exc) {
           throw new SAXException(exc.getMessage());
         }
-      } else if (name.equals(A3CML.ELT_CLUSTER)) {
-        try {
-          short sid;
-          try {
-            sid = Short.parseShort(atts.getValue(A3CML.ATT_ID));
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for cluster id: " +
-                                atts.getValue(A3CML.ATT_ID));
-          }
-          cluster = new A3CMLCluster(sid,
-                                     atts.getValue(A3CML.ATT_NAME));
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage());
-        }
       } else if (name.equals(A3CML.ELT_NETWORK)) {
         try {
           int port;
@@ -288,14 +269,8 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
           a3cmlConfig.addDomain(domain);
           domain = null;
         } else if (name.equals(A3CML.ELT_SERVER)) {
-          if (cluster == null)
-            a3cmlConfig.addServer(server);
-          else
-            cluster.addServer(server);
+          a3cmlConfig.addServer(server);
           server = null;
-        } else if (name.equals(A3CML.ELT_CLUSTER)) {
-          a3cmlConfig.addCluster(cluster);
-          cluster = null;
         } else if (name.equals(A3CML.ELT_NETWORK)) {
           if (server != null) {
             server.addNetwork(network);
@@ -313,12 +288,10 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
           }
           service = null;
         } else if (name.equals(A3CML.ELT_PROPERTY)) {
-          if (server ==  null && cluster == null)
+          if (server ==  null)
             a3cmlConfig.addProperty(property);	// Global property
           else if (server !=  null)
             server.addProperty(property); 	// Server property
-          else if (server ==  null && cluster != null)
-            cluster.addProperty(property); 	// Cluster property
           property = null;
         } else if (name.equals(A3CML.ELT_NAT)) {
           if (server !=  null)
@@ -327,8 +300,6 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
         } else if (name.equals(A3CML.ELT_JVM_ARGS)) {
           if (server != null && jvmArgs != null)
             server.jvmArgs = jvmArgs;
-          else if (server ==  null && cluster != null)
-            cluster.jvmArgs = jvmArgs;
           jvmArgs = null;
         } else {
           throw new SAXException("unknown element \"" + name + "\"");

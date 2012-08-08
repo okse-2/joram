@@ -1111,7 +1111,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   private void doProcess(AgentId replyTo, String msgId) {
     try {
       A3CMLConfig config = AgentServer.getConfig();
-      A3CMLServer a3cmlServer = config.getServer(AgentServer.getServerId(), AgentServer.getClusterId());
+      A3CMLServer a3cmlServer = config.getServer(AgentServer.getServerId());
       distributeReply(replyTo, msgId,
                       new GetLocalServerRep(a3cmlServer.sid,
                                             a3cmlServer.name,

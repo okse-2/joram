@@ -56,7 +56,6 @@ import fr.dyade.aaa.common.Debug;
  * The reserved words for properties:
  * <ul>
  *  <li> sid
- *  <li> cid
  *  <li> storage
  *  <li> pathToConf
  * </ul>
@@ -83,15 +82,12 @@ public class A3ManagedService implements ManagedService, BundleActivator {
 	// The reserved words.
 	/** the server id */
 	public static final String SID = "sid";
-	/** the cluster id */
-	public static final String CID = "cid";
 	/** persistence directory */
 	public static final String STORAGE = "storage";
 	/** the path to the configuration (a3servers.xml, ...) */
 	public static final String PATH_TO_CONF = "pathToConf";
 	
 	private short sid = 0;
-	private short cid = AgentServer.NULL_ID;
 	private String path = "s0";
 	
   private BundleContext bundleContext;
@@ -125,7 +121,7 @@ public class A3ManagedService implements ManagedService, BundleActivator {
   	if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "A3ManagedService.doStart()");
   	 try {
-       AgentServer.init(sid, path, null, cid);
+       AgentServer.init(sid, path, null);
      } catch (Exception exc) {
        logmon.log(BasicLevel.ERROR, AgentServer.getName() + " initialization failed", exc);
        throw exc;
@@ -194,11 +190,6 @@ public class A3ManagedService implements ManagedService, BundleActivator {
   		sid = new Short(sidStr).shortValue();
   	}
   	
-		String cidStr = (String) properties.get(CID);
-		if (cidStr != null && cidStr.length() > 0) {
-  		cid = new Short(cidStr).shortValue();
-  	}
-		
 		DefaultSubstitutionEngine engine = new DefaultSubstitutionEngine();
 		ChainedResolver resolver = new ChainedResolver();
 		resolver.getResolvers().add(new PropertiesResolver(System.getProperties()));
@@ -218,7 +209,7 @@ public class A3ManagedService implements ManagedService, BundleActivator {
 		Enumeration en = properties.keys();
 		while (en.hasMoreElements()) {
 	    String key = (String) en.nextElement();
-	    if (SID.equals(key) || CID.equals(key) || STORAGE.equals(key) || PATH_TO_CONF.equals(key)) {
+	    if (SID.equals(key) || STORAGE.equals(key) || PATH_TO_CONF.equals(key)) {
 	    	// reserved word.
 	    	continue;
 	    } else {

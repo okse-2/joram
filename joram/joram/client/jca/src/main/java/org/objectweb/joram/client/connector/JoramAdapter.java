@@ -45,8 +45,6 @@ import org.objectweb.joram.client.jms.admin.AdminItf;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.JoramAdmin;
 import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.mom.proxies.tcp.TcpProxyService;
@@ -131,17 +129,6 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     this.serverPort = serverPort.intValue();
   }
 
-  /** URL hajoram (for collocated mode). */
-  private String haURL = null;
-
-  public String getHAURL() {
-    return haURL;
-  }
-
-  public void setHAURL(String haURL) {
-    this.haURL = haURL;
-  }
-
   /** login name for administrator. */
   String rootName = "root";
 
@@ -198,27 +185,6 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
 
   public void setStorage(String storage) {
     this.storage = storage;
-  }
-
-  /** Identifier of the JORAM replica to start in case of HA. */
-  short clusterId = AgentServer.NULL_ID;
-
-  /** <code>true</code> if the underlying a JORAM HA server is defined */
-  boolean isHa = false;
-  
-  public Boolean getIsHa() {
-  	return new Boolean(isHa);
-  }
-
-  public Short getClusterId() {
-    return new Short(clusterId);
-  }
-  
-  public void setClusterId(Short clusterId) {
-    this.clusterId = clusterId.shortValue();
-    if (this.clusterId != AgentServer.NULL_ID){
-      this.isHa = true;
-    }
   }
 
   /**
@@ -373,9 +339,6 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
    super.start();
    status.value = Status.STARTING;
    
-//    // set HA mode if needed
-//    wrapper.setHa(isHa);
-    
     if (logger.isLoggable(BasicLevel.INFO))
   		logger.log(BasicLevel.INFO, "JORAM adapter:: Start the Joram server : " + startJoramServer);
 
@@ -409,7 +372,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     		}
 
     		try {
-    			AgentServer.init(serverId, storage, null, clusterId);
+    			AgentServer.init(serverId, storage, null);
     			AgentServer.start();
     			joramPort = AgentServer.getServiceArgs(AgentServer.getServerId(), TcpProxyService.class.getName());
     			if (serverPort < 0 && joramPort != null && joramPort.length() > 0)
@@ -514,25 +477,10 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     try {
       org.objectweb.joram.client.jms.ConnectionFactory cf;
 
-      if (isHa) {
-        if (collocated) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "haURL = " + haURL);
-          if (haURL != null) {
-            cf = HATcpConnectionFactory.create(haURL);
-          } else {
-            cf = HALocalConnectionFactory.create();
-          }
-        } else {
-          String urlHa = "hajoram://" + hostName + ":" + serverPort;
-          cf = HATcpConnectionFactory.create(urlHa);
-        }
-      } else {
-        if (collocated)
-          cf = LocalConnectionFactory.create();
-        else
-          cf = TcpConnectionFactory.create(hostName, serverPort);
-      }
+      if (collocated)
+        cf = LocalConnectionFactory.create();
+      else
+        cf = TcpConnectionFactory.create(hostName, serverPort);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
   			logger.log(BasicLevel.DEBUG, "adminConnect: cf = " + cf);

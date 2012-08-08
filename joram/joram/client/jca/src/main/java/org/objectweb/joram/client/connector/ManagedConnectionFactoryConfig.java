@@ -38,9 +38,6 @@ public class ManagedConnectionFactoryConfig implements java.io.Serializable {
 	/** <code>true</code> for collocated outbound connectivity. */
   private boolean collocated = false;
 
-  /** <code>true</code> for ha mode */
-  private boolean isHa = false;
-
   /** Underlying JORAM server host name. */
   private String hostName = "localhost";
   /** Underlying JORAM server port number. -1 if collocated */
@@ -179,9 +176,6 @@ public class ManagedConnectionFactoryConfig implements java.io.Serializable {
    */
   private String outInterceptors = null;
 
-  /** URL hajoram (for collocated mode). */
-  private String haURL = null;
-  
   private String mode = "Unified"; // Unified | PTP | PubSub
   
   private String name = null;
@@ -323,28 +317,6 @@ public class ManagedConnectionFactoryConfig implements java.io.Serializable {
   }
 
 	/**
-   * @return the isHa
-   */
-  public boolean isHa() {
-  	return isHa;
-  }
-
-	/**
-   * @param isHa the isHa to set
-   */
-  public void setHa(boolean isHa) {
-  	this.isHa = isHa;
-  }
-  
-  public String getHAURL() {
-    return haURL;
-  }
-
-  public void setHAURL(String haURL) {
-    this.haURL = haURL;
-  }
-
-	/**
    * @return the mode
    */
   public String getMode() {
@@ -376,7 +348,6 @@ public class ManagedConnectionFactoryConfig implements java.io.Serializable {
   	name = props.getProperty("name");
   	hostName = props.getProperty("HostName", "localhost");
   	serverPort = new Integer(props.getProperty("ServerPort", "-1")).intValue();
-  	haURL = props.getProperty("HAURL", "hajoram://localhost:16010,localhost:16011");
 
   	userName = props.getProperty("UserName", "anonymous");
   	password = props.getProperty("Password", "anonymous");

@@ -39,10 +39,6 @@ import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.SecurityException;
 
 import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
-import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.local.XAQueueHALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.XAQueueHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.XAQueueLocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XAQueueTcpConnectionFactory;
@@ -124,43 +120,18 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
 //  		serverPort = -1;
 //  	}
 
-  	if (isHa()) {
-  		if (isCollocated()) {
-  			if (getHAURL() != null) {
-  				if (cxRequest instanceof QueueConnectionRequest) {
-  					factory = XAQueueHATcpConnectionFactory.create(getHAURL());
-  				} else {
-  					factory = XAHATcpConnectionFactory.create(getHAURL());
-  				}
-  			} else {          
-  				if (cxRequest instanceof QueueConnectionRequest) {
-  					factory = XAQueueHALocalConnectionFactory.create();
-  				} else {
-  					factory = XAHALocalConnectionFactory.create();
-  				}
-  			}
-  		} else {
-  			String urlHa = "hajoram://" + hostName + ":" + serverPort;
-  			if (cxRequest instanceof QueueConnectionRequest) {
-  				factory = XAQueueHATcpConnectionFactory.create(urlHa);
-  			} else {
-  				factory = XAHATcpConnectionFactory.create(urlHa);
-  			}
-  		}
+  	if (isCollocated()) {
+  	  if (cxRequest instanceof QueueConnectionRequest) {
+  	    factory = XAQueueLocalConnectionFactory.create();
+  	  } else {
+  	    factory = XALocalConnectionFactory.create();
+  	  }
   	} else {
-  		if (isCollocated()) {
-  			if (cxRequest instanceof QueueConnectionRequest) {
-  				factory = XAQueueLocalConnectionFactory.create();
-  			} else {
-  				factory = XALocalConnectionFactory.create();
-  			}
-  		} else {
-  			if (cxRequest instanceof QueueConnectionRequest) {
-  				factory = XAQueueTcpConnectionFactory.create(hostName, serverPort);
-  			} else {
-  				factory = XATcpConnectionFactory.create(hostName, serverPort);
-  			}
-  		}
+  	  if (cxRequest instanceof QueueConnectionRequest) {
+  	    factory = XAQueueTcpConnectionFactory.create(hostName, serverPort);
+  	  } else {
+  	    factory = XATcpConnectionFactory.create(hostName, serverPort);
+  	  }
   	}
   	
   	((AbstractConnectionFactory) factory).setCnxJMXBeanBaseName(ra.jmxRootName+"#"+ra.getName());

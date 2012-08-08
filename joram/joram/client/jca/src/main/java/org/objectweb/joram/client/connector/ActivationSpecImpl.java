@@ -145,31 +145,6 @@ public class ActivationSpecImpl
     this.serverPort = new Integer(serverPort).intValue();
   }
 
-  /** URL hajoram (for collocated mode). */
-  private String haURL = null;
-
-  public String getHAURL() {
-  	if (haURL == null)
-  		if (ra != null)
-  			haURL = ra.getHAURL();
-    return haURL;
-  }
-
-  public void setHAURL(String haURL) {
-    this.haURL = haURL;
-  }
-  
-  /** <code>true</code> if the underlying a JORAM HA server is defined */
-  private Boolean isHA = false;
-  
-  public void setIsHA(String isHA) {
-    this.isHA = new Boolean(isHA);
-  }
-  
-  public Boolean isHA() {
-    return new Boolean(isHA);
-  }
-  
   /**
    * Duration in seconds during which connecting is attempted (connecting
    * might take time if the server is temporarily not reachable); the 0 value
@@ -363,12 +338,10 @@ public class ActivationSpecImpl
     	// this value can be override by the MDB descriptor
     	hostName = this.ra.getHostName();
     	serverPort = this.ra.getServerPort();
-    	haURL = this.ra.getHAURL();
     	// userName = the default value is anonymous
     	// password = the default value is anonymous
     	identityClass = this.ra.getIdentityClass();
     	collocated = this.ra.getCollocated();
-    	isHA = this.ra.getIsHa();
     }
   }
 
@@ -542,13 +515,11 @@ public class ActivationSpecImpl
   	name = props.getProperty("name");
   	hostName = props.getProperty("HostName", "localhost");
   	serverPort = new Integer(props.getProperty("ServerPort", "16010")).intValue();
-  	haURL = props.getProperty("HAURL", "hajoram://localhost:16010,localhost:16011");
 
   	userName = props.getProperty("UserName", "anonymous");
   	password = props.getProperty("Password", "anonymous");
   	identityClass = props.getProperty("IdentityClass", "org.objectweb.joram.shared.security.SimpleIdentity");
   	collocated = new Boolean(props.getProperty("Collocated", "false")).booleanValue();
-  	isHA = new Boolean(props.getProperty("IsHA", "false")).booleanValue();
 
   	connectingTimer = new Integer(props.getProperty("ConnectingTimer", "0")).intValue();
   	cnxPendingTimer = new Integer(props.getProperty("CnxPendingTimer", "0")).intValue();
@@ -583,7 +554,7 @@ public class ActivationSpecImpl
 	      + maxNumberOfWorks + ", maxMessages=" + maxMessages
 	      + ", deleteDurableSubscription=" + deleteDurableSubscription + ", ra="
 	      + ra + ", collocated=" + collocated + ", hostName=" + hostName
-	      + ", serverPort=" + serverPort + ", haURL=" + haURL + ", isHA=" + isHA
+	      + ", serverPort=" + serverPort
 	      + ", connectingTimer=" + connectingTimer + ", txPendingTimer="
 	      + txPendingTimer + ", cnxPendingTimer=" + cnxPendingTimer
 	      + ", queueMessageReadMax=" + queueMessageReadMax

@@ -48,28 +48,6 @@ public class SimpleNetwork extends StreamNetwork {
   /** FIFO list of all messages to be sent by the watch-dog thread. */
   MessageSoftList sendList;
 
-  private JGroups jgroups = null;
-
-  public void setJGroups(JGroups jgroups) {
-    this.jgroups = jgroups;
-  }
-  
-  void ackMsg(JGroupsAckMsg ack) {
-    try {
-      AgentServer.getTransaction().begin();
-      //  Deletes the processed notification
-      qout.remove(ack.getStamp());
-      ack.delete();
-      AgentServer.getTransaction().commit(true);
-      if (this.logmon.isLoggable(BasicLevel.DEBUG))
-        this.logmon.log(BasicLevel.DEBUG,
-                        this.getName() + ", ackMsg(...) done.");
-    } catch (Exception exc) {
-      this.logmon.log(BasicLevel.FATAL,
-                      this.getName() + ", ackMsg unrecoverable exception", exc);
-    }
-  }
-
   /**
    * Creates a new network component.
    */

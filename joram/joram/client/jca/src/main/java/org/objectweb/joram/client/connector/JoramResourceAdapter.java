@@ -57,8 +57,6 @@ import javax.transaction.xa.XAResource;
 import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.ConnectionMetaData;
 import org.objectweb.joram.client.jms.Destination;
-import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.osgi.JndiHelper;
@@ -301,23 +299,11 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
   public String createTopic(String name) throws Exception {throw new Exception("createTopic: not yet available.");}
   
   private ConnectionFactory getConnectionFactory(ActivationSpecImpl specImpl) {
-  	ConnectionFactory cf = null;
-  	if (specImpl.isHA()) {
-      if (specImpl.getCollocated()) {
-        if (specImpl.getHAURL() != null) {
-          cf = HATcpConnectionFactory.create(specImpl.getHAURL());
-        } else {
-          cf = HALocalConnectionFactory.create();
-        }
-      } else {
-        cf = HATcpConnectionFactory.create("hajoram://" + specImpl.getHostName() + ':' + specImpl.getServerPort());
-      }
-    }  else {
-      if (specImpl.getCollocated())
-        cf = LocalConnectionFactory.create();
-      else
-        cf = TcpConnectionFactory.create(specImpl.getHostName(), specImpl.getServerPort());
-    }
+    ConnectionFactory cf = null;
+    if (specImpl.getCollocated())
+      cf = LocalConnectionFactory.create();
+    else
+      cf = TcpConnectionFactory.create(specImpl.getHostName(), specImpl.getServerPort());
 
     cf.getParameters().connectingTimer = specImpl.getConnectingTimer();
     cf.getParameters().cnxPendingTimer = specImpl.getCnxPendingTimer();

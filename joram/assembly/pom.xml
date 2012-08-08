@@ -201,10 +201,6 @@
       <artifactId>activation</artifactId>
     </dependency>
     <dependency>
-      <groupId>jgroups</groupId>
-      <artifactId>jgroups-all</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.ow2.spec.ee</groupId>
       <artifactId>ow2-connector-1.5-spec</artifactId>
     </dependency>

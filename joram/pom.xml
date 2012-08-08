@@ -174,7 +174,6 @@
     <monolog.version>5.2.0</monolog.version>
     <jcup.version>5.3.1</jcup.version>
     <jftp.version>1.52</jftp.version>
-    <jgroups-all.version>2.2.8</jgroups-all.version>
     <geronimo-jms_spec.version>1.1.1</geronimo-jms_spec.version>
     <osgi.compendium.version>4.2.0</osgi.compendium.version>
     <org.osgi.version>3.0.0</org.osgi.version>
@@ -252,11 +251,6 @@
         <artifactId>activation</artifactId>
         <version>${activation.version}</version>
         <type>jar</type>
-      </dependency>
-      <dependency>
-        <groupId>jgroups</groupId>
-        <artifactId>jgroups-all</artifactId>
-        <version>${jgroups-all.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.geronimo.specs</groupId>

@@ -46,8 +46,6 @@ import javax.resource.spi.SecurityException;
 import javax.security.auth.Subject;
 
 import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
-import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -134,29 +132,16 @@ public class ManagedConnectionFactoryImpl extends ManagedConnectionFactoryConfig
 //  		serverPort = -1;
 //  	}
   	if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createFactory hostName = " + hostName + ", serverPort = " + serverPort);
-  	
-  	if (isHa()) {
-  		if (isCollocated()) {
-  			if (getHAURL() != null) {
-  				factory = XAHATcpConnectionFactory.create(getHAURL());
-  			} else {
-  				factory = XAHALocalConnectionFactory.create();
-  			}
-  		} else {
-  			String urlHa = "hajoram://" + hostName + ":" + serverPort;
-  			factory = XAHATcpConnectionFactory.create(urlHa);
-  		}
+  	  logger.log(BasicLevel.DEBUG, this + " createFactory hostName = " + hostName + ", serverPort = " + serverPort);
+
+  	if (isCollocated()) {
+  	  factory = XALocalConnectionFactory.create();
   	} else {
-  		if (isCollocated()) {
-  			factory = XALocalConnectionFactory.create();
-  		} else {
-  			factory = XATcpConnectionFactory.create(hostName, serverPort);
-  		}
-  	}	
-  	
+  	  factory = XATcpConnectionFactory.create(hostName, serverPort);
+  	}
+
   	((AbstractConnectionFactory) factory).setCnxJMXBeanBaseName(ra.jmxRootName+"#"+ra.getName());
-  	
+
   	return factory;
   }
   
