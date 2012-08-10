@@ -22,6 +22,7 @@
  */
 package org.ow2.joram.shell.mom.commands;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +33,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.objectweb.joram.mom.dest.AdminTopicMBean;
+import org.objectweb.joram.mom.dest.Queue;
+import org.objectweb.joram.mom.dest.Topic;
 import org.objectweb.joram.mom.dest.TopicMBean;
 import org.objectweb.joram.mom.dest.QueueMBean;
 import org.objectweb.joram.mom.dest.DestinationMBean;
@@ -39,6 +42,7 @@ import org.objectweb.joram.mom.messages.MessageView;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.UserAgentMBean;
 import org.objectweb.joram.mom.util.JoramHelper;
+import org.objectweb.joram.mom.util.SynchronousAgent;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -85,7 +89,6 @@ public class MOMCommandsImpl implements MOMCommands {
   
   public static final String NAMESPACE = "joram:mom";
   private static final int TIMEOUT = 1000;
-//  private static final int DEFAULT_SID = 0;
  
   static private BundleContext bundleContext;
   static private ServiceTracker destinationTracker;
@@ -94,29 +97,6 @@ public class MOMCommandsImpl implements MOMCommands {
   static private ServiceTracker userTracker;
   static private ServiceTracker adminTracker;
   static private ServiceTracker clientSubTracker;
-
-//  public MOMCommandsImpl(BundleContext context) {
-//    this.bundleContext = context;
-//    this.destinationTracker = new ServiceTracker
-//                (bundleContext, DestinationMBean.class.getCanonicalName(), null);
-//    this.queueTracker = new ServiceTracker
-//                (bundleContext, QueueMBean.class.getCanonicalName(),       null);
-//    this.topicTracker = new ServiceTracker
-//                (bundleContext, TopicMBean.class.getCanonicalName(),       null);
-//    this.userTracker = new ServiceTracker
-//                (bundleContext, UserAgentMBean.class.getCanonicalName(),   null);
-//    this.adminTracker = new ServiceTracker
-//                (bundleContext, AdminTopicMBean.class.getCanonicalName(),  null);
-//    this.clientSubTracker = new ServiceTracker
-//                (bundleContext, ClientSubscriptionMBean.class.getCanonicalName(),  null);
-//
-//    destinationTracker.open();
-//    queueTracker.open();
-//    topicTracker.open();
-//    userTracker.open();
-//    adminTracker.open();
-//    clientSubTracker.open();
-//  }
   
   /**
    * Commands list
@@ -395,33 +375,37 @@ public class MOMCommandsImpl implements MOMCommands {
       help("create");
       return;
     }
-    byte type = 0;
-    String name= null;
-    int sid = AgentServer.getServerId();
-    String ext = null;
     
-    if(args[0].equals("topic")) {
-      type=DestinationConstants.TOPIC_TYPE;
-    }  else if(args[0].equals("queue")) {
-      type=DestinationConstants.QUEUE_TYPE;
+    if(args[0].equals("topic") || args[0].equals("queue")) {
+      createDestination(args);
     }  else if(args[0].equals("user")) {
       String[] newArgs = new String[args.length-1];
       for (int i = 1; i < args.length; i++) {
         newArgs[i-1] = args[i];
       }
-      addUser(newArgs);
+      createUser(newArgs);
       return;
     } else {
       help("create");
       return;
     }
-    
+  }
+  
+  private void createDestination(String[] args) {
+    byte type = args[0].equalsIgnoreCase("queue")?
+        DestinationConstants.QUEUE_TYPE:
+        DestinationConstants.TOPIC_TYPE;
+    String name= null;
+    short sid = AgentServer.getServerId();
+    String ext = null;
+    //TODO: Handle properties
+//    Properties props = new Properties();
     name=args[1];
-   
+    
     for(int i = 2; i < args.length; i++) {
       if(args[i].equals("-sid") && args.length>i+1) {
-        sid=Integer.parseInt(args[++i]);
-      } else if(args[i].equals("ext") && args.length>i+1) {
+        sid=Short.parseShort(args[++i]);
+      } else if(args[i].equals("-ext") && args.length>i+1) {
         ext = args[++i];
       } else {
         help("create");
@@ -429,37 +413,72 @@ public class MOMCommandsImpl implements MOMCommands {
      }
     }
     
-    AdminTopicMBean admin;
     try {
-      admin = (AdminTopicMBean) adminTracker.waitForService(TIMEOUT);
-      if(admin==null) {
-        System.err.println("Error: AdminTopic not found.");
-        return;
-      }
+      SynchronousAgent syncAgent = SynchronousAgent.getSynchronousAgent();
+      if(ext==null)
+        ext = type==DestinationConstants.QUEUE_TYPE?
+            Queue.class.getName():Topic.class.getName();
+      if(syncAgent.createDestination(sid, name, ext, null, type))
+        if(type==DestinationConstants.QUEUE_TYPE)
+          System.out.println("Queue "+name+" created on server "+sid+
+              (ext==null?".":" with the class "+ext+"."));
+        else
+          System.out.println("Topic "+name+" created on server "+sid+
+              (ext==null?".":" with the class "+ext+"."));
+      else
+        System.err.println("Error: The creation request failed.");
+    } catch (IOException e) {
+      System.err.println("Error: Couldn't retrieve the synchronous agent.");
     } catch (InterruptedException e) {
-      System.err.println("Error: Interrupted.");
+      System.err.println("Error: Interrupted while waiting for the reply.");
+    }
+  }
+  
+  /**
+   * Add a new user to the servers
+   * @param args parameters of the command
+   */
+  private void createUser(String[] args) {
+    String userName = null;
+    Scanner s = new Scanner(System.in);
+    if(args.length==0) {
+      System.out.print("User name: "); System.out.flush();
+      userName = s.nextLine();
+    } else if(args.length==1) {
+      userName = args[0];
+    } else {
+      help("addUser");
       return;
     }
-    // TODO: checks whether the destination has been properly created
-    switch(type) {
-      case DestinationConstants.QUEUE_TYPE:
-        if(ext==null)
-          admin.createQueue(name,sid);
-        else
-          admin.createQueue(name,ext,sid);
-        System.out.println(
-            "Queue "+name+" created on server "+sid+
-            (ext==null?".":" with the class "+ext+"."));
-        break;
-      case DestinationConstants.TOPIC_TYPE:
-        if(ext==null)
-          admin.createTopic(name,sid);
-        else
-          admin.createTopic(name,ext,sid);
-        System.out.println(
-            "Topic "+name+" created on server "+sid+
-            (ext==null?".":" with the class "+ext+"."));
-        break;
+    if(!userName.matches("[A-Za-z][A-Za-z0-9]{2,}?")) {
+      System.out.println("The user name must begin with a letter and contain at least 3 alhpa-numeric caracters.");
+      return;
+    }
+    
+    System.out.print("Password: "); System.out.flush();
+    String pwd = s.nextLine();
+    if(userName.length()<5) {
+      System.out.println("The password must be at least 6 caracters long.");
+      return;
+    }
+    
+    try {
+      SynchronousAgent syncAgent = SynchronousAgent.getSynchronousAgent();
+      boolean res =syncAgent.createUser(AgentServer.getServerId(),
+          userName, pwd, null, null);
+      if(res)
+        System.out.println("User "+userName+" succesfully created.");
+      else
+        System.out.println("User creation failed.");
+    } catch (ClassNotFoundException e) {
+      System.err.println("Error: Identity class not found.");
+    } catch (IOException e) {
+      System.err.println("Error: Couldn't retrieve the synchronous agent.");
+    } catch (InterruptedException e) {
+      System.err.println("Error: Interrupted while waiting for the reply.");
+    } catch (Exception e) {
+      System.err.println("Error: "+e.getClass().getName()+" received.");
+      e.printStackTrace(System.err);
     }
   }
   
@@ -500,54 +519,6 @@ public class MOMCommandsImpl implements MOMCommands {
     System.err.println("Error: "+category.toLowerCase()+" not found.");
   }
 
-  /**
-   * Add a new user to the servers
-   * @param args parameters of the command
-   */
-  private void addUser(String[] args) {
-    String userName = null;
-    Scanner s = new Scanner(System.in);
-    if(args.length==0) {
-      System.out.print("User name: "); System.out.flush();
-      userName = s.nextLine();
-    } else if(args.length==1) {
-      userName = args[0];
-    } else {
-      help("addUser");
-      return;
-    }
-    if(!userName.matches("[A-Za-z][A-Za-z0-9]{2,}?")) {
-      System.out.println("The user name must begin with a letter and contain at least 3 alhpa-numeric caracters.");
-      return;
-    }
-    
-    System.out.print("Password: "); System.out.flush();
-    String pwd = s.nextLine();
-    if(userName.length()<5) {
-      System.out.println("The password must be at least 6 caracters long.");
-      return;
-    }
-   
-    AdminTopicMBean admin;
-    try {
-      admin = (AdminTopicMBean) adminTracker.waitForService(TIMEOUT);
-      if(admin==null) {
-        System.err.println("Error: AdminTopic not found.");
-        return;
-      }      
-      //TODO: No info about the result of the creation... Now assuming it works.
-      admin.createUser(userName, pwd);
-      System.out.println("User succesfully created.");
-    } catch (InterruptedException e) {
-      System.err.println("Error: Interrupted.");
-      return;
-    } catch (Exception e) {
-      System.err.println("Error: "+e.getMessage());
-      e.printStackTrace();
-      return;
-    }
-  }
-  
   /**
    * Shows the pending message count<br/>
    * Usage: [joram:mom:]queueLoad <queueName><br/>
@@ -613,7 +584,6 @@ public class MOMCommandsImpl implements MOMCommands {
       help("subscriptionLoad");
       return;
     }
-    //TODO not used yet
     String userName = args[0];
     String subName = args[1];
     ClientSubscriptionMBean sub = null;
@@ -640,7 +610,6 @@ public class MOMCommandsImpl implements MOMCommands {
     return null;
   }
   
-  //TODO
   private ClientSubscriptionMBean findClientSubscription(String userName, String subName) throws UserNotFoundException {
     UserAgentMBean user = findUser(userName);
     if(user==null) {
@@ -948,6 +917,7 @@ public class MOMCommandsImpl implements MOMCommands {
     QueueMBean queue = findQueue(queueName);
     if(queue == null)
       return null;
+    @SuppressWarnings("unchecked")
     List<MessageView> msgs = queue.getMessagesView();
     return msgs==null?new ArrayList<MessageView>():msgs;
   }
@@ -956,6 +926,7 @@ public class MOMCommandsImpl implements MOMCommands {
     ClientSubscriptionMBean sub = findClientSubscription(userName, subscriptionName);
     if(sub==null)
       return null;
+    @SuppressWarnings("unchecked")
     List<MessageView> msgs = sub.getMessagesView();
     return msgs==null?new ArrayList<MessageView>():msgs;
   }
@@ -974,13 +945,6 @@ public class MOMCommandsImpl implements MOMCommands {
   }
   
   public static void main(String[] args) {
-//    Scanner s = new Scanner(System.in);
-//    String cmd = null;
-//    System.out.print("Command? "); System.out.flush();
-//    while(!(cmd=s.nextLine()).equalsIgnoreCase("exit")) {
-//      help(cmd);
-//      System.out.print("Command? "); System.out.flush();
-//    }
     for(String cmd : COMMANDS) {
       System.out.println("======== "+cmd+" ========");
       help(cmd);
@@ -989,6 +953,11 @@ public class MOMCommandsImpl implements MOMCommands {
   }
   
   private class UserNotFoundException extends Exception{
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8029807791362829155L;
+
     public UserNotFoundException(String userName) {
       super("The user ["+userName+"] was not found.");
     }
