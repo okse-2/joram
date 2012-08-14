@@ -3,6 +3,8 @@
 # Vtest linux script for JORAM  #
 #################################
 
+export VTEST_HOME="/home/vsadt/joram"
+
 #ensure existence of ENV variable VTEST_HOME
 if [ -z "$VTEST_HOME" ]
 then
