@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -102,7 +102,7 @@ public final class MySQLDBTransaction extends DBTransaction {
       Statement s = conn.createStatement();
       
       // We create the table.
-      s.execute("CREATE TABLE JoramDB (name VARCHAR(256), content LONGBLOB, PRIMARY KEY(name))");
+      s.execute("CREATE TABLE JoramDB (name VARCHAR(255), content LONGBLOB, PRIMARY KEY(name))");
 
       s.close();
       conn.commit();
