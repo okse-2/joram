@@ -26,8 +26,6 @@
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Export-Package>
               fr.dyade.aaa.jndi2.client,
-              fr.dyade.aaa.jndi2.haclient,
-              fr.dyade.aaa.jndi2.hascn,
               fr.dyade.aaa.jndi2.scn</Export-Package>
           </instructions>
         </configuration>
