@@ -19,7 +19,7 @@ cd src;
 ant tests.all;
 mkdir results;
 echo "OK" > results/report.txt;
-zip results.zip results;
+zip -r results.zip results;
 
-echo "joram JMS tests are finished";
+echo " joram tests are finished";
 exit 0;
