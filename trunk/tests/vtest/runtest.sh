@@ -3,8 +3,6 @@
 # Vtest linux script for JORAM  #
 #################################
 
-export VTEST_HOME="/home/vsadt/joram"
-
 #ensure existence of ENV variable VTEST_HOME
 if [ -z "$VTEST_HOME" ]
 then
@@ -18,6 +16,10 @@ fi
 cd $VTEST_HOME;
 mvn install;
 cd src;
-ant tests.jms.all
+ant tests.all;
+mkdir results;
+echo "OK" > results/report.txt;
+zip results.zip results;
 
-echo "joram JMS tests are finished"
+echo "joram JMS tests are finished";
+exit 0;
