@@ -13,7 +13,7 @@ else
     echo "VTEST_HOME set to $VTEST_HOME"
 fi
 
-cd $VTEST_HOME;
+cd $VTEST_HOME/joram;
 mvn install;
 cd src;
 ant tests.all;
