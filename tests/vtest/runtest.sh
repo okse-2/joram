@@ -16,7 +16,7 @@ fi
 cd $VTEST_HOME/joram;
 mvn install;
 cd src;
-ant tests.all;
+ant tests.jms.all;
 mkdir results;
 echo "OK" > results/report.txt;
 zip -r results.zip results;
