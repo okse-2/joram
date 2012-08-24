@@ -65,7 +65,7 @@ public class LocalConnectionFactory extends ConnectionFactory {
   }
   
   /**
-   * Admin method creating a <code>javax.jms.ConnectionFactory</code>
+   * Administration method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating local connections.
    */ 
   public static ConnectionFactory create() {
