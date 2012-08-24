@@ -422,7 +422,7 @@ public interface AdminItf {
   public String[] getServersNames(String domain) throws ConnectException, AdminException;
   
   /**
-   * Returns the list of the platform's servers' identifiers.
+   * Returns the list of the platform's servers' descriptions.
    * 
    * @return An array containing the description of all servers.
    * 
@@ -437,7 +437,7 @@ public interface AdminItf {
    * Returns the list of the servers' that belong to the specified domain.
    *
    * @param domain  Name of the domain.
-   * @return An array containing the description of all servers.
+   * @return An array containing the description of the corresponding servers.
    * 
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
