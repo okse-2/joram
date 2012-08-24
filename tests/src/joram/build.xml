@@ -89,6 +89,36 @@
     <antcall target="tests.distribution"/>
   </target>
 
+	  <target name="custom.tests.vtest"
+	          description=" --> custom selection of tests to run on vtest (excludes dist, reconf, bridge, perf)">
+	    <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
+	    <property name="isOSGi" value="true"/>
+	    <antcall target="tests.base"/>
+	    <antcall target="tests.recovery"/>
+	    <antcall target="tests.admin"/>
+	    <antcall target="tests.client"/>
+	    <antcall target="tests.connection"/>
+	    <antcall target="tests.local"/>
+	    <antcall target="tests.dursub"/>
+	    <antcall target="tests.tcp"/>
+	    <antcall target="tests.noreg"/>
+	    <antcall target="tests.xa"/>
+	    <antcall target="tests.bridge.new"/>
+	    <antcall target="tests.schedqueue"/>
+	    <antcall target="tests.clusterTopic"/>
+	    <antcall target="tests.clusterQueue"/>
+	    <antcall target="tests.hierarchical"/>
+	    <antcall target="tests.ssl"/>
+	    <antcall target="tests.jca"/>
+	    <antcall target="tests.dmq"/>
+	    <antcall target="tests.ttl"/>
+	    <antcall target="tests.sub"/>
+	    <antcall target="tests.monitoring"/>
+	    <antcall target="tests.collector"/>
+	  	<antcall target="tests.interceptors"/>
+	    <antcall target="tests.distribution"/>
+	  </target>
+	
 	<target name="tests.base"
   				description=" --> launch all base tests">
     <antcall target="tests.messages"/>

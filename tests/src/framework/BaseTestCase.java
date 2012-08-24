@@ -822,7 +822,7 @@ public class BaseTestCase {
         && (current.failures != null || current.errors != null || current.exceptions != null)) {
       DateFormat df = new SimpleDateFormat("yy-MM-dd [HH.mm.ss] ");
       File currentDir = new File(".");
-      File destDir = new File("../" + df.format(new Date()) + current.name);
+      File destDir = new File("../ERROR-" + df.format(new Date()) + current.name);
       try {
         copyDirectory(currentDir, destDir);
       } catch (IOException exc) {
