@@ -152,7 +152,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     return type;
   }
 
-  /** Name given by the administrator. */
+  /** Symbolic name given by the administrator. */
   protected String adminName;
 
   /**
@@ -235,15 +235,18 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @exception AdminException  If the platform's reply is invalid, or if
    *              the request failed.
    */
-  public final AdminReply doRequest(AdminRequest request) throws AdminException, ConnectException {
+  final AdminReply doRequest(AdminRequest request) throws AdminException, ConnectException {
     return getWrapper().doRequest(request);
   }
 
   /**
-   * Format the destination properties in a XML format
+   * Format the destination properties in a XML format, the result can be used
+   * in an XML configuration script.
+   * 
    * @param indent use this indent for prefixing XML representation.
    * @param serverId server id hosting the destination object
-   * @return returns a XML view of the queue (administration format)
+   * @return returns a XML view of the queue (XML configuration format)
+   * 
    * @throws ConnectException if the server is unreachable
    * @throws AdminException if an error occurs
    */
@@ -727,15 +730,15 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * <p>
    * This method should be only used by the JMX MBean.
    *
-   * @param b if true set the free reading access else disable.
+   * @param readable if true set the free reading access else disable.
    * 
    * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    * 
    * @see org.objectweb.joram.client.jms.DestinationMBean#setFreelyReadable(boolean)
    */
-  public void setFreelyReadable(boolean b) throws ConnectException, AdminException {
-    if (b)
+  public void setFreelyReadable(boolean readable) throws ConnectException, AdminException {
+    if (readable)
       setFreeReading();
     else
       unsetFreeReading();
@@ -762,15 +765,15 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * <p>
    * This method should be only used by the JMX MBean.
    *
-   * @param b if true set the free writing access else disable.
+   * @param writeable if true set the free writing access else disable.
    * 
    * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    * 
    * @see org.objectweb.joram.client.jms.DestinationMBean#setFreelyWriteable(boolean)
    */
-  public void setFreelyWriteable(boolean b) throws ConnectException, AdminException {
-    if (b)
+  public void setFreelyWriteable(boolean writeable) throws ConnectException, AdminException {
+    if (writeable)
       setFreeWriting();
     else
       unsetFreeWriting();
@@ -923,8 +926,9 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * Administration method add interceptors.
    * 
    * @param interceptors list of string className interceptor (separate with ",")
-   * @throws ConnectException
-   * @throws AdminException
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
    */
   public void addInterceptors(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
@@ -936,8 +940,9 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * Administration method to get interceptors list.
    * 
    * @return list of string className interceptor (separate with ",")
-   * @throws ConnectException
-   * @throws AdminException
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
    */
   public String getInterceptors() throws ConnectException, AdminException {
     AdminCommandReply reply = (AdminCommandReply) getWrapper().processAdmin(getName(),
@@ -949,8 +954,9 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * Administration method to remove interceptors. 
    * 
    * @param interceptors list of string className interceptor (separate with ",")
-   * @throws ConnectException
-   * @throws AdminException
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
    */
   public void removeInterceptors(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
@@ -963,8 +969,9 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * 
    * @param newInterceptor the new className interceptor.
    * @param oldInterceptor the old className interceptor.
-   * @throws ConnectException
-   * @throws AdminException
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
    */
   public void replaceInterceptor(String newInterceptor, String oldInterceptor) throws ConnectException, AdminException {
   	Properties prop = new Properties();
@@ -978,8 +985,9 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * 
    * @param prop the properties to update.
    * @return the admin reply
-   * @throws ConnectException
-   * @throws AdminException
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
    */
   public AdminReply setProperties(Properties prop) throws ConnectException, AdminException {
   	return getWrapper().processAdmin(getName(), AdminCommandConstant.CMD_SET_PROPERTIES, prop);
