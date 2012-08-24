@@ -175,7 +175,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception AdminException  If the platform's reply is invalid, or if
    *              the request failed.
    */
-  public final AdminReply doRequest(AdminRequest request) throws AdminException, ConnectException {
+  private final AdminReply doRequest(AdminRequest request) throws AdminException, ConnectException {
     return getWrapper().doRequest(request);
   }
 
@@ -602,6 +602,7 @@ public class User extends AdministeredObject implements UserMBean {
     return sub;
   }
 
+  /** used by MBean jmx */
   public String getSubscriptionString(String subName) throws AdminException, ConnectException {
     return getSubscription(subName).toString();
   }
@@ -612,6 +613,17 @@ public class User extends AdministeredObject implements UserMBean {
     return reply.getMessageIds();
   }
 
+  /**
+   * Returns a copy of a message of the subscription.
+   * 
+   * @param subName       The name of the related subscription.
+   * @param msgId         The identifier of the message.
+   * @return The message
+   * 
+   * @throws AdminException
+   * @throws ConnectException
+   * @throws JMSException
+   */
   public Message getMessage(String subName,
                             String msgId) throws AdminException, ConnectException, JMSException {
     GetSubscriptionMessageRep reply = 
