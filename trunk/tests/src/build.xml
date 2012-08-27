@@ -69,6 +69,14 @@
 			<ant dir="jms" antfile="build.xml" target="check.report.file" />
 		</parallel>
 	</target>
+	
+	<target name="vtest.check.reports" description=" --> check reports (for vtest">
+		<parallel>
+			<ant dir="jndi2" antfile="build.xml" target="check.report.file" />
+			<ant dir="joram" antfile="build.xml" target="check.report.file" />
+			<ant dir="jms" antfile="build.xml" target="check.report.file" />
+		</parallel>
+	</target>
 
 	<target name="tests.joram.noperf.all" description=" --> launch all no perf Joram tests">
 		<ant dir="joram" antfile="build.xml" target="clean" />
