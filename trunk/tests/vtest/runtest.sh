@@ -15,8 +15,8 @@ fi
 
 date=`date +%x`
 date=`echo $date | sed -e s:/:.:g`
-LOGFILE= $VTEST_HOME/"vtest.log"
-ZIPFILE= $VTEST_HOME/"joram-vtest-$date.zip"
+LOGFILE=$VTEST_HOME/"vtest.log"
+ZIPFILE=$VTEST_HOME/"joram-vtest-$date.zip"
 
 #following command suppose that svn check out has been made into path $VTEST_HOME/joram
 cd $VTEST_HOME/joram;
@@ -27,10 +27,10 @@ mvn install > $LOGFILE;
 # launching tests
 cd src;
 echo "on launching ant custom.tests.vtest"
-ant custom.tests.vtest > $LOGFILE;
+ant custom.tests.vtest >> $LOGFILE;
 
 mkdir results;
-mv $LOGFILE results;
+cp $LOGFILE results;
 
 # getting test exit code
 if [[ $? -gt 0 ]]; then
