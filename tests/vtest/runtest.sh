@@ -28,12 +28,13 @@ mvn install > $LOGFILE;
 cd src;
 echo "on launching ant custom.tests.vtest"
 ant custom.tests.vtest >> $LOGFILE;
+TEST_RESULT=$?;
 
 mkdir results;
 cp $LOGFILE results;
 
 # getting test exit code
-if [[ $? -gt 0 ]]; then
+if [[ $TEST_RESULT -gt 0 ]]; then
     echo "TEST FAILED !";
     #save contents when test failed
     mv $VTEST_HOME/ERROR-* results;
