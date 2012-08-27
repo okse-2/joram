@@ -15,8 +15,8 @@ fi
 
 date=`date +%x`
 date=`echo $date | sed -e s:/:.:g`
-LOGFILE=$VTEST_HOME/"vtest.log"
-ZIPFILE=$VTEST_HOME/"joram-vtest-$date.zip"
+LOGFILE=$VTEST_HOME/"vtest-$date.log"
+ZIPFILE=$VTEST_HOME/"result.zip"
 
 #following command suppose that svn check out has been made into path $VTEST_HOME/joram
 cd $VTEST_HOME/joram;
