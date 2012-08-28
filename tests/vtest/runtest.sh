@@ -27,7 +27,9 @@ mvn install > $LOGFILE;
 # launching tests
 cd src;
 echo "on launching ant custom.tests.vtest"
-ant custom.tests.vtest >> $LOGFILE;
+#ant custom.tests.vtest >> $LOGFILE;
+ant tests.joram.noperf.all >> $LOGFILE;
+ant vtest.check.reports >> $LOGFILE;
 TEST_RESULT=$?;
 
 mkdir results;
