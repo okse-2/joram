@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -50,6 +50,9 @@ public class TopicPublisher extends MessageProducer implements javax.jms.TopicPu
 
   /** 
    * API method.
+   * Gets the topic associated with this topic publisher.
+   * 
+   * @return this publisher's topic.
    *
    * @exception IllegalStateException  If the publisher is closed.
    */
@@ -62,6 +65,12 @@ public class TopicPublisher extends MessageProducer implements javax.jms.TopicPu
 
   /** 
    * API method.
+   * Sends a message to a topic with default delivery parameters.
+   * 
+   * @param message       the message to send.
+   * @param deliveryMode  the delivery mode to use.
+   * @param priority      the priority for this message.
+   * @param timeToLive    the message's lifetime in milliseconds.
    *
    * @exception IllegalStateException  If the publisher is closed, or if the
    *              connection is broken.
@@ -76,6 +85,9 @@ public class TopicPublisher extends MessageProducer implements javax.jms.TopicPu
     
   /** 
    * API method.
+   * Sends a message to a topic with default delivery parameters.
+   * 
+   * @param message       the message to send.
    *
    * @exception IllegalStateException  If the publisher is closed, or if the
    *              connection is broken.
@@ -87,24 +99,48 @@ public class TopicPublisher extends MessageProducer implements javax.jms.TopicPu
 
   /** 
    * API method.
+   * Sends a message to a topic for an unidentified topic publisher with default
+   * delivery parameters.
+   * <p>
+   * Typically, a topic publisher is assigned a topic at creation time; however,
+   * the JMS API also supports unidentified topic publisher, which require that the
+   * topic be supplied every time a message is sent.
+   * 
+   * @param topic         the topic to send this message to.
+   * @param message       the message to send.
    *
    * @exception IllegalStateException  If the publisher is closed, or if the
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void publish(javax.jms.Topic topic, javax.jms.Message message) throws JMSException {
+  public void publish(javax.jms.Topic topic,
+                      javax.jms.Message message) throws JMSException {
     super.send(topic, message);
   }
 
   /** 
    * API method.
+   * Sends a message to a topic for an unidentified topic publisher with given
+   * delivery parameters.
+   * <p>
+   * Typically, a topic publisher is assigned a topic at creation time; however,
+   * the JMS API also supports unidentified topic publisher, which require that the
+   * topic be supplied every time a message is sent.
+   * 
+   * @param topic         the topic to send this message to.
+   * @param message       the message to send.
+   * @param deliveryMode  the delivery mode to use.
+   * @param priority      the priority for this message.
+   * @param timeToLive    the message's lifetime in milliseconds.
    *
    * @exception IllegalStateException  If the publisher is closed, or if the
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void publish(javax.jms.Topic topic, javax.jms.Message message,
-                      int deliveryMode, int priority,
+  public void publish(javax.jms.Topic topic,
+                      javax.jms.Message message,
+                      int deliveryMode,
+                      int priority,
                       long timeToLive) throws JMSException {
     super.send(topic, message, deliveryMode, priority, timeToLive);
   }
