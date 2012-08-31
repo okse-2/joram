@@ -399,6 +399,16 @@ public abstract class StreamNetwork extends Network {
    * @exception IOException	for networking errors
    */
   ServerSocket createServerSocket(int port) throws IOException {
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      StringBuffer strbuf = new StringBuffer();
+      strbuf.append(" createServerSocket(");
+      strbuf.append(", backlog=").append(backlog);
+      strbuf.append(", inLocalAddr=").append(inLocalAddr);
+      strbuf.append(')');
+      
+      logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
+    }
+
     return serverSocketFactory.createServerSocket(port, backlog, inLocalAddr);
   }
 
@@ -412,6 +422,17 @@ public abstract class StreamNetwork extends Network {
    * @exception IOException	for networking errors
    */ 
   void setSocketOption(Socket sock) throws SocketException {
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      StringBuffer strbuf = new StringBuffer();
+      strbuf.append(" setSocketOption(");
+      strbuf.append(", TcpNoDelay=").append(TcpNoDelay);
+      strbuf.append(", SoLinger=").append(SoLinger);
+      strbuf.append(", SoTimeout=").append(SoTimeout);
+      strbuf.append(')');
+      
+      logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
+    }
+
     // TCP data coalescing - ie Nagle's algorithm
     sock.setTcpNoDelay(TcpNoDelay);
     // Read operation will block indefinitely until requested data arrives
