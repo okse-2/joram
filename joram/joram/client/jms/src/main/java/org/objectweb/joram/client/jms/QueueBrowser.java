@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -43,6 +43,15 @@ import fr.dyade.aaa.common.Debug;
 
 /**
  * Implements the <code>javax.jms.QueueBrowser</code> interface.
+ * <p>
+ * A client uses a QueueBrowser object to look at messages on a queue
+ * without removing them.
+ * <p>
+ * The getEnumeration method returns a java.util.Enumeration that is used to
+ * scan the queue's messages. It may be an enumeration of the entire content of
+ * a queue, or it may contain only the messages matching a message selector.
+ * <p>
+ * A QueueBrowser can be created from either a Session or a QueueSession. 
  */
 public class QueueBrowser implements javax.jms.QueueBrowser {
   /** The session the browser belongs to. */
@@ -109,6 +118,10 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
 
   /** 
    * API method.
+   * Gets this queue browser's message selector expression.
+   * 
+   * @return this queue browser's message selector, or null if no message
+   *         selector exists for the message consumer.
    *
    * @exception IllegalStateException  If the browser is closed.
    */
@@ -121,6 +134,10 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
 
   /**
    * API method.
+   * Gets an enumeration for browsing the current queue messages in the order
+   * they would be received.
+   * 
+   * @return an enumeration for browsing the messages.
    *
    * @exception IllegalStateException  If the browser is closed, or if the
    *              connection is broken.
@@ -151,6 +168,10 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
 
   /**
    * API method.
+   * Closes the QueueBrowser.
+   * <p>
+   * In order to free significant resources allocated on behalf of a QueueBrowser,
+   * clients should close them when they are not needed.
    *
    * @exception JMSException  Actually never thrown.
    */

@@ -61,7 +61,7 @@ import fr.dyade.aaa.common.Debug;
  * it delivers them by calling the MessageListener's onMessage method. It is a
  * client programming error for a MessageListener to throw an exception.</li>
  * </ul>
- *
+ * It is a client programming error for a MessageListener to throw an exception.
  */
 public class MessageConsumer implements javax.jms.MessageConsumer {
   /**
@@ -269,6 +269,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    * arrive on the connection, the session or the consumer without being
    * able to reach their target listener!
    *
+   * @param messageListener the listener to which the messages are to be delivered.
+
    * @exception IllegalStateException  If the consumer is closed, or if the
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
@@ -299,9 +301,11 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   }
 
   /**
-   * Gets the message consumer's MessageListener.
    * API method.
-   *
+   * Gets the message consumer's MessageListener.
+   * 
+   * @return the listener for the message consumer, or null if no listener is set. 
+   * 
    * @exception IllegalStateException  If the consumer is closed.
    */
   public synchronized javax.jms.MessageListener getMessageListener() throws JMSException {
@@ -312,9 +316,11 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   }
 
   /**
-   * Gets this message consumer's message selector expression.
    * API method.
-   *
+   * Gets this message consumer's message selector expression.
+   * 
+   * @return this message consumer's message selector, or null if no message selector is set.
+   * 
    * @exception IllegalStateException  If the consumer is closed.
    */
   public final String getMessageSelector() throws JMSException {
@@ -323,8 +329,16 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   }
 
   /** 
-   * Receives the next message that arrives before the specified timeout.
    * API method.
+   * Receives the next message that arrives before the specified timeout.
+   * <p>
+   * This call blocks until a message is available, the timeout expires, or this
+   * message consumer is closed. A timeout of zero never expires, and the call blocks
+   * indefinitely.
+   * 
+   * @param timeout the timeout value (in milliseconds).
+   * @return the next message available for this message consumer, or null if the timeout
+   *         expires or this message consumer is concurrently closed.
    *
    * @exception IllegalStateException  If the consumer is closed, or if the
    *              connection is broken.
@@ -340,9 +354,16 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   }
 
   /** 
-   * Receives the next message produced for this message consumer.
    * API method.
+   * Receives the next message produced for this message consumer, this call blocks
+   * indefinitely until a message is available or until this message consumer is closed.
+   * <p>
+   * If this receive is done within a transaction, the consumer retains the message until
+   * the transaction commits.
    * 
+   * @return the next message available for this message consumer, or null if this message
+   *         consumer is concurrently closed.
+   *         
    * @exception IllegalStateException  If the consumer is closed, or if the
    *              connection is broken.
    * @exception JMSSecurityException  If the requester is not a READER on the
@@ -354,8 +375,10 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   }
 
   /** 
-   * Receives the next message if one is immediately available.
    * API method.
+   * Receives the next message if one is immediately available.
+   * 
+   * @return the next message available for this message consumer, or null if none is available.
    * 
    * @exception IllegalStateException  If the consumer is closed, or if the
    *              connection is broken.
@@ -372,8 +395,15 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
 
   /**
    * API method.
-   *
-   * @exception JMSException
+   * Closes the message consumer.
+   * <p>
+   * In order to free significant resources allocated on behalf of a MessageConsumer,
+   * clients should close them when they are not needed.
+   * <p>
+   * This call blocks until a receive or message listener in progress has completed.
+   * A blocked message consumer receive call returns null when this message consumer is closed.
+   * 
+   * @exception JMSException if closing the consumer fails due to some internal error.
    */
   public void close() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -383,10 +413,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
 
   /**
    * This class synchronizes the close.
-   * Close can't be synchronized with 'this' 
-   * because the MessageConsumer must be accessed
-   * concurrently during its closure. So
-   * we need a second lock.
+   * Close can't be synchronized with 'this' concurrently during its closure. So we
+   * need a second lock.
    */
   class Closer {
     synchronized void close() throws JMSException {

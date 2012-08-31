@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -42,13 +42,17 @@ public final class ConnectionMetaData implements javax.jms.ConnectionMetaData {
   public final static String jmsVersion = "1.1";
   /** JMS provider name: Joram */
   public final static String providerName = "Joram";
-  /** Joram's major version number, currently ${major.filter.value} */
+  /** Joram's major version number. */
   public final static int providerMajorVersion;
-  /** Joram's minor version number, currently ${minor.filter.value} */
+  /** Joram's minor version number. */
   public final static int providerMinorVersion;
-  /** Joram's implementation version, currently ${build.filter.value}. */
+  /** Joram's implementation version. */
   public final static String providerVersion;
-  /** Enumeration of the Joram's JMSX property names */
+  
+  /**
+   * Enumeration of the Joram's JMSX property names, currently  JMSXDeliveryCount,
+   * JMSXGroupID and JMSXGroupSeq.
+   */
   private final static Vector jmsxProperties = new Vector();
   
   static {
@@ -125,7 +129,7 @@ public final class ConnectionMetaData implements javax.jms.ConnectionMetaData {
   }
 
   /**
-   * API method: Gets the Joram's implementation version, currently 5.0.10.
+   * API method: Gets the Joram's implementation version.
    *
    * @exception JMSException  Actually never thrown.
    */

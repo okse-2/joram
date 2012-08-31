@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -45,7 +45,8 @@ import fr.dyade.aaa.common.net.SocketFactory13;
 
 /**
  * A <code>FactoryParameters</code> instance holds a
- * <code>&lt;XA&gt;ConnectionFactory</code> configuration parameters.
+ * <code>&lt;XA&gt;ConnectionFactory</code> configuration parameters,
+ * it allows to configure the related ConnectionFactory.
  */
 public class FactoryParameters implements java.io.Serializable, Cloneable {
   /** define serialVersionUID for interoperability */
@@ -145,10 +146,15 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
   public boolean implicitAck;
 
   /**
-   *  Determines whether the produced messages are asynchronously
-   * sent or not (without or with acknowledgement).
+   *  Determines whether the persistent produced messages are asynchronously
+   * sent (without acknowledge) or not.
    * <p>
-   *  Default is false (with ack).
+   * Messages sent asynchronously may be lost if a failure occurs before the
+   * message is persisted on the server.
+   * <p>
+   * Non persistent messages are always sent without acknowledgment. 
+   * <p>
+   *  Default is false, persistent messages are sent with acknowledge.
    */
   public boolean asyncSend = false;
 
