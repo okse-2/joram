@@ -44,6 +44,14 @@ public class XATopicConnection extends TopicConnection implements javax.jms.XATo
 
   /**
    * API method.
+   * Creates a TopicSession object.
+   * 
+   * @param transacted      indicates whether the session is transacted.
+   * @param acknowledgeMode indicates whether the consumer or the client will acknowledge
+   *                        any messages it receives; ignored if the session is transacted.
+   *                        Legal values are Session.AUTO_ACKNOWLEDGE, Session.CLIENT_ACKNOWLEDGE,
+   *                        and Session.DUPS_OK_ACKNOWLEDGE.
+   * @return A newly created session.
    * 
    * @exception IllegalStateException  If the connection is closed.
    * @exception JMSException  In case of an invalid acknowledge mode.
@@ -55,6 +63,9 @@ public class XATopicConnection extends TopicConnection implements javax.jms.XATo
 
   /** 
    * API method.
+   * Creates an XATopicSession object.
+   *  
+   * @return A newly created session.
    *
    * @exception IllegalStateException  If the connection is closed.
    */
