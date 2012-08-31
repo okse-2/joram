@@ -73,7 +73,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.common.Debug;
 
 /**
- * The <code>Admin</code> class allows to set an administrator
+ * The <code>AdminWrapper</code> class allows to set an administrator
  * connection to a given JORAM server, and provides administration and
  * monitoring methods at a server/platform level.
  */
