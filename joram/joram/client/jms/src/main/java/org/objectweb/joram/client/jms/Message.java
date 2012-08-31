@@ -42,8 +42,26 @@ import fr.dyade.aaa.common.Debug;
 /**
  * Implements the <code>javax.jms.Message</code> interface.
  * <p>
- * A Joram message encapsulates a proprietary message which is also used
- * for effective MOM transport facility.
+ * A Joram message encapsulates a proprietary message which is used for effective
+ * MOM transport facility. It defines the message header and properties, and the
+ * acknowledge method used for all messages.
+ * <p>
+ * JMS messages are composed of the following parts:<ul>
+ * <li>Header - All messages support the same set of header fields. Header fields contain
+ * values used by both clients and providers to identify and route messages.</li>
+ * <li>Properties - Each message contains a built-in facility for supporting application-defined
+ * property values. Properties provide an efficient mechanism for supporting message filtering.</li>
+ * <li>Body - The JMS API defines several types of message body, which cover the majority of
+ * messaging styles currently in use.</li>
+ * </ul>
+ * The JMS API defines five types of message body:<ul>
+ * <li>Stream - A StreamMessage object's message body contains a stream of primitive values.</li>
+ * <li>Map - A MapMessage object's message body contains a set of name-value pairs, where names
+ * are String objects, and values are Java primitives.</li>
+ * <li>Text - A TextMessage object's message body contains a java.lang.String object.</li>
+ * <li>Object - An ObjectMessage object's message body contains a Serializable Java object.</li>
+ * <li>Bytes - A BytesMessage object's message body contains a stream of uninterpreted bytes.</li>
+ * </ul>
  */
 public class Message implements javax.jms.Message {
   /** logger */
@@ -108,10 +126,20 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Acknowledges all previously consumed messages of the session of this consumed message.
+   * <p>
+   * All consumed JMS messages support the acknowledge method for use when a client has specified
+   * that its JMS session's consumed messages are to be explicitly acknowledged. By invoking acknowledge
+   * on a consumed message, a client implicitly acknowledges all messages consumed by the session that
+   * the message was delivered to.
+   * <p>
+   * Calls to acknowledge are ignored for both transacted sessions and sessions specified to use implicit
+   * acknowledgement modes.
+   * <p>
+   * Messages that have been received but not acknowledged may be redelivered.
    *
    * @exception IllegalStateException  If the session is closed.
-   * @exception JMSException  If the acknowledgement fails for any other
-   *              reason.
+   * @exception JMSException  If the acknowledgement fails for any other reason.
    */
   public void acknowledge() throws JMSException {
     if (session.getAcknowledgeMode() == Session.INDIVIDUAL_ACKNOWLEDGE)
@@ -129,6 +157,10 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Clears the message's body.
+   * <p>
+   * Calling this method leaves the message body in the same state as an empty body in
+   * a newly created message.
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -138,14 +170,22 @@ public class Message implements javax.jms.Message {
   }
 
   /** set message read-only */
-  public void setReadOnly() {
+  private void setReadOnly() {
     propertiesRO = true;
     RObody = true;
   }
 
   /**
-   * Returns the message identifier.
    * API method.
+   * Returns the unique message identifier.
+   * <p>
+   * The JMSMessageID header field contains a value that uniquely identifies each message
+   * sent by Joram. When a message is sent, JMSMessageID is ignored, when the send or publish
+   * method returns, it contains an unique identifier assigned by Joram.
+   * <p>
+   * All JMSMessageID values starts with the prefix 'ID:'.
+   * 
+   * @return the unique message identifier.
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -155,6 +195,12 @@ public class Message implements javax.jms.Message {
  
   /**
    * API method.
+   * Sets the message identifier.
+   * <p>
+   * This field is set when a message is sent, this method can only be used to change
+   * the value for a message that has been received.
+   * 
+   * @param id the identifier for this message. 
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -163,8 +209,16 @@ public class Message implements javax.jms.Message {
   }
  
   /**
-   * Returns the message priority.
    * API method.
+   * Returns the message priority.
+   * <p>
+   * The JMS API defines ten levels of priority value, with 0 as the lowest priority
+   * and 9 as the highest. In addition, clients should consider priorities 0-4 as
+   * gradations of normal priority and priorities 5-9 as gradations of expedited priority.
+   * <p>
+   * Default prioprity is defined by Message.DEFAULT_PRIORITY.
+   * 
+   * @return the message priority.
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -174,6 +228,12 @@ public class Message implements javax.jms.Message {
    
   /**
    * API method.
+   * Sets the priority level for this message.
+   * <p>
+   * This field is set when a message is sent, this method can be used to change the value
+   * for a message that has been received.
+   * 
+   * @param priority the priority of this message. 
    *
    * @exception JMSException  If the priority value is incorrect.
    */
@@ -190,6 +250,16 @@ public class Message implements javax.jms.Message {
    * This field is set by <code>Session.send()</code>, it can be overloaded
    * for received messages.
    * API method.
+   * Returns the message destination. This field is set by the provider at sending, it
+   * contains the destination to which the message is being sent.
+   * <p>
+   * When a message is sent, this field is ignored. After completion of the send or publish
+   * method, the field holds the destination specified by the method.
+   * <p>
+   * When a message is received, its JMSDestination value must be equivalent to the value
+   * assigned when it was sent. This field can be overloaded for received messages.
+   * 
+   * @return the destination of this message.
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -208,10 +278,13 @@ public class Message implements javax.jms.Message {
   }
 
   /**
-   * Set the message destination.
-   * This field is set when message is sent. This method can be used to
-   * change the value for a message that has been received.
    * API method.
+   * Set the message destination.
+   * <p>
+   * This field is set when message is sent, this method can only be used to change the
+   * value for a message that has been received.
+   * 
+   * @param dest the destination for this message.
    *
    * @exception JMSException  If the destination id not a Joram's one.
    */
@@ -227,8 +300,22 @@ public class Message implements javax.jms.Message {
   }
 
   /**
-   * Returns the message expiration time.
    * API method.
+   * Returns the message expiration time.
+   * <p>
+   * When a message is sent, the JMSExpiration header field is ignored. After completion of
+   * the send or publish method, it holds the expiration time of the message. This is the sum
+   * of the time-to-live value specified by the client and the GMT at the time of the send or
+   * publish.
+   * <p>
+   * If the time-to-live is specified as zero, JMSExpiration is set to zero to indicate that
+   * the message does not expire.
+   * <p>
+   * When a message's expiration time is reached, it is either discarded or forwarded to a
+   * DeadMessageQueue.
+   * 
+   * @return the time the message expires, which is the sum of the time-to-live value specified
+   *         by the client and the GMT at the time of the send.
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -238,6 +325,12 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets the message's expiration value.
+   * <p>
+   * This field is set when a message is sent, this method can only be used to change
+   * the value for a message that has been received.
+   * 
+   * @param expiration the message's expiration time.
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -247,8 +340,14 @@ public class Message implements javax.jms.Message {
   }
 
   /**
-   * Gets an indication of whether this message is being redelivered.
    * API method.
+   * Gets an indication of whether this message is being redelivered.
+   * <p>
+   * If a client receives a message with the JMSRedelivered field set, it can
+   * access the JMSXDeliveryCount property to determine the number of attempts
+   * to deliver this message.
+   * 
+   * @return true if this message is being redelivered.
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -258,6 +357,12 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Specifies whether this message is being redelivered.
+   * <p>
+   * This field is set at the time the message is delivered, this method can only
+   * be used to change the value for a message that has been received.
+   * 
+   * @param redelivered an indication of whether this message is being redelivered. 
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -266,10 +371,11 @@ public class Message implements javax.jms.Message {
   }
 
   /**
-   * Gets the Destination object to which a reply to this message should
-   * be sent.
    * API method.
+   * Gets the Destination object to which a reply to this message should be sent.
    *
+   * @return Destination to which to send a response to this message.
+   * 
    * @exception JMSException  Actually never thrown.
    */
   public final javax.jms.Destination getJMSReplyTo() throws JMSException {
@@ -286,6 +392,12 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets the Destination object to which a reply to this message should be sent.
+   * <p>
+   * The JMSReplyTo header field contains the destination where a reply to the current
+   * message should be sent. The destination may be either a Queue object or a Topic object.
+   * 
+   * @param replyTo Destination to which to send a response to this message.
    *
    * @exception JMSException  If the destination id not a Joram's one.
    */
@@ -301,8 +413,22 @@ public class Message implements javax.jms.Message {
   }
 
   /**
-   * Returns the message time stamp.
    * API method.
+   * Returns the message time stamp.
+   * <p>
+   * The JMSTimestamp header field contains the time a message was handed off to Joram to be sent.
+   * It is not the time the message was actually transmitted, because the actual send may occur
+   * later due to transactions or other client-side queueing of messages.
+   * <p>
+   * When a message is sent, JMSTimestamp is ignored. When the send or publish method returns, it
+   * contains a time value somewhere in the interval between the call and the return.
+   * <p>
+   * Since timestamps take some effort to create and increase a message's size, some Joram allows
+   * to optimize message overhead if they are given a hint that the timestamp is not used by an
+   * application. By calling the MessageProducer.setDisableMessageTimestamp method, a JMS client
+   * enables this potential optimization for all messages sent by that message producer.
+   * 
+   * @return the message timestamp.
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -312,6 +438,12 @@ public class Message implements javax.jms.Message {
   
   /**
    * API method.
+   * Sets the message timestamp.
+   * <p>
+   * This field is set when a message is sent, this method can only be used to change
+   * the value for a message that has been received.
+   * 
+   * @param timestamp the timestamp for this message. 
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -320,9 +452,11 @@ public class Message implements javax.jms.Message {
   }
 
   /**
-   * Returns the message correlation identifier.
    * API method.
-   *
+   * Returns the message correlation identifier.
+   * 
+   * @return the correlation ID for the message.
+   * 
    * @exception JMSException  Actually never thrown.
    */
   public final String getJMSCorrelationID() throws JMSException {
@@ -331,6 +465,12 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets the correlation identifier for the message.
+   * <p>
+   * A client can use the JMSCorrelationID header field to link one message with
+   * another. A typical use is to link a response message with its request message.
+   * 
+   * @param correlationID the message ID of a message being referred to. 
    *
    * @exception JMSException  Actually never thrown.
    */ 
@@ -340,6 +480,9 @@ public class Message implements javax.jms.Message {
   
   /**
    * API method.
+   * Gets the correlation ID as an array of bytes for the message.
+   * 
+   * @return the correlation ID for the message as an array of bytes.
    *
    * @exception MessageFormatException  In case of a problem while retrieving
    *              the field. 
@@ -354,6 +497,11 @@ public class Message implements javax.jms.Message {
   
   /**
    * API method.
+   * Sets the correlation ID as an array of bytes for the message.
+   * <p>
+   * The use of a byte[] value for JMSCorrelationID is non-portable.
+   * 
+   * @param correlationID the message ID value as an array of bytes. 
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -362,10 +510,16 @@ public class Message implements javax.jms.Message {
   }
 
   /**
-   * Returns <code>true</code> if the message is persistent.
    * API method.
+   * Gets the DeliveryMode value specified for this message.
+   * <p>
+   * The delivery modes supported are DeliveryMode.PERSISTENT and DeliveryMode.NON_PERSISTENT.
+   * 
+   * @return the delivery mode for this message.
    *
    * @exception JMSException  Actually never thrown.
+   * 
+   * @see javax.jms.DeliveryMode
    */
   public final int getJMSDeliveryMode() throws JMSException {
     if (momMsg.persistent) 
@@ -375,6 +529,12 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets the DeliveryMode value for this message.
+   * <p>
+   * JMS providers set this field when a message is sent. This method can be used
+   * to change the value for a message that has been received.
+   * 
+   * @param deliveryMode the delivery mode for this message. 
    *
    * @exception JMSException  If the delivery mode is incorrect.
    */
@@ -388,6 +548,9 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Gets the message type identifier supplied by the client when the message was sent.
+   * 
+   * @return the message type
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -397,6 +560,12 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets the message type.
+   * <p>
+   * Joram does not define a standard message definition repository, this field can
+   * be used freely by the JMS applications.
+   * 
+   * @param type the message type. 
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -413,6 +582,7 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Clears the message's properties.
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -436,8 +606,10 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Indicates whether a property value exists.
    *
-   * @param name  The property name.
+   * @param name  the name of the property to test.
+   * @return true if the property exists.
    *
    * @exception JMSException  Actually never thrown.
    */
@@ -460,7 +632,13 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Returns an Enumeration of all the property names.
+   * <p>
+   * Note that JMS standard header fields are not considered properties and are not
+   * returned in this enumeration.
    *
+   * @return An enumeration of all the names of property values.
+   * 
    * @exception JMSException  Actually never thrown.
    */
   public final Enumeration getPropertyNames() throws JMSException {
@@ -472,6 +650,7 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets a boolean property value with the specified name into the message.
    *
    * @param name  The property name.
    * @param value  The property value.
@@ -485,6 +664,7 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets a byte property value with the specified name into the message.
    *
    * @param name  The property name.
    * @param value  The property value.
@@ -498,6 +678,7 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets a short property value with the specified name into the message.
    *
    * @param name  The property name.
    * @param value  The property value.
@@ -511,6 +692,8 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets an int property value with the specified name into the message.
+
    *
    * @param name  The property name.
    * @param value  The property value.
@@ -524,6 +707,8 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets a long property value with the specified name into the message.
+
    *
    * @param name  The property name.
    * @param value  The property value.
@@ -537,6 +722,8 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets a floaf property value with the specified name into the message.
+
    *
    * @param name  The property name.
    * @param value  The property value.
@@ -550,6 +737,8 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets a double property value with the specified name into the message.
+
    *
    * @param name  The property name.
    * @param value  The property value.
@@ -563,6 +752,8 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Sets a String property value with the specified name into the message.
+
    *
    * @param name  The property name.
    * @param value  The property value.
@@ -575,7 +766,11 @@ public class Message implements javax.jms.Message {
   }
 
   /**
-   * API method, sets a property value.
+   * API method.
+   * Sets an object property value.
+   * <p>
+   * Note that this method works only for the objectified primitive object
+   * types (Integer, Double, Long ...) and String objects.
    *
    * @param name  The property name.
    * @param value  The property value.
@@ -657,9 +852,11 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Returns the value of the boolean property with the specified name.
    *
    * @param name  The property name.
-   *
+   * @return the property value for the specified name.
+   * 
    * @exception MessageFormatException  If the property type is invalid.
    * @exception JMSException  If the name is invalid.
    */
@@ -673,8 +870,10 @@ public class Message implements javax.jms.Message {
   
   /**
    * API method.
+   * Returns the value of the byte property with the specified name.
    *
    * @param name  The property name.
+   * @return the property value for the specified name.
    *
    * @exception MessageFormatException  If the property type is invalid.
    * @exception JMSException  If the name is invalid.
@@ -689,8 +888,10 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Returns the value of the short property with the specified name.
    *
    * @param name  The property name.
+   * @return the property value for the specified name.
    *
    * @exception MessageFormatException  If the property type is invalid.
    * @exception JMSException  If the name is invalid.
@@ -705,8 +906,10 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Returns the value of the int property with the specified name.
    *
    * @param name  The property name.
+   * @return the property value for the specified name.
    *
    * @exception MessageFormatException  If the property type is invalid.
    * @exception JMSException  If the name is invalid.
@@ -721,8 +924,10 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Returns the value of the long property with the specified name.
    *
    * @param name  The property name.
+   * @return the property value for the specified name.
    *
    * @exception MessageFormatException  If the property type is invalid.
    * @exception JMSException  If the name is invalid.
@@ -737,8 +942,10 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Returns the value of the float property with the specified name.
    *
    * @param name  The property name.
+   * @return the property value for the specified name.
    *
    * @exception MessageFormatException  If the property type is invalid.
    * @exception JMSException  If the name is invalid.
@@ -753,8 +960,10 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Returns the value of the double property with the specified name.
    *
    * @param name  The property name.
+   * @return the property value for the specified name.
    *
    * @exception MessageFormatException  If the property type is invalid.
    * @exception JMSException  If the name is invalid.
@@ -769,8 +978,10 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
+   * Returns the value of the String property with the specified name.
    *
    * @param name  The property name.
+   * @return the property value for the specified name.
    *
    * @exception MessageFormatException  If the property type is invalid.
    * @exception JMSException  If the name is invalid.
@@ -781,8 +992,15 @@ public class Message implements javax.jms.Message {
 
   /**
    * API method.
-   *
-   * @param name  The property name.
+   * Returns the value of the object property with the specified name.
+   * <p>
+   * This method can be used to return, in objectified format, an object that has
+   * been stored as a property in the message with the equivalent setObjectProperty
+   * method call, or its equivalent primitive settypeProperty method.
+   * 
+   * @param name The property name.
+   * @return the Java object property value with the specified name, in objectified
+   * format; if there is no property by this name, a null value is returned.
    *
    * @exception JMSException  If the name is invalid.
    */
@@ -792,6 +1010,7 @@ public class Message implements javax.jms.Message {
 
   /**
    * Method actually getting a property.
+   * @return the property value for the specified name.
    *
    * @param name  The property name.
    */
@@ -808,6 +1027,9 @@ public class Message implements javax.jms.Message {
   /**
    * Converts a non-Joram JMS message into a Joram message.
    *
+   * @param jmsMsg a JMS message.
+   * @return a Joram message.
+   * 
    * @exception JMSException  If an error occurs while building the message.
    */
   static public Message convertJMSMessage(javax.jms.Message jmsMsg) throws JMSException {

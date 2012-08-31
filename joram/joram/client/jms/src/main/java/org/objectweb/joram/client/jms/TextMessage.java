@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -54,8 +54,10 @@ public final class TextMessage extends Message implements javax.jms.TextMessage 
   }
 
   /**
-   * Sets a String as the body of the message.
    * API method.
+   * Sets a String as the body of the message.
+   * 
+   * @param string the String containing the message's data.
    *
    * @exception MessageNotWriteableException  When trying to set the text
    *              if the message body is read-only.
@@ -73,8 +75,10 @@ public final class TextMessage extends Message implements javax.jms.TextMessage 
   }
 
   /**
-   * Returns the text body of the message.
    * API method.
+   * Returns the text body of the message, null if none.
+   * 
+   * @return the String containing this message's data.
    *
    * @exception JMSException  In case of a problem when getting the body.
    */
