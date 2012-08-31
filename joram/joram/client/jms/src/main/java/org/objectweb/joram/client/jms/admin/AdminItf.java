@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - ScalAgent Distributed Technologies
+ * Copyright (C) 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,12 +32,10 @@ import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 
 /**
- * The <code>Admin</code> class allows to set an administrator
- * connection to a given JORAM server, and provides administration and
- * monitoring methods at a server/platform level.
+ * The <code>AdminItf</code> interface defines the set of methods needed
+ * for administration and monitoring of the  Joram platform.
  */
 public interface AdminItf {
- 
   /**
    * Set the maximum time in ms before aborting request.
    * 
