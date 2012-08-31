@@ -110,7 +110,11 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
   
   /** 
    * API method.
-   *
+   * Clears out the message body.
+   * <p>
+   * Calling this method leaves the message body in the same state as an empty body in
+   * a newly created message.
+
    * @exception JMSException  In case of an error while closing the input or
    *              output streams.
    */
@@ -155,6 +159,10 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /** 
    * API method.
+   * Writes a boolean to the stream message as a 1-byte value. The value true is
+   * written as the value 1; the value false is written as the value 0.
+   * 
+   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -174,6 +182,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
  
   /** 
    * API method.
+   * Writes a byte to the stream message.
+   * 
+   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -193,6 +204,13 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
  
   /** 
    * API method.
+   * Writes a byte array to the StreamMessage.
+   * <p>
+   * Each byte array is written to the message as a separate byte array field.
+   * Consecutively written byte array fields are treated as distinct fields when
+   * the fields are read.
+   * 
+   * @param value the byte array to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -203,6 +221,15 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /** 
    * API method.
+   * Writes a portion of a byte array to the StreamMessage.
+   * <p>
+   * The portion of the byte array is written to the message as a separate byte array
+   * field. Consecutively written byte array fields are treated as distinct fields when
+   * the fields are read.
+   * 
+   * @param value   the byte array to be written.
+   * @param offset  the initial offset within the byte array
+   * @param length  the number of bytes to use
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -228,6 +255,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
  
   /** 
    * API method.
+   * Writes a char to the stream message.
+   * 
+   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -247,6 +277,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
  
   /** 
    * API method.
+   * Writes a double to the stream message.
+   * 
+   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -266,6 +299,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
  
   /** 
    * API method.
+   * Writes a float to the stream message.
+   * 
+   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -285,6 +321,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
  
   /** 
    * API method.
+   * Writes an int to the stream message.
+   * 
+   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -304,6 +343,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
  
   /** 
    * API method.
+   * Writes a long to the stream message.
+   * 
+   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -323,6 +365,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /** 
    * API method.
+   * Writes a short to the stream message.
+   * 
+   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -342,6 +387,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
  
   /** 
    * API method.
+   * Writes a String to the stream message.
+   * 
+   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -365,6 +413,10 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
  
   /** 
    * API method.
+   * Writes an object to the stream message. This method works only for the objectified
+   * primitive object types (Integer, Double, Long ...), String objects, and byte arrays.
+   * 
+   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception MessageFormatException  If the value type is invalid.
@@ -409,6 +461,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
   
   /**
    * API method.
+   * Reads a boolean from the StreamMessage.
+   * 
+   * @return the value read.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
@@ -441,6 +496,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /**
    * API method.
+   * Reads a byte from the StreamMessage.
+   * 
+   * @return the value read.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
@@ -479,6 +537,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
  
   /**
    * API method.
+   * Reads a short from the StreamMessage.
+   * 
+   * @return the value read.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
@@ -513,6 +574,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /**
    * API method.
+   * Reads a char from the StreamMessage.
+   * 
+   * @return the value read.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
@@ -547,6 +611,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /**
    * API method.
+   * Reads an int from the StreamMessage.
+   * 
+   * @return the value read.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
@@ -584,6 +651,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /**
    * API method.
+   * Reads a long from the StreamMessage.
+   * 
+   * @return the value read.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
@@ -623,6 +693,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /**
    * API method.
+   * Reads a float from the StreamMessage.
+   * 
+   * @return the value read.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
@@ -655,6 +728,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /**
    * API method.
+   * Reads a double from the StreamMessage.
+   * 
+   * @return the value read.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
@@ -690,6 +766,27 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /**
    * API method.
+   * Reads a byte array from the StreamMessage into the specified buffer.
+   * <p>
+   * To read the field value, readBytes should be successively called until it returns a
+   * value less than the length of the read buffer. The value of the bytes in the buffer
+   * following the last byte read is undefined. If readBytes returns a value equal to the
+   * length of the buffer, a subsequent readBytes call must be made. If there are no more
+   * bytes to be read, this call returns -1.
+   * <p>
+   * If the byte array field value is null, readBytes returns -1.
+   * <p>
+   * If the byte array field value is empty, readBytes returns 0.
+   * <p>
+   * Once the first readBytes call on a byte[] field value has been made, the full value of
+   * the field must be read before it is valid to read the next field. An attempt to read the
+   * next field before that has been done will throw a MessageFormatException.
+   * <p>
+   * To read the byte field value into a new byte[] object, use the readObject method.
+   * 
+   * @param bytes the buffer into which the data is read.
+   * @return the total number of bytes read into the buffer, or -1 if there is no more data
+   *         because the end of the byte field has been reached.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
@@ -784,6 +881,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /**
    * API method.
+   * Reads a String from the StreamMessage.
+   * 
+   * @return a Unicode string from the SreamMessage.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
@@ -833,6 +933,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
   /**
    * API method.
+   * Reads an objectified primitive type from the StreamMessage.
+   * 
+   * @return the value read.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the body is
@@ -892,6 +995,7 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
   
   /** 
    * API method.
+   * Puts the message body in read-only mode and reset the stream to the beginning.
    *
    * @exception JMSException  If an error occurs while closing the output
    *              stream.
