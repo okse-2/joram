@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -31,6 +31,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.TemporaryQueue</code> interface.
+ * <p>
+ * A TemporaryQueue object is a Queue object created for the duration of a Connection.
+ * It is a system-defined queue that can be consumed only by the Connection that created it.
+ * A TemporaryQueue object can be created at either the Session or QueueSession level. 
  */
 public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
   /** define serialVersionUID for interoperability */
@@ -61,7 +65,9 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
 
   /**
    * API method.
-   *
+   * Deletes this temporary queue. If there are existing receivers still using it, a 
+   * JMSException will be thrown.
+   * 
    * @exception IllegalStateException  If the connection is closed or broken.
    * @exception JMSException  If the request fails for any other reason.
    */

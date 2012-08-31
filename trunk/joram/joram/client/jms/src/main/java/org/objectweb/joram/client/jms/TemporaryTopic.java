@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -32,6 +32,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.TemporaryTopic</code> interface.
+ * <p>
+ * A TemporaryTopic object is a Topic object created for the duration of a
+ * Connection. It is a system-defined topic that can be consumed only by the
+ * Connection that created it. A TemporaryTopic object can be created either
+ * at the Session or TopicSession level.
  */
 public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
   /** define serialVersionUID for interoperability */
@@ -62,7 +67,9 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
 
   /**
    * API method.
-   *
+   * Deletes this temporary topic. If there are existing subscribers still using it,
+   * a JMSException will be thrown.
+   * 
    * @exception IllegalStateException  If the connection is closed or broken.
    * @exception JMSException  If the request fails for any other reason.
    */
