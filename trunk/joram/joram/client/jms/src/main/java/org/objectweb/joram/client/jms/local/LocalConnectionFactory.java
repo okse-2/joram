@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -32,13 +32,14 @@ import org.objectweb.joram.shared.security.Identity;
 
 /**
  * A <code>LocalConnectionFactory</code> instance is a factory of local connections.
+ * The created ConnectionFactory can be configured using theFactoryParameters.
  */
 public class LocalConnectionFactory extends ConnectionFactory {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
-   * Constructs a <code>QueueLocalConnectionFactory</code> instance.
+   * Constructs a <code>LocalConnectionFactory</code> instance.
    * Should only be used for internal purposes.
    */
   public LocalConnectionFactory() {
@@ -65,8 +66,8 @@ public class LocalConnectionFactory extends ConnectionFactory {
   }
   
   /**
-   * Administration method creating a <code>javax.jms.ConnectionFactory</code>
-   * instance for creating local connections.
+   * Administration method creating a <code>ConnectionFactory</code>
+   * instance for creating local in-VM connections.
    */ 
   public static ConnectionFactory create() {
     return new LocalConnectionFactory();
