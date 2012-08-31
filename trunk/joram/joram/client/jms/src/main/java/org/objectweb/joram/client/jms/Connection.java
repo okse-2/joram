@@ -358,10 +358,14 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
   }
 
   /** 
-   *  Indicates whether the messages produced are asynchronously sent
-   * or not (without or with acknowledgement).
+   * Indicates whether the persistent produced messages are asynchronously sent
+   * (without acknowledge) or not. Messages sent asynchronously may be lost if a
+   * failure occurs before the message is persisted on the server.
    * <p>
-   *  This attribute is inherited from FactoryParameters, by default false. 
+   * Non persistent messages are always sent without acknowledgment.
+   * <p>
+   * This attribute is inherited from FactoryParameters, by default false, persistent
+   * messages are sent with acknowledge.
    *
    * @return true if messages produced are asynchronously sent.
    *
@@ -498,7 +502,18 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 
   /**
    * API method.
+   * Creates a connection consumer for this connection, this is an expert facility needed for
+   * applications servers.
    * 
+   * @param dest        the destination to access.
+   * @param selector    only messages with properties matching the message selector expression
+   *                    are delivered. A value of null or an empty string indicates that there
+   *                    is no message selector for this message consumer.
+   * @param sessionPool the server session pool to associate with this connection consumer.
+   * @param maxMessages the maximum number of messages that can be assigned to a server session
+   *                    at one time.
+   * @return    The connection consumer.
+   *                    
    * @exception IllegalStateException  If the connection is closed.
    * @exception InvalidSelectorException  If the selector syntax is wrong.
    * @exception InvalidDestinationException  If the target destination does
@@ -519,6 +534,18 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 
   /**
    * API method.
+   * Create a durable connection consumer for this connection, this is an expert facility
+   * needed for applications servers.
+   * 
+   * @param topic       the topic to access.
+   * @param subName     durable subscription name.
+   * @param selector    only messages with properties matching the message selector expression
+   *                    are delivered. A value of null or an empty string indicates that there
+   *                    is no message selector for this message consumer.
+   * @param sessionPool the server session pool to associate with this connection consumer.
+   * @param maxMessages the maximum number of messages that can be assigned to a server session
+   *                    at one time.
+   * @return    The durable connection consumer.
    * 
    * @exception IllegalStateException  If the connection is closed.
    * @exception InvalidSelectorException  If the selector syntax is wrong.
@@ -609,7 +636,14 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 
   /** 
    * API method.
-   *
+   * Creates a Session object.
+   * 
+   * @param transacted  indicates whether the session is transacted.
+   * @param acknowledgeMode indicates whether the consumer or the client will acknowledge any messages
+   *                        it receives; ignored if the session is transacted. Legal values are
+   *                        Session.AUTO_ACKNOWLEDGE, Session.CLIENT_ACKNOWLEDGE, and Session.DUPS_OK_ACKNOWLEDGE.
+   * @return A newly created session.
+   * 
    * @exception IllegalStateException  If the connection is closed.
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
@@ -640,6 +674,16 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 
   /**
    * API method.
+   * Sets an exception listener for this connection. When Joram detects a serious problem with
+   * a connection, it informs the connection's ExceptionListener, if one has been registered.
+   * It does this by calling the listener's onException method, passing it a JMSException object
+   * describing the problem.
+   * <p>
+   * The exception listener allows a client to be notified of a problem asynchronously. Some
+   * connections only consume messages, so they would have no other way to learn their connection
+   * has failed. A connection serializes execution of its ExceptionListener.
+   * 
+   * @param listener the exception listener.
    *
    * @exception IllegalStateException  If the connection is closed.
    */
@@ -650,7 +694,11 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 
   /**
    * API method.
-   *
+   * Gets the ExceptionListener object for this connection if it is configured.
+   * 
+   * @return the ExceptionListener for this connection, or null. if no ExceptionListener
+   * is associated with this connection.
+   * 
    * @exception IllegalStateException  If the connection is closed.
    */
   public javax.jms.ExceptionListener getExceptionListener() throws JMSException {
@@ -660,6 +708,11 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 
   /**
    * API method.
+   * Sets the client identifier for this connection. Joram automatically allocates a
+   * client identifier when the connection is created, so this method always throws 
+   * an IllegalStateException.
+   * 
+   * @param clientID  the unique client identifier.
    *
    * @exception IllegalStateException  Systematically thrown.
    */
@@ -669,6 +722,10 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 
   /**
    * API method.
+   * Gets the client identifier for this connection. This value is specific to the Joram, it
+   * is automatically assigned by the server.
+   * 
+   * @return the unique client identifier.
    *
    * @exception IllegalStateException  If the connection is closed.
    */
@@ -679,8 +736,13 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 
   /**
    * API method.
+   * Gets the metadata for this connection.
+   * 
+   * @return the  connection metadata.
    *
    * @exception IllegalStateException  If the connection is closed.
+   * 
+   * @see ConnectionMetadata
    */
   public javax.jms.ConnectionMetaData getMetaData() throws JMSException {
     checkClosed();
@@ -691,6 +753,9 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 
   /**
    * API method for starting the connection.
+   * <p>
+   * Starts (or restarts) the connection's delivery of incoming messages. A call to start
+   * on a connection that has already been started is ignored.
    *
    * @exception IllegalStateException  If the connection is closed or broken.
    */
@@ -723,6 +788,15 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
   /**
    * API method for stopping the connection; even if the connection appears
    * to be broken, stops the sessions.
+   * <p>
+   * Temporarily stops the connection's delivery of incoming messages. Delivery can
+   * be restarted using the connection's start method. When the connection is stopped,
+   * delivery to all the connection's message consumers is inhibited.
+   * <p>
+   * Stopping a connection has no effect on its ability to send messages. A call to stop
+   * on a connection that has already been stopped is ignored. This call blocks until receives
+   * and/or message listeners in progress have completed, it must not return until delivery
+   * of messages has paused. 
    *
    * @exception IllegalStateException  If the connection is closed or broken.
    */
@@ -764,8 +838,15 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
   /**
    * API method for closing the connection; even if the connection appears
    * to be broken, closes the sessions.
+   * <p>
+   * In order to free significant resources allocated on behalf of a connection,
+   * clients should close connections when they are not needed. Closing a connection
+   * automatically close all related sessions, producers, and consumers and causes
+   * all temporary destinations to be deleted. 
    *
    * @exception JMSException  Actually never thrown.
+   * 
+   * @see javax.jms.Connection.close()
    */
   public void close() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
