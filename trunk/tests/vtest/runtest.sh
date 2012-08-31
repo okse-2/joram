@@ -34,8 +34,8 @@ mvn install
 # launching tests
 cd src;
 echo "on launching ant custom.tests.vtest"
-ant custom.tests.vtest >> $LOGFILE;
-ant vtest.check.reports >> $LOGFILE;
+ant tests.jms.all >> $LOGFILE;
+#ant vtest.check.reports >> $LOGFILE;
 TEST_RESULT=$?;
 
 mkdir results;
