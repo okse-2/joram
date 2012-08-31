@@ -24,7 +24,6 @@
 package org.objectweb.joram.client.jms.admin;
 
 import java.net.ConnectException;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
@@ -70,8 +69,25 @@ import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
- * The <code>User</code> class is a utility class needed for administering
- * JORAM users.
+ * The <code>User</code> class is a utility class needed for administering Joram users.
+ * <p>
+ * The User class is a factory for Joram's users through the create static methods, the
+ * User object provides Joram specific administration and monitoring methods.
+ * <p>
+ * The User object provides methods to add and remove Interceptors, such an interceptor
+ * can handle each incoming and outgoing message. Interceptors can read and also modify
+ * the messages. This enables filtering, transformation or content enrichment, for example
+ * adding a property into the message. Also Interceptors can stop the Interceptor chain by
+ * simply returning false to their intercept method invocation, in this case the transmission
+ * of the message is stopped.
+ * <p>
+ * There is two distinct chains of interceptors:<ul>
+ * <li>The first one “interceptors_in” handles each message that’s entering the server (result
+ * of a send method on a connection from the selected user).</li>
+ * <li>The second one “interceptors_out” handles each message that’s exiting the server (result
+ * of a receive method on a connection from the selected user).</li>
+ * <ul>
+ * These two interceptor chains are configurable for each user.
  */
 public class User extends AdministeredObject implements UserMBean {
   /** define serialVersionUID for interoperability */
@@ -119,7 +135,10 @@ public class User extends AdministeredObject implements UserMBean {
     return name;
   }
 
-  /** Provides a reliable way to compare <code>User</code> instances. */
+  /** 
+   * Returns <code>true</code> if the parameter object is a Joram user wrapping
+   * the same Joram's User.
+   */
   public boolean equals(Object o) {
     if (! (o instanceof User))
       return false;
