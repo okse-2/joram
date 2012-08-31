@@ -58,10 +58,14 @@ import org.objectweb.joram.shared.admin.SetSyncExceptionOnFullDestRequest;
 import org.objectweb.joram.shared.admin.SetThresholdRequest;
 
 /**
- *  Implements the <code>javax.jms.Queue</code> interface and provides
- * Joram specific administration and monitoring methods. This is a proxy
- * object a client uses to specify the destination of messages it is
- * sending and the source of messages it receives.
+ * Implements the <code>javax.jms.Queue</code> interface.
+ * <p>
+ * This is a proxy object a client uses to specify the destination of messages
+ * it is sending and the source of messages it receives. 
+ * <p>
+ * The Queue class is a factory for Joram's Queue destination through the create
+ * static methods, the Queue object provides Joram specific administration and
+ * monitoring methods. 
  */
 public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	/** define serialVersionUID for interoperability */
@@ -94,11 +98,12 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	}
 
 	/**
-	 * Gets the The Joram's internal unique identifier of this queue.
 	 * API method.
+	 * Gets the The Joram's internal unique identifier of this queue.
 	 *
-	 * @exception JMSException  Actually never thrown.
 	 * @return	The Joram's internal unique identifier.
+	 * 
+	 * @exception JMSException  Actually never thrown.
 	 */
 	public String getQueueName() throws JMSException {
 		return getName();

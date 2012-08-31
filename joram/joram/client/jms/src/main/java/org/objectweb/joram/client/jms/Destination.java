@@ -72,6 +72,29 @@ import fr.dyade.aaa.util.management.MXWrapper;
 /**
  * Implements the <code>javax.jms.Destination</code> interface and provides
  * JORAM specific administration and monitoring methods.
+ * <p>
+ * A Destination is a JMS administered object that encapsulates a Joram's specific address.
+ * It is created by an administrator and later used by JMS clients. Normally the JMS clients
+ * find administered objects by looking them up in a JNDI namespace.
+ * <p>
+ * <b>Joram MOM Model</b>
+ * <p>
+ * Server side, a destination is a component receiving messages from producers and answering to
+ * consuming requests from consumers. A destination might either be a “queue” or a “topic”:<ul>
+ * <li>Queue: each messages is read only by a single client.</li>
+ * <li>Topic: All clients that have previously subscribed to this topic are notified of
+ * the corresponding message.</li>
+ * </ul>
+ * A destination allows clients to perform operations according to their access rights. A client
+ * set as a READER will be able to request messages from the destination (either as a subscriber
+ * to a topic, or as a receiver or browser on a queue). A client set as a WRITER will be able to
+ * send messages to the destination.
+ * <p>
+ * A destination provides methods to add and remove Interceptors, an interceptor is an object handling
+ * each message sent to the destination. Interceptors can read and also modify the messages. This enables
+ * filtering, transformation or content enrichment, for example adding a property into the message.
+ * Also Interceptors can stop the Interceptor chain by simply returning false to their intercept method
+ * invocation, in this case the transmission of the message is stopped.
  */
 public abstract class Destination extends AdministeredObject implements javax.jms.Destination, DestinationMBean {
   /** Define serialVersionUID for interoperability. */
@@ -157,7 +180,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
 
   /**
    * Returns the symbolic administration name of the destination.
-   * This symbolic name is given by the user at creation.
+   * This symbolic name is given by the user at creation, if it is unknown the internal
+   * name of this destination is returned.
    * 
    * @return the symbolic name of the destination if any.
    */
@@ -180,7 +204,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
 
   /**
    * Returns <code>true</code> if the parameter object is a Joram destination
-   * wrapping the same agent identifier.
+   * wrapping the same Joram's Destination.
    */
   public boolean equals(Object obj) {
     if (! (obj instanceof Destination))
