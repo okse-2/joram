@@ -20,17 +20,16 @@ ZIPFILE=$VTEST_HOME/"result.zip"
 
 #extracting joram source so as to test updated trunk artifacts
 svn co svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram $VTEST_HOME/joram-src
-cd $VTEST_HOME/joram-src
-echo "installing joram trunk" >> $LOGFILE
-mvn install >> $LOGFILE
-
+cd $VTEST_HOME/joram-src;
+echo "installing joram trunk"
+mvn install;
 
 #following command suppose that svn check out has been made into path $VTEST_HOME/joram
 cd $VTEST_HOME/joram;
 
 #installing joram tests using maven
-echo "installing joram tests" >> $LOGFILE
-mvn install >> $LOGFILE;
+echo "installing joram tests"
+mvn install
 
 # launching tests
 cd src;
