@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - Bull SA
- * Copyright (C) 2011 - ScalAgent
+ * Copyright (C) 2005 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package org.objectweb.joram.client.connector.utils;
@@ -48,7 +48,7 @@ import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 
 /**
- *
+ * This class allows to handle the RA configuration file.
  */
 public class RAConfig {
 
