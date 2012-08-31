@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,6 +53,9 @@ public class QueueReceiver extends MessageConsumer implements javax.jms.QueueRec
 
   /** 
    * API method.
+   * Gets the queue associated with this queue receiver.
+   * 
+   * @return this receiver's Queue.
    *
    * @exception IllegalStateException  If the receiver is closed.
    */

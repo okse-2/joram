@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -51,6 +51,9 @@ public class QueueSender extends MessageProducer implements javax.jms.QueueSende
 
   /** 
    * API method.
+   * Gets the queue associated with this queue sender.
+   * 
+   * @return this sender's Queue.
    *
    * @exception IllegalStateException  If the sender is closed.
    */
@@ -63,6 +66,15 @@ public class QueueSender extends MessageProducer implements javax.jms.QueueSende
 
   /**
    * API method.
+   * Sends a message to a queue for an unidentified queue sender with default delivery parameters.
+   * <p>
+   * Typically, a queue sender is assigned a queue at creation time; however, the JMS API also
+   * supports unidentified queue sender, which require that the queue be supplied every time a
+   * message is sent.
+   * 
+   * @param queue         the queue to send this message to.
+   * @param message       the message to send.
+
    *
    * @exception UnsupportedOperationException  When the sender did not
    *              properly identify itself.
@@ -78,6 +90,17 @@ public class QueueSender extends MessageProducer implements javax.jms.QueueSende
 
   /**
    * API method.
+   * Sends a message to a queue for an unidentified queue sender with given delivery parameters.
+   * <p>
+   * Typically, a queue sender is assigned a queue at creation time; however, the JMS API also
+   * supports unidentified queue sender, which require that the queue be supplied every time a
+   * message is sent.
+   * 
+   * @param queue         the queue to send this message to.
+   * @param message       the message to send.
+   * @param deliveryMode  the delivery mode to use.
+   * @param priority      the priority for this message.
+   * @param timeToLive    the message's lifetime in milliseconds.
    *
    * @exception UnsupportedOperationException  When the sender did not
    *              properly identify itself.
@@ -89,7 +112,8 @@ public class QueueSender extends MessageProducer implements javax.jms.QueueSende
    */
   public void send(javax.jms.Queue queue,
                    javax.jms.Message message,
-                   int deliveryMode, int priority,
+                   int deliveryMode,
+                   int priority,
                    long timeToLive) throws JMSException {
     super.send(queue, message, deliveryMode, priority, timeToLive);
   }
