@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,17 +44,28 @@ public class XAQueueConnection extends QueueConnection implements javax.jms.XAQu
 
   /**
    * API method.
+   * Creates a QueueSession object.
+   * 
+   * @param transacted      indicates whether the session is transacted.
+   * @param acknowledgeMode indicates whether the consumer or the client will acknowledge any
+   *                        messages it receives; ignored if the session is transacted. Legal
+   *                        values are Session.AUTO_ACKNOWLEDGE, Session.CLIENT_ACKNOWLEDGE,
+   *                        and Session.DUPS_OK_ACKNOWLEDGE.
+   * @return A newly created session.
    * 
    * @exception IllegalStateException If the connection is closed.
    * @exception JMSException In case of an invalid acknowledge mode.
    */
   public javax.jms.QueueSession createQueueSession(boolean transacted,
-      int acknowledgeMode) throws JMSException {
+                                                   int acknowledgeMode) throws JMSException {
     return super.createQueueSession(transacted, acknowledgeMode);
   }
 
   /**
    * API method.
+   * Creates an XAQueueSession object.
+   * 
+   * @return  A newly created session.
    * 
    * @exception IllegalStateException If the connection is closed.
    */
@@ -72,8 +83,8 @@ public class XAQueueConnection extends QueueConnection implements javax.jms.XAQu
    * @exception IllegalStateException If the connection is closed.
    * @exception JMSException In case of an invalid acknowledge mode.
    */
-  public javax.jms.Session createSession(boolean transacted, int acknowledgeMode)
-      throws JMSException {
+  public javax.jms.Session createSession(boolean transacted,
+                                         int acknowledgeMode) throws JMSException {
     return super.createSession(transacted, acknowledgeMode);
   }
 

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -50,9 +50,13 @@ import javax.jms.TemporaryQueue;
  * An XA session actually extends the behaviour of a normal session by
  * providing an XA resource representing it to a Transaction Manager, so that
  * it is part of a distributed transaction. The XASession wraps what looks like
- * a "normal"Session object. This object takes care of producing and
+ * a "normal" Session object. This object takes care of producing and
  * consuming messages, the actual sendings and acknowledgement being managed
  * by this XA wrapper.
+ * <p>
+ * This class offers support to transactional environments. Client programs are
+ * strongly encouraged to use the transactional support available in their environment,
+ * rather than use these XA interfaces directly. 
  */
 public class XASession implements javax.jms.XASession {
   /** The XA resource representing the session to the transaction manager. */
@@ -89,6 +93,9 @@ public class XASession implements javax.jms.XASession {
   
   /**
    * API method.
+   * Gets the session associated with this XASession.
+   * 
+   * @return the session object.
    *
    * @exception IllegalStateException  If the session is closed.
    */
@@ -96,14 +103,22 @@ public class XASession implements javax.jms.XASession {
     return sess;
   }
  
-  /** API method. */  
+  /**
+   * API method.
+   * Returns an XA resource to the caller.
+   * 
+   * @return an XA resource.
+   */  
   public javax.transaction.xa.XAResource getXAResource() {
     return xaResource;
   }
 
   /**
-   * API method. 
+   * API method.
+   * Indicates whether the session is in transacted mode.
    *
+   * @return true
+   * 
    * @exception IllegalStateException  If the session is closed.
    */
   public boolean getTransacted() throws JMSException {
@@ -205,80 +220,130 @@ public class XASession implements javax.jms.XASession {
   }
 
   /**
-   *
+   * API method. Closes the session.
+   * 
    * @exception JMSException  Actually never thrown.
+   * @see Session.close
    */
   public void close() throws JMSException {
     sess.close();
   }
   
-  /** 
-   *
+  /**
+   * Delegates the call to the wrapped JMS session.
    */
   public void run() {
     sess.run();
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public void unsubscribe(String name) throws JMSException {
     sess.unsubscribe(name);
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public synchronized TemporaryQueue createTemporaryQueue() throws JMSException {
     return sess.createTemporaryQueue();
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public synchronized TemporaryTopic createTemporaryTopic() throws JMSException {
     return sess.createTemporaryTopic();
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public synchronized Topic createTopic(String topicName) throws JMSException {
     return sess.createTopic(topicName);
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public Queue createQueue(String queueName) throws JMSException {
     return sess.createQueue(queueName);
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public void setMessageListener(MessageListener messageListener)throws JMSException {
     sess.setMessageListener(messageListener);
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public MessageListener getMessageListener() throws JMSException {
     return sess.getMessageListener();
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public int getAcknowledgeMode() throws JMSException {
     return sess.getAcknowledgeMode();
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public TextMessage createTextMessage() throws JMSException {
     return sess.createTextMessage();
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public TextMessage createTextMessage(String text) throws JMSException {
     return sess.createTextMessage(text);
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public StreamMessage createStreamMessage() throws JMSException {
     return sess.createStreamMessage();
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public ObjectMessage createObjectMessage() throws JMSException {
     return sess.createObjectMessage();
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public ObjectMessage createObjectMessage(java.io.Serializable obj) throws JMSException {
     return sess.createObjectMessage(obj);
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public Message createMessage() throws JMSException {
     return sess.createMessage();
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public MapMessage createMapMessage() throws JMSException {
     return sess.createMapMessage();
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public BytesMessage createBytesMessage() throws JMSException {
     return sess.createBytesMessage();
   }

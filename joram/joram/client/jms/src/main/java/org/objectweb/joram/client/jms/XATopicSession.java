@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2004 Bull SA
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
@@ -30,9 +30,7 @@ import javax.jms.TopicSubscriber;
 /**
  * Implements the <code>javax.jms.XATopicSession</code> interface.
  */
-public class XATopicSession extends XASession
-                            implements javax.jms.XATopicSession
-{
+public class XATopicSession extends XASession implements javax.jms.XATopicSession {
   /**
    * Constructs an <code>XATopicSession</code> instance.
    *
@@ -43,22 +41,24 @@ public class XATopicSession extends XASession
    */
   XATopicSession(XATopicConnection cnx, 
                  TopicSession ts, 
-                 XAResourceMngr rm) throws JMSException
-  {
+                 XAResourceMngr rm) throws JMSException {
     super(cnx, ts, rm);
   }
 
   
   /** Returns a String image of this session. */
-  public String toString()
-  {
+  public String toString() {
     return "XATopicSess:" + sess.getId();
   }
 
 
-  /** API method. */ 
-  public javax.jms.TopicSession getTopicSession() throws JMSException
-  {
+  /**
+   * API method.
+   * Gets the topic session associated with this XATopicSession.
+   * 
+   * @return the topic session object.
+   */ 
+  public javax.jms.TopicSession getTopicSession() throws JMSException {
     return (javax.jms.TopicSession) sess;
   }
 
@@ -67,18 +67,14 @@ public class XATopicSession extends XASession
    */
   public TopicSubscriber createSubscriber(javax.jms.Topic topic,
                                           String selector,
-                                          boolean noLocal)
-         throws JMSException
-  {
+                                          boolean noLocal) throws JMSException {
     return ((TopicSession) sess).createSubscriber(topic, selector, noLocal);
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public TopicSubscriber createSubscriber(javax.jms.Topic topic)
-         throws JMSException
-  {
+  public TopicSubscriber createSubscriber(javax.jms.Topic topic) throws JMSException {
     return ((TopicSession) sess).createSubscriber(topic);
   }
 }
