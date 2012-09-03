@@ -26,13 +26,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import org.objectweb.joram.mom.dest.AdminTopic;
+import org.objectweb.joram.mom.dest.AdminTopic.DestinationDesc;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
+import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AdminReply;
+import org.objectweb.joram.shared.admin.ClearQueue;
+import org.objectweb.joram.shared.admin.ClearSubscription;
 import org.objectweb.joram.shared.admin.CreateDestinationRequest;
 import org.objectweb.joram.shared.admin.CreateUserRequest;
 import org.objectweb.joram.shared.admin.DeleteDestination;
+import org.objectweb.joram.shared.admin.DeleteQueueMessage;
+import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
 import org.objectweb.joram.shared.admin.DeleteUser;
+import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -71,13 +78,13 @@ public class SynchronousAgent extends Agent {
    */
   private static final long serialVersionUID = 3842240802167239809L;
 
-  private int nextMsgId;  
+  private int nextReqMsgId;  
   private Map<String, Message> requests;
   
   public SynchronousAgent() {
     super(true);
     requests = new HashMap<String,Message>();
-    nextMsgId = 0;
+    nextReqMsgId = 0;
   }
   
   @Override
@@ -102,15 +109,15 @@ public class SynchronousAgent extends Agent {
       logger.log(BasicLevel.DEBUG, "createDestination("+serverId+","+name+","+className+","+props+","+expectedType+")");
     CreateDestinationRequest req = new CreateDestinationRequest(
         serverId, name, className, props, expectedType);
-    String msgId = nextMsgId();
+    String reqId = nextReqMsgId();
     FwdAdminRequestNot not = new FwdAdminRequestNot(req,
         getId(),
-        msgId,
+        reqId,
         null);
     sendTo(AdminTopic.getDefault(), not);
-    while(!requests.containsKey(msgId))
+    while(!requests.containsKey(reqId))
       wait();
-    Message msg = requests.get(msgId);
+    Message msg = requests.get(reqId);
     AdminReply reply = (AdminReply) msg.getAdminMessage();
     return reply.succeeded();        
   }
@@ -140,15 +147,15 @@ public class SynchronousAgent extends Agent {
       identity.setIdentity(userName, password);
     
     CreateUserRequest req = new CreateUserRequest(identity,serverId,props);
-    String msgId = nextMsgId();
+    String reqId = nextReqMsgId();
     FwdAdminRequestNot not = new FwdAdminRequestNot(req,
         getId(),
-        msgId,
+        reqId,
         null);
     sendTo(AdminTopic.getDefault(), not);
-    while(!requests.containsKey(msgId))
+    while(!requests.containsKey(reqId))
       wait();
-    Message msg = requests.remove(msgId);
+    Message msg = requests.remove(reqId);
     AdminReply reply = (AdminReply) msg.getAdminMessage();
     return reply.succeeded();        
   }
@@ -156,15 +163,15 @@ public class SynchronousAgent extends Agent {
   public synchronized boolean deleteUser(String userName, String agentId)
       throws Exception {
     DeleteUser req = new DeleteUser(userName,agentId);
-    String msgId = nextMsgId();
+    String reqId = nextReqMsgId();
     FwdAdminRequestNot not = new FwdAdminRequestNot(req,
         getId(),
-        msgId,
+        reqId,
         null);
     sendTo(AdminTopic.getDefault(), not);
-    while(!requests.containsKey(msgId))
+    while(!requests.containsKey(reqId))
       wait();
-    Message msg = requests.remove(msgId);
+    Message msg = requests.remove(reqId);
     AdminReply reply = (AdminReply) msg.getAdminMessage();
     return reply.succeeded();        
   }
@@ -172,22 +179,159 @@ public class SynchronousAgent extends Agent {
   public synchronized boolean deleteDest(String agentId)
       throws Exception {
     DeleteDestination req = new DeleteDestination(agentId);
-    String msgId = nextMsgId();
+    String reqId = nextReqMsgId();
     FwdAdminRequestNot not = new FwdAdminRequestNot(req,
         getId(),
-        msgId,
+        reqId,
         null);
     sendTo(AdminTopic.getDefault(), not);
-    while(!requests.containsKey(msgId))
+    while(!requests.containsKey(reqId))
       wait();
-    Message msg = requests.remove(msgId);
+    Message msg = requests.remove(reqId);
     AdminReply reply = (AdminReply) msg.getAdminMessage();
     return reply.succeeded();        
   }
+  
+  /**
+   * Delete a message in a queue
+   * @param queueName Name of the queue
+   * @param msgId ID of the message to be deleted
+   * @return
+   * @throws InterruptedException 
+   */
+  public synchronized boolean deleteQueueMessage(String queueName, String msgId) throws InterruptedException {
+    if(logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,this.toString() 
+          + ".deleteQueueMessage(" + queueName + ", " + msgId + ")" +
+          		": Method called");
+    
+    DestinationDesc queueDesc;
+    try {
+      queueDesc = AdminTopic.lookupDest(queueName, DestinationConstants.QUEUE_TYPE);
+    } catch (RequestException e) {
+      return false;
+    }
+    if(logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,this.toString() 
+          + ".deleteQueueMessage(" + queueName + ", " + msgId + ")" +
+              ": Queue found="+queueDesc!=null);
+    if(queueDesc==null) return false;
+    
+    String reqId = nextReqMsgId();
+    DeleteQueueMessage req =
+        new DeleteQueueMessage(queueDesc.getId().toString(), msgId);
+    FwdAdminRequestNot not =
+        new FwdAdminRequestNot(req, getId(), reqId, null);
+    sendTo(queueDesc.getId(), not);
+    if(logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,this.toString() 
+          + ".deleteQueueMessage(" + queueName + ", " + msgId + ")" +
+              ": Request sent to "+queueDesc.getId());
+    while(!requests.containsKey(reqId))
+      wait();
+    if(logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,this.toString() 
+          + ".deleteQueueMessage(" + queueName + ", " + msgId + ")" +
+              ": Reply received");
+    Message msg = requests.remove(reqId);
+    AdminReply reply = (AdminReply) msg.getAdminMessage();
+    return reply.succeeded();
+  }
+  
+  /**
+   * Deletes a message in a subscription
+   * @param userName Subscriber's name
+   * @param subName Subscription name
+   * @param msgId ID of the message to be deleted
+   * @return
+   * @throws InterruptedException 
+   */
+  public boolean deleteSubMessage(String userName, String subName, String msgId) throws InterruptedException {
+    if(logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,this.toString() 
+          + ".deleteSubMessage("+ userName + ", " + subName + ", " + msgId + ")" +
+              ": Method called.");
+    AgentId userId = AdminTopic.lookupUser(userName);
+    if(logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,this.toString() 
+          + ".deleteSubMessage("+ userName + ", " + subName + ", " + msgId + ")" +
+              ": User found="+userId!=null);
+    if(userId==null)
+      return false;
+    String reqId = nextReqMsgId();
+    DeleteSubscriptionMessage req =
+        new DeleteSubscriptionMessage(userId.toString(), subName, msgId);
+    FwdAdminRequestNot not =
+        new FwdAdminRequestNot(req, getId(), reqId, null);
+    sendTo(userId, not);
+    if(logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,this.toString() 
+          + ".deleteSubMessage("+ userName + ", " + subName + ", " + msgId + ")" +
+              ": Request sent to "+userId);
+    while(!requests.containsKey(reqId))
+      wait();
+    if(logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,this.toString() 
+          + ".deleteSubMessage("+ userName + ", " + subName + ", " + msgId + ")" +
+            ": Reply received");
+    Message msg = requests.remove(reqId);
+    AdminReply reply = (AdminReply) msg.getAdminMessage();
+    return reply.succeeded();
+  }
 
   
-  private synchronized String nextMsgId() {
-    return "ID:"+getAgentId()+"m"+nextMsgId++;
+  /**
+   * Clears all pending message of a queue
+   * @param queueName Name of the queue
+   * @return
+   * @throws InterruptedException 
+   */
+  public boolean clearQueue(String queueName) throws InterruptedException {
+    DestinationDesc queueDesc;
+    try {
+      queueDesc = AdminTopic.lookupDest(queueName, DestinationConstants.QUEUE_TYPE);
+      if(queueDesc==null) return false;
+    } catch (RequestException e) {
+      return false;
+    }
+    String reqId = nextReqMsgId();
+    ClearQueue req = new ClearQueue(queueDesc.getId().toString());
+    FwdAdminRequestNot not =
+        new FwdAdminRequestNot(req, getId(), reqId, null);
+    sendTo(queueDesc.getId(), not);
+    while(!requests.containsKey(reqId))
+      wait();
+    Message msg = requests.remove(reqId);
+    AdminReply reply = (AdminReply) msg.getAdminMessage();
+    return reply.succeeded();
+  }
+  
+  /**
+   * Clears all pending message of a subscription
+   * @param userName Subscriber's name
+   * @param subName Subscription name
+   * @return
+   * @throws InterruptedException 
+   */
+  public boolean clearSubscription(String userName, String subName) throws InterruptedException {
+    AgentId userId = AdminTopic.lookupUser(userName);
+    if(userId==null)
+      return false;
+    String reqId = nextReqMsgId();
+    ClearSubscription req =
+        new ClearSubscription(userId.toString(), subName);
+    FwdAdminRequestNot not =
+        new FwdAdminRequestNot(req, getId(), reqId, null);
+    sendTo(userId, not);
+    while(!requests.containsKey(reqId))
+      wait();
+    Message msg = requests.remove(reqId);
+    AdminReply reply = (AdminReply) msg.getAdminMessage();
+    return reply.succeeded();
+  }
+  
+  private synchronized String nextReqMsgId() {
+    return "ID:"+getAgentId()+"m"+nextReqMsgId++;
   }
   
   public void react(AgentId from, Notification not) throws Exception {

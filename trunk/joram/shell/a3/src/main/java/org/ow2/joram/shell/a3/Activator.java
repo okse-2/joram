@@ -34,11 +34,9 @@ public class Activator implements BundleActivator {
   public void start(BundleContext bundleContext) throws Exception {
     Hashtable<String, Object> prop = new Hashtable<String, Object>();
     //CommandProcessor.COMMAND_SCOPE="osgi.command.scope"
-    prop.put("osgi.command.scope",
-        A3CommandsImpl.NAMESPACE);
+    prop.put("osgi.command.scope", A3CommandsImpl.NAMESPACE);
     //CommandProcessor.COMMAND_FUNCTION="osgi.command.function"
-    prop.put("osgi.command.function",
-        A3CommandsImpl.COMMANDS);
+    prop.put("osgi.command.function", A3CommandsImpl.COMMANDS);
     bundleContext.registerService(A3Commands.class.getCanonicalName(),
         new A3CommandsImpl(bundleContext), prop);
   }
