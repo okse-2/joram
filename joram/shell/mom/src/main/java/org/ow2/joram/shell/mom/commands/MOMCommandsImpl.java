@@ -859,36 +859,59 @@ public class MOMCommandsImpl implements MOMCommands {
    *        [joram:mom:]deleteMsg subscription <username> <subscription name> <msg id><br/>
    */
   public void deleteMsg(String[] args) {
-    if(args.length == 3 && args[0].equalsIgnoreCase("queue")) {
-      String queueName = args[1];
-      String msgId = args[2];
-      if(!JoramHelper.deleteQueueMessage(queueName, msgId))
-        System.err.println("Error: The queue \""+queueName+"\" does not exist.");
-    
-    } else if (args.length == 4 && args[0].equalsIgnoreCase("subscription")) {
-      String userName = args[1];
-      String subName  = args[2];
-      String msgId    = args[3];
-      //Check user & subscription
-      try {
-        ClientSubscriptionMBean sub = findClientSubscription(userName, subName);
-        if(sub==null) {
-          System.err.println("Error: The user \""+userName
-              +"\" has no subscription of the name \""+subName+"\"");          
-          return;
-        }
-      } catch(UserNotFoundException e) {
-        System.err.println("Error: The user \""+userName+"\" does not exist.");          
-        return;        
-      }
-      if(!JoramHelper.deleteSubMessage(userName, subName, msgId))
-        System.err.println("Error: Couldn't delete message from "+userName
-            +"'s subscription "+subName);
+    if(args.length == 3
+        && args[0].equalsIgnoreCase("queue")) {
+      deleteMsgQueue(args[1], args[2]);
+    } else if (args.length == 4
+        && args[0].equalsIgnoreCase("subscription")) {
+      deleteMsgSub(args[1], args[2], args[3]);
     } else {
       help("deleteMsg");
     }
   }
  
+  private void deleteMsgQueue(String queueName,String msgId) {
+    try {
+      if(!SynchronousAgent.getSynchronousAgent()
+          .deleteQueueMessage(queueName, msgId))
+        System.err.println("Error: The queue \""+queueName+"\" does not exist.");
+    } catch (InterruptedException e) {
+      System.err.println("Error: Interrupted.");
+      return;
+    } catch (Exception e) {
+      System.err.println("Error: Exception raised");
+      e.printStackTrace();
+      return;
+    }
+  }
+  
+  private void deleteMsgSub(String userName, String subName, String msgId) {
+    //Check user & subscription
+    try {
+      ClientSubscriptionMBean sub = findClientSubscription(userName, subName);
+      if(sub==null) {
+        System.err.println("Error: The user \""+userName
+            +"\" has no subscription of the name \""+subName+"\"");          
+        return;
+      }
+    } catch(UserNotFoundException e) {
+      System.err.println("Error: The user \""+userName+"\" does not exist.");          
+      return;        
+    }
+    try {
+      if(!SynchronousAgent.getSynchronousAgent().deleteSubMessage(userName, subName, msgId))
+        System.err.println("Error: Couldn't delete message from "+userName
+            +"'s subscription "+subName);
+    } catch (InterruptedException e) {
+      System.err.println("Error: Interrupted.");
+      return;
+    } catch (Exception e) {
+      System.err.println("Error: Exception raised");
+      e.printStackTrace();
+      return;
+    }
+  }
+  
   /**
    * Deletes all pending messages from a subscription or a queue.<br/>
    * Usage: [joram:mom:]clear queue <name><br/>
