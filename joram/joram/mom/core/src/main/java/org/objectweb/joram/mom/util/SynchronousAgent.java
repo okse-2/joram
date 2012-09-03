@@ -31,6 +31,8 @@ import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.CreateDestinationRequest;
 import org.objectweb.joram.shared.admin.CreateUserRequest;
+import org.objectweb.joram.shared.admin.DeleteDestination;
+import org.objectweb.joram.shared.admin.DeleteUser;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -50,6 +52,7 @@ public class SynchronousAgent extends Agent {
   //TODO: Doesn't work. Might be useless because this agent is to be merged to AdminTopic
 //  static private Object monitor = new Object();
   
+  //TODO: Should be accessed as a service => Will be done when merged
   static public synchronized SynchronousAgent getSynchronousAgent()
       throws IOException, InterruptedException {
     if(INSTANCE == null) {
@@ -83,7 +86,7 @@ public class SynchronousAgent extends Agent {
     INSTANCE = this;
 //    notifyInitialized();
   }
-  
+ 
 //  private static synchronized void notifyInitialized() {
 //    monitor.notifyAll();    
 //  }
@@ -149,6 +152,39 @@ public class SynchronousAgent extends Agent {
     AdminReply reply = (AdminReply) msg.getAdminMessage();
     return reply.succeeded();        
   }
+ 
+  public synchronized boolean deleteUser(String userName, String agentId)
+      throws Exception {
+    DeleteUser req = new DeleteUser(userName,agentId);
+    String msgId = nextMsgId();
+    FwdAdminRequestNot not = new FwdAdminRequestNot(req,
+        getId(),
+        msgId,
+        null);
+    sendTo(AdminTopic.getDefault(), not);
+    while(!requests.containsKey(msgId))
+      wait();
+    Message msg = requests.remove(msgId);
+    AdminReply reply = (AdminReply) msg.getAdminMessage();
+    return reply.succeeded();        
+  }
+
+  public synchronized boolean deleteDest(String agentId)
+      throws Exception {
+    DeleteDestination req = new DeleteDestination(agentId);
+    String msgId = nextMsgId();
+    FwdAdminRequestNot not = new FwdAdminRequestNot(req,
+        getId(),
+        msgId,
+        null);
+    sendTo(AdminTopic.getDefault(), not);
+    while(!requests.containsKey(msgId))
+      wait();
+    Message msg = requests.remove(msgId);
+    AdminReply reply = (AdminReply) msg.getAdminMessage();
+    return reply.succeeded();        
+  }
+
   
   private synchronized String nextMsgId() {
     return "ID:"+getAgentId()+"m"+nextMsgId++;

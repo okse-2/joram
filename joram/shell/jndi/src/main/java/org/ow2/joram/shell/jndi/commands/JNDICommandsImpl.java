@@ -22,8 +22,6 @@
  */
 package org.ow2.joram.shell.jndi.commands;
 
-import java.util.regex.Pattern;
-
 import javax.naming.NamingException;
 
 import org.osgi.framework.BundleContext;
@@ -45,7 +43,6 @@ public class JNDICommandsImpl implements JNDICommands {
   private BundleContext bundleContext;
   private ServiceTracker tracker;
 
-  @SuppressWarnings("unchecked")
   public JNDICommandsImpl(BundleContext bundleContext) {
     this.bundleContext = bundleContext;
     this.tracker = new ServiceTracker(this.bundleContext,
