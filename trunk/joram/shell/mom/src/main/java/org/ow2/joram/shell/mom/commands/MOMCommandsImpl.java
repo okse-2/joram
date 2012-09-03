@@ -512,7 +512,30 @@ public class MOMCommandsImpl implements MOMCommands {
     for(int i = 0; i < objs.length; i++) {
       a = (AgentMBean) objs[i];
       if(a.getName().equals(args[1])) {
-        a.delete();
+        if(category.equalsIgnoreCase("user"))
+          try {
+            if(SynchronousAgent.getSynchronousAgent().deleteUser(a.getName(), a.getAgentId()))
+              System.out.println("User successfully deleted.");
+            else
+              System.err.println("User suppression failed.");            
+          } catch (InterruptedException e) {
+            System.err.println("Error: Interrupted");
+          } catch (Exception e) {
+            System.err.println("Error: Exception raised");
+            e.printStackTrace();
+          }
+        else
+          try {
+            if(SynchronousAgent.getSynchronousAgent().deleteDest(a.getAgentId()))
+              System.out.println("Destination successfully deleted.");
+            else
+              System.err.println("Destination suppression failed.");            
+          } catch (InterruptedException e) {
+            System.err.println("Error: Interrupted");
+          } catch (Exception e) {
+            System.err.println("Error: Exception raised");
+            e.printStackTrace();
+          }
         return;
       }
     }
