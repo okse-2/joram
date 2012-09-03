@@ -38,6 +38,7 @@ public class MOMCommandsTests extends TestCase {
       System.out.println("Waiting for the test to complete.");
       while(lock.exists() || !testFile.exists())
         Thread.sleep(100);
+      System.out.println("Test completed. Parsing results...");
 
       ObjectInputStream oif = new ObjectInputStream(new FileInputStream(testFile));
 

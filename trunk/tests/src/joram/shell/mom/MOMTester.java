@@ -46,7 +46,7 @@ import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.EngineMBean;
 
 
-public class MOMTester implements BundleActivator {
+public class MOMTester extends Thread implements BundleActivator {
 
   private static final long TIMEOUT = 10000;
   private static final long TEMPORIZER = 200;
@@ -137,7 +137,7 @@ public class MOMTester implements BundleActivator {
     excFile = new ObjectOutputStream(new FileOutputStream(TEST_FILE));
     excCollec = new ArrayList<Exception>();
     
-    doRun();
+    start();
   }
   
   @Override
@@ -162,11 +162,11 @@ public class MOMTester implements BundleActivator {
   }
   
   @SuppressWarnings("deprecation")
-  private void doRun() {
+  public void run() {
     try {
       cf = TcpConnectionFactory.create(HOST, PORT);
-      ((TcpConnectionFactory) cf).getParameters().connectingTimer = 5;
-      ((TcpConnectionFactory) cf).getParameters().multiThreadSync = false;
+        ((TcpConnectionFactory) cf).getParameters().connectingTimer = 5;
+        ((TcpConnectionFactory) cf).getParameters().multiThreadSync = false;
       AdminModule.connect(cf, "root", "root");
         
       testCreate();
