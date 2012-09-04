@@ -18,43 +18,41 @@ date=`echo $date | sed -e s:/:.:g`
 LOGFILE=$VTEST_HOME/"vtest-$date.log"
 ZIPFILE=$VTEST_HOME/"result.zip"
 
-touch $ZIPFILE
-
 #extracting joram source so as to test updated trunk artifacts
-#svn co svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram $VTEST_HOME/joram-src
-#cd $VTEST_HOME/joram-src;
-#echo "installing joram trunk"
-#mvn install;
+svn co svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram $VTEST_HOME/joram-src >>& $LOGFILE;
+cd $VTEST_HOME/joram-src;
+echo "installing joram trunk"
+mvn install >>& $LOGFILE;
 
 #following command suppose that svn check out has been made into path $VTEST_HOME/joram
-#cd $VTEST_HOME/joram;
+cd $VTEST_HOME/joram;
 
 #installing joram tests using maven
-#echo "installing joram tests"
-#mvn install
+echo "installing joram tests"
+mvn install >>& $LOGFILE;
 
-# launching tests
-#cd src;
-#echo "on launching ant custom.tests.vtest"
-#ant tests.jms.all >> $LOGFILE;
-#ant vtest.check.reports >> $LOGFILE;
-#TEST_RESULT=$?;
+#launching tests
+cd src;
+echo "on launching ant custom.tests.vtest"
+ant tests.jms.all >>& $LOGFILE;
+ant vtest.check.reports >>& $LOGFILE;
+TEST_RESULT=$?;
 
-#mkdir results;
-#cp $LOGFILE results;
+mkdir results;
+cp $LOGFILE results;
 
-# getting test exit code
-# if [[ $TEST_RESULT -gt 0 ]]; then
-#     echo "TEST FAILED !";
-#     #save contents when test failed
-#     mv $VTEST_HOME/ERROR-* results;
-#     jar cf $ZIPFILE results;
-#     exit 1;
-# else
-#     echo "TEST OK";
-#     cp $VTEST_HOME/joram/src/jndi2/report.txt results/jndi2-report.txt;
-#     cp $VTEST_HOME/joram/src/joram/report.txt results/joram-report.txt;
-#     cp $VTEST_HOME/joram/src/jms/report.txt results/jms-report.txt;
-#     jar cf $ZIPFILE results;
-#     exit 0;
-# fi
+getting test exit code
+if [[ $TEST_RESULT -gt 0 ]]; then
+    echo "TEST FAILED !";
+    #save contents when test failed
+    mv $VTEST_HOME/ERROR-* results;
+    jar cf $ZIPFILE results;
+    exit 1;
+else
+    echo "TEST OK";
+    cp $VTEST_HOME/joram/src/jndi2/report.txt results/jndi2-report.txt;
+    cp $VTEST_HOME/joram/src/joram/report.txt results/joram-report.txt;
+    cp $VTEST_HOME/joram/src/jms/report.txt results/jms-report.txt;
+    jar cf $ZIPFILE results;
+    exit 0;
+fi
