@@ -201,7 +201,7 @@ public class MOMCommandsImpl implements MOMCommands {
       help("list");
       return;
     }
-    String category = args[0];
+    String category = args[0].toLowerCase();
     if(category.equals("destination")
     || category.equals("queue")
     || category.equals("topic")) {
@@ -227,7 +227,7 @@ public class MOMCommandsImpl implements MOMCommands {
     }
     
     if(obj == null || obj.length ==0) {
-      System.err.println("Error: There is no "+category);
+      System.out.println("There is no "+category);
       return;
     }
     

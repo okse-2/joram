@@ -22,11 +22,15 @@
  */
 package org.ow2.joram.shell.jndi.commands;
 
+import java.util.Properties;
+import java.util.StringTokenizer;
+
 import javax.naming.NamingException;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import fr.dyade.aaa.jndi2.impl.NamingContext;
 import fr.dyade.aaa.jndi2.impl.NamingContextMBean;
 
 public class JNDICommandsImpl implements JNDICommands {
@@ -34,11 +38,13 @@ public class JNDICommandsImpl implements JNDICommands {
   private static final int TIMEOUT = 1000;
 
   public static final String NAMESPACE = "joram:jndi";
+//  public static final String[] COMMANDS = new String[] {
+//    "getNamingContext", "getStrOwnerId",
+//    "setStrOwnerId", "createSubcontext",
+//    "destroySubcontext", "lookup",
+//    "unbind"};
   public static final String[] COMMANDS = new String[] {
-    "getNamingContext", "getStrOwnerId",
-    "setStrOwnerId", "createSubcontext",
-    "destroySubcontext", "lookup",
-    "unbind"};
+    "list"};
   
   private BundleContext bundleContext;
   private ServiceTracker tracker;
@@ -59,16 +65,7 @@ public class JNDICommandsImpl implements JNDICommands {
         if(names != null && names.length > 0) {
           System.out.println("Naming context:");
           for(String n : names) {
-//            String detail;
-//            try {
-//              String s = nc.lookup(n);
-//              Pattern p = Pattern.compile("Reference Class Name: (\p{Alnum}{2}");
-//              detail = (String) o;
-//            } catch (Exception e) {
-//              detail="<error>";
-//            }
-//            System.out.println("\t"+n+" : "+detail);
-          System.out.println("\t"+n);
+            System.out.println("\t"+n);
      }
         } else {
           System.out.println("No name in the naming context.");
@@ -164,6 +161,25 @@ public class JNDICommandsImpl implements JNDICommands {
       System.err.println("Error: Interrupted.");
     } catch (NamingException e) {
       System.err.println("Error: Invalid record name.");
+    }
+  }
+  
+  public void list() {
+    try {
+      NamingContextMBean nc = (NamingContextMBean) tracker.waitForService(TIMEOUT);
+      for(String name : nc.getNamingContext()) {
+        try {
+          System.out.println(name + ":");
+          Properties prop = nc.getProperties(name);
+          for(String key : prop.stringPropertyNames()) {
+            System.out.println("\t"+key+" : "+prop.getProperty(key));
+          }
+        } catch (NamingException e) {
+          System.err.println("Error: Naming exception.");
+        }
+      }
+    } catch(InterruptedException e) {
+      System.err.println("Error: Interrupted.");      
     }
   }
 }
