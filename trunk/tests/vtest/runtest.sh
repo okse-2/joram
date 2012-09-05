@@ -19,23 +19,23 @@ LOGFILE=$VTEST_HOME/"vtest-$date.log"
 ZIPFILE=$VTEST_HOME/"result.zip"
 
 #extracting joram source so as to test updated trunk artifacts
-svn co svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram $VTEST_HOME/joram-src >> $LOGFILE 2>1&
+svn co svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
 cd $VTEST_HOME/joram-src ;
 echo "installing joram trunk"
-mvn install >> $LOGFILE 2>1&
+mvn install >> $LOGFILE 2>&1
 
 #following command suppose that svn check out has been made into path $VTEST_HOME/joram
 cd $VTEST_HOME/joram ;
 
 #installing joram tests using maven
 echo "installing joram tests"
-mvn install >> $LOGFILE 2>1&
+mvn install >> $LOGFILE 2>&1
 
 #launching tests
 cd src;
 echo "on launching ant custom.tests.vtest"
-ant custom.tests.vtest >> $LOGFILE 2>1& 
-ant vtest.check.reports >> $LOGFILE 2>1& 
+ant custom.tests.vtest >> $LOGFILE 2>&1 
+ant vtest.check.reports >> $LOGFILE 2>&1 
 TEST_RESULT=$?;
 
 mkdir results ;
