@@ -25,6 +25,7 @@ package fr.dyade.aaa.jndi2.impl;
 
 import java.io.Serializable;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.naming.Binding;
@@ -36,6 +37,7 @@ import javax.naming.NamingException;
 import javax.naming.Reference;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.osgi.service.io.ConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
@@ -249,6 +251,27 @@ public class NamingContext implements NamingContextMBean, Serializable, Cloneabl
     else
       cn = getCompositeName(name);
     sendTo(new UnbindRequest(cn));
+  }
+ 
+  public Properties getProperties(String name) throws NamingException {
+    Properties prop = new Properties();
+    Record rec = getRecord(name);
+    if(rec instanceof ObjectRecord) {
+      Reference ref = (Reference) ((ObjectRecord) rec).getObject();
+      String className = ref.getClassName();
+      prop.setProperty("className", className);
+      if(className.equals("org.objectweb.joram.client.jms.Topic")
+          || className.equals("org.objectweb.joram.client.jms.Queue")) {
+        prop.setProperty("agentId", (String) ref.get("dest.agentId").getContent());        
+        prop.setProperty("name", (String) ref.get("dest.adminName").getContent());
+      } else if(className.equals("org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory")
+          ||className.equals("org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory")
+          || className.equals("org.objectweb.joram.client.jms.tcp.TcpConnectionFactory")) {
+        prop.setProperty("host", (String) ref.get("cf.host").getContent());        
+        prop.setProperty("port", (String) ref.get("cf.port").getContent());        
+      }
+    }
+    return prop;
   }
   
   private CompositeName getCompositeName(String path) throws InvalidNameException {
