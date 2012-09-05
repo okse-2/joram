@@ -202,10 +202,12 @@ public class MOMCommandsImpl implements MOMCommands {
       return;
     }
     String category = args[0].toLowerCase();
-    if(category.equals("destination")
-    || category.equals("queue")
-    || category.equals("topic")) {
-      listDestination(category);
+    if(category.equals("destination")) {
+      listDestination();
+    } else if(category.equals("topic")) {
+      listTopic();
+    } else if(category.equals("queue")) {
+      listQueue();
     } else if(category.equals("user")) {
       listUser();
     } else if (category.equals("subscription") && args.length==2) {
@@ -215,19 +217,11 @@ public class MOMCommandsImpl implements MOMCommands {
     }
   }
   
-  private void listDestination(String category) {
-    Object[] obj;
-    
-    if(category.equals("destination")) {
-      obj = destinationTracker.getServices();
-    } else if(category.equals("queue")) {
-      obj = queueTracker.getServices();
-    } else {
-      obj = topicTracker.getServices();
-    }
+  private void listDestination() {
+    Object[] obj = destinationTracker.getServices();
     
     if(obj == null || obj.length ==0) {
-      System.out.println("There is no "+category);
+      System.out.println("There is no destination.");
       return;
     }
     
@@ -242,10 +236,7 @@ public class MOMCommandsImpl implements MOMCommands {
                               "Name",
                               "Type",
                               "Creation Date",
-                              "Nb Rcvd Msg",
-                              "Nb Dlvd Msg",
-                              "Read",
-                              "Write"};
+                              "Perm."};
     int i = 1;
     for(DestinationMBean d : dests.values()) {
       String type = "NA";
@@ -256,17 +247,93 @@ public class MOMCommandsImpl implements MOMCommands {
                                 d.getName(),
                                 type,
                                 d.getCreationDate(),
-                                Long.toString(d.getNbMsgsReceiveSinceCreation()),
-                                Long.toString(d.getNbMsgsDeliverSinceCreation()),
-                                (d.isFreeReading()?"Yes":"No"),
-                                (d.isFreeWriting()?"Yes":"No")};
+                                (d.isFreeReading()?"r":"-")+'/'
+                                +(d.isFreeWriting()?"w":"-")};
     }
     int n = dests.size();
     if(n < 2)
-      System.out.println("There is " + dests.size() + " "+category+".");
+      System.out.println("There is " + dests.size() + " destination.");
     else
-      System.out.println("There are " + dests.size() + " "+category+"s.");
+      System.out.println("There are " + dests.size() + " destinations.");
     ShellDisplay.displayTable(table, true);
+  }
+  
+  private void listQueue() {
+    Object[] obj = queueTracker.getServices();
+    
+    if(obj == null || obj.length ==0) {
+      System.out.println("There is no queue.");
+      return;
+    }
+    
+    HashMap<String, QueueMBean> dests = new HashMap<String, QueueMBean>();
+    for(Object o : obj) {
+      QueueMBean d = (QueueMBean) o;
+      dests.put(d.getDestinationId(), d);
+    }
+
+    String[][] table = new String[dests.size()+1][];
+    table[0] = new String[] { "Id",
+                              "Name",
+                              "Pending msg",
+                              "Rcvd Msg",
+                              "Dlvd Msg",
+                              "Perm."};
+    int i = 1;
+    for(QueueMBean d : dests.values()) {
+      table[i++] = new String[] { d.getDestinationId(),
+                                d.getName(),
+                                Integer.toString(d.getPendingMessageCount()),
+                                Long.toString(d.getNbMsgsReceiveSinceCreation()),
+                                Long.toString(d.getNbMsgsDeliverSinceCreation()),
+                                (d.isFreeReading()?"r":"-")+'/'
+                                +(d.isFreeWriting()?"w":"-")};
+    }
+    int n = dests.size();
+    if(n < 2)
+      System.out.println("There is " + dests.size() + " queue.");
+    else
+      System.out.println("There are " + dests.size() + " queues.");
+    ShellDisplay.displayTable(table, true);    
+  }
+  
+  private void listTopic() {
+    Object[] obj = topicTracker.getServices();
+    
+    if(obj == null || obj.length ==0) {
+      System.out.println("There is no topic.");
+      return;
+    }
+    
+    HashMap<String, TopicMBean> dests = new HashMap<String, TopicMBean>();
+    for(Object o : obj) {
+      TopicMBean d = (TopicMBean) o;
+      dests.put(d.getDestinationId(), d);
+    }
+
+    String[][] table = new String[dests.size()+1][];
+    table[0] = new String[] { "Id",
+                              "Name",
+                              "Subscriber",
+                              "Rcvd Msg",
+                              "Dlvd Msg",
+                              "Perm."};
+    int i = 1;
+    for(TopicMBean d : dests.values()) {
+      table[i++] = new String[] { d.getDestinationId(),
+                                d.getName(),
+                                Integer.toString(d.getNumberOfSubscribers()),
+                                Long.toString(d.getNbMsgsReceiveSinceCreation()),
+                                Long.toString(d.getNbMsgsDeliverSinceCreation()),
+                                (d.isFreeReading()?"r":"-")+'/'
+                                +(d.isFreeWriting()?"w":"-")};
+    }
+    int n = dests.size();
+    if(n < 2)
+      System.out.println("There is " + dests.size() + " topic.");
+    else
+      System.out.println("There are " + dests.size() + " topics.");
+    ShellDisplay.displayTable(table, true);    
   }
   
   private void listUser() {
@@ -336,26 +403,21 @@ public class MOMCommandsImpl implements MOMCommands {
     String[][] table = new String[subs.size()+1][8];
     table[0] = new String[]{"Name",
                             "Topic Id",
-                            "Pending messages",
-                            "Waiting for ack.",
-                            "Nb msg delivered",
+                            "Pndng msgs",
+                            "Wtng for ack.",
+                            "Dlvd msg",
                             "Nb msg max",
-                            "Nb msg send to DMQ",
-                            "Selector"};
+                            "Sent to DMQ"};
     int i=1;
     for(ClientSubscriptionMBean sub : subs) {
-      String selector = sub.getSelector()==null?"(none)":sub.getSelector();
-      if(selector.length()>20)
-        selector = selector.substring(0, selector.length()-3)+"...";
       table[i] = new String[] {
-        sub.getName(), //Name
+        sub.getName().subSequence(0, 9).toString(), //Name
         sub.getTopicIdAsString(), //Topic Id
         String.valueOf(sub.getPendingMessageCount()), //Pending messages
         String.valueOf(sub.getDeliveredMessageCount()), //Waiting for ack.
         String.valueOf(sub.getNbMsgsDeliveredSinceCreation()), //Nb msg delivered
         String.valueOf(sub.getNbMaxMsg()), //Nb msg max
-        String.valueOf(sub.getNbMsgsSentToDMQSinceCreation()), //Nb msg send to DMQ
-        selector //Selector
+        String.valueOf(sub.getNbMsgsSentToDMQSinceCreation()) //Nb msg send to DMQ
       };
     }
     ShellDisplay.displayTable(table, true);
