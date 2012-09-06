@@ -89,7 +89,7 @@ public class JMSConnections implements JMSConnectionsMBean {
 			
     synchronized (servers) {
       if (!servers.containsKey(name)) {
-        JMSModule cnx = new JMSModule(cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, clientID);
+        JMSModule cnx = new JMSModule(name, cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, clientID);
         cnx.startLiveConnection();
         servers.put(name, cnx);
       }
