@@ -136,6 +136,9 @@ public class JMSAcquisition implements AcquisitionDaemon {
     synchronized (sessions) {
       for (Session session : sessions.values()) {
         try {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Close JMS session: " + session);
+          
           session.close();
         } catch (JMSException exc) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
@@ -150,13 +153,13 @@ public class JMSAcquisition implements AcquisitionDaemon {
   /**
    * Create a new JMS consumer for each connection available.
    */
-  public void updateConnections(List<JMSModule> connections) {
+  public synchronized void updateConnections(List<JMSModule> connections) {
     for (JMSModule connection : connections) {
       if (!sessions.containsKey(connection.getCnxFactName())) {
         if (connectionNames == null || connectionNames.contains(connection.getCnxFactName())) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
             logger.log(BasicLevel.DEBUG,
-                "Creating a new consumer for connection: " + connection.getCnxFactName());
+                       "Creating a new consumer for connection: " + connection.getCnxFactName(), new Exception());
           }
           try {
             dest = (Destination) connection.retrieveJndiObject(destName);
