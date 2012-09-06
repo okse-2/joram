@@ -72,17 +72,39 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
     return cnx;
   }
 
+  /** the name identifying the remote JMS provider */
+  private String name;
+  
+  public String getName() {
+    return name;
+  }
+  
   /** User identification for connecting to the foreign JMS server. */
   protected String userName = null;
+
+  /**
+   * @return the user name
+   */
+  public String getUserName() {
+    return userName;
+  }
 
   /** User password for connecting to the foreign JMS server. */
   protected String password = null;
 
   /** Name of the JNDI factory class to use. */
   protected String jndiFactory = null;
+  
+  public String getNamingFactory() {
+    return jndiFactory;
+  }
 
   /** JNDI URL. */
   protected String jndiUrl = null;
+  
+  public String getNamingURL() {
+    return jndiUrl;
+  }
 
   /** ConnectionFactory JNDI name. */
   protected String cnxFactName;
@@ -94,25 +116,24 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
     return cnxFactName;
   }
 
-  /**
-   * @return the user name
-   */
-  public String getUserName() {
-    return userName;
-  }
-
   /** JMS clientID field. */
   protected String clientID = null;
+  
+  public String getClientID() {
+    return clientID;
+  }
 
   /** Connection factory object for connecting to the foreign JMS server. */
   protected transient ConnectionFactory cnxFact = null;
 
-  public JMSModule(String cnxFactoryName, String jndiFactoryClass, String jndiUrl,
+  public JMSModule(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl,
                    String user, String password, String clientID) {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "JMSModule.<init>");
     }
 
+    this.name = name;
+    
     this.jndiFactory = jndiFactoryClass;
     this.jndiUrl = jndiUrl;
 
@@ -321,9 +342,9 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
   private String getMBeanName() {
     StringBuilder strbuf = new StringBuilder();
 
-    strbuf.append("JMS#").append(AgentServer.getServerId());
+    strbuf.append("BridgeJMS#").append(AgentServer.getServerId());
     strbuf.append(':');
-    strbuf.append("type=Connections,name=").append(cnxFactName);
+    strbuf.append("type=Connections,name=").append(name);
 
     return strbuf.toString();
   }
