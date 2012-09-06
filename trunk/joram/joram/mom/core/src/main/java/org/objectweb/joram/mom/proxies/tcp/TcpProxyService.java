@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -139,14 +139,20 @@ public class TcpProxyService implements TcpProxyServiceMBean {
   	if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "TcpProxyService.createServerSocket(" + port + ',' + backlog + ',' + address + ')');
   	
-    ServerSocket serverSocket;
-    // TODO (AF): Use the ServerSocketFactory
-    if (address.equals("0.0.0.0")) {
-      serverSocket = new ServerSocket(port, backlog);
-    } else {
-      serverSocket = new ServerSocket(port, backlog, InetAddress.getByName(address));
+  	ServerSocket serverSocket;
+  	try {
+  	  // TODO (AF): Use the ServerSocketFactory
+  	  if (address.equals("0.0.0.0")) {
+  	    serverSocket = new ServerSocket(port, backlog);
+  	  } else {
+  	    serverSocket = new ServerSocket(port, backlog, InetAddress.getByName(address));
+  	  }
+    } catch (Exception exc) {
+      logger.log(BasicLevel.ERROR,
+                 "TcpProxyService.createServerSocket(" + port + ',' + backlog + ',' + address + ')', exc);
+      throw exc;
     }
-    
+  	
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "TcpProxyService.createServerSocket serverSocket = " + serverSocket);
     
