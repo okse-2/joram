@@ -8,10 +8,11 @@
 
   <server id="0" name="S0" hostname="localhost">
     <network domain="D1" port="16301"/>
+    <property name="D1.InLocalAddress" value="192.168.1.100:16301"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
              args="root root"/>
     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
-             args="16010"/>
+             args="16010 192.168.1.100"/>
     <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
   </server>
 
