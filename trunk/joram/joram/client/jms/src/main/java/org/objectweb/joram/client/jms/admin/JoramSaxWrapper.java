@@ -67,7 +67,6 @@ import fr.dyade.aaa.common.Debug;
 public class JoramSaxWrapper extends DefaultHandler {
 
   public static final String SCN = "scn:comp/";
-  public static final String HASCN = "hascn:comp/";
   
   /**
    * Builds a new JoramSaxWrapper using by default AdminModule static connection.
@@ -92,12 +91,23 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_CONNECT = "connect";
   /** Syntaxic name for collocatedConnect element */
   static final String ELT_COLLOCATEDCONNECT = "collocatedConnect";
+  
+  // Since 5.8 the usage of generic ConnectionFactory with local or tcp element is
+  // now deprecated. Use instead specific ConnectionFactory elements.
   /** Syntaxic name for ConnectionFactory element */
   static final String ELT_CONNECTIONFACTORY = "ConnectionFactory";
   /** Syntaxic name for tcp element */
   static final String ELT_TCP = "tcp";
   /** Syntaxic name for local element */
   static final String ELT_LOCAL = "local";
+
+  /** Syntaxic name for ConnectionFactory element */
+  static final String ELT_LOCAL_CONNECTIONFACTORY = "LocalConnectionFactory";
+  /** Syntaxic name for ConnectionFactory element */
+  static final String ELT_TCP_CONNECTIONFACTORY = "TcpConnectionFactory";
+  /** Syntaxic name for ConnectionFactory element */
+  static final String ELT_SSL_CONNECTIONFACTORY = "SSLConnectionFactory";
+
   /** Syntaxic name for jndi element */
   static final String ELT_JNDI = "jndi";
   /** Syntaxic name for Server element */
@@ -136,6 +146,7 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_IN_INTERCEPTORS="inInterceptors";
   static final String ELT_OUT_INTERCEPTORS="outInterceptors";
   static final String ELT_INTERCEPTOR="interceptor";
+  
   /** Syntaxic name for AMQP bridge connection element */
   static final String ELT_AMQP_BRIDGE_CNX = "AMQPBridgeConnection";
   /** Syntaxic name for JMS bridge connection element */
@@ -188,8 +199,9 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final int DFLT_LISTEN_PORT = 16010;
 
   static final String DFLT_CF = "org.objectweb.joram.client.jms.tcp.TcpConnectionFactory";
+  static final String LOCAL_CF = "org.objectweb.joram.client.jms.local.LocalConnectionFactory";
+  static final String TCP_CF = "org.objectweb.joram.client.jms.tcp.TcpConnectionFactory";
 
-  Object obj = null;
   String name = null;
   String login = null;
   String password = null;
@@ -219,6 +231,8 @@ public class JoramSaxWrapper extends DefaultHandler {
   List currentInterceptorList;
   
   InitialContext jndiCtx = null;
+  
+  AbstractConnectionFactory cf  = null;
   
   /**
    * External wrapper used to perform administration stuff.
@@ -429,6 +443,45 @@ public class JoramSaxWrapper extends DefaultHandler {
         identityClass = atts.getValue(ATT_IDENTITYCLASS);
         if (!isSet(identityClass))
           identityClass = SimpleIdentity.class.getName();
+      } else if (rawName.equals(ELT_LOCAL_CONNECTIONFACTORY)) {
+        name = atts.getValue(ATT_NAME);
+        className = LOCAL_CF;
+        identityClass = atts.getValue(ATT_IDENTITYCLASS);
+        properties = null;
+      } else if (rawName.equals(ELT_TCP_CONNECTIONFACTORY)) {
+        name = atts.getValue(ATT_NAME);
+        className = TCP_CF;
+        identityClass = atts.getValue(ATT_IDENTITYCLASS);
+        host = atts.getValue(ATT_HOST);
+        if (!isSet(host)) host = DFLT_LISTEN_HOST;
+        try {
+          // Get the listen port of server for this connection factory.
+          String value = atts.getValue(ATT_PORT);
+          if (value == null)
+            port = DFLT_LISTEN_PORT;
+          else
+            port = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for port: " + atts.getValue(ATT_PORT));
+        }
+        properties = null;
+      } else if (rawName.equals(ELT_SSL_CONNECTIONFACTORY)) {
+        name = atts.getValue(ATT_NAME);
+        className = TCP_CF;
+        identityClass = atts.getValue(ATT_IDENTITYCLASS);
+        host = atts.getValue(ATT_HOST);
+        if (!isSet(host)) host = DFLT_LISTEN_HOST;
+        try {
+          // Get the listen port of server for this connection factory.
+          String value = atts.getValue(ATT_PORT);
+          if (value == null)
+            port = DFLT_LISTEN_PORT;
+          else
+            port = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for port: " + atts.getValue(ATT_PORT));
+        }
+        properties = null;
       } else if (rawName.equals(ELT_CONNECTIONFACTORY)) {
         name = atts.getValue(ATT_NAME);
         className = atts.getValue(ATT_CLASSNAME);
@@ -721,42 +774,31 @@ public class JoramSaxWrapper extends DefaultHandler {
           cnx = cf.createConnection(name, password);
           cnx.start();
           wrapper = new AdminWrapper(cnx);
+        } else if (rawName.equals(ELT_LOCAL_CONNECTIONFACTORY)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Creates LocalConnectionFactory \""+ name + "\"");
+          
+          AbstractConnectionFactory cf = LocalConnectionFactory.create();
+          configureConnectionFactory(cf);
+        } else if (rawName.equals(ELT_TCP_CONNECTIONFACTORY)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Creates TcpConnectionFactory \""+ name + "\"");
+          
+          AbstractConnectionFactory cf = TcpConnectionFactory.create(host, port);
+          configureConnectionFactory(cf);
+        } else if (rawName.equals(ELT_SSL_CONNECTIONFACTORY)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Creates SSLConnectionFactory \""+ name + "\"");
+          
+          AbstractConnectionFactory cf = TcpConnectionFactory.create(host, port,
+              "org.objectweb.joram.client.jms.tcp.ReliableSSLTcpClient");
+          configureConnectionFactory(cf);
         } else if (rawName.equals(ELT_CONNECTIONFACTORY)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "cf \""+ name + "\"= " + obj);
-          // set identity className
-          if (isSet(identityClass)) 
-            ((AbstractConnectionFactory) obj).setIdentityClassName(identityClass);
-          // Bind the ConnectionFactory in JNDI.
-          // Be Careful, currently only one binding is handled.
-          if (isSet(jndiName))
-            toBind.put(jndiName, obj);
-          jndiName = null;
-          // Register the CF in order to handle it later (cluster, etc.)
-          if (isSet(name)){
-        	  cfs.put(name, obj);
-          }
-          // Configure parameters if any
-          ((AbstractConnectionFactory) obj).getParameters().setParameters(properties);
-          //Add interceptors if any
-          if ((inInterceptorClassname!=null) && (!inInterceptorClassname.isEmpty())) {
-            for (Iterator it=inInterceptorClassname.iterator(); it.hasNext(); ) {
-              String iicn = (String) it.next();
-        		  ((AbstractConnectionFactory) obj).getParameters().addInInterceptor(iicn);
-        	  }
-        	  inInterceptorClassname.clear();
-          }
-          if ((outInterceptorClassname != null) && (!outInterceptorClassname.isEmpty())) {
-            for (Iterator it=outInterceptorClassname.iterator(); it.hasNext(); ) {
-              String oicn = (String) it.next();
-        		  ((AbstractConnectionFactory) obj).getParameters().addOutInterceptor(oicn);
-        	  }
-        	  outInterceptorClassname.clear();
-          }
-          className = null;
-          obj = null;
-          identityClass = null;
-          properties = null;
+            logger.log(BasicLevel.DEBUG, "Creates ConnectionFactory \""+ name + "\"= " + cf);
+          
+          configureConnectionFactory(cf);
+          cf = null;
         } else if (rawName.equals(ELT_TCP)) {
           try {
             Class<?> clazz = Class.forName(className);
@@ -765,27 +807,30 @@ public class JoramSaxWrapper extends DefaultHandler {
                                     new String().getClass()};
             Method methode = clazz.getMethod("create", classParams);
             Object[] objParams = {host, new Integer(port), reliableClass};
-            obj = methode.invoke(null, objParams);
+            cf = (AbstractConnectionFactory) methode.invoke(null, objParams);
           } catch (Throwable exc) {
             logger.log(BasicLevel.ERROR,
-                       "JoramSaxWrapper: Cannot instantiate " + className, exc);
+                       "JoramSaxWrapper: Cannot instantiate ConnectionFactory " + className, exc);
             throw new SAXException(exc.getMessage());
+          } finally {
+            className = null;
           }
         } else if (rawName.equals(ELT_LOCAL)) {
           try {
             Class<?> clazz = Class.forName(className);
             Method methode = clazz.getMethod("create", new Class[0]);
-            obj = methode.invoke(null, new Object[0]);
+            cf = (AbstractConnectionFactory) methode.invoke(null, new Object[0]);
           } catch (Throwable exc) {
             logger.log(BasicLevel.ERROR,
-                       "JoramSaxWrapper: Cannot instantiate " + className, exc);
+                       "JoramSaxWrapper: Cannot instantiate ConnectionFactory " + className, exc);
             throw new SAXException(exc.getMessage());
+          } finally {
+            className = null;
           }
         } else if (rawName.equals(ELT_JNDI)) {
         } else if (rawName.equals(ELT_SERVER)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,
-                       "Server.configure(" + serverId + ")");
+            logger.log(BasicLevel.DEBUG, "Server.configure(" + serverId + ")");
           
           if (threshold > 0)
             getWrapper().setDefaultThreshold(serverId, threshold);
@@ -794,7 +839,9 @@ public class JoramSaxWrapper extends DefaultHandler {
             if (queues.containsKey(dmq)) {
               getWrapper().setDefaultDMQ(serverId, (Queue) queues.get(dmq));
             } else {
-              logger.log(BasicLevel.ERROR, "Cannot set default DMQ, unknown DMQ: " + dmq);
+              logger.log(BasicLevel.ERROR,
+                         "Cannot set default dead message queue, queue \"" + dmq + "\" unknown.",
+                         new Exception("The dead message queue \"" + dmq + "\" has not been declared previously to this statement."));
             }
           }
         } else if (rawName.equals(ELT_USER)) {
@@ -814,7 +861,9 @@ public class JoramSaxWrapper extends DefaultHandler {
             if (queues.containsKey(dmq)) {
               user.setDMQ((Queue) queues.get(dmq));
             } else {
-              logger.log(BasicLevel.ERROR, "User.create(), unknown DMQ: " + dmq);
+              logger.log(BasicLevel.ERROR, 
+                         "Cannot set User's dead message queue, queue \"" + dmq + "\" unknown.",
+                         new Exception("The dead message queue \"" + dmq + "\" has not been declared previously to \"" + name + "\"."));
             }
           }
           properties = null;
@@ -867,7 +916,7 @@ public class JoramSaxWrapper extends DefaultHandler {
             topics.put(name, dest);
           }
           // Fix DMQ if any
-          setDestinationDMQ(dest, dmq);
+          setDestinationDMQ(name, dest, dmq);
         } else if (rawName.equals(ELT_QUEUE)) {
           if (className == null)
             className = "org.objectweb.joram.mom.dest.Queue";
@@ -895,7 +944,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (! isSet(name)) name = queue.getName();
           queues.put(name, queue);
           // Fix DMQ if any
-          setDestinationDMQ(queue, dmq);
+          setDestinationDMQ(name, queue, dmq);
         } else if (rawName.equals(ELT_TOPIC)) {
           if (className == null)
             className = "org.objectweb.joram.mom.dest.Topic";
@@ -926,7 +975,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (! isSet(name)) name = topic.getName();
           topics.put(name, topic);
           // Fix DMQ if any
-          setDestinationDMQ(topic, dmq);
+          setDestinationDMQ(name, topic, dmq);
         } else if (rawName.equals(ELT_DMQUEUE)) {
           className = "org.objectweb.joram.mom.dest.Queue";
           if (logger.isLoggable(BasicLevel.DEBUG))
@@ -1045,6 +1094,40 @@ public class JoramSaxWrapper extends DefaultHandler {
     }
   }
 
+  void configureConnectionFactory(AbstractConnectionFactory cf) {
+    // set identity className
+    if (isSet(identityClass)) 
+      cf.setIdentityClassName(identityClass);
+    identityClass = null;
+    // Bind the ConnectionFactory in JNDI.
+    // Be Careful, currently only one binding is handled.
+    if (isSet(jndiName))
+      toBind.put(jndiName, cf);
+    jndiName = null;
+    // Register the CF in order to handle it later (cluster, etc.)
+    if (isSet(name)){
+      cfs.put(name, cf);
+    }
+    // Configure parameters if any
+    cf.getParameters().setParameters(properties);
+    properties = null;
+    //Add interceptors if any
+    if ((inInterceptorClassname!=null) && (!inInterceptorClassname.isEmpty())) {
+      for (Iterator it=inInterceptorClassname.iterator(); it.hasNext(); ) {
+        String iicn = (String) it.next();
+        cf.getParameters().addInInterceptor(iicn);
+      }
+      inInterceptorClassname.clear();
+    }
+    if ((outInterceptorClassname != null) && (!outInterceptorClassname.isEmpty())) {
+      for (Iterator it=outInterceptorClassname.iterator(); it.hasNext(); ) {
+        String oicn = (String) it.next();
+        cf.getParameters().addOutInterceptor(oicn);
+      }
+      outInterceptorClassname.clear();
+    }
+  }
+  
   void configureDestination(Destination dest) throws Exception {
     if (freeReading)
       dest.setFreeReading();
@@ -1069,12 +1152,14 @@ public class JoramSaxWrapper extends DefaultHandler {
     writers.clear();
   }
 
-  void setDestinationDMQ(Destination dest, String dmq) throws Exception {
+  void setDestinationDMQ(String name, Destination dest, String dmq) throws Exception {
     if (isSet(dmq)) {
       if (queues.containsKey(dmq)) {
         dest.setDMQ((Queue) queues.get(dmq));
       } else  {
-        logger.log(BasicLevel.ERROR, "Destination.create(): Unknown DMQ: " + dmq);
+        logger.log(BasicLevel.ERROR,
+                   "Cannot set Destination's dead message queue, queue \"" + dmq + "\" unknown.",
+                   new Exception("The dead message queue \"" + dmq + "\" has not been declared previously to \"" + name + "\"."));
       }
     }
   }
@@ -1106,9 +1191,6 @@ public class JoramSaxWrapper extends DefaultHandler {
         if (name.startsWith(SCN)) {
           buff = new StringBuffer(SCN);
           st = new StringTokenizer(name.substring(SCN.length(), name.length()), "/");
-        } else if (name.startsWith(HASCN)) {
-          buff = new StringBuffer(HASCN);
-          st = new StringTokenizer(name.substring(HASCN.length(), name.length()), "/");
         } else {
           buff = new StringBuffer();
           st = new StringTokenizer(name, "/");
