@@ -85,12 +85,22 @@ public class JoramSaxWrapper extends DefaultHandler {
 
   /** Syntaxic name for JoramAdmin element */
   static final String ELT_JORAMADMIN = "JoramAdmin";
+  
+  // Since 5.8 the usage of generic AdminModule with connect or collocatedConnect
+  // element is now deprecated. Use instead specific AdminModule elements.  
   /** Syntaxic name for AdminModule element */
   static final String ELT_ADMINMODULE = "AdminModule";
   /** Syntaxic name for connect element */
   static final String ELT_CONNECT = "connect";
   /** Syntaxic name for collocatedConnect element */
   static final String ELT_COLLOCATEDCONNECT = "collocatedConnect";
+  
+  /** Syntaxic name for a colocated AdminModule element */
+  static final String ELT_LOCAL_ADMINMODULE = "LocalAdminModule";
+  /** Syntaxic name for a TCP AdminModule element */
+  static final String ELT_TCP_ADMINMODULE = "TcpAdminModule";
+  /** Syntaxic name for a SSL AdminModule element */
+  static final String ELT_SSL_ADMINMODULE = "SSLAdminModule";
   
   // Since 5.8 the usage of generic ConnectionFactory with local or tcp element is
   // now deprecated. Use instead specific ConnectionFactory elements.
@@ -101,11 +111,11 @@ public class JoramSaxWrapper extends DefaultHandler {
   /** Syntaxic name for local element */
   static final String ELT_LOCAL = "local";
 
-  /** Syntaxic name for ConnectionFactory element */
+  /** Syntaxic name for a colocated ConnectionFactory element */
   static final String ELT_LOCAL_CONNECTIONFACTORY = "LocalConnectionFactory";
-  /** Syntaxic name for ConnectionFactory element */
+  /** Syntaxic name for a TCP ConnectionFactory element */
   static final String ELT_TCP_CONNECTIONFACTORY = "TcpConnectionFactory";
-  /** Syntaxic name for ConnectionFactory element */
+  /** Syntaxic name for a SSL ConnectionFactory element */
   static final String ELT_SSL_CONNECTIONFACTORY = "SSLConnectionFactory";
 
   /** Syntaxic name for jndi element */
@@ -114,6 +124,9 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_SERVER = "Server";
   /** Syntaxic name for User element */
   static final String ELT_USER = "User";
+  
+  // Since 5.8 the usage of Destination elements is deprecated, use instead queue and
+  // topic elements.
   /** Syntaxic name for Destination element */
   static final String ELT_DESTINATION = "Destination";
   /** Syntaxic name for Queue element */
@@ -195,12 +208,7 @@ public class JoramSaxWrapper extends DefaultHandler {
   /** Syntaxic name for urls attribute */
   static final String ATT_URLS = "urls";
 
-  static final String DFLT_LISTEN_HOST = "localhost";
-  static final int DFLT_LISTEN_PORT = 16010;
-
   static final String DFLT_CF = "org.objectweb.joram.client.jms.tcp.TcpConnectionFactory";
-  static final String LOCAL_CF = "org.objectweb.joram.client.jms.local.LocalConnectionFactory";
-  static final String TCP_CF = "org.objectweb.joram.client.jms.tcp.TcpConnectionFactory";
 
   String name = null;
   String login = null;
@@ -392,21 +400,20 @@ public class JoramSaxWrapper extends DefaultHandler {
       conf = atts.getValue(ATT_NAME);
       if (conf == null) conf = joramAdmName;
     } else if (joramAdmName.equals(conf)) {
-      if (rawName.equals(ELT_ADMINMODULE)) {
-      } else if (rawName.equals(ELT_CONNECT)) {
-        // Get the hostname of server for administrator connection.
-        host = atts.getValue(ATT_HOST);
-        if (!isSet(host)) host = DFLT_LISTEN_HOST;
-        try {
-          // Get the listen port of server for administrator connection.
-          String value = atts.getValue(ATT_PORT);
-          if (value == null)
-            port = DFLT_LISTEN_PORT;
-          else
-            port = Integer.parseInt(value);
-        } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for port: " + atts.getValue(ATT_PORT));
-        }
+      if (rawName.equals(ELT_ADMINMODULE)) {            // Deprecated since 5.8
+        // work is done in ELT_CONNECT and ELT_COLLOCATEDCONNECT handling
+      } else if (rawName.equals(ELT_LOCAL_ADMINMODULE)) {
+        getLoginAtts(atts);
+        properties = null;
+      } else if (rawName.equals(ELT_TCP_ADMINMODULE)) {
+        getLoginAtts(atts);
+        getConnectionAtts(atts);
+        properties = null;
+      } else if (rawName.equals(ELT_SSL_ADMINMODULE)) {
+        getLoginAtts(atts);
+        getConnectionAtts(atts);
+        properties = null;
+      } else if (rawName.equals(ELT_CONNECT)) {         // Deprecated since 5.8
         // Get the username for administrator connection.
         name = atts.getValue(ATT_NAME);
         if (!isSet(name))
@@ -415,23 +422,23 @@ public class JoramSaxWrapper extends DefaultHandler {
         password = atts.getValue(ATT_PASSWORD);
         if (!isSet(password))
           password = AbstractConnectionFactory.getDefaultRootPassword();
+        identityClass = atts.getValue(ATT_IDENTITYCLASS);
+        if (!isSet(identityClass))
+          identityClass = SimpleIdentity.class.getName();
+        getConnectionAtts(atts);
+        String value = null;
         try {
           // Get the CnxTimer attribute for administrator connection.
-          String value = atts.getValue(ATT_CNXTIMER);
+          value = atts.getValue(ATT_CNXTIMER);
           if (value == null)
             cnxTimer = 60;
           else
             cnxTimer = Integer.parseInt(value);
         } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for cnxTimer: " + atts.getValue(ATT_CNXTIMER));
+          logger.log(BasicLevel.ERROR,
+                     "bad value for cnxTimer: " + value + ", use default (60).",
+                     new Exception("bad value for cnxTimer: " + value));
         }
-        // Get the protocol implementation.
-        reliableClass = atts.getValue(ATT_RELIABLECLASS);
-        // Get identity class name.
-        identityClass = atts.getValue(ATT_IDENTITYCLASS);
-        if (!isSet(identityClass))
-          identityClass = SimpleIdentity.class.getName();
-
       } else if (rawName.equals(ELT_COLLOCATEDCONNECT)) {
         name = atts.getValue(ATT_NAME);
         if (!isSet(name))
@@ -445,64 +452,28 @@ public class JoramSaxWrapper extends DefaultHandler {
           identityClass = SimpleIdentity.class.getName();
       } else if (rawName.equals(ELT_LOCAL_CONNECTIONFACTORY)) {
         name = atts.getValue(ATT_NAME);
-        className = LOCAL_CF;
         identityClass = atts.getValue(ATT_IDENTITYCLASS);
         properties = null;
       } else if (rawName.equals(ELT_TCP_CONNECTIONFACTORY)) {
         name = atts.getValue(ATT_NAME);
-        className = TCP_CF;
         identityClass = atts.getValue(ATT_IDENTITYCLASS);
-        host = atts.getValue(ATT_HOST);
-        if (!isSet(host)) host = DFLT_LISTEN_HOST;
-        try {
-          // Get the listen port of server for this connection factory.
-          String value = atts.getValue(ATT_PORT);
-          if (value == null)
-            port = DFLT_LISTEN_PORT;
-          else
-            port = Integer.parseInt(value);
-        } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for port: " + atts.getValue(ATT_PORT));
-        }
+        getConnectionAtts(atts);
         properties = null;
       } else if (rawName.equals(ELT_SSL_CONNECTIONFACTORY)) {
         name = atts.getValue(ATT_NAME);
-        className = TCP_CF;
         identityClass = atts.getValue(ATT_IDENTITYCLASS);
-        host = atts.getValue(ATT_HOST);
-        if (!isSet(host)) host = DFLT_LISTEN_HOST;
-        try {
-          // Get the listen port of server for this connection factory.
-          String value = atts.getValue(ATT_PORT);
-          if (value == null)
-            port = DFLT_LISTEN_PORT;
-          else
-            port = Integer.parseInt(value);
-        } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for port: " + atts.getValue(ATT_PORT));
-        }
+        getConnectionAtts(atts);
         properties = null;
-      } else if (rawName.equals(ELT_CONNECTIONFACTORY)) {
+      } else if (rawName.equals(ELT_CONNECTIONFACTORY)) {         // Deprecated since 5.8
         name = atts.getValue(ATT_NAME);
         className = atts.getValue(ATT_CLASSNAME);
         if (!isSet(className)) className = DFLT_CF;
         identityClass = atts.getValue(ATT_IDENTITYCLASS);
         properties = null;
-      } else if (rawName.equals(ELT_TCP)) {
-        host = atts.getValue(ATT_HOST);
-        if (!isSet(host)) host = DFLT_LISTEN_HOST;
-        try {
-          // Get the listen port of server for this connection factory.
-          String value = atts.getValue(ATT_PORT);
-          if (value == null)
-            port = DFLT_LISTEN_PORT;
-          else
-            port = Integer.parseInt(value);
-        } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for port: " + atts.getValue(ATT_PORT));
-        }
+      } else if (rawName.equals(ELT_TCP)) {                       // Deprecated since 5.8
+        getConnectionAtts(atts);
         reliableClass = atts.getValue(ATT_RELIABLECLASS);
-      } else if (rawName.equals(ELT_LOCAL)) {
+      } else if (rawName.equals(ELT_LOCAL)) {                     // Deprecated since 5.8
       } else if (rawName.equals(ELT_JNDI)) {
         jndiName = atts.getValue(ATT_NAME);
       } else if (rawName.equals(ELT_SERVER)) {
@@ -558,7 +529,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           throw new SAXException("bad value for threshold: " + atts.getValue(ATT_THRESHOLD));
         }
         identityClass = atts.getValue(ATT_IDENTITYCLASS);
-      } else if (rawName.equals(ELT_DESTINATION)) {
+      } else if (rawName.equals(ELT_DESTINATION)) {         // Deprecated since 5.8
         type = atts.getValue(ATT_TYPE);
         name = atts.getValue(ATT_NAME);
         properties = null;
@@ -730,6 +701,39 @@ public class JoramSaxWrapper extends DefaultHandler {
     }
   }
 
+  private void getLoginAtts(Attributes atts) {
+    login = atts.getValue(ATT_LOGIN);
+    if (!isSet(login))
+      login = AbstractConnectionFactory.getDefaultRootLogin();
+    password = atts.getValue(ATT_PASSWORD);
+    if (!isSet(password))
+      password = AbstractConnectionFactory.getDefaultRootPassword();
+    // Get identity class name.
+    identityClass = atts.getValue(ATT_IDENTITYCLASS);
+    if (!isSet(identityClass))
+      identityClass = SimpleIdentity.class.getName();
+  }
+  
+  private void getConnectionAtts(Attributes atts) {
+    // Get the hostname of server for administrator connection.
+    host = atts.getValue(ATT_HOST);
+    if (!isSet(host)) host = AbstractConnectionFactory.getDefaultServerHost();
+    String value = null;
+    try {
+      // Get the listen port of server for administrator connection.
+      value = atts.getValue(ATT_PORT);
+      if (value == null)
+        port = AbstractConnectionFactory.getDefaultServerPort();
+      else
+        port = Integer.parseInt(value);
+    } catch (NumberFormatException exc) {
+      port = AbstractConnectionFactory.getDefaultServerPort();
+      logger.log(BasicLevel.ERROR,
+                 "bad value for port: " + value + ", use default one " + port,
+                 new Exception("bad value for port: " + value));
+    }
+  }
+  
   /**
    * Receive notification of the end of an element.
    *
@@ -752,6 +756,47 @@ public class JoramSaxWrapper extends DefaultHandler {
     } else if (joramAdmName.equals(conf)) {
       try {
         if (rawName.equals(ELT_ADMINMODULE)) {
+        } else if (rawName.equals(ELT_LOCAL_ADMINMODULE)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       "JoramSaxWrapper creates local administration wrapper: " + login);
+          
+          ConnectionFactory cf = LocalConnectionFactory.create();
+          // Configure parameters if any
+          cf.getParameters().setParameters(properties);
+          properties = null;
+          cf.setIdentityClassName(identityClass);
+
+          cnx = cf.createConnection(login, password);
+          cnx.start();
+          wrapper = new AdminWrapper(cnx);
+        } else if (rawName.equals(ELT_TCP_ADMINMODULE)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       "JoramSaxWrapper creates TCP administration wrapper: " + host + ':' + port + '/' + login);
+          ConnectionFactory cf = TcpConnectionFactory.create(host, port);
+          // Configure parameters if any
+          cf.getParameters().setParameters(properties);
+          properties = null;
+          cf.setIdentityClassName(identityClass);
+
+          cnx = cf.createConnection(login, password);
+          cnx.start();
+          wrapper = new AdminWrapper(cnx);
+        } else if (rawName.equals(ELT_SSL_ADMINMODULE)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       "JoramSaxWrapper creates SSL administration wrapper: " + host + ':' + port + '/' + login);
+          ConnectionFactory cf = TcpConnectionFactory.create(host, port,
+              "org.objectweb.joram.client.jms.tcp.ReliableSSLTcpClient");
+          // Configure parameters if any
+          cf.getParameters().setParameters(properties);
+          properties = null;
+          cf.setIdentityClassName(identityClass);
+
+          cnx = cf.createConnection(login, password);
+          cnx.start();
+          wrapper = new AdminWrapper(cnx);
         } else if (rawName.equals(ELT_CONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
