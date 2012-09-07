@@ -236,7 +236,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * recovery policy in case of exception in agent specific code.
    * Default value is <code>RP_EXC_NOT</code>.
    */
-  int recoveryPolicy = RP_EXC_NOT;
+  int recoveryPolicy = RP_EXIT;
 
   private String name;
 
