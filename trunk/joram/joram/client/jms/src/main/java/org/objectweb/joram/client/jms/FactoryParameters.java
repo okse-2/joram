@@ -613,11 +613,12 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
           outLocalAddress = value;
         } else {
           logger.log(BasicLevel.ERROR,
-                     "Could not set FactoryParameters <" + name + ", " + value + ">");
+                     "Could not set FactoryParameters <" + name + ", " + value + ">",
+                     new Exception("Unknow parameter: " + name));
         }
       } catch (NumberFormatException exc) {
         logger.log(BasicLevel.ERROR,
-                   "Could not set FactoryParameters <" + name + ", " + value + ">");
+                   "Could not set FactoryParameters <" + name + ", " + value + ">", exc);
       }
     }
   }
