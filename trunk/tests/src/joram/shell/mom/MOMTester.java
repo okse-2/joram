@@ -13,6 +13,9 @@ import java.io.PrintStream;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.jms.Connection;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
@@ -44,6 +47,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.EngineMBean;
+import fr.dyade.aaa.common.Strings;
 
 
 public class MOMTester extends Thread implements BundleActivator {
@@ -278,7 +282,7 @@ public class MOMTester extends Thread implements BundleActivator {
       startStdoutCapture();
       cmds.list(new String[]{"queue"});
       res = stopStdoutCapture();
-      regex = ".* ! "+QUEUE_NAME+" * ! Queue * ! .* ! .* ! .* ! .* ! .*";
+      regex = ".* ! "+QUEUE_NAME+" * ! .* ! .* ! .* ! .*";
       assertTrue("[joram:mom:list queue] Created queue named \""+QUEUE_NAME+"\" not found", hasMatchingLine(res, regex));
     } catch (AdminException e) {
       log("[joram:mom:list queue] Creation request failed.");
@@ -297,7 +301,7 @@ public class MOMTester extends Thread implements BundleActivator {
       cmds.list(new String[]{"topic"});
       res = stopStdoutCapture();
       
-      regex = ".* ! "+TOPIC_NAME+" * ! Topic * ! .* ! .* ! .* ! .* ! .*";
+      regex = ".* ! "+TOPIC_NAME+" * ! .* ! .* ! .* ! .*";
       assertTrue("[joram:mom:list topic] Created topic named \""+TOPIC_NAME+"\" not found", hasMatchingLine(res, regex));
     } catch (AdminException e) {
       log("[joram:mom:list topic] Creation request failed.");
@@ -312,10 +316,14 @@ public class MOMTester extends Thread implements BundleActivator {
       startStdoutCapture();
       cmds.list(new String[]{"destination"});
       res = stopStdoutCapture();
-      regex = ".* ! "+QUEUE_NAME+" * ! Queue * ! .* ! .* ! .* ! .* ! .*";
-      assertTrue("[joram:mom:list destination] Created queue named \""+QUEUE_NAME+"\" not found", hasMatchingLine(res, regex));
-      regex = ".* ! "+TOPIC_NAME+" * ! Topic * ! .* ! .* ! .* ! .* ! .*";
-      assertTrue("[joram:mom:list destination] Created topic named \""+TOPIC_NAME+"\" not found", hasMatchingLine(res, regex));
+      //#0.0.1028 ! testQueue       ! Queue ! Mon Sep 10 09:10:52 CEST 2012 ! -/-  
+      //.* ! testQueue * ! Queue * ! .* ! [r-]/[w-] *
+      regex = ".* ! "+QUEUE_NAME+" * ! Queue * ! .* ! [r-]/[w-] *";
+      assertTrue("[joram:mom:list destination] Created queue named \""+QUEUE_NAME+"\" not found",
+          hasMatchingLine(res, regex));
+      regex = ".* ! "+TOPIC_NAME+" * ! Topic * ! .* ! [r-]/[w-] *";
+      assertTrue("[joram:mom:list destination] Created topic named \""+TOPIC_NAME+"\" not found",
+          hasMatchingLine(res, regex));
     } catch (Exception e) {
       log("[joram:mom:list destination] "+e.getClass().getCanonicalName());
     }
@@ -330,7 +338,7 @@ public class MOMTester extends Thread implements BundleActivator {
         cmds.list(new String[]{"subscription",USER_NAME});
         res = stopStdoutCapture();
         
-        regex = SUB_NAME+" * ! #\\d+.\\d+.\\d+ * ! \\d+ * ! \\d+ * ! \\d+ * ! -?\\d+ * ! \\d+ * ! .* *";
+        regex = SUB_NAME.substring(0, 9)+" * ! #\\d+.\\d+.\\d+ * ! \\d+ * ! \\d+ * ! \\d+ * ! -?\\d+ * ! \\d+ *";
         assertTrue("[joram:mom:list subscription] Created subscripion named \""+SUB_NAME+"\" not found",
             hasMatchingLine(res, regex));
         
@@ -386,10 +394,12 @@ public class MOMTester extends Thread implements BundleActivator {
     res = stopStdoutCapture();
     
     int nbMatch = 0;
-    for(String line : res.split("\n")){
-      String regex = "ID:\\d+.\\d+.\\d+c\\d+m\\d+ * ! [A-Z]+ * ! .* ! .* ! .* ! \\d+ *\t";
-      if(line.matches(regex)) nbMatch++;
-    }
+//    for(String line : res.split("\n")){
+//      String regex = "ID:\\d+.\\d+.\\d+c\\d+m\\d+ * ! [A-Z]+ * ! .* ! .* ! .* ! \\d+ *\t";
+//      if(line.matches(regex)) nbMatch++;
+//    }
+    String regex = "ID:\\d+.\\d+.\\d+c\\d+m\\d+ +! [A-Z]+ +! .* +! .* +! .* +! \\d+";
+    nbMatch = countMatchingLines(res, regex);
     assertTrue("[joram:mom:lsMsg queue] Not all messages have been displayed. Read: "+nbMatch,
         nbMatch>=NB_MSG);
     
@@ -434,10 +444,13 @@ public class MOMTester extends Thread implements BundleActivator {
     res = stopStdoutCapture();
 
     nbMatch = 0;
-    for(String line : res.split("\n")){
-      String regex = "ID:\\d+.\\d+.\\d+c\\d+m\\d+ * ! [A-Z]+ * ! .* ! .* ! .* ! \\d+ *\t";
-      if(line.matches(regex)) nbMatch++;
-    }
+//    for(String line : res.split("\n")){
+//      String regex = "ID:\\d+.\\d+.\\d+c\\d+m\\d+ * ! [A-Z]+ * ! .* ! .* ! .* ! \\d+ *\t";
+//      if(line.matches(regex)) nbMatch++;
+//    }
+    //Same as [lsMsg queue]
+    //regex = "ID:\\d+.\\d+.\\d+c\\d+m\\d+ * ! [A-Z]+ * ! .* ! .* ! .* ! \\d+ *";
+    nbMatch = countMatchingLines(res, regex);
     assertTrue("[joram:mom:lsMsg subscription] Not all messages have been displayed. Read: "+nbMatch,
         nbMatch>=NB_MSG);
     
@@ -732,7 +745,7 @@ public class MOMTester extends Thread implements BundleActivator {
         		"messages, clear can't be tested for normal case");
         return;
       }
-      log("Before clear, PMC = "+before);
+//      log("Before clear, PMC = "+before);
       cmds.clear(new String[]{"subscription",USER_NAME,SUB_NAME});
       try {
         Thread.sleep(TEMPORIZER);
@@ -740,16 +753,6 @@ public class MOMTester extends Thread implements BundleActivator {
         log("ERROR: [joram:mom:clear subscription] Interrupted");
       }
       int after = user.getSubscription(SUB_NAME).getMessageCount();
-      //Must wait 58s to get a correct value...
-//      for(int i = 0; i < 60; i++) {
-//        try {
-//          Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//          log("ERROR: [joram:mom:clear subscription] Interrupted");
-//        }
-//        after = user.getSubscription(SUB_NAME).getMessageCount();
-//        log((i+1)+"s : PMC = "+after);
-//      }
       assertTrue("[joram:mom:clear subscription] The subscription has not been " +
       		"cleared. Nb messages left: "+after, after==0);
     } catch (Exception e) {
@@ -953,12 +956,22 @@ public class MOMTester extends Thread implements BundleActivator {
     return baos_err.toString();
   }
  
-  boolean hasMatchingLine(String input, String regex) {
-    for(String line : input.split("\n")) {
-      if(line.matches(regex))
-        return true;
-    }
-    return false;
+  private boolean hasMatchingLine(String input, String regex) {
+//    log("hasMatchingLine("+input+','+regex+')');
+    Pattern pattern = Pattern.compile(regex);
+    java.util.regex.Matcher matcher = pattern.matcher(input);
+    return matcher.find();
+  }
+  
+  private int countMatchingLines(String input, String regex) {
+//    log("countMatchingLine("+input+','+regex+')');
+    Pattern pattern = Pattern.compile(regex);
+    Matcher matcher = pattern.matcher(input);
+    int count = 0;
+    while(matcher.find())
+      count++;
+    return count;
+
   }
 
   private void log(String msg) {
