@@ -524,4 +524,10 @@ public interface JoramAdapterMBean {
    * true if the resource adapter start the JoramServer 
    */
   public Boolean getStartJoramServer();
+  
+  //*****************************************************************************************
+  //for compatibility with JOnAS 5.2 admin GUI
+  public Boolean getCollocatedServer();
+  public String getServerName();
+  //*****************************************************************************************
 }
