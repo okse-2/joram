@@ -545,7 +545,13 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
 
   public String getMBeanName() {
     StringBuffer strbuf = new StringBuffer();
-    strbuf.append(jmxRootName).append("#").append(getName());
+    
+    //for compatibility with JOnAS 5.2 admin GUI
+    if (Boolean.getBoolean("joram.ra.oldMBeanName"))
+      strbuf.append("joramClient");
+    else
+      strbuf.append(jmxRootName).append("#").append(getName());
+    
     strbuf.append(':');
     strbuf.append("type=JoramAdapter");
     return strbuf.toString();
@@ -1282,4 +1288,15 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   public JoramAdmin getWrapper() {
   	return wrapper;
   }
+  
+  //*****************************************************************************************
+  //for compatibility with JOnAS 5.2 admin GUI
+  public Boolean getCollocatedServer() {
+    return new Boolean(collocated);
+  }
+  
+  public String getServerName() {
+    return name;
+  }
+  //*****************************************************************************************
 }
