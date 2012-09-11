@@ -80,7 +80,7 @@ public class ShellDisplay {
         //On any row except the line separator
         if(header && c != nbCol-1 && (r != 1 || !lineheader))
           System.out.print(" ! ");
-        else if (!lineheader)
+        else if (!lineheader && c != nbCol-1)
           System.out.print("\t");
       }
       System.out.println();

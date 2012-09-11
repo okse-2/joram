@@ -30,6 +30,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Scanner;
 
 import org.objectweb.joram.mom.dest.AdminTopicMBean;
@@ -44,6 +46,7 @@ import org.objectweb.joram.mom.proxies.UserAgentMBean;
 import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.mom.util.SynchronousAgent;
 import org.objectweb.joram.shared.DestinationConstants;
+import org.objectweb.joram.shared.messages.Message;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.ow2.joram.shell.ShellDisplay;
@@ -103,7 +106,7 @@ public class MOMCommandsImpl implements MOMCommands {
    */
   public static String[] COMMANDS =
       new String[] {"list",       "create",
-                    "delete",
+                    "delete",     "infoMsg",
                     "queueLoad",  "subscriptionLoad",
                     "info",       "lsMsg",
                     "ping",       "deleteMsg",
@@ -615,18 +618,18 @@ public class MOMCommandsImpl implements MOMCommands {
     }
     
     String name = args[0];
-    QueueMBean queue = findQueue(name);
-
-    if(queue!=null) {
+    QueueMBean queue;
+    try {
+      queue = findQueue(name);
       int c = queue.getPendingMessageCount();
       System.out.println("Pending count of \""+name+"\" : "+c);
-    } else {
+    } catch (QueueNotFoundException e) {
       System.err.println("Error: There is no queue with the name \""+name+"\".");
     }
   }
   
   //TODO recode this when service registration fixed (object name's properties registered)
-  private QueueMBean findQueue(String name) {
+  private QueueMBean findQueue(String name) throws QueueNotFoundException {
     Object[] objs = queueTracker.getServices();
     if(objs==null)
       return null;
@@ -636,7 +639,7 @@ public class MOMCommandsImpl implements MOMCommands {
         return q;
       }
     }
-    return null;
+    throw new QueueNotFoundException(name);
   }
 
   private TopicMBean findTopic(String name) {
@@ -674,14 +677,11 @@ public class MOMCommandsImpl implements MOMCommands {
     ClientSubscriptionMBean sub = null;
     try {
       sub = findClientSubscription(userName, subName);
+      System.out.println("Pending count of \""+subName+"\" ("+userName+") : "+sub.getPendingMessageCount());
     } catch (UserNotFoundException e) {
       System.err.println("Error: The user "+userName+" does not exist.");
-      return;
-    }
-    if(sub == null) {
+    } catch (SubscriptionNotFoundException e) {
       System.err.println("Error: There is no subscription of "+userName+" to "+subName);
-    } else {
-      System.out.println("Pending count of \""+subName+"\" ("+userName+") : "+sub.getPendingMessageCount());
     }
   }
   
@@ -695,7 +695,7 @@ public class MOMCommandsImpl implements MOMCommands {
     return null;
   }
   
-  private ClientSubscriptionMBean findClientSubscription(String userName, String subName) throws UserNotFoundException {
+  private ClientSubscriptionMBean findClientSubscription(String userName, String subName) throws UserNotFoundException, SubscriptionNotFoundException {
     UserAgentMBean user = findUser(userName);
     if(user==null) {
       throw new UserNotFoundException(userName);
@@ -711,7 +711,7 @@ public class MOMCommandsImpl implements MOMCommands {
       if(c.getName().equals(subName))
         return c;
     }
-    return null;
+    throw new SubscriptionNotFoundException(userName, subName);
   }
   
   /**
@@ -757,8 +757,10 @@ public class MOMCommandsImpl implements MOMCommands {
   }
 
   private void infoQueue(String name) {
-    QueueMBean dest = findQueue(name);
-    if(dest==null) {
+    QueueMBean dest;
+    try {
+      dest = findQueue(name);
+    } catch (QueueNotFoundException e) {
       System.err.println("Error: Queue \""+name+"\" not found.");
       return;
     }
@@ -777,18 +779,16 @@ public class MOMCommandsImpl implements MOMCommands {
     ClientSubscriptionMBean sub = null;
     try {
       sub = findClientSubscription(userName, subName);
+      System.out.println("Subscription name        : "+sub.getName());
+      System.out.println("Nb of pending messages   : "+sub.getPendingMessageCount());
+      System.out.println("Nb of delivered messages : "+sub.getNbMsgsDeliveredSinceCreation());
+      System.out.println("Nb of DMQ messages       : "+sub.getNbMsgsSentToDMQSinceCreation());
     } catch (UserNotFoundException e) {
       System.err.println("Error: The user "+userName+" does not exist.");
       return;
-    }
-    if(sub == null) {
+    } catch (SubscriptionNotFoundException e) {
       System.err.println("Error: Subscription not found.");
-      return;
     }
-    System.out.println("Subscription name        : "+sub.getName());
-    System.out.println("Nb of pending messages   : "+sub.getPendingMessageCount());
-    System.out.println("Nb of delivered messages : "+sub.getNbMsgsDeliveredSinceCreation());
-    System.out.println("Nb of DMQ messages       : "+sub.getNbMsgsSentToDMQSinceCreation());
   }
   
   /**
@@ -815,8 +815,9 @@ public class MOMCommandsImpl implements MOMCommands {
       if(args.length==3)
         range = args[2];
       //messages retrieval
-      msgs = getQueueMessages(queueName);
-      if(msgs == null) {
+      try {
+        msgs = getQueueMessages(queueName);
+      } catch (QueueNotFoundException e) {
         System.err.println("Error: Queue not found.");
         return;
       }
@@ -832,12 +833,11 @@ public class MOMCommandsImpl implements MOMCommands {
       //messages retrieval
       try {
         msgs = getSubscriptionMessages(userName, subName);
-        if(msgs == null) {
-          System.err.println("Error: Subscription not found.");
-          return;
-        }
       } catch (UserNotFoundException e) {
         System.err.println("Error: The user "+userName+" does not exist.");
+        return;
+      } catch (SubscriptionNotFoundException e) {
+        System.err.println("Error: Subscription not found.");
         return;
       }
     } else {
@@ -865,12 +865,11 @@ public class MOMCommandsImpl implements MOMCommands {
     
     //Data formatting
     String[][] table = new String[msgs.size()+1][];
-    table[0] =
-        new String[]{"Msg ID","Type","Creation date","Text","Expiration Date",
+    table[0] = new String[]{"Msg ID","Type","Creation date","Exp. Date",
         "Priority"};
     //TODO: The order attribute (in joram.mom.messages.Message, visible via JMXMessageWrapper) unretrievable
     int i = 1;
-    SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss dd-MMM-yyyy");
+    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss dd/M/y");
     for(MessageView msg : msgs) {
       String type = "UNKNOWN";
       switch (msg.getType()) {
@@ -891,19 +890,103 @@ public class MOMCommandsImpl implements MOMCommands {
         default:
           break;
       }
-      String date = msg.getExpiration()!=0?
+      String expDate = msg.getExpiration()!=0?
           sdf.format(new Date(msg.getExpiration())):
           "-";
       table[i++] = new String[] {
           msg.getId(),
           type,
           sdf.format(new Date(msg.getTimestamp())),
-          type=="TEXT"?msg.getText():"N/A",
-          date,
+//          type=="TEXT"?msg.getText():"N/A",
+          expDate,
           Integer.toString(msg.getPriority())
       };
     }
     ShellDisplay.displayTable(table, true);
+  }
+  
+  public void infoMsg(String[] args) {
+    //Argument parsing (includes messages retrieval)
+    if(args.length < 2) {
+      help("infoMsg");
+      return;
+    }
+    
+    String category = args[0].toLowerCase();
+    MessageView msg = null;
+    if(category.equals("queue")) {
+      if(args.length > 3) {
+        help("infoMsg");
+        return;
+      }
+      String queueName = args[1];
+      String msgId = args[2];
+      try {
+        msg = getQueueMessage(queueName,msgId);
+      } catch (QueueNotFoundException e) {
+        System.err.println("Error: Queue not found.");
+        return;
+      }
+    } else if(category.equals("subscription")) {
+      if(args.length > 4 || args.length < 3) {
+        help("lsMsg");
+        return;
+      }
+      String userName = args[1];
+      String subName = args[2];
+      String msgId = args[3];
+      //messages retrieval
+      try {
+        msg = getSubscriptionMessage(userName, subName, msgId);
+      } catch (UserNotFoundException e) {
+        System.err.println("Error: The user "+userName+" does not exist.");
+        return;
+      } catch (SubscriptionNotFoundException e) {
+        System.err.println("Error: Subscription not found.");
+        return;
+      }
+    } else {
+      System.err.println("Error: Unknown category: "+category);
+      return;
+    }
+    if(msg!= null) {
+      //TODO
+      String type = "UNKNOWN";
+      switch (msg.getType()) {
+        case org.objectweb.joram.shared.messages.Message.SIMPLE:
+          type="SIMPLE"; break;
+        case org.objectweb.joram.shared.messages.Message.TEXT:
+          type="TEXT"; break;
+        case org.objectweb.joram.shared.messages.Message.OBJECT:
+          type="OBJECT"; break;
+        case org.objectweb.joram.shared.messages.Message.MAP:
+          type="MAP"; break;
+        case org.objectweb.joram.shared.messages.Message.STREAM:
+          type="STREAM"; break;
+        case org.objectweb.joram.shared.messages.Message.BYTES:
+          type="BYTES"; break;
+        case org.objectweb.joram.shared.messages.Message.ADMIN:
+          type="ADMIN"; break;
+        default:
+          break;
+      }
+      System.out.println("Message ID: "+msg.getId());
+      System.out.println("Message type: "+type);
+      System.out.println("Creation date: "+msg.getTimestamp());
+      System.out.println("Priority: "+msg.getPriority());
+      if(msg.getType()==Message.TEXT) {
+        System.out.println("Text: "+msg.getText());
+      }
+      Map props = msg.getProperties();
+      if(props!=null) {
+        System.out.println("Properties:");
+        for(Object k : props.keySet())
+          System.out.println("  "+k+" : "+props.get(k));
+      }
+      System.out.println("Expiration date: "+msg.getExpiration());
+    } else {
+      System.err.println("Error: Message not found.");      
+    }
   }
   
   /**
@@ -950,15 +1033,14 @@ public class MOMCommandsImpl implements MOMCommands {
   private void deleteMsgSub(String userName, String subName, String msgId) {
     //Check user & subscription
     try {
-      ClientSubscriptionMBean sub = findClientSubscription(userName, subName);
-      if(sub==null) {
-        System.err.println("Error: The user \""+userName
-            +"\" has no subscription of the name \""+subName+"\"");          
-        return;
-      }
+      findClientSubscription(userName, subName);
     } catch(UserNotFoundException e) {
       System.err.println("Error: The user \""+userName+"\" does not exist.");          
       return;        
+    } catch (SubscriptionNotFoundException e) {
+      System.err.println("Error: The user \""+userName
+          +"\" has no subscription of the name \""+subName+"\"");          
+      return;
     }
     try {
       if(!SynchronousAgent.getSynchronousAgent().deleteSubMessage(userName, subName, msgId))
@@ -988,15 +1070,14 @@ public class MOMCommandsImpl implements MOMCommands {
       String userName = args[1];
       String subName = args[2];
       try {
-        ClientSubscriptionMBean sub = findClientSubscription(userName, subName);
-        if(sub==null) {
-          System.err.println("Error: The user \""+userName
-              +"\" has no subscription of the name \""+subName+"\"");          
-          return;
-        }
+        findClientSubscription(userName, subName);
       } catch(UserNotFoundException e) {
         System.err.println("Error: The user \""+userName+"\" does not exist.");          
         return;        
+      } catch (SubscriptionNotFoundException e) {
+          System.err.println("Error: The user \""+userName
+              +"\" has no subscription of the name \""+subName+"\"");          
+          return;
       }
       if(!JoramHelper.clearSubscription(userName, subName))
         System.err.println("Error: Couldn't clear "+userName+"'s subscription "+subName);      
@@ -1021,22 +1102,34 @@ public class MOMCommandsImpl implements MOMCommands {
     help("receiveMsg");
   }
 
-  private List<MessageView> getQueueMessages(String queueName) {
+  private List<MessageView> getQueueMessages(String queueName) throws QueueNotFoundException {
     QueueMBean queue = findQueue(queueName);
-    if(queue == null)
-      return null;
     @SuppressWarnings("unchecked")
     List<MessageView> msgs = queue.getMessagesView();
     return msgs==null?new ArrayList<MessageView>():msgs;
   }
   
-  private List<MessageView> getSubscriptionMessages(String userName, String subscriptionName) throws UserNotFoundException {
+  private MessageView getQueueMessage(String queueName, String msgId) throws QueueNotFoundException {
+    for(MessageView msg : getQueueMessages(queueName)){
+      if(msg.getId().equals(msgId))
+        return msg;
+    }
+    return null;
+  }
+  
+  private List<MessageView> getSubscriptionMessages(String userName, String subscriptionName) throws UserNotFoundException, SubscriptionNotFoundException {
     ClientSubscriptionMBean sub = findClientSubscription(userName, subscriptionName);
-    if(sub==null)
-      return null;
     @SuppressWarnings("unchecked")
     List<MessageView> msgs = sub.getMessagesView();
     return msgs==null?new ArrayList<MessageView>():msgs;
+  }
+  
+  private MessageView getSubscriptionMessage(String userName, String subName, String msgId) throws UserNotFoundException, SubscriptionNotFoundException {
+    for(MessageView msg : getSubscriptionMessages(userName, subName)){
+      if(msg.getId().equals(msgId))
+        return msg;
+    }
+    return null;
   }
   
   private List<MessageView> getMessageRange(List<MessageView> msgs, int start, int end) {
@@ -1061,13 +1154,26 @@ public class MOMCommandsImpl implements MOMCommands {
   }
   
   private class UserNotFoundException extends Exception{
-    /**
-     * 
-     */
     private static final long serialVersionUID = -8029807791362829155L;
 
     public UserNotFoundException(String userName) {
       super("The user ["+userName+"] was not found.");
+    }
+  }
+  
+  private class QueueNotFoundException extends Exception{
+    private static final long serialVersionUID = -4968096805181928340L;
+
+    public QueueNotFoundException(String queueName) {
+      super("The queue ["+queueName+"] was not found.");
+    }
+  }
+  
+  private class SubscriptionNotFoundException extends Exception{
+    private static final long serialVersionUID = -7792553586609849268L;
+
+    public SubscriptionNotFoundException(String userName, String subName) {
+      super("The subscription ["+userName+", "+subName+"] was not found.");
     }
   }
 }
