@@ -398,7 +398,8 @@ public class MOMTester extends Thread implements BundleActivator {
 //      String regex = "ID:\\d+.\\d+.\\d+c\\d+m\\d+ * ! [A-Z]+ * ! .* ! .* ! .* ! \\d+ *\t";
 //      if(line.matches(regex)) nbMatch++;
 //    }
-    String regex = "ID:\\d+.\\d+.\\d+c\\d+m\\d+ +! [A-Z]+ +! .* +! .* +! .* +! \\d+";
+    //ID:0.0.1027c1m8 ! TEXT ! 10:36:40 11/9/2012 ! -         ! 4
+    String regex = "ID:\\d+.\\d+.\\d+c\\d+m\\d+ +! [A-Z]+ +! .* +! .* +! \\d+";
     nbMatch = countMatchingLines(res, regex);
     assertTrue("[joram:mom:lsMsg queue] Not all messages have been displayed. Read: "+nbMatch,
         nbMatch>=NB_MSG);
