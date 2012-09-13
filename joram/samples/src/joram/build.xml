@@ -52,7 +52,7 @@
     <mkdir dir="${obj.dir}/joram"/>
     <javac srcdir="${src.dir}"
            destdir="${obj.dir}/joram"
-           source="1.4" target="1.4" debug="true"
+           source="1.5" target="1.5" debug="true"
            deprecation="${deprecation}"
            optimize="${optimize}"
            nowarn="${nowarn}"
@@ -105,14 +105,13 @@
       <param name="sid" value="0"/>
       <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
       <param name="osgi.conf" value="${conf.dir}/config.properties"/>
-      <param name="monit.conf" value="${conf.dir}/MonitoringConfig_0.xml"/>
     </antcall>
   </target>
 	
   <!-- Start a single server with the shell commands -->
   <target name="shell_server" depends="init"
           description="--> Starts a single server with the shell commands">
-    <antcall target="server_nofork">
+    <antcall target="server">
       <param name="sid" value="0"/>
       <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
       <param name="osgi.conf" value="${conf.dir}/config_shell.properties"/>     
@@ -167,6 +166,16 @@
       <param name="sid" value="0"/>
       <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
       <param name="osgi.conf" value="${conf.dir}/config_console.properties"/>    	
+    </antcall>
+  </target>
+  
+  <!-- Start a single AMQP server -->
+  <target name="amqp_server" depends="init"
+          description="--> Starts a single AMQP server in persistent mode">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+      <param name="a3.conf" value="${conf.dir}/amqp_a3servers.xml"/>
+      <param name="osgi.conf" value="${conf.dir}/config_amqp.properties"/>
     </antcall>
   </target>
 
@@ -628,7 +637,7 @@
     <java classname="cluster.queue.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dsleep=5000 -DnbMsgSleep=10"/>
+      <jvmarg line="-Dsleep=10 -DnbMsgSleep=1000"/>
       <arg value="${sid}"/>
     </java>
   </target>
@@ -639,7 +648,8 @@
     <java classname="cluster.queue.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <arg line="${sid} 1000"/>
+      <jvmarg line="-Dsleep=500 -DnbMsgSleep=1000"/>
+      <arg line="${sid} 50000"/>
     </java>
   </target>
 
@@ -1040,31 +1050,37 @@
   <!-- Initializes the jaas configuration -->
   <target name="jaas_init" depends="init">
     <mkdir dir="${run.dir}"/>
-    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <mkdir dir="${run.dir}/server0"/>
+    <copy file="${conf.dir}/config.properties" tofile="${run.dir}/server0/config.properties"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}/server0"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/server0"/>
     <copy file="${conf.dir}/jndi.properties"
-          tofile="${run.dir}/jndi.properties"
+          tofile="${run.dir}/server0/jndi.properties"
           overwrite="true"/>
     <copy file="${conf.dir}/jaas_a3servers.xml"
-          tofile="${run.dir}/a3servers.xml"
+          tofile="${run.dir}/server0/a3servers.xml"
           overwrite="true"/>
     <copy file="${src.dir}/jaas/jaas.config"
-          tofile="${run.dir}/jaas.config"
+          tofile="${run.dir}/server0/jaas.config"
           overwrite="true"/>
     <copy file="${src.dir}/jaas/keystore"
-          tofile="${run.dir}/keystore"
+          tofile="${run.dir}/server0/keystore"
           overwrite="true"/>
     <copy file="${src.dir}/jaas/carol.properties"
-          tofile="${run.dir}/carol.properties"
+          tofile="${run.dir}/server0/carol.properties"
           overwrite="true"/>
   </target>
 
   <!-- Start a jaas server -->
   <target name="jaas_server" depends="jaas_init"
           description="--> Starts a JAAS server.">
-    <antcall target="server">
-      <param name="sid" value="0"/>
-    </antcall>
+    <java classname="org.apache.felix.main.Main"
+          failonerror="no" fork="yes"
+          dir="${run.dir}/server0">
+      <classpath path="${felix.class.path}"/>
+      <jvmarg line="-Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+    </java>
   </target>
 
   <!-- Setup the classic configuration -->
@@ -1124,17 +1140,6 @@
     </java>
   </target>
 
-  <!-- Runs the 25 performance sample producer: send 50.000 transient messages on queue -->
-  <target name="perfs_prod_qx" depends="simple_init"
-    description="--> Starts the PERFS producer with 25 clients">
-    <java classname="perfs.Producer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-DNbClient=25 -DRound=40 -DNbMsgPerRound=50 -Dmps=50 -DMsgSize=500 -DMsgTransient=false -DTransacted=false" />
-      <arg line="queue"/>
-    </java>
-  </target>
-
   <!-- Runs the performance sample producer: send 50.000 transient messages on queue -->
   <target name="perfs_prod_q1" depends="simple_init"
     description="--> Starts the PERFS producer">
@@ -1167,13 +1172,25 @@
     </java>
   </target>
 
-  <!-- Runs the performance sample consumer on queue -->
+  <!-- Runs the special performance sample producer on queue -->
+  <target name="perfs_prod_qx" depends="simple_init"
+    description="--> Starts the PERFS producer with 25 clients">
+    <java classname="perfs.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DNbClient=1 -DRound=10000 -DNbMsgPerRound=1000 -Dmps=8000 -DMsgSize=10000 -DMsgTransient=true -DTransacted=true" />
+      <!-- jvmarg line="-DNbClient=25 -DRound=40 -DNbMsgPerRound=50 -Dmps=50 -DMsgSize=500 -DMsgTransient=false -DTransacted=false" / -->
+      <arg line="queue"/>
+    </java>
+  </target>
+
+	<!-- Runs the special performance sample consumer on queue -->
   <target name="perfs_cons_qx" depends="simple_init"
     description="--> Starts the PERFS consumer">
     <java classname="perfs.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DNbMaxMessage=200000" />
+      <jvmarg line=" -DTransacted=true -DNbMaxMessage=10000000" />
       <arg line="queue"/>
     </java>
   </target>
