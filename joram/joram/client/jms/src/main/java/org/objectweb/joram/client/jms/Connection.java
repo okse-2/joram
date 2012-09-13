@@ -642,6 +642,10 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
    * @param acknowledgeMode indicates whether the consumer or the client will acknowledge any messages
    *                        it receives; ignored if the session is transacted. Legal values are
    *                        Session.AUTO_ACKNOWLEDGE, Session.CLIENT_ACKNOWLEDGE, and Session.DUPS_OK_ACKNOWLEDGE.
+   *                        Additionnaly Joram defines INDIVIDUAL_ACKNOWLEDGE: With this acknowledgment mode,
+   *                        the client acknowledges a consumed message by calling the message's acknowledge
+   *                        method. Contrary to CLIENT_ACKNOWLEDGE mode this mode allows to acknowledge only
+   *                        the specified message.
    * @return A newly created session.
    * 
    * @exception IllegalStateException  If the connection is closed.

@@ -98,7 +98,12 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   public static Logger logger = Debug.getLogger(Session.class.getName());
   public static Logger trace = Debug.getLogger(Session.class.getName() + ".Message");
-  
+
+  /**
+   *  With this acknowledgment mode, the client acknowledges a consumed message by calling
+   * the message's acknowledge method. Contrary to CLIENT_ACKNOWLEDGE mode this mode allows
+   * to acknowledge only the specified message.
+   */
   public static int INDIVIDUAL_ACKNOWLEDGE = 4;
   
   /**
