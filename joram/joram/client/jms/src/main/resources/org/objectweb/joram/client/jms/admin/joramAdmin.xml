@@ -1,3 +1,21 @@
+<!--
+  - Copyright (C) 2000 - 2012 ScalAgent Distributed Technologies
+  - 
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or any later version.
+  - 
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  - 
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+  - USA.
+-->
   
 <!-- ====================================== -->
 <!-- ====================================== -->
@@ -8,60 +26,67 @@
 <?xml version="1.0"?>
   
 <JoramAdmin>
-  <AdminModule>
-    <connect hostName="" port=""
-             name="" password=""
-             cnxTimer="" reliableClass=""/>
+  <LocalAdminModule login="root" password="root"
+  								  identityClass="org.objectweb.joram.shared.security.SimpleIdentity">
+    <property name="asyncSend" value="true"/>
   </AdminModule>
-  
-  <AdminModule>
-    <collocatedConnect name="" password=""/>
-  </AdminModule>
-  
-  
-  <ConnectionFactory name="" className="">
-    <tcp host=""
-         port=""
-         reliableClass=""/>
-    <local/>
-    <hatcp url=""
-           reliableClass=""/>
-    <halocal/>
-    <jndi name=""/>
+
+  <TcpAdminModule host="localhost" port="16010" login="root" password="root"
+  								identityClass="org.objectweb.joram.shared.security.SimpleIdentity">
+    <property name="connectingTimer" value="60"/>
+  </TcpAdminModule>
+
+  <SSLAdminModule host="localhost" port="16010" login="root" password="root"
+  								identityClass="org.objectweb.joram.shared.security.SimpleIdentity">
+    <property name="connectingTimer" value="60"/>
+  </SSLAdminModule>
+
+  <LocalConnectionFactory name="lcf">
+    <property name="asyncSend" value="true"/>
+    <inInterceptors>
+    	<interceptor className=""/>"
+    	<interceptor className=""/>"
+    </inInterceptors>
+    <outInterceptors>
+    	<interceptor className=""/>"
+    	<interceptor className=""/>"
+    </outInterceptors>
+    <jndi name="lcf"/>
   </ConnectionFactory>
+
+  <TcpConnectionFactory name="cf" host="localhost" port="16010">
+    <property name="connectingTimer" value="60"/>
+    <inInterceptors>
+    	<interceptor className=""/>"
+    	<interceptor className=""/>"
+    </inInterceptors>
+    <outInterceptors>
+    	<interceptor className=""/>"
+    	<interceptor className=""/>"
+    </outInterceptors>
+    <jndi name="cf"/>
+  </TcpConnectionFactory>
+
+  <SSLConnectionFactory name="sslcf" host="localhost" port="16011">
+    <property name="connectingTimer" value="60"/>
+    <inInterceptors>
+    	<interceptor className=""/>"
+    	<interceptor className=""/>"
+    </inInterceptors>
+    <outInterceptors>
+    	<interceptor className=""/>"
+    	<interceptor className=""/>"
+    </outInterceptors>
+    <jndi name="sslcf"/>
+  </SSLConnectionFactory>
   
-  <User name="" login="" password="" serverId="">
+  <User name="anonymous" login="anonymous" password="anonymous" serverId="0">
     <property name="jms_joram_interceptors_in" value=""/>
     <property name="jms_joram_interceptors_out" value=""/>
   </User>
   
-  <Server serverId="" dmq="" threshold=""/>
-
-  <Destination type=""
-               serverId=""
-               name=""
-               dmq=""
-               className="">
-    <property name="jms_joram_interceptors" value=""/>
-    <property name="" value=""/>
-    <property name="" value=""/>
-    <reader user=""/>
-    <reader user=""/>
-    <writer user=""/>
-    <writer user=""/>
-    <freeReader/>
-    <freeWriter/>
-    <jndi name=""/>
-  </Destination>
-  
-  <DMQueue name=""
-           serverId="">
-    <reader user=""/>
-    <writer user=""/>
-    <freeReader/>
-    <freeWriter/>
-    <jndi name=""/>
-  </DMQueue>
+	<!-- Be careful to create dmq before -->
+  <Server serverId="0" dmq="dmq" threshold="3"/>
   
   <Queue name=""
          serverId=""
