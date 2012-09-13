@@ -525,9 +525,24 @@ public interface JoramAdapterMBean {
    */
   public Boolean getStartJoramServer();
   
-  //*****************************************************************************************
-  //for compatibility with JOnAS 5.2 admin GUI
+  // *****************************************************************************************
+  // Code to remove in future
+
+  /**
+   * Returns true if the server is colocated.
+   * 
+   * @see org.objectweb.joram.client.connector.JoramAdapterMBean#getCollocatedServer()
+   * @deprecated only needed for compatibility with JOnAS 5.2 administration GUI
+   */
   public Boolean getCollocatedServer();
+  
+  /**
+   * Returns the server name.
+   * 
+   * @see org.objectweb.joram.client.connector.JoramAdapterMBean#getServerName()
+   * @deprecated only needed for compatibility with JOnAS 5.2 administration GUI
+   */
   public String getServerName();
+  
   //*****************************************************************************************
 }
