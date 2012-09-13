@@ -66,10 +66,10 @@ public class ClusterAdmin {
 
     Properties prop = new Properties();
     prop.setProperty("period","100");
-    prop.setProperty("producThreshold","25");
-    prop.setProperty("consumThreshold","2");
-    prop.setProperty("autoEvalThreshold","true");
-    prop.setProperty("waitAfterClusterReq","100");
+    prop.setProperty("producThreshold","1000");
+    prop.setProperty("consumThreshold","5");
+    prop.setProperty("autoEvalThreshold","false");
+    prop.setProperty("waitAfterClusterReq","10000");
 
     Queue queue0 = Queue.create(0, null, Queue.CLUSTER_QUEUE, prop);
     Queue queue1 = Queue.create(1, null, Queue.CLUSTER_QUEUE, prop);
