@@ -16,7 +16,6 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 
 import elasticity.interfaces.Service;
-import elasticity.old.JoramAmazonVMs;
 
 /**
  * Joram service, manages Joram workers.
@@ -71,7 +70,7 @@ public class JoramService extends Service {
 		//Pre-provisioning, if requested.
 		preVms = new LinkedList<String>();
 		for (int i = 0; i < ppSize; i++) {
-			PreProvision pp = new PreProvision(preVms);
+			PreProvision pp = new PreProvision(as,preVms);
 			pp.start();
 		}
 		
@@ -118,7 +117,7 @@ public class JoramService extends Service {
 				logger.log(Level.INFO,"Runned new VM with IP: " + vm + "..");
 			} else {
 				vm = preVms.poll();
-				PreProvision pp = new PreProvision(preVms);
+				PreProvision pp = new PreProvision(as,preVms);
 				pp.start(); //Replaces the VM we just polled
 				logger.log(Level.INFO,"Used pre-provisionned VM..");
 			}
@@ -197,13 +196,19 @@ public class JoramService extends Service {
 class PreProvision extends Thread {
 	
 	private LinkedList<String> preVms;
+	private AmazonService as;
 	
-	public PreProvision(LinkedList<String> preVms) {
+	public PreProvision(AmazonService as, LinkedList<String> preVms) {
 		this.preVms = preVms;
+		this.as = as;
 	}
 	
 	public void run() {
-		String vm = JoramAmazonVMs.runInstance();
+		try {
+		String vm = as.runInstance();
 		preVms.offer(vm);
+		} catch (Exception e) {
+			//Well, this is awkward...
+		}
 	}
 }

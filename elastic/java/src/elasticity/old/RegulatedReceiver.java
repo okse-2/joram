@@ -35,7 +35,7 @@ public class RegulatedReceiver {
 	static class ReceiveRound extends Thread {
 		public void run() {
 			int count = 0;
-			for(int j = 0; j < 500; j++) {
+			for(int j = 0; j < Constants.MSG_PER_ROUND; j++) {
 				try {
 					receiver.receive();
 					count++;
