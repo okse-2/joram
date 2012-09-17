@@ -39,29 +39,29 @@ public class RegulatedSender {
 	 * @return
 	 */
 	public static int computeLoad(int round) {
+		if (round < 200)
+			return round;
+		if (round < 300)
+			return 200;
+		if (round < 400)
+			return  200 + (round -300);
+		if (round < 500)
+			return 300;
+		if (round < 600)
+			return  300 - (round - 500);
+		if (round < 700)
+			return 200;
+		if (round < 800)
+			return 200 - (round - 700);
+		if (round < 900)
+			return 100;
+		if (round < 1000)
+			return 100 + (round - 900);
 		if (round < 1100)
-			return round / 2;
-		if (round < 1400)
-			return 550;
-		if (round < 1600)
-			return 550 + (round - 1400) / 2;
-		if (round < 1900)
-			return 650;
-		if (round < 2100)
-			return 650 - (round - 1900) / 2;
-		if (round < 2400)
-			return 550;
-		if (round < 2600)
-			return 550 - (round - 2400) / 2;
-		if (round < 2900)
-			return 450;
-		if (round < 3100)
-			return 450 + (round - 2900) / 2;
-		if (round < 3400)
-			return 550;
-		if (round < 4500)
-			return 550 - (round - 3400) / 2;
-		
+			return 200;
+		if (round < 1300)
+			return 200 - (round - 1100);
+
 		return 0;
 	}
 
@@ -90,12 +90,12 @@ public class RegulatedSender {
 		int load;
 		cnx.start();
 		start = System.currentTimeMillis();
-		int rounds = 4600 * 1000 / Constants.TIME_UNIT;
-		for(int i = 0; i < 4600; i++) {
-			load = computeLoad(i) * 5 / 2;
+		
+		for(int i = 0; true; i++) {
+			load = computeLoad(i);
 			for(int j = 0; j < load; j++) {
 				sender.send(message);
-				if ((j % 10) == 9)
+				//if ((j % 10) == 9)
 					session.commit();
 			}
 			System.out.println("[RegulatedSender " + number + "]\t" + i + "\t" + load);
@@ -103,8 +103,8 @@ public class RegulatedSender {
 			if (wait > 0)
 				Thread.sleep(wait);
 		}
-		cnx.close();
-		System.out.println("[RegulatedSender]\tDone.");
+		//cnx.close();
+		//System.out.println("[RegulatedSender]\tDone.");
 		
 	}
 }
