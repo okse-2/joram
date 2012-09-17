@@ -38,5 +38,5 @@ cp $CONFIG_DIR/config.properties $SERVER_RUN_DIR/config.properties
 
 sed -e "s/NUM/$1/g" -e "s/RAND/$RANDOM/g" $CONFIG_DIR/MonitoringConfig.template > $SERVER_RUN_DIR/MonitoringConfig.xml
 
-PORT=$((16400+$1))
+PORT=$((16500+$1))
 cd $SERVER_RUN_DIR; exec "${JAVA_HOME}"/bin/java  -Dosgi.shell.telnet.port=$PORT -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -Dfr.dyade.aaa.agent.AgentServer.id=$1 -classpath $CLASSPATH org.apache.felix.main.Main

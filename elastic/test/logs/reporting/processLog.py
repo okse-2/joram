@@ -44,7 +44,8 @@ for i in range(1,len(sys.argv)):
 resId = 0
 for i in range(1,len(sys.argv)):
     fname = sys.argv[i]
-    if fname.find("10.0.0.2") > -1 or fname.find("10.0.0.3") > -1:
+    #if fname.find("10.0.0.2") > -1 or fname.find("10.0.0.3") > -1:
+    if fname.find("10.0.0.2") > -1: 
         continue # Skip producers
 
     wId = getId()
