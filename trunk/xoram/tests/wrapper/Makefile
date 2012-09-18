@@ -1,20 +1,4 @@
-LIBDIR = ../../src
-INCDIR = ../../src
-
-###############################
-# i86-cygwin
-# CCOPT = -g -I$(INCDIR)
-# LDFLAGS = -g
-# LIBXORAM = libxoram.dll
-###############################
-# i86-linux
-CCOPT = -g -fPIC -I$(INCDIR)
-LDFLAGS = -lrt
-LIBXORAM = libxoram.so
-###############################
-
-CC = gcc $(CCOPT) 
-LD = gcc $(CCOPT) $(LDFLAGS)
+include ../Makefile.global
 
 clean:
 	rm -f *.exe *.o *~ ${LIBXORAM}
