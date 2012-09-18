@@ -63,7 +63,7 @@
       <p>The JavaDoc of the version in development is generated each day at 00:00 AM CEST, it is available at:
 	    <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/JavaDoc/target/apidocs/index.html">here</a>.</p>
       <p>Joram nightly builds (snapshots) are also available from the
-      <a href="http://repository.ow2.org/nexus/index.html#nexus-search;quick~joram">OW2 Maven repository</a>:
+      <a href="http://repository.ow2.org/nexus/content/repositories/snapshots/org/ow2/joram/">OW2 Maven repository</a>:
       http://repository.ow2.org/nexus, GroupId is org.ow2.joram</p>
       </s2>
       
@@ -92,7 +92,7 @@
 
       <s2 name="Maven access">
       <p>Joram libraries are available on the <a href="http://repo1.maven.org/maven2/org/objectweb/joram">maven repository</a>
-      <strong>http://repo1.maven.org/maven2/org/objectweb/joram</strong>, GroupId is org.objectweb.joram</p>
+      <strong>http://repo1.maven.org/maven2/org/ow2/joram</strong>, GroupId is org.ow2.joram</p>
       
       <p>Since Joram 5.3.2 main artifactIds are:</p>
 	    <ul>
