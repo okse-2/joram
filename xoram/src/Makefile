@@ -1,6 +1,3 @@
-LIBDIR = ../../src
-INCDIR = ../../src
-
 ###############################
 # i86-cygwin
 #CCOPT = -g
