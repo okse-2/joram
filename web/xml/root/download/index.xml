@@ -21,15 +21,15 @@
       
 	    <p>The latest release packages are:</p>
 	    <ul>
-      <li><code>joram-release-5.*.zip</code>, including JORAM libraries and the JORAM samples sources;</li>
-      <li><code>joram-release-5.*-src.zip</code>, including JORAM sources;</li>
-	    <li><code>joram-release-5.*-javadoc.jar</code>, including JORAM javadoc;</li>
+      <li><code>joram-5.*.zip</code>, including JORAM libraries and the JORAM samples sources;</li>
+      <li><code>joram-5.*-src.zip</code>, including JORAM sources;</li>
+	    <li><code>joram-5.*-javadoc.jar</code>, including JORAM javadoc;</li>
       <li><code>joram-jca-jonas-5.*.rar</code>, JCA Adapter for Jonas;</li>
       <li><code>joram-jca-remote-5.*.rar</code>, the resource adapter for a collocated JORAM server within any J2EE compliant 
 	    	application server.</li>
       <li><code>joram-jca-ra-5.*.rar</code>, the resource adapter for a collocated JORAM server within any J2EE compliant 
 	    	application server.</li>
-      <li><code>joram-release-5.*-raconfig.zip</code>, facilities enabling configuration of JCA rars.</li>
+      <li><code>joram-5.*-raconfig.zip</code>, facilities enabling configuration of JCA rars.</li>
 	    </ul>
  
 	    <p>The license agreement is displayed before the download can start.
@@ -91,12 +91,13 @@
       </s2>
 
       <s2 name="Maven access">
-      <p>Joram libraries are available on the <a href="http://repo1.maven.org/maven2/org/objectweb/joram">maven repository</a>
-      <strong>http://repo1.maven.org/maven2/org/ow2/joram</strong>, GroupId is org.ow2.joram</p>
+      <p>Joram libraries are available on the <a href="http://repo1.maven.org/maven2/org/ow2/joram">maven repository</a>
+      <strong>http://repo1.maven.org/maven2/org/ow2/joram</strong>. Be careful, since Joram 5.8 GroupId is org.ow2.joram
+      (older releases are available with org.objectweb.joram GroupId).</p>
       
       <p>Since Joram 5.3.2 main artifactIds are:</p>
 	    <ul>
-	      <li>a3-common and a3-rt for the asynchronous middleware,</li>
+	      <li>a3-common, a3-rt and a3-osgi for the asynchronous middleware,</li>
 	      <li>joram-client-jms, joram-shared and joram-mom-core for JMS client and server implementation,</li>
 	      <li>jndi-client, jndi-shared and jndi-server for the JNDI implementation.</li>
 	    </ul>
