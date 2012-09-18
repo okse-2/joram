@@ -131,7 +131,7 @@
     </table>		
     </s1>
 
-    <s1 name="Thanks">
+    <s1 name="Acknowledgements">
     <table width="100%">
     <tr>
       <td align="center" valign="middle">
@@ -150,8 +150,8 @@
       <img src="images/partners/intellijidea-269x139.jpg" alt="IntelliJ IDEA logo" border="0" height="115" width="210"/></a>
       </td>
       <td>
-        <p>Thanks to the people at <a href="http://http://www.jetbrains.com">JetBrains</a> for providing us a
-        free license for their <a href="http://http://www.jetbrains.com/idea/">Intelligent Java IDE</a>.</p>
+        <p>We acknowledge <a href="http://http://www.jetbrains.com">JetBrains</a> for giving us free licenses of
+        <a href="http://http://www.jetbrains.com/idea/">Intelligent Java IDE</a>.</p>
       </td>
     </tr>
     </table>		
