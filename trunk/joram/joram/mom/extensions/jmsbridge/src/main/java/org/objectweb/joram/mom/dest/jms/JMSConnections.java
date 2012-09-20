@@ -80,18 +80,35 @@ public class JMSConnections implements JMSConnectionsMBean {
   }
 
   /** {@inheritDoc} */
-  public void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
-      String password, String clientID) {
+  public void addServer(String name,
+                        String cnxFactoryName,
+                        String jndiFactoryClass,
+                        String jndiUrl,
+                        String user,
+                        String password,
+                        String clientID) {
   	if (logger.isLoggable(BasicLevel.DEBUG)) {
 			logger.log(BasicLevel.DEBUG, "JMSConnection.addServer(" + name + ", " + 
 					cnxFactoryName + ", " + jndiFactoryClass + ", " + jndiUrl + ", " + user + ", ****, " + clientID + ')');
   	}
+  	
+    if (name == null) {
+      int i = 0;
+      do {
+        name = "cnx" + i; i += 1;
+      } while (servers.containsKey(name));
+      logger.log(BasicLevel.WARN,
+                 "Cannot add an unamed JMSConnection, set name to \"" + name  + "\".");
+    }
 			
     synchronized (servers) {
       if (!servers.containsKey(name)) {
         JMSModule cnx = new JMSModule(name, cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, clientID);
         cnx.startLiveConnection();
         servers.put(name, cnx);
+      } else {
+        logger.log(BasicLevel.ERROR,
+                   "Cannot add a JMSConnection with an already defined name: " + name  + ".");
       }
     }
     try {
@@ -125,7 +142,7 @@ public class JMSConnections implements JMSConnectionsMBean {
             AgentServer.getTransaction().commit(true);
           }
         } catch (IOException exc) {
-          logger.log(BasicLevel.ERROR, "Error while deleting server " + name, exc);
+          logger.log(BasicLevel.ERROR, "Error while deleting connection: " + name, exc);
         }
       }
     }
