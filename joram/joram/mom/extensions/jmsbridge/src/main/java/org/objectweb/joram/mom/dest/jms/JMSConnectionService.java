@@ -62,7 +62,7 @@ public class JMSConnectionService {
    * in url, use %26 instead of & if needed.
    */
   public static void addServer(String urls) {
-  	String name = "default";
+  	String name = null;
   	String cf = null;
     String jndiFactoryClass = null;
     String jndiUrl = null;
