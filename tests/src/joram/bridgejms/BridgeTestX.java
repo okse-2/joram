@@ -87,7 +87,7 @@ public class BridgeTestX extends TestCase {
       Properties prop2 = new Properties();
       prop2.setProperty("jms.DestinationName", "foreignQueue");
       prop2.setProperty("jms.ConnectionUpdatePeriod", "1000");
-      prop2.setProperty("period", "1000");      
+      prop2.setProperty("period", "1000");
       prop2.put("distribution.async", "" + async);
       prop2.setProperty("distribution.className", JMSDistribution.class.getName());
 
