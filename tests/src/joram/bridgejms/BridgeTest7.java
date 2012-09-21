@@ -44,6 +44,11 @@ import framework.TestCase;
 
 /**
  * Test : One bridge to multiple JMS servers with round robin distribution.
+ *  - Sends ten messages on the distribution bridge, then receives them
+ *  alternatively from server #1 (5) and #2 (5).
+ *  - Sends ten messages on the distribution bridge specifying the use of
+ *  the connection to server #2, then verifying that all messages are sent
+ *  on server #2.
  */
 public class BridgeTest7 extends TestCase {
 
@@ -102,7 +107,6 @@ public class BridgeTest7 extends TestCase {
       joramCnx.start();
 
       TextMessage msg = joramSess.createTextMessage();
-
       for (int i = 1; i < 11; i++) {
         msg.setText("Joram message number " + i);
         System.out.println("send msg = " + msg.getText());
@@ -116,6 +120,23 @@ public class BridgeTest7 extends TestCase {
       }
 
       for (int i = 1; i < 6; i++) {
+        msg = (TextMessage) foreignCons2.receive(5000);
+        assertNotNull(msg);
+        System.out.println("Consumer 2: receive msg = " + msg.getText());
+      }
+
+      msg = joramSess.createTextMessage();
+      for (int i = 1; i < 11; i++) {
+        msg.setText("Joram message number " + i);
+        msg.setStringProperty("jms.Routing", "cfS2");
+        System.out.println("send msg = " + msg.getText());
+        joramSender.send(msg);
+      }
+
+      msg = (TextMessage) foreignCons1.receive(5000);
+      assertNull(msg);
+
+      for (int i = 1; i < 11; i++) {
         msg = (TextMessage) foreignCons2.receive(5000);
         assertNotNull(msg);
         System.out.println("Consumer 2: receive msg = " + msg.getText());
