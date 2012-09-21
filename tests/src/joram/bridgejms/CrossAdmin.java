@@ -33,10 +33,6 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 public class CrossAdmin  {
 
   public static void main(String[] args) {
-    new CrossAdmin().run();
-  }
-
-  public void run() {
     try{
       AdminModule.connect("root", "root", 60);
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();
@@ -112,7 +108,9 @@ public class CrossAdmin  {
 
 	    AdminModule.disconnect();
 	    System.out.println("Admin closed.");
-    }catch(Exception exc){
+    } catch (Throwable exc) {
+      exc.printStackTrace();
+      System.exit(-1);
     }
   }
 }
