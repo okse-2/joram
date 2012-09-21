@@ -37,10 +37,6 @@ import org.objectweb.joram.mom.dest.jms.JMSDistribution;
 public class DistributionCrossAdmin {
 
   public static void main(String[] args) {
-    new DistributionCrossAdmin().run();
-  }
-
-  public void run() {
     try {
       AdminModule.connect("root", "root", 60);
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();
@@ -108,6 +104,7 @@ public class DistributionCrossAdmin {
       System.out.println("Admin closed.");
     } catch (Throwable exc) {
       exc.printStackTrace();
+      System.exit(-1);
     }
   }
 }

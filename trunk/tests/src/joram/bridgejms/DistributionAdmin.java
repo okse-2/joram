@@ -34,10 +34,6 @@ import org.objectweb.joram.mom.dest.jms.JMSDistribution;
 public class DistributionAdmin {
 
   public static void main(String[] args) {
-    new DistributionAdmin().run();
-  }
-
-  public void run() {
     try {
       boolean async = Boolean.getBoolean("async");
       System.out.println("async=" + async);
@@ -108,6 +104,7 @@ public class DistributionAdmin {
       System.out.println("Admin closed.");
     } catch (Throwable exc) {
       exc.printStackTrace();
+      System.exit(-1);
     }
   }
 }

@@ -34,10 +34,6 @@ import org.objectweb.joram.mom.dest.jms.JMSAcquisition;
 public class AcquisitionAdmin {
 
   public static void main(String[] args) {
-    new AcquisitionAdmin().run();
-  }
-
-  public void run() {
     try {
       AdminModule.connect("root", "root", 60);
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();
@@ -106,6 +102,7 @@ public class AcquisitionAdmin {
       System.out.println("Admin closed.");
     } catch (Throwable exc) {
       exc.printStackTrace();
+      System.exit(-1);
     }
   }
 }

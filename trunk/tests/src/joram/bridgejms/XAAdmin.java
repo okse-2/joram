@@ -35,84 +35,89 @@ import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
  * Administration code for the bridge sample using XA connections.
  */
 public class XAAdmin {
-  public static void main(String[] args) throws Exception {
-    System.out.println("XA Bridge administration...");
+  public static void main(String[] args) {
+    try {
+      System.out.println("XA Bridge administration...");
 
-    AdminModule.connect("root", "root", 60);
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    
-    User.create("anonymous", "anonymous", 0);
-    User.create("anonymous", "anonymous", 1);
-    
-    // create The foreign destination and connectionFactory
-    Queue foreignQueue = Queue.create(1, "foreignQueue");
-    foreignQueue.setFreeReading();
-    foreignQueue.setFreeWriting();
-    System.out.println("foreign queue = " + foreignQueue);
-    
-    Topic foreignTopic = Topic.create(1, "foreignTopic");
-    foreignTopic.setFreeReading();
-    foreignTopic.setFreeWriting();
-    System.out.println("foreign topic = " + foreignTopic);
-    
-    javax.jms.XAConnectionFactory foreignCF = XATcpConnectionFactory.create("localhost", 16011);
-    
-    // bind foreign destination and connectionFactory
-    jndiCtx.rebind("foreignQueue", foreignQueue);
-    jndiCtx.rebind("foreignTopic", foreignTopic);
-    jndiCtx.rebind("foreignCF", foreignCF);
-    
-    
-    // Setting the bridge properties
-    Properties prop = new Properties();
-    // Foreign QueueConnectionFactory JNDI name: foreignCF
-    prop.setProperty("connectionFactoryName", "foreignCF");
-   prop.setProperty("useXAConnection", "true");
-    // Foreign Queue JNDI name: foreignDest
-    prop.setProperty("destinationName", "foreignQueue");
-    // automaticRequest
-    String autoReq = System.getProperty("automaticRequest", "false");
-    prop.setProperty("automaticRequest", autoReq);
-    
-    prop.setProperty("jndiFactory", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
-    prop.setProperty("jndiUrl", "scn://localhost:16400");
+      AdminModule.connect("root", "root", 60);
+      javax.naming.Context jndiCtx = new javax.naming.InitialContext();
 
-    // Creating a Queue bridge on server 0:
-    Queue joramQueue = Queue.create(0,
-                                 "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeQueue",
-                                 prop);
-    joramQueue.setFreeReading();
-    joramQueue.setFreeWriting();
-    System.out.println("joram queue = " + joramQueue);
-    
-    // Setting the bridge properties
-    prop = new Properties();
-    // Foreign QueueConnectionFactory JNDI name: foreignCF
-    prop.setProperty("connectionFactoryName", "foreignCF");
-    prop.setProperty("useXAConnection", "true");
-    // Foreign Queue JNDI name: foreignDest
-    prop.setProperty("destinationName", "foreignTopic");
-    
-    prop.setProperty("jndiFactory", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
-    prop.setProperty("jndiUrl", "scn://localhost:16400");
+      User.create("anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 1);
 
-    // Creating a Topic bridge on server 0:
-    Topic joramTopic = Topic.create(0,
-                                 "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeTopic",
-                                 prop);
-    joramTopic.setFreeReading();
-    joramTopic.setFreeWriting();
-    System.out.println("joram topic = " + joramTopic);
+      // create The foreign destination and connectionFactory
+      Queue foreignQueue = Queue.create(1, "foreignQueue");
+      foreignQueue.setFreeReading();
+      foreignQueue.setFreeWriting();
+      System.out.println("foreign queue = " + foreignQueue);
 
-    javax.jms.ConnectionFactory joramCF = TcpConnectionFactory.create();
+      Topic foreignTopic = Topic.create(1, "foreignTopic");
+      foreignTopic.setFreeReading();
+      foreignTopic.setFreeWriting();
+      System.out.println("foreign topic = " + foreignTopic);
 
-    jndiCtx.rebind("joramQueue", joramQueue);
-    jndiCtx.rebind("joramTopic", joramTopic);
-    jndiCtx.rebind("joramCF", joramCF);
-    
-    jndiCtx.close();
+      javax.jms.XAConnectionFactory foreignCF = XATcpConnectionFactory.create("localhost", 16011);
 
-    AdminModule.disconnect();
-    System.out.println("Admin closed.");
+      // bind foreign destination and connectionFactory
+      jndiCtx.rebind("foreignQueue", foreignQueue);
+      jndiCtx.rebind("foreignTopic", foreignTopic);
+      jndiCtx.rebind("foreignCF", foreignCF);
+
+
+      // Setting the bridge properties
+      Properties prop = new Properties();
+      // Foreign QueueConnectionFactory JNDI name: foreignCF
+      prop.setProperty("connectionFactoryName", "foreignCF");
+      prop.setProperty("useXAConnection", "true");
+      // Foreign Queue JNDI name: foreignDest
+      prop.setProperty("destinationName", "foreignQueue");
+      // automaticRequest
+      String autoReq = System.getProperty("automaticRequest", "false");
+      prop.setProperty("automaticRequest", autoReq);
+
+      prop.setProperty("jndiFactory", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
+      prop.setProperty("jndiUrl", "scn://localhost:16400");
+
+      // Creating a Queue bridge on server 0:
+      Queue joramQueue = Queue.create(0,
+                                      "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeQueue",
+                                      prop);
+      joramQueue.setFreeReading();
+      joramQueue.setFreeWriting();
+      System.out.println("joram queue = " + joramQueue);
+
+      // Setting the bridge properties
+      prop = new Properties();
+      // Foreign QueueConnectionFactory JNDI name: foreignCF
+      prop.setProperty("connectionFactoryName", "foreignCF");
+      prop.setProperty("useXAConnection", "true");
+      // Foreign Queue JNDI name: foreignDest
+      prop.setProperty("destinationName", "foreignTopic");
+
+      prop.setProperty("jndiFactory", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
+      prop.setProperty("jndiUrl", "scn://localhost:16400");
+
+      // Creating a Topic bridge on server 0:
+      Topic joramTopic = Topic.create(0,
+                                      "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeTopic",
+                                      prop);
+      joramTopic.setFreeReading();
+      joramTopic.setFreeWriting();
+      System.out.println("joram topic = " + joramTopic);
+
+      javax.jms.ConnectionFactory joramCF = TcpConnectionFactory.create();
+
+      jndiCtx.rebind("joramQueue", joramQueue);
+      jndiCtx.rebind("joramTopic", joramTopic);
+      jndiCtx.rebind("joramCF", joramCF);
+
+      jndiCtx.close();
+
+      AdminModule.disconnect();
+      System.out.println("Admin closed.");
+    } catch (Throwable exc) {
+      exc.printStackTrace();
+      System.exit(-1);
+    }
   }
 }
