@@ -22,6 +22,8 @@
  */
 package org.objectweb.joram.client.connector;
 
+import javax.jms.JMSException;
+
 
 /**
  *
@@ -31,4 +33,6 @@ public interface OutboundConnectionMBean {
  public int getNumberOfSession();
  
  public String[] getSessions();
+ 
+ public void close() throws JMSException;
 }
