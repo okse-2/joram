@@ -37,7 +37,6 @@ import javax.naming.NamingException;
 import javax.naming.Reference;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.osgi.service.io.ConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
