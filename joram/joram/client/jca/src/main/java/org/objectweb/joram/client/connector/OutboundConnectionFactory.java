@@ -112,8 +112,13 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
                                     ", " + password + ")");
 
     try {
-      ConnectionRequest cxRequest =
-        new ConnectionRequest(userName, password, mcf.getIdentityClass());
+      ConnectionRequest cxRequest = null;
+      if (mcf instanceof ManagedQueueConnectionFactoryImpl)
+        cxRequest = new QueueConnectionRequest(userName, password, mcf.getIdentityClass());
+      else if (mcf instanceof ManagedTopicConnectionFactoryImpl)
+        cxRequest = new TopicConnectionRequest(userName, password, mcf.getIdentityClass());
+      else
+        cxRequest = new ConnectionRequest(userName, password, mcf.getIdentityClass());
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, this + " createConnection cxManager = " + cxManager);
