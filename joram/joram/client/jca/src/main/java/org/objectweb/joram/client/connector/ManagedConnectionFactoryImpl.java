@@ -288,6 +288,8 @@ public class ManagedConnectionFactoryImpl extends ManagedConnectionFactoryConfig
     String hostName = getHostName();
     int serverPort = getServerPort();
 
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " hostName = " +  hostName + ", serverPort = " + serverPort);
     if (isCollocated()) {
       hostName = "localhost";
       serverPort = -1;
