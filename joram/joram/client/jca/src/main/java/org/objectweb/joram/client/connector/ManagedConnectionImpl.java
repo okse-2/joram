@@ -25,6 +25,7 @@
 package org.objectweb.joram.client.connector;
 
 import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.Vector;
 
 import javax.jms.JMSException;
@@ -273,7 +274,11 @@ public class ManagedConnectionImpl
         OutboundConnection outboundCnx = null;
         for (java.util.Enumeration e = handles.elements(); e.hasMoreElements(); ) {
           outboundCnx = (OutboundConnection) e.nextElement();
-          if (outboundCnx.cnxEquals(cnx)) break;
+          if (outboundCnx.cnxEquals(cnx)) {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, this + " getXAResource : outboundCnx found in handles table.");
+            break;
+          }
         }
 
         if (outboundCnx == null)
@@ -439,8 +444,9 @@ public class ManagedConnectionImpl
       logger.log(BasicLevel.DEBUG, this + " cleanup()");
 
     OutboundConnection handle;
-    while (! handles.isEmpty()) {
-      handle = (OutboundConnection) handles.remove(0);
+    Iterator it = handles.iterator();
+    while (it.hasNext()) {
+      handle = (OutboundConnection) it.next();
       handle.cleanup();
     }
     session = null;
@@ -460,7 +466,10 @@ public class ManagedConnectionImpl
 
     try {
       cnx.close();
-    } catch (Exception exc) {}
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, this + " destroy()", exc);
+    }
 
     ra.removeProducer(this);
 
@@ -489,8 +498,8 @@ public class ManagedConnectionImpl
 
     boolean res =
       mode.equals(other.mode)
-      && hostName.equals(other.hostName)
-      && serverPort == other.serverPort
+      && ((hostName.equals(other.hostName) && serverPort == other.serverPort) ||
+          (mcf.isCollocated() && other.serverPort == -1))
       && userName.equals(other.userName)
       && cnx.equals(other.cnx);
 
@@ -685,8 +694,14 @@ public class ManagedConnectionImpl
                   int serverPort,
                   String userName,
                   String mode) {
-    return this.hostName.equals(hostName)
-           && this.serverPort == serverPort
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "matches: " + hostName + " = " + this.hostName + ", " +
+          serverPort + " = " + this.serverPort + ", " + userName + " = " + this.userName + ", " +
+          mode + " = " + this.mode + ", isColocated = " + mcf.isCollocated());
+      
+    return ((this.hostName.equals(hostName)
+           && this.serverPort == serverPort) ||
+           (mcf.isCollocated()&& serverPort == -1))
            && this.userName.equals(userName)
            && this.mode.equals(mode);
   }
@@ -704,6 +719,9 @@ public class ManagedConnectionImpl
   void closeHandle(OutboundConnection handle) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + " closeHandle(" + handle + ")");
+    
+    // remove handle from handles table.
+    handles.remove(handle);
 
     ConnectionEvent event =
       new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);
