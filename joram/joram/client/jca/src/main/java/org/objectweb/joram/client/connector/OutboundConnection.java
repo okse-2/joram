@@ -315,7 +315,7 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
   }
 
   public String toString() {
-    return "OutboundConnection[" + xac.toString() + "]";
+    return "OutboundConnection[" + xac.toString() + "]@" + hashCode();
   }
   
   public String getJMXBeanName(XAConnection cnx) {
@@ -328,6 +328,8 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
   }
 
   public String registerMBean() {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "OutboundConnection.registerMBean: " + this);
     String JMXBeanName = getJMXBeanName(xac);
     try {
       if (JMXBeanName != null)
@@ -341,6 +343,8 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
   }
 
   public void unregisterMBean() {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "OutboundConnection.unregisterMBean: " + this);
     try {
       MXWrapper.unregisterMBean(getJMXBeanName(xac));
     } catch (Exception e) {
