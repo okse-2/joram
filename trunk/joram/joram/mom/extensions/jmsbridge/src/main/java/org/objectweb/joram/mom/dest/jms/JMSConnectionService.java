@@ -43,12 +43,14 @@ public class JMSConnectionService {
   private static final Logger logger = Debug.getLogger(JMSConnectionService.class.getName());
 
   private static JMSConnections singleton;
+  
+  final static String JMXBaseName = "BridgeJMS#";
 
   public synchronized static JMSConnections getInstance() {
     if (singleton == null) {
       singleton = new JMSConnections();
       try {
-        MXWrapper.registerMBean(singleton, "JMS#" + AgentServer.getServerId(), "type=Connections");
+        MXWrapper.registerMBean(singleton, JMXBaseName + AgentServer.getServerId(), "type=Connections");
       } catch (Exception e) {
         logger.log(BasicLevel.DEBUG, "registerMBean", e);
       }

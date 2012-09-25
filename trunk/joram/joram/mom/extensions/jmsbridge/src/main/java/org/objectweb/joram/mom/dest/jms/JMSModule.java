@@ -342,7 +342,7 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
   private String getMBeanName() {
     StringBuilder strbuf = new StringBuilder();
 
-    strbuf.append("BridgeJMS#").append(AgentServer.getServerId());
+    strbuf.append(JMSConnectionService.JMXBaseName).append(AgentServer.getServerId());
     strbuf.append(':');
     strbuf.append("type=Connections,name=").append(name);
 
