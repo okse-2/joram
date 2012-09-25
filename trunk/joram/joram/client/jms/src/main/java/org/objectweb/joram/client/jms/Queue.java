@@ -120,7 +120,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	}
 
 	/**
-	 * Admin method creating and deploying a queue on the local server. 
+	 * Administration method creating and deploying a queue on the local server. 
 	 * <p>
 	 * The request fails if the destination deployment fails server side.
 	 * <p>
@@ -134,7 +134,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	}
 
 	/**
-	 * Admin method creating and deploying a queue on a given server.
+	 * Administration method creating and deploying a queue on a given server.
 	 * <p>
 	 * The request fails if the target server does not belong to the platform,
 	 * or if the destination deployment fails server side.
@@ -151,7 +151,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	}
 
 	/**
-	 * Admin method creating and deploying (or retrieving) a queue on the
+	 * Administration method creating and deploying (or retrieving) a queue on the
 	 * local server. First a destination with the specified name is searched
 	 * on the given server, if it does not exist it is created. In any case,
 	 * its provider-specific address is returned.
@@ -173,7 +173,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	}
 
 	/**
-	 * Admin method creating and deploying (or retrieving) a queue on a given
+	 * Administration method creating and deploying (or retrieving) a queue on a given
 	 * server with a given name. First a destination with the specified name is
 	 * searched on the given server, if it does not exist it is created. In any
 	 * case, its provider-specific address is returned.
@@ -195,7 +195,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	}
 
 	/**
-	 * Admin method creating and deploying a queue on a given server.
+	 * Administration method creating and deploying a queue on a given server.
 	 * It creates a Joram's standard queue.
 	 * <p>
 	 * The request fails if the target server does not belong to the platform,
@@ -215,7 +215,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	}
 
 	/**
-	 * Admin method creating and deploying a queue on a given server.
+	 * Administration method creating and deploying a queue on a given server.
 	 * <p>
 	 * The request fails if the target server does not belong to the platform,
 	 * or if the destination deployment fails server side.
@@ -236,7 +236,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	}
 
 	/**
-	 *  Admin method creating and deploying (or retrieving) a queue on a
+	 *  Administration method creating and deploying (or retrieving) a queue on a
 	 * given server. First a destination with the specified name is searched
 	 * on the given server, if it does not exist it is created. In any case,
 	 * its provider-specific address is returned.
@@ -264,7 +264,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	}
 
 	/**
-	 * Admin method setting or unsetting the threshold for this queue.
+	 * Administration method setting or unsetting the threshold for this queue.
 	 * <p>
 	 * The request fails if the queue is deleted server side.
 	 *
@@ -294,7 +294,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	}
 
 	/**
-	 * Admin method setting nbMaxMsg for this queue.
+	 * Administration method setting nbMaxMsg for this queue.
 	 * <p>
 	 * The request fails if the queue is deleted server side.
 	 *
@@ -322,7 +322,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	}
 	
 	/**
-   * Admin method setting syncExceptionOnFull for this queue.
+   * Administration method setting syncExceptionOnFull for this queue.
    * <p>
    * The request fails if the queue is deleted server side.
    *
