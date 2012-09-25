@@ -1230,7 +1230,7 @@ public class AdminWrapper implements AdminItf {
   }
   
   /**
-   * Removes the live connection to the specified AMQP server.
+   * Removes the live connection to the specified JMS server.
    * 
    * @param serverId the serverId
    * @param names the name identifying the server or list of name separate by space
