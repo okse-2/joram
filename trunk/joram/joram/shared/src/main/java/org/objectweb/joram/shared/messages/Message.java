@@ -128,6 +128,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
   /**
    * The client message type: SIMPLE, TEXT, OBJECT, MAP, STREAM, BYTES, ADMIN.
    * By default, the message type is SIMPLE.
+   * Be careful, this type is coded on 4 bits (see writeTo and readFrom methods).
    */
   public transient int type = SIMPLE;
 
@@ -140,6 +141,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
   /**
    * The message priority from 0 to 9, 9 being the highest.
    * By default, the priority is 4.
+   * Be careful, this type is coded on 4 bits (see writeTo and readFrom methods).
    */
   public transient int priority = DEFAULT_PRIORITY;
  
@@ -463,6 +465,10 @@ public final class Message implements Cloneable, Serializable, Streamable {
     StreamUtil.writeTo(s, os);
     
     if (type != SIMPLE) { StreamUtil.writeTo(type, os); }
+//    if ((type != SIMPLE) || (priority != DEFAULT_PRIORITY)) {
+//      byte b = (byte) (((priority << 4) & 0xF0) | (type & 0x0F));
+//      StreamUtil.writeTo(b, os);
+//    }
     if (replyToId != null) { StreamUtil.writeTo(replyToId, os); }
     if (replyToType != 0) { StreamUtil.writeTo(replyToType, os); }
     if (properties != null) { StreamUtil.writeTo(properties, os); }
@@ -493,6 +499,14 @@ public final class Message implements Cloneable, Serializable, Streamable {
     short s = StreamUtil.readShortFrom(is);
 
     if ((s & typeFlag) != 0) { type = StreamUtil.readIntFrom(is); }
+//    if ((s & (typeFlag|priorityFlag)) != 0) {
+//      byte b = StreamUtil.readByteFrom(is);
+//      type = b & 0x0F;
+//      priority = (b >> 4) & 0xF0;
+//    } else {
+//      type = SIMPLE;
+//      priority = DEFAULT_PRIORITY;
+//    }
     if ((s & replyToIdFlag) != 0) { replyToId = StreamUtil.readStringFrom(is); }
     if ((s & replyToTypeFlag) != 0) { replyToType = StreamUtil.readByteFrom(is); }
     if ((s & propertiesFlag) != 0) { properties = StreamUtil.readPropertiesFrom(is); }
