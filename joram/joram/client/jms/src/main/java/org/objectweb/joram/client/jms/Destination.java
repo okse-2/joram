@@ -359,14 +359,46 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     return (this instanceof javax.jms.Topic);
   }
 
+  /**
+   * Constant defining the implementation class for a classic Queue.
+   */
   public static final String QUEUE = "org.objectweb.joram.mom.dest.Queue";
+  /**
+   * Constant defining the implementation class for a classic Topic.
+   */ 
   public static final String TOPIC = "org.objectweb.joram.mom.dest.Topic";
+  /**
+   * Constant defining the implementation class for a Dead Message Queue. 
+   * @deprecated Since Joram 5.2.2 the DeadMQueue is a simple Queue. 
+   */
   public static final String DEAD_MQUEUE = "org.objectweb.joram.mom.dest.Queue";
+  /**
+   * Constant defining the implementation class for a clustered Queue. 
+   */
   public static final String CLUSTER_QUEUE = "org.objectweb.joram.mom.dest.ClusterQueue";
+  /**
+   * Constant defining the implementation class for a scheduled Queue.
+   */
   public static final String SCHEDULER_QUEUE = "com.scalagent.joram.mom.dest.scheduler.SchedulerQueue";
+  /**
+   * Constant defining the implementation class for a Queue allowing to collect data from
+   * external sources. The nature of data collector is configurable through properties.
+   */
   public static final String ACQUISITION_QUEUE = "org.objectweb.joram.mom.dest.AcquisitionQueue";
+  /**
+   * Constant defining the implementation class for a Queue allowing to forward data to
+   * external targets. The nature of data forwarder is configurable through properties.
+   */
   public static final String DISTRIBUTION_QUEUE = "org.objectweb.joram.mom.dest.DistributionQueue";
+  /**
+   * Constant defining the implementation class for a Topic allowing to collect data from
+   * external sources. The nature of data collector is configurable through properties.
+   */
   public static final String ACQUISITION_TOPIC = "org.objectweb.joram.mom.dest.AcquisitionTopic";
+  /**
+   * Constant defining the implementation class for a Queue allowing to forward data to
+   * external targets. The nature of data forwarder is configurable through properties.
+   */
   public static final String DISTRIBUTION_TOPIC = "org.objectweb.joram.mom.dest.DistributionTopic";
   
   /**
