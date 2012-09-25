@@ -2568,7 +2568,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
             setCtx(sub.getContextId());
             activeCtx.removeSubName(name);
             doReply(new MomExceptionReply(rep.getCorrelationId(), exc));
-          } catch (StateException pExc) {}
+          } catch (StateException pExc) {
+            // The context is lost: nothing to do.
+          }
         }
         return;
       }
@@ -2577,7 +2579,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     try {
       setCtx(rep.getClientContext());
       doReply(new MomExceptionReply(rep.getCorrelationId(), exc));
-    } catch (StateException pExc) {}
+    } catch (StateException pExc) {
+      // The context is lost: nothing to do.
+    }
   }
   
   private String getSubMBeanName(String name) {
@@ -2637,7 +2641,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
           setCtx(sub.getContextId());
           activeCtx.removeSubName(name);
           doReply(new MomExceptionReply(sub.getSubRequestId(), exc));
-        } catch (StateException pExc) {}
+        } catch (StateException pExc) {
+          // The context is lost: nothing to do.
+        }
       }
       return;
     }
@@ -2694,7 +2700,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         } catch (StateException se) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "", se);          
-          // Do nothing (the contexte doesn't exist any more).
+          // Do nothing (the context doesn't exist any more).
         }
       }
       if (logger.isLoggable(BasicLevel.INFO))
