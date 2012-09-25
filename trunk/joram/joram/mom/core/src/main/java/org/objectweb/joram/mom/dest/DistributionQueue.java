@@ -247,11 +247,31 @@ public class DistributionQueue extends Queue {
   protected void postProcess(ClientMessages msgs) {
     super.postProcess(msgs);
     if (distributionDaemon != null) {
-    	if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "DistributionQueue postProcess(...)");
-    	List ackList = distributionDaemon.getAckList();
-    	if (ackList != null)
-    		removeMessages(ackList);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "DistributionQueue.postProcess(...)");
+      List ackList = distributionDaemon.getAckList();
+      if (ackList != null) {
+        // Bug fix (JORAM-74): delete anew the forwarded messages
+        // Replaces the call to removeMessages(ackList) by a similar code deleting the
+        // related messages.
+        String id = null;
+        Iterator itMessages = ackList.iterator();
+        while (itMessages.hasNext()) {
+          id = (String) itMessages.next();
+          int i = 0;
+          org.objectweb.joram.mom.messages.Message message = null;
+          while (i < messages.size()) {
+            message = (org.objectweb.joram.mom.messages.Message) messages.get(i);
+            if (id.equals(message.getId())) {
+              messages.remove(i);
+              message.delete();
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "DistributionQueue.postProcess removes " + id);
+              break;
+            }
+          }
+        }
+      }
     }
   }
   
@@ -272,8 +292,28 @@ public class DistributionQueue extends Queue {
     // delete the ackQueue
     if (distributionDaemon != null) {
     	List ackList = distributionDaemon.getAckList();
-    	if (ackList != null)
-    		removeMessages(ackList);
+    	if (ackList != null) {
+    	  // Bug fix (JORAM-74): delete anew the forwarded messages
+    	  // Replaces the call to removeMessages(ackList) by a similar code deleting the
+    	  // related messages.
+    	  String id = null;
+    	  Iterator itMessages = ackList.iterator();
+    	  while (itMessages.hasNext()) {
+    	    id = (String) itMessages.next();
+    	    int i = 0;
+    	    org.objectweb.joram.mom.messages.Message message = null;
+    	    while (i < messages.size()) {
+    	      message = (org.objectweb.joram.mom.messages.Message) messages.get(i);
+    	      if (id.equals(message.getId())) {
+    	        messages.remove(i);
+    	        message.delete();
+    	        if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot removes " + id);
+    	        break;
+    	      }
+    	    }
+    	  }
+    	}
     }
     
     for (Iterator ite = messages.iterator(); ite.hasNext();) {
