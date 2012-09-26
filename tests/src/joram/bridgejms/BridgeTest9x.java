@@ -44,7 +44,7 @@ import framework.TestCase;
  * Test: Test the bridge behavior during stop / restart of Joram server.
  *  - Sends 50 messages on foreign server.
  *  - Stops the Joram server during sending, then restarts it.
- *  - Receives the messages.
+ *  - Receives the messages through a JMS AcquisitionQueue.
  */
 public class BridgeTest9x extends TestCase {
   public static void main(String[] args) {

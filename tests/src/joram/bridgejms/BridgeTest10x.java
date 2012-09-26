@@ -42,10 +42,10 @@ import org.objectweb.joram.mom.dest.jms.JMSDistribution;
 import framework.TestCase;
 
 /**
- * Test: Use 2 bridge queues to send and receive messages through a foreign queue.
- *  - Sends 50 messages on foreign server.
+ * Test: Test the bridge behavior during stop / restart of Joram server.
+ *  - Sends 50 messages through a JMS DistributionQueue.
  *  - Stops the Joram server during sending, then restarts it.
- *  - Receives the messages.
+ *  - Receives the sent messages.
  */
 public class BridgeTest10x extends TestCase {
   public static void main(String[] args) {
