@@ -42,7 +42,7 @@ public interface PoolNetworkMBean extends NetworkMBean {
   public int getNbActiveSession();
 
   /**
-   * Gets the maximum idle period permitted before reseting the connection.
+   * Gets the number of waiting messages to send for this session.
    *
    * @return	the number of waiting messages.
    */

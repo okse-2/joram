@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France-Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -192,7 +192,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
                                          String identityClassName) throws Exception {
     Identity identity = null;
     try {
-    	Class<?> clazz = Class.forName(identityClassName);
+    	Class clazz = Class.forName(identityClassName);
     	identity = (Identity) clazz.newInstance();
     	if (adminPassword != null)
         identity.setIdentity(adminName, adminPassword);

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -128,7 +128,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
   /**
    * The client message type: SIMPLE, TEXT, OBJECT, MAP, STREAM, BYTES, ADMIN.
    * By default, the message type is SIMPLE.
-   * Be careful, this type is coded on 4 bits (see writeTo and readFrom methods).
    */
   public transient int type = SIMPLE;
 
@@ -140,8 +139,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
 
   /**
    * The message priority from 0 to 9, 9 being the highest.
-   * By default, the priority is 4.
-   * Be careful, this type is coded on 4 bits (see writeTo and readFrom methods).
+   * By default, the priority is 4?
    */
   public transient int priority = DEFAULT_PRIORITY;
  
@@ -415,6 +413,17 @@ public final class Message implements Cloneable, Serializable, Streamable {
     }
   }
 
+  public Hashtable soapCode() {
+    Hashtable h = new Hashtable();
+    // AF: TODO
+    return h;
+  }
+
+  public static Message soapDecode(Hashtable h) {
+    // AF: TODO
+    return null;
+  }
+
   private static final short typeFlag = 0x0001;
   private static final short replyToIdFlag = 0x0002;
   private static final short replyToTypeFlag = 0x0004;
@@ -465,10 +474,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
     StreamUtil.writeTo(s, os);
     
     if (type != SIMPLE) { StreamUtil.writeTo(type, os); }
-//    if ((type != SIMPLE) || (priority != DEFAULT_PRIORITY)) {
-//      byte b = (byte) (((priority << 4) & 0xF0) | (type & 0x0F));
-//      StreamUtil.writeTo(b, os);
-//    }
     if (replyToId != null) { StreamUtil.writeTo(replyToId, os); }
     if (replyToType != 0) { StreamUtil.writeTo(replyToType, os); }
     if (properties != null) { StreamUtil.writeTo(properties, os); }
@@ -477,6 +482,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
     if (correlationId != null) { StreamUtil.writeTo(correlationId, os); }
     if (deliveryCount != 0) { StreamUtil.writeTo(deliveryCount, os); }
     if (jmsType != null) { StreamUtil.writeTo(jmsType, os); }
+
   }
 
   /**
@@ -499,18 +505,9 @@ public final class Message implements Cloneable, Serializable, Streamable {
     short s = StreamUtil.readShortFrom(is);
 
     if ((s & typeFlag) != 0) { type = StreamUtil.readIntFrom(is); }
-//    if ((s & (typeFlag|priorityFlag)) != 0) {
-//      byte b = StreamUtil.readByteFrom(is);
-//      type = b & 0x0F;
-//      priority = (b >> 4) & 0xF0;
-//    } else {
-//      type = SIMPLE;
-//      priority = DEFAULT_PRIORITY;
-//    }
     if ((s & replyToIdFlag) != 0) { replyToId = StreamUtil.readStringFrom(is); }
     if ((s & replyToTypeFlag) != 0) { replyToType = StreamUtil.readByteFrom(is); }
     if ((s & propertiesFlag) != 0) { properties = StreamUtil.readPropertiesFrom(is); }
-    priority = DEFAULT_PRIORITY;
     if ((s & priorityFlag) != 0) { priority = StreamUtil.readIntFrom(is); }
     if ((s & expirationFlag) != 0) { expiration = StreamUtil.readLongFrom(is); }
     if ((s & corrrelationIdFlag) != 0) { correlationId = StreamUtil.readStringFrom(is); }
@@ -518,6 +515,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
     if ((s & jmsTypeFlag) != 0) { jmsType = StreamUtil.readStringFrom(is); }
     redelivered = (s & redeliveredFlag) != 0;
     persistent = (s & persistentFlag) != 0;
+
   }
 
   /**

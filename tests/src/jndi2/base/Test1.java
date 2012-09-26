@@ -73,7 +73,7 @@ public class Test1 extends TestCase {
       properties.put("java.naming.factory.host", "localhost");
       properties.put("java.naming.factory.port", "16600");
     
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.NTransaction" });
 
       Thread.sleep(1000);
@@ -194,7 +194,7 @@ public class Test1 extends TestCase {
         
       Thread.sleep(1000);
       
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.ATransaction" });
       
       Thread.sleep(1000);
@@ -262,7 +262,7 @@ public class Test1 extends TestCase {
         
       Thread.sleep(1000);
       
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.NTransaction" });
       
       Thread.sleep(1000);

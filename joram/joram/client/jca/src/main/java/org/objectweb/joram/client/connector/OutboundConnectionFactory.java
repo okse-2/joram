@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -30,9 +30,6 @@ import javax.naming.Reference;
 import javax.resource.spi.ConnectionManager;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>OutboundConnectionFactory</code> instance is used for
@@ -43,8 +40,6 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
                                                   javax.resource.Referenceable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-  
-  public static Logger logger = Debug.getLogger(OutboundConnectionFactory.class.getName());
   
   /** Central manager for outbound connectivity. */
   protected ManagedConnectionFactoryImpl mcf;
@@ -64,8 +59,9 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
   OutboundConnectionFactory(ManagedConnectionFactoryImpl mcf,
                             ConnectionManager cxManager) {
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "OutboundConnectionFactory(" + mcf + 
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundConnectionFactory(" + mcf + 
                                     ", " + cxManager + ")");
 
     this.mcf = mcf;
@@ -88,10 +84,10 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
    */
   public javax.jms.Connection createConnection() 
     throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createConnection()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnection()");
 
-    return createConnection(mcf.getUserName(), mcf.getPassword());
+    return createConnection(mcf.userName, mcf.password);
   }
 
   /**
@@ -107,26 +103,24 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
       createConnection(String userName, String password)
     throws JMSException {
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createConnection(" + userName + 
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createConnection(" + userName + 
                                     ", " + password + ")");
 
     try {
-      ConnectionRequest cxRequest = null;
-      if (mcf instanceof ManagedQueueConnectionFactoryImpl)
-        cxRequest = new QueueConnectionRequest(userName, password, mcf.getIdentityClass());
-      else if (mcf instanceof ManagedTopicConnectionFactoryImpl)
-        cxRequest = new TopicConnectionRequest(userName, password, mcf.getIdentityClass());
-      else
-        cxRequest = new ConnectionRequest(userName, password, mcf.getIdentityClass());
+      ConnectionRequest cxRequest =
+        new ConnectionRequest(userName, password, mcf.getIdentityClass());
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + " createConnection cxManager = " + cxManager);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                      this + " createConnection cxManager = " + cxManager);
 
       Object o = cxManager.allocateConnection(mcf, cxRequest);
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + " createConnection connection = " + o);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                      this + " createConnection connection = " + o);
 
       return (javax.jms.Connection) o;
     } catch (javax.resource.spi.SecurityException exc) {

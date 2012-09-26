@@ -1,9 +1,5 @@
 <?xml version="1.0"?>
 <JoramAdmin>
-  <AdminModule>
-    <collocatedConnect name="root" password="root"/>
-  </AdminModule>
-  
   <Queue name="anotherQueue">
     <freeReader/>
     <freeWriter/>

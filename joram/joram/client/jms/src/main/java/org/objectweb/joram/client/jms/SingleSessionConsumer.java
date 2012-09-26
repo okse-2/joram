@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -40,11 +40,10 @@ public class SingleSessionConsumer extends MessageConsumerListener {
   SingleSessionConsumer(boolean queueMode,
                         boolean durable,
                         String selector,
-                        String destName,
                         String targetName,
                         Session session,
                         MessageListener listener) {
-    super(queueMode, durable, selector, destName, targetName,
+    super(queueMode, durable, selector, targetName,
           listener,
           session.getQueueMessageReadMax(),
           session.getTopicActivationThreshold(),

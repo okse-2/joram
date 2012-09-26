@@ -33,9 +33,8 @@ import org.objectweb.joram.shared.messages.Message;
 public interface ReliableTransmitter {
 
   /**
-   * Transmits a message to the MOM in a reliable way: if the message is
-   * persistent it has been persisted when the method returns and therefore
-   * can be safely acknowledged.
+   * Transmits a message to the MOM in a reliable way: message has been
+   * persisted when the method returns and therefore can be safely acknowledged.
    * The message ID is used to avoid duplicates if a server crash happens right
    * after transmitting the message and before it has been acknowledged. It can
    * be <code>null</code> if such duplicates are tolerated.
@@ -48,18 +47,17 @@ public interface ReliableTransmitter {
   public void transmit(Message message, String messageId);
 
   /**
-   * Transmits a list of messages to the MOM in a reliable way: if persistent
-   * is set to true the messages have been persisted when the method returns and
-   * therefore can be safely acknowledged.
-   * The ID is used to avoid duplicates if a server crash happens right after
-   * transmitting the messages and before they have been acknowledged. It can be
-   * <code>null</code> if such duplicates are tolerated.
+   * Transmits a list of messages to the MOM in a reliable way: messages have
+   * been persisted when the method returns and therefore can be safely
+   * acknowledged. The ID is used to avoid duplicates if a server crash happens
+   * right after transmitting the messages and before they have been
+   * acknowledged. It can be <code>null</code> if such duplicates are tolerated.
    * 
    * @param messages
    *          the messages to transmit
    * @param messagesId
    *          a unique ID for the list of transmitted messages.
    */
-  public void transmit(List messages, boolean persistent, String messagesId);
+  public void transmit(List messages, String messagesId);
 
 }

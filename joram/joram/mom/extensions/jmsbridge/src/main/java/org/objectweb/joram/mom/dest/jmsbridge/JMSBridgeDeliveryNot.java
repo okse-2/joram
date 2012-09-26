@@ -30,7 +30,6 @@ import org.objectweb.joram.shared.messages.Message;
  * A <code>BridgeDeliveryNot</code> notification carries a message obtained
  * by a JMS module from a foreign JMS server.
  */
-@Deprecated
 public class JMSBridgeDeliveryNot extends fr.dyade.aaa.agent.Notification {
   /**
    * 

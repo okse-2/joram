@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -29,9 +29,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
 import javax.jms.IllegalStateException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
@@ -44,7 +41,8 @@ import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.PingRequest;
 import org.objectweb.joram.shared.client.SessDenyRequest;
-import org.objectweb.joram.shared.excepts.MomException;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
 
@@ -269,26 +267,6 @@ public class RequestMultiplexer {
     }
     requestsTable.clear();
   }
-  
-  public void replyAllError(MomExceptionReply exc) {
-    // Create first a copy of the current keys
-    // registered into the requests table.
-    Integer[] requestIds;
-    synchronized (requestsTable) {
-      Set keySet = requestsTable.keySet();
-      requestIds = new Integer[keySet.size()];
-      keySet.toArray(requestIds);
-    }
-    for (int i = 0; i < requestIds.length; i++) {
-      ReplyListener rl = (ReplyListener) requestsTable.get(requestIds[i]);
-      // The listener may be null because the table
-      // may have been modified meanwhile.
-      if (rl != null) {
-      	rl.errorReceived(requestIds[i].intValue(), exc);
-      }
-    }
-    requestsTable.clear();
-  }
 
   /**
    * Not synchronized because it would possibly
@@ -437,7 +415,7 @@ public class RequestMultiplexer {
       // The real name is set later when
       // the proxy id and connection id are known
       // see setDemultiplexerDaemonName()
-      super("Connection#?", logger);
+      super("Connection#?");
     }
 
     public void run() {
@@ -456,10 +434,7 @@ public class RequestMultiplexer {
             // of a closure or at the same time as an independant
             // close call).
             if (! isClosed()) {
-            	replyAllError(new MomExceptionReply(new MomException(exc.getMessage())));
-            	
-            	RequestMultiplexer.this.close();
-            	
+              RequestMultiplexer.this.close();
               // The connection close() must be
               // called by another thread. Calling it with
               // this thread (demultiplexer daemon) could
@@ -521,6 +496,7 @@ public class RequestMultiplexer {
         if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN, "Error during close", exc2);
       }
+      
       onException(exc);
     }
   }

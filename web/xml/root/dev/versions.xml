@@ -11,28 +11,6 @@
   </properties>
 
 	<body>
-		<s1 name="September 14, 2011: JORAM 5.7.0 release is available.">
-			<p>Joram 5.7.0 is available in the SVN repository with tag JORAM_5_6_0.</p>
-			<s2 name="New features and improvements">
-				<ul>
-					<li>A new JMS bridge component using a connection pool similarly to the
-					AMQP bridge.</li>
-        	<li>Get/set DMQ settings individually for user susbcriptions.</li>
-					<li>Persistent handling of transaction properties and enhancements in
-					NGTransaction component.</li>
-					<li>A new AliasQueue destination forwarding messages to a remote Joram
-					destination.</li>
-				</ul>
-			</s2>
-
-			<s2 name="Bug fixes">
-				<ul>
-					<li>Avoid multiples deallocation in Xoram.</li>
-					<li>Update Xoram message to fit the updated Joram one.</li>
-					<li>Potential encoding issue with TextMessage.</li>
-				</ul>
-			</s2>
-		</s1>
 
 		<s1 name="July 13, 2011: JORAM 5.6.0 release is available.">
 			<p>Joram 5.6.0 is available in the SVN repository with tag JORAM_5_6_0.</p>

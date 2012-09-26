@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -47,7 +47,8 @@ import fr.dyade.aaa.common.Queue;
 public class MultiSessionConsumer extends MessageConsumerListener
   implements javax.jms.ConnectionConsumer{
   
-  private static final Logger logger = Debug.getLogger(MultiSessionConsumer.class.getName());
+  private static final Logger logger = 
+    Debug.getLogger(MultiSessionConsumer.class.getName());
   
   private ServerSessionPool sessPool;
   
@@ -79,7 +80,6 @@ public class MultiSessionConsumer extends MessageConsumerListener
       boolean queueMode,
       boolean durable,
       String selector,
-      String destName,
       String targetName,
       ServerSessionPool sessionPool,
       int queueMessageReadMax, 
@@ -88,7 +88,7 @@ public class MultiSessionConsumer extends MessageConsumerListener
       RequestMultiplexer reqMultiplexer,
       Connection connection,
       int maxMessages) {
-    super(queueMode, durable, selector, destName, targetName, 
+    super(queueMode, durable, selector, targetName, 
         null, queueMessageReadMax,
         topicActivationThreshold,
         topicPassivationThreshold, topicAckBufferMax,
@@ -96,7 +96,7 @@ public class MultiSessionConsumer extends MessageConsumerListener
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MultiSessionConsumer.<init>(" +
           queueMode + ',' + durable + ',' + selector + ',' + 
-          destName + ',' + targetName + ',' + sessionPool + ',' +
+          targetName + ',' + sessionPool + ',' +
           queueMessageReadMax + ',' +
           topicActivationThreshold + ',' + topicPassivationThreshold + ',' +
           topicAckBufferMax + ',' + 
@@ -179,7 +179,7 @@ public class MultiSessionConsumer extends MessageConsumerListener
   class MessageDispatcher extends Daemon {
     
     MessageDispatcher(String name) {
-      super(name, logger);
+      super(name);
     }
 
     /* (non-Javadoc)

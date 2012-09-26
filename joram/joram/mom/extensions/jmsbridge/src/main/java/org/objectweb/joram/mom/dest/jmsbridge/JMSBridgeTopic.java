@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -51,7 +51,6 @@ import fr.dyade.aaa.agent.Notification;
  * This topic is in fact a bridge linking JORAM and a foreign JMS server, and
  * which is accessible through the Pub/Sub communication mode.
  */
-@Deprecated
 public class JMSBridgeTopic extends Topic {
 
   /** define serialVersionUID for interoperability */
@@ -171,7 +170,7 @@ public class JMSBridgeTopic extends Topic {
   private void bridgeDeliveryNot(AgentId from, JMSBridgeDeliveryNot not) {
     ClientMessages clientMessages = new ClientMessages();
     clientMessages.addMessage(not.getMessage());
-    super.doClientMessages(getId(), clientMessages, false);
+    super.doClientMessages(getId(), clientMessages);
   }
 
   /**
@@ -237,12 +236,12 @@ public class JMSBridgeTopic extends Topic {
       message = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
       message.order = arrivalsCounter++;
 
-      outTable.put(message.getId(), message);
+      outTable.put(message.getIdentifier(), message);
 
       try {
         jmsModule.send(message.getFullMessage());
       } catch (Exception exc) {
-        outTable.remove(message.getId());
+        outTable.remove(message.getIdentifier());
         if (dmqManager == null) {
           dmqManager = new DMQManager(dmqId, getId());
         }
@@ -274,12 +273,12 @@ public class JMSBridgeTopic extends Topic {
     for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
       message = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
       message.order = arrivalsCounter++;
-      outTable.put(message.getId(), message);
+      outTable.put(message.getIdentifier(), message);
 
       try {
         jmsModule.send(message.getFullMessage());
       } catch (Exception exc) {
-        outTable.remove(message.getId());
+        outTable.remove(message.getIdentifier());
         if (dmqManager == null) {
           dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
         }

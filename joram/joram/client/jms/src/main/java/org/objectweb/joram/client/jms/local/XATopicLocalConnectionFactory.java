@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -68,7 +68,7 @@ public class XATopicLocalConnectionFactory extends org.objectweb.joram.client.jm
   }
 
   /**
-   * Administration method creating a <code>javax.jms.XATopicConnectionFactory</code>
+   * Admin method creating a <code>javax.jms.XATopicConnectionFactory</code>
    * instance for creating local connections.
    */ 
   public static javax.jms.XATopicConnectionFactory create() {

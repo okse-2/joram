@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -244,7 +244,7 @@ public class NGNetwork extends StreamNetwork {
 
   final class Dispatcher extends Daemon {
     Dispatcher(String name, Logger logmon) {
-      super(name + ".dispatcher", logmon);
+      super(name + ".dispatcher");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
     }
@@ -288,7 +288,7 @@ public class NGNetwork extends StreamNetwork {
 
   final class NetServer extends Daemon {
     NetServer(String name, Logger logmon) throws IOException {
-      super(name + ".NetServer", logmon);
+      super(name + ".NetServer");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
 
@@ -354,12 +354,12 @@ public class NGNetwork extends StreamNetwork {
 
           // Get list of selection keys with pending events, then process
           // each key
-          Set<SelectionKey> keys = selector.selectedKeys();
-          for(Iterator<SelectionKey> it = keys.iterator(); it.hasNext(); ) {
+          Set keys = selector.selectedKeys();
+          for(Iterator it = keys.iterator(); it.hasNext(); ) {
             if (! running) break;
 
             // Get the selection key
-            SelectionKey key = it.next();
+            SelectionKey key = (SelectionKey) it.next();
             // Remove it from the list to indicate that it is being processed
             it.remove();
 
@@ -368,7 +368,11 @@ public class NGNetwork extends StreamNetwork {
                          getName() + "(1): " + key + " -> " + key.interestOps());
 
             logmon.log(BasicLevel.DEBUG,
-                       getName() + ":" + key.isValid() + key.isAcceptable() + key.isReadable() + key.isWritable());
+                       getName() + ":" +
+                       key.isValid() +
+                       key.isAcceptable() +
+                       key.isReadable() +
+                       key.isWritable());
             try {
               // Check if it's a connection request
               if (key.isAcceptable()) {
@@ -401,7 +405,7 @@ public class NGNetwork extends StreamNetwork {
                     logmon.log(BasicLevel.DEBUG, getName() + " writable");
                   cnx.write();
                 } else  if (cnx.sendlist.size() > 0) {
-//                  logmon.log(BasicLevel.FATAL, getName() + " force");
+                  logmon.log(BasicLevel.FATAL, getName() + " force");
                   key.interestOps(key.channel().validOps());
                 }
               }
@@ -421,7 +425,7 @@ public class NGNetwork extends StreamNetwork {
           }
         }
       } catch (Throwable exc) {
-        logmon.log(BasicLevel.FATAL, getName() + "Unrecoverable error", exc);
+        logmon.log(BasicLevel.FATAL, getName(), exc);
       }
     }
   }
@@ -1144,7 +1148,7 @@ public class NGNetwork extends StreamNetwork {
     }
 
     public synchronized Message nextMessage() {
-//      logmon.log(BasicLevel.FATAL, getName() + ", nextMessage:" + toString());
+      logmon.log(BasicLevel.FATAL, getName() + ", nextMessage:" + toString());
 
       if ((current +1) < elementCount)
         return elementData[++current];
@@ -1172,7 +1176,7 @@ public class NGNetwork extends StreamNetwork {
      * @param   msg   the component to be added.
      */
     public synchronized void addMessage(Message msg) {
-//      logmon.log(BasicLevel.FATAL, getName() + ", addMessage:" + toString());
+      logmon.log(BasicLevel.FATAL, getName() + ", addMessage:" + toString());
 
       if ((elementCount + 1) > elementData.length) {
         Message oldData[] = elementData;
@@ -1183,7 +1187,7 @@ public class NGNetwork extends StreamNetwork {
     }
 
     public synchronized void removeCurrent() {
-//      logmon.log(BasicLevel.FATAL, getName() + ", removeCurrent:" + toString());
+      logmon.log(BasicLevel.FATAL, getName() + ", removeCurrent:" + toString());
 
       if (elementCount > (current +1)) {
         System.arraycopy(elementData, current +1,
@@ -1204,7 +1208,7 @@ public class NGNetwork extends StreamNetwork {
     public synchronized Message removeMessage(int stamp) {
       Message msg = null;
 
-//      logmon.log(BasicLevel.FATAL, getName() + ", removeMessage:" + toString());
+      logmon.log(BasicLevel.FATAL, getName() + ", removeMessage:" + toString());
 
       for (int index=0 ; index<elementCount ; index++) {
         msg = elementData[index];

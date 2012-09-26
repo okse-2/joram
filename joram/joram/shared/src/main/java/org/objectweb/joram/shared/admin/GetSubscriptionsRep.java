@@ -36,21 +36,17 @@ public class GetSubscriptionsRep extends AdminReply {
   private String[] topicIds;
 
   private int[] messageCounts;
-  
-  private int[] ackCounts;
 
   private boolean[] durable;
 
   public GetSubscriptionsRep(String[] subNames,
                              String[] topicIds,
                              int[] messageCounts,
-                             int[] ackCounts,
                              boolean[] durable) {
     super(true, null);
     this.subNames = subNames;
     this.topicIds = topicIds;
     this.messageCounts = messageCounts;
-    this.ackCounts = ackCounts;
     this.durable = durable;
   }
 
@@ -67,10 +63,6 @@ public class GetSubscriptionsRep extends AdminReply {
   public final int[] getMessageCounts() {
     return messageCounts;
   }
-  
-  public final int[] getDeliveredMessageCount() {
-    return ackCounts;
-  }
 
   public final boolean[] getDurable() {
     return durable;
@@ -85,7 +77,6 @@ public class GetSubscriptionsRep extends AdminReply {
     subNames = StreamUtil.readArrayOfStringFrom(is);
     topicIds = StreamUtil.readArrayOfStringFrom(is);
     messageCounts = StreamUtil.readArrayOfIntFrom(is);
-    ackCounts = StreamUtil.readArrayOfIntFrom(is);
     durable = StreamUtil.readArrayOfBooleanFrom(is);
   }
 
@@ -94,7 +85,6 @@ public class GetSubscriptionsRep extends AdminReply {
     StreamUtil.writeArrayOfStringTo(subNames, os);
     StreamUtil.writeArrayOfStringTo(topicIds, os);
     StreamUtil.writeArrayOfIntTo(messageCounts, os);
-    StreamUtil.writeArrayOfIntTo(ackCounts, os);
     StreamUtil.writeArrayOfBooleanTo(durable, os);
   }
 }

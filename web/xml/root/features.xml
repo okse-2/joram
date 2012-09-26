@@ -406,27 +406,6 @@
 
 			</s2>
 
-			<s2 name="Performances">
-
-				<p>JORAM performances are dependent on the target architecture: hardware (CPU, Memory, Disk),
-				network, operating system and JVM.<br></br>
-				They also differ depending on many factors:</p>
-				<ul>
-					<li>the type of JMS destination used: Queue or Topic,</li>
-					<li>the communication link between the client and the server: In-VM, TCP, etc</li>
-					<li>the quality of service requested and the size of messages,</li>
-					<li>the number of clients: producers and consumers.</li>
-				</ul>
-				<p>When running the JORAM server on a laptop (Intel Core i7 1.8Ghz) and a single producer and
-				consumer client in separate VMs on the same box, using a single topic we got around 25,000
-				messages per second using JMS messages with a payload of 500 bytes.<br></br>
-				To obtain an indication of what kind of performance you can expect from JORAM, the distribution
-				includes a set of tests you can run easily on your hardware architecture (a simple tutorial
-				shows the use of these tests <a href="doc/tutorials.html">here</a>).
-				</p>
-
-			</s2>
-
 		</s1>
 	</body>
 </document>

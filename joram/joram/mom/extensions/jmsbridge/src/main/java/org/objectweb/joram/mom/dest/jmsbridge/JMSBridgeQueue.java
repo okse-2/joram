@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -52,7 +52,6 @@ import fr.dyade.aaa.agent.Notification;
  * <p>
  * This queue is in fact a bridge linking JORAM and a foreign JMS server.
  */
-@Deprecated
 public class JMSBridgeQueue extends Queue {
 
   /** define serialVersionUID for interoperability */
@@ -175,9 +174,7 @@ public class JMSBridgeQueue extends Queue {
     clientMessages.addMessage(not.getMessage());
     // it come from bridge, so set destId for from 
     //(do not preProcess this ClientMessage).
-    try {
-      super.doClientMessages(getId(), clientMessages, false);
-    } catch (AccessException e) {/* never happens*/}
+    super.doClientMessages(getId(), clientMessages);
   }
 
   /**
@@ -273,7 +270,7 @@ public class JMSBridgeQueue extends Queue {
       message = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
       message.order = arrivalsCounter++;
 
-      outTable.put(message.getId(), message);
+      outTable.put(message.getIdentifier(), message);
 
       try {
         jmsModule.send(message.getFullMessage());
@@ -282,7 +279,7 @@ public class JMSBridgeQueue extends Queue {
           logger.log(BasicLevel.ERROR,
                      "Failing sending to remote  destination: ", exc);
 
-        outTable.remove(message.getId());
+        outTable.remove(message.getIdentifier());
         DMQManager dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNEXPECTED_ERROR);

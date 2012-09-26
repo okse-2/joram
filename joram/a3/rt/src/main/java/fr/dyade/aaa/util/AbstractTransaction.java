@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -93,7 +93,7 @@ public abstract class AbstractTransaction extends BaseTransaction {
    * the last <code>commit</code>. On commit, its content is added to current
    * log (clog, memory + disk), then it is freed.
    */
-  protected ThreadLocal<Context> perThreadContext = null;
+  protected ThreadLocal perThreadContext = null;
 
   public abstract void initRepository() throws IOException;
 
@@ -126,8 +126,8 @@ public abstract class AbstractTransaction extends BaseTransaction {
     initRepository();
     saveProperties(dir);
     
-    perThreadContext = new ThreadLocal<Context>() {
-      protected synchronized Context initialValue() {
+    perThreadContext = new ThreadLocal() {
+      protected synchronized Object initialValue() {
         return new Context();
       }
     };
@@ -168,7 +168,7 @@ public abstract class AbstractTransaction extends BaseTransaction {
     }
     
     Context() {
-      log = new Hashtable<Object, Operation>(15);
+      log = new Hashtable(15);
       bos = new ByteArrayOutputStream(256);
     }
   }
@@ -250,7 +250,7 @@ public abstract class AbstractTransaction extends BaseTransaction {
   public final void save(Serializable obj,
                          String dirName, String name,
                          boolean first) throws IOException {
-    Context ctx = perThreadContext.get();
+    Context ctx = (Context) perThreadContext.get();
     if (ctx.oos == null) {
       ctx.bos.reset();
       ctx.oos = new ObjectOutputStream(ctx.bos);
@@ -332,7 +332,7 @@ public abstract class AbstractTransaction extends BaseTransaction {
                                   String dirName, String name,
                                   boolean copy,
                                   boolean first) throws IOException {
-    saveInLog(buf, dirName, name, perThreadContext.get().log, copy, first);
+    saveInLog(buf, dirName, name, ((Context) perThreadContext.get()).log, copy, first);
   }
 
   /**

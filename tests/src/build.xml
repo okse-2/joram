@@ -2,85 +2,67 @@
 
 <project default="tests.all" basedir=".">
 
-	<target name="clean" description=" --> launch all tests">
-		<ant dir="a3" antfile="build.xml" target="clean" />
-		<ant dir="jndi2" antfile="build.xml" target="clean" />
-		<ant dir="joram" antfile="build.xml" target="clean" />
-		<ant dir="jms" antfile="build.xml" target="clean" />
-	</target>
+  <target name="tests.all" description=" --> launch all tests">
+    <antcall target="tests.a3.all" />
+    <antcall target="tests.jndi.all" />
+    <antcall target="tests.joram.all" />
+    <antcall target="tests.jms.all" />
+  </target>
 
-	<target name="tests.all" description=" --> launch all tests">
-		<antcall target="tests.a3.all" />
-		<antcall target="tests.jndi.all" />
-		<antcall target="tests.joram.all" />
-		<antcall target="tests.jms.all" />
-	</target>
+  <target name="tests.a3.all" description=" --> launch all A3 tests">
+    <ant dir="a3" antfile="build.xml" target="clean" />
+    <ant dir="a3" antfile="build.xml" target="tests.all" />
+  </target>
 
-	<target name="tests.a3.all" description=" --> launch all A3 tests">
-		<ant dir="a3" antfile="build.xml" target="clean" />
-		<ant dir="a3" antfile="build.xml" target="tests.all" />
-	</target>
+  <target name="tests.jndi.all" description=" --> launch all JNDI tests">
+    <ant dir="jndi2" antfile="build.xml" target="clean" />
+    <ant dir="jndi2" antfile="build.xml" target="tests.all" />
+  </target>
 
-	<target name="tests.jndi.all" description=" --> launch all JNDI tests">
-		<ant dir="jndi2" antfile="build.xml" target="clean" />
-		<ant dir="jndi2" antfile="build.xml" target="tests.all" />
-	</target>
+  <target name="tests.joram.all" description=" --> launch all Joram tests">
+    <ant dir="joram" antfile="build.xml" target="clean" />
+    <ant dir="joram" antfile="build.xml" target="tests.all" />
+  </target>
 
-	<target name="tests.joram.all" description=" --> launch all Joram tests">
-		<ant dir="joram" antfile="build.xml" target="clean" />
-		<ant dir="joram" antfile="build.xml" target="tests.all" />
-	</target>
+  <target name="tests.jms.all"
+          description=" --> launch all JMS compliance tests">
+    <ant dir="jms" antfile="build.xml" target="clean" />
+    <ant dir="jms" antfile="build.xml" target="jms.test" />
+  </target>
 
-	<target name="tests.jms.all" description=" --> launch all JMS compliance tests">
-		<ant dir="jms" antfile="build.xml" target="clean" />
-		<ant dir="jms" antfile="build.xml" target="jms.test" />
-	</target>
+  <target name="tests.task.all" description=" --> launch all task tests">
+    <ant dir="jms" antfile="build.xml" target="clean" />
+    <ant dir="jms" antfile="build.xml" target="tests.all" />
+  </target>
 
-	<target name="tests.noperf.all" description=" --> launch all no perf tests">
-		<!-- ant dir="." antfile="build.xml" target="tests.a3.all" / -->
-		<antcall target="tests.jndi.all" />
-		<antcall target="tests.joram.noperf.all" />
-		<antcall target="tests.jms.all" />
-		<antcall target="check.reports" />
-	</target>
+  <target name="tests.noperf.all" description=" --> launch all no perf tests">
+    <!-- ant dir="." antfile="build.xml" target="tests.a3.all" / -->
+    <antcall target="tests.jndi.all" />
+    <antcall target="tests.joram.noperf.all" />
+    <antcall target="tests.jms.all" />
+    <antcall target="check.reports" />
+  </target>
+  
+  <target name="custom.tests.bamboo" description=" --> Custom set of tests for bamboo.">
+    <ant dir="a3" antfile="build.xml" target="clean" />
+    <ant dir="a3" antfile="build.xml" target="tests.base.osgi" />
+    <antcall target="tests.jndi.all" />
+    <antcall target="tests.jms.all" />
+    <ant dir="joram" antfile="build.xml" target="clean" />
+    <ant dir="joram" antfile="build.xml" target="custom.tests.bamboo" />
+  </target>
+  
+  <target name="check.reports" description=" --> check reports (for bamboo)">
+    <parallel>
+      <ant dir="jndi2" antfile="build.xml" target="check.report.file" />
+      <ant dir="joram" antfile="build.xml" target="check.report.file" />
+      <ant dir="jms" antfile="build.xml" target="check.report.file" />
+  	</parallel>
+  </target>
 
-	<target name="custom.tests.bamboo" description=" --> Custom set of tests for bamboo.">
-		<ant dir="a3" antfile="build.xml" target="clean" />
-		<ant dir="a3" antfile="build.xml" target="tests.base.osgi" />
-		<antcall target="tests.jndi.all" />
-		<antcall target="tests.jms.all" />
-		<ant dir="joram" antfile="build.xml" target="clean" />
-		<ant dir="joram" antfile="build.xml" target="custom.tests.bamboo" />
-	</target>
-
-	<target name="custom.tests.vtest" description=" --> Custom set of tests for vtest.">
-		<ant dir="a3" antfile="build.xml" target="clean" />
-		<ant dir="a3" antfile="build.xml" target="tests.base.osgi" />
-		<antcall target="tests.jndi.all" />
-		<antcall target="tests.jms.all" />
-		<ant dir="joram" antfile="build.xml" target="clean" />
-		<ant dir="joram" antfile="build.xml" target="custom.tests.vtest" />
-	</target>
-
-	<target name="check.reports" description=" --> check reports (for bamboo)">
-		<parallel>
-			<ant dir="jndi2" antfile="build.xml" target="check.report.file" />
-			<ant dir="joram" antfile="build.xml" target="check.report.file" />
-			<ant dir="jms" antfile="build.xml" target="check.report.file" />
-		</parallel>
-	</target>
-	
-	<target name="vtest.check.reports" description=" --> check reports (for vtest">
-		<parallel>
-			<ant dir="jndi2" antfile="build.xml" target="check.report.file" />
-			<ant dir="joram" antfile="build.xml" target="check.report.file" />
-			<ant dir="jms" antfile="build.xml" target="check.report.file" />
-		</parallel>
-	</target>
-
-	<target name="tests.joram.noperf.all" description=" --> launch all no perf Joram tests">
-		<ant dir="joram" antfile="build.xml" target="clean" />
-		<ant dir="joram" antfile="build.xml" target="tests.noperf.all" />
-	</target>
+  <target name="tests.joram.noperf.all" description=" --> launch all no perf Joram tests">
+    <ant dir="joram" antfile="build.xml" target="clean" />
+    <ant dir="joram" antfile="build.xml" target="tests.noperf.all" />
+  </target>
 
 </project>

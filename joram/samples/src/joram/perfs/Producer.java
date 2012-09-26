@@ -34,13 +34,12 @@ import org.objectweb.joram.client.jms.Destination;
 /**
  * MessageProducer sending messages on queue or topic for performance statistics.
  */
-public class Producer implements Runnable {
-  static int NbClient = 1;
+public class Producer {
   static int Round = 50;
   static int NbMsgPerRound = 1000;
   static int MsgSize = 1000;
   static int mps = 10000;
-
+  
   static Destination dest = null;
   static ConnectionFactory cf = null;
 
@@ -52,21 +51,18 @@ public class Producer implements Runnable {
     String value = System.getProperty(key, Boolean.toString(def));
     return Boolean.parseBoolean(value);
   }
-
+  
   public static void main (String args[]) throws Exception {
-    NbClient = Integer.getInteger("NbClient", NbClient).intValue();
     Round = Integer.getInteger("Round", Round).intValue();
-    NbMsgPerRound = Integer.getInteger("NbMsgPerRound", NbMsgPerRound).intValue();
     MsgSize = Integer.getInteger("MsgSize", MsgSize).intValue();
-    mps = Integer.getInteger("mps", mps).intValue();
 
     MsgTransient = getBoolean("MsgTransient", MsgTransient);
     SwapAllowed = getBoolean("SwapAllowed", SwapAllowed);
     transacted = getBoolean("Transacted", transacted);
-
+    
     InitialContext ictx = new InitialContext();
-    dest = (Destination) ictx.lookup(args[0]);
-    cf = (ConnectionFactory) ictx.lookup("cf");
+    Destination dest = (Destination) ictx.lookup(args[0]);
+    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
     ictx.close();
 
     System.out.println("Destination: " + (dest.isQueue()?"Queue":"Topic"));
@@ -74,59 +70,50 @@ public class Producer implements Runnable {
     System.out.println("Message: SwapAllowed=" + SwapAllowed);
     System.out.println("Transacted=" + transacted);
     System.out.println("NbMsg=" + (Round*NbMsgPerRound) + ", MsgSize=" + MsgSize);
+
+    Connection cnx = cf.createConnection();
+    Session session = cnx.createSession(transacted, Session.AUTO_ACKNOWLEDGE);
+    MessageProducer producer = session.createProducer(dest);
+    if (MsgTransient) {
+      producer.setDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
+    }
+
+    byte[] content = new byte[MsgSize];
+    for (int i = 0; i< MsgSize; i++)
+      content[i] = (byte) (i & 0xFF);
     
-    for (int i=0; i<NbClient; i++) {
-      new Thread(new Producer()).start();
-    }
-  }
-
-  public void run() {
-    try {
-      Connection cnx = cf.createConnection();
-      Session session = cnx.createSession(transacted, Session.AUTO_ACKNOWLEDGE);
-      MessageProducer producer = session.createProducer(dest);
-      if (MsgTransient) {
-        producer.setDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
+    long dtx = 0;
+    long start = System.currentTimeMillis();
+    for (int i=0; i<(Round*NbMsgPerRound); i++) {
+      BytesMessage msg = session.createBytesMessage();
+      if (SwapAllowed) {
+        msg.setBooleanProperty("JMS_JORAM_SWAPALLOWED", true);
       }
-
-      byte[] content = new byte[MsgSize];
-      for (int i = 0; i< MsgSize; i++)
-        content[i] = (byte) (i & 0xFF);
-
-      long dtx = 0;
-      long start = System.currentTimeMillis();
-      for (int i=0; i<(Round*NbMsgPerRound); i++) {
-        BytesMessage msg = session.createBytesMessage();
-        if (SwapAllowed) {
-          msg.setBooleanProperty("JMS_JORAM_SWAPALLOWED", true);
-        }
-        msg.writeBytes(content);
-        msg.setLongProperty("time", System.currentTimeMillis());
-        msg.setIntProperty("index", i);
-        producer.send(msg);
-
-        if (transacted && ((i%10) == 9)) session.commit();
-
-        if ((i%NbMsgPerRound) == (NbMsgPerRound-1)) {
-          long dtx1 = (i * 1000L) / mps;
-          long dtx2 = System.currentTimeMillis() - start;
-          if (dtx1 > (dtx2 + 20)) {
-            dtx += (dtx1 - dtx2);
-            Thread.sleep(dtx1 - dtx2);
-          }
+      msg.writeBytes(content);
+      msg.setLongProperty("time", System.currentTimeMillis());
+      msg.setIntProperty("index", i);
+      producer.send(msg);
+      
+      if (transacted && ((i%10) == 9)) session.commit();
+      
+      if ((i%NbMsgPerRound) == (NbMsgPerRound-1)) {
+        long dtx1 = (i * 1000L) / mps;
+        long dtx2 = System.currentTimeMillis() - start;
+        if (dtx1 > (dtx2 + 20)) {
+          dtx += (dtx1 - dtx2);
+          Thread.sleep(dtx1 - dtx2);
         }
       }
-      long end = System.currentTimeMillis();
-      long dt = end - start;
-
-      System.out.println("----------------------------------------------------");
-      System.out.println("| sender dt=" +  ((dt *1000L)/(Round*NbMsgPerRound)) + "us -> " +
-          ((1000L * (Round*NbMsgPerRound)) / (dt)) + "msg/s");
-      System.out.println("| sender wait=" + dtx + "ms");
-
-      cnx.close();
-    } catch (Exception exc) {
-      exc.printStackTrace();
     }
+    long end = System.currentTimeMillis();
+    long dt = end - start;
+    
+    System.out.println("----------------------------------------------------");
+    System.out.println("| sender dt=" +  ((dt *1000L)/(Round*NbMsgPerRound)) + "us -> " +
+                        ((1000L * (Round*NbMsgPerRound)) / (dt)) + "msg/s");
+    System.out.println("| sender wait=" + dtx + "ms");
+    
+    cnx.close();
   }
+
 }

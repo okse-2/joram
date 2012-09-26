@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -55,11 +55,6 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
 
   Properties attlist = null;
   
-  /**
-   * Name use to register/unregister MBean
-   */
-  public String MBean_name = null;
-  
   public static Logger logger = Debug.getLogger(MonitoringTimerTask.class.getName());
   
   /**
@@ -71,19 +66,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
   public MonitoringTimerTask(long period, Properties attlist) {
     this.period = period;
     this.attlist = attlist;
-    
   }
-  
-  /**
-   * Initializes the <code>MonitoringTimerTask</code> component.
-   * 
-   * @param period  Period value of the resulting task
-   * @param attlist List of JMX attributes to periodically watch.
-   */
-  public MonitoringTimerTask() {
-  }
-  
-  public abstract void init(Timer timer, long period, Properties attlist, Properties taskProps);
   
   /**
    * Starts the resulting task.
@@ -91,7 +74,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
    * @param timer Timer to use to schedule the resulting task.
    */
   protected final void start(Timer timer) {
-    timer.scheduleAtFixedRate(this, 0, period);
+    timer.scheduleAtFixedRate(this, period, period);
   }
   
   /**
@@ -128,7 +111,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
     while (mbeans.hasMoreElements()) {
       String name = (String) mbeans.nextElement();
 
-      Set<String> mBeans = null;
+      Set mBeans = null;
       try {
         mBeans = MXWrapper.queryNames(name);
       } catch (Exception exc) {
@@ -136,7 +119,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
       }
 
       if (mBeans != null) {
-        for (Iterator<String> iterator = mBeans.iterator(); iterator.hasNext();) {
+        for (Iterator iterator = mBeans.iterator(); iterator.hasNext();) {
           String mBean = (String) iterator.next();
           StringTokenizer st = new StringTokenizer((String) attlist.get(name), ",");
           while (st.hasMoreTokens()) {
@@ -144,7 +127,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
             if (token.equals("*")) {
               // Get all mbean's attributes
               try {
-                List<String> attributes = MXWrapper.getAttributeNames(mBean);
+                List attributes = MXWrapper.getAttributeNames(mBean);
                 if (attributes != null) {
                   for (int i = 0; i < attributes.size(); i++) {
                     String attname = (String) attributes.get(i);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -85,30 +85,6 @@ public abstract class Agent implements AgentMBean, Serializable {
     return reactNb;
   }
 
-  /**
-   * Boolean value indicating if the agent profiling is on.
-   * If true, the cumulative time of reaction and commit is kept for this agent.
-   */
-  public boolean agentProfiling = false;
-  
-  /**
-   * Returns true if the agent profiling is on.
-   * 
-   * @see fr.dyade.aaa.agent.EngineMBean#isAgentProfiling()
-   */
-  public boolean isAgentProfiling() {
-    return this.agentProfiling;
-  }
-  
-  /**
-   * Sets the agent profiling.
-   * 
-   * @see fr.dyade.aaa.agent.EngineMBean#setAgentProfiling(boolean)
-   */
-  public void setAgentProfiling(boolean agentProfiling) {
-    this.agentProfiling = agentProfiling;
-  }
-
   transient long reactTime = 0L;
 
   /**
@@ -116,13 +92,6 @@ public abstract class Agent implements AgentMBean, Serializable {
    */
   public long getReactTime() {
     return reactTime;
-  }
-  
-  /**
-   * reset the reactTime
-   */
-  public void resetReactTime(){
-  	reactTime = 0;
   }
 
   transient long commitTime = 0L;
@@ -133,21 +102,6 @@ public abstract class Agent implements AgentMBean, Serializable {
   public long getCommitTime() {
     return commitTime;
   }  
-  
-  /**
-   * reset the commitTime
-   */
-  public void resetCommitTime(){
-  	commitTime = 0;
-  }
-  
-  /**
-   * Reset reactTime and commitTime
-   */
-  public void resetTimer(){
-  	resetReactTime();
-  	resetCommitTime();
-  }
   
   /**
    * Sets the <code>updated</code> field to <code>false</code> so that the
@@ -677,10 +631,12 @@ public abstract class Agent implements AgentMBean, Serializable {
    * @param role  the destination <code>MultiplRole</code>.
    * @param not   the notification to send.
    */
-  protected final void sendTo(RoleMultiple role, Notification not) {
+  protected final void
+  sendTo(RoleMultiple role, Notification not) {
     if (role == null) return;
-    Enumeration<AgentId> to = role.getListeners();
-    if (to == null) return;
+    Enumeration to = role.getListeners();
+    if (to == null)
+      return;
     while (to.hasMoreElements())
       sendTo((AgentId) to.nextElement(), not);
   }

@@ -45,7 +45,7 @@ public class test2 extends TestCase {
 
   protected void setUp() throws Exception {
     startAgentServer(ServerPong);
-    startAgentServer(router, new String[] { "-DTransaction.UseLockFile=false" });
+    startAgentServer(router, new String[] { "-DNTNoLockFile=true" });
 
     int bounce = Integer.getInteger("bounce", 600).intValue();
     timeout = 200L * bounce;
@@ -128,7 +128,7 @@ public class test2 extends TestCase {
 	  // Wait in order to prevent WAIT status on TCP connection
 	  Thread.sleep(1000L);
 	  // Start server#2
-      TestCase.startAgentServer(test2.router, new String[] { "-DTransaction.UseLockFile=false" });
+      TestCase.startAgentServer(test2.router, new String[] { "-DNTNoLockFile=true" });
 	  nbStopTask++;
 	  if(nbStopTask > 20 ) endTest();
         } else {

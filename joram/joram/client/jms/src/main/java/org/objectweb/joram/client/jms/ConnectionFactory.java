@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -32,17 +32,6 @@ import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
  * <p>
  * A ConnectionFactory object encapsulates a set of configuration parameters defined by
  * an administrator. A client needs to use it to create a connection with a Joram server.
- * <p>
- * A ConnectionFactory object encapsulates a set of configuration parameters defined by an
- * administrator. A client needs to use it to create a connection with a Joram server.
- * <p>
- * A ConnectionFactory object is a JMS administered object containing configuration information,
- * it is created by an administrator and later used by JMS clients. Normally the JMS clients find
- * administered objects by looking them up in a JNDI namespace.
- * <p>
- * ConnectionFactory objects can be programmatically created using the LocalConnectionFactory.create
- * or TcpConnectionFactory.create methods. Created objects can be then configured using FactoryParameters
- * object.
  * 
  * @see javax.jms.ConnectionFactory
  * @see javax.jms.QueueConnectionFactory
@@ -50,6 +39,9 @@ import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
  * @see javax.jms.XAConnectionFactory
  * @see javax.jms.XAQueueConnectionFactory
  * @see javax.jms.XATopicConnectionFactory
+ */
+/**
+ *
  */
 public abstract class ConnectionFactory extends AbstractConnectionFactory
   implements javax.jms.ConnectionFactory, javax.jms.QueueConnectionFactory, javax.jms.TopicConnectionFactory,

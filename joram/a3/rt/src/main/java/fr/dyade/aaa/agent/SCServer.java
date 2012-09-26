@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -57,11 +57,11 @@ public class SCServer implements SCServerMBean {
   }
 
   public String[] getServers() {
-    Enumeration<ServerDesc> e = AgentServer.elementsServerDesc();
+    Enumeration e = AgentServer.elementsServerDesc();
     String[] servers = new String[AgentServer.getServerNb()];
     StringBuffer strBuf = new StringBuffer();
     for (int i=0; e.hasMoreElements(); i++) {
-      ServerDesc server = e.nextElement();
+      ServerDesc server = (ServerDesc) e.nextElement();
       strBuf.append("sid=").append(server.sid);
       strBuf.append(",name=").append(server.name);
       if (server.gateway == -1) {

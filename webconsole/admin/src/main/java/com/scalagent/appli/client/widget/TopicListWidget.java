@@ -58,8 +58,8 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.events.CloseClickEvent;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
+import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -286,7 +286,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
         nbMsgsSentToDMQSinceCreationFieldD, periodFieldD, rightsFieldD, freeReadingFieldD, freeWritingFieldD);
 
     chartWidth = (com.google.gwt.user.client.Window.getClientWidth() / 2) - 45;
-    chart = new AnnotatedTimeLine(createTable(), createOptions(true), chartWidth + "px", "200px");
+    chart = new AnnotatedTimeLine(createTable(), createOptions(true), "" + chartWidth, "200");
 
     columnForm = new DynamicForm();
     columnForm.setNumCols(6);
@@ -531,7 +531,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     winModal.setShowModalMask(Boolean.TRUE);
     winModal.centerInPage();
     winModal.addCloseClickHandler(new CloseClickHandler() {
-      public void onCloseClick(CloseClickEvent event) {
+      public void onCloseClick(CloseClientEvent event) {
         winModal.destroy();
       }
     });
@@ -563,20 +563,6 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     nameItem.setName("nameItem");
     nameItem.setRequired(Boolean.TRUE);
 
-    TextItem periodItem = new TextItem();
-    periodItem.setTitle(Application.messages.topicWidget_periodItem_title());
-    periodItem.setName("periodItem");
-    periodItem.setRequired(Boolean.TRUE);
-    periodItem.setValidators(integerValidator);
-
-    CheckboxItem freeReadingItem = new CheckboxItem();
-    freeReadingItem.setTitle(Application.messages.topicWidget_freeReadingItem_title());
-    freeReadingItem.setName("freeReadingItem");
-
-    CheckboxItem freeWritingItem = new CheckboxItem();
-    freeWritingItem.setTitle(Application.messages.topicWidget_freeWritingItem_title());
-    freeWritingItem.setName("freeWritingItem");
-
     if (tlr != null) {
       TextItem DMQItem = new TextItem();
       DMQItem.setTitle(Application.messages.topicWidget_DMQItem_title());
@@ -588,6 +574,20 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
       destinationItem.setName("destinationItem");
       destinationItem.setDisabled(Boolean.TRUE);
 
+      TextItem periodItem = new TextItem();
+      periodItem.setTitle(Application.messages.topicWidget_periodItem_title());
+      periodItem.setName("periodItem");
+      periodItem.setRequired(Boolean.TRUE);
+      periodItem.setValidators(integerValidator);
+
+      CheckboxItem freeReadingItem = new CheckboxItem();
+      freeReadingItem.setTitle(Application.messages.topicWidget_freeReadingItem_title());
+      freeReadingItem.setName("freeReadingItem");
+
+      CheckboxItem freeWritingItem = new CheckboxItem();
+      freeWritingItem.setTitle(Application.messages.topicWidget_freeWritingItem_title());
+      freeWritingItem.setName("freeWritingItem");
+
       nameItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_NAME));
       nameItem.setDisabled(Boolean.TRUE);
       DMQItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_DMQID));
@@ -598,7 +598,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
       form.setFields(nameItem, DMQItem, destinationItem, periodItem, freeReadingItem, freeWritingItem);
     } else {
-      form.setFields(nameItem, periodItem, freeReadingItem, freeWritingItem);
+      form.setFields(nameItem);
     }
 
 

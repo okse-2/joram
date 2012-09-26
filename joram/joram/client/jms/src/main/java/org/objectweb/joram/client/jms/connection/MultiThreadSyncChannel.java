@@ -28,7 +28,6 @@ import java.util.Vector;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
-import org.objectweb.joram.shared.security.Identity;
 
 /**
  * Class wrapping the <code>RequestChannel</code> in order to group the
@@ -125,9 +124,5 @@ public class MultiThreadSyncChannel implements RequestChannel {
 
   public void closing() {
     channel.closing();
-  }
-  
-  public Identity getIdentity() {
-    return null;
   }
 }

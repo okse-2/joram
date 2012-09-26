@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -24,7 +24,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -40,7 +42,9 @@ import fr.dyade.aaa.common.Strings;
  * persistency service provided by <code>Transaction</code>.
  */
 public class ServiceManager implements Serializable {
-  /** Define serialVersionUID for interoperability. */
+  /**
+   * 
+   */
   private static final long serialVersionUID = 1L;
 
   /** the unique <code>ServiceManager</code> in the agent server */
@@ -70,11 +74,10 @@ public class ServiceManager implements Serializable {
     if (manager == null) {
       manager = new ServiceManager();
     }
-    
-// TODO(AF): no longer needed.
-//    if (manager.trackers == null) {
-//      manager.trackers = new HashMap();
-//    }
+
+    if (manager.trackers == null) {
+      manager.trackers = new HashMap();
+    }
     save();
   }
 
@@ -106,16 +109,15 @@ public class ServiceManager implements Serializable {
   }
 
   /** repository holding <code>Service</code>s */
-  Hashtable<String, ServiceDesc> registry;
+  Hashtable registry;
 
-// TODO(AF): no longer needed.
-//  transient Map trackers;
+  transient Map trackers;
 
   /**
    * Default constructor.
    */
   private ServiceManager() {
-    registry = new Hashtable<String, ServiceDesc>();
+    registry = new Hashtable();
   }
 
   /**
@@ -163,13 +165,15 @@ public class ServiceManager implements Serializable {
    */
   static void start() throws Exception {
     // Launch all services defined in A3CML file
-    for (Enumeration<ServiceDesc> e = manager.registry.elements(); e.hasMoreElements() ;) {
-      ServiceDesc desc = e.nextElement();
+    for (Enumeration e = manager.registry.elements();
+	 e.hasMoreElements() ;) {
+      ServiceDesc desc = (ServiceDesc) e.nextElement();
       try {
         start(desc);
       } catch (Exception exc) {
         xlogmon.log(BasicLevel.ERROR,
-                   getName() + ", cannot start service:" + desc.getClassName(), exc);
+                   getName() + ", cannot start service:" +
+                   desc.getClassName(), exc);
       }
     }
   }
@@ -198,7 +202,7 @@ public class ServiceManager implements Serializable {
    * @param scname	service class name.
    */
   public static void stop(String scname) throws Exception {
-    ServiceDesc desc = manager.registry.get(scname);
+    ServiceDesc desc = (ServiceDesc) manager.registry.get(scname);
     if (desc == null)
       throw new NoSuchElementException("Unknown service: " + scname);
     stop(desc);
@@ -211,8 +215,8 @@ public class ServiceManager implements Serializable {
     if ((manager == null) || (manager.registry == null))
       return;
 
-    for (Enumeration<ServiceDesc> e = manager.registry.elements(); e.hasMoreElements();) {
-      ServiceDesc desc = e.nextElement();
+    for (Enumeration e = manager.registry.elements(); e.hasMoreElements();) {
+      ServiceDesc desc = (ServiceDesc) e.nextElement();
       try {
         if (xlogmon.isLoggable(BasicLevel.DEBUG))
           xlogmon.log(BasicLevel.DEBUG, getName() + ", stops: " + desc);
@@ -281,8 +285,8 @@ public class ServiceManager implements Serializable {
   static ServiceDesc[] getServices() {
     ServiceDesc[] services = new ServiceDesc[manager.registry.size()];
     int i = 0;
-    for (Enumeration<ServiceDesc> e = manager.registry.elements(); e.hasMoreElements();) {
-      services[i++] = e.nextElement();
+    for (Enumeration e = manager.registry.elements(); e.hasMoreElements();) {
+      services[i++] = (ServiceDesc) e.nextElement();
     }
 // 1.2    Collection values = manager.registry.values();
 // 1.2    ServiceDesc[] services = new ServiceDesc[values.size()];

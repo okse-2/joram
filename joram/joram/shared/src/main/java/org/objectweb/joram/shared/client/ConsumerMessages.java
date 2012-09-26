@@ -97,22 +97,6 @@ public final class ConsumerMessages extends AbstractJmsReply {
   public void setQueueMode(boolean queueMode) {
     this.queueMode = queueMode;
   } 
-  
-  private boolean isActive = true;
-
-  /**
-   * @return the isActive
-   */
-  public boolean isActive() {
-    return isActive;
-  }
-
-  /**
-   * @param isActive the isActive to set
-   */
-  public void setActive(boolean isActive) {
-    this.isActive = isActive;
-  }
 
   protected int getClassId() {
     return CONSUMER_MESSAGES;
@@ -180,7 +164,6 @@ public final class ConsumerMessages extends AbstractJmsReply {
     strbuf.append(",messages=").append(messages);
     strbuf.append(",comingFrom=").append(comingFrom);
     strbuf.append(",queueMode=").append(queueMode);
-    strbuf.append(",isActive=").append(isActive);
     strbuf.append(')');
   }
 
@@ -199,7 +182,6 @@ public final class ConsumerMessages extends AbstractJmsReply {
     Message.writeVectorTo(messages, os);
     StreamUtil.writeTo(comingFrom, os);
     StreamUtil.writeTo(queueMode, os);
-    StreamUtil.writeTo(isActive, os);
   }
   
   /**
@@ -213,6 +195,5 @@ public final class ConsumerMessages extends AbstractJmsReply {
     messages = Message.readVectorFrom(is);
     comingFrom = StreamUtil.readStringFrom(is);
     queueMode = StreamUtil.readBooleanFrom(is);
-    isActive = StreamUtil.readBooleanFrom(is);
   }
 }

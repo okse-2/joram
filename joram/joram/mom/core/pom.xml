@@ -3,15 +3,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.objectweb.joram</groupId>
   <artifactId>joram-mom-core</artifactId>
   <packaging>bundle</packaging>
   <name>JORAM :: joram :: mom :: core</name>
   <description>Builds the Joram mom core project.</description>
 
   <parent>
-    <groupId>org.ow2.joram</groupId>
+    <groupId>org.objectweb.joram</groupId>
     <artifactId>joram-mom</artifactId>
-    <version>5.8.0-SNAPSHOT</version>
+    <version>5.7.0</version>
   </parent>
 
   <build>
@@ -30,6 +31,7 @@
               org.objectweb.joram.mom.messages,
               org.objectweb.joram.mom.notifications,
               org.objectweb.joram.mom.proxies,
+              org.objectweb.joram.mom.proxies.soap,
               org.objectweb.joram.mom.proxies.tcp,
               org.objectweb.joram.mom.util</Export-Package>
             <Import-Package>
@@ -63,12 +65,12 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-shared</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>a3-rt</artifactId>
       <version>${project.version}</version>
     </dependency>

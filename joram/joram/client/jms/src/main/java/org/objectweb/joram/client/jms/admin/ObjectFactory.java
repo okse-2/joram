@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -50,7 +50,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
     Reference ref = (Reference) obj;
     AdministeredObject ao = null;
     try {
-      Class<?> clazz = Class.forName(ref.getClassName());
+      Class clazz = Class.forName(ref.getClassName());
       ao = (AdministeredObject) clazz.newInstance();
       ao.fromReference(ref);
     } catch (Exception exc) {

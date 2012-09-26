@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2008 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C)  2008 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -102,7 +102,7 @@ public class TestCollectorTopic2 extends TestCase implements MessageListener {
       
       Thread.sleep(12000);
 
-      assertTrue("Should receives 3 messages: " + nbReceived, nbReceived >= 3);
+      assertTrue(nbReceived >= 3);
       
       AdminModule.disconnect();
       cnx.close();

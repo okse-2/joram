@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -228,7 +228,7 @@ public final class ATransaction extends AbstractTransaction implements ATransact
   private final byte[] getFromLog(String dirName, String name) throws IOException {
     // First searchs in the logs a new value for the object.
     Object key = OperationKey.newKey(dirName, name);
-    byte[] buf = getFromLog(perThreadContext.get().getLog(), key);
+    byte[] buf = getFromLog(((Context) perThreadContext.get()).getLog(), key);
     if (buf != null) return buf;
 
     if (((buf = getFromLog(clog, key)) != null) ||
@@ -271,9 +271,9 @@ public final class ATransaction extends AbstractTransaction implements ATransact
   public final void delete(String dirName, String name) {
     Object key = OperationKey.newKey(dirName, name);
 
-    Hashtable<Object, Operation> log = perThreadContext.get().getLog();
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     Operation op = Operation.alloc(Operation.DELETE, dirName, name);
-    op = log.put(key, op);
+    op = (Operation) log.put(key, op);
     if (op != null) op.free();
   }
 
@@ -290,11 +290,11 @@ public final class ATransaction extends AbstractTransaction implements ATransact
       logmon.log(BasicLevel.DEBUG, "ATransaction, commit");
 
     commitCount += 1; // AF: Monitoring
-    Hashtable<Object, Operation> log = perThreadContext.get().getLog();
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     if (! log.isEmpty()) {
       Operation op = null;
-      for (Enumeration<Operation> e = log.elements(); e.hasMoreElements(); ) {
-        op = e.nextElement();
+      for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
+        op = (Operation) e.nextElement();
 
         operationCount += 1; // AF: Monitoring
         // Save the log to disk
@@ -356,7 +356,7 @@ public final class ATransaction extends AbstractTransaction implements ATransact
       logmon.log(BasicLevel.DEBUG, "ATransaction, rollback");
 
     setPhase(ROLLBACK);
-    perThreadContext.get().getLog().clear();
+    ((Context) perThreadContext.get()).getLog().clear();
   }
 
   public final synchronized void release() throws IOException {

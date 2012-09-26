@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -46,14 +46,10 @@ import org.objectweb.joram.shared.admin.GetSubscriptionsRequest;
 import org.objectweb.joram.shared.admin.SetFather;
 
 /**
- * Implements the <code>javax.jms.Topic</code> interface.
- * <p>
- * This is a proxy object a client uses to specify the destination of messages
- * it is sending and the source of messages it receives. 
- * <p>
- * The Topic class is a factory for Joram's Topic destination through the create
- * static methods, the Topic object provides Joram specific administration and
- * monitoring methods. 
+ *  Implements the <code>javax.jms.Topic</code> interface and provides
+ * Joram specific administration and monitoring methods. This is a proxy
+ * object a client uses to specify the destination of messages it is
+ * sending and the source of messages it receives.
  */
 public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
 
@@ -87,10 +83,9 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
   }
 
   /**
-   * API method.
    * Gets the The Joram's internal unique identifier of this topic.
+   * API method.
    *
-   * @return The Joram's internal unique identifier.
    * @exception JMSException  Actually never thrown.
    */
   public String getTopicName() throws JMSException {

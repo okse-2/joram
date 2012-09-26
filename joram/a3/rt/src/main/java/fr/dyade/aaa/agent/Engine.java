@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -125,7 +125,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   /** This table is used to maintain a list of agents already in memory
    * using the AgentId as primary key.
    */
-  Hashtable<AgentId, Agent> agents;
+  Hashtable agents;
   /** Virtual time counter use in FIFO swap-in/swap-out mechanisms. */
   long now = 0;
   /** Maximum number of memory loaded agents. */
@@ -187,7 +187,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   }
 
   /** Vector containing id's of all fixed agents. */
-  Vector<AgentId> fixedAgentIdList = null;
+  Vector fixedAgentIdList = null;
 
   /**
    * Returns the number of fixed agents.
@@ -236,7 +236,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * recovery policy in case of exception in agent specific code.
    * Default value is <code>RP_EXC_NOT</code>.
    */
-  int recoveryPolicy = RP_EXIT;
+  int recoveryPolicy = RP_EXC_NOT;
 
   private String name;
 
@@ -267,7 +267,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     String cname = "fr.dyade.aaa.agent.Engine";
     cname = AgentServer.getProperty("Engine", cname);
 
-    Class<?> eclass = Class.forName(cname);
+    Class eclass = Class.forName(cname);
     return (Engine) eclass.newInstance();
   }
 
@@ -314,21 +314,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       }
 
       if (msg.from == null) msg.from = AgentId.localId;
-
       Channel.post(msg);
-      
-//      if (AgentServer.sdf != null) {
-//        // SDF generation
-//        strbuf.append("<sendto agent=\"").append(msg.to).append("\" notification=\"").append(StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp())).append("\" flowid=\"0\">\n");
-//        strbuf.append("\" info=\"").append(msg.not.getClass().getSimpleName());
-//        strbuf.append("<comment>" + msg.not + "</comment>\n");
-//        strbuf.append("</sendto>\n");
-//      }
-//      
-//      // TODO (AF): Generates the appropriate code for SDF
-//      if (AgentServer.logsdf.isLoggable(BasicLevel.INFO))
-//        AgentServer.logsdf.log(BasicLevel.INFO, "");
-      
       mq.pop();
     }
     Channel.save();
@@ -377,15 +363,15 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   void init() throws Exception {
     // Before any agent may be used, the environment, including the hash table,
     // must be initialized.
-    agents = new Hashtable<AgentId, Agent>();
+    agents = new Hashtable();
     try {
       // Creates or initializes AgentFactory, then loads and initializes
       // all fixed agents.
-      fixedAgentIdList = (Vector<AgentId>) AgentServer.getTransaction().load(getName() + ".fixed");
+      fixedAgentIdList = (Vector) AgentServer.getTransaction().load(getName() + ".fixed");
       if (fixedAgentIdList == null) {
         // It's the first launching of this engine, in other case there is
         // at least the factory in fixedAgentIdList.
-        fixedAgentIdList = new Vector<AgentId>();
+        fixedAgentIdList = new Vector();
         // Creates factory
         AgentFactory factory = new AgentFactory(AgentId.factoryId);
         createAgent(AgentId.factoryId, factory);
@@ -421,8 +407,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     logmon.log(BasicLevel.DEBUG, getName() + ", ends");
     Agent[] ag = new Agent[agents.size()];
     int i = 0;
-    for (Enumeration<Agent> e = agents.elements() ; e.hasMoreElements() ;) {
-      ag[i++] = e.nextElement();
+    for (Enumeration e = agents.elements() ; e.hasMoreElements() ;) {
+      ag[i++] = (Agent) e.nextElement();
     }
     for (i--; i>=0; i--) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -477,7 +463,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       addFixedAgentId(agent.getId());
     }
     if (agent.logmon == null)
-      agent.logmon = Debug.getLogger(Agent.class.getName());
+      agent.logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
+                                     ".#" + AgentServer.getServerId());
     agent.save();
 
     // Memorize the agent creation and ...
@@ -542,41 +529,36 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  getName() + ", garbage: " + agents.size() + '/' + NbMaxAgents + '+' + fixedAgentIdList.size() + ' ' + now);
-    
     long deadline = now - NbMaxAgents;
     Agent[] ag = new Agent[agents.size()];
     int i = 0;
-    for (Enumeration<Agent> e = agents.elements() ; e.hasMoreElements() ;) {
-      ag[i++] = e.nextElement();
+    for (Enumeration e = agents.elements() ; e.hasMoreElements() ;) {
+      ag[i++] = (Agent) e.nextElement();
     }
-    
-    Agent old = agent;
-    try {
-      for (i--; i>=0; i--) {
-        if ((ag[i].last <= deadline) && (!ag[i].fixed)) {
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       "Agent" + ag[i].id + " [" + ag[i].name + "] garbaged");
-          agents.remove(ag[i].id);
-          try {
-            // Set current agent running in order to allow from field fixed
-            // for sendTo during agentFinalize (We assume that only Engine
-            // use this method).
-            agent = ag[i];
-            ag[i].agentFinalize(false);
-            agent = old;
-          } catch (Exception exc) {
-            logmon.log(BasicLevel.ERROR,
-                       "Agent" + ag[i].id + " [" + ag[i].name + "] error during agentFinalize", exc);
-          }
-          ag[i] = null;
+    for (i--; i>=0; i--) {
+      if ((ag[i].last <= deadline) && (!ag[i].fixed)) {
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                     "Agent" + ag[i].id + " [" + ag[i].name + "] garbaged");
+        agents.remove(ag[i].id);
+        try {
+          // Set current agent running in order to allow from field fixed
+          // for sendTo during agentFinalize (We assume that only Engine
+          // use this method).
+          agent = ag[i];
+          ag[i].agentFinalize(false);
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.ERROR,
+                     "Agent" + ag[i].id + " [" + ag[i].name + "] error during agentFinalize", exc);
+        } finally {
+          agent = null;
         }
+        ag[i] = null;
       }
-    } finally {
-      agent = old;
     }
 
-    logmon.log(BasicLevel.DEBUG, getName() + ", garbage: " + agents.size());
+    logmon.log(BasicLevel.DEBUG,
+               getName() + ", garbage: " + agents.size());
   }
 
   /**
@@ -608,8 +590,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   AgentId[] getLoadedAgentIdlist() {
     AgentId list[] = new AgentId[agents.size()];
     int i = 0;
-    for (Enumeration<Agent> e = agents.elements(); e.hasMoreElements() ;)
-      list[i++] = e.nextElement().id;
+    for (Enumeration e = agents.elements(); e.hasMoreElements() ;)
+      list[i++] = ((Agent) e.nextElement()).id;
     return list;
   }
 
@@ -695,7 +677,6 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   throws IOException, ClassNotFoundException, Exception {
     Agent ag = null;
     if ((ag = Agent.load(id)) != null) {
-      Agent old = agent;
       try {
         // Set current agent running in order to allow from field fixed
         // for sendTo during agentInitialize (We assume that only Engine
@@ -703,14 +684,13 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         agent = ag;
         ag.agentInitialize(false);
       } catch (Throwable exc) {
+        agent = null;
         // AF: May be we have to delete the agent or not to allow
         // reaction on it.
         logmon.log(BasicLevel.ERROR,
                    getName() + "Can't initialize Agent" + ag.id + " [" + ag.name + "]",
                    exc);
         throw new Exception(getName() + "Can't initialize Agent" + ag.id);
-      } finally {
-        agent = old;
       }
       if (ag.logmon == null)
         ag.logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
@@ -869,9 +849,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   }
 
   protected final void stamp(Message msg) {
-    if (msg.isPersistent())
-      // If the message is transient there is no need to save the stamp counter.
-      modified = true;
+    modified = true;
     msg.source = AgentServer.getServerId();
     msg.dest = AgentServer.getServerId();
     msg.stamp = ++stamp;
@@ -883,8 +861,11 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
-    stamp(msg);
-    msg.save();
+    if (msg.isPersistent()) {
+      stamp(msg);
+      msg.save();
+    }
+
     qin.push(msg);
   }
 
@@ -917,7 +898,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   }
 
   /**
-   * Time consumed during agent's reaction.
+   * Time consumned during agent's reaction.
    */
   private long reactTime = 0L;
 
@@ -927,16 +908,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   public long getReactTime() {
     return reactTime;
   }
-  
-  /**
-   * reset the reactTime
-   */
-  public void resetReactTime(){
-  	reactTime = 0;
-  }
 
   /**
-   * Time consumed during reaction commit.
+   * Time consumned during reaction commit.
    */
   private long commitTime;
 
@@ -946,26 +920,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   public long getCommitTime() {
     return commitTime;
   }
-  
-  /**
-   * reset the commitTime
-   */
-  public void resetCommitTime(){
-  	commitTime = 0;
-  }
-  
-  /**
-   * Reset reactTime and commitTime
-   */
-  public void resetTimer(){
-  	resetReactTime();
-  	resetCommitTime();
-  }
 
   protected void onTimeOut() throws Exception {}
 
-//  private static StringBuffer strbuf = new StringBuffer();
-  
   /**
    * Main loop of agent server <code>Engine</code>.
    */
@@ -973,12 +930,13 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     try {
       long start = 0L;
       long end = 0L;
-      boolean profiling = false;
+      boolean profiling;
       
       main_loop:
         while (isRunning) {
           agent = null;
           canStop = true;
+          profiling = agentProfiling;
 
           // Get a notification, then execute the right reaction.
           try {
@@ -1021,7 +979,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
                          getName() + ": Unknown agent, " + msg.to + ".react(" +
                          msg.from + ", " + msg.not + ")");
               agent = null;
-              push(AgentId.localId, msg.from, new UnknownAgent(msg.to, msg.not));
+              push(AgentId.localId,
+                   msg.from,
+                   new UnknownAgent(msg.to, msg.not));
             } catch (Exception exc) {
               //  Can't load agent then send an error notification
               // to sending agent.
@@ -1053,37 +1013,26 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
             }
           }
 
+          if (profiling) {
+            start = System.currentTimeMillis();
+          }
           if (agent != null) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
-                         getName() + ": " + agent + ".react(" + msg.from + ", " + msg.getStamp() + ", " + msg.not + ")");
-
-            profiling = agentProfiling || agent.agentProfiling;
-            if (profiling) {
-              start = System.nanoTime();
-            }
-            
-//            if (AgentServer.sdf != null) {
-//              // SDF generation
-//              strbuf.append("<react agentName=\"").append(agent.getAgentId()).append("\" notification=\"").append(StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp())).append("\" logpointer=\"10\" timestamp=\"").append(System.currentTimeMillis()).append("\">\n");
-//            }
-
-            profiling = agentProfiling || agent.agentProfiling;
-            if (profiling)
-              start = System.nanoTime();
-           
+                         getName() + ": " + agent + ".react(" + msg.from + ", " + msg.not + ")");
             try {
               agent.react(msg.from, msg.not);
               agent.reactNb += 1;
               if (profiling) {
-                end  = System.nanoTime();
+                end  = System.currentTimeMillis();
                 agent.reactTime += (end - start);
                 reactTime += (end - start);
                 start = end;
               }
             } catch (Exception exc) {
               logmon.log(BasicLevel.ERROR,
-                         getName() + ": Uncaught exception during react, " + agent + ".react(" + msg.from + ", " + msg.not + ")",
+                         getName() + ": Uncaught exception during react, " +
+                         agent + ".react(" + msg.from + ", " + msg.not + ")",
                          exc);
               switch (recoveryPolicy) {
               case RP_EXC_NOT:
@@ -1103,30 +1052,18 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
           // Commit all changes then continue.
           commit();
-          
-//          // SDF generation
-//          if (AgentServer.sdf != null) {
-//            strbuf.append("</react>");
-//            AgentServer.sdf.println(strbuf.toString());
-//            strbuf.setLength(0);
-//          }
-//          
-//          // TODO (AF): This code could throw a NPE if the agent doesn't exist!
-//          if (AgentServer.logsdf.isLoggable(BasicLevel.INFO))
-//            AgentServer.logsdf.log(BasicLevel.INFO,
-//                                   "react " + agent.getAgentId() + ' ' + StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp()));
 
-          // Agent profiling
-          if (profiling && (agent != null)) {
-            end  = System.nanoTime();
-            agent.commitTime += (end - start);
+          if (profiling) {
+            end  = System.currentTimeMillis();
+            if (agent != null)
+              agent.commitTime += (end - start);
             commitTime += (end - start);
           }
         }
     } catch (Throwable exc) {
       //  There is an unrecoverable exception during the transaction
       // we must exit from server.
-      logmon.log(BasicLevel.FATAL, getName() + ": Transaction problem", exc);
+      logmon.log(BasicLevel.FATAL, getName() + ": Fatal error", exc);
       canStop = false;
       // Stop the AgentServer
       AgentServer.stop(false);
@@ -1149,7 +1086,6 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ": commit()");
     
-    if (agent != null) agent.save();
     AgentServer.getTransaction().begin();
     // Suppress the processed notification from message queue ..
     qin.pop();
@@ -1161,6 +1097,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     // then saves changes.
     dispatch();
     // Saves the agent state then commit the transaction.
+    if (agent != null) agent.save();
     AgentServer.getTransaction().commit(false);
     // The transaction has committed, then validate all messages.
     Channel.validate();
@@ -1213,11 +1150,6 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   
   EngineAverageLoadTask averageLoadTask = null;
   
-  public void resetAverageLoad() {
-    if (averageLoadTask != null)
-      averageLoadTask.reset();
-  }
-
   /**
    * Returns the load averages for the last minute.
    * @return the load averages for the last minute.
@@ -1248,7 +1180,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     }
     
     /**
-     * Returns the number of waiting messages in the engine.
+     * Returns the number of waiting messages in the enfgine.
      * 
      * @see fr.dyade.aaa.common.AverageLoadTask#countActiveTasks()
      */

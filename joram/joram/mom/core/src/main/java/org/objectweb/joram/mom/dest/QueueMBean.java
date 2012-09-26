@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -61,25 +61,7 @@ public interface QueueMBean extends DestinationMBean {
    * @return The number of pending messages.
    */
   int getPendingMessageCount();
-  
-//  /**
-//   * Returns the load averages for the last minute.
-//   * @return the load averages for the last minute.
-//   */
-//  float getAverageLoad1();
-//
-//  /**
-//   * Returns the load averages for the past 5 minutes.
-//   * @return the load averages for the past 5 minutes.
-//   */
-//  float getAverageLoad5();
-//  
-//  /**
-//   * Returns the load averages for the past 15 minutes.
-//   * @return the load averages for the past 15 minutes.
-//   */
-//  float getAverageLoad15();
-    
+
    /**
     * Removes all messages that the time-to-live is expired.
     */

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -62,7 +62,7 @@ public class TcpReader extends Daemon {
                    AgentId proxyId,
                    TcpConnection tcpConnection,
                    boolean closeConnection) {
-    super("tcpReader." + tcpConnection.getKey(), logger);
+    super("tcpReader." + tcpConnection.getKey());
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;
     this.tcpConnection = tcpConnection;

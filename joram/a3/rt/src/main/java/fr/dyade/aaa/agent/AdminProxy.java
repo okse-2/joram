@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -31,7 +31,6 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.conf.A3CML;
 import fr.dyade.aaa.agent.conf.A3CMLConfig;
 import fr.dyade.aaa.common.Daemon;
-import fr.dyade.aaa.common.Debug;
 
 /**
  * A <code>AdminProxy</code> service provides a TCP service allowing remote
@@ -64,7 +63,7 @@ public class AdminProxy {
   AdminMonitor monitors[] = null;
   ServerSocket listen = null;
 
-  static Logger xlogmon = Debug.getLogger(AdminProxy.class.getName());;
+  static Logger xlogmon = null;
 
   /**
    * Initializes the package as a well known service.
@@ -91,17 +90,24 @@ public class AdminProxy {
       nbm = 1;
     }
 
+    // Get the logging monitor from current server MonologMonitorFactory
+    xlogmon = Debug.getLogger(Debug.A3Service + ".AdminProxy" +
+                              ".#" + AgentServer.getServerId());
+
     if (proxy != null) {
       xlogmon.log(BasicLevel.ERROR,
-                  "AdminProxy#" + AgentServer.getServerId() + ": already initialized.");
-      throw new Exception("AdminProxy" + ".#" + AgentServer.getServerId() + ": already initialized.");
+                  "AdminProxy#" + AgentServer.getServerId() +
+      ": already initialized.");
+      throw new Exception("AdminProxy" + ".#" + AgentServer.getServerId() +
+      ": already initialized.");
     }
 
     try {
       proxy = new AdminProxy();
     } catch (IOException exc) {
       xlogmon.log(BasicLevel.ERROR,
-                  "AdminProxy#" + AgentServer.getServerId() + ", can't get listen port", exc);
+                  "AdminProxy#" + AgentServer.getServerId() +
+                  ", can't get listen port", exc);
       throw exc;
     }
     start();
@@ -130,7 +136,8 @@ public class AdminProxy {
 
     monitors = new AdminMonitor[nbm];
     for (int i=0; i<monitors.length; i++) {
-      monitors[i] = new AdminMonitor("AdminProxy#" + AgentServer.getServerId() + '.' + i, xlogmon);
+      monitors[i] = new AdminMonitor("AdminProxy#" +
+                                     AgentServer.getServerId() + '.' + i);
     }
   }
 
@@ -207,8 +214,9 @@ public class AdminProxy {
     /**
      * Constructor.
      */
-    protected AdminMonitor(String name, Logger logger) {
-      super(name, logger);
+    protected AdminMonitor(String name) {
+      // Get the logging monitor from AdminProxy (overload Daemon setup)
+      super(name, AdminProxy.xlogmon);
       this.setThreadGroup(AgentServer.getThreadGroup());
     }
 
@@ -333,7 +341,7 @@ public class AdminProxy {
 
             try {
               // finds variable
-              Class<?> varClass = Class.forName(varClassName);
+              Class varClass = Class.forName(varClassName);
               Field var = varClass.getDeclaredField(varName);
               // sets variable according to its type
               String varType = var.getType().getName();
@@ -378,7 +386,7 @@ public class AdminProxy {
 
             try {
               // finds variable
-              Class<?> varClass = Class.forName(varClassName);
+              Class varClass = Class.forName(varClassName);
               Field var = varClass.getDeclaredField(varName);
               // get the variable value
               Object value = var.get(null);
@@ -417,8 +425,9 @@ public class AdminProxy {
                            tab[j]);
           }
         } else if (cmd.equals(LIST_MCONS)) {
-          for (Enumeration<MessageConsumer> c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-            MessageConsumer cons = c.nextElement();
+          for (Enumeration c=AgentServer.getConsumers();
+          c.hasMoreElements(); ) {
+            MessageConsumer cons = (MessageConsumer) c.nextElement();
             writer.println("+----------------------------------------");
             writer.println(cons);
           }
@@ -428,8 +437,9 @@ public class AdminProxy {
             // start the identified consumer.
             domain = st.nextToken();
           }
-          for (Enumeration<MessageConsumer> c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-            MessageConsumer cons = c.nextElement();
+          for (Enumeration c=AgentServer.getConsumers();
+          c.hasMoreElements(); ) {
+            MessageConsumer cons = (MessageConsumer) c.nextElement();
 
             if (((domain == null) || domain.equals(cons.getName()))) {
               try {
@@ -448,8 +458,9 @@ public class AdminProxy {
             // stop the identified consumer.
             domain = st.nextToken();
           }
-          for (Enumeration<MessageConsumer> c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-            MessageConsumer cons = c.nextElement();
+          for (Enumeration c=AgentServer.getConsumers();
+          c.hasMoreElements(); ) {
+            MessageConsumer cons = (MessageConsumer) c.nextElement();
 
             if (((domain == null) || domain.equals(cons.getName()))) {
               cons.stop();

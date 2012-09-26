@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,29 +40,28 @@ import javax.management.ObjectName;
 import org.osgi.framework.ServiceRegistration;
 
 import fr.dyade.aaa.common.osgi.Activator;
-import fr.dyade.aaa.util.management.MXServer;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
- * Implementation of the MXServer interface allowing the a3rt independence
- * from the JMX framework.
+ * 
  */
-public class JMXServer implements MXServer {
+public class JMXServer {
 
   public static boolean registerAsService = false;
   
   private MBeanServer mxserver = null;
 
-  private Map<ObjectName, ServiceRegistration> registeredServices = new HashMap<ObjectName, ServiceRegistration>();
+  private Map registeredServices = new HashMap();
 
   public JMXServer(MBeanServer mxserver) {
     this.mxserver = mxserver;
+    MXWrapper.setMXServer(this);
   }
 
   public JMXServer() {
     try {
       // Try to get the default platform MBeanServer (since JDK 1.5)
-      Class<?> clazz = Class.forName("java.lang.management.ManagementFactory");
+      Class clazz = Class.forName("java.lang.management.ManagementFactory");
       Method method = clazz.getMethod("getPlatformMBeanServer", (Class[]) null);
       mxserver = (MBeanServer) method.invoke(null, (Object[]) null);
     } catch (Exception exc) {
@@ -73,9 +72,10 @@ public class JMXServer implements MXServer {
   }
 
   private void registerOSGi(Object obj, ObjectName objName) {
-    if (!registerAsService) return;
-
-    Hashtable<String, String> registrationProperties = objName.getKeyPropertyList();
+    if (!registerAsService) {
+      return;
+    }
+    Hashtable registrationProperties = objName.getKeyPropertyList();
     registrationProperties.put("domain", objName.getDomain());
     if (registeredServices.containsKey(objName)) {
       ServiceRegistration registration = (ServiceRegistration) registeredServices.get(objName);
@@ -83,16 +83,17 @@ public class JMXServer implements MXServer {
       return;
     }
     
-    Set<String> serviceNames = new HashSet<String>();
+    Set serviceNames = new HashSet();
     computeOSGiServiceNames(obj.getClass(), obj, serviceNames);
     ServiceRegistration registration = Activator.context.registerService((String[]) serviceNames.toArray(new String[serviceNames.size()]), obj, registrationProperties);
     registeredServices.put(objName, registration);
   }
 
-  private void computeOSGiServiceNames(Class<?> beanClass, Object bean, Set<String> registered) {
-    if (beanClass == null)  return;
-
-    Class<?>[] interfaces = beanClass.getInterfaces();
+  private void computeOSGiServiceNames(Class beanClass, Object bean, Set registered) {
+    if (beanClass == null) {
+      return;
+    }
+    Class[] interfaces = beanClass.getInterfaces();
     for (int i = 0; i < interfaces.length; i++) {
       if (interfaces[i].getName().endsWith("MBean") && !registered.contains(interfaces[i].getName())) {
         registered.add(interfaces[i].getName());
@@ -103,16 +104,16 @@ public class JMXServer implements MXServer {
   }
 
   public void registerMBean(Object bean, String fullName) throws Exception {
-    if (mxserver == null) return;
-    
+    if (mxserver == null)
+      return;
     ObjectName objName = ObjectName.getInstance(fullName);
     mxserver.registerMBean(bean, objName);
     registerOSGi(bean, objName);
   }
 
   public void unregisterMBean(String fullName) throws Exception {
-    if (mxserver == null) return;
-    
+    if (mxserver == null)
+      return;
     ObjectName objName = ObjectName.getInstance(fullName);
     mxserver.unregisterMBean(objName);
 
@@ -125,29 +126,32 @@ public class JMXServer implements MXServer {
   }
 
   public Object getAttribute(String objectName, String attribute) throws Exception {
-    if (mxserver == null) return null;
-
+    if (mxserver == null) {
+      return null;
+    }
     return mxserver.getAttribute(new ObjectName(objectName), attribute);
   }
   
-  public List<String> getAttributeNames(String objectName) throws Exception {
-    if (mxserver == null)  return null;
-
+  public List getAttributeNames(String objectName) throws Exception {
+    if (mxserver == null) {
+      return null;
+    }
     MBeanAttributeInfo[] attrs = mxserver.getMBeanInfo(new ObjectName(objectName)).getAttributes();
-    List<String> names = new ArrayList<String>();
+    List names = new ArrayList();
     for (int i = 0; i < attrs.length; i++) {
       names.add(attrs[i].getName());
     }
     return names;
   }
   
-  public Set<String> queryNames(String objectName) throws MalformedObjectNameException {
-    if (mxserver == null) return null;
-
-    Set<ObjectName> objectNames = mxserver.queryNames(new ObjectName(objectName), null);
-    Set<String> names = new HashSet<String>();
-    for (Iterator<ObjectName> iterator = objectNames.iterator(); iterator.hasNext();) {
-      ObjectName objName = iterator.next();
+  public Set queryNames(String objectName) throws MalformedObjectNameException {
+    if (mxserver == null) {
+      return null;
+    }
+    Set objectNames = mxserver.queryNames(new ObjectName(objectName), null);
+    Set names = new HashSet();
+    for (Iterator iterator = objectNames.iterator(); iterator.hasNext();) {
+      ObjectName objName = (ObjectName) iterator.next();
       names.add(objName.getCanonicalName());
     }
     return names;

@@ -55,10 +55,6 @@ public class AdminReply extends AbstractAdminMessage {
   
   public final static int BAD_CLUSTER_REQUEST = 7;
   
-  public final static int UNKNOWN_DESTINATION = 8;
-  
-  public final static int ILLEGAL_STATE = 9;
-  
   /** <code>true</code> if this reply replies to a successful request. */
   private boolean success = false;
 

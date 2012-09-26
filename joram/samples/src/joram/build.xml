@@ -9,7 +9,7 @@
     <property name="lib.dir" location="${ship.dir}/lib"/>
     <property name="run.dir" location="../../run"/>
     <property name="conf.dir" location="../../config"/>
-    <property name="felix.dir" location="${ship.dir}/bin/"/>
+    <property name="felix.dir" location="${ship.dir}/bin"/>
     <property name="bundle.dir" location="${ship.dir}/bundle" />
   	
   	<!-- Project classpath needed for execution -->
@@ -52,7 +52,7 @@
     <mkdir dir="${obj.dir}/joram"/>
     <javac srcdir="${src.dir}"
            destdir="${obj.dir}/joram"
-           source="1.5" target="1.5" debug="true"
+           source="1.4" target="1.4" debug="true"
            deprecation="${deprecation}"
            optimize="${optimize}"
            nowarn="${nowarn}"
@@ -70,7 +70,7 @@
     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/server${sid}"/>
     <copy file="${a3.conf}" tofile="${run.dir}/server${sid}/a3servers.xml"/>
     <copy file="${osgi.conf}" tofile="${run.dir}/server${sid}/config.properties"/>
-    <!--copy file="${monit.conf}" tofile="${run.dir}/server${sid}/MonitoringConfig.xml"/-->
+    <!-- copy file="${conf.dir}/fileMonitoring.props" todir="${run.dir}/server${sid}"/ -->
   </target>
 
   <target name="simple_init" depends="init">
@@ -87,16 +87,6 @@
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
   </target>
-
-  <target name="server_nofork" depends="server_init">
-    <java classname="org.apache.felix.main.Main"
-          failonerror="no" fork="no"
-          dir="${run.dir}/server${sid}">
-      <classpath path="${felix.class.path}"/>
-      <jvmarg line="-Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=${sid} -Dcom.sun.management.jmxremote"/>
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
-    </java>
-  </target>
   
   <!-- Start a single server in NullTransaction mode -->
   <target name="single_server" depends="init"
@@ -104,17 +94,7 @@
     <antcall target="server">
       <param name="sid" value="0"/>
       <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
-      <param name="osgi.conf" value="${conf.dir}/config.properties"/>
-    </antcall>
-  </target>
-	
-  <!-- Start a single server with the shell commands -->
-  <target name="shell_server" depends="init"
-          description="--> Starts a single server with the shell commands">
-    <antcall target="server">
-      <param name="sid" value="0"/>
-      <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
-      <param name="osgi.conf" value="${conf.dir}/config_shell.properties"/>     
+      <param name="osgi.conf" value="${conf.dir}/config.properties"/>    	
     </antcall>
   </target>
   
@@ -168,16 +148,6 @@
       <param name="osgi.conf" value="${conf.dir}/config_console.properties"/>    	
     </antcall>
   </target>
-  
-  <!-- Start a single AMQP server -->
-  <target name="amqp_server" depends="init"
-          description="--> Starts a single AMQP server in persistent mode">
-    <antcall target="server">
-      <param name="sid" value="0"/>
-      <param name="a3.conf" value="${conf.dir}/amqp_a3servers.xml"/>
-      <param name="osgi.conf" value="${conf.dir}/config_amqp.properties"/>
-    </antcall>
-  </target>
 
   <!-- Setup a distributed architecture with 3 servers -->
   <target name="server0" depends="init"
@@ -185,8 +155,7 @@
     <antcall target="server">
       <param name="sid" value="0"/>
       <param name="a3.conf" value="${conf.dir}/distributed_a3servers.xml"/>
-      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>   
-    	<param name="monit.conf" value="${conf.dir}/MonitoringConfig_0.xml"/>
+      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>    	
     </antcall>
   </target>
 	
@@ -195,8 +164,7 @@
     <antcall target="server">
       <param name="sid" value="1"/>
       <param name="a3.conf" value="${conf.dir}/distributed_a3servers.xml"/>
-      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>   
-    	<param name="monit.conf" value="${conf.dir}/MonitoringConfig_1.xml"/>
+      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>    	
     </antcall>
   </target>
 	
@@ -205,8 +173,7 @@
     <antcall target="server">
       <param name="sid" value="2"/>
       <param name="a3.conf" value="${conf.dir}/distributed_a3servers.xml"/>
-      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>  
-    	<param name="monit.conf" value="${conf.dir}/MonitoringConfig_2.xml"/>
+      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>    	
     </antcall>
   </target>
 	
@@ -360,15 +327,6 @@
   <target name="subscriber" depends="simple_init"
     description="--> Starts a subscriber client">
     <java classname="classic.Subscriber" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-	
-  <!-- Runs the classic subscriber client -->
-  <target name="waiting_subscriber" depends="simple_init"
-    description="--> Starts a subscriber client, waiting for instruction to read a new message">
-    <java classname="classic.WaitingSubscriber" failonerror="no" fork="no"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
     </java>
@@ -637,7 +595,7 @@
     <java classname="cluster.queue.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dsleep=10 -DnbMsgSleep=1000"/>
+      <jvmarg line="-Dsleep=5000 -DnbMsgSleep=10"/>
       <arg value="${sid}"/>
     </java>
   </target>
@@ -648,8 +606,7 @@
     <java classname="cluster.queue.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dsleep=500 -DnbMsgSleep=1000"/>
-      <arg line="${sid} 50000"/>
+      <arg line="${sid} 1000"/>
     </java>
   </target>
 
@@ -1050,37 +1007,31 @@
   <!-- Initializes the jaas configuration -->
   <target name="jaas_init" depends="init">
     <mkdir dir="${run.dir}"/>
-    <mkdir dir="${run.dir}/server0"/>
-    <copy file="${conf.dir}/config.properties" tofile="${run.dir}/server0/config.properties"/>
-    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}/server0"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/server0"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
     <copy file="${conf.dir}/jndi.properties"
-          tofile="${run.dir}/server0/jndi.properties"
+          tofile="${run.dir}/jndi.properties"
           overwrite="true"/>
     <copy file="${conf.dir}/jaas_a3servers.xml"
-          tofile="${run.dir}/server0/a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
           overwrite="true"/>
     <copy file="${src.dir}/jaas/jaas.config"
-          tofile="${run.dir}/server0/jaas.config"
+          tofile="${run.dir}/jaas.config"
           overwrite="true"/>
     <copy file="${src.dir}/jaas/keystore"
-          tofile="${run.dir}/server0/keystore"
+          tofile="${run.dir}/keystore"
           overwrite="true"/>
     <copy file="${src.dir}/jaas/carol.properties"
-          tofile="${run.dir}/server0/carol.properties"
+          tofile="${run.dir}/carol.properties"
           overwrite="true"/>
   </target>
 
   <!-- Start a jaas server -->
   <target name="jaas_server" depends="jaas_init"
           description="--> Starts a JAAS server.">
-    <java classname="org.apache.felix.main.Main"
-          failonerror="no" fork="yes"
-          dir="${run.dir}/server0">
-      <classpath path="${felix.class.path}"/>
-      <jvmarg line="-Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote"/>
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
-    </java>
+    <antcall target="server">
+      <param name="sid" value="0"/>
+    </antcall>
   </target>
 
   <!-- Setup the classic configuration -->
@@ -1128,7 +1079,7 @@
   </target>
 
   <!-- **************************************************
-       * Performance Sample
+       * Performance Sample (Topic)
        ************************************************** -->
 
   <!-- Runs the performance sample administration code -->
@@ -1139,7 +1090,7 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
-
+ 
   <!-- Runs the performance sample producer: send 50.000 transient messages on queue -->
   <target name="perfs_prod_q1" depends="simple_init"
     description="--> Starts the PERFS producer">
@@ -1172,25 +1123,13 @@
     </java>
   </target>
 
-  <!-- Runs the special performance sample producer on queue -->
-  <target name="perfs_prod_qx" depends="simple_init"
-    description="--> Starts the PERFS producer with 25 clients">
-    <java classname="perfs.Producer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-DNbClient=1 -DRound=10000 -DNbMsgPerRound=1000 -Dmps=8000 -DMsgSize=10000 -DMsgTransient=true -DTransacted=true" />
-      <!-- jvmarg line="-DNbClient=25 -DRound=40 -DNbMsgPerRound=50 -Dmps=50 -DMsgSize=500 -DMsgTransient=false -DTransacted=false" / -->
-      <arg line="queue"/>
-    </java>
-  </target>
-
-	<!-- Runs the special performance sample consumer on queue -->
+  <!-- Runs the performance sample consumer on queue -->
   <target name="perfs_cons_qx" depends="simple_init"
     description="--> Starts the PERFS consumer">
     <java classname="perfs.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line=" -DTransacted=true -DNbMaxMessage=10000000" />
+      <jvmarg line="-DNbMaxMessage=200000" />
       <arg line="queue"/>
     </java>
   </target>
@@ -1201,7 +1140,7 @@
     <java classname="perfs.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DRound=50 -DMsgSize=500 -Dmps=10500 -DMsgTransient=true" />
+      <jvmarg line="-DRound=50 -DMsgSize=500 -DMsgTransient=true" />
       <arg line="topic"/>
     </java>
   </target>
@@ -1234,55 +1173,11 @@
     <java classname="perfs.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DSubDurable=true"/>
+      <jvmarg line="-DSubDurable=true" />
       <arg line="topic"/>
     </java>
   </target>
-
-  <!-- **************************************************
-       * JMX Connector Sample
-       ************************************************** -->
-
-  <!-- Runs the JMX connector sample administration code -->
-  <target name="jmxconnector_admin" depends="simple_init"
-    description="--> Launches the JMX Connector admin">
-    <java classname="jmxconnector.JMXConnectorAdmin" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
- 
-  <!-- Runs the JMX connector Hello sample -->
-  <target name="jmxconnector_hello" depends="simple_init"
-    description="--> Starts the JMX Connector Hello sample">
-    <java classname="jmxconnector.Hello" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    	<jvmarg value="-javaagent:../../../jmx-connector/target/joram-jmx-connector-0.1.0-SNAPSHOT.jar"/>
-    	<jvmarg line="-Dorg.ow2.joram.jmxconnector.server.url=service:jmx:jms://localhost:16010/Hello"/>
-    </java>
-  </target>
-	
-  <!-- Runs the JMX connector Client sample -->
-  <target name="jmxconnector_client" depends="simple_init"
-    description="--> Starts the JMX Connector Client sample">
-    <java classname="jmxconnector.JMXConnectorClient" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath>
-        <pathelement location="../../../../jmx-connector/target/joram-jmx-connector-0.1.0-SNAPSHOT.jar"/>
-        <pathelement path="${project.class.path}"/>
-      </classpath>
-    </java>
-  </target>
-	
-  <!-- Runs the JMX connector Test sample -->
-  <target name="jmxconnector_test" depends="simple_init"
-    description="--> Starts the JMX Connector Test sample">
-    <java classname="jmxconnector.JMXConnectorTest" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath>
-        <pathelement location="../../../../jmx-connector/target/joram-jmx-connector-0.1.0-SNAPSHOT.jar"/>
-        <pathelement path="${project.class.path}"/>
-      </classpath>
-    </java>
-  </target>
-
+  
  <!-- **************************************************
       * Cron sample
       ************************************************** -->

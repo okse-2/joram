@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,6 +47,8 @@ public class SCAdminOSGi implements SCAdminItf {
 
   private static final Logger logmon = Debug.getLogger(SCAdminOSGi.class.getName());
 
+  private static final short NO_CID_DEFINED = -1;
+
   /** Map containing all <code>Process</code> of running AgentServers */
   private Map launchedServers = new HashMap();
 
@@ -73,9 +75,18 @@ public class SCAdminOSGi implements SCAdminItf {
   }
 
   public void startAgentServer(short sid, String[] jvmargs) throws Exception {
+    startAgentServer(sid, NO_CID_DEFINED, jvmargs);
+  }
+
+  public void startAgentServer(short sid, short cid, String[] jvmargs) throws Exception {
     logmon.log(BasicLevel.DEBUG, "SCAdminOSGi: run AgentServer#" + sid);
 
-    Server server = (Server) launchedServers.get(new Short(sid));
+    Server server;
+    if (cid == NO_CID_DEFINED) {
+      server = (Server) launchedServers.get(new Short(sid));
+    } else {
+      server = (Server) launchedServers.get(new Short(cid));
+    }
 
     if (server != null) {
       try {
@@ -129,10 +140,11 @@ public class SCAdminOSGi implements SCAdminItf {
     argv.add("-Dorg.osgi.framework.storage=" + 's' + sid + "/felix-cache");
     argv.add("-Dosgi.shell.telnet.port=" + port);
     argv.add("-D" + Activator.AGENT_SERVER_ID_PROPERTY + '=' + sid);
+    if (cid != NO_CID_DEFINED)
+      argv.add("-D" + Activator.AGENT_SERVER_CLUSTERID_PROPERTY + "=" + cid);
     argv.add("-D" + Activator.AGENT_SERVER_STORAGE_PROPERTY + "=s" + sid);
     argv.add("-XX:+UnlockDiagnosticVMOptions");
     argv.add("-XX:+UnsyncloadClass");
-    argv.add("-Dgosh.args=--nointeractive");// need with gogo
 
     // Main class
     argv.add("org.apache.felix.main.Main");
@@ -142,12 +154,17 @@ public class SCAdminOSGi implements SCAdminItf {
     }
 
     Process p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]));
-    
+
     p.getInputStream().close();
     p.getOutputStream().close();
     p.getErrorStream().close();
 
-    launchedServers.put(new Short(sid), new Server(port.intValue(), p));
+    if (cid == NO_CID_DEFINED) {
+      launchedServers.put(new Short(sid), new Server(port.intValue(), p));
+    } else {
+      launchedServers.put(new Short(cid), new Server(port.intValue(), p));
+    }
+
   }
 
   public void stopAgentServer(short sid) throws Exception {
@@ -164,8 +181,7 @@ public class SCAdminOSGi implements SCAdminItf {
         daemon = new TelnetReaderDaemon(socket.getInputStream());
         daemon.start();
 
-        // use stop 0 to shutdown ! (available in felix and gogo)
-        socket.getOutputStream().write("stop 0\n".getBytes());
+        socket.getOutputStream().write("shutdown\n".getBytes());
         socket.getOutputStream().flush();
 
 
@@ -198,8 +214,7 @@ public class SCAdminOSGi implements SCAdminItf {
       daemon = new TelnetReaderDaemon(socket.getInputStream());
       daemon.start();
 
-      // use stop 0 to shutdown ! (available in felix and gogo)
-      socket.getOutputStream().write("stop 0\n".getBytes());
+      socket.getOutputStream().write("shutdown\n".getBytes());
       socket.getOutputStream().flush();
 
     } catch (Throwable exc) {

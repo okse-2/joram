@@ -86,7 +86,6 @@ public final class AdminRequestor {
    * 
    * @see DEFAULT_REQUEST_TIMEOUT
    * @see REQUEST_TIMEOUT_PROP
-   * @since 5.2.2
    */
   private long requestTimeout = DEFAULT_REQUEST_TIMEOUT;
   
@@ -94,8 +93,6 @@ public final class AdminRequestor {
    * Set the maximum time in ms before aborting arequest.
    * 
    * @param requestTimeout the maximum time in ms before aborting request.
-   * 
-   * @since 5.2.2
    */
   public void setRequestTimeout(long requestTimeout) {
     this.requestTimeout = requestTimeout;
@@ -105,8 +102,6 @@ public final class AdminRequestor {
    * Returns the maximum time in ms before aborting a request.
    * 
    * @return the maximum time in ms before aborting request.
-   * 
-   * @since 5.2.2
    */
   public long getRequestTimeout() {
     return requestTimeout;

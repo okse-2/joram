@@ -2,16 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
+  <groupId>org.objectweb.joram</groupId>
   <artifactId>jndi-shared</artifactId>
   <packaging>bundle</packaging>
   <name>JORAM :: jndi :: shared</name>
   <description>Builds the Joram jndi shared project.</description>
 
 	<parent>
-		<groupId>org.ow2.joram</groupId>
+		<groupId>org.objectweb.joram</groupId>
     <artifactId>jndi</artifactId>
-		<version>5.8.0-SNAPSHOT</version>
-  </parent>
+		<version>5.7.0</version>
+	</parent>
 
   <build>
     <plugins>
@@ -32,7 +33,7 @@
   
   <dependencies>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>a3-common</artifactId>
       <version>${project.version}</version>
     </dependency>

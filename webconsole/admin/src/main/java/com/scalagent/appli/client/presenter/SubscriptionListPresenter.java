@@ -28,10 +28,13 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionAction;
+import com.scalagent.appli.client.command.subscription.DeleteSubscriptionHandler;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionResponse;
 import com.scalagent.appli.client.command.subscription.SendEditedSubscriptionAction;
+import com.scalagent.appli.client.command.subscription.SendEditedSubscriptionHandler;
 import com.scalagent.appli.client.command.subscription.SendEditedSubscriptionResponse;
 import com.scalagent.appli.client.command.subscription.SendNewSubscriptionAction;
+import com.scalagent.appli.client.command.subscription.SendNewSubscriptionHandler;
 import com.scalagent.appli.client.command.subscription.SendNewSubscriptionResponse;
 import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
@@ -43,7 +46,6 @@ import com.scalagent.appli.client.widget.SubscriptionListWidget;
 import com.scalagent.appli.client.widget.record.SubscriptionListRecord;
 import com.scalagent.appli.shared.SubscriptionWTO;
 import com.scalagent.engine.client.BaseRPCServiceAsync;
-import com.scalagent.engine.client.command.Handler;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -139,7 +141,7 @@ public class SubscriptionListPresenter extends
    * The form information are sent to the server.
    */
   public void createNewSubscription(SubscriptionWTO newSub) {
-    service.execute(new SendNewSubscriptionAction(newSub), new Handler<SendNewSubscriptionResponse>(eventBus) {
+    service.execute(new SendNewSubscriptionAction(newSub), new SendNewSubscriptionHandler(eventBus) {
       @Override
       public void onSuccess(SendNewSubscriptionResponse response) {
         if (response.isSuccess()) {
@@ -160,7 +162,7 @@ public class SubscriptionListPresenter extends
    * The form information are sent to the server.
    */
   public void editSubscription(SubscriptionWTO sub) {
-    service.execute(new SendEditedSubscriptionAction(sub), new Handler<SendEditedSubscriptionResponse>(eventBus) {
+    service.execute(new SendEditedSubscriptionAction(sub), new SendEditedSubscriptionHandler(eventBus) {
       @Override
       public void onSuccess(SendEditedSubscriptionResponse response) {
         if (response.isSuccess()) {
@@ -181,7 +183,7 @@ public class SubscriptionListPresenter extends
    * The subscription name is sent to the server which delete the subscription.
    */
   public void deleteSubscription(SubscriptionWTO sub) {
-    service.execute(new DeleteSubscriptionAction(sub.getId()), new Handler<DeleteSubscriptionResponse>(eventBus) {
+    service.execute(new DeleteSubscriptionAction(sub.getId()), new DeleteSubscriptionHandler(eventBus) {
       @Override
       public void onSuccess(DeleteSubscriptionResponse response) {
         if (response.isSuccess()) {

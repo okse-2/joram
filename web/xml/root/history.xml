@@ -12,74 +12,6 @@
 
   <body>
     <s1 name="JORAM History">
-    
-      <s2 name="October 10, 2011: 2 new tutorials are available.">
-      <p>Two short tutorials are available in the <a href="doc/tutorials.html">tutorial</a> section. The first
-      shows the use of the web administration console of Joram and the second allows benchmarking of Joram.</p>
-      </s2>
-    
-      <s2 name="October 03, 2011: JORAM JMX/JMS Connector tutorial is available.">
-      <p>A short tutorial demonstrating the use of JORAM JMX/JMS connector is available in the
-      <a href="doc/tutorials.html">tutorial</a> section.</p>
-      </s2>
-
-      <s2 name="September 14, 2011: JORAM 5.7.0 release is available.">
-      <p>This release introduces some improvements and bug fixes, essentially:</p>
-      <ul>
-        <li>A new JMS bridge component using a connection pool similarly to the AMQP bridge.</li>
-        <li>Persistent handling of transaction properties and enhancements in NGTransaction component.</li>
-        <li>A new AliasQueue destination forwarding messages to a remote Joram destination.</li>
-        <li>A Xoram component (C/C++ client API), corrected and updated.</li>
-      </ul>
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
-      and in Maven repository.</p>
-      <p>It is tagged in SVN (JORAM_5_7_0), the complete list of changes can be viewed either in
-      <a href="dev/versions.html">code updates</a> or in
-      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
-      </s2>
-
-      <s2 name="July 13, 2011: JORAM/AMQP 1.0 is released">
-      <p>Joram team is proud to announce the final version of the implementation of the specification AMQP v0.9.1.
-      This version successfully passed interoperability testing with RabbitMQ and QPID, it is available in Maven
-      reprository.</p>
-			</s2>
-
-      <s2 name="July 13, 2011: JORAM 5.6.0 release is available.">
-      <p>This release introduces some improvements and bug fixes, essentially:</p>
-      <ul>
-        <li>Changes on JCA connector enabling Joram to be started as a JOnAS OSGi service.</li>
-        <li>Evolves AMQP acquisition and distribution destinations:<ul>
-          <li>Adds persistence to distribution queues for messages that can't be
-          distributed. The queue tries to send the messages regularly.</li>
-          <li>Adds a persistence mechanism for AMQP connections pool (AMQP acquisition and
-          distribution destinations).</li>
-          <li>Fix NPE in AMQP distribution destination when amqp.Routing property is not
-          correctly set.</li>
-          <li>Fix possible NPE in JMS module for acquisition and distribution JMS bridge
-          destinations.</li>
-        </ul></li>
-        <li>Fix a potential issue in PoolNetwork when a connection is initiated by a bad
-        component (the incoming component still connected).</li>
-        <li>Adds samples configurations for Derby and NGT Transaction components.</li>
-        <li>Adds samples configurations and clients for HttpNetwork Network components.</li>
-        <li>Updates performance sample.</li>
-      </ul>
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
-      and in Maven repository.</p>
-      <p>It is tagged in SVN (JORAM_5_6_0), the complete list of changes can be viewed either in
-      <a href="dev/versions.html">code updates</a> or in
-      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
-      </s2>
-
-      <s2 name="June 17, 2011: JORAM/AMQP 0.5 is released">
-      <p>This version implements the AMQP v0.9.1 specification. It is tagged JORAM_AMQP_0_5 in SVN repository.</p>
-			</s2>
-
-      <s2 name="April 08, 2011: JORAM/AMQP 0.4 is released">
-      <p>This version implements the AMQP v0.9.1 specification. It is available in Maven reprository, it is tagged
-      JORAM_AMQP_0_4 in SVN repository (project mom-amqp).</p>
-			</s2>
-
       <s2 name="March 28, 2011: JORAM 5.5.0 release is available.">
       <p>This release introduces some improvements and bug fixes, essentially:</p>
       <ul>
@@ -103,17 +35,6 @@
       <p>It is tagged in SVN (JORAM_5_5_0), the complete list of changes can be viewed either in
       <a href="dev/versions.html">code updates</a> or in
       <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
-      </s2>
-
-      <s2 name="November 24-25, 2010: OW2 Annual Conference, Paris, France.">
-      <p>During the <a href="http://www.ow2.org/view/Events/OW2AnnualConference2010">OW2 Annual Conference</a>,
-      Serge Lacourte (<a href="www.scalagent.com">ScalAgent D.T.</a>) presents two very different Use Cases of Joram.
-      They demonstrate the ability of Joram to adapt to very different deployment environments,
-      thanks to the very high configuration capability of its architecture.</p>
-      <p>
-      The slide show is available on the OW2 web site:
-      <a href="http://www.ow2.org/xwiki/bin/download/Events2010AnnualConference/Program/JORAM-S-Lacourte.pdf">Configuration from clustering to WAN distribution with Joram</a>.
-			</p>
       </s2>
 
       <s2 name="October 27, 2010: JORAM 5.4.0 release is available.">
@@ -256,11 +177,6 @@
 	      <a href="http://www.scalagent.com/spip.php?article314">(PDF, in french only)</a></p>
       </s2>
     
-      <s2 name="October 28, 2009: JORAM/AMQP 0.3 is released">
-      <p>This version implements the AMQP v0.9.1 specification. It is available in OW2 JORAM SVN repository (project mom-amqp) and
-      it is tagged JORAM_AMQP_0_3.</p>
-			</s2>
-    
       <s2 name="October 23, 2009: JORAM 5.2.6 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
       <p>It introduces some improvements and bug fixes, essentially:</p>
@@ -297,11 +213,6 @@
       <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
       </s2>
 
-      <s2 name="September 09, 2009: JORAM/AMQP 0.2 is released">
-      <p>This version implements the AMQP v0.9.1 specification. It is available in OW2 JORAM SVN repository (project mom-amqp) and
-      it is tagged JORAM_AMQP_0_2.</p>
-			</s2>
-
       <s2 name="June 4, 2009: JORAM 5.2.4 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
       <p>It introduces many improvements and some bug fixes, essentially:</p>
@@ -317,7 +228,7 @@
       <p>It is tagged in SVN (JORAM_5_2_4), the complete list of changes can be viewed either in
       <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
       <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
-    	</s2>
+    </s2>
 
       <s2 name="March 4, 2009: JORAM 5.2.1 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
@@ -329,12 +240,7 @@
       <p>It is tagged in SVN (JORAM_5_2_1), the complete list of changes can be viewed either in
       <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
       <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
-			</s2>
-
-      <s2 name="December 12, 2008: JORAM/AMQP 0.1 is released">
-      <p>This version implements the AMQP v0.9.1 specification. It is available in OW2 JORAM SVN repository (project mom-amqp) and
-      it is tagged JORAM_AMQP_0_1.</p>
-			</s2>
+</s2>
 
       <s2 name="September 16, 2008: JORAM 5.1.0 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>

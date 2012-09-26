@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -39,8 +39,8 @@ import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
-import org.objectweb.joram.client.jms.admin.AdminItf;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.AdminWrapper;
 import org.objectweb.joram.client.jms.admin.AdministeredObject;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.XmlSerializer;
@@ -72,29 +72,6 @@ import fr.dyade.aaa.util.management.MXWrapper;
 /**
  * Implements the <code>javax.jms.Destination</code> interface and provides
  * JORAM specific administration and monitoring methods.
- * <p>
- * A Destination is a JMS administered object that encapsulates a Joram's specific address.
- * It is created by an administrator and later used by JMS clients. Normally the JMS clients
- * find administered objects by looking them up in a JNDI namespace.
- * <p>
- * <b>Joram MOM Model</b>
- * <p>
- * Server side, a destination is a component receiving messages from producers and answering to
- * consuming requests from consumers. A destination might either be a “queue” or a “topic”:<ul>
- * <li>Queue: each messages is read only by a single client.</li>
- * <li>Topic: All clients that have previously subscribed to this topic are notified of
- * the corresponding message.</li>
- * </ul>
- * A destination allows clients to perform operations according to their access rights. A client
- * set as a READER will be able to request messages from the destination (either as a subscriber
- * to a topic, or as a receiver or browser on a queue). A client set as a WRITER will be able to
- * send messages to the destination.
- * <p>
- * A destination provides methods to add and remove Interceptors, an interceptor is an object handling
- * each message sent to the destination. Interceptors can read and also modify the messages. This enables
- * filtering, transformation or content enrichment, for example adding a property into the message.
- * Also Interceptors can stop the Interceptor chain by simply returning false to their intercept method
- * invocation, in this case the transmission of the message is stopped.
  */
 public abstract class Destination extends AdministeredObject implements javax.jms.Destination, DestinationMBean {
   /** Define serialVersionUID for interoperability. */
@@ -175,19 +152,16 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     return type;
   }
 
-  /** Symbolic name given by the administrator. */
+  /** Name given by the administrator. */
   protected String adminName;
 
   /**
    * Returns the symbolic administration name of the destination.
-   * This symbolic name is given by the user at creation, if it is unknown the internal
-   * name of this destination is returned.
+   * This symbolic name is given by the user at creation.
    * 
    * @return the symbolic name of the destination if any.
    */
   public final String getAdminName() {
-    if (adminName == null)
-      return agentId;
     return adminName;
   }
 
@@ -204,7 +178,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
 
   /**
    * Returns <code>true</code> if the parameter object is a Joram destination
-   * wrapping the same Joram's Destination.
+   * wrapping the same agent identifier.
    */
   public boolean equals(Object obj) {
     if (! (obj instanceof Destination))
@@ -224,7 +198,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * the script. if it is not defined the wrapper set at creation is used, if
    * none the static AdminModule connection is used.
    */
-  AdminItf wrapper = null;
+  AdminWrapper wrapper = null;
 
   /**
    * Returns the administration wrapper to use.
@@ -232,7 +206,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @return The wrapper to use.
    * @throws ConnectException if no wrapper is defined.
    */
-  protected final AdminItf getWrapper() throws ConnectException {
+  protected final AdminWrapper getWrapper() throws ConnectException {
     if ((wrapper != null) && (! wrapper.isClosed()))
       return wrapper;
     return AdminModule.getWrapper();
@@ -244,7 +218,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * 
    * @param wrapper The wrapper to use or null to unset.
    */
-  public void setWrapper(AdminItf wrapper) {
+  public void setWrapper(AdminWrapper wrapper) {
     this.wrapper = wrapper;
   }
 
@@ -259,18 +233,15 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @exception AdminException  If the platform's reply is invalid, or if
    *              the request failed.
    */
-  final AdminReply doRequest(AdminRequest request) throws AdminException, ConnectException {
+  public final AdminReply doRequest(AdminRequest request) throws AdminException, ConnectException {
     return getWrapper().doRequest(request);
   }
 
   /**
-   * Format the destination properties in a XML format, the result can be used
-   * in an XML configuration script.
-   * 
+   * Format the destination properties in a XML format
    * @param indent use this indent for prefixing XML representation.
    * @param serverId server id hosting the destination object
-   * @return returns a XML view of the queue (XML configuration format)
-   * 
+   * @return returns a XML view of the queue (administration format)
    * @throws ConnectException if the server is unreachable
    * @throws AdminException if an error occurs
    */
@@ -359,46 +330,14 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     return (this instanceof javax.jms.Topic);
   }
 
-  /**
-   * Constant defining the implementation class for a classic Queue.
-   */
   public static final String QUEUE = "org.objectweb.joram.mom.dest.Queue";
-  /**
-   * Constant defining the implementation class for a classic Topic.
-   */ 
   public static final String TOPIC = "org.objectweb.joram.mom.dest.Topic";
-  /**
-   * Constant defining the implementation class for a Dead Message Queue. 
-   * @deprecated Since Joram 5.2.2 the DeadMQueue is a simple Queue. 
-   */
   public static final String DEAD_MQUEUE = "org.objectweb.joram.mom.dest.Queue";
-  /**
-   * Constant defining the implementation class for a clustered Queue. 
-   */
   public static final String CLUSTER_QUEUE = "org.objectweb.joram.mom.dest.ClusterQueue";
-  /**
-   * Constant defining the implementation class for a scheduled Queue.
-   */
   public static final String SCHEDULER_QUEUE = "com.scalagent.joram.mom.dest.scheduler.SchedulerQueue";
-  /**
-   * Constant defining the implementation class for a Queue allowing to collect data from
-   * external sources. The nature of data collector is configurable through properties.
-   */
   public static final String ACQUISITION_QUEUE = "org.objectweb.joram.mom.dest.AcquisitionQueue";
-  /**
-   * Constant defining the implementation class for a Queue allowing to forward data to
-   * external targets. The nature of data forwarder is configurable through properties.
-   */
   public static final String DISTRIBUTION_QUEUE = "org.objectweb.joram.mom.dest.DistributionQueue";
-  /**
-   * Constant defining the implementation class for a Topic allowing to collect data from
-   * external sources. The nature of data collector is configurable through properties.
-   */
   public static final String ACQUISITION_TOPIC = "org.objectweb.joram.mom.dest.AcquisitionTopic";
-  /**
-   * Constant defining the implementation class for a Queue allowing to forward data to
-   * external targets. The nature of data forwarder is configurable through properties.
-   */
   public static final String DISTRIBUTION_TOPIC = "org.objectweb.joram.mom.dest.DistributionTopic";
   
   /**
@@ -786,15 +725,15 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * <p>
    * This method should be only used by the JMX MBean.
    *
-   * @param readable if true set the free reading access else disable.
+   * @param b if true set the free reading access else disable.
    * 
    * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    * 
    * @see org.objectweb.joram.client.jms.DestinationMBean#setFreelyReadable(boolean)
    */
-  public void setFreelyReadable(boolean readable) throws ConnectException, AdminException {
-    if (readable)
+  public void setFreelyReadable(boolean b) throws ConnectException, AdminException {
+    if (b)
       setFreeReading();
     else
       unsetFreeReading();
@@ -821,15 +760,15 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * <p>
    * This method should be only used by the JMX MBean.
    *
-   * @param writeable if true set the free writing access else disable.
+   * @param b if true set the free writing access else disable.
    * 
    * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    * 
    * @see org.objectweb.joram.client.jms.DestinationMBean#setFreelyWriteable(boolean)
    */
-  public void setFreelyWriteable(boolean writeable) throws ConnectException, AdminException {
-    if (writeable)
+  public void setFreelyWriteable(boolean b) throws ConnectException, AdminException {
+    if (b)
       setFreeWriting();
     else
       unsetFreeWriting();
@@ -979,12 +918,27 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
 
   /**
+   * Codes a <code>Destination</code> as a Hashtable for travelling through the
+   * SOAP protocol.
+   */
+  public Hashtable code() {
+    Hashtable h = new Hashtable();
+    h.put("agentId", getName());
+    h.put("type", new Byte(type));
+    return h;
+  }
+
+  public void decode(Hashtable h) {
+    agentId = (String) h.get("agentId");
+    type = ((Byte) h.get("type")).byteValue();
+  }
+  
+  /**
    * Administration method add interceptors.
    * 
    * @param interceptors list of string className interceptor (separate with ",")
-   * 
-   * @exception ConnectException  If the administration connection is closed or broken.
-   * @exception AdminException  If the request fails.
+   * @throws ConnectException
+   * @throws AdminException
    */
   public void addInterceptors(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
@@ -996,9 +950,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * Administration method to get interceptors list.
    * 
    * @return list of string className interceptor (separate with ",")
-   * 
-   * @exception ConnectException  If the administration connection is closed or broken.
-   * @exception AdminException  If the request fails.
+   * @throws ConnectException
+   * @throws AdminException
    */
   public String getInterceptors() throws ConnectException, AdminException {
     AdminCommandReply reply = (AdminCommandReply) getWrapper().processAdmin(getName(),
@@ -1010,9 +963,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * Administration method to remove interceptors. 
    * 
    * @param interceptors list of string className interceptor (separate with ",")
-   * 
-   * @exception ConnectException  If the administration connection is closed or broken.
-   * @exception AdminException  If the request fails.
+   * @throws ConnectException
+   * @throws AdminException
    */
   public void removeInterceptors(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
@@ -1025,9 +977,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * 
    * @param newInterceptor the new className interceptor.
    * @param oldInterceptor the old className interceptor.
-   * 
-   * @exception ConnectException  If the administration connection is closed or broken.
-   * @exception AdminException  If the request fails.
+   * @throws ConnectException
+   * @throws AdminException
    */
   public void replaceInterceptor(String newInterceptor, String oldInterceptor) throws ConnectException, AdminException {
   	Properties prop = new Properties();
@@ -1041,9 +992,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * 
    * @param prop the properties to update.
    * @return the admin reply
-   * 
-   * @exception ConnectException  If the administration connection is closed or broken.
-   * @exception AdminException  If the request fails.
+   * @throws ConnectException
+   * @throws AdminException
    */
   public AdminReply setProperties(Properties prop) throws ConnectException, AdminException {
   	return getWrapper().processAdmin(getName(), AdminCommandConstant.CMD_SET_PROPERTIES, prop);

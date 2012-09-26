@@ -36,8 +36,8 @@ import org.objectweb.joram.mom.proxies.UserAgentMBean;
 import org.osgi.framework.BundleContext;
 import org.ow2.easybeans.osgi.annotation.OSGiResource;
 import org.ow2.joram.admin.Activator;
+import org.ow2.joram.admin.AdminListener;
 import org.ow2.joram.admin.JoramAdmin;
-import org.ow2.joram.admin.JoramAdminJMX;
 import org.ow2.joram.admin.JoramAdminOSGi;
 
 import com.scalagent.appli.server.converter.MessageWTOConverter;
@@ -77,12 +77,12 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
   private static final String SESSION_USERS = "usersList";
   private static final String SESSION_SUBSCRIPTION = "subscriptionList";
 
-  // Annotation is used to inject BundleContext when bundle is used as a war in JOnAS
   @OSGiResource
   private BundleContext bundleContext = null;
 
   private boolean isConnected = false;
   private JoramAdmin joramAdmin;
+  private LiveListener listener = new LiveListener();
 
   private Map<String, QueueMBean> mapQueues;
   private Map<String, TopicMBean> mapTopics;
@@ -90,11 +90,6 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
   private Map<String, ClientSubscriptionMBean> listSubscriptions;
 
   private long lastupdate = 0;
-
-  protected void doUnexpectedFailure(Throwable e) {
-    super.doUnexpectedFailure(e);
-    e.printStackTrace();
-  }
 
   @SuppressWarnings("unchecked")
   public List<TopicWTO> getTopics(HttpSession session, boolean retrieveAll, boolean forceUpdate) {
@@ -303,21 +298,17 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
   }
 
   public boolean connectJORAM(String login, String password) throws Exception {
-    if (Boolean.getBoolean("joram.webadmin.hostedmode")) {
-      joramAdmin = new JoramAdminJMX();
-    } else {
-      // If context has not been injected, we should be in pax web OSGi case.
-      if (bundleContext == null) {
-        bundleContext = Activator.getContext();
-      }
-      if (bundleContext == null) {
-        throw new Exception("OSGi context has not been found, server is not configured properly.");
-      }
-      joramAdmin = new JoramAdminOSGi(bundleContext);
+    // If context has not been injected, we should be in pax web OSGi case.
+    if (bundleContext == null) {
+      bundleContext = Activator.getContext();
     }
+    if (bundleContext == null) {
+      throw new Exception("OSGi context has not been found, server is not configured properly.");
+    }
+    joramAdmin = new JoramAdminOSGi(bundleContext);
     isConnected = joramAdmin.connect(login, password);
     if (isConnected) {
-      joramAdmin.start();
+      joramAdmin.start(listener);
     }
     return isConnected;
   }
@@ -328,10 +319,10 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
 
     if (now > lastupdate + 5000 || mapQueues == null || forceUpdate) {
 
-      mapQueues = joramAdmin.getQueues();
-      mapTopics = joramAdmin.getTopics();
-      mapUsers = joramAdmin.getUsers();
-      listSubscriptions = joramAdmin.getSubscription();
+      mapQueues = listener.getQueues();
+      mapTopics = listener.getTopics();
+      mapUsers = listener.getUsers();
+      listSubscriptions = listener.getSubscription();
       lastupdate = now;
     }
 
@@ -481,6 +472,63 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
       return false;
     }
     return joramAdmin.deleteSubscription(subName);
+  }
+
+  static class LiveListener implements AdminListener {
+
+    private Map<String, QueueMBean> queues = new HashMap<String, QueueMBean>();
+    private Map<String, TopicMBean> topics = new HashMap<String, TopicMBean>();
+    private Map<String, UserAgentMBean> users = new HashMap<String, UserAgentMBean>();
+    private Map<String, ClientSubscriptionMBean> subscriptions = new HashMap<String, ClientSubscriptionMBean>();
+
+    public void onQueueAdded(QueueMBean queue) {
+      queues.put(queue.getName(), queue);
+    }
+
+    public void onQueueRemoved(QueueMBean queue) {
+      queues.remove(queue.getName());
+    }
+
+    public void onTopicAdded(TopicMBean topic) {
+      topics.put(topic.getName(), topic);
+    }
+
+    public void onTopicRemoved(TopicMBean topic) {
+      topics.remove(topic.getName());
+    }
+
+    public void onSubscriptionAdded(ClientSubscriptionMBean subscription) {
+      subscriptions.put(subscription.getName(), subscription);
+    }
+
+    public void onSubscriptionRemoved(ClientSubscriptionMBean subscription) {
+      subscriptions.remove(subscription.getName());
+    }
+
+    public void onUserAdded(UserAgentMBean user) {
+      users.put(user.getName(), user);
+    }
+
+    public void onUserRemoved(UserAgentMBean user) {
+      users.remove(user.getName());
+    }
+
+    public Map<String, QueueMBean> getQueues() {
+      return queues;
+    }
+
+    public Map<String, TopicMBean> getTopics() {
+      return topics;
+    }
+
+    public Map<String, UserAgentMBean> getUsers() {
+      return users;
+    }
+
+    public Map<String, ClientSubscriptionMBean> getSubscription() {
+      return subscriptions;
+    }
+
   }
 
 }

@@ -28,10 +28,13 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.topic.DeleteTopicAction;
+import com.scalagent.appli.client.command.topic.DeleteTopicHandler;
 import com.scalagent.appli.client.command.topic.DeleteTopicResponse;
 import com.scalagent.appli.client.command.topic.SendEditedTopicAction;
+import com.scalagent.appli.client.command.topic.SendEditedTopicHandler;
 import com.scalagent.appli.client.command.topic.SendEditedTopicResponse;
 import com.scalagent.appli.client.command.topic.SendNewTopicAction;
+import com.scalagent.appli.client.command.topic.SendNewTopicHandler;
 import com.scalagent.appli.client.command.topic.SendNewTopicResponse;
 import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
@@ -42,7 +45,6 @@ import com.scalagent.appli.client.widget.TopicListWidget;
 import com.scalagent.appli.client.widget.record.TopicListRecord;
 import com.scalagent.appli.shared.TopicWTO;
 import com.scalagent.engine.client.BaseRPCServiceAsync;
-import com.scalagent.engine.client.command.Handler;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -128,7 +130,7 @@ public class TopicListPresenter extends
    * The form information are sent to the server.
    */
   public void createNewTopic(TopicWTO newTopic) {
-    service.execute(new SendNewTopicAction(newTopic), new Handler<SendNewTopicResponse>(eventBus) {
+    service.execute(new SendNewTopicAction(newTopic), new SendNewTopicHandler(eventBus) {
       @Override
       public void onSuccess(SendNewTopicResponse response) {
         if (response.isSuccess()) {
@@ -149,7 +151,7 @@ public class TopicListPresenter extends
    * The form information are sent to the server.
    */
   public void editTopic(TopicWTO topic) {
-    service.execute(new SendEditedTopicAction(topic), new Handler<SendEditedTopicResponse>(eventBus) {
+    service.execute(new SendEditedTopicAction(topic), new SendEditedTopicHandler(eventBus) {
       @Override
       public void onSuccess(SendEditedTopicResponse response) {
         if (response.isSuccess()) {
@@ -170,7 +172,7 @@ public class TopicListPresenter extends
    * The topic name is sent to the server which delete the subscription.
    */
   public void deleteTopic(TopicWTO topic) {
-    service.execute(new DeleteTopicAction(topic.getId()), new Handler<DeleteTopicResponse>(eventBus) {
+    service.execute(new DeleteTopicAction(topic.getId()), new DeleteTopicHandler(eventBus) {
       @Override
       public void onSuccess(DeleteTopicResponse response) {
         if (response.isSuccess()) {

@@ -1,6 +1,5 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -23,19 +22,10 @@
  */
 package org.objectweb.joram.client.connector;
 
-import javax.jms.ConnectionConsumer;
+import javax.jms.*;
 import javax.jms.IllegalStateException;
-import javax.jms.JMSException;
-import javax.jms.ServerSessionPool;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicSession;
-import javax.jms.XATopicConnection;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>OutboundTopicConnection</code> instance is a handler for a
@@ -43,10 +33,10 @@ import fr.dyade.aaa.common.Debug;
  * component to transparently use this physical connection possibly within
  * a transaction (local or global).
  */
-public class OutboundTopicConnection extends OutboundConnection implements javax.jms.TopicConnection {
-  
-  public static Logger logger = Debug.getLogger(OutboundTopicConnection.class.getName());
-  
+public class OutboundTopicConnection
+             extends OutboundConnection
+             implements javax.jms.TopicConnection
+{
   /**
    * Constructs an <code>OutboundTopicConnection</code> instance.
    *
@@ -57,8 +47,9 @@ public class OutboundTopicConnection extends OutboundConnection implements javax
                           XATopicConnection xac) {
     super(managedCx, xac);
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "OutboundTopicConnection(" + managedCx +
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundTopicConnection(" + managedCx +
                                     ", " + xac + ")");
   }
 
@@ -73,15 +64,17 @@ public class OutboundTopicConnection extends OutboundConnection implements javax
   public TopicSession
       createTopicSession(boolean transacted, int acknowledgeMode)
     throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createTopicSession(" + transacted +
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createTopicSession(" + transacted +
                                     ", " + acknowledgeMode + ")");
     
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createTopicSession sess = " + managedCx.session);
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createTopicSession sess = " + managedCx.session);
 
     Session sess = managedCx.session;
     if (sess == null)

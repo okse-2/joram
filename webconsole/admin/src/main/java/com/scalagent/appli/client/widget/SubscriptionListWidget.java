@@ -56,8 +56,8 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.events.CloseClickEvent;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
+import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -300,7 +300,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
         subRequestIdFieldD);
 
     chartWidth = (com.google.gwt.user.client.Window.getClientWidth() / 2) - 45;
-    chart = new AnnotatedTimeLine(createTable(), createOptions(true), chartWidth + "px", "200px");
+    chart = new AnnotatedTimeLine(createTable(), createOptions(true), "" + chartWidth, "200");
 
     columnForm = new DynamicForm();
     columnForm.setNumCols(6);
@@ -542,7 +542,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     winModal.setShowModalMask(Boolean.TRUE);
     winModal.centerInPage();
     winModal.addCloseClickHandler(new CloseClickHandler() {
-      public void onCloseClick(CloseClickEvent event) {
+      public void onCloseClick(CloseClientEvent event) {
         winModal.destroy();
       }
     });

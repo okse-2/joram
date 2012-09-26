@@ -47,16 +47,9 @@ public class ConnectorTest2 extends TestCase {
 
   public void run(){
     try{      
-    	JoramAdapter ja= new JoramAdapter() ;
-    	ja.setCollocated(Boolean.TRUE);
-    	ja.setName("ra");
-    	ja.setStartJoramServer(true);
-    	ja.setStorage("s0");
-    	ja.setServerId((short) 0);
-    	ja.setPlatformConfigDir(".");
-    	ja.setAdminFileXML("joramAdmin.xml");
-    	ja.setAdminFileExportXML("joramAdminExport.xml");
-    	ja.start(new ResourceBootstrapContext(new JWorkManager(1, 5, 5000)));
+      JoramAdapter ja= new JoramAdapter() ;
+      ja.setCollocatedServer(Boolean.TRUE);
+      ja.start(new ResourceBootstrapContext(new JWorkManager(1, 5, 5000)));
       
       Thread.sleep(5000);
       

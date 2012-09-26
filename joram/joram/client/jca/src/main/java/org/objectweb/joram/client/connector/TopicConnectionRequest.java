@@ -45,8 +45,4 @@ public class TopicConnectionRequest extends ConnectionRequest {
   public int hashCode() {
     return ("PubSub:" + userName).hashCode();
   }
-  
-  public String toString() {
-    return "TopicConnectionRequest:PubSub:" + userName + "@"+ hashCode();
-  }
 }

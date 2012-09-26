@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -30,12 +30,13 @@ import java.io.IOException;
 import fr.dyade.aaa.common.stream.StreamUtil;
 
 public final class ActivateConsumerRequest extends AbstractJmsRequest {
-  /** Define serialVersionUID for interoperability. */
+  /**
+   * 
+   */
   private static final long serialVersionUID = 1L;
-  
-  private int activate;
+  private boolean activate;
 
-  public int getActivate() {
+  public boolean getActivate() {
     return activate;
   }
 
@@ -43,7 +44,7 @@ public final class ActivateConsumerRequest extends AbstractJmsRequest {
     return ACTIVATE_CONSUMER_REQUEST;
   }
 
-  public ActivateConsumerRequest(String targetName, int activate) {
+  public ActivateConsumerRequest(String targetName, boolean activate) {
     super(targetName);
     this.activate = activate;
   }
@@ -76,6 +77,6 @@ public final class ActivateConsumerRequest extends AbstractJmsRequest {
    */
   public void readFrom(InputStream is) throws IOException {
     super.readFrom(is);
-    activate = StreamUtil.readIntFrom(is);
+    activate = StreamUtil.readBooleanFrom(is);
   }
 }

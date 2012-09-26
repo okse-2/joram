@@ -59,8 +59,8 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.events.CloseClickEvent;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
+import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.events.MouseOutEvent;
@@ -361,7 +361,7 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
         waitingRequestCountFieldD, pendingMessageCountFieldD, deliveredMessagecountFieldD, nbMaxMessFieldD);
 
     chartWidth = (com.google.gwt.user.client.Window.getClientWidth() / 2) - 45;
-    chart = new AnnotatedTimeLine(createTable(), createOptions(true), chartWidth + "px", "200px");
+    chart = new AnnotatedTimeLine(createTable(), createOptions(true), "" + chartWidth, "200");
 
     columnForm = new DynamicForm();
     columnForm.setNumCols(8);
@@ -656,9 +656,8 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
     winModal.setShowModalMask(Boolean.TRUE);
     winModal.centerInPage();
     winModal.addCloseClickHandler(new CloseClickHandler() {
-      public void onCloseClick(CloseClickEvent event) {
+      public void onCloseClick(CloseClientEvent event) {
         winModal.destroy();
-
       }
     });
 
@@ -691,20 +690,6 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
     nameItem.setName("nameItem");
     nameItem.setRequired(Boolean.TRUE);
 
-    TextItem periodItem = new TextItem();
-    periodItem.setTitle(Application.messages.queueWidget_periodItem_title());
-    periodItem.setName("periodItem");
-    periodItem.setRequired(Boolean.TRUE);
-    periodItem.setValidators(integerRangeValidator, integerValidator);
-
-    CheckboxItem freeReadingItem = new CheckboxItem();
-    freeReadingItem.setTitle(Application.messages.queueWidget_freeReadingItem_title());
-    freeReadingItem.setName("freeReadingItem");
-
-    CheckboxItem freeWritingItem = new CheckboxItem();
-    freeWritingItem.setTitle(Application.messages.queueWidget_freeWritingItem_title());
-    freeWritingItem.setName("freeWritingItem");
-
     if (qlr != null) {
       TextItem DMQItem = new TextItem();
       DMQItem.setTitle(Application.messages.queueWidget_DMQItem_title());
@@ -715,6 +700,12 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
       destinationItem.setTitle(Application.messages.queueWidget_destinationItem_title());
       destinationItem.setName("destinationItem");
       destinationItem.setDisabled(Boolean.TRUE);
+
+      TextItem periodItem = new TextItem();
+      periodItem.setTitle(Application.messages.queueWidget_periodItem_title());
+      periodItem.setName("periodItem");
+      periodItem.setRequired(Boolean.TRUE);
+      periodItem.setValidators(integerRangeValidator, integerValidator);
 
       TextItem thresholdItem = new TextItem();
       thresholdItem.setTitle(Application.messages.queueWidget_thresholdItem_title());
@@ -727,6 +718,14 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
       nbMaxMsgItem.setName("nbMaxMsgItem");
       nbMaxMsgItem.setRequired(Boolean.TRUE);
       nbMaxMsgItem.setValidators(integerRangeValidator, integerValidator);
+
+      CheckboxItem freeReadingItem = new CheckboxItem();
+      freeReadingItem.setTitle(Application.messages.queueWidget_freeReadingItem_title());
+      freeReadingItem.setName("freeReadingItem");
+
+      CheckboxItem freeWritingItem = new CheckboxItem();
+      freeWritingItem.setTitle(Application.messages.queueWidget_freeWritingItem_title());
+      freeWritingItem.setName("freeWritingItem");
 
       nameItem.setValue(qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_NAME));
       nameItem.setDisabled(Boolean.TRUE);
@@ -742,7 +741,7 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
           freeReadingItem, freeWritingItem);
 
     } else {
-      form.setFields(nameItem, periodItem, freeReadingItem, freeWritingItem);
+      form.setFields(nameItem);
     }
 
 

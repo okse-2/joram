@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -59,7 +59,7 @@ public class DumpAttributes {
   public static void dumpAttributes(String name, String path) {
     FileWriter writer = null;
     try {
-      Set<String> mBeans = null;
+      Set mBeans = null;
       try {
         mBeans = MXWrapper.queryNames(name);
       } catch (Exception exc) {
@@ -71,12 +71,12 @@ public class DumpAttributes {
         writer = new FileWriter(path, true);
         StringBuffer strbuf = new StringBuffer();
 
-        for (Iterator<String> iterator = mBeans.iterator(); iterator.hasNext();) {
-          String mBean = iterator.next();
+        for (Iterator iterator = mBeans.iterator(); iterator.hasNext();) {
+          String mBean = (String) iterator.next();
 
           // Get all mbean's attributes
           try {
-            List<String> attributes = MXWrapper.getAttributeNames(mBean);
+            List attributes = MXWrapper.getAttributeNames(mBean);
             if (attributes != null) {
               for (int i = 0; i < attributes.size(); i++) {
                 String attname = (String) attributes.get(i);

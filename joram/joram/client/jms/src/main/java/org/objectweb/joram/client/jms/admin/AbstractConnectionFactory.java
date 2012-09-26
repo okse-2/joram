@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -122,7 +122,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
       if (!isSetIdentityClassName) {
         identityClassName = System.getProperty("org.objectweb.joram.Identity", SimpleIdentity.class.getName());
       }
-      Class<?> clazz = Class.forName(identityClassName);
+      Class clazz = Class.forName(identityClassName);
       identity = (Identity) clazz.newInstance();
       identity.setIdentity(user, passwd);
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -255,12 +255,6 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
     return params;
   }
 
-  private String cnxJMXBeanBaseName = "JoramConnection";
-  
-  public void setCnxJMXBeanBaseName(String base) {
-    this.cnxJMXBeanBaseName = base;
-  }
-  
   /*
    * ConnectionFactory interfaces implementation.
    */
@@ -308,10 +302,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   public javax.jms.Connection createConnection(String name,
                                                String password) throws JMSException {
     initIdentity(name, password);
-    Connection cnx = new Connection();
-    cnx.setJMXBeanBaseName(cnxJMXBeanBaseName);
-    cnx.open(params, createRequestChannel(params, identity, reliableClass));
-    return cnx;
+    return new Connection(params, createRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -343,10 +334,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   public javax.jms.QueueConnection createQueueConnection(String name,
                                                          String password) throws JMSException {
     initIdentity(name, password);
-    QueueConnection cnx = new QueueConnection();
-    cnx.setJMXBeanBaseName(cnxJMXBeanBaseName);
-    cnx.open(params, createRequestChannel(params, identity, reliableClass));
-    return cnx;
+    return new QueueConnection(params, createRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -378,10 +366,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   public javax.jms.TopicConnection createTopicConnection(String name,
                                                          String password) throws JMSException {
     initIdentity(name, password);
-    TopicConnection cnx = new TopicConnection();
-    cnx.setJMXBeanBaseName(cnxJMXBeanBaseName);
-    cnx.open(params, createRequestChannel(params, identity, reliableClass));
-    return cnx;
+    return new TopicConnection(params, createRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -416,10 +401,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
           + ") reliableClass=" + reliableClass);
 
     initIdentity(name, password);
-    XAConnection cnx = new XAConnection();
-    cnx.setJMXBeanBaseName(cnxJMXBeanBaseName);
-    cnx.open(params, createRequestChannel(params, identity, reliableClass));
-    return cnx;
+    return new XAConnection(params, createRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -451,10 +433,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   
   public javax.jms.XAQueueConnection createXAQueueConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    XAQueueConnection cnx = new XAQueueConnection();
-    cnx.setJMXBeanBaseName(cnxJMXBeanBaseName);
-    cnx.open(params, createRequestChannel(params, identity, reliableClass));
-    return cnx;
+    return new XAQueueConnection(params, createRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -486,10 +465,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
   public javax.jms.XATopicConnection createXATopicConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    XATopicConnection cnx = new XATopicConnection();
-    cnx.setJMXBeanBaseName(cnxJMXBeanBaseName);
-    cnx.open(params, createRequestChannel(params, identity, reliableClass));
-    return cnx;
+    return new XATopicConnection(params, createRequestChannel(params, identity, reliableClass));
   }
 
   /*
@@ -522,5 +498,38 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
     reliableClass = (String) ref.get(prefix + ".reliableClass").getContent();
     setIdentityClassName((String) ref.get(prefix + ".identityClassName").getContent());
     params.fromReference(ref, prefix);
+  }
+
+  /*
+   * SoapItf interface implementation.
+   */
+
+  /**
+   * Codes a <code>ConnectionFactory</code> as a Hashtable for traveling
+   * through the SOAP protocol.
+   */
+  public Hashtable code() {
+    return code(new Hashtable(), "cf");
+  }
+
+  public Hashtable code(Hashtable h, String prefix) {
+    if (reliableClass != null)
+      h.put(prefix + ".reliableClass", reliableClass);
+    h.put(prefix + ".identityClassName", identityClassName);
+    return params.code(h, prefix);
+  }
+
+  /**
+   * Implements the <code>decode</code> abstract method defined in the
+   * <code>fr.dyade.aaa.jndi2.soap.SoapObjectItf</code> interface.
+   */
+  public void decode(Hashtable h) {
+    decode(h, "cf");
+  }
+
+  public void decode(Hashtable h, String prefix) {
+    reliableClass = (String) h.get(prefix + ".reliableClass");
+    identityClassName = (String) h.get(prefix + ".identityClassName");
+    params.decode(h, prefix);
   }
 }

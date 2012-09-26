@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -22,6 +22,7 @@
  * Contributor(s): ScalAgent Distributed Technologies
  */
 
+
 package fr.dyade.aaa.agent;
 
 /**
@@ -29,8 +30,13 @@ package fr.dyade.aaa.agent;
  * that the notification is unknown. 
  */
 public class UnknownNotificationException extends Exception {
-  /** define serialVersionUID for interoperability */
+
+
+  /**
+   * 
+   */
   private static final long serialVersionUID = 1L;
+
 
   /**
    *  Constructs a new <code>UnknownNotificationException</code> with
@@ -39,6 +45,7 @@ public class UnknownNotificationException extends Exception {
   public UnknownNotificationException() {
     super();
   }
+
 
   /**
    *  Constructs a new <code>UnknownNotificationException</code> with

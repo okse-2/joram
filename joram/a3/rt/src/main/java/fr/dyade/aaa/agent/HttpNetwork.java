@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -488,7 +488,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     NetworkOutputStream nos = null;
 
     NetServerOut(String name, Logger logmon) throws IOException {
-      super(name + ".NetServerOut", logmon);
+      super(name + ".NetServerOut");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
 
@@ -700,7 +700,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     NetworkOutputStream nos = null;
 
     NetServerIn(String name, ServerSocket listen, Logger logmon) throws IOException {
-      super(name + ".NetServerIn", logmon);
+      super(name + ".NetServerIn");
       this.listen = listen;
       // Overload logmon definition in Daemon
       this.logmon = logmon;

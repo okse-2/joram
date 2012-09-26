@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,6 +47,8 @@ public class SCAdminClassic implements SCAdminItf {
 
   private static final Logger logmon = Debug.getLogger(SCAdminClassic.class.getName());
 
+  private static final short NO_CID_DEFINED = -1;
+
   /** Map containing all <code>Process</code> of running AgentServers */
   private Map launchedServers = new HashMap();
 
@@ -73,9 +75,18 @@ public class SCAdminClassic implements SCAdminItf {
   }
 
   public void startAgentServer(short sid, String[] jvmargs) throws Exception {
+    startAgentServer(sid, NO_CID_DEFINED, jvmargs);
+  }
+
+  public void startAgentServer(short sid, short cid, String[] jvmargs) throws Exception {
     logmon.log(BasicLevel.DEBUG, "SCAdminClassic: run AgentServer#" + sid);
 
-    Server server = (Server) launchedServers.get(new Short(sid));
+    Server server;
+    if (cid == NO_CID_DEFINED) {
+      server = (Server) launchedServers.get(new Short(sid));
+    } else {
+      server = (Server) launchedServers.get(new Short(cid));
+    }
 
     if (server != null) {
       try {
@@ -132,7 +143,12 @@ public class SCAdminClassic implements SCAdminItf {
     // Retrieve port from a3 configuration file (a3servers.xml)
     int port = -1;
     try {
-      port = Integer.parseInt(a3config.getServiceArgs(sid, "fr.dyade.aaa.agent.AdminProxy"));
+      if (cid == NO_CID_DEFINED) {
+        port = Integer.parseInt(a3config.getServiceArgs(sid, "fr.dyade.aaa.agent.AdminProxy"));
+      } else {
+        port = Integer.parseInt(a3config.getCluster(sid).getServer(cid).getServiceArgs(
+            "fr.dyade.aaa.agent.AdminProxy"));
+      }
     } catch (UnknownServiceException exc) {
       if (logmon.isLoggable(BasicLevel.WARN)) {
         logmon.log(BasicLevel.WARN, "AdminProxy service not found, server will not be stoppable "
@@ -147,6 +163,9 @@ public class SCAdminClassic implements SCAdminItf {
     argv.add("fr.dyade.aaa.agent.AgentServer");
     argv.add(Short.toString(sid));
     argv.add("s" + sid);
+    if (cid != NO_CID_DEFINED) {
+      argv.add(Short.toString(cid));
+    }
 
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       logmon.log(BasicLevel.DEBUG, "SCAdmin" + ": launches AgentServer#" + sid + " with: " + argv);
@@ -158,7 +177,12 @@ public class SCAdminClassic implements SCAdminItf {
     p.getOutputStream().close();
     p.getErrorStream().close();
 
-    launchedServers.put(new Short(sid), new Server(port, p));
+    if (cid == NO_CID_DEFINED) {
+      launchedServers.put(new Short(sid), new Server(port, p));
+    } else {
+      launchedServers.put(new Short(cid), new Server(port, p));
+    }
+
   }
 
   public void stopAgentServer(short sid) throws Exception {
@@ -172,7 +196,7 @@ public class SCAdminClassic implements SCAdminItf {
       }
       try {
         socket = new Socket("localhost", server.telnetPort);
-        daemon = new TelnetReaderDaemon(socket.getInputStream(), logmon);
+        daemon = new TelnetReaderDaemon(socket.getInputStream());
         daemon.start();
 
         socket.getOutputStream().write("halt\n".getBytes());
@@ -205,7 +229,7 @@ public class SCAdminClassic implements SCAdminItf {
     }
     try {
       socket = new Socket("localhost", telnetPort);
-      daemon = new TelnetReaderDaemon(socket.getInputStream(), logmon);
+      daemon = new TelnetReaderDaemon(socket.getInputStream());
       daemon.start();
 
       socket.getOutputStream().write("halt\n".getBytes());
@@ -233,8 +257,8 @@ public class SCAdminClassic implements SCAdminItf {
 
     private InputStreamReader reader;
 
-    protected TelnetReaderDaemon(InputStream stream, Logger logger) {
-      super("TelnetReaderDaemon", logger);
+    protected TelnetReaderDaemon(InputStream stream) {
+      super("TelnetReaderDaemon");
       this.reader = new InputStreamReader(stream);
     }
 

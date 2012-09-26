@@ -22,7 +22,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.ow2.joram:joram-client-jca</include>
+        <include>org.objectweb.joram:joram-client-jca</include>
       </includes>
       <unpack>false</unpack>
       <unpackOptions>

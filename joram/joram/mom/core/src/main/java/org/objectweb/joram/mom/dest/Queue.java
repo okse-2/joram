@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -61,7 +61,6 @@ import org.objectweb.joram.shared.admin.ClearQueue;
 import org.objectweb.joram.shared.admin.DeleteQueueMessage;
 import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
 import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
-import org.objectweb.joram.shared.admin.GetDeliveredMessages;
 import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
 import org.objectweb.joram.shared.admin.GetNumberReply;
 import org.objectweb.joram.shared.admin.GetPendingMessages;
@@ -71,7 +70,6 @@ import org.objectweb.joram.shared.admin.GetQueueMessageIds;
 import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
 import org.objectweb.joram.shared.admin.GetQueueMessageRep;
 import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
-import org.objectweb.joram.shared.admin.SetSyncExceptionOnFullDestRequest;
 import org.objectweb.joram.shared.admin.SetThresholdRequest;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.DestinationException;
@@ -94,6 +92,7 @@ import fr.dyade.aaa.common.Debug;
  * basically storing messages and delivering them upon clients requests.
  */
 public class Queue extends Destination implements QueueMBean, BagSerializer {
+
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -165,9 +164,6 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
   public void react(AgentId from, Notification not) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Queue.react(" + from + ',' + not + ')');
-
-    // set agent no save (this is the default).
-    setNoSave();
 
     try {
       if (not instanceof ReceiveRequest)
@@ -283,7 +279,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG,
-                     "Removes expired message " + message.getId(), new Exception());
+                     "Removes expired message " + message.getIdentifier(), new Exception());
       } else {
         index++;
       }
@@ -303,54 +299,6 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     return 0;
   }
 
-//  /**
-//   * This task allow to compute the average load of the queue.
-//   */
-//  transient QueueAverageLoadTask averageLoadTask = null;
-//  
-//  /**
-//   * Returns the load averages for the last minute.
-//   * @return the load averages for the last minute.
-//   */
-//  public float getAverageLoad1() {
-//    return (averageLoadTask==null)?0:averageLoadTask.getAverageLoad1();
-//  }
-//
-//  /**
-//   * Returns the load averages for the past 5 minutes.
-//   * @return the load averages for the past 5 minutes.
-//   */
-//  public float getAverageLoad5() {
-//    return (averageLoadTask==null)?0:averageLoadTask.getAverageLoad5();
-//  }
-//  
-//  /**
-//   * Returns the load averages for the past 15 minutes.
-//   * @return the load averages for the past 15 minutes.
-//   */
-//  public float getAverageLoad15() {
-//    return (averageLoadTask==null)?0:averageLoadTask.getAverageLoad15();
-//  }
-//
-//  class QueueAverageLoadTask extends AverageLoadTask {
-//    Queue queue = null;
-//    
-//    public QueueAverageLoadTask(Timer timer, Queue queue) {
-//      this.queue = queue;
-//      start(timer);
-//    }
-//    
-//    /**
-//     * Returns the number of waiting messages in the engine.
-//     * 
-//     * @see fr.dyade.aaa.common.AverageLoadTask#countActiveTasks()
-//     */
-//    @Override
-//    protected long countActiveTasks() {
-//      return queue.getPendingMessageCount();
-//    }
-//  }
-  
   /** Table holding the delivered messages before acknowledgment. */
   protected transient Map deliveredMsgs;
 
@@ -400,14 +348,12 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
    * 
    * @param firstTime		true when first called by the factory
    */
-  protected void initialize(boolean firstTime) {
+  public void initialize(boolean firstTime) {
     cleanWaitingRequest(System.currentTimeMillis());
 
     receiving = false;
     messages = new Vector();
     deliveredMsgs = new Hashtable();
-    
-//    averageLoadTask = new QueueAverageLoadTask(AgentServer.getTimer(), this);
 
     if (firstTime) return;
 
@@ -420,37 +366,25 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       
       while (! persistedMsgs.isEmpty()) {
         persistedMsg = (Message) persistedMsgs.remove(0);
-        consId = (AgentId) consumers.get(persistedMsg.getId());
-
-        try {
-          if (consId == null) {
-            if (!addMessage(persistedMsg, false)) {
-              persistedMsg.delete();
-            }
-          } else if (isLocal(consId)) {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, " -> deny " + persistedMsg.getId());
-            consumers.remove(persistedMsg.getId());
-            contexts.remove(persistedMsg.getId());
-            if (!addMessage(persistedMsg, false)) {
-              persistedMsg.delete();
-            }
-          } else {
-            deliveredMsgs.put(persistedMsg.getId(), persistedMsg);
+        consId = (AgentId) consumers.get(persistedMsg.getIdentifier());
+        
+        if (consId == null) {
+          if (!addMessage(persistedMsg)) {
+            persistedMsg.delete();
           }
-        } catch (AccessException e) {/*never happens*/}
+        } else if (isLocal(consId)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, " -> deny " + persistedMsg.getIdentifier());
+          consumers.remove(persistedMsg.getIdentifier());
+          contexts.remove(persistedMsg.getIdentifier());
+          if (!addMessage(persistedMsg)) {
+            persistedMsg.delete();
+          }
+        } else {
+          deliveredMsgs.put(persistedMsg.getIdentifier(), persistedMsg);
+        }
       }
     }
-  }
-
-  /**
-   * Finalizes the destination before it is garbaged.
-   * 
-   * @param lastime true if the destination is deleted
-   */
-  protected void finalize(boolean lastTime) {
-//    averageLoadTask.cancel();
-//    averageLoadTask = null;
   }
 
   /**
@@ -653,10 +587,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
           consumers.remove(msgId);
           contexts.remove(msgId);
           entries.remove();
-          if (not.isRedelivered())
-            message.setRedelivered();
-          else
-            message.setDeliveryCount(message.getDeliveryCount()-1);
+          message.setRedelivered();
 
           // If message considered as undeliverable, adding
           // it to the list of dead messages:
@@ -667,10 +598,8 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
             nbMsgsSentToDMQSinceCreation++;
             dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
           } else {
-            try {
-              // Else, putting the message back into the deliverables list:
-              storeMessageHeader(message, false);
-            } catch (AccessException e) { /* never happens */ }
+            // Else, putting the message back into the deliverables list:
+            storeMessageHeader(message);
           }
 
           if (logger.isLoggable(BasicLevel.DEBUG))
@@ -695,10 +624,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         break;
       }
 
-      if (not.isRedelivered())
-        message.setRedelivered();
-      else
-        message.setDeliveryCount(message.getDeliveryCount()-1);
+      message.setRedelivered();
 
 
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -718,10 +644,8 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
       } else {
-        try {
-          // Else, putting the message back into the deliverables list:
-          storeMessageHeader(message, false);
-        } catch (AccessException e) {/* never happens */}
+        // Else, putting the message back into the deliverables list:
+        storeMessageHeader(message);
       }
 
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -819,19 +743,6 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
                    not.getReplyTo(),
                    not.getRequestMsgId(),
                    not.getReplyMsgId());
-    } else if (adminRequest instanceof SetSyncExceptionOnFullDestRequest) {
-      setSave(); // state change, so save.
-      syncExceptionOnFullDest = ((SetSyncExceptionOnFullDestRequest) adminRequest).isSyncExceptionOnFullDest();
-
-      replyToTopic(new AdminReply(true, null),
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
-    } else if (adminRequest instanceof GetDeliveredMessages) {
-        replyToTopic(new GetNumberReply((int)nbMsgsDeliverSinceCreation),
-                not.getReplyTo(),
-                not.getRequestMsgId(),
-                not.getReplyMsgId());
     } else {
       super.handleAdminRequestNot(from, not);
     }
@@ -843,7 +754,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     String[] res = new String[messages.size()];
     for (int i = 0; i < messages.size(); i++) {
       Message msg = (Message) messages.get(i);
-      res[i] = msg.getId();
+      res[i] = msg.getIdentifier();
     }
     replyToTopic(new GetQueueMessageIdsRep(res), replyTo, requestMsgId, replyMsgId);
   }
@@ -856,7 +767,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
     for (int i = 0; i < messages.size(); i++) {
       message = (Message) messages.get(i);
-      if (message.getId().equals(request.getMessageId())) break;
+      if (message.getIdentifier().equals(request.getMessageId())) break;
       message = null;
     }
 
@@ -880,7 +791,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
                                   String replyMsgId) {
     for (int i = 0; i < messages.size(); i++) {
       Message message = (Message) messages.get(i);
-      if (message.getId().equals(request.getMessageId())) {
+      if (message.getIdentifier().equals(request.getMessageId())) {
         messages.remove(i);
         message.delete();
         DMQManager dmqManager = new DMQManager(dmqId, getId());
@@ -954,7 +865,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
    * <p>
    * This method stores the messages and launches a delivery sequence.
    */
-  protected void doClientMessages(AgentId from, ClientMessages not, boolean throwsExceptionOnFullDest) throws AccessException {
+  protected void doClientMessages(AgentId from, ClientMessages not) {
     receiving = true;
     ClientMessages cm = null;
     
@@ -1003,8 +914,8 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
 
         msg.order = arrivalsCounter++;
-        storeMessage(msg, throwsExceptionOnFullDest);
-        if (msg.isPersistent()) setSave();
+        storeMessage(msg);
+        setSave();
       }
     }
 
@@ -1066,15 +977,13 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
           nbMsgsSentToDMQSinceCreation++;
           dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
         } else {
-          try {
-            // Else, putting it back into the deliverables list:
-            storeMessageHeader(message, false);
-          } catch (AccessException e) {/* never happens */  }
+          // Else, putting it back into the deliverables list:
+          storeMessageHeader(message);
         }
 
         if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN,
-                     "Message " + message.getId() + " denied.");
+                     "Message " + message.getIdentifier() + " denied.");
       }
     }
     // Sending dead messages to the DMQ, if needed:
@@ -1147,72 +1056,44 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
    * Actually stores a message in the deliverables list.
    * 
    * @param msg The message to store.
-   * @param throwsExceptionOnFullDest true, can throws an exception on sending message on full destination
-   * @throws AccessException
    */
-  protected final synchronized void storeMessage(Message msg, boolean throwsExceptionOnFullDest) throws AccessException {
-    if (addMessage(msg, throwsExceptionOnFullDest)) {
+  protected final synchronized void storeMessage(Message msg) {
+    if (addMessage(msg)) {
       // Persisting the message.
       setMsgTxName(msg);
       msg.save();
       msg.releaseFullMessage();
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Message " + msg.getId() + " stored.");
+        logger.log(BasicLevel.DEBUG, "Message " + msg.getIdentifier() + " stored.");
     }
   }
   
   /**
    * Actually stores a message header in the deliverables list.
    * 
-   * @param message The message to store.
-   * @param throwsExceptionOnFullDest true, can throws an exception on sending message on full destination
-   * @throws AccessException
+   * @param message
+   *          The message to store.
    */
-  protected final synchronized void storeMessageHeader(Message message,  boolean throwsExceptionOnFullDest) throws AccessException {
-    if (addMessage(message, throwsExceptionOnFullDest)) {
+  protected final synchronized void storeMessageHeader(Message message) {
+    if (addMessage(message)) {
       // Persisting the message.
       message.saveHeader();
       message.releaseFullMessage();
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Message " + message.getId() + " stored.");
+        logger.log(BasicLevel.DEBUG, "Message " + message.getIdentifier() + " stored.");
     }
-  }
-
-  /** if true, throws an exception on sending message on full destination. */
-  private boolean syncExceptionOnFullDest = false;
-  
-  /**
-   * @return the syncExceptionOnFullDest
-   */
-  public boolean isSyncExceptionOnFullDest() {
-    return syncExceptionOnFullDest;
-  }
-
-  /**
-   * @param syncExceptionOnFullDest the syncExceptionOnFullDest to set
-   */
-  public void setSyncExceptionOnFullDest(boolean syncExceptionOnFullDest) {
-    this.syncExceptionOnFullDest = syncExceptionOnFullDest;
   }
 
   /**
    * Adds a message in the list of messages to deliver.
    * 
-   * @param message the message to add.
-   * @param throwsExceptionOnFullDest true, can throws an exception on sending message on full destination
+   * @param message
+   *          the message to add.
    * @return true if the message has been added. false if the queue is full.
-   * @throws AccessException If syncExceptionOnFullDest and the queue isFull
    */
-  protected final synchronized boolean addMessage(Message message, boolean throwsExceptionOnFullDest) throws AccessException {
+  protected final synchronized boolean addMessage(Message message) {
 
-    if (nbMaxMsg > -1 && nbMaxMsg <= (messages.size() + deliveredMsgs.size())) {
-      
-      if (throwsExceptionOnFullDest && isSyncExceptionOnFullDest()) {
-        if (logger.isLoggable(BasicLevel.INFO))
-          logger.log(BasicLevel.INFO, "addMessage " + message.getId() + " throws Exception: The queue \"" + getName() + "\" is full (syncExceptionOnFullDest).");
-        throw new AccessException("The queue \"" + getName() + "\" is full.");
-      }
-      
+    if (nbMaxMsg > -1 && nbMaxMsg <= messages.size()) {
       DMQManager dmqManager = new DMQManager(dmqId, getId());
       nbMsgsSentToDMQSinceCreation++;
       dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.QUEUE_FULL);
@@ -1274,7 +1155,6 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
   /**
    * Get a client message contain <code>nb</code> messages.
-   * Only used in ClusterQueue.
    *  
    * @param nb        number of messages returned in ClientMessage.
    * @param selector  jms selector
@@ -1299,32 +1179,28 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     return cm;
   }
 
-  /**
-   * List of message to be removed from messages vector.
-   * No message.delete() call.
-   * 
-   * @param msgIds  List of message id.
-   */
-  protected void removeMessages(List msgIds) {
-  	if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Queue.removeMessages(" + msgIds + ')');
-    String id = null;
-    Iterator itMessages = msgIds.iterator();
-    while (itMessages.hasNext()) {
-      id = (String) itMessages.next();
-      int i = 0;
-      Message message = null;
-      while (i < messages.size()) {
-        message = (Message) messages.get(i);
-        if (id.equals(message.getId())) {
-          messages.remove(i);
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "Queue.removeMessages msgId = " + id);
-          break;
-        }
-      }
-    }
-  }
+//  /**
+//   * List of message to be removed.
+//   * 
+//   * @param msgIds  List of message id.
+//   */
+//  protected void removeMessages(List msgIds) {
+//    String id = null;
+//    Iterator itMessages = msgIds.iterator();
+//    while (itMessages.hasNext()) {
+//      id = (String) itMessages.next();
+//      int i = 0;
+//      Message message = null;
+//      while (i < messages.size()) {
+//        message = (Message) messages.get(i);
+//        if (id.equals(message.getIdentifier())) {
+//          messages.remove(i);
+//          message.delete();
+//          break;
+//        }
+//      }
+//    }
+//  }
 
   /**
    * get messages, if it's possible.
@@ -1352,14 +1228,11 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         message.incDeliveryCount();
         nbMsgsDeliverSinceCreation++;
 
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "Queue.getMessages() -> " + j + ',' + message.getId());
-
         // use in sub class see ClusterQueue
-        messageDelivered(message.getId());
+        messageDelivered(message.getIdentifier());
 
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "Message " + message.getId());
+          logger.log(BasicLevel.DEBUG, "Message " + message.getIdentifier());
 
         lsMessages.add(message);
 
@@ -1383,7 +1256,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     Message msg = null;
     for (Iterator ite = messages.iterator(); ite.hasNext();) {
       msg = (Message) ite.next();
-      if (msgId.equals(msg.getId()))
+      if (msgId.equals(msg.getIdentifier()))
         return msg;
     }
     return msg;
@@ -1402,19 +1275,19 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
     Message message =  getMomMessage(msgId);
     if (checkDelivery(message.getHeaderMessage())) {
-    	message.incDeliveryCount();
-    	nbMsgsDeliverSinceCreation++;
+    message.incDeliveryCount();
+    nbMsgsDeliverSinceCreation++;
 
       // use in sub class see ClusterQueue
-      messageDelivered(message.getId());
+      messageDelivered(message.getIdentifier());
 
-    	if (logger.isLoggable(BasicLevel.DEBUG))
-    		logger.log(BasicLevel.DEBUG, "Message " + msgId);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Message " + msgId);
 
-    	if (remove) {
-    		messages.remove(message);
-    		message.delete();
-    	}
+    if (remove) {
+      messages.remove(message);
+      message.delete();
+    }
     }
     return message;
   }
@@ -1491,15 +1364,15 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         notMsg.addMessage(message.getFullMessage());
         if (!notRec.getAutoAck()) {
           // putting the message in the delivered messages table:
-          consumers.put(message.getId(), notRec.requester);
-          contexts.put(message.getId(),
+          consumers.put(message.getIdentifier(), notRec.requester);
+          contexts.put(message.getIdentifier(),
                        new Integer(notRec.getClientContext()));
-          deliveredMsgs.put(message.getId(), message);
+          deliveredMsgs.put(message.getIdentifier(), message);
           messages.remove(message);
         }
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG,
-                     "Message " + message.getId() + " to " + notRec.requester +
+                     "Message " + message.getIdentifier() + " to " + notRec.requester +
                      " as reply to " + notRec.getRequestId());
       }
 
@@ -1564,12 +1437,10 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
    * Adds the client messages in the queue.
    * 
    * @param clientMsgs client message notification.
-   * @param throwsExceptionOnFullDest true, can throws an exception on sending message on full destination
-   * @throws AccessException
    */
-  public void addClientMessages(ClientMessages clientMsgs, boolean throwsExceptionOnFullDest) throws AccessException {
+  public void addClientMessages(ClientMessages clientMsgs) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Queue.addClientMessage(" + clientMsgs + ')');
+      logger.log(BasicLevel.DEBUG, "Queue.storeClientMessage(" + clientMsgs + ')');
     
     if (clientMsgs != null) {
       Message msg;
@@ -1578,9 +1449,6 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
         msg.order = arrivalsCounter++;
         
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "Queue.addClientMessage() -> " + msg.getId() + ',' + msg.order);
-
         if (interceptorsAvailable()) {
         	// get the shared message
         	org.objectweb.joram.shared.messages.Message message = msg.getFullMessage();
@@ -1602,7 +1470,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       	}
         
         // store message
-        storeMessage(msg, throwsExceptionOnFullDest);
+        storeMessage(msg);
       }
     }
     // Launching a delivery sequence:
@@ -1654,20 +1522,4 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     dmqManager.sendToDMQ();
   }
 
-	public String getTxName(String msgId) {
-		Message momMsg = getMomMessage(msgId);
-		if (momMsg != null)
-			return momMsg.getTxName();
-	  return null;
-  }
-
-	// Flow Control related fields
-	protected fr.dyade.aaa.common.stream.Properties getStats() {
-	  fr.dyade.aaa.common.stream.Properties stats = new fr.dyade.aaa.common.stream.Properties();
-	  
-		stats.put("NbMsgsDeliverSinceCreation", nbMsgsDeliverSinceCreation);
-		stats.put("PendingMessageCount", getPendingMessageCount());
-		
-		return stats;
-	}
 }

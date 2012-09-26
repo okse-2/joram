@@ -24,7 +24,6 @@ package fr.dyade.aaa.common.monitoring;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Properties;
 import java.util.Timer;
 
@@ -93,7 +92,6 @@ public class FileMonitoringTimerTask extends MonitoringTimerTask {
 
   FileWriter writer;
   StringBuffer strbuf = null;
-  Timer timer;
   
   /**
    * Initializes the <code>FileMonitoringTimerTask</code> component.
@@ -118,38 +116,6 @@ public class FileMonitoringTimerTask extends MonitoringTimerTask {
   }
   
   /**
-   * Instantiates the <code>FileMonitoringTimerTask</code> component.
-   *
-   */
-  public FileMonitoringTimerTask() {}
-  
-  /**
-   * Pathname of the result file.
-   */
-  public String path = null;
-  
-  /**
-   * Initializes the <code>FileMonitoringTimerTask</code> component.
-   *
-   */
-  public void init(Timer timer, long period, Properties attlist, Properties taskProps){
-  	super.period = period;
-  	super.attlist = (Properties) attlist.clone();
-
-    path = taskProps.getProperty("resultPath");
-    
-    try {
-        writer = new FileWriter(path, true);
-      } catch (Exception exc) {
-        logger.log(BasicLevel.ERROR,
-                   "FileMonitoringTimerTask.<init>, cannot open file \"" + path + "\"", exc);
-      }
-      strbuf = new StringBuffer();
-      
-      start(timer);
-  }
-  
-  /**
    * Initialize the record for the current collect time.
    * For the FileMonitoringTimer, it consists to initialize a StringBuffer to collect
    * informations about all attributes.
@@ -157,15 +123,7 @@ public class FileMonitoringTimerTask extends MonitoringTimerTask {
    * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask#initializeRecords()
    */
   protected void initializeRecords() {
-  	Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(System.currentTimeMillis());
-		strbuf.append(cal.get(Calendar.YEAR)).append('/')
-				.append(cal.get(Calendar.MONTH)+1).append('/')
-				.append(cal.get(Calendar.DATE)).append(" ")
-				.append(cal.get(Calendar.HOUR_OF_DAY)).append(":")
-				.append(cal.get(Calendar.MINUTE)).append(':')
-				.append(cal.get(Calendar.SECOND)).append(',')
-				.append(cal.get(Calendar.MILLISECOND)).append(';');
+    strbuf.append(System.currentTimeMillis()).append(';');
   }
   
   /**
@@ -200,17 +158,4 @@ public class FileMonitoringTimerTask extends MonitoringTimerTask {
     strbuf.setLength(0);
   }
 
-  /**
-   * Close the result file, be careful you have to call this method only if the
-   * monitoring task is stopped.
-   */
-  public void close() {
-    try {
-      writer.flush();
-      writer.close();
-    } catch (IOException exc) {
-      logger.log(BasicLevel.ERROR,
-                 "FileMonitoringTimerTask.close, cannot close file.", exc);
-    }
-  }
 }

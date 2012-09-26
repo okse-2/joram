@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -93,16 +93,11 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
 
   /**
    * Maximum period of time before forwarding a waiting message or request to
-   * other queues of the cluster. By default it is set to <code>Queue.period</code>.
+   * other queues of the cluster. By default it is set to
+   * <code>Queue.period</code>.
    */
   private long timeThreshold = -1L;
 
-  public static final int DEFAULT_PRODUC_THRESHOLD = 10000;
-  public static final int DEFAULT_CONSUM_THRESHOLD = 5;
-  public static final boolean DEFAULT_AUTO_EVAL_THRESHOLD = false;
-  public static final long DEFAULT_WAIT_AFTER_CLUSTER_REQ = 60000L;
-  public static final long DEFAULT_TIME_THRESHOLD = 60000L;
-  
   /**
    * Configures a <code>ClusterQueue</code> instance.
    * 
@@ -111,48 +106,43 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
   public void setProperties(Properties prop, boolean firstTime) throws Exception {
     super.setProperties(prop, firstTime);
 
-    /** */
-    long waitAfterClusterReq = DEFAULT_WAIT_AFTER_CLUSTER_REQ;
     /** producer threshold */
-    int producThreshold = DEFAULT_PRODUC_THRESHOLD;
+    int producThreshold = 10000;
     /** consumer threshold */
-    int consumThreshold = DEFAULT_CONSUM_THRESHOLD;
-    /** automatic evaluation of thresholds */
+    int consumThreshold = 10000;
+    /** automatic eval threshold */
     boolean autoEvalThreshold = false;
 
-    long timeThreshold = getPeriod();
+    long waitAfterClusterReq = 60000;
+
+    timeThreshold = getPeriod();
 
     if (prop != null) {
       try {
         waitAfterClusterReq = Long.valueOf(prop.getProperty("waitAfterClusterReq")).longValue();
       } catch (NumberFormatException exc) {
-        logger.log(BasicLevel.WARN, "Incorrect waitAfterClusterReq value, set default");
-        waitAfterClusterReq = DEFAULT_WAIT_AFTER_CLUSTER_REQ;
-     }
+        logger.log(BasicLevel.ERROR, "Incorrect waitAfterClusterReq value" + exc);
+      }
       try {
         producThreshold = Integer.valueOf(prop.getProperty("producThreshold")).intValue();
       } catch (NumberFormatException exc) {
-        logger.log(BasicLevel.WARN, "Incorrect producThreshold value, set default");
-        producThreshold = DEFAULT_PRODUC_THRESHOLD;        
+        logger.log(BasicLevel.ERROR, "Incorrect producThreshold value" + exc);
       }
       try {
         consumThreshold = Integer.valueOf(prop.getProperty("consumThreshold")).intValue();
       } catch (NumberFormatException exc) {
-        logger.log(BasicLevel.WARN, "Incorrect consumThreshold value, set default");
-        consumThreshold = DEFAULT_CONSUM_THRESHOLD;
+        logger.log(BasicLevel.ERROR, "Incorrect consumThreshold value" + exc);
       }
       autoEvalThreshold = Boolean.valueOf(prop.getProperty("autoEvalThreshold")).booleanValue();
       try {
         timeThreshold = Long.valueOf(prop.getProperty("timeThreshold")).longValue();
       } catch (NumberFormatException exc) {
-        logger.log(BasicLevel.WARN, "Incorrect timeThreshold value, set default");
-        timeThreshold = DEFAULT_TIME_THRESHOLD;
+        logger.log(BasicLevel.ERROR, "Incorrect timeThreshold value" + exc);
       }
     }
 
-    loadingFactor = new LoadingFactor(this,
-                                      producThreshold, consumThreshold,
-                                      autoEvalThreshold, waitAfterClusterReq);
+    loadingFactor = new LoadingFactor(this, producThreshold, consumThreshold, autoEvalThreshold,
+        waitAfterClusterReq);
   }
   
   /**
@@ -255,8 +245,8 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     replyToTopic(new AdminReply(true, null), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "--- " + this + " ClusterQueue.joinQueueCluster(" + not + "), clusters=" + clusters);
+      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.joinQueueCluster(" + not + "), clusters="
+          + clusters);
   }
 
   /**
@@ -273,8 +263,8 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     }
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "--- " + this + " ClusterQueue.ackJoinQueueCluster(" + not + "), clusters=" + clusters);
+      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.ackJoinQueueCluster(" + not
+          + "), clusters=" + clusters);
   }
 
   /**
@@ -302,8 +292,7 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     clusters.clear();
     clusters.put(getId(), new Float(1));
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "--- " + this + " ClusterQueue.leaveCluster: " + getId());
+      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.leaveCluster: " + getId());
   }
 
   /**
@@ -317,10 +306,11 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
       ((List) e.next()).remove(queue);
     }
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "--- " + this + " ClusterQueue.removeQueueFromCluster: removedQueue=" + queue + ", clusters=" + clusters);
+      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.removeQueueFromCluster: removedQueue="
+          + queue + ", clusters=" + clusters);
   }
   
+
   /**
    * overload preProcess(AgentId, ClientMessages)
    * store all msgId in timeTable and visitTable.
@@ -339,7 +329,7 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
       msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
       msg.order = arrivalsCounter++;
-      storeMsgIdInTimeTable(msg.getId(),
+      storeMsgIdInTimeTable(msg.getIdentifier(),
                             new Long(date));
       //storeMsgIdInVisitTable(msg.getIdentifier(), destId);
     }
@@ -449,12 +439,11 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     }
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.lBCycleLife(" + not + "), visitTable=" + clusters);
+      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.lBCycleLife(" + not + "), visitTable="
+          + clusters);
     ClientMessages cm = not.getClientMessages();
-    try {
-      if (cm != null)
-        doClientMessages(from, cm, false);
-    } catch (AccessException e) {/* never happens */}
+    if (cm != null)
+      doClientMessages(from, cm);
   }
 
   /**
@@ -492,9 +481,7 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
 
     ClientMessages cm = not.getClientMessages();
     if (cm != null) {
-      try {
-        doClientMessages(from, cm, false);
-      } catch (AccessException e) { /* never happens */}
+      doClientMessages(from, cm);
     }
   }
 
@@ -577,7 +564,7 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
   protected Message getQueueMessage(String msgId, boolean remove) {  
     Message msg = super.getQueueMessage(msgId, remove);
     if (msg != null) {
-      monitoringMsgSendToCluster(msg.getId());
+      monitoringMsgSendToCluster(msg.getIdentifier());
     }
     return msg;
   }
@@ -617,8 +604,8 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
       replyToTopic(new AdminReply(AdminReply.BAD_CLUSTER_REQUEST, info), cT.getReplyTo(),
           cT.getRequestMsgId(), cT.getReplyMsgId());
     } else if (not instanceof ClusterJoinAck || not instanceof ClusterRemoveNot) {
-      logger.log(BasicLevel.ERROR,
-                 "Cluster error: " + uA.agent + " unknown. " + "The topic has probably been removed in the meantime.");
+      logger.log(BasicLevel.ERROR, "Cluster error: " + uA.agent + " unknown. "
+          + "The topic has probably been removed in the meantime.");
       clusterRemove(agId);
     }
   }
@@ -638,9 +625,7 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
   private void storeMsgIdInTimeTable(String msgId, Long date) {
     try {
       timeTable.put(msgId, date);
-    } catch (NullPointerException exc) {
-      logger.log(BasicLevel.ERROR, "--- " + this, exc);
-    }
+    } catch (NullPointerException exc) {}
   }
 
   /**

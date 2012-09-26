@@ -28,56 +28,17 @@
     </tr>
     </table>
     </s1>
-    
-    <s1 name="Collaborations">
-    <table>	
-    <tr>
-      <td align="center" valign="middle">
-      <a href="http://www.ujf-grenoble.fr/">
-      <img src="images/partners/logo-UJF-couleur-droite.gif" alt="UJF Grenoble 1 logo" border="0" height="137" width="300"/></a>
-      </td>
-      <td>
-      <p>The <a href="http://www.ujf-grenoble.fr/">Joseph Fourier university</a> and the
-      <a href="http://www.liglab.fr">LIG Lab</a> have strong collaborations with Scalagent
-      concerning JORAM. The current research collaborations concern the following topics:</p>
-      <ul>
-        <li>The performance evaluation of JORAM on a private cloud,</li>
-        <li>The design and implementation of an auto-scalable cloud messaging service,</li>
-        <li>JORAM improvement.</li>
-      </ul>
-      <p>The LIG lab and ScalAgent are currently involved in the ANR INFRA ctrl-green and in the
-      FSN OpenCloudWare.</p>
-      <p>UJF/LIG contact: Noel De Palma</p>
-      </td>
-      <td align="center" valign="middle">
-      <a href="http://www.ujf-grenoble.fr/">
-      <img src="images/partners/logo_lig.jpg" alt="LIG logo" border="0" height="121" width="104"/></a>
-      </td>
-    </tr>
-    
-    </table>
+
+    <s1 name="Thanks">
+      <s2 name="YourKit">
+        <p>Thanks to the people at <a href="http://www.yourkit.com/">YourKit</a> for providing us a free license
+        for their <a href="http://www.yourkit.com/">Java profiler</a>. It will be very useful in optimizing future
+        releases of Joram.</p>
+      </s2>
     </s1>
-    
 	
-    <s1 name="Sponsors and main user">
+    <s1 name="Sponsors">
     <table>
-    <tr>
-      <td align="center" valign="middle">
-      <a href="http://www.rd.francetelecom.com/">
-      <img src="images/partners/logo-ftrd.gif" alt="France Telecom RD logo" border="0" height="33" width="140"/></a>
-      </td>
-      <td>
-      <p><a href="http://www.rd.francetelecom.com">France Telecom R&amp;D</a> is the main sponsor of many advanced
-      functions in Joram:</p>
-        <ul>
-          <li>Clustering facilities,</li>
-          <li>High Availability Joram Server,</li>
-          <li>AMQP and JMS bridge,</li>
-          <li>WebSphere and WebLogic resources adapter.</li>
-        </ul>
-      </td>
-    </tr>
-    
     <tr>
       <td align="center" valign="middle">
       <a href="http://www.cnes.fr/">
@@ -89,6 +50,23 @@
       </td>
     </tr>
 
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://www.rd.francetelecom.com/">
+      <img src="images/partners/logo-ftrd.gif" alt="France Telecom RD logo" border="0" height="33" width="140"/></a>
+      </td>
+      <td>
+      <p><a href="http://www.rd.francetelecom.com">France Telecom R&amp;D</a> is the main sponsor of many advanced
+      functions in Joram:</p>
+        <ul>
+          <li>Clustering facilities,</li>
+          <li>High Availability Joram Server,</li>
+          <li>JMS bridge,</li>
+          <li>WebLogic resources adapter.</li>
+        </ul>
+      </td>
+    </tr>
+    
     <tr>
       <td align="center" valign="middle">
       <a href="http://www.bull.com/">
@@ -116,44 +94,7 @@
       </ul>
       </td>
     </tr>
-      
-    <tr>
-      <td align="center" valign="middle">
-      <a href="http://www.thalesgroup.com/">
-      <img src="images/partners/logo_thales.gif" alt="THALES logo" border="0" height="60" width="266"/></a>
-      </td>
-      <td>
-      <p>Thales Services SAS  uses Joram for its <a href="http://cct.cnes.fr/cct22/infos/documents/Supervision/s05_PHOEBUS_CCT.PPT">Phoebus</a>
-      product line, a generic tool for monitoring ground segment for spacecraft.</p>
-      </td>
-    </tr>
-    
-    </table>		
-    </s1>
-
-    <s1 name="Acknowledgements">
-    <table width="100%">
-    <tr>
-      <td align="center" valign="middle">
-      <a href="http://www.yourkit.com/">
-      <img src="images/partners/yourkit.jpg" alt="YourKit logo" border="0" height="110" width="210"/></a>
-      </td>
-      <td>
-        <p>Thanks to the people at <a href="http://www.yourkit.com/">YourKit</a> for providing us a free license
-        for <a href="http://www.yourkit.com/">YourKit Java profiler</a> the industry leader in Java Profiling.</p>
-        <p>It will be very useful in optimizing future releases of Joram.</p>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" valign="middle">
-      <a href="http://http://www.jetbrains.com/idea/">
-      <img src="images/partners/intellijidea-269x139.jpg" alt="IntelliJ IDEA logo" border="0" height="115" width="210"/></a>
-      </td>
-      <td>
-        <p>We acknowledge <a href="http://http://www.jetbrains.com">JetBrains</a> for giving us free licenses of
-        <a href="http://http://www.jetbrains.com/idea/">Intelligent Java IDE</a>.</p>
-      </td>
-    </tr>
+        
     </table>		
     </s1>
 

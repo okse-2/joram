@@ -60,8 +60,8 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.events.CloseClickEvent;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
+import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -236,7 +236,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     queueDetailLeft.setData(new Record[] { new QueueListRecord(presenter.getQueue()) });
 
     chartWidth = (com.google.gwt.user.client.Window.getClientWidth() / 2) - 35;
-    chart = new AnnotatedTimeLine(createTable(), createOptions(), chartWidth + "px", "170px");
+    chart = new AnnotatedTimeLine(createTable(), createOptions(), "" + chartWidth, "170");
 
     columnForm = new DynamicForm();
     columnForm.setNumCols(8);
@@ -614,7 +614,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     winModal.setShowModalMask(Boolean.TRUE);
     winModal.centerInPage();
     winModal.addCloseClickHandler(new CloseClickHandler() {
-      public void onCloseClick(CloseClickEvent event) {
+      public void onCloseClick(CloseClientEvent event) {
         winModal.destroy();
       }
     });

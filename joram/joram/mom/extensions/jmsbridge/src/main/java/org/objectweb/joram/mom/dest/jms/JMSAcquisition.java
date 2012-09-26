@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -136,9 +136,6 @@ public class JMSAcquisition implements AcquisitionDaemon {
     synchronized (sessions) {
       for (Session session : sessions.values()) {
         try {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "Close JMS session: " + session);
-          
           session.close();
         } catch (JMSException exc) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
@@ -153,13 +150,13 @@ public class JMSAcquisition implements AcquisitionDaemon {
   /**
    * Create a new JMS consumer for each connection available.
    */
-  public synchronized void updateConnections(List<JMSModule> connections) {
+  public void updateConnections(List<JMSModule> connections) {
     for (JMSModule connection : connections) {
       if (!sessions.containsKey(connection.getCnxFactName())) {
         if (connectionNames == null || connectionNames.contains(connection.getCnxFactName())) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
             logger.log(BasicLevel.DEBUG,
-                       "Creating a new consumer for connection: " + connection.getCnxFactName(), new Exception());
+                "Creating a new consumer for connection: " + connection.getCnxFactName());
           }
           try {
             dest = (Destination) connection.retrieveJndiObject(destName);
@@ -210,29 +207,32 @@ public class JMSAcquisition implements AcquisitionDaemon {
      */
     public void onMessage(javax.jms.Message jmsMessage) {
       if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, name + ".onMessage(" + jmsMessage + ')');
+        logger.log(BasicLevel.DEBUG, "onMessage(" + jmsMessage + ')');
       }
       try {
         try {
-          org.objectweb.joram.client.jms.Message clientMessage = org.objectweb.joram.client.jms.Message.convertJMSMessage(jmsMessage);
+
+          org.objectweb.joram.client.jms.Message clientMessage = org.objectweb.joram.client.jms.Message
+              .convertJMSMessage(jmsMessage);
           Message momMessage = clientMessage.getMomMsg();
 
           transmitter.transmit(momMessage, jmsMessage.getJMSMessageID());
 
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, name + ".onMessage: commit.");
-          
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "onMessage: commit.");
+          }
           session.commit();
+
         } catch (MessageFormatException conversionExc) {
           // Conversion error: denying the message.
+
           session.rollback();
-          
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, name + ".onMessage: rollback, can not convert message.", conversionExc);
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "Exception:: onMessage: rollback.");
+          }
         }
       } catch (JMSException exc) {
         // Commit or rollback failed: nothing to do.
-        logger.log(BasicLevel.ERROR, name + ".onMessage(" + jmsMessage + ')', exc);
       }
     }
 
@@ -302,12 +302,14 @@ public class JMSAcquisition implements AcquisitionDaemon {
           List<JMSModule> currentConnections = JMSConnectionService.getInstance().getConnections();
 
           synchronized (listeners) {
-            if (listeners.size() == 0) stop();
-
+            if (listeners.size() == 0) {
+              stop();
+            }
             for (JMSAcquisition listener : listeners) {
               listener.updateConnections(currentConnections);
             }
           }
+
         }
       } finally {
         finish();
@@ -333,13 +335,17 @@ public class JMSAcquisition implements AcquisitionDaemon {
 
       List<JMSModule> existingConnections = JMSConnectionService.getInstance().getConnections();
       listener.updateConnections(existingConnections);
+
     }
 
     protected void removeUpdateListener(JMSAcquisition listener) {
       synchronized (listeners) {
         listeners.remove(listener);
-        if (listeners.size() == 0) stop();
+        if (listeners.size() == 0) {
+          stop();
+        }
       }
     }
   }
+
 }

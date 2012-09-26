@@ -3,15 +3,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.objectweb.joram</groupId>
   <artifactId>a3-rt</artifactId>
   <packaging>bundle</packaging>
   <name>JORAM :: a3 :: rt</name>
   <description>Builds the Joram a3 rt project.</description>
 
   <parent>
-    <groupId>org.ow2.joram</groupId>
+    <groupId>org.objectweb.joram</groupId>
     <artifactId>a3</artifactId>
-    <version>5.8.0-SNAPSHOT</version>
+    <version>5.7.0</version>
   </parent>
 
   <build>
@@ -24,7 +25,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Export-Package>fr.dyade.aaa.agent,fr.dyade.aaa.agent.conf,fr.dyade.aaa.util,fr.dyade.aaa.ext</Export-Package>
+            <Export-Package>fr.dyade.aaa.agent,fr.dyade.aaa.agent.conf,fr.dyade.aaa.util</Export-Package>
             <Import-Package>com.scalagent.jmx,
               fr.dyade.aaa.common,
               fr.dyade.aaa.common.monitoring,
@@ -42,9 +43,13 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>a3-common</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jgroups</groupId>
+      <artifactId>jgroups-all</artifactId>
     </dependency>
     
     <!-- Used for MySqlDBRepository. -->

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -47,6 +47,29 @@ public class SimpleNetwork extends StreamNetwork {
 
   /** FIFO list of all messages to be sent by the watch-dog thread. */
   MessageSoftList sendList;
+
+  private JGroups jgroups = null;
+
+  public void setJGroups(JGroups jgroups) {
+    this.jgroups = jgroups;
+  }
+  
+  void ackMsg(JGroupsAckMsg ack) {
+    try {
+      AgentServer.getTransaction().begin();
+      //  Deletes the processed notification
+      qout.remove(ack.getStamp());
+      ack.delete();
+      AgentServer.getTransaction().commit(true);
+      if (this.logmon.isLoggable(BasicLevel.DEBUG))
+        this.logmon.log(BasicLevel.DEBUG,
+                        this.getName() + ", ackMsg(...) done.");
+    } catch (Exception exc) {
+      this.logmon.log(BasicLevel.FATAL,
+                      this.getName() + ", ackMsg unrecoverable exception",
+                      exc);
+    }
+  }
 
   /**
    * Creates a new network component.
@@ -145,7 +168,7 @@ public class SimpleNetwork extends StreamNetwork {
     NetworkOutputStream nos = null;
 
     NetServerOut(String name, Logger logmon) {
-      super(name + ".NetServerOut", logmon);
+      super(name + ".NetServerOut");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
       this.setThreadGroup(AgentServer.getThreadGroup());
@@ -157,7 +180,7 @@ public class SimpleNetwork extends StreamNetwork {
 
     public void run() {
       Message msg = null;
-      Set<ServerDesc> servers = new HashSet<ServerDesc>();
+      Set servers = new HashSet();
       try {
         try {
           nos = new NetworkOutputStream();
@@ -373,7 +396,7 @@ public class SimpleNetwork extends StreamNetwork {
     ServerSocket listen = null;
 
     NetServerIn(String name, Logger logmon) throws IOException {
-      super(name + ".NetServerIn", logmon);
+      super(name + ".NetServerIn");
       // Create the listen socket in order to verify the port availability.
       listen = createServerSocket();
       // Overload logmon definition in Daemon

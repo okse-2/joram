@@ -44,8 +44,4 @@ public class QueueConnectionRequest extends ConnectionRequest {
   public int hashCode() {
     return ("PTP:" + userName).hashCode();
   }
-  
-  public String toString() {
-    return "QueueConnectionRequest:PTP:" + userName + "@"+ hashCode();
-  }
 }

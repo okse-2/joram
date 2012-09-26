@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -59,7 +59,6 @@ import fr.dyade.aaa.common.Daemon;
  * The <code>BridgeUnifiedModule</code> class is a bridge module based on the
  * JMS 1.1 unified semantics and classes.
  */
-@Deprecated
 public class JMSBridgeModule implements javax.jms.ExceptionListener,
                                             javax.jms.MessageListener,
                                             java.io.Serializable {
@@ -183,7 +182,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
   public void init(AgentId agentId) {
     this.agentId = agentId;
   }
-  
+
   /**
    * Launches the connection process to the foreign JMS server.
    *
@@ -203,6 +202,9 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     // Creating the module's daemons.
     consumerDaemon = new ConsumerDaemon();
     reconnectionDaemon = new ReconnectionDaemon();
+
+    // start daemon.
+    consumerDaemon.start();
     
     // Administered objects have not been retrieved: launching the startup
     // daemon.
@@ -217,8 +219,6 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
         } else {
           doConnect();
         }
-        // start daemon.
-        consumerDaemon.start();
       } catch (JMSException exc) {
         reconnectionDaemon.reconnect();
       }
@@ -251,7 +251,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
    */
   public void unsetMessageListener() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "JMSBridgeModule.unsetMessageListener()");
+      logger.log(BasicLevel.DEBUG, "unsetMessageListener()");
     
     try {
       consumerCnx.stop();
@@ -451,12 +451,10 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
           }
         }
       } catch (javax.jms.JMSException exc) {
-        // Connection failure? Keeps the message for later delivery.
+        // Connection failure? Keeping the message for later delivery.
         qout.add(message);
-        // Try to reconnect?
-        onException(exc);
-        if (logger.isLoggable(BasicLevel.WARN))
-          logger.log(BasicLevel.WARN, "send: Exception qout=" + qout);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "send: Exception qout=" + qout);
       }
     }
   }
@@ -466,59 +464,33 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
    */
   public void close() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "JMSBridgeModule.close()");
+      logger.log(BasicLevel.DEBUG, "close()");
 
     try {
-      if (consumerCnx != null)
-        consumerCnx.setExceptionListener(null);
-    } catch (Exception exc) {
-      logger.log(BasicLevel.WARN, "JMSBridgeModule.close", exc);
+      consumerCnx.setExceptionListener(null);
+      producerCnx.setExceptionListener(null);
+    } catch (JMSException exc1) {
+      logger.log(BasicLevel.ERROR, "", exc1);
     }
+    
     try {
-      if (producerCnx != null)
-        producerCnx.setExceptionListener(null);
-    } catch (Exception exc) {
-      logger.log(BasicLevel.WARN, "JMSBridgeModule.close", exc);
-    }
-
-    try {
-      if (producerCnx != null)
-        producerCnx.stop();
-    } catch (Exception exc) {
-      logger.log(BasicLevel.WARN, "JMSBridgeModule.close", exc);
-    }
-    try {
-      if (consumerCnx != null)
-        consumerCnx.stop();
-    } catch (Exception exc) {
-      logger.log(BasicLevel.WARN, "JMSBridgeModule.close", exc);
-    }
+      producerCnx.stop();
+      consumerCnx.stop();
+    } catch (JMSException exc) {}
 
     unsetMessageListener();
 
     try {
       consumerDaemon.stop();
-    } catch (Exception exc) {
-      logger.log(BasicLevel.WARN, "JMSBridgeModule.close", exc);
-    }
+    } catch (Exception exc) {}
     try {
       reconnectionDaemon.stop();
-    } catch (Exception exc) {
-      logger.log(BasicLevel.WARN, "JMSBridgeModule.close", exc);
-    }
+    } catch (Exception exc) {}
 
     try {
-      if (producerCnx != null)
-        producerCnx.close();
-    } catch (Exception exc) {
-      logger.log(BasicLevel.WARN, "JMSBridgeModule.close", exc);
-    }
-    try {
-      if (consumerCnx != null)
-        consumerCnx.close();
-    } catch (Exception exc) {
-      logger.log(BasicLevel.WARN, "JMSBridgeModule.close", exc);
-    }
+      producerCnx.close();
+      consumerCnx.close();
+    } catch (JMSException exc) {}
   }
 
   /**
@@ -540,7 +512,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
    */
   public void onMessage(javax.jms.Message jmsMessage) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "JMSBridgeModule.onMessage(" + jmsMessage + ')');
+      logger.log(BasicLevel.DEBUG, "onMessage(" + jmsMessage + ')');
     try {
       Xid xid = null;
       synchronized (lock) {
@@ -548,13 +520,13 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
           if (isXA) {
             xid = new XidImpl(new byte[0], 1, (agentId.toString() + System.currentTimeMillis()).getBytes());
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "JMSBridgeModule.onMessage: xid=" + xid);
+              logger.log(BasicLevel.DEBUG, "onMessage: xid=" + xid);
 
             try {
               consumerRes.start(xid, XAResource.TMNOFLAGS);
             } catch (XAException e) {
               if (logger.isLoggable(BasicLevel.WARN))
-                logger.log(BasicLevel.WARN, "JMSBridgeModule.onMessage: XA can't start resource : " + consumerRes, e);
+                logger.log(BasicLevel.WARN, "Exception onMessage:: XA can't start resource : " + consumerRes, e);
             }
           }
           org.objectweb.joram.client.jms.Message clientMessage = 
@@ -564,10 +536,10 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
             try {
               consumerRes.end(xid, XAResource.TMSUCCESS);
               if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "JMSBridgeModule.onMessage: XA end " + consumerRes);
+                logger.log(BasicLevel.DEBUG, "onMessage: XA end " + consumerRes);
             } catch (XAException e) {
               if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "JMSBridgeModule.onMessage: XA resource end(...) failed: " + consumerRes, e);
+                logger.log(BasicLevel.DEBUG, "Exception onMessage:: XA resource end(...) failed: " + consumerRes, e);
               throw new JMSException("onMessage: XA resource end(...) failed: " + consumerRes + " :: " + e.getMessage());
             }
             try {
@@ -575,14 +547,14 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
               if (ret == XAResource.XA_OK)
                 consumerRes.commit(xid, false);
               if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "JMSBridgeModule.onMessage: XA commit " + consumerRes);
+                logger.log(BasicLevel.DEBUG, "onMessage: XA commit " + consumerRes);
             } catch (XAException e) {
               if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "JMSBridgeModule.onMessage: XA resource rollback(" + xid + ")", e);
+                logger.log(BasicLevel.DEBUG, "Exception onMessage:: XA resource rollback(" + xid + ")", e);
               try {
                 consumerRes.rollback(xid);
                 if (logger.isLoggable(BasicLevel.DEBUG))
-                  logger.log(BasicLevel.DEBUG, "JMSBridgeModule.onMessage: XA rollback " + consumerRes);
+                  logger.log(BasicLevel.DEBUG, "onMessage: XA rollback " + consumerRes);
               } catch (XAException e1) { }
               throw new JMSException("onMessage: XA resource rollback(" + xid + ") failed: " + 
                   consumerRes + " :: " + e.getMessage());
@@ -590,11 +562,11 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
 
           } else {
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "JMSBridgeModule.onMessage: commit.");
+              logger.log(BasicLevel.DEBUG, "onMessage: commit.");
             consumerSession.commit();
           }
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "JMSBridgeModule.onMessage: send JMSBridgeDeliveryNot.");
+            logger.log(BasicLevel.DEBUG, "onMessage: send JMSBridgeDeliveryNot.");
           Channel.sendTo(agentId, new JMSBridgeDeliveryNot(momMessage));
 
         } catch (MessageFormatException conversionExc) {
@@ -603,19 +575,17 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
             try {
               consumerRes.rollback(xid);
               if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "JMSBridgeModule.onMessage: XA rollback " + consumerRes);
+                logger.log(BasicLevel.DEBUG, "run: XA rollback " + consumerRes);
             } catch (XAException e1) { }
           } else {
             consumerSession.rollback();
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "JMSBridgeModule.onMessage: rollback.");
+              logger.log(BasicLevel.DEBUG, "Exception:: onMessage: rollback.");
           }
         }
       }
     } catch (JMSException exc) {
       // Commit or rollback failed: nothing to do.
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "JMSBridgeModule.onMessage: ", exc);
     }
   }
 
@@ -724,7 +694,8 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     } catch (JMSException exc) {
       throw exc;
     } catch (Exception exc) {
-      throw new JMSException("JMS resources do not allow to create consumer: " + exc);
+      throw new JMSException("JMS resources do not allow to create consumer: "
+                             + exc);
     }
   }
 
@@ -761,7 +732,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
   protected class StartupDaemon extends Daemon {
     /** Constructs a <code>StartupDaemon</code> thread. */
     protected StartupDaemon() {
-      super(agentId.toString() + ":StartupDaemon", logger);
+      super(agentId.toString() + ":StartupDaemon");
       setDaemon(false);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "StartupDaemon<init> " + agentId);
@@ -912,7 +883,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
 
     /** Constructs a <code>ReconnectionDaemon</code> thread. */
     protected ReconnectionDaemon() {
-      super(agentId.toString() + ":ReconnectionDaemon", logger);
+      super(agentId.toString() + ":ReconnectionDaemon");
       setDaemon(false);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "ReconnectionDaemon<init> " + agentId);
@@ -1004,7 +975,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
 
     /** Constructs a <code>ReceiverDaemon</code> thread. */
     protected ConsumerDaemon() {
-      super(agentId.toString() + ":ConsumerDaemon", logger);
+      super(agentId.toString() + ":ConsumerDaemon");
       setDaemon(false);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "ConsumerDaemon<init> " + agentId);
@@ -1052,8 +1023,8 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
         consumerCnx.start();
         while (running) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,
-                       "run: receiveRequest=" + receiveRequest + ", automaticRequest=" + automaticRequest);
+            logger.log(BasicLevel.DEBUG, "run: receiveRequest=" + receiveRequest +
+                ", automaticRequest=" + automaticRequest);
           
           synchronized (consumerLock) {
             if (automaticRequest || receiveRequest) {
@@ -1077,9 +1048,9 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
           }
         }
       } catch (JMSException exc) {
-        // Connection loss? Try to reconnect?
-        onException(exc);
-      } finally {
+        // Connection loss?
+      }
+      finally {
         finish();
       }
     }
@@ -1098,32 +1069,34 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
           if (isXA) {
             xid = new XidImpl(new byte[0], 1, (agentId.toString() + System.currentTimeMillis()).getBytes());
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "process: xid=" + xid);
+              logger.log(BasicLevel.DEBUG, "run: xid=" + xid);
 
             try {
               consumerRes.start(xid, XAResource.TMNOFLAGS);
             } catch (XAException e) {
               if (logger.isLoggable(BasicLevel.WARN))
                 logger.log(BasicLevel.WARN, 
-                           "Exception:: XA can't start resource : " + consumerRes + ", xid = " + xid, e);
+                    "Exception:: XA can't start resource : " + consumerRes +
+                    ", xid = " + xid, e);
             }
           }
           org.objectweb.joram.client.jms.Message clientMessage = 
             org.objectweb.joram.client.jms.Message.convertJMSMessage(consumer.receive());
 
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "process: clientMessage=" + clientMessage);
+            logger.log(BasicLevel.DEBUG, "run: clientMessage=" + clientMessage);
 
           momMessage = clientMessage.getMomMsg();
           if (isXA) {
             try {
               consumerRes.end(xid, XAResource.TMSUCCESS);
               if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "process: XA end " + consumerRes);
+                logger.log(BasicLevel.DEBUG, "run: XA end " + consumerRes);
             } catch (XAException e) {
               if (logger.isLoggable(BasicLevel.DEBUG))
                 logger.log(BasicLevel.DEBUG, 
-                    "Exception:: XA resource end(...) failed: " + consumerRes + ", xid = " + xid, e);
+                    "Exception:: XA resource end(...) failed: " + consumerRes +
+                    ", xid = " + xid, e);
               throw new JMSException("XA resource end(...) failed: " + consumerRes + " :: " + e.getMessage());
             }
             try {
@@ -1131,20 +1104,19 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
               if (ret == XAResource.XA_OK)
                 consumerRes.commit(xid, false);
               if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "process: XA commit " + consumerRes);
+                logger.log(BasicLevel.DEBUG, "run: XA commit " + consumerRes);
             } catch (XAException e) {
               if (logger.isLoggable(BasicLevel.DEBUG))
                 logger.log(BasicLevel.DEBUG, "Exception:: XA resource rollback(" + xid + ")", e);
               try {
                 consumerRes.rollback(xid);
                 if (logger.isLoggable(BasicLevel.DEBUG))
-                  logger.log(BasicLevel.DEBUG, "process: XA rollback " + consumerRes);
+                  logger.log(BasicLevel.DEBUG, "run: XA rollback " + consumerRes);
               } catch (XAException e1) { }
-              throw new JMSException("XA resource rollback(" + xid + ") failed: " +  consumerRes + " :: " + e.getMessage());
+              throw new JMSException("XA resource rollback(" + xid + ") failed: " + 
+                  consumerRes + " :: " + e.getMessage());
             }
           } else {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "process: session commit");
             consumerSession.commit();
           }
         } catch (MessageFormatException messageExc) {
@@ -1188,7 +1160,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     
     /** Constructs a <code>XARecoverDaemon</code> thread. */
     protected XARecoverDaemon(XAResource resource) {
-      super(agentId.toString() + ":XARecoverDaemon", logger);
+      super(agentId.toString() + ":XARecoverDaemon");
       this.resource = resource;
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "XARecoverDaemon<init> " + agentId);

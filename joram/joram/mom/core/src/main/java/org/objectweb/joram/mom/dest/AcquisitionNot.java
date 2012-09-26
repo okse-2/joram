@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,7 @@ import org.objectweb.joram.mom.notifications.ClientMessages;
 import fr.dyade.aaa.agent.Notification;
 
 public class AcquisitionNot extends Notification {
+
   /** Define serialVersionUID for interoperability. */
   private static final long serialVersionUID = 1L;
 
@@ -46,21 +47,5 @@ public class AcquisitionNot extends Notification {
 
   public String getId() {
     return id;
-  }
-
-  /**
-   * Appends a string image for this object to the StringBuffer parameter.
-   * 
-   * @param output buffer to fill in
-   * @return <code>output</code> buffer is returned
-   */
-  public StringBuffer toString(StringBuffer output) {
-    output.append('(');
-    super.toString(output);
-    output.append(",id=").append(id);
-    output.append(",acquiredMessages=").append(acquiredMessages);
-    output.append(')');
-
-    return output;
   }
 }

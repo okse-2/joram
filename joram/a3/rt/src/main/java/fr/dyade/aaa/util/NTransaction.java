@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -156,7 +156,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
   /**
    *  If true use a lock file to avoid multiples activation of Transaction
    * component. This value can be adjusted for a particular server by setting
-   * <code>Transaction.UseLockFile</code> specific property.
+   * <code>Transaction.minObjInLog</code> specific property.
    * <p>
    *  This property can be set only at first launching.
    */
@@ -390,11 +390,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     }
     
     syncOnWrite = getBoolean("NTSyncOnWrite");
-    if (getBoolean("NTNoLockFile"))
-      logmon.log(BasicLevel.ERROR,
-                 "NTransaction, no longer use NTNoLockFile property, use Transaction.UseLockFile.");
-    useLockFile = getBoolean("Transaction.UseLockFile");
-    
+    useLockFile = getBoolean("NTNoLockFile");
     logFile = new LogFile(dir, repository, useLockFile, syncOnWrite);
     
     // Be careful, setGarbageDelay and garbageAsync use logFile !!
@@ -524,7 +520,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
   private final byte[] getFromLog(String dirName, String name) throws IOException {
     // First searches in the logs a new value for the object.
     Object key = OperationKey.newKey(dirName, name);
-    byte[] buf = getFromLog(perThreadContext.get().getLog(), key);
+    byte[] buf = getFromLog(((Context) perThreadContext.get()).getLog(), key);
     if (buf != null) return buf;
     
     if ((buf = getFromLog(logFile.log, key)) != null) {
@@ -562,9 +558,9 @@ public final class NTransaction extends AbstractTransaction implements NTransact
 
     Object key = OperationKey.newKey(dirName, name);
 
-    Hashtable<Object, Operation> log = perThreadContext.get().getLog();
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     Operation op = Operation.alloc(Operation.DELETE, dirName, name);
-    Operation old = log.put(key, op);
+    Operation old = (Operation) log.put(key, op);
     if (old != null) {
       if (old.type == Operation.CREATE) op.type = Operation.NOOP;
       old.free();
@@ -578,7 +574,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "NTransaction, commit(" + release + ')');
     
-    Hashtable<Object, Operation> log = perThreadContext.get().getLog();
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     if (! log.isEmpty()) {
       logFile.commit(log);
       log.clear();
@@ -693,7 +689,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     /**
      * Log of all operations already committed but not reported on disk.
      */
-    Hashtable<Object, Operation> log = null;
+    Hashtable log = null;
     /** log file */
     RandomAccessFile logFile = null; 
 
@@ -749,12 +745,14 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       super(4 * Kb);
       this.repository = repository;
 
-      if (useLockFile) {
+      if (! useLockFile) {
         lockFile = new File(dir, LockPathname);
         if (! lockFile.createNewFile()) {
           logmon.log(BasicLevel.FATAL,
-                     "NTransaction.init(): Either the server is already running, " + 
-                     "either you have to remove lock file: " + lockFile.getAbsolutePath());
+                     "NTransaction.init(): " +
+                     "Either the server is already running, " + 
+                     "either you have to remove lock file: " +
+                     lockFile.getAbsolutePath());
           throw new IOException("Transaction already running.");
         }
         lockFile.deleteOnExit();
@@ -765,7 +763,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       else
         mode = "rw";
       
-      log = new Hashtable<Object, Operation>(LogMemoryCapacity);
+      log = new Hashtable(LogMemoryCapacity);
 
       //  Search for old log file, then apply all committed operation,
       // finally cleans it.
@@ -800,12 +798,12 @@ public final class NTransaction extends AbstractTransaction implements NTransact
                 byte buf[] = new byte[logFile.readInt()];
                 logFile.readFully(buf);
                 op = Operation.alloc(optype, dirName, name, buf);
-                Operation old = log.put(key, op);
+                Operation old = (Operation) log.put(key, op);
                 if (old != null) old.free();
               } else {
                 // Operation.DELETE
                 op = Operation.alloc(optype, dirName, name);
-                Operation old = log.put(key, op);
+                Operation old = (Operation) log.put(key, op);
                 if (old != null) {
                   if (old.type == Operation.CREATE) op.type = Operation.NOOP;
                   old.free();
@@ -883,15 +881,15 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     /**
      * Reports all buffered operations in logs.
      */
-    void commit(Hashtable<Object, Operation> ctxlog) throws IOException {
+    void commit(Hashtable ctxlog) throws IOException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, "NTransaction.LogFile.commit()");
 
       commitCount += 1;
       
       Operation op = null;
-      for (Enumeration<Operation> e = ctxlog.elements(); e.hasMoreElements(); ) {
-        op = e.nextElement();
+      for (Enumeration e = ctxlog.elements(); e.hasMoreElements(); ) {
+        op = (Operation) e.nextElement();
         if (op.type == Operation.NOOP) continue;
 
 //      if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -925,12 +923,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
           if ((old.type == Operation.SAVE) || (old.type == Operation.CREATE))
             logMemorySize -= old.value.length;
 
-          if (old.type == Operation.CREATE) {
-            if (op.type == Operation.DELETE)
-              op.type = Operation.NOOP;
-            else if (op.type == Operation.SAVE)
-              op.type = Operation.CREATE;
-          }
+          if ((old.type == Operation.CREATE) && (op.type == Operation.DELETE))
+            op.type = Operation.NOOP;
           old.free();
         }
       }
@@ -964,8 +958,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       garbageCount += 1;
 
       Operation op = null;
-      for (Enumeration<Operation> e = log.elements(); e.hasMoreElements(); ) {
-        op = e.nextElement();
+      for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
+        op = (Operation) e.nextElement();
 
         if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -1022,7 +1016,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
 
       if ((lockFile != null) && (! lockFile.delete())) {
         logmon.log(BasicLevel.FATAL,
-                   "NTransaction.LogFile, - can't delete lockfile: " + lockFile.getAbsolutePath());
+                   "NTransaction.LogFile, - can't delete lockfile: " +
+                   lockFile.getAbsolutePath());
       }
 
       if (logmon.isLoggable(BasicLevel.DEBUG))

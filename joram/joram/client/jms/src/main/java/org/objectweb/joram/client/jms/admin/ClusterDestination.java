@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2007 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -230,5 +230,57 @@ public class ClusterDestination extends Destination {
       cluster.put((String) refAddr.getContent(), dest);
       i++;
     }
+  }
+
+  /**
+   * Codes a <code>ClusterDestination</code> as a Hashtable for
+   * travelling through the SOAP protocol.
+   */
+  public Hashtable code() {
+    Hashtable h = new Hashtable();
+
+    Map.Entry entries[] = new Map.Entry [cluster.size()];
+    cluster.entrySet().toArray(entries);
+    StringBuffer strbuf = new StringBuffer(20);
+
+    for (int i=0; i<entries.length; i++) {
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".key");
+      h.put(strbuf.toString(), (String) entries[i].getKey());
+
+      Destination dest = (Destination) entries[i].getValue();
+
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".destName");
+      h.put(strbuf.toString(), dest.getName());
+    }
+
+    return h;
+  }
+
+  public void decode(Hashtable h) {
+    cluster = new Hashtable();
+
+    int i = 0;
+    Destination dest = null;
+    StringBuffer strbuf = new StringBuffer(20);
+
+    while (true) {
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".key");
+      String key = (String) h.get(strbuf.toString());
+      if (key == null) break;
+
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".destName");
+      if (isQueue()) {
+        dest = new Queue((String) h.get(strbuf.toString()));
+      } else {
+        dest = new Topic((String) h.get(strbuf.toString()));
+      }
+      cluster.put(key, dest);
+      i++;
+    }
+
   }
 }

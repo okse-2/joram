@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,12 +26,9 @@ import java.util.List;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.ClientMessages;
-import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.MessageErrorConstants;
-import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.excepts.RequestException;
-import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -56,14 +53,6 @@ public class DistributionTopic extends Topic {
   private String distributionClassName;
 
   private Properties properties;
-  
-  private transient DistributionDaemon distributionDaemon;  
-  
-  /**
-   * Tells if daemon distribution is active.
-   * On true, the batchDistribution is set.
-   */
-  private boolean isAsyncDistribution;
 
   /**
    * Configures a {@link DistributionTopic} instance.
@@ -80,10 +69,6 @@ public class DistributionTopic extends Topic {
 
     this.properties = properties;
 
-    if (properties != null) {
-    	isAsyncDistribution = isAsyncDistribution(properties);
-    }
-    
     if (firstTime) {
       if (properties != null) {
         distributionClassName = properties.getProperty(DistributionModule.CLASS_NAME);
@@ -91,52 +76,26 @@ public class DistributionTopic extends Topic {
       }
       if (distributionClassName == null) {
         throw new RequestException("Distribution class name not found: " + DistributionModule.CLASS_NAME
-            + " property must be set on topic creation.");
+            + " property must be set on queue creation.");
       }
 
       // Check the existence of the distribution class and the presence of a no-arg constructor.
       try {
-        Class.forName(distributionClassName).getConstructor();
+        String className = distributionClassName;
+        Class.forName(className).getConstructor();
       } catch (Exception exc) {
-        logger.log(BasicLevel.ERROR, "DistributionTopic: error with distribution class.", exc);
+        logger.log(BasicLevel.ERROR, "DistributionQueue: error with distribution class.", exc);
         throw new RequestException(exc.getMessage());
       }
     } else {
-      distributionModule.setProperties(properties, firstTime);
-      
-      if (distributionDaemon == null && isAsyncDistribution) {
-    		// start distributionDaemon
-    		distributionDaemon = new DistributionDaemon(distributionModule.getDistributionHandler(), getName(), this);
-    		distributionDaemon.start();
-    	} else if (distributionDaemon != null && !isAsyncDistribution) {
-    		// stop distributionDaemon
-    		distributionDaemon.close();
-    		distributionDaemon = null;
-    	}
+      distributionModule.setProperties(properties);
     }
   }
 
-  private boolean isAsyncDistribution(Properties properties) {
-  	if (properties.containsKey(DistributionQueue.ASYNC_DISTRIBUTION_OPTION)) {
-  		try {
-  			return ConversionHelper.toBoolean(properties.get(DistributionQueue.ASYNC_DISTRIBUTION_OPTION));
-  		} catch (MessageValueException exc) {
-  			logger.log(BasicLevel.ERROR, "DistributionModule: can't parse DaemonDistribution option.", exc);
-  		}	
-  	}
-  	return false;
-  }
-  
   public void initialize(boolean firstTime) {
     super.initialize(firstTime);
     if (distributionModule == null) {
-      distributionModule = new DistributionModule(distributionClassName, properties, firstTime);
-    }
-    if (properties != null)
-    	isAsyncDistribution = isAsyncDistribution(properties);
-    if (distributionDaemon == null && isAsyncDistribution) {
-    	distributionDaemon = new DistributionDaemon(distributionModule.getDistributionHandler(), getName(), this);
-    	distributionDaemon.start();
+      distributionModule = new DistributionModule(distributionClassName, properties);
     }
   }
 
@@ -145,11 +104,8 @@ public class DistributionTopic extends Topic {
     if (distributionModule != null) {
       distributionModule.close();
     }
-    if (distributionDaemon != null) {
-    	distributionDaemon.close();
-    }
   }
-  
+
   /**
    * @see DistributionModule#processMessages(ClientMessages)
    * @see Destination#preProcess(AgentId, ClientMessages)
@@ -166,22 +122,9 @@ public class DistributionTopic extends Topic {
         distributionModule.processMessage(msg);
         nbMsgsDeliverSinceCreation++;
       } catch (Exception exc) {
-      	if (!isAsyncDistribution) {
-      		if (logger.isLoggable(BasicLevel.WARN)) {
-      			logger.log(BasicLevel.WARN, "DistributionTopic: distribution error.", exc);
-      		}
-      	} else {
-      		// a processMessage exception is normal with async mode.
-      		if (distributionDaemon != null) {
-      			// use msg.id ?
-      			distributionDaemon.push(msg);
-      		} else {
-      			if (logger.isLoggable(BasicLevel.WARN)) {
-      				logger.log(BasicLevel.WARN, "DistributionTopic.preProcess: distribution distributionDaemon = null but we are in async distribution mode.", exc);
-      			}
-      		}
-      	}
-        
+        if (logger.isLoggable(BasicLevel.WARN)) {
+          logger.log(BasicLevel.WARN, "DistributionTopic: distribution error.", exc);
+        }
         if (dmqManager == null) {
           dmqManager = new DMQManager(cm.getDMQId(), getDMQAgentId(), getId());
         }
@@ -195,38 +138,8 @@ public class DistributionTopic extends Topic {
     return null;
   }
 
-  @Override
-  protected void postProcess(ClientMessages msgs) {
-    super.postProcess(msgs);
-    if (distributionDaemon != null) {
-    	if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "DistributionTopic postProcess(...)");
-    	distributionDaemon.getAckList();
-    }
-  }
-  
   public String toString() {
     return "DistributionTopic:" + getId().toString();
   }
 
-  public void wakeUpNot(WakeUpNot not) {
-  	if (logger.isLoggable(BasicLevel.DEBUG) && !isAsyncDistribution) {
-  		logger.log(BasicLevel.DEBUG, "DistributionTopic.wakeUpNot(" + not + ')');
-  	}
-  	super.wakeUpNot(not);
-
-  	// delete the ackQueue
-  	if (distributionDaemon != null) {
-  		List ackList = distributionDaemon.getAckList();
-  	}
-
-  	if (distributionDaemon != null) {
-  		synchronized (distributionDaemon) {
-  			// wakeup the daemon, because the distributionDaemon can wait 
-    		// after a distribution exception
-  			distributionDaemon.notify();
-  		}
-  	}
-  }
-  
 }

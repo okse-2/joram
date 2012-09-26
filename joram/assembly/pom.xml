@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.objectweb.joram</groupId>
   <artifactId>joram-assembly</artifactId>
   <packaging>pom</packaging>
   <name>JORAM :: assembly</name>
   <url>http://maven.apache.org</url>
   <description>Provides a Joram assembly target.</description>
-
+  
   <parent>
-    <groupId>org.ow2.joram</groupId>
-    <artifactId>parent</artifactId>
-    <version>5.8.0-SNAPSHOT</version>
-  </parent>
-
+	  <groupId>org.objectweb.joram</groupId>
+		<artifactId>parent</artifactId>
+		<version>5.7.0</version>
+	</parent>
+       
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2.1</version>
+        <version>2.2-beta-5</version>
         <executions>
-          <!-- ============= joram-osgi ===================== -->
+          <!-- ============= joram-osgi =====================-->
           <execution>
             <id>joram-osgi</id>
             <phase>package</phase>
@@ -40,7 +41,7 @@
     </plugins>
   </build>
 
-  <dependencies>
+  <dependencies>  
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jms_1.1_spec</artifactId>
@@ -52,109 +53,111 @@
     <dependency>
       <groupId>org.objectweb.joram</groupId>
       <artifactId>jcup</artifactId>
-    </dependency>
+    </dependency> 
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-shared</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-mom-core</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
-      <artifactId>joram-mom-amqp</artifactId>
+      <groupId>org.objectweb.joram</groupId>
+      <artifactId>joram-client</artifactId>
       <version>${project.version}</version>
-      <type>jar</type>
+      <type>pom</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-client-jms</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>a3-common</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>a3-rt</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>a3-osgi</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>jndi-shared</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>jndi-server</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>jndi-client</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
+      <artifactId>joram-mom-extensions</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-mom-extensions-amqp</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-mom-extensions-ftp</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-mom-extensions-jmsbridge</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-mom-extensions-mail</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-mom-extensions-collector</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-mom-extensions-scheduler</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-tools-jasp</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
@@ -181,24 +184,12 @@
     </dependency>
     
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.gogo.runtime</artifactId>
-      <version>${felix.gogo.runtime.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.gogo.command</artifactId>
-      <version>${felix.gogo.command.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.gogo.shell</artifactId>
-      <version>${felix.gogo.shell.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>javax.activation</groupId>
       <artifactId>activation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jgroups</groupId>
+      <artifactId>jgroups-all</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ow2.spec.ee</groupId>
@@ -209,44 +200,26 @@
       <artifactId>mail</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>soap</groupId>
+      <artifactId>soap</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-client-jca</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>licenses</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>conf</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
-     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-      <type>jar</type>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.ow2.joram</groupId>
-      <artifactId>shell-mom</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ow2.joram</groupId>
-      <artifactId>shell-jndi</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ow2.joram</groupId>
-      <artifactId>shell-a3</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    
-  </dependencies>
+  </dependencies>  
 </project>

@@ -34,7 +34,7 @@ public class AcquisitionHandlerTest2 implements AcquisitionHandler {
   }
 
   public void retrieve(ReliableTransmitter trsmiter) throws Exception {
-    trsmiter.transmit(DistributionHandlerTest2.getAllMessages(), true, null);
+    trsmiter.transmit(DistributionHandlerTest2.getAllMessages(), null);
   }
 
   public void setProperties(Properties arg0) {

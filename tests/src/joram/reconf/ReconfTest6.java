@@ -45,7 +45,7 @@ public class ReconfTest6 extends ReconfTestBase {
   public void run() {
     try {
       String network = HttpNetwork.class.getName();
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false" });
+      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true" });
 
       AdminModule.connect("localhost", 2560, "root", "root", 60);
       User.create("anonymous", "anonymous", 0);
@@ -58,7 +58,7 @@ public class ReconfTest6 extends ReconfTestBase {
 
       AdminModule.addServer(1, "localhost", "D0", 0, "s1");
       deployAgentServer((short) 1, "./s1");
-      startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
       
       checkQueue((short) 1);
@@ -70,7 +70,7 @@ public class ReconfTest6 extends ReconfTestBase {
       //System.out.println("Add server s2");
       AdminModule.addServer(2, "localhost", "D1", 0, "s2");
       deployAgentServer((short) 2, "./s2");
-      startAgentServer((short) 2, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 2, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });
       
       checkQueue((short) 1);
@@ -80,7 +80,7 @@ public class ReconfTest6 extends ReconfTestBase {
 
       crashAgentServer((short) 1);
       Thread.sleep(1000L);
-      startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
       Thread.sleep(1000L);
       
@@ -91,7 +91,7 @@ public class ReconfTest6 extends ReconfTestBase {
 
       AdminModule.addServer(3, "localhost", "D0", 0, "s3");
       deployAgentServer((short) 3, "./s3");
-      startAgentServer((short) 3, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 3, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s3/a3servers.xml" });
       
       checkQueue((short) 3);
@@ -100,7 +100,7 @@ public class ReconfTest6 extends ReconfTestBase {
 
       crashAgentServer((short) 3);
       Thread.sleep(1000L);
-      startAgentServer((short) 3, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 3, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s3/a3servers.xml" });
       Thread.sleep(1000L);
       
@@ -110,7 +110,7 @@ public class ReconfTest6 extends ReconfTestBase {
 
       AdminModule.addServer(4, "localhost", "D1", 0, "s4");
       deployAgentServer((short) 4, "./s4");
-      startAgentServer((short) 4, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 4, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s4/a3servers.xml" });
       
       checkQueue((short) 4);
@@ -119,7 +119,7 @@ public class ReconfTest6 extends ReconfTestBase {
 
       crashAgentServer((short) 4);
       Thread.sleep(1000L);
-      startAgentServer((short) 4, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 4, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s4/a3servers.xml" });
       Thread.sleep(1000L);
       
@@ -129,7 +129,7 @@ public class ReconfTest6 extends ReconfTestBase {
 
       crashAgentServer((short) 1);
       Thread.sleep(1000L);
-      startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
       Thread.sleep(1000L);
       

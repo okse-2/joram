@@ -75,11 +75,11 @@ public interface JoramAdapterMBean {
   public Short getServerId();
 
   /**
-   * Returns the name of the resource adapter.
+   * Returns the name of the Joram server.
    * 
-   * @return The name of the resource adapter.
+   * @return The name of the Joram server.
    */
-  public String getName();
+  public String getServerName();
 
   /**
    * Returns the location of the Joram server.
@@ -95,19 +95,19 @@ public interface JoramAdapterMBean {
    */
   public Integer getServerPort();
 
-//  /**
-//   * Returns <code>true</code> if the Joram server is persistent.
-//   * 
-//   * @return <code>true</code> if the Joram server is persistent.
-//   */
-//  public Boolean getPersistentPlatform();
+  /**
+   * Returns <code>true</code> if the Joram server is persistent.
+   * 
+   * @return <code>true</code> if the Joram server is persistent.
+   */
+  public Boolean getPersistentPlatform();
 
   /**
    * Returns <code>true</code> if the Joram server is collocated.
    * 
    * @return <code>true</code> if the Joram server is collocated.
    */
-  public Boolean getCollocated();
+  public Boolean getCollocatedServer();
 
 
   /**
@@ -117,20 +117,20 @@ public interface JoramAdapterMBean {
    */
   public Integer getConnectingTimer();
 
-//  /**
-//   * Duration in seconds during which a JMS transacted (non XA) session might
-//   * be pending; above that duration the session is rolled back and closed;
-//   * the 0 value means "no timer".
-//   */
-//  public Integer getTxPendingTimer();
-//
-//  /**
-//   * Period in milliseconds between two ping requests sent by the client
-//   * connection to the server; if the server does not receive any ping
-//   * request during more than 2 * cnxPendingTimer, the connection is
-//   * considered as dead and processed as required.
-//   */
-//  public Integer getCnxPendingTimer();
+  /**
+   * Duration in seconds during which a JMS transacted (non XA) session might
+   * be pending; above that duration the session is rolled back and closed;
+   * the 0 value means "no timer".
+   */
+  public Integer getTxPendingTimer();
+
+  /**
+   * Period in milliseconds between two ping requests sent by the client
+   * connection to the server; if the server does not receive any ping
+   * request during more than 2 * cnxPendingTimer, the connection is
+   * considered as dead and processed as required.
+   */
+  public Integer getCnxPendingTimer();
 
   /**
    * Sets timeout before abort a request.
@@ -178,6 +178,14 @@ public interface JoramAdapterMBean {
    * @exception AdminException  If the request fails.
    */
   public String getDefaultDMQId(short serverId) throws ConnectException, AdminException;
+
+  /**
+   * Unset the default dead message queue for the local server.
+   * 
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void resetDefaultDMQ() throws ConnectException, AdminException;
 
   /**
    * Unset the default dead message queue for the given server.
@@ -413,7 +421,7 @@ public interface JoramAdapterMBean {
    * 
    * @param name Name of created connection factory.
    */
-  public void createCF(String name) throws Exception;
+  public void createCF(String name);
 
   /**
    * Creates a non managed PTP connection factory and binds it to JNDI.
@@ -432,7 +440,7 @@ public interface JoramAdapterMBean {
   /**
    * Path to the directory containing JORAM's configuration files
    * (<code>a3servers.xml</code>, <code>a3debug.cfg</code>
-   * and admin file), needed when StartJoramServer is set to true.
+   * and admin file), needed when starting the collocated JORAM server.
    */
   public String getPlatformConfigDir();
 
@@ -494,55 +502,4 @@ public interface JoramAdapterMBean {
    * @exception AdminException  If the request fails.
    */
   public String getConfiguration() throws ConnectException, AdminException;
-  
-  /**
-   * The persistence directory of the JORAM server to start,
-   * needed when StartJoramServer is set to true.
-   * 
-   * @return the persistence directory.
-   */
-  public String getStorage();
-  
-  /** 
-   * The Joram resource adapter jndi name.
-   * 
-   * @return the Joram resource adapter jndi name. 
-   */
-  public String getJndiName();
-  
-  /** 
-   * login name for administrator. 
-   */
-  public String getRootName();
-  
-  /** 
-   * Identity class needed for authentication 
-   */
-  public String getIdentityClass();
-  
-  /** 
-   * true if the resource adapter start the JoramServer 
-   */
-  public Boolean getStartJoramServer();
-  
-  // *****************************************************************************************
-  // Code to remove in future
-
-  /**
-   * Returns true if the server is colocated.
-   * 
-   * @see org.objectweb.joram.client.connector.JoramAdapterMBean#getCollocatedServer()
-   * @deprecated only needed for compatibility with JOnAS 5.2 administration GUI
-   */
-  public Boolean getCollocatedServer();
-  
-  /**
-   * Returns the server name.
-   * 
-   * @see org.objectweb.joram.client.connector.JoramAdapterMBean#getServerName()
-   * @deprecated only needed for compatibility with JOnAS 5.2 administration GUI
-   */
-  public String getServerName();
-  
-  //*****************************************************************************************
 }

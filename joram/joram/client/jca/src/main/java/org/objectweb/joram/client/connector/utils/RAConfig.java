@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2012 ScalAgent Distributed Technologies
- * Copyright (C) 2005 Bull SA
+ * Copyright (C) 2005 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
  * Contributor(s):
  */
 package org.objectweb.joram.client.connector.utils;
@@ -48,12 +47,14 @@ import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 
 /**
- * This class allows to handle the RA configuration file.
+ *
  */
 public class RAConfig {
 
   private static final String RA_XML = "META-INF/ra.xml";
+  private static final String JORAM_CONFIG_JAR = "joram-config.jar";
   private static final String A3SERVERS_XML = "a3servers.xml";
+  private static final String A3DEBUG_CFG = "a3debug.cfg";
   private static final String RA_PROPERTIES = "ra.properties";
   private static final String JORAMADMIN_CFG = "joram-admin.cfg";
   private static final String JORAMADMIN_XML = "joramAdmin.xml";
@@ -608,16 +609,22 @@ public class RAConfig {
                          " port=" + port +
                          " serverId=" + serverId);
 
+    // extract the joram-config.jar file from RAR in the temp dir
+    extractFromRAR(rarName,JORAM_CONFIG_JAR);
+
     // if present the a3server.xml source is the confdir one
+    // otherwise, we take the RAR one
     if (confDir != null) {
         File f = new File(confDir, A3SERVERS_XML);
         if (f.exists()) {
             copy(f.getPath(), tmpDir + A3SERVERS_XML);
         } else {
-          throw new Exception(A3SERVERS_XML + " file not found : " + f.getAbsolutePath());
+          // extract the a3servers.xml file from joram-config.jar in the tmp dir
+          extractFromJAR(tmpDir + JORAM_CONFIG_JAR, A3SERVERS_XML);
         }
     } else {
-    	throw new Exception("The config directory \"" + confDir + "\" not found.");
+      // extract the a3servers.xml file from joram-config.jar in the tmp dir
+      extractFromJAR(tmpDir + JORAM_CONFIG_JAR, A3SERVERS_XML);
     }
 
     // update A3SERVERS_XML
@@ -643,6 +650,14 @@ public class RAConfig {
         updateJoramAdminXml(hostName, port);
     }
 
+    if (new File(tmpDir +JORAM_CONFIG_JAR).exists()) {
+      // update jar
+      updateZIP(tmpDir + JORAM_CONFIG_JAR,A3SERVERS_XML,tmpDir + A3SERVERS_XML,A3SERVERS_XML);
+      // update rar
+      updateZIP(rarName,JORAM_CONFIG_JAR,tmpDir +JORAM_CONFIG_JAR,JORAM_CONFIG_JAR);
+      // remove temporary file
+      new File(tmpDir + JORAM_CONFIG_JAR).delete();
+    }
     new File(tmpDir + A3SERVERS_XML).delete();
   }
 

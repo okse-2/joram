@@ -45,7 +45,7 @@ public class DistributionHandlerTest implements DistributionHandler {
     addMessage(msg);
   }
 
-  public void init(Properties props, boolean FirstTime) {
+  public void init(Properties props) {
 
   }
 

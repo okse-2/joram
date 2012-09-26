@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@ import org.objectweb.joram.mom.dest.QueueMBean;
 import org.objectweb.joram.mom.dest.TopicMBean;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
+import org.objectweb.joram.mom.proxies.ConnectionManagerMBean;
 import org.objectweb.joram.mom.proxies.UserAgentMBean;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -66,15 +67,24 @@ public class JoramAdminOSGi extends JoramAdmin implements ServiceTrackerCustomiz
   }
 
   public boolean connect(String login, String password) throws Exception {
-    return ConnectionManager.getCurrentInstance().checkCredentials(login, password);
+    ServiceReference sr = context.getServiceReference(ConnectionManagerMBean.class.getName());
+    if (sr != null) {
+      ConnectionManager cm = (ConnectionManager) context.getService(sr);
+      boolean success = cm.checkCredentials(login, password);
+      context.ungetService(sr);
+      return success;
+    }
+    throw new Exception("Joram ConnectionManager not found.");
   }
 
-  public void start() {
+  public void start(AdminListener listener) {
+    super.start(listener);
     serviceTracker = new ServiceTracker(context, filter, this);
     serviceTracker.open();
   }
 
   public void stop() {
+    super.stop();
     serviceTracker.close();
   }
 

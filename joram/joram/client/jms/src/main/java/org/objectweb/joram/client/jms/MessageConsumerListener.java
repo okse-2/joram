@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -33,7 +33,6 @@ import org.objectweb.joram.shared.client.ConsumerSetListRequest;
 import org.objectweb.joram.shared.client.ConsumerUnsetListRequest;
 import org.objectweb.joram.shared.client.ConsumerAckRequest;
 import org.objectweb.joram.shared.client.ActivateConsumerRequest;
-import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.client.jms.connection.ReplyListener;
 import org.objectweb.joram.client.jms.connection.AbortedRequestException;
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
@@ -90,14 +89,8 @@ abstract class MessageConsumerListener implements ReplyListener {
   
   private String selector;
   
-  private String destName;
-  
-  public final String getDestName() {
-    return destName;
-  }
-  
   private String targetName;
-  
+
   /**
    * The identifier of the subscription request.
    */ 
@@ -105,7 +98,7 @@ abstract class MessageConsumerListener implements ReplyListener {
 
   private int status;
 
-  private Vector<String> messagesToAck;
+  private Vector messagesToAck;
   
   /**
    * The number of messages which are in queue (Session.qin)
@@ -141,7 +134,6 @@ abstract class MessageConsumerListener implements ReplyListener {
   MessageConsumerListener(boolean queueMode,
                           boolean durable,
                           String selector,
-                          String destName,
                           String targetName,
                           MessageListener listener,
                           int queueMessageReadMax,
@@ -152,7 +144,7 @@ abstract class MessageConsumerListener implements ReplyListener {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "MessageConsumerListener(" + queueMode +
-                 ',' + durable + ',' + selector + ',' + destName  + ',' + targetName + 
+                 ',' + durable + ',' + selector + ',' + targetName + 
                  ',' + listener + ',' + queueMessageReadMax + 
                  ',' + topicActivationThreshold +
                  ',' + topicPassivationThreshold +
@@ -160,7 +152,6 @@ abstract class MessageConsumerListener implements ReplyListener {
     this.queueMode = queueMode;
     this.durable = durable;
     this.selector = selector;
-    this.destName = destName;
     this.targetName = targetName;
     this.listener = listener;
     this.queueMessageReadMax = queueMessageReadMax;
@@ -168,7 +159,7 @@ abstract class MessageConsumerListener implements ReplyListener {
     this.topicPassivationThreshold = topicPassivationThreshold;
     this.topicAckBufferMax = topicAckBufferMax;
     rm = reqMultiplexer;
-    messagesToAck = new Vector<String>(0);
+    messagesToAck = new Vector(0);
     requestId = -1;
     messageCount = 0;
     topicMsgInputPassivated = false;
@@ -217,7 +208,7 @@ abstract class MessageConsumerListener implements ReplyListener {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> messageCount = " + messageCount);
         // Consume in advance (default is one message in advance)
-        if ((messageCount < queueMessageReadMax || (queueMessageReadMax == 0))
+        if (messageCount < queueMessageReadMax
             && receiveStatus == ReceiveStatus.CONSUMING_REPLY) {
           subscribe = true;
           if (ackMode == javax.jms.Session.DUPS_OK_ACKNOWLEDGE) {
@@ -231,12 +222,9 @@ abstract class MessageConsumerListener implements ReplyListener {
           }
         }
       }
-      // out of the synchronized block
       if (subscribe) {
-        if (queueMessageReadMax == 0)
-          subscribe(toAck, 1);
-        else 
-          subscribe(toAck, queueMessageReadMax);
+        // out of the synchronized block
+        subscribe(toAck);
       }
     } else {
       synchronized (this) {
@@ -272,10 +260,7 @@ abstract class MessageConsumerListener implements ReplyListener {
       logger.log(
         BasicLevel.DEBUG, "MessageConsumerListener.start()");
     if (status == Status.INIT) {
-      if (queueMessageReadMax == 0)
-        subscribe(null, 1);
-      else
-        subscribe(null, queueMessageReadMax);
+      subscribe(null);
       setStatus(Status.RUN);
     } else {
       // Should not happen
@@ -283,9 +268,10 @@ abstract class MessageConsumerListener implements ReplyListener {
     }
   }
 
-  private void subscribe(String[] toAck, int msgCount) throws JMSException {
+  private void subscribe(String[] toAck) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MessageConsumerListener.subscribe()");
+      logger.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.subscribe()");
     
     ConsumerSetListRequest req = 
       new ConsumerSetListRequest(
@@ -293,7 +279,7 @@ abstract class MessageConsumerListener implements ReplyListener {
         selector, 
         queueMode,
         toAck,
-        msgCount);
+        queueMessageReadMax);
     
     // Change the receive status before sending
     // the request. subscribe() is not synchronized
@@ -309,22 +295,9 @@ abstract class MessageConsumerListener implements ReplyListener {
    */
   public void close() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MessageConsumerListener.close()");
+      logger.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.close()");
 
-    if (queueMode) {
-      // Out of the synchronized block because it could
-      // lead to a dead lock with
-      // the connection driver thread calling replyReceived.
-      ConsumerUnsetListRequest unsetLR = new ConsumerUnsetListRequest(
-          queueMode);
-      unsetLR.setTarget(targetName);
-      unsetLR.setCancelledRequestId(requestId);
-      rm.sendRequest(unsetLR);
-    }
-    // else useless for a topic 
-    // because the subscription
-    // is deleted (see MessageConsumer.close())
-    
     synchronized (this) {
       while (status == Status.ON_MSG) {
         try {
@@ -344,6 +317,20 @@ abstract class MessageConsumerListener implements ReplyListener {
 
       setStatus(Status.CLOSE);
     }
+    
+    if (queueMode) {
+      // Out of the synchronized block because it could
+      // lead to a dead lock with
+      // the connection driver thread calling replyReceived.
+      ConsumerUnsetListRequest unsetLR = new ConsumerUnsetListRequest(
+          queueMode);
+      unsetLR.setTarget(targetName);
+      unsetLR.setCancelledRequestId(requestId);
+      rm.sendRequest(unsetLR);
+    }
+    // else useless for a topic 
+    // because the subscription
+    // is deleted (see MessageConsumer.close())
   }
 
   private void acknowledge(int threshold) {
@@ -374,7 +361,9 @@ abstract class MessageConsumerListener implements ReplyListener {
   public synchronized boolean replyReceived(AbstractJmsReply reply) 
     throws AbortedRequestException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MessageConsumerListener.replyReceived(" + reply + ')');
+      logger.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.replyReceived(" + 
+        reply + ')');
     
     if (status == Status.CLOSE)
       throw new AbortedRequestException();
@@ -389,13 +378,6 @@ abstract class MessageConsumerListener implements ReplyListener {
       // 2- increment messageCount (synchronized)
       messageCount += cm.getMessageCount();
       
-      // verify the server activity
-      if (!cm.isActive()) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "MessageConsumerListener.replyReceived: the server passivate.");
-        topicMsgInputPassivated = true;
-      }
-          
       pushMessages(cm);
     } catch (StoppedQueueException exc) {
       throw new AbortedRequestException();
@@ -424,10 +406,6 @@ abstract class MessageConsumerListener implements ReplyListener {
   public void replyAborted(int requestId) {
     // Nothing to do.
   }
-  
-  public void errorReceived(int requestId, MomExceptionReply exc) {
-    // Nothing to do.
-  }
 
   public synchronized boolean isClosed() {
     return (status == Status.CLOSE);
@@ -445,18 +423,16 @@ abstract class MessageConsumerListener implements ReplyListener {
     return targetName;
   }
 
-  protected void activateListener(Message msg,
-                                  MessageListener listener,
-                                  int ackMode) throws JMSException {
+  
+  protected void activateListener(
+      Message msg, MessageListener listener, int ackMode) 
+    throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" +  msg + ')');
+      logger.log(BasicLevel.DEBUG,
+                 "MessageConsumerListener.onMessage(" +  msg + ')');
     
-    // if queueMessageReadMax == 0 (disable the mechanism of pre-requesting of the messages), 
-    // consume the next message after onMessage.
-    if (queueMessageReadMax > 0) {
     // Consume one message
     decreaseMessageCount(ackMode);
-    }
 
     try {
       listener.onMessage(msg);
@@ -471,34 +447,28 @@ abstract class MessageConsumerListener implements ReplyListener {
       exc.setLinkedException(re);
       throw exc;
     } 
-    
-    if (queueMessageReadMax == 0) {
-      // Consume one message
-      decreaseMessageCount(ackMode);
-    }
   }
   
-  public abstract void onMessage(Message msg,
-                                 MessageListener listener,
-                                 int ackMode) throws JMSException;
+  public abstract void onMessage(
+      Message msg, MessageListener listener, int ackMode) 
+    throws JMSException;
   
   /**
-   * Called by Session (standard JMS, mono-threaded)
+   * Called by Session (standard JMS, mono-threaded
    */
   public void onMessage(Message msg, int ackMode) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" + msg + ')');
-    
     if (listener != null) {
-      synchronized (this) {
-        if (status == Status.RUN) {
-          setStatus(Status.ON_MSG);
-        } else {
-          // Notify threads trying to close the listener.
+        synchronized (this) {
+          if (status == Status.RUN) {
+            setStatus(Status.ON_MSG);
+          } else {
+            // Notify threads trying to close the listener.
           notifyAll();
-          throw new javax.jms.IllegalStateException("Message listener closed");
+            throw new javax.jms.IllegalStateException("Message listener closed");
+          }
         }
-      }
 
       try {
         activateListener(msg, listener, ackMode);
@@ -533,11 +503,12 @@ abstract class MessageConsumerListener implements ReplyListener {
   }
 
   void activateMessageInput() throws JMSException {
-    rm.sendRequest(new ActivateConsumerRequest(targetName,
-                                               topicPassivationThreshold - topicActivationThreshold));
+    rm.sendRequest(
+      new ActivateConsumerRequest(targetName, true));
   }
 
   void passivateMessageInput() throws JMSException {
-    rm.sendRequest(new ActivateConsumerRequest(targetName, 0));
+    rm.sendRequest(
+      new ActivateConsumerRequest(targetName, false));
   }
 }

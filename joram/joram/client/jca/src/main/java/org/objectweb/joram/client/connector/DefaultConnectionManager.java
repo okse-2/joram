@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -41,23 +41,20 @@ import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 /** 
  * The <code>DefaultConnectionManager</code> class is the default connection
  * manager provided with JORAM resource adapter, which intercepts connections
  * requests coming from non managed client applications.
  */
-public class DefaultConnectionManager implements javax.resource.spi.ConnectionManager, java.io.Serializable {
+public class DefaultConnectionManager
+             implements javax.resource.spi.ConnectionManager,
+                        java.io.Serializable
+{
   /**
    * 
    */
   private static final long serialVersionUID = 1L;
-  
-  public static Logger logger = Debug.getLogger(DefaultConnectionManager.class.getName());
-  
   /**
    * Static reference to the local <code>DefaultConnectionManager</code>
    * instance.
@@ -83,8 +80,9 @@ public class DefaultConnectionManager implements javax.resource.spi.ConnectionMa
   public Object allocateConnection(ManagedConnectionFactory mcf,
                                    ConnectionRequestInfo cxRequest)
     throws ResourceException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " allocateConnection(" + mcf + "," + cxRequest + ")");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " allocateConnection(" + mcf + "," + cxRequest + ")");
     
     String userName;
     String password;
@@ -101,10 +99,8 @@ public class DefaultConnectionManager implements javax.resource.spi.ConnectionMa
     }
     
     String hostName = ((ManagedConnectionFactoryImpl) mcf).getHostName();
-    int serverPort = ((ManagedConnectionFactoryImpl) mcf).getServerPort().intValue();
-    
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " allocateConnection: hostName = " + hostName + ", serverPort = " + serverPort);
+    int serverPort =
+      ((ManagedConnectionFactoryImpl) mcf).getServerPort().intValue();
     
     try {
       if (cxRequest instanceof QueueConnectionRequest) {
@@ -133,17 +129,26 @@ public class DefaultConnectionManager implements javax.resource.spi.ConnectionMa
   }
 
   private void setFactoryParameters(AbstractConnectionFactory factory , ManagedConnectionFactoryImpl mcf) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " setFactoryParameters(" + factory + "," + mcf + ")"); 
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " setFactoryParameters(" + factory + "," + mcf + ")");   
+    factory.getParameters().connectingTimer = mcf.getConnectingTimer();
+    factory.getParameters().cnxPendingTimer = mcf.getCnxPendingTimer();
+    factory.getParameters().txPendingTimer = mcf.getTxPendingTimer();
+    factory.getParameters().asyncSend = mcf.isAsyncSend();
+    factory.getParameters().multiThreadSync = mcf.isMultiThreadSync();
+    factory.getParameters().multiThreadSyncDelay = mcf.getMultiThreadSyncDelay();
+    factory.getParameters().outLocalAddress = mcf.getOutLocalAddress();
+    factory.getParameters().outLocalPort = mcf.getOutLocalPort().intValue();
     
-    mcf.setParameters(factory);
   }
 
   /**
    * Returns the reference to the <code>DefaultConnectionManager</code>
    * instance, creates it if needed.
    */
-  static DefaultConnectionManager getRef() {
+  static DefaultConnectionManager getRef()
+  {
     if (ref == null)
       ref = new DefaultConnectionManager();
 

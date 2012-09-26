@@ -54,7 +54,7 @@ public class AliasTestQ2 extends TestCase {
   public void run() {
     try {
       startAgentServer((short) 0);
-      startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false" });
+      startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true" });
       startAgentServer((short) 2);
 
       admin();
@@ -80,13 +80,13 @@ public class AliasTestQ2 extends TestCase {
 
       for (int i = 0; i < 10; i++) {
         TextMessage msg = sessionp.createTextMessage();
-        msg.setText("Message nï¿½" + i);
+        msg.setText("Message n°" + i);
         producer.send(msg);
       }
 
       for (int i = 0; i < 10; i++) {
         Message msg = consumer.receive();
-        assertEquals("Message nï¿½" + i, ((TextMessage) msg).getText());
+        assertEquals("Message n°" + i, ((TextMessage) msg).getText());
       }
 
       // Kill server holding the final queue
@@ -94,7 +94,7 @@ public class AliasTestQ2 extends TestCase {
 
       for (int i = 0; i < 10; i++) {
         TextMessage msg = sessionp.createTextMessage();
-        msg.setText("Message nï¿½" + i);
+        msg.setText("Message n°" + i);
         producer.send(msg);
       }
 
@@ -113,7 +113,7 @@ public class AliasTestQ2 extends TestCase {
       // Alias queue should transmit the waiting messages to the final queue
       for (int i = 0; i < 10; i++) {
         Message msg = consumer.receive(10000);
-        assertEquals("Message nï¿½" + i, ((TextMessage) msg).getText());
+        assertEquals("Message n°" + i, ((TextMessage) msg).getText());
       }
 
       cnx0.close();

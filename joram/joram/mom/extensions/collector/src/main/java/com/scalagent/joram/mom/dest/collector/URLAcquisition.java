@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.objectweb.joram.mom.dest.AcquisitionHandler;
 import org.objectweb.joram.mom.dest.ReliableTransmitter;
@@ -102,13 +104,15 @@ public class URLAcquisition implements AcquisitionHandler {
     Properties prop = new Properties();
     prop.put(URL, urlStr);
 
+    List list = new ArrayList(1);
     Message msg = new Message();
 
     msg.body = getResource(urlStr, prop);
     msg.properties = prop;
     msg.type = type;
 
-    transmitter.transmit(msg, null);
+    list.add(msg);
+    transmitter.transmit(list, null);
   }
 
   public void setProperties(java.util.Properties properties) {

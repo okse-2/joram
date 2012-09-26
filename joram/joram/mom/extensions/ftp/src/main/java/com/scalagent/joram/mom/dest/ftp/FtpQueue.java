@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,6 @@ import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.MessageErrorConstants;
-import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -150,9 +149,7 @@ public class FtpQueue extends Queue {
                  " ftpNot(" + not + ")\n" +
                  "transferTable = " + transferTable);
     Message msg = (Message) not.getMessages().get(0);
-    try {
-      storeMessage(new org.objectweb.joram.mom.messages.Message(msg), false);
-    } catch (AccessException e) {/* never happens */}
+    storeMessage(new org.objectweb.joram.mom.messages.Message(msg));
     deliverMessages(0);
     transferTable.remove(new FtpMessage(msg).getIdentifier());
 

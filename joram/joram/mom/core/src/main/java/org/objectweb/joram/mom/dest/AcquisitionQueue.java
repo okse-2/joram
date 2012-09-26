@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,6 @@ package org.objectweb.joram.mom.dest;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.ClientMessages;
-import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -40,6 +39,7 @@ import fr.dyade.aaa.common.Debug;
  * using an {@link AcquisitionModule}.
  */
 public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
+
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -56,20 +56,6 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
 
   /** The number of produced messages. */
   private long msgCount = 0;
-  
-  /** The threshold of messages send by the handler in the engine */
-  private long diff_max = 10;
-  private long diff_min = 0;
-  private String ACQ_QUEUE_MAX_MSG = "acquisition.max_msg";
-  private String ACQ_QUEUE_MIN_MSG = "acquisition.min_msg";
-  
-  /** The threshold of pending messages in the queue */
-  private long pending_max = 20;
-  private long pending_min = 10;
-  private String ACQ_QUEUE_MAX_PND = "acquisition.max_pnd";
-  private String ACQ_QUEUE_MIN_PND = "acquisition.min_pnd";
-  
-  private boolean pause = false;
 
   /** The acquisition class name. */
   private String acquisitionClassName;
@@ -95,11 +81,6 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
       logger.log(BasicLevel.DEBUG, "AcquisitionQueue.setProperties prop = " + properties);
     }
     this.properties = properties;
-    
-    diff_max = Long.parseLong(properties.getProperty(ACQ_QUEUE_MAX_MSG, String.valueOf(diff_max)));
-    diff_min = Long.parseLong(properties.getProperty(ACQ_QUEUE_MIN_MSG, String.valueOf(diff_min)));
-    pending_max = Long.parseLong(properties.getProperty(ACQ_QUEUE_MAX_PND, String.valueOf(pending_max)));
-    pending_min = Long.parseLong(properties.getProperty(ACQ_QUEUE_MIN_PND, String.valueOf(pending_min)));
 
     // Acquisition class name can only be set the first time.
     if (firstTime) {
@@ -129,17 +110,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     }
   }
 
-  public void react(AgentId from, Notification not) throws Exception { 	
-  	long diff = AcquisitionModule.getCount() - msgCount;
-  	int pending = getPendingMessageCount();
-  	if (!pause && ((diff >= diff_max) || (pending >= pending_max))){
-  		stopHandler(properties);
-  		pause = true;
-  	}
-  	else if (pause && (diff <= diff_min) && (pending <= pending_min)){
-  		startHandler(properties);
-  		pause = false;
-  	}
+  public void react(AgentId from, Notification not) throws Exception {
     if (not instanceof AcquisitionNot) {
       acquisitionNot((AcquisitionNot) not);
     } else {
@@ -224,9 +195,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     ClientMessages clientMessages = acquisitionModule.acquisitionNot(not, msgCount);
     if (clientMessages != null) {
       msgCount += clientMessages.getMessageCount();
-      try {
-        addClientMessages(clientMessages, false);
-      } catch (AccessException e) {/* never happens */}
+      addClientMessages(clientMessages);
     }
   }
 

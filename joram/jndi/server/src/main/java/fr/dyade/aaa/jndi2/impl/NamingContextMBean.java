@@ -22,8 +22,6 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
-import java.util.Properties;
-
 import javax.naming.NamingException;
 
 public interface NamingContextMBean {
@@ -41,6 +39,4 @@ public interface NamingContextMBean {
    public String lookup(String name) throws NamingException;
 
    public void unbind(String name) throws NamingException;
-   
-   public Properties getProperties(String name) throws NamingException;
 }

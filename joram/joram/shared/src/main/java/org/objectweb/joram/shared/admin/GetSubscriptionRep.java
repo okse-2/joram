@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,19 +34,15 @@ public class GetSubscriptionRep extends AdminReply {
   private String topicId;
 
   private int messageCount;
-  
-  private int ackCount;
 
   private boolean durable;
 
   public GetSubscriptionRep(String topicId,
                             int messageCount,
-                            int ackCount,
                             boolean durable) {
     super(true, null);
     this.topicId = topicId;
     this.messageCount = messageCount;
-    this.ackCount = ackCount;
     this.durable = durable;
   }
   
@@ -60,10 +56,6 @@ public class GetSubscriptionRep extends AdminReply {
     return messageCount;
   }
 
-  public final int getDeliveredMessageCount() {
-    return ackCount;
-  }
-  
   public final boolean getDurable() {
     return durable;
   }
@@ -76,7 +68,6 @@ public class GetSubscriptionRep extends AdminReply {
     super.readFrom(is);
     topicId = StreamUtil.readStringFrom(is);
     messageCount = StreamUtil.readIntFrom(is);
-    ackCount = StreamUtil.readIntFrom(is);
     durable = StreamUtil.readBooleanFrom(is);
   }
 
@@ -84,7 +75,6 @@ public class GetSubscriptionRep extends AdminReply {
     super.writeTo(os);
     StreamUtil.writeTo(topicId, os);
     StreamUtil.writeTo(messageCount, os);
-    StreamUtil.writeTo(ackCount, os);
     StreamUtil.writeTo(durable, os);
   }
 }

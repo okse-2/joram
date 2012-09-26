@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,6 +36,9 @@ import fr.dyade.aaa.common.Debug;
  * This class wraps multiples implementations of the java.net.Socket class.
  */
 public abstract class ServerSocketFactory {
+  /**
+   * Logger statique des objets de la classe ServerSocketFactory.
+   */
   static Logger logger = Debug.getLogger(ServerSocketFactory.class.getName());
 
   /**
@@ -52,7 +55,7 @@ public abstract class ServerSocketFactory {
   public final static ServerSocketFactory getDefaultFactory() {
     ServerSocketFactory serverSocketFactory = null;
     try {
-      Class<?> factoryClass = Class.forName(DefaultFactory);
+      Class factoryClass = Class.forName(DefaultFactory);
       Method method = factoryClass.getMethod("getFactory", (Class[]) null);
       serverSocketFactory = (ServerSocketFactory) method.invoke(null, (Object[]) null);
     } catch (Exception exc) {
@@ -72,7 +75,7 @@ public abstract class ServerSocketFactory {
   public final static ServerSocketFactory getFactory(String ssfcn) {
   	ServerSocketFactory serverSocketFactory = null;
     try {
-      Class<?> factoryClass = Class.forName(ssfcn);
+      Class factoryClass = Class.forName(ssfcn);
       Method method = factoryClass.getMethod("getFactory", (Class[]) null);
       serverSocketFactory = (ServerSocketFactory) method.invoke(null, (Object[]) null);
     } catch (Exception exc) {

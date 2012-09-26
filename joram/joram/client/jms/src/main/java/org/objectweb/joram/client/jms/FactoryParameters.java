@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -25,34 +25,25 @@
 package org.objectweb.joram.client.jms;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 import javax.naming.RefAddr;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.net.SocketFactory;
 import fr.dyade.aaa.common.net.SocketFactory13;
 
 /**
  * A <code>FactoryParameters</code> instance holds a
- * <code>&lt;XA&gt;ConnectionFactory</code> configuration parameters,
- * it allows to configure the related ConnectionFactory.
+ * <code>&lt;XA&gt;ConnectionFactory</code> configuration parameters.
  */
 public class FactoryParameters implements java.io.Serializable, Cloneable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-
-  private static Logger logger = Debug.getLogger(FactoryParameters.class.getName());
 
   /** Name of host hosting the server to create connections with. */
   private String host;
@@ -146,15 +137,10 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
   public boolean implicitAck;
 
   /**
-   *  Determines whether the persistent produced messages are asynchronously
-   * sent (without acknowledge) or not.
+   *  Determines whether the produced messages are asynchronously
+   * sent or not (without or with acknowledgement).
    * <p>
-   * Messages sent asynchronously may be lost if a failure occurs before the
-   * message is persisted on the server.
-   * <p>
-   * Non persistent messages are always sent without acknowledgment. 
-   * <p>
-   *  Default is false, persistent messages are sent with acknowledge.
+   *  Default is false (with ack).
    */
   public boolean asyncSend = false;
 
@@ -462,13 +448,12 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
 	strbuf.append('(').append(super.toString());
 	strbuf.append(",host=").append(host);
   strbuf.append(",port=").append(port);
-  strbuf.append(",url=").append(url);
+  strbuf.append(",url").append(url);
   strbuf.append(",connectingTimer=").append(connectingTimer);
   strbuf.append(",txPendingTimer=").append(txPendingTimer);
   strbuf.append(",cnxPendingTimer=").append(cnxPendingTimer);
   strbuf.append(",implicitAck=").append(implicitAck);
   strbuf.append(",asyncSend=").append(asyncSend);
-  strbuf.append(",queueMessageReadMax=").append(queueMessageReadMax);
   strbuf.append(",topicAckBufferMax=").append(topicAckBufferMax);
   strbuf.append(",multiThreadSync=").append(multiThreadSync);
   strbuf.append(",multiThreadSyncDelay=").append(multiThreadSyncDelay);
@@ -567,60 +552,4 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
       }
     }
   }
-  
-  public void setParameters(Properties properties) {
-    if ((properties == null) || (properties.isEmpty()))
-      return;
-
-    for (Enumeration keys = properties.keys(); keys.hasMoreElements();) {
-      String name = (String) keys.nextElement();
-      String value = (String) properties.getProperty(name);
-
-      try {
-        if ("cnxPendingTimer".equals(name)) {
-          cnxPendingTimer = new Integer(value).intValue();
-        } else if ("connectingTimer".equals(name)) {
-          connectingTimer = new Integer(value).intValue();
-        } if ("asyncSend".equals(name)) {
-          asyncSend = new Boolean(value).booleanValue();
-        } else if ("txPendingTimer".equals(name)) {
-          txPendingTimer = new Integer(value).intValue();
-        } else if ("implicitAck".equals(name)) {
-          implicitAck = new Boolean(value).booleanValue();
-        } else if ("multiThreadSync".equals(name)) {
-          multiThreadSync = new Boolean(value).booleanValue();
-        } else if ("multiThreadSyncDelay".equals(name)) {
-          multiThreadSyncDelay = new Integer(value).intValue();
-        } else if ("multiThreadSyncThreshold".equals(name)) {
-          multiThreadSyncThreshold = new Integer(value).intValue();
-        } else if ("queueMessageReadMax".equals(name)) {
-          queueMessageReadMax = new Integer(value).intValue();
-        } else if ("topicAckBufferMax".equals(name)) {
-          topicAckBufferMax = new Integer(value).intValue();
-        } else if ("topicActivationThreshold".equals(name)) {
-          topicActivationThreshold = new Integer(value).intValue();
-        } else if ("topicPassivationThreshold".equals(name)) {
-          topicPassivationThreshold = new Integer(value).intValue();
-        } else if ("SoTimeout".equals(name)) {
-          SoTimeout = new Integer(value).intValue();
-        } else if ("TcpNoDelay".equals(name)) {
-          TcpNoDelay = new Boolean(value).booleanValue();
-        } else if ("SoLinger".equals(name)) {
-          SoLinger = new Integer(value).intValue();
-        } else if ("outLocalPort".equals(name)) {
-          outLocalPort = new Integer(value).intValue();
-        } else if ("outLocalAddress".equals(name)) {
-          outLocalAddress = value;
-        } else {
-          logger.log(BasicLevel.ERROR,
-                     "Could not set FactoryParameters <" + name + ", " + value + ">",
-                     new Exception("Unknow parameter: " + name));
-        }
-      } catch (NumberFormatException exc) {
-        logger.log(BasicLevel.ERROR,
-                   "Could not set FactoryParameters <" + name + ", " + value + ">", exc);
-      }
-    }
-  }
-
 }

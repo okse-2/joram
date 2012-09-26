@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -88,7 +88,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * The <code>Destination</code> class implements the common behavior of
  * MOM destinations.
  */
-public abstract class Destination extends Agent implements DestinationMBean, TxDestination {
+public abstract class Destination extends Agent implements DestinationMBean {
 
   public static Logger logger = Debug.getLogger(Destination.class.getName());
   
@@ -174,23 +174,10 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     }
   }
 
-  /**
-   * Initializes the destination.
-   * 
-   * @param firstTime true when first called by the factory
-   */
-  protected abstract void initialize(boolean firstTime);
-
-  /**
-   * Finalizes the agent before it is garbaged.
-   * 
-   * @param lastime true if the destination is deleted
-   */
+  /** Finalizes the agent before it is garbaged. */
   public void agentFinalize(boolean lastTime) {
-    if (task != null) task.cancel();
-    
-    finalize(lastTime);
-    
+    if (task != null)
+      task.cancel();
     try {
       MXWrapper.unregisterMBean(getMBeanName());
     } catch (Exception exc) {
@@ -199,13 +186,6 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     }
     super.agentFinalize(lastTime);
   }
-
-  /**
-   * Finalizes the destination before it is garbaged.
-   * 
-   * @param lastime true if the destination is deleted
-   */
-  protected abstract void finalize(boolean lastTime);
 
   public String getMBeanName() {
     StringBuffer strbuf = new StringBuffer();
@@ -217,8 +197,6 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     return strbuf.toString();
   }
 
-  abstract fr.dyade.aaa.common.stream.Properties getStats();
-  
   /**
    * Distributes the received notifications to the appropriate reactions.
    * 
@@ -250,8 +228,8 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
         }
       } else if (not instanceof WakeUpNot) {
         if (logger.isLoggable(BasicLevel.DEBUG)) {
-          logger.log(BasicLevel.DEBUG,
-                     "wakeupnot received: current task=" + task + " update=" + ((WakeUpNot) not).update);
+          logger.log(BasicLevel.ERROR, "wakeupnot received: current task=" + task + " update="
+              + ((WakeUpNot) not).update);
         }
         setNoSave();
         if (task == null || ((WakeUpNot) not).update) {
@@ -263,7 +241,7 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       } else if (not instanceof FwdAdminRequestNot) {
         handleAdminRequestNot(from, (FwdAdminRequestNot) not);
       } else if (not instanceof PingNot) {
-        Channel.sendTo(from, new PongNot(getStats()));
+        Channel.sendTo(from, new PongNot());
       } else {
         throw new UnknownNotificationException(not.getClass().getName());
       }
@@ -382,6 +360,13 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       }
     }
   }
+
+  /**
+   * Initializes the destination.
+   * 
+   * @param firstTime true when first called by the factory
+   */
+  protected abstract void initialize(boolean firstTime);
 
   protected boolean isLocal(AgentId id) {
     return (getId().getTo() == id.getTo());
@@ -654,12 +639,12 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       throw new AccessException("WRITE right not granted");
     }
 
-    doClientMessages(from, not, true);
+    doClientMessages(from, not);
 
-    // For topic performance we must send reply after process ClientMessage. It results
-    // in a best flow-control of sender allowing the handling of forwarded messages before
-    // sender freeing.
-    
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // for topic performance : must send reply after process ClientMessage
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     if (!not.isPersistent() && !not.getAsyncSend()) {
       forward(from, new SendReplyNot(not.getClientContext(), not.getRequestId()));
     }
@@ -736,10 +721,7 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       }
     }
     
-    
-    try {
-      doClientMessages(from, theCM, false);
-    } catch (AccessException e) {/* never happens */}
+    doClientMessages(from, theCM);
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // for topic performance : must send reply after process ClientMessage
@@ -790,7 +772,7 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     return AdminTopic.isAdminTopicId(client) || client.equals(adminId);
   }
 
-  abstract protected void doClientMessages(AgentId from, ClientMessages not, boolean throwsExceptionOnFullDest) throws AccessException;
+  abstract protected void doClientMessages(AgentId from, ClientMessages not);
   abstract protected void doUnknownAgent(UnknownAgent not);
   abstract protected void doDeleteNot(DeleteNot not);
   

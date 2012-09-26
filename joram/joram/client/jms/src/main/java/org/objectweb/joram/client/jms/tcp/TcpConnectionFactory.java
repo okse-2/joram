@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -38,7 +38,6 @@ import fr.dyade.aaa.common.Debug;
 
 /**
  * A <code>TcpConnectionFactory</code> instance is a factory of TCP connections.
- * The created ConnectionFactory can be configured using theFactoryParameters.
  */
 public class TcpConnectionFactory extends ConnectionFactory {
   /** define serialVersionUID for interoperability */
@@ -81,18 +80,20 @@ public class TcpConnectionFactory extends ConnectionFactory {
   }
 
   /**
-   * Administration method creating a <code>ConnectionFactory</code>
+   * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating TCP connections with the default server.
    * 
-   * @see ConnectionFactory#getDefaultServerHost()
-   * @see ConnectionFactory#getDefaultServerPort()
+   * @throws java.net.ConnectException If the admin connection is closed or broken.
+   * 
+   * @see #getDefaultServerHost()
+   * @see #getDefaultServerPort()
    */ 
-  public static ConnectionFactory create() {
+  public static ConnectionFactory create() throws java.net.ConnectException {
     return create(getDefaultServerHost(), getDefaultServerPort());
   }
 
   /**
-   * Administration method creating a <code>ConnectionFactory</code>
+   * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating TCP connections with a given server.
    *
    * @param host  Name or IP address of the server's host.
@@ -103,7 +104,7 @@ public class TcpConnectionFactory extends ConnectionFactory {
   }
 
   /**
-   * Administration method creating a <code>ConnectionFactory</code>
+   * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating TCP connections with a given server.
    *
    * @param host           Name or IP address of the server's host.

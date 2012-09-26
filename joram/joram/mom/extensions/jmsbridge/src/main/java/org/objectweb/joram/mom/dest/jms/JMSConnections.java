@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,7 +43,7 @@ public class JMSConnections implements JMSConnectionsMBean {
 
   private static final Logger logger = Debug.getLogger(JMSConnections.class.getName());
 
-  static final String SAVE_FILE_NAME = "JmsCnx";
+  static final String SAVE_FILE_NAME = "Jms_Cnx";
 
   private Map<String, JMSModule> servers = new HashMap<String, JMSModule>();
 
@@ -64,51 +64,29 @@ public class JMSConnections implements JMSConnectionsMBean {
   }
 
   /** {@inheritDoc} */
-  public void addServer(String name, String cnxFactoryName) {
-    addServer(name, cnxFactoryName, null, null);
+  public void addServer(String cnxFactoryName) {
+    addServer(cnxFactoryName, null, null);
   }
 
   /** {@inheritDoc} */
-  public void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl) {
-    addServer(name, cnxFactoryName, jndiFactoryClass, jndiUrl, null, null);
+  public void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl) {
+    addServer(cnxFactoryName, jndiFactoryClass, jndiUrl, null, null);
   }
 
   /** {@inheritDoc} */
-  public void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
+  public void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
       String password) {
-    addServer(name, cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, null);
+    addServer(cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, null);
   }
 
   /** {@inheritDoc} */
-  public void addServer(String name,
-                        String cnxFactoryName,
-                        String jndiFactoryClass,
-                        String jndiUrl,
-                        String user,
-                        String password,
-                        String clientID) {
-  	if (logger.isLoggable(BasicLevel.DEBUG)) {
-			logger.log(BasicLevel.DEBUG, "JMSConnection.addServer(" + name + ", " + 
-					cnxFactoryName + ", " + jndiFactoryClass + ", " + jndiUrl + ", " + user + ", ****, " + clientID + ')');
-  	}
-  	
-    if (name == null) {
-      int i = 0;
-      do {
-        name = "cnx" + i; i += 1;
-      } while (servers.containsKey(name));
-      logger.log(BasicLevel.WARN,
-                 "Cannot add an unamed JMSConnection, set name to \"" + name  + "\".");
-    }
-			
+  public void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
+      String password, String clientID) {
     synchronized (servers) {
-      if (!servers.containsKey(name)) {
-        JMSModule cnx = new JMSModule(name, cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, clientID);
+      if (!servers.containsKey(cnxFactoryName)) {
+        JMSModule cnx = new JMSModule(cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, clientID);
         cnx.startLiveConnection();
-        servers.put(name, cnx);
-      } else {
-        logger.log(BasicLevel.ERROR,
-                   "Cannot add a JMSConnection with an already defined name: " + name  + ".");
+        servers.put(cnxFactoryName, cnx);
       }
     }
     try {
@@ -126,9 +104,6 @@ public class JMSConnections implements JMSConnectionsMBean {
 
   /** {@inheritDoc} */
   public void deleteServer(String name) {
-  	if (logger.isLoggable(BasicLevel.DEBUG)) {
-			logger.log(BasicLevel.DEBUG, "JMSConnection.deleteServer(" + name + ')');
-  	}
     synchronized (servers) {
       JMSModule cnx = servers.remove(name);
       if (cnx != null) {
@@ -142,7 +117,7 @@ public class JMSConnections implements JMSConnectionsMBean {
             AgentServer.getTransaction().commit(true);
           }
         } catch (IOException exc) {
-          logger.log(BasicLevel.ERROR, "Error while deleting connection: " + name, exc);
+          logger.log(BasicLevel.ERROR, "Error while deleting server " + name, exc);
         }
       }
     }

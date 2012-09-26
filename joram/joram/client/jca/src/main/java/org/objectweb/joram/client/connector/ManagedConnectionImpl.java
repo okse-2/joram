@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -25,7 +25,6 @@
 package org.objectweb.joram.client.connector;
 
 import java.io.PrintWriter;
-import java.util.Iterator;
 import java.util.Vector;
 
 import javax.jms.JMSException;
@@ -41,15 +40,13 @@ import javax.resource.spi.ConnectionEventListener;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.IllegalStateException;
 import javax.resource.spi.LocalTransactionException;
+import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionMetaData;
 import javax.resource.spi.ResourceAdapterInternalException;
 import javax.security.auth.Subject;
 import javax.transaction.xa.XAResource;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 /**
  * A <code>ManagedConnectionImpl</code> instance wraps a physical connection
@@ -60,13 +57,8 @@ public class ManagedConnectionImpl
              implements javax.resource.spi.ManagedConnection,
                         javax.resource.spi.LocalTransaction,
                         javax.jms.ExceptionListener {
-  
-  public static Logger logger = Debug.getLogger(ManagedConnectionImpl.class.getName());
-  
   /** Central adapter authority. */
-  private JoramResourceAdapter ra;
-  /** Ref to the managed connection factory (use to reconnect) */
-  ManagedConnectionFactoryImpl mcf;
+  private JoramAdapter ra;
 
   /** Physical connection to the JORAM server. */
   private XAConnection cnx = null;
@@ -105,39 +97,30 @@ public class ManagedConnectionImpl
   Subject subject;
   /** only used for reconnection */
   ConnectionRequestInfo cxRequest;
-  
-  /** Use for reconnection synchronization */
-  private Object lock = new Object();
-  /** The waiting time in ms for reconnection. */
-  private long timeWaitReconnect = 240000;
 
   /**
    * Creates a <code>ManagedConnectionImpl</code> instance wrapping a
    * physical connection to the underlying JORAM server.
    *
    * @param ra          Central adapter authority.
-   * @param mcf         The Managed Connection Factory
    * @param cnx         Physical connection to the JORAM server.
    * @param hostName    JORAM server host name.
    * @param serverPort  JORAM server port number.
    * @param userName    User identification.
    */
-  ManagedConnectionImpl(JoramResourceAdapter ra,
-  		                  ManagedConnectionFactoryImpl mcf,
+  ManagedConnectionImpl(JoramAdapter ra,
                         XAConnection cnx,
                         String hostName,
                         int serverPort,
                         String userName) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ManagedConnectionImpl(" + ra +
-                                    ", " + mcf +
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "ManagedConnectionImpl(" + ra +
                                     ", " + cnx +
                                     ", " + hostName +
                                     ", " + serverPort +
                                     ", " + userName + ")");
 
     this.ra = ra;
-    this.mcf = mcf;
     this.cnx = cnx;
     this.hostName = hostName;
     this.serverPort = serverPort;
@@ -152,7 +135,8 @@ public class ManagedConnectionImpl
 
     try {
       cnx.setExceptionListener(this);
-    } catch (JMSException exc) {}
+    }
+    catch (JMSException exc) {}
 
     handles = new Vector();
     listeners = new Vector();
@@ -162,11 +146,6 @@ public class ManagedConnectionImpl
     hashCode = -1;
 
     ra.addProducer(this);
-    
-    if (ra instanceof JoramAdapter) {
-    	if (((JoramAdapter)ra).getConnectingTimer() > 0)
-    		timeWaitReconnect = ((JoramAdapter)ra).getConnectingTimer() * 1000;
-    }
   }
 
 
@@ -179,13 +158,16 @@ public class ManagedConnectionImpl
   public Object getConnection(javax.security.auth.Subject subject,
                               ConnectionRequestInfo cxRequestInfo)
                 throws ResourceException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " getConnection(" + subject + ", " + cxRequestInfo + ")");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " getConnection(" + subject +
+                                    ", " + cxRequestInfo + ")");
 
     if (! isValid()) {
         if (out != null)
             out.print("Physical connection to the underlying JORAM server has been lost.");
-      throw new CommException("Physical connection to the underlying JORAM server has been lost.");
+      throw new CommException("Physical connection to the underlying "
+                              + "JORAM server has been lost.");
     }
 
     OutboundConnection handle;
@@ -199,8 +181,9 @@ public class ManagedConnectionImpl
 
     handles.add(handle);
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " getConnection handles = " + handles);
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " getConnection handles = " + handles);
     return handle;
   }
 
@@ -213,34 +196,38 @@ public class ManagedConnectionImpl
    */
   public void associateConnection(Object connection)
     throws ResourceException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " associateConnection(" + connection + ")");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " associateConnection(" + connection + ")");
 
     if (! isValid()) {
         if (out != null)
             out.print("Physical connection to the underlying JORAM server has been lost.");
-      throw new CommException("Physical connection to the underlying JORAM server has been lost.");
+      throw new CommException("Physical connection to the underlying "
+                              + "JORAM server has been lost.");
     }
 
     if (! (connection instanceof OutboundConnection)) {
         if (out != null)
             out.print("The provided connection handle is not a JORAM handle.");
-      throw new ResourceException("The provided connection handle is not a JORAM handle.");
+      throw new ResourceException("The provided connection handle is not "
+                                  + "a JORAM handle.");
     }
 
     OutboundConnection newConn = (OutboundConnection) connection;
-
     newConn.managedCx = this;
     newConn.xac = cnx;
   }
 
   /** Adds a connection event listener. */
-  public void addConnectionEventListener(ConnectionEventListener listener) {
+  public void addConnectionEventListener(ConnectionEventListener listener)
+  {
     listeners.add(listener);
   }
 
   /** Removes a connection event listener. */
-  public void removeConnectionEventListener(ConnectionEventListener listener) {
+  public void removeConnectionEventListener(ConnectionEventListener listener)
+  {
     listeners.remove(listener);
   }
 
@@ -257,36 +244,36 @@ public class ManagedConnectionImpl
    *                                              retrieved.
    */
   public XAResource getXAResource() throws ResourceException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " getXAResource()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " getXAResource()");
 
     if (! isValid()) {
         if (out != null)
             out.print("Physical connection to the underlying JORAM server has been lost.");
-      throw new CommException("Physical connection to the underlying JORAM server has been lost.");
+      throw new CommException("Physical connection to the underlying "
+                              + "JORAM server has been lost.");
     }
 
     try {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + " getXAResource session = " + session);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                      this + " getXAResource session = " + session);
 
       if (session == null) {
         OutboundConnection outboundCnx = null;
         for (java.util.Enumeration e = handles.elements(); e.hasMoreElements(); ) {
           outboundCnx = (OutboundConnection) e.nextElement();
-          if (outboundCnx.cnxEquals(cnx)) {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, this + " getXAResource : outboundCnx found in handles table.");
-            break;
-          }
+          if (outboundCnx.cnxEquals(cnx)) break;
         }
 
         if (outboundCnx == null)
           outboundCnx = (OutboundConnection) getConnection(null,null);
 
         if (outboundCnx != null) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, this + " getXAResource  outboundCnx = " + outboundCnx +
+          if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                          this + " getXAResource  outboundCnx = " + outboundCnx +
                                           "\n  outboundCnx.sess = " + outboundCnx.sessions);
 
           OutboundSession outboundSession = null;
@@ -294,8 +281,9 @@ public class ManagedConnectionImpl
             outboundSession = (OutboundSession) outboundCnx.sessions.get(0);
 
             if (!(outboundSession.sess instanceof XASession)) {
-              if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, this + " getXAResource  outboundSession.sess = " + outboundSession.sess);
+              if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+                AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                              this + " getXAResource  outboundSession.sess = " + outboundSession.sess);
 
               // getXARessourceManager (create by XAConnection)
               org.objectweb.joram.client.jms.XAResourceMngr xaResourceMngr = null;
@@ -311,8 +299,9 @@ public class ManagedConnectionImpl
                 xaResourceMngr = new org.objectweb.joram.client.jms.XAResourceMngr(
                   (org.objectweb.joram.client.jms.Connection) outboundCnx.xac);
 
-              if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, this + " getXAResource  xaResourceMngr = " + xaResourceMngr);
+              if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+                AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                              this + " getXAResource  xaResourceMngr = " + xaResourceMngr);
 
               org.objectweb.joram.client.jms.Session sess =
                 (org.objectweb.joram.client.jms.Session) outboundSession.sess;
@@ -324,18 +313,21 @@ public class ManagedConnectionImpl
                 sess,
                 xaResourceMngr);
 
-              if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, this + " getXAResource  session = " + session);
+              if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+                AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                              this + " getXAResource  session = " + session);
             }
           } else {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, this + " getXAResource createXASession");
+            if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+              AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                            this + " getXAResource createXASession");
             session = cnx.createXASession();
           }
         }
       } else if (session instanceof org.objectweb.joram.client.jms.XASession) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, this + " getXAResource session is XASession and not null");
+        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+          AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                        this + " getXAResource session is XASession and not null");
         // set Session transacted = true
         ((org.objectweb.joram.client.jms.XASession)session).getDelegateSession().setTransacted(true);
 
@@ -349,14 +341,18 @@ public class ManagedConnectionImpl
       }
 
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + " getXAResource  return = " + ((XASession) session).getXAResource());
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                      this + " getXAResource  return = " +
+                                      ((XASession) session).getXAResource());
 
       return ((XASession) session).getXAResource();
-    } catch (JMSException exc) {
+    }
+    catch (JMSException exc) {
         if (out != null)
             out.print("Could not get XA resource: " + exc);
-      throw new ResourceAdapterInternalException("Could not get XA resource: " + exc);
+      throw new ResourceAdapterInternalException("Could not get XA resource: "
+                                                 + exc);
     }
   }
 
@@ -373,30 +369,36 @@ public class ManagedConnectionImpl
    */
   public javax.resource.spi.LocalTransaction getLocalTransaction()
     throws ResourceException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " getLocalTransaction()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " getLocalTransaction()");
 
     if (! isValid()) {
         if (out != null)
             out.print("Physical connection to the underlying JORAM server has been lost.");
-      throw new CommException("Physical connection to the underlying JORAM server has been lost.");
+      throw new CommException("Physical connection to the underlying "
+                              + "JORAM server has been lost.");
     }
     try {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + " getLocalTransaction session = " + session);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                      this + " getLocalTransaction session = " + session);
       if (session == null)
         session = cnx.createSession(true, 0);
       else if (session instanceof javax.jms.XASession) {
           if (out != null)
               out.print("Managed connection already involved in a distributed transaction.");
-        throw new IllegalStateException("Managed connection already involved in a distributed transaction.");
+        throw new IllegalStateException("Managed connection already involved "
+                                        + "in a distributed transaction.");
       }
 
       return this;
-    } catch (JMSException exc) {
+    }
+    catch (JMSException exc) {
         if (out != null)
             out.print("Could not build underlying transacted JMS session: " + exc);
-      throw new LocalTransactionException("Could not build underlying transacted JMS session: " + exc);
+      throw new LocalTransactionException("Could not build underlying "
+                                          + "transacted JMS session: " + exc);
     }
   }
 
@@ -405,7 +407,8 @@ public class ManagedConnectionImpl
    *
    * @exception ResourceException  Never thrown.
    */
-  public ManagedConnectionMetaData getMetaData() throws ResourceException {
+  public ManagedConnectionMetaData getMetaData() throws ResourceException
+  {
     if (metaData == null)
       metaData = new ManagedConnectionMetaDataImpl(userName);
 
@@ -418,7 +421,8 @@ public class ManagedConnectionImpl
    *
    * @exception ResourceException  Never thrown.
    */
-  public void setLogWriter(PrintWriter out) throws ResourceException {
+  public void setLogWriter(PrintWriter out) throws ResourceException
+  {
     this.out = out;
   }
 
@@ -428,7 +432,8 @@ public class ManagedConnectionImpl
    *
    * @exception ResourceException  Never thrown.
    */
-  public PrintWriter getLogWriter() throws ResourceException {
+  public PrintWriter getLogWriter() throws ResourceException
+  {
     return out;
   }
 
@@ -440,13 +445,12 @@ public class ManagedConnectionImpl
    */
   public synchronized void cleanup()
     throws ResourceException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " cleanup()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " cleanup()");
 
     OutboundConnection handle;
-    Iterator it = handles.iterator();
-    while (it.hasNext()) {
-      handle = (OutboundConnection) it.next();
+    while (! handles.isEmpty()) {
+      handle = (OutboundConnection) handles.remove(0);
       handle.cleanup();
     }
     session = null;
@@ -459,17 +463,15 @@ public class ManagedConnectionImpl
    */
   public synchronized void destroy()
     throws ResourceException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " destroy()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " destroy()");
 
     cleanup();
 
     try {
       cnx.close();
-    } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + " destroy()", exc);
     }
+    catch (Exception exc) {}
 
     ra.removeProducer(this);
 
@@ -498,21 +500,21 @@ public class ManagedConnectionImpl
 
     boolean res =
       mode.equals(other.mode)
-      && ((hostName.equals(other.hostName) && serverPort == other.serverPort) ||
-          (mcf.isCollocated() && other.serverPort == -1))
+      && hostName.equals(other.hostName)
+      && serverPort == other.serverPort
       && userName.equals(other.userName)
       && cnx.equals(other.cnx);
 
-//    if (logger.isLoggable(BasicLevel.DEBUG))
-//      logger.log(BasicLevel.DEBUG, this + " equals = " + res);
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " equals = " + res);
 
     return res;
   }
 
   /** Notifies that the wrapped physical connection has been lost. */
   public synchronized void onException(JMSException exc) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " onException(" + exc + ')');
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " onException(" + exc + ')');
 
     // Physical connection already invalid: doing nothing.
     if (! isValid())
@@ -535,45 +537,24 @@ public class ManagedConnectionImpl
     try {
     	cleanup();
     } catch (ResourceException e) {
-    	if (logger.isLoggable(BasicLevel.DEBUG))
-    		logger.log(BasicLevel.DEBUG, this + " onException.cleanup exception " + e);
-    }
-    
-    
-    try {
-    	if (logger.isLoggable(BasicLevel.DEBUG))
-    		logger.log(BasicLevel.DEBUG, this + " onException: call ra.reconnect()");
-    	ra.reconnect();
-    	reconnect();
-    } catch (Exception e) {
+    	if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+    		AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " onException.cleanup exception " + e);
     }
   }
 
   void reconnect() {
-  	if (logger.isLoggable(BasicLevel.DEBUG))
-  		logger.log(BasicLevel.DEBUG, this + " reconnect(), ra.isActive() = " + ((JoramAdapter) ra).isActive());
+  	valid = true;
   	try {
-  		valid = true;
-  		synchronized (lock) {
-  			lock.notifyAll();
-  		}
+  		ManagedConnectionFactoryImpl mcf = new ManagedConnectionFactoryImpl();
+  		mcf.setResourceAdapter(ra);
+  		ManagedConnection mc = mcf.createManagedConnection(subject, cxRequest);
+  		destroy();
   	}	catch (Exception e) {
-  		if (logger.isLoggable(BasicLevel.DEBUG))
-  			logger.log(BasicLevel.DEBUG, this + " reconnect exception ", e);
+  		if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " reconnect exception " + e);
   	}
   }
 
-  boolean isReconnected() {
-  	synchronized (lock) {
-  		try {
-  			lock.wait(timeWaitReconnect);
-  			return true;
-  		} catch (InterruptedException e) {
-  		}
-  	}
-  	return false;
-  }
-  
   /**
    * Notifies that the local transaction is beginning.
    *
@@ -584,8 +565,8 @@ public class ManagedConnectionImpl
    */
   public synchronized void begin() throws ResourceException {
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " begin()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " begin()");
 
     if (! isValid())
       throw new CommException("Physical connection to the underlying "
@@ -617,8 +598,8 @@ public class ManagedConnectionImpl
    */
   public synchronized void commit() throws ResourceException {
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " commit()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " commit()");
 
     if (! isValid())
       throw new CommException("Physical connection to the underlying "
@@ -657,11 +638,12 @@ public class ManagedConnectionImpl
    */
   public synchronized void rollback() throws ResourceException {
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " rollback()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " rollback()");
 
     if (! isValid())
-      throw new CommException("Physical connection to the underlying JORAM server has been lost.");
+      throw new CommException("Physical connection to the underlying "
+                              + "JORAM server has been lost.");
 
     if (! startedLocalTx)
       throw new LocalTransactionException("Local transaction has not begun.");
@@ -670,7 +652,8 @@ public class ManagedConnectionImpl
       session.rollback();
     }
     catch (JMSException exc) {
-      throw new LocalTransactionException("Rollback of the transacted JMS session failed: " + exc);
+      throw new LocalTransactionException("Rollback of the transacted JMS "
+                                          + "session failed: " + exc);
     }
 
     ConnectionEvent event =
@@ -694,14 +677,8 @@ public class ManagedConnectionImpl
                   int serverPort,
                   String userName,
                   String mode) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "matches: " + hostName + " = " + this.hostName + ", " +
-          serverPort + " = " + this.serverPort + ", " + userName + " = " + this.userName + ", " +
-          mode + " = " + this.mode + ", isColocated = " + mcf.isCollocated());
-      
-    return ((this.hostName.equals(hostName)
-           && this.serverPort == serverPort) ||
-           (mcf.isCollocated()&& serverPort == -1))
+    return this.hostName.equals(hostName)
+           && this.serverPort == serverPort
            && this.userName.equals(userName)
            && this.mode.equals(mode);
   }
@@ -717,11 +694,8 @@ public class ManagedConnectionImpl
 
   /** Notifies of the closing of one of the connection handles. */
   void closeHandle(OutboundConnection handle) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " closeHandle(" + handle + ")");
-    
-    // remove handle from handles table.
-    handles.remove(handle);
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " closeHandle(" + handle + ")");
 
     ConnectionEvent event =
       new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);

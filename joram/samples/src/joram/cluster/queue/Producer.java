@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -71,7 +71,6 @@ public class Producer {
       System.out.println("Sends messages on queue on " + location);
 
     TextMessage msg = session.createTextMessage();
-    msg.setStringProperty("location", location);
     long time = System.currentTimeMillis();
     System.out.println("FirstTime = " + time);
 

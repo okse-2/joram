@@ -27,7 +27,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -177,7 +176,7 @@ public final class Message implements Serializable, MessageView {
   }
 
   /** Returns the message identifier. */
-  public String getId() {
+  public String getIdentifier() {
     return msg.id;
   }
 
@@ -350,9 +349,6 @@ public final class Message implements Serializable, MessageView {
     return msg;
   }
 
-  /**
-   * Method used to save the initial state of the message.
-   */
   public void save() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message.save:" + txname);
@@ -385,32 +381,24 @@ public final class Message implements Serializable, MessageView {
     }
   }
 
-  /**
-   * Method used to save the header of a message after modification.
-   * The body of a message should never be saved.
-   */
   public void saveHeader() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message.saveHeader:" + txname);
 
-    if (!isPersistent()) return;
-    
+    if (!isPersistent())
+      return;
     if (soft) {
       byte[] body = msg.body;
       // sets the body to null to not save it
       msg.body = null;
       try {
-        AgentServer.getTransaction().save(this, txname);
+        AgentServer.getTransaction().create(this, txname);
       } catch (IOException exc) {
         logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
       }
       msg.body = body;
     } else {
-      try {
-        AgentServer.getTransaction().save(this, txname);
-      } catch (IOException exc) {
-        logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
-      }
+      save();
     }
   }
 
@@ -418,8 +406,8 @@ public final class Message implements Serializable, MessageView {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message.delete:" + txname);
 
-    if (!isPersistent()) return;
-    
+    if (!isPersistent())
+      return;
     AgentServer.getTransaction().delete(txname);
     if (soft) {
       AgentServer.getTransaction().delete(txname + "B");
@@ -429,7 +417,7 @@ public final class Message implements Serializable, MessageView {
   /** Loads all persisted messages. */
   public static Vector loadAll(String msgTxname) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Message.loadAll() " + msgTxname);
+      logger.log(BasicLevel.DEBUG, "MessagePersistenceModule.loadAll() " + msgTxname);
 
     Vector messages = new Vector();
 
@@ -445,7 +433,7 @@ public final class Message implements Serializable, MessageView {
           msg.txname = names[i];
 
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "loadAll: names[" + i + "] = " + msg.txname);
+            logger.log(BasicLevel.DEBUG, "loadAll: names[" + i + "] = " + msg);
           messages.add(msg);
         } catch (Exception exc) {
           logger.log(BasicLevel.ERROR, "Message named [" + names[i] + "] could not be loaded", exc);
@@ -498,6 +486,10 @@ public final class Message implements Serializable, MessageView {
     msg.body = StreamUtil.readByteArrayFrom(in);
   }
 
+  public String getId() {
+    return msg.id;
+  }
+
   public String getText() {
     try {
 	    return msg.getText();
@@ -517,11 +509,7 @@ public final class Message implements Serializable, MessageView {
     if (msg.properties == null) {
       return null;
     }
-    Enumeration enu = msg.properties.keys();
-    while (enu.hasMoreElements()) {
-      String key = (String) enu.nextElement();
-      props.put(key, msg.properties.get(key).toString());
-    }
+    msg.properties.copyInto(props);
     return props;
   }
 }
