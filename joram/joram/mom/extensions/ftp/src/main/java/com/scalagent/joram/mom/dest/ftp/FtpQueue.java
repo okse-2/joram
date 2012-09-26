@@ -114,19 +114,21 @@ public class FtpQueue extends Queue {
         logger.log(BasicLevel.DEBUG,
                    "--- " + this + " initialize : transferTable = " + transferTable);
 
-      for (Enumeration e = transferTable.elements(); e.hasMoreElements(); ) {
-        Message msg = (Message) e.nextElement();
-        FtpMessage ftpMsg = new FtpMessage(msg);
-        FtpThread t = new FtpThread(transfer,
-                                    (FtpMessage) ftpMsg.clone(),
-                                    getId(),
-                                    dmq,
-                                    clientContext,
-                                    requestId,
-                                    user,
-                                    pass,
-                                    path);
-        t.start();
+      if (transferTable != null) {
+        for (Enumeration e = transferTable.elements(); e.hasMoreElements(); ) {
+          Message msg = (Message) e.nextElement();
+          FtpMessage ftpMsg = new FtpMessage(msg);
+          FtpThread t = new FtpThread(transfer,
+              (FtpMessage) ftpMsg.clone(),
+              getId(),
+              dmq,
+              clientContext,
+              requestId,
+              user,
+              pass,
+              path);
+          t.start();
+        }
       }
     }
   }
