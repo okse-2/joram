@@ -290,13 +290,13 @@ public class Message implements javax.jms.Message {
    */
   public final void setJMSDestination(javax.jms.Destination dest) throws JMSException {
     jmsDest = dest;
-    if (dest == null) {
-      momMsg.setDestination(null, (byte) 0);
-    } else if (dest instanceof org.objectweb.joram.client.jms.Destination) {
+    if ((dest != null) &&
+        (dest instanceof org.objectweb.joram.client.jms.Destination)) {
       Destination d = (org.objectweb.joram.client.jms.Destination) dest;
-      momMsg.toId = d.getName();
-      momMsg.toType = d.getType();
+      momMsg.setDestination(d.getName(), d.getType());
+      return;
     }
+    momMsg.setDestination(null, (byte) 0);
   }
 
   /**
@@ -402,14 +402,13 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  If the destination id not a Joram's one.
    */
   public final void setJMSReplyTo(javax.jms.Destination replyTo) throws JMSException {
-    try {
+    if ((replyTo != null) &&
+        (replyTo instanceof org.objectweb.joram.client.jms.Destination)) {
       Destination d = (org.objectweb.joram.client.jms.Destination) replyTo;
       momMsg.setReplyTo(d.getName(), d.getType());
-    } catch (NullPointerException npe) {
-      momMsg.setReplyTo(null, (byte) 0);
-    } catch (ClassCastException cce) {
-      throw new JMSException("Destination is not Joram compatible.");
+      return;
     }
+    momMsg.setReplyTo(null, (byte) 0);
   }
 
   /**
