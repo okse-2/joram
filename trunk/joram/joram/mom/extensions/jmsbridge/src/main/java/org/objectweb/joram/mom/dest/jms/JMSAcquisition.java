@@ -209,9 +209,9 @@ public class JMSAcquisition implements AcquisitionDaemon {
      * asynchronous deliveries coming from the foreign JMS server.
      */
     public void onMessage(javax.jms.Message jmsMessage) {
-      if (logger.isLoggable(BasicLevel.DEBUG)) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, name + ".onMessage(" + jmsMessage + ')');
-      }
+
       try {
         try {
           org.objectweb.joram.client.jms.Message clientMessage = org.objectweb.joram.client.jms.Message.convertJMSMessage(jmsMessage);
@@ -220,10 +220,10 @@ public class JMSAcquisition implements AcquisitionDaemon {
           transmitter.transmit(momMessage, jmsMessage.getJMSMessageID());
 
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, name + ".onMessage: commit.");
+            logger.log(BasicLevel.DEBUG, name + ".onMessage: Try to commit.");
           
           session.commit();
-        } catch (MessageFormatException conversionExc) {
+        } catch (JMSException conversionExc) {
           // Conversion error: denying the message.
           session.rollback();
           
