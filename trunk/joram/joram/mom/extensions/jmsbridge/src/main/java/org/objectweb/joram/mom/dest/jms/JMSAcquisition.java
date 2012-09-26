@@ -219,21 +219,20 @@ public class JMSAcquisition implements AcquisitionDaemon {
 
           transmitter.transmit(momMessage, jmsMessage.getJMSMessageID());
 
-          if (logger.isLoggable(BasicLevel.DEBUG)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, name + ".onMessage: commit.");
-          }
+          
           session.commit();
-
         } catch (MessageFormatException conversionExc) {
           // Conversion error: denying the message.
-
           session.rollback();
-          if (logger.isLoggable(BasicLevel.WARN)) {
+          
+          if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, name + ".onMessage: rollback, can not convert message.", conversionExc);
-          }
         }
       } catch (JMSException exc) {
         // Commit or rollback failed: nothing to do.
+        logger.log(BasicLevel.ERROR, name + ".onMessage(" + jmsMessage + ')', exc);
       }
     }
 
