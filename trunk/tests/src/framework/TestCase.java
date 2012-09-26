@@ -68,15 +68,7 @@ public class TestCase extends BaseTestCase {
   protected void endEnv() {
     if (running) {
       // Stop the AgentServer
-      // Creates a thread to execute AgentServer.stop in order to
-      // avoid deadlock if called from an agent reaction.
-      Thread t = new Thread() {
-        public void run() {
-          AgentServer.stop();
-        }
-      };
-      t.setDaemon(true);
-      t.start();
+      AgentServer.stop(false);
       running = false;
     }
   }
@@ -126,6 +118,8 @@ public class TestCase extends BaseTestCase {
     }
   }
 
+  // Useless method identical to killAgentServer.
+  // To be removed in future.
   public static void crashAgentServer(short sid) {
     killAgentServer(sid);
   }
