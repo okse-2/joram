@@ -98,9 +98,10 @@ public class Test5 extends TestCase {
 			// kill AgentServer 0
 			killAgentServer((short) 0);
 			System.out.println("server is killed");
-
+			Thread.sleep(500L);
 			System.out.println("Start server...");
 			startAgentServer((short) 0);
+			Thread.sleep(1000L);
 			
 			cnx = cf.createXAConnection();
 			sessionp = cnx.createXASession();
