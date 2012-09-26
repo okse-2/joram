@@ -146,8 +146,8 @@ public class JMSAcquisitionTopic {
                              String name,
                              String dest,
                              Properties props) throws ConnectException, AdminException {
-    if (!props.containsKey("distribution.className"))
-      props.setProperty("distribution.className", JMSAcquisition);
+    if (!props.containsKey("acquisition.className"))
+      props.setProperty("acquisition.className", JMSAcquisition);
     if (!props.containsKey("jms.DestinationName"))
       props.setProperty("jms.DestinationName", dest);
     Topic topic = Topic.create(serverId, name, Topic.ACQUISITION_TOPIC, props);
