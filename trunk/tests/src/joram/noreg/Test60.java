@@ -24,23 +24,19 @@ package joram.noreg;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
+import javax.jms.XAConnectionFactory;
 
-import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.common.Debug;
 import framework.TestCase;
 
 /**
  * Verifies that the opening and closing of a great number of connections does not
- * cause memory leaks (see JORAM-20).
+ * cause memory leaks (see JORAM-20). We now verify the number of threads created
+ * during the test.
  * 
  * TODO (AF): How to verify that there is no memory leak ?
  */
@@ -66,21 +62,39 @@ public class Test60 extends TestCase {
       User.create("anonymous", "anonymous");
       
       AdminModule.disconnect();
+      Thread.sleep(1000);
 
       System.gc();
       long m1 = Runtime.getRuntime().maxMemory();
       long m2 = Runtime.getRuntime().freeMemory();
       
+      int tc0 = Thread.activeCount();
+      System.out.println("Threads count = " + tc0);
+//      Thread[] tarray = new Thread[50];
+//      int tc = Thread.enumerate(tarray);
+//      for (int i=0; i<tc; i++)
+//        System.out.println("Thread[" + i + "] = " + tarray[i].getName());
       long start = System.currentTimeMillis();
+      
+      int tc1 = -1; int tc2 = -1;
       Connection[] cnx = new Connection[10];
-      for (int i=0; i<50000; i++) {
+      for (int i=0; i<10000; i++) {
         if (i>9) {
+          tc1 = Thread.activeCount();
           cnx[i%10].close();
           cnx[i%10] = null;
         }
-        cnx[i%10] = cf.createConnection("anonymous", "anonymous");
+        if ((i%2) == 0)
+          cnx[i%10] = ((XAConnectionFactory) cf).createXAConnection("anonymous", "anonymous");
+        else
+          cnx[i%10] = ((ConnectionFactory) cf).createConnection("anonymous", "anonymous");
         cnx[i%10].start();
         
+//        if ((i%100) == 99) {
+//          tc2 = Thread.activeCount();
+//          assertTrue("Bad number of threads: " + tc2 + " != " + tc1, (tc2 == tc1));
+//          System.out.println("#" + i + " - Threads count = " + tc2);
+//        }
         Thread.sleep(5);
       }
       
@@ -89,7 +103,15 @@ public class Test60 extends TestCase {
         cnx[i] = null;
       }
       long end = System.currentTimeMillis();
+      Thread.sleep(1000);
       
+      tc2 = Thread.activeCount();
+      assertTrue("Bad number of final threads: " + tc2 + " != " + tc0, (tc2 == tc0));
+      System.out.println("Threads count = " + tc2);
+//      tc = Thread.enumerate(tarray);
+//      for (int i=0; i<tc; i++)
+//        System.out.println("Thread[" + i + "] = " + tarray[i].getName());
+
       System.gc();
       System.gc();
       long m3 = Runtime.getRuntime().maxMemory();
@@ -97,7 +119,7 @@ public class Test60 extends TestCase {
 
       System.out.println("dt=" + (end-start) + ", m1=" + m1 + ", m2=" + m2 + ", m3=" + m3 + ", m4=" + m4);
 
-      Thread.sleep(10000);
+//      Thread.sleep(120000);
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
