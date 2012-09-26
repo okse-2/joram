@@ -735,15 +735,7 @@ public class BaseTestCase {
    * Informs the framework that a test was completed.
    */
   public static final void endTest() {
-    endTest(null);
-  }
-
-  public static final void endTest(boolean exit) {
-    endTest(null, exit);
-  }
-
-  public static final void endTest(String msg) {
-    endTest(msg, true);
+    endTest(null, true);
   }
 
   public static final void endTest(String msg, boolean exit) {

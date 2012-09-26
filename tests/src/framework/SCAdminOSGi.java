@@ -23,57 +23,24 @@
 package framework;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.UnknownServerException;
 import fr.dyade.aaa.agent.osgi.Activator;
-import fr.dyade.aaa.common.Daemon;
-import fr.dyade.aaa.common.Debug;
 
-public class SCAdminOSGi implements SCAdminItf {
-
-  private static final Logger logmon = Debug.getLogger(SCAdminOSGi.class.getName());
-
-  /** Map containing all <code>Process</code> of running AgentServers */
-  private Map launchedServers = new HashMap();
-
-  public void killAgentServer(short sid) {
-    Server server = (Server) launchedServers.get(new Short(sid));
-    logmon.log(BasicLevel.DEBUG, "SCAdminOSGi: kill AgentServer#" + sid);
-    if (server != null) {
-      server.process.destroy();
-      try {
-        server.process.waitFor();
-      } catch (InterruptedException exc) {
-        if (logmon.isLoggable(BasicLevel.ERROR)) {
-          logmon.log(BasicLevel.ERROR,
-              "SCAdminOSGi: AgentServer#" + sid + " error waiting for process kill.", exc);
-        }
-      }
-    } else {
-      logmon.log(BasicLevel.WARN, "Server process to kill not found: " + sid);
-    }
-  }
-
-  public void startAgentServer(short sid) throws Exception {
-    startAgentServer(sid, null);
+public class SCAdminOSGi extends SCBaseAdmin {
+  // use stop 0 to shutdown ! (available in felix and gogo)
+  private static byte [] halt = "stop 0\n".getBytes();
+  
+  protected byte[] getHaltCommand() {
+    return halt;
   }
 
   public void startAgentServer(short sid, String[] jvmargs) throws Exception {
-    logmon.log(BasicLevel.DEBUG, "SCAdminOSGi: run AgentServer#" + sid);
+    logmon.log(BasicLevel.DEBUG, "SCAdmin: run AgentServer#" + sid);
 
     Server server = (Server) launchedServers.get(new Short(sid));
 
@@ -81,11 +48,11 @@ public class SCAdminOSGi implements SCAdminItf {
       try {
         int exitValue = server.process.exitValue();
         if (logmon.isLoggable(BasicLevel.DEBUG)) {
-          logmon.log(BasicLevel.DEBUG, "SCAdminOSGi: AgentServer#" + sid + " -> " + exitValue);
+          logmon.log(BasicLevel.DEBUG, "SCAdmin: AgentServer#" + sid + " -> " + exitValue);
         }
       } catch (IllegalThreadStateException exc) {
         if (logmon.isLoggable(BasicLevel.WARN)) {
-          logmon.log(BasicLevel.WARN, "SCAdminOSGi: AgentServer#" + sid + " already running.");
+          logmon.log(BasicLevel.WARN, "SCAdmin: AgentServer#" + sid + " already running.");
         }
         throw new IllegalStateException("AgentServer#" + sid + " already running.");
       }
@@ -113,12 +80,9 @@ public class SCAdminOSGi implements SCAdminItf {
     argv.add("-Dcom.sun.management.jmxremote");
 
     // Choose a random telnet port if unspecified
-    Integer port = Integer.getInteger("osgi.shell.telnet.port");
-    if (port==null) {
-      port = new Integer(getFreePort());
-    }
+    int port = Integer.getInteger("osgi.shell.telnet.port", getFreePort());
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
-      logmon.log(BasicLevel.DEBUG, "SCAdminOSGi: AgentServer#" + sid + " telnet port: " + port);
+      logmon.log(BasicLevel.DEBUG, "SCAdmin: AgentServer#" + sid + " telnet port: " + port);
     }
 
     // Get felix configuration file.
@@ -142,186 +106,11 @@ public class SCAdminOSGi implements SCAdminItf {
     }
 
     Process p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]));
-    
+
     p.getInputStream().close();
     p.getOutputStream().close();
     p.getErrorStream().close();
 
-    launchedServers.put(new Short(sid), new Server(port.intValue(), p));
+    launchedServers.put(new Short(sid), new Server(port, p));
   }
-
-  public void stopAgentServer(short sid) throws Exception {
-    Socket socket = null;
-    Server server = (Server) launchedServers.get(new Short(sid));
-    TelnetReaderDaemon daemon = null;
-
-    if (server != null) {
-      if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        logmon.log(BasicLevel.DEBUG, "SCAdminOSGi: stop AgentServer#" + sid);
-      }
-      try {
-        socket = new Socket("localhost", server.telnetPort);
-        daemon = new TelnetReaderDaemon(socket.getInputStream());
-        daemon.start();
-
-        // use stop 0 to shutdown ! (available in felix and gogo)
-        socket.getOutputStream().write("stop 0\n".getBytes());
-        socket.getOutputStream().flush();
-
-
-      } catch (Throwable exc) {
-        if (logmon.isLoggable(BasicLevel.ERROR))
-          logmon.log(BasicLevel.ERROR, "SCAdminOSGi: Can't stop server#" + sid + ", kill it.", exc);
-        killAgentServer(sid);
-        throw new Exception("SCAdminOSGi: Can't stop server#" + sid, exc);
-      }
-
-      if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        logmon.log(BasicLevel.DEBUG, "SCAdminOSGi: join AgentServer#" + sid + " [" + server.process + ']');
-      }
-      server.process.waitFor();
-      daemon.stop();
-    } else {
-      throw new UnknownServerException("Server " + sid + " unknown: not started using SCAdmin.");
-    }
-  }
-
-  public void stopAgentServerExt(int telnetPort) throws Exception {
-    Socket socket = null;
-    TelnetReaderDaemon daemon = null;
-
-    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-      logmon.log(BasicLevel.DEBUG, "SCAdminOSGi: stop on port " + telnetPort);
-    }
-    try {
-      socket = new Socket("localhost", telnetPort);
-      daemon = new TelnetReaderDaemon(socket.getInputStream());
-      daemon.start();
-
-      // use stop 0 to shutdown ! (available in felix and gogo)
-      socket.getOutputStream().write("stop 0\n".getBytes());
-      socket.getOutputStream().flush();
-
-    } catch (Throwable exc) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "SCAdminOSGi: Can't stop server on port " + telnetPort, exc);
-      if (daemon != null) {
-        daemon.stop();
-      }
-      throw new Exception("Can't stop server on port " + telnetPort + ": " + exc.getMessage());
-    }
-
-    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-      logmon.log(BasicLevel.DEBUG, "SCAdminOSGi: wait closing telnet connection on " + telnetPort);
-    }
-    while (daemon.isRunning()) {
-      Thread.sleep(500);
-    }
-    daemon.close();
-  }
-
-  private static class TelnetReaderDaemon extends Daemon {
-
-    private InputStreamReader reader;
-
-    protected TelnetReaderDaemon(InputStream stream) {
-      super("TelnetReaderDaemon");
-      this.reader = new InputStreamReader(stream);
-    }
-
-    protected void close() {
-    }
-
-    protected void shutdown() {
-      try {
-        reader.close();
-      } catch (IOException exc) {
-      }
-    }
-
-    public void run() {
-      int character;
-      StringBuffer sb = new StringBuffer();
-      try {
-        while (running) {
-          canStop = true;
-          try {
-            character = reader.read();
-          } catch (IOException exc) {
-            logmon.log(BasicLevel.ERROR, "Error in telnet daemon.", exc);
-            return;
-          }
-          canStop = false;
-          if (character == -1) break;
-          
-          if (character == '\n') {
-            if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "TelnetReaderDaemon read: " + sb);
-            }
-            sb.setLength(0);
-          } else {
-            sb.append((char) character);
-          }
-        }
-      } finally {
-        finish();
-      }
-    }
-  }
-
-  private static class Server {
-    public int telnetPort;
-
-    public Process process;
-
-    public Server(int telnetPort, Process process) {
-      super();
-      this.telnetPort = telnetPort;
-      this.process = process;
-    }
-  }
-
-  /* *********************************************************** */
-
-  private static final int MIN_PORT_NUMBER = 1025;
-  private static final int MAX_PORT_NUMBER = 32760;
-  private static final int PORT_CHECK_RANGE = 1000;
-  private static final int PORT_CHECK_START = 20000;
-
-  public static int getFreePort() {
-    Random random = new Random();
-    int port = random.nextInt(PORT_CHECK_RANGE) + PORT_CHECK_START;
-    while (!available(port)) {
-      port = random.nextInt(PORT_CHECK_RANGE) + PORT_CHECK_START;
-    }
-    return port;
-  }
-
-  /**
-   * Checks to see if a specific port is available.
-   * 
-   * @param port
-   *          the port to check for availability
-   */
-  public static boolean available(int port) {
-    if (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER) {
-      throw new IllegalArgumentException("Invalid start port: " + port);
-    }
-    ServerSocket ss = null;
-    try {
-      ss = new ServerSocket(port);
-      return true;
-    } catch (IOException e) {
-    } finally {
-      if (ss != null) {
-        try {
-          ss.close();
-        } catch (IOException e) {
-          /* should not be thrown */
-        }
-      }
-    }
-    return false;
-  }
-
 }
