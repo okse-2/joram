@@ -108,10 +108,10 @@ public class BridgeTest extends TestCase {
 
       foreignCnx.close();
       stopAgentServer((short)1);
-      System.out.println("Bridge server stopped.");
+      System.out.println("Foreign server stopped.");
       
       startAgentServer((short)1, new String[]{"-DTransaction.UseLockFile=false"});
-      System.out.println("Bridge server started.");
+      System.out.println("Foreign server started.");
       Thread.sleep(5000);
       
       foreignCnx = foreignCF.createConnection();
