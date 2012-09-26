@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.objectweb.joram</groupId>
+  <artifactId>joram-shared</artifactId>
+  <packaging>bundle</packaging>
+  <name>JORAM :: joram :: shared</name>
+  <description>Builds the Joram sharedproject.</description>
+
+  <parent>
+    <artifactId>joram</artifactId>
+    <groupId>org.objectweb.joram</groupId>
+    <version>5.7.0</version>
+  </parent>
+
+  <properties>
+    <version.filter.value>${project.version}</version.filter.value>
+    <protocol.filter.value>${joram.protocol}</protocol.filter.value>
+  </properties>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Implementation-Version>${project.version}</Implementation-Version> 
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Export-Package>
+              org.objectweb.joram.shared,
+              org.objectweb.joram.shared.admin,
+              org.objectweb.joram.shared.client,
+              org.objectweb.joram.shared.excepts,
+              org.objectweb.joram.shared.messages,
+              org.objectweb.joram.shared.security,
+              org.objectweb.joram.shared.selectors,
+              org.objectweb.joram.shared.stream</Export-Package>
+            <Import-Package>fr.dyade.aaa.common,
+              fr.dyade.aaa.common.stream,
+              java_cup.runtime,
+              javax.naming,
+              javax.naming.spi,
+              org.objectweb.util.monolog,
+              org.objectweb.util.monolog.api</Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
+      <artifactId>a3-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
+      <artifactId>jcup</artifactId>
+    </dependency>
+  </dependencies>
+</project>

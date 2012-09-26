@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<JoramAdmin>
+  <AdminModule>
+    <haConnect url="hajoram://localhost:2560,localhost:2561"
+               name="root"
+              password="root"/>
+  </AdminModule>
+  
+
+  <InitialContext>
+    <property name="java.naming.factory.initial"
+              value="fr.dyade.aaa.jndi2.haclient.HANamingContextFactory"/>
+    <property name="java.naming.provider.url" value="hascn://localhost:16400,localhost:16410"/>
+  </InitialContext>
+
+  <ConnectionFactory className="org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory">
+    <hatcp url="hajoram://localhost:2560,localhost:2561" reliableClass="org.objectweb.joram.client.jms.tcp.ReliableTcpClient"/>
+    <jndi name="tcf"/>
+  </ConnectionFactory>
+  
+  <User name="anonymous" password="anonymous" serverId="0"/>
+  <User name="anonymous" password="anonymous" serverId="3"/>
+  
+  <Topic name="topic" serverId="0">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="topic"/>
+  </Topic>
+
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost"
+         port="16030"/>
+    <jndi name="cf"/>
+  </ConnectionFactory>
+
+  <Queue name="queue" serverId="3">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="queue"/>
+  </Queue>
+
+</JoramAdmin>

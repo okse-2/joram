@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Download</title>
+    <filename>index.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+
+    <s1 name="JORAM source and binary packages">
+
+      <s2 name="stable distribution from OW2 Forge">
+	
+	    <p>The JORAM source and binary packages are available from the
+	    <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">OW2 Forge</a>.</p>
+      
+	    <p>The latest release packages are:</p>
+	    <ul>
+      <li><code>joram-release-5.*.zip</code>, including JORAM libraries and the JORAM samples sources;</li>
+      <li><code>joram-release-5.*-src.zip</code>, including JORAM sources;</li>
+	    <li><code>joram-release-5.*-doc.tgz</code>, including JORAM javadoc;</li>
+      <li><code>joram-jca-jonas-5.*.rar</code>, JCA Adapter for Jonas;</li>
+      <li><code>joram-jca-remote-5.*.rar</code>, the resource adapter for a collocated JORAM server within any J2EE compliant 
+	    	application server.</li>
+      <li><code>joram-jca-ra-5.*.rar</code>, the resource adapter for a collocated JORAM server within any J2EE compliant 
+	    	application server.</li>
+      <li><code>joram-release-5.*-raconfig.zip</code>, facilities enabling configuration of JCA rars.</li>
+	    </ul>
+ 
+	    <p>The license agreement is displayed before the download can start.
+      <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">
+      Click here to start the download process</a>.</p>
+	
+	    <p>Note: all the packages are available as .zip files. To unzip these files, just go where you want
+	    to install JORAM, and unzip it (see <a href="../doc/starting.html">here</a> for a quick start guide).
+	    Please consult the <a href="../doc/index.html">JORAM documentation</a> for installation
+	    instructions and a tutorial.</p>
+      </s2>
+      
+      <s2 name="Latest snpashots from Continuous Integration Build Tool">
+      
+      <p>The latest development snapshots are available from
+      <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/Releases/release/target">Continuous Integration Build Tool</a>:</p>
+      <ul>
+      <li><code>joram-release-5.*-SNAPSHOT.zip</code>, including JORAM libraries and the JORAM samples sources;</li>
+      <li><code>joram-release-5.*-SNAPSHOT-src.zip</code>, including JORAM sources;</li>
+      <li><code>joram-jca-jonas-5.*-SNAPSHOT.rar</code>, JCA Adapter for Jonas;</li>
+      <li><code>joram-jca-remote-5.*-SNAPSHOT.rar</code>, the resource adapter for a collocated JORAM server within any J2EE compliant 
+	    	application server.</li>
+      <li><code>joram-jca-ra-5.*-SNAPSHOT.rar</code>, the resource adapter for a collocated JORAM server within any J2EE compliant 
+	    	application server.</li>
+      <li><code>joram-release-5.*-SNAPSHOT-raconfig.zip</code>, facilities enabling configuration of JCA rars.</li>
+      </ul>
+      <p>This will be built automatically from the current development code after each change in the SVN code base.</p>
+      <p>If you need quickly a fix for a particular bug, you may be able to find a fixed Joram release here well
+      before the fix makes it into the next release version. On the other hand, these snapshots might sometimes
+      be unstable.</p>
+      <p>The JavaDoc of the version in development is generated each day at 00:00 AM CEST, it is available at:
+	    <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/JavaDoc/target/apidocs/index.html">here</a>.</p>
+      
+      </s2>
+      
+      <s2 name="JORAM SVN code base">
+	    <p>For getting the latest stable JORAM version, or for the current development release, you have to
+      use <a href="http://forge.objectweb.org/plugins/scmsvn/index.php?group_id=4">SVN</a>.</p>
+
+	    <p>Joram, Xoram (C/C++ client API) and kJoram (J2ME client API) are respectively available by checking out the
+	    <strong>joram</strong>,  <strong>xoram</strong> or <strong>kjoram</strong> modules. The <strong>tests</strong>
+	    module contains the tests for all the components of Joram.</p>
+
+      <p>The latest stable release tag and the description of all Joram's versions can be found in
+      <a href="../dev/versions.html">Code updates</a>. For getting the current development release
+      (potentially unstable), check out joram with no tag.</p>
+      
+      <p>Snapshots of the SVN code base are generated each day at 00:00 AM CEST, they are available at:</p>
+	    <ul>
+	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-joram-svn-latest.tar.gz">Joram</a>.</li>
+	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-kjoram-svn-latest.tar.gz">kJoram</a>.</li>
+	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-xoram-svn-latest.tar.gz">Xoram</a>.</li>
+	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-tests-svn-latest.tar.gz">Tests</a>.</li>
+	    </ul>
+	    <p>You can find the corresponding JavaDoc
+	    <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/JavaDoc/target/apidocs/index.html">here</a>.</p>
+      </s2>
+
+      <s2 name="Maven access">
+      <p>Joram libraries are available on the <a href="http://repo1.maven.org/maven2/org/objectweb/joram">maven repository</a>
+      <strong>http://repo1.maven.org/maven2/org/objectweb/joram</strong>, GroupId is org.objectweb.joram</p>
+      
+      <p>Since Joram 5.3.2 main artifactIds are:</p>
+	    <ul>
+	      <li>a3-common and a3-rt for the asynchronous middleware,</li>
+	      <li>joram-client-jms, joram-shared and joram-mom-core for JMS client and server implementation,</li>
+	      <li>jndi-client, jndi-shared and jndi-server for the JNDI implementation.</li>
+	    </ul>
+	    <p>Other important artifacts are:</p>
+	    <ul>
+	    	<li>For specialized destinations:<ul>
+	      	<li>joram-mom-extensions-collector,</li>
+	        <li>joram-mom-extensions-ftp,</li>
+	        <li>joram-mom-extensions-jmsbridge,</li>
+	        <li>joram-mom-extensions-mail,</li>
+	        <li>joram-mom-extensions-scheduler</li>
+	      </ul></li>
+	    	<li>For JCA adapter:<ul>
+	      	<li>joram-client-jca, or</li>
+	      	<li>joram-security-jonas.</li>
+	      </ul></li>
+	    </ul>
+      
+      </s2>
+
+    </s1>
+  </body>
+</document>

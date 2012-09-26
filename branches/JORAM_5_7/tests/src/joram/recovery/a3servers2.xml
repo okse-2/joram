@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config>
+  <property name="Transaction" value="fr.dyade.aaa.util.NTransaction" />
+  <property name="NTLogFileSize" value="33" />
+  <property name="NTLogThresholdOperation" value="32768" />
+  <property name="NTLogMemoryCapacity" value="500" />
+
+  <server id="0" name="S0" hostname="localhost">
+  </server>
+  
+</config>
