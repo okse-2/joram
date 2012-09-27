@@ -190,7 +190,7 @@ public class Test1 extends TestCase {
       assertTrue("Expected list failure (record)", 
                  expectedExc != null);
 
-      crashAgentServer((short)0);
+      killAgentServer((short)0);
         
       Thread.sleep(1000);
       
@@ -258,7 +258,7 @@ public class Test1 extends TestCase {
       assertTrue("Expected list failure (destroyed context)", 
                  expectedExc != null);
 
-      crashAgentServer((short)0);
+      killAgentServer((short)0);
         
       Thread.sleep(1000);
       
@@ -277,11 +277,11 @@ public class Test1 extends TestCase {
         error(exc);
       }
 
-      crashAgentServer((short)0);
+      killAgentServer((short)0);
 
       endTest();
     } catch (Exception exc2) {
-      crashAgentServer((short) 0);
+      killAgentServer((short) 0);
       exc2.printStackTrace();
       error(exc2);
       endTest();
