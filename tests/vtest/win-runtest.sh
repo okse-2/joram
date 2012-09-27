@@ -1,7 +1,7 @@
 #!/bin/bash
-##################################
-# Vtest cygwin script for JORAM  #
-##################################
+#################################
+# Vtest linux script for JORAM  #
+#################################
 
 #ensure existence of environment variable VTEST_HOME
 if [ -z "$VTEST_HOME" ]
@@ -17,7 +17,6 @@ date=`date +%x`
 date=`echo $date | sed -e s:/:.:g`
 LOGFILE=$VTEST_HOME/"vtest-$date.log"
 ZIPFILE=$VTEST_HOME/"result.zip"
-BATFILE="runtest.bat"
 
 #extracting joram source so as to test updated trunk artifacts
 svn co svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
@@ -32,10 +31,15 @@ cd $VTEST_HOME/joram ;
 echo "installing joram tests"
 mvn install >> $LOGFILE 2>&1
 
+#launching tests
+cd src;
+echo "on launching ant custom.tests.vtest"
 
-cmd.exe $BATFILE >> $LOGFILE 2>&1
+cmd <<EOF
+ant tests.jms.all >> antrun.txt 
+EOF
 
-
+#ant vtest.check.reports >> $LOGFILE 2>&1 
 TEST_RESULT=$?;
 
 mkdir results ;
@@ -50,9 +54,10 @@ if [[ $TEST_RESULT -gt 0 ]]; then
     exit 1;
 else
     echo "TEST OK";
-    cp $VTEST_HOME/joram/src/jndi2/report.txt results/jndi2-report.txt;
-    cp $VTEST_HOME/joram/src/joram/report.txt results/joram-report.txt;
-    cp $VTEST_HOME/joram/src/jms/report.txt results/jms-report.txt;
+    # uncomment when using real joram test
+    # cp $VTEST_HOME/joram/src/jndi2/report.txt results/jndi2-report.txt;
+    # cp $VTEST_HOME/joram/src/joram/report.txt results/joram-report.txt;
+    # cp $VTEST_HOME/joram/src/jms/report.txt results/jms-report.txt;
     jar cf $ZIPFILE results;
     exit 0;
 fi
