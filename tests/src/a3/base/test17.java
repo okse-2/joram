@@ -60,8 +60,8 @@ public class test17 extends TestCase {
   }
 
   protected void tearDown() {
-    crashAgentServer(ServerSender1);
-    crashAgentServer(ServerSender2);
+    killAgentServer(ServerSender1);
+    killAgentServer(ServerSender2);
   }
 
   public static void main(String args[]) {

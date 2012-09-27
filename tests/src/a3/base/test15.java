@@ -70,7 +70,7 @@ public class test15 extends TestCase {
 
   protected void tearDown() {
     if (ServerEcho != 0)
-      crashAgentServer((short) ServerEcho);
+      killAgentServer((short) ServerEcho);
   }
 
   public static void main(String args[]) {

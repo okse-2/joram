@@ -78,9 +78,9 @@ public class test22 extends TestCase {
 
   protected void tearDown() {
     for (int i=1; i<nb; i++) {
-      crashAgentServer((short) i);
+      killAgentServer((short) i);
     }
-    if (router) crashAgentServer((short) nb);
+    if (router) killAgentServer((short) nb);
   }
 
 

@@ -47,7 +47,7 @@ public class test14 extends TestCase {
   }
 
   protected void tearDown() {
-    crashAgentServer((short) 1);
+    killAgentServer((short) 1);
   }
 
   public static void main(String args[]) {
@@ -79,7 +79,7 @@ public class test14 extends TestCase {
                                 "a3.base.test14$Test14Not");
           TestCase.assertTrue(((Test14Not) not).creation);
           // Stop, then start AgentServer#1
-          crashAgentServer((short) 1);
+          killAgentServer((short) 1);
           startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false" });
           // Then send a not to slave in order to reload it !!
           sendTo(slave, new Notification());
