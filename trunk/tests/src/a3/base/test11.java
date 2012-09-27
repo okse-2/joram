@@ -62,9 +62,9 @@ public class test11 extends TestCase {
 
   protected void tearDown() {
     if (ServerSender != 0)
-      crashAgentServer(ServerSender);
+      killAgentServer(ServerSender);
     if ((ServerReceiver != 0) && (ServerReceiver != ServerSender))
-      crashAgentServer(ServerReceiver);
+      killAgentServer(ServerReceiver);
   }
 
   public static void main(String args[]) {

@@ -59,8 +59,8 @@ public class test5 extends TestCase {
   }
 
   protected void tearDown() {
-    if (ServerPong != ServerPing) crashAgentServer(ServerPong);
-    if (router) crashAgentServer((short) 2);
+    if (ServerPong != ServerPing) killAgentServer(ServerPong);
+    if (router) killAgentServer((short) 2);
   }
 
 

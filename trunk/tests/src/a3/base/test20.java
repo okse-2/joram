@@ -61,7 +61,7 @@ public class test20 extends TestCase {
   }
   
   protected void tearDown() {
-    crashAgentServer((short) 1);
+    killAgentServer((short) 1);
   }
 
   static class TestAgent20A extends Agent {
