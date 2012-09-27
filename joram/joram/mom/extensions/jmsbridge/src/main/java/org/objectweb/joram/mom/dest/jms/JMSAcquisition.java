@@ -164,7 +164,7 @@ public class JMSAcquisition implements AcquisitionDaemon {
           try {
             dest = (Destination) connection.retrieveJndiObject(destName);
   
-            Session session = connection.getCnx().createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Session session = connection.getCnx().createSession(true, Session.AUTO_ACKNOWLEDGE);
             MessageConsumer consumer;
             if (dest instanceof Queue) {
               consumer = session.createConsumer(dest, selector);
@@ -213,26 +213,28 @@ public class JMSAcquisition implements AcquisitionDaemon {
         logger.log(BasicLevel.DEBUG, name + ".onMessage(" + jmsMessage + ')');
 
       try {
+        org.objectweb.joram.client.jms.Message clientMessage = null;
         try {
-          org.objectweb.joram.client.jms.Message clientMessage = org.objectweb.joram.client.jms.Message.convertJMSMessage(jmsMessage);
-          Message momMessage = clientMessage.getMomMsg();
-
-          transmitter.transmit(momMessage, jmsMessage.getJMSMessageID());
-
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, name + ".onMessage: Try to commit.");
-          
-          session.commit();
+          clientMessage = org.objectweb.joram.client.jms.Message.convertJMSMessage(jmsMessage);
         } catch (JMSException conversionExc) {
           // Conversion error: denying the message.
-          session.rollback();
-          
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, name + ".onMessage: rollback, can not convert message.", conversionExc);
+
+          session.rollback();
+          return;
         }
+        transmitter.transmit(clientMessage.getMomMsg(), jmsMessage.getJMSMessageID());
+
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, name + ".onMessage: Try to commit.");
+
+        session.commit();
       } catch (JMSException exc) {
         // Commit or rollback failed: nothing to do.
         logger.log(BasicLevel.ERROR, name + ".onMessage(" + jmsMessage + ')', exc);
+      } catch (Throwable t) {
+        logger.log(BasicLevel.ERROR, name + ".onMessage(" + jmsMessage + ')', t);
       }
     }
 
