@@ -69,8 +69,8 @@ public class test6 extends TestCase {
   }
 
   protected void tearDown() {
-    crashAgentServer(ServerPing);
-    if (ServerPong != ServerPing) crashAgentServer(ServerPong);
+    killAgentServer(ServerPing);
+    if (ServerPong != ServerPing) killAgentServer(ServerPong);
   }
 
 
@@ -102,7 +102,7 @@ public class test6 extends TestCase {
             TestCase.stopAgentServer(test6.ServerPing);
           } else {
             System.out.println("crash");
-            TestCase.crashAgentServer(test6.ServerPing);
+            TestCase.killAgentServer(test6.ServerPing);
           }
           // Start server#1
           TestCase.startAgentServer(test6.ServerPing, new String[] { "-DTransaction.UseLockFile=false" });
