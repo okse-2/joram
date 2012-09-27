@@ -168,7 +168,7 @@ public class Test5 extends TestCase {
         try {
           Thread.sleep((2*timeout*msgs)/5);
           synchronized(lock) {
-            crashAgentServer((short) 0);
+            killAgentServer((short) 0);
           }
           System.out.println("Joram server stopped.");
           startAgentServer((short) 0, new String[]{"-DTransaction.UseLockFile=false"});
