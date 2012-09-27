@@ -72,8 +72,8 @@ public class test8 extends TestCase {
   }
 
   protected void tearDown() {
-    crashAgentServer(ServerPong1);
-    crashAgentServer(ServerPong2);
+    killAgentServer(ServerPong1);
+    killAgentServer(ServerPong2);
     timer.cancel();
   }
 
@@ -139,7 +139,7 @@ public class test8 extends TestCase {
             TestCase.stopAgentServer(remote);
           } else {
             System.out.println("crash " + remote + " - " + bounce);
-            TestCase.crashAgentServer(remote);
+            TestCase.killAgentServer(remote);
           }
           if( remote == 1 ){
             nbStopTask0++;

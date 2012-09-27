@@ -55,7 +55,7 @@ public class test10 extends TestCase {
   }
 
   protected void tearDown() {
-    crashAgentServer(ServerEcho);
+    killAgentServer(ServerEcho);
   }
 
 

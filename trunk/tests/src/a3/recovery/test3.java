@@ -48,7 +48,7 @@ public class test3 extends TestCase {
   }
 
   protected void tearDown() {
-    crashAgentServer((short) 1);
+    killAgentServer((short) 1);
   }
 
   public static void main(String args[]) {
@@ -100,7 +100,7 @@ public class test3 extends TestCase {
                          slave1,
                          ((UnknownAgent) not).agent);
           }
-          crashAgentServer((short) 1);
+          killAgentServer((short) 1);
 	  Thread.sleep(1000);
           startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false" });
 

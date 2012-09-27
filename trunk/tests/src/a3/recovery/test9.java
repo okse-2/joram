@@ -68,7 +68,7 @@ public class test9 extends TestCase {
   }
 
   protected void tearDown() {
-    crashAgentServer(ServerPong);
+    killAgentServer(ServerPong);
   }
 
 
@@ -150,7 +150,7 @@ public class test9 extends TestCase {
             TestCase.stopAgentServer(test9.ServerPong);
           } else {
             System.out.println("crash");
-            TestCase.crashAgentServer(test9.ServerPong);
+            TestCase.killAgentServer(test9.ServerPong);
           }
           // Wait in order to prevent WAIT status on TCP connection
           Thread.sleep(500L);
