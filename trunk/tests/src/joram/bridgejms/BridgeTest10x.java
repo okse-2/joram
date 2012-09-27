@@ -27,7 +27,6 @@ import java.util.Properties;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
-import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
@@ -35,17 +34,16 @@ import javax.jms.TextMessage;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.JMSDistributionQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.mom.dest.jms.JMSDistribution;
-
 import framework.TestCase;
 
 /**
  * Test: Test the bridge behavior during stop / restart of Joram server.
  *  - Sends 50 messages through a JMS DistributionQueue.
  *  - Stops the Joram server during sending, then restarts it.
- *  - Receives the sent messages.
+ *  - Receives the sent messages on foreign queue.
  */
 public class BridgeTest10x extends TestCase {
   public static void main(String[] args) {
@@ -85,14 +83,10 @@ public class BridgeTest10x extends TestCase {
       
         // Setting the bridge properties
         Properties prop = new Properties();
-        prop.setProperty("jms.DestinationName", "foreignQueue");
         prop.setProperty("jms.ConnectionUpdatePeriod", "1000");
         prop.setProperty("period", "1000");
-//        prop.setProperty("persistent", "true");
         prop.put("distribution.async", "" + async);
-        prop.setProperty("distribution.className", JMSDistribution.class.getName());
-
-        Queue joramOutQueue = Queue.create(0, "BridgeOutQueue", Queue.DISTRIBUTION_QUEUE, prop);
+        Queue joramOutQueue = JMSDistributionQueue.create(0, "BridgeOutQueue", "foreignQueue", prop);
         joramOutQueue.setFreeWriting();
         System.out.println("joramOutQueue = " + joramOutQueue);
 
@@ -141,7 +135,7 @@ public class BridgeTest10x extends TestCase {
       public void run() {
         try {
           Thread.sleep((2*timeout/5)*msgs);
-          crashAgentServer((short) 0);
+          killAgentServer((short) 0);
 //          System.out.println("Joram server stopped.");
           startAgentServer((short) 0, new String[]{"-DTransaction.UseLockFile=false"});
 //          System.out.println("Joram server started.");
@@ -157,8 +151,8 @@ public class BridgeTest10x extends TestCase {
       TextMessage msgOut = joramSess.createTextMessage();
       for (; nbmsg < msgs; nbmsg++) {
         msgOut.setText("Message number " + nbmsg);
-//        System.out.println("send msg = " + msgOut.getText());
         joramProd.send(msgOut);
+        System.out.println("send msg = " + msgOut.getText());
         Thread.sleep(timeout);
       }
     } catch (Exception exc) {
@@ -171,19 +165,33 @@ public class BridgeTest10x extends TestCase {
     foreignCnx.start();
 
     TextMessage msgIn;
-    for (int i = 0; i < msgs; i++) { 
-      msgIn=(TextMessage) foreignCons.receive(5000);
+    for (int i = 0; i < msgs; i++) {
+      msgIn = (TextMessage) foreignCons.receive(5000);
       if (msgIn != null) {
-        assertEquals("Message number " + i, msgIn.getText());
-        if (! msgIn.getText().equals("Message number " + i))
-          throw new Exception();
+        if (! msgIn.getText().equals("Message number " + i)) {
+          if (((i == nbmsg) || (i == (nbmsg+1))) && (msgIn.getText().equals("Message number " + (i-1)))) {
+            // The last message can be sent twice to the foreign server, one time before the crash
+            // and a second time after (the first time the implicit acknowledge is lost due to the
+            // crash). The last incoming message in the server could be the nbmsg-1 as the nbmsg could
+            // be lost between the JMS client and the broker s0.
+            System.out.println("Receive twice last message");
+          } else {
+            assertEquals("Message number " + i, msgIn.getText());
+            System.out.println("Error during receiving msg " + i + ": " + msgIn.getText());
+            throw new Exception();
+          }
+        }
       } else {
-        assertEquals("Number of message received " + i + " should be " + nbmsg, nbmsg, i);
-        if (i != nbmsg)
+        // The server failure could have happened just after the transmission of the message to
+        // the server and before it was implicitly acquitted to the client. In this case i should
+        // be equals to nbmsg+1, otherwise it should be equals to nbmsg.
+        System.out.println("Error not receiving msg " + i);
+        assertTrue("Number of message received " + i + " should be " + nbmsg, (nbmsg <= i));
+        if (i < nbmsg) 
           throw new Exception();
         break;
       }
-//      System.out.println("receive msg = " + msgIn.getText());
+      System.out.println("receive msg = " + msgIn.getText());
     }
     
     joramCnx.close();
