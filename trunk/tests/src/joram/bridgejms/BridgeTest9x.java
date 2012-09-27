@@ -141,7 +141,7 @@ public class BridgeTest9x extends TestCase {
       public void run() {
         try {
           Thread.sleep((2*timeout/5)*msgs);
-          crashAgentServer((short) 0);
+          killAgentServer((short) 0);
 //          System.out.println("Joram server stopped.");
           startAgentServer((short) 0, new String[]{"-DTransaction.UseLockFile=false"});
 //          System.out.println("Joram server started.");
