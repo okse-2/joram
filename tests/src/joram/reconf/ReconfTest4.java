@@ -101,7 +101,7 @@ public class ReconfTest4 extends ReconfTestBase {
       
       // Stops the server S1
 
-      crashAgentServer((short) 1);
+      killAgentServer((short) 1);
       Thread.sleep(1000L);
       
       checkQueue((short) 0);
@@ -135,7 +135,7 @@ public class ReconfTest4 extends ReconfTestBase {
 
       // Stops the server S1 then restart it
 
-      crashAgentServer((short) 3);
+      killAgentServer((short) 3);
       Thread.sleep(1000L);
       startAgentServer((short) 3, new String[] { "-DTransaction.UseLockFile=false",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s3/a3servers.xml" });

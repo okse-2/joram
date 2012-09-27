@@ -88,7 +88,7 @@ public class ReconfTest8 extends ReconfTestBase {
 
       // Stops the server S1 then restart it
 
-      crashAgentServer((short) 1);
+      killAgentServer((short) 1);
       Thread.sleep(1000L);
       startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
@@ -122,7 +122,7 @@ public class ReconfTest8 extends ReconfTestBase {
       // Stops the server S3 then restart it
 
       System.out.println("crash and restart #3"); Thread.sleep(5000L);
-      crashAgentServer((short) 3);
+      killAgentServer((short) 3);
       Thread.sleep(1000L);
       startAgentServer((short) 3, new String[] { "-DTransaction.UseLockFile=false",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s3/a3servers.xml" });
@@ -133,7 +133,7 @@ public class ReconfTest8 extends ReconfTestBase {
       // Stops the server S1 then restart it
 
       System.out.println("crash and restart #1"); Thread.sleep(5000L);
-      crashAgentServer((short) 1);
+      killAgentServer((short) 1);
       Thread.sleep(1000L);
       startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });

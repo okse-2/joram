@@ -82,7 +82,7 @@ public class ReconfTest0 extends ReconfTestBase {
       
       AdminModule.disconnect();
       
-      crashAgentServer((short) 0);
+      killAgentServer((short) 0);
       Thread.sleep(1000L);
       startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false" });
       Thread.sleep(1000L);
@@ -106,7 +106,7 @@ public class ReconfTest0 extends ReconfTestBase {
       
       // Crash the server S2 then restart it
       
-      crashAgentServer((short) 2);
+      killAgentServer((short) 2);
       Thread.sleep(1000L);
       startAgentServer((short) 2, new String[] { "-DTransaction.UseLockFile=false",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });

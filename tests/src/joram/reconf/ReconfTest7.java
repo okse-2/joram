@@ -90,7 +90,7 @@ public class ReconfTest7 extends ReconfTestBase {
       exc.printStackTrace();
       error(exc);
     } finally {
-      crashAgentServer((short) 0);
+      killAgentServer((short) 0);
       killAgentServer((short) 1);
       endTest();
     }
