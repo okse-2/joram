@@ -118,12 +118,6 @@ public class TestCase extends BaseTestCase {
     }
   }
 
-  // Useless method identical to killAgentServer.
-  // To be removed in future.
-  public static void crashAgentServer(short sid) {
-    killAgentServer(sid);
-  }
-
   public static void killAgentServer(short sid) {
     try {
       getAdmin().killAgentServer(sid);
