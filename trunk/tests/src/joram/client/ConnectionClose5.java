@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,14 +32,16 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
 
-
 /**
- * Stop the server during the producer's, with Exit interceptor.
- * The producer must be throw a JMSException.
+ * Kills the server during the messages production, with Exit interceptor.
+ * The producer must throw a JMSException.
  */
 public class ConnectionClose5 extends TestCase {
   
@@ -53,26 +55,61 @@ public class ConnectionClose5 extends TestCase {
   private MessageProducer producer;
   private MessageConsumer consumer;
   
+  int nbexc = 0;
+  
   public void run() {
-  	try {
-  		startAgentServer();
-  		connect();
+    try {
+      System.out.println("Start agent server");
+      startAgentServer((short)0, new String[]{"-DTransaction=fr.dyade.aaa.ext.NGTransaction"});
+      
+      System.out.println("Connect");
+      AdminModule.connect("localhost", 2560, "root", "root", 60);
 
-  		try {
-				TextMessage msg = session.createTextMessage("hello");
-				producer.send(msg);
-				System.out.println("send 0");
-				assertTrue("NO Exception !", false);
-			} catch (Exception exc) {
-				System.out.println("Expected exception: " + exc);
-				assertTrue("unexpected exception: " + exc, exc instanceof javax.jms.JMSException);
-			}
-			
-			Thread.sleep(5000);
-			
-  		System.out.println("Close connection");
-  		connection.close();
-  	} catch (Throwable exc) {
+      System.out.println("create user");
+      User user =  User.create("anonymous", "anonymous", 0);
+      //  user.addInterceptorsIN("joram.client.Exit1");
+
+      System.out.println("create queue");
+      Queue queue = Queue.create(0);
+      queue.addInterceptors("joram.client.Exit1");
+      queue.setFreeReading();
+      queue.setFreeWriting();
+
+      AdminModule.disconnect();
+
+      dest = queue;
+
+      ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
+
+      System.out.println("create connection");
+      connection = cf.createConnection("anonymous", "anonymous");
+      connection.start();
+
+      connection.setExceptionListener(new MsgExceptionListener());
+
+      session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      producer = session.createProducer(dest);
+      consumer = session.createConsumer(dest);
+
+      System.out.println("connected");
+
+      try {
+        TextMessage msg = session.createTextMessage("hello");
+        producer.send(msg);
+        System.out.println("send 0");
+        assertTrue("NO Exception !", false);
+      } catch (Exception exc) {
+        System.out.println("Exception on sending: " + exc);
+        assertTrue("unexpected exception on sending: " + exc, exc instanceof javax.jms.JMSException);
+      }
+
+      Thread.sleep(5000);
+      
+      assertTrue("bad number of exception: " + nbexc, (nbexc == 1));
+
+      System.out.println("Close connection");
+      connection.close();
+    } catch (Throwable exc) {
   		exc.printStackTrace();
   		error(exc);
   	} finally {
@@ -81,53 +118,11 @@ public class ConnectionClose5 extends TestCase {
   	}
   }
   
-  private void startAgentServer() throws Exception {
-      System.out.println("Start agent server");
-    startAgentServer((short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
-  }
-  
-  private void connect() throws Exception {
-      System.out.println("Connect");
-    AdminModule.connect("localhost", 2560, "root", "root", 60);
-
-    System.out.println("create user");
-    org.objectweb.joram.client.jms.admin.User user = 
-      org.objectweb.joram.client.jms.admin.User
-        .create("anonymous", "anonymous", 0);
-//    user.addInterceptorsIN("joram.client.Exit1");
-
-    System.out.println("create queue");
-    org.objectweb.joram.client.jms.Queue queue = 
-      org.objectweb.joram.client.jms.Queue.create(0);
-    queue.addInterceptors("joram.client.Exit1");
-    queue.setFreeReading();
-    queue.setFreeWriting();
-    
-    AdminModule.disconnect();
-
-    dest = queue;
-    
-    ConnectionFactory cf = 
-      org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create("localhost", 2560);
-    
-    System.out.println("create connection");
-    connection = cf.createConnection("anonymous", "anonymous");
-    connection.start();
-    
-    connection.setExceptionListener(new MsgExceptionListener());
-    
-    session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    producer = session.createProducer(dest);
-    consumer = session.createConsumer(dest);
-    
-    System.out.println("connected");
-  }
-  
   class MsgExceptionListener implements ExceptionListener {
 		@Override
     public void onException(JMSException exc) {
-	   System.out.println("onException: EXCEPTION" + exc);
+		  System.out.println("onException: " + exc);
+		  nbexc += 1;
     }
-  	
   }
 }
