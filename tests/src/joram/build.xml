@@ -2176,6 +2176,7 @@
   <target name="connection.test1.1" depends="init.a3props,compile"
           description=" --> Test connection close with a colocalised server">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="connection.test1.1"/>
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.connection.Test1"/>
       <param name="jndiconf" value="connection/jndi.properties"/>
@@ -2187,6 +2188,7 @@
   <target name="connection.test1.2" depends="init.a3props,compile"
           description=" --> Test connection close with a remote server">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="connection.test1.2"/>
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.connection.Test1"/>
       <param name="jndiconf" value="connection/jndi.properties"/>
@@ -4038,6 +4040,17 @@
 	    <param name="jvmargs" value=""/>
 	  </antcall>
   </target>
+	
+	<target name="noreg.test62" depends="init.a3props,compile"
+	        description=" --> Verify that there is no memory leak during connection opening [JORAM-XX]">
+	  <antcall target="test.run" inheritAll="true">
+	    <param name="className" value="joram.noreg.Test62"/>
+	    <param name="testid" value="noreg.test62"/>
+	    <param name="jndiconf" value="noreg/jndi.properties"/>
+	    <param name="a3conf" value="noreg/a3servers1.xml"/>
+	    <param name="jvmargs" value=""/>
+	  </antcall>
+  </target>
 
   <!-- end noreg -->
 
@@ -4622,6 +4635,42 @@
       <param name="className" value="joram.bridgejms.BridgeTest10x"/>
       <param name="jndiconf" value="bridgejms/jndi.properties"/>
       <param name="a3conf" value="bridgejms/a3servers.xml"/>
+      <param name="jvmargs" value="-Dasync=false"/>
+    </antcall>
+  </target>
+  
+  <target name="bridge.jms.test11x" depends="init.a3props,compile"
+          description=" --> Creates and configures a distribution queue as the foreign server is not already running.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.test11xA"/>
+      <param name="className" value="joram.bridgejms.BridgeTest11x"/>
+      <param name="jndiconf" value="bridgejms/jndi.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers.xml"/>
+      <param name="jvmargs" value="-Dasync=true"/>
+    </antcall>
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.test11xB"/>
+      <param name="className" value="joram.bridgejms.BridgeTest11x"/>
+      <param name="jndiconf" value="bridgejms/jndi.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers.xml"/>
+      <param name="jvmargs" value="-Dasync=false"/>
+    </antcall>
+  </target>
+  
+  <target name="bridge.jms.test12x" depends="init.a3props,compile"
+          description=" --> Tests various behavior about the distribution queue and JMSConnectionService">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.test12xA"/>
+      <param name="className" value="joram.bridgejms.BridgeTest12x"/>
+      <param name="jndiconf" value="bridgejms/jndi.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers4.xml"/>
+      <param name="jvmargs" value="-Dasync=true"/>
+    </antcall>
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.test12xB"/>
+      <param name="className" value="joram.bridgejms.BridgeTest12x"/>
+      <param name="jndiconf" value="bridgejms/jndi.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers4.xml"/>
       <param name="jvmargs" value="-Dasync=false"/>
     </antcall>
   </target>
