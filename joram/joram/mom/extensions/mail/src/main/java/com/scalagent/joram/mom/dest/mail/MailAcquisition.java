@@ -92,7 +92,7 @@ public class MailAcquisition implements AcquisitionHandler {
         }
       }
 
-      transmitter.transmit(list, persistent, null);
+      transmitter.transmit(list, persistent);
       closeFolder(toExpunge, expunge);
     }
   }
