@@ -31,7 +31,6 @@ import java.util.Properties;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
-import javax.jms.MessageFormatException;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
 import javax.jms.Session;
@@ -39,7 +38,6 @@ import javax.jms.Topic;
 
 import org.objectweb.joram.mom.dest.AcquisitionDaemon;
 import org.objectweb.joram.mom.dest.ReliableTransmitter;
-import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -87,6 +85,9 @@ public class JMSAcquisition implements AcquisitionDaemon {
   private String durableSubscriptionName = null;
 
   public void start(Properties properties, ReliableTransmitter transmitter) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Start JMSAcquisition.");
+    
     this.transmitter = transmitter;
 
     destName = properties.getProperty(DESTINATION_NAME_PROP);
@@ -126,9 +127,8 @@ public class JMSAcquisition implements AcquisitionDaemon {
   }
 
   public void stop() {
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Stop JMSAcquisition.");
-    }
 
     connectionUpdater.removeUpdateListener(this);
     
@@ -138,15 +138,20 @@ public class JMSAcquisition implements AcquisitionDaemon {
         try {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "Close JMS session: " + session);
-          
+
           session.close();
+          
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "JMS session closed: " + session);
         } catch (JMSException exc) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
             logger.log(BasicLevel.DEBUG, "Error while stopping JmsAcquisition.", exc);
           }
         }
       }
+      
       sessions.clear();
+      closing = false;
     }
   }
 
