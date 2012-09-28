@@ -136,7 +136,7 @@ public class AcquisitionModule implements ReliableTransmitter {
   private AcquisitionTask acquisitionTask;
   
   /** The number of transmitted messages */
-  private static long transmitCounter = 0;
+  private static volatile long transmitCounter = 0;
 
   /**
    * Tells if acquisition is done on-demand using the acquisition task or with a
@@ -228,6 +228,7 @@ public class AcquisitionModule implements ReliableTransmitter {
   
   /**
    * Returns the number of transmitted messages
+   * Be careful this counter is reseted at each time the server starts.
    * 
    * @return the number of transmitted messages
    */
@@ -479,22 +480,21 @@ public class AcquisitionModule implements ReliableTransmitter {
    * Transmits a list of messages to the MOM in a reliable way: if persistent
    * is set to true the messages have been persisted when the method returns and
    * therefore can be safely acknowledged.
-   * The ID is used to avoid duplicates if a server crash happens right after
-   * transmitting the messages and before they have been acknowledged. It can be
-   * <code>null</code> if such duplicates are tolerated.
+   * Be careful, the use of this transmit method does not allow to verify the
+   * duplication of messages.
    * 
    * @param messages
-   *          the messages to transmit
-   * @param messagesId
-   *          a unique ID for the list of transmitted messages.
+   *          the list of messages to transmit
+   * @param persistent
+   *          true if the message must be persisted.
    * 
    * @see ReliableTransmitter
    */
-  public void transmit(List messages, boolean persistent, String messagesId) {
+  public void transmit(List messages, boolean persistent) {
     if (messages != null && messages.size() > 0) {
     	transmitCounter ++;
       Channel.sendTo(destination.getId(),
-                     new AcquisitionNot(new ClientMessages(-1, -1, messages), persistent, messagesId));
+                     new AcquisitionNot(new ClientMessages(-1, -1, messages), persistent, null));
     }
   }
 
