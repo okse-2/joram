@@ -26,5 +26,50 @@ package org.objectweb.joram.mom.dest;
  * JMX interface for the monitoring queue.
  */
 public interface AcquisitionQueueMBean extends QueueMBean, AcquisitionMBean {
-
+  /**
+   * Returns the number of messages acquired by the acquisition handler.
+   * Be careful this counter is reseted at each time the server starts.
+   * 
+   * @return the number of messages acquired by the acquisition handler.
+   */
+  long getAcquiredMsgCount();
+  /**
+   * Returns the number of acquired messages processed by the destination.
+   * 
+   * @return the number of acquired messages processed by the destination.
+   */
+  long getHandledMsgCount();
+  
+  /**
+   * Returns the maximum number of acquired messages waiting to be handled by
+   * the destination. When the number of messages waiting to be handled is greater
+   * the acquisition handler is temporarily stopped.
+   * 
+   * @return the maximum number of acquired messages waiting to be handled by
+   * the destination.
+   */
+  long getDiffMax();
+  /**
+   * Returns the minimum threshold of acquired messages waiting to be handled by
+   * the destination for restarting the acquisition handler.
+   * 
+   * @return the minimum threshold of acquired messages waiting to be handled by
+   * the destination.
+   */
+  long getDiffMin();
+  
+  /**
+   * Returns the maximum number of waiting messages in the destination. When the number
+   * of waiting messages is greater the acquisition handler is temporarily stopped.
+   * 
+   * @return the maximum number of waiting messages in the destination.
+   */
+  long getPendingMax();
+  /**
+   * Returns the minimum threshold of waiting messages in the destination for restarting
+   * the acquisition handler.
+   * 
+   * @return the minimum threshold of waiting messages in the destination.
+   */
+  long getPendingMin();
 }
