@@ -32,6 +32,7 @@ import javax.jms.TextMessage;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.JMSDistributionQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.mom.dest.jms.JMSDistribution;
@@ -85,13 +86,10 @@ public class BridgeTest12x extends TestCase {
       
         // Setting the bridge properties
         Properties prop = new Properties();
-        prop.setProperty("jms.DestinationName", "foreignQueue");
         prop.setProperty("jms.ConnectionUpdatePeriod", "1000");
         prop.setProperty("period", "1000");
         prop.put("distribution.async", "" + async);
-        prop.setProperty("distribution.className", JMSDistribution.class.getName());
-
-        Queue joramOutQueue = Queue.create(0, "BridgeOutQueue", Queue.DISTRIBUTION_QUEUE, prop);
+        Queue joramOutQueue = JMSDistributionQueue.create(0, "BridgeOutQueue", "foreignQueue", prop);
         joramOutQueue.setFreeWriting();
         
         System.out.println("admin done.");
@@ -121,7 +119,7 @@ public class BridgeTest12x extends TestCase {
         joramProd.send(msgOut);
         System.out.println("send a message = " + msgOut.getText());
         
-//        Be Careful, if a message cannot be routed the next one ar not delivered. 
+//        Be Careful, if a message cannot be routed the next one is not delivered. 
 //        msgOut = joramSess.createTextMessage("Coucou");
 //        joramProd.send(msgOut);
 //        System.out.println("send a message = " + msgOut.getText());
@@ -132,7 +130,7 @@ public class BridgeTest12x extends TestCase {
           System.out.println("Should not receive message: " + msgIn);
 
         System.out.println("Adds the cnx1 connection");
-        AdminModule.addJMSBridgeConnection(0, "scn://localhost:16400/?name=cnx0&cf=addedForeignCF&jndiFactoryClass=fr.dyade.aaa.jndi2.client.NamingContextFactory");
+        AdminModule.addJMSBridgeConnection(0, "scn://localhost:16400/?name=cnx1&cf=addedForeignCF&jndiFactoryClass=fr.dyade.aaa.jndi2.client.NamingContextFactory");
         Thread.sleep(1000);
         
         msgIn = (TextMessage) foreignCons.receive(5000);
@@ -141,12 +139,8 @@ public class BridgeTest12x extends TestCase {
           System.out.println("Receive message: " + msgIn.getText());
      
         AdminModule.disconnect();
-        System.out.println("Admin closed.");
       }catch(Exception exc){
       }
-
-      System.out.println("admin config ok");
-      Thread.sleep(1000);      
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
