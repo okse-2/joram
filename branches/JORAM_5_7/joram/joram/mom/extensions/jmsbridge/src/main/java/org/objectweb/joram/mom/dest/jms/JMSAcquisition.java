@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -161,7 +161,7 @@ public class JMSAcquisition implements AcquisitionDaemon {
           try {
             dest = (Destination) connection.retrieveJndiObject(destName);
   
-            Session session = connection.getCnx().createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Session session = connection.getCnx().createSession(true, Session.AUTO_ACKNOWLEDGE);
             MessageConsumer consumer;
             if (dest instanceof Queue) {
               consumer = session.createConsumer(dest, selector);
@@ -206,33 +206,33 @@ public class JMSAcquisition implements AcquisitionDaemon {
      * asynchronous deliveries coming from the foreign JMS server.
      */
     public void onMessage(javax.jms.Message jmsMessage) {
-      if (logger.isLoggable(BasicLevel.DEBUG)) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "onMessage(" + jmsMessage + ')');
-      }
+      
       try {
-        try {
+      	org.objectweb.joram.client.jms.Message clientMessage = null;
+      	try {
+      		clientMessage = org.objectweb.joram.client.jms.Message.convertJMSMessage(jmsMessage);
+      	} catch (JMSException conversionExc) {
+      		// Conversion error: denying the message.
+      		if (logger.isLoggable(BasicLevel.WARN))
+      			logger.log(BasicLevel.WARN, "onMessage: rollback.", conversionExc);
 
-          org.objectweb.joram.client.jms.Message clientMessage = org.objectweb.joram.client.jms.Message
-              .convertJMSMessage(jmsMessage);
-          Message momMessage = clientMessage.getMomMsg();
+      		session.rollback();
+      		return;
+      	}
 
-          transmitter.transmit(momMessage, jmsMessage.getJMSMessageID());
-
-          if (logger.isLoggable(BasicLevel.DEBUG)) {
-            logger.log(BasicLevel.DEBUG, "onMessage: commit.");
-          }
-          session.commit();
-
-        } catch (MessageFormatException conversionExc) {
-          // Conversion error: denying the message.
-
-          session.rollback();
-          if (logger.isLoggable(BasicLevel.DEBUG)) {
-            logger.log(BasicLevel.DEBUG, "Exception:: onMessage: rollback.");
-          }
-        }
+      	transmitter.transmit(clientMessage.getMomMsg(), jmsMessage.getJMSMessageID());
+      	
+      	if (logger.isLoggable(BasicLevel.DEBUG))
+      		logger.log(BasicLevel.DEBUG, "onMessage: Try to commit.");
+      	
+      	session.commit();
       } catch (JMSException exc) {
-        // Commit or rollback failed: nothing to do.
+      	// Commit or rollback failed: nothing to do.
+      	logger.log(BasicLevel.ERROR, name + ".onMessage(" + jmsMessage + ')', exc);
+      } catch (Throwable t) {
+      	logger.log(BasicLevel.ERROR, name + ".onMessage(" + jmsMessage + ')', t);
       }
     }
 
