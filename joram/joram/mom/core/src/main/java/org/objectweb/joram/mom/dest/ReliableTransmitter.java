@@ -51,15 +51,12 @@ public interface ReliableTransmitter {
    * Transmits a list of messages to the MOM in a reliable way: if persistent
    * is set to true the messages have been persisted when the method returns and
    * therefore can be safely acknowledged.
-   * The ID is used to avoid duplicates if a server crash happens right after
-   * transmitting the messages and before they have been acknowledged. It can be
-   * <code>null</code> if such duplicates are tolerated.
+   * Be careful, the use of this transmit method does not allow to verify the
+   * duplication of messages.
    * 
    * @param messages
    *          the messages to transmit
-   * @param messagesId
-   *          a unique ID for the list of transmitted messages.
    */
-  public void transmit(List messages, boolean persistent, String messagesId);
+  public void transmit(List messages, boolean persistent);
 
 }
