@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.joram</groupId>
+  <artifactId>joram</artifactId>
+  <packaging>pom</packaging>
+  <name>JORAM :: joram</name>
+  <description>Builds the Joram joram project.</description>
+
+	<parent>
+		<artifactId>parent</artifactId>
+		<groupId>org.ow2.joram</groupId>
+		<version>5.7.1</version>
+	</parent>
+  
+	<modules>
+    <module>shared</module>
+    <module>client</module>
+    <module>mom</module>
+    <module>security</module>
+	  <module>tools</module>
+	</modules>
+
+  <profiles>
+    <!-- Profile release -->
+    <profile>
+      <id>release</id>
+      <modules>
+        <module>jca</module>
+      </modules>
+    </profile>
+  </profiles>
+  
+</project>

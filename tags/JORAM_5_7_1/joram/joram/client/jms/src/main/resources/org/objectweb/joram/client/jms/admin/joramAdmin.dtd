@@ -1,0 +1,146 @@
+<!-- joramAdmin.dtd 
+
+ Copyright (C) 2005 - ScalAgent Distributed Technologies
+
+ The contents of this file are subject to the Joram Public License,
+ as defined by the file JORAM_LICENSE.TXT 
+ 
+ You may not use this file except in compliance with the License.
+ You may obtain a copy of the License on the Objectweb web site
+ (www.objectweb.org). 
+ 
+ Software distributed under the License is distributed on an "AS IS" basis,
+ WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+ the specific terms governing rights and limitations under the License. 
+ 
+ The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
+ fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
+ released May 24, 2000. 
+ 
+ The Initial Developer of the Original Code is Dyade. The Original Code and
+ portions created by Dyade are Copyright Bull and Copyright INRIA.
+ All Rights Reserved.
+-->
+
+<!ELEMENT JoramAdmin (AdminModule | ConnectionFactory | User | Destination | Queue | Topic | DMQueue | Cluster | Server | InitialContext)*>
+<!ATTLIST JoramAdmin name CDATA "default">
+
+<!ELEMENT AdminModule (connect | collocatedConnect)*>
+<!ATTLIST AdminModule>
+
+<!ELEMENT connect EMPTY>
+<!ATTLIST connect
+	host          CDATA "localhost"
+	port          CDATA "16010"
+  name          CDATA "root"
+  password      CDATA "root"
+  cnxTimer      CDATA "60"
+  reliableClass CDATA "org.objectweb.joram.client.jms.tcp.ReliableTcpClient"
+  identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+
+<!ELEMENT collocatedConnect EMPTY>
+<!ATTLIST collocatedConnect
+        name     CDATA "root"
+        password CDATA "root"
+        identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+
+<!ELEMENT ConnectionFactory (tcp | local | hatcp | halocal | soap | jndi)*>
+<!ATTLIST ConnectionFactory
+	class CDATA #REQUIRED
+	identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+
+<!ELEMENT tcp EMPTY>
+<!ATTLIST tcp
+	host          CDATA "localhost"
+	port          CDATA "16010"
+	reliableClass CDATA "org.objectweb.joram.client.jms.tcp.ReliableTcpClient">
+
+<!ELEMENT local EMPTY>
+<!ATTLIST local>
+
+<!ELEMENT hatcp EMPTY>
+<!ATTLIST hatcp
+	url           CDATA #REQUIRED
+	reliableClass CDATA "org.objectweb.joram.client.jms.tcp.ReliableTcpClient">
+<!ELEMENT halocal EMPTY>
+<!ATTLIST halocal>
+
+<!ELEMENT soap EMPTY>
+<!ATTLIST soap
+	host    CDATA "localhost"
+	port    CDATA "8080"
+	timeout CDATA "60">
+
+<!ELEMENT jndi EMPTY>
+<!ATTLIST jndi
+	name CDATA #REQUIRED>
+
+<!ELEMENT Server EMPTY>
+<!ATTLIST Server
+        serverId CDATA "0"
+        threshold CDATA "-1"
+        dmq      CDATA "">
+
+<!ELEMENT User (reader)*>
+<!ATTLIST User
+	name     CDATA #REQUIRED
+	password CDATA #REQUIRED
+  threshold CDATA "-1"
+  dmq      CDATA ""
+  serverId CDATA "0"
+  identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+
+<!ELEMENT Destination (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST Destination
+	type      CDATA #REQUIRED
+	name      CDATA ""
+	serverId  CDATA "0"
+        dmq       CDATA ""
+        className CDATA #REQUIRED>
+
+<!ELEMENT Queue (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST Queue
+	name      CDATA ""
+	serverId  CDATA "0"
+        dmq       CDATA ""
+        threshold CDATA "-1"
+        nbMaxMsg  CDATA "-1"
+        className CDATA "org.objectweb.joram.mom.dest.Queue">
+
+<!ELEMENT Topic (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST Topic
+	name      CDATA ""
+	serverId  CDATA "0"
+        dmq       CDATA ""
+        parent    CDATA ""
+        className CDATA "org.objectweb.joram.mom.dest.Topic">
+
+<!ELEMENT DMQueue (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST DMQueue
+	name      CDATA #REQUIRED
+	serverId  CDATA "0">
+
+<!ELEMENT property EMPTY>
+<!ATTLIST property
+	name  CDATA #REQUIRED
+	value CDATA #REQUIRED>
+
+<!ELEMENT reader EMPTY>
+<!ATTLIST reader
+	user CDATA #REQUIRED>
+
+<!ELEMENT writer EMPTY>
+<!ATTLIST writer
+	user CDATA #REQUIRED>
+
+<!ELEMENT freeReader EMPTY>
+<!ATTLIST freeReader>
+
+<!ELEMENT freeWriter EMPTY>
+<!ATTLIST freeWriter>
+
+<!ELEMENT InitialContext (property)*>
+<!ATTLIST InitialContext>
+
+<!ELEMENT Cluster (Queue | Topic | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST Cluster>

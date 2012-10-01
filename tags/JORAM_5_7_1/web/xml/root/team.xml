@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Team</title>
+    <filename>team.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="Team">
+      <s2 name="Project Team and Contributors">
+
+      <p>Here is the list of all contributors to Joram, past and present :</p>
+      <ul>
+      <li>Abdenbi Benammour</li>
+      <li>Cyril Araud</li>
+      <li>Fabien Badolle</li>
+      <li>Roland Balter (Grenoble University)</li>
+      <li>Luc Bellissard (TagSys RFID)</li>
+      <li>Abdenbi Benammour</li>
+      <li>Laurent Chauvirey</li>
+      <li>Philippe Coq (<a href="http://www.bull.com/">Bull</a>)</li>
+      <li>Adriana Danes (<a href="http://www.bull.com/">Bull</a>)</li>
+      <li>Xavier Etchevers</li>
+      <li>Alexander Fedorowicz</li>
+      <li>David Feliot (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+      <li>Andre Freyssinet (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+      <li>Marc Herrmann (<a href="http://www.cgey.com/">Cap Gemini</a>)</li>
+      <li>Douglas S. Jackson</li>
+      <li>Helene Johanin (<a href="http://www.bull.com/">Bull</a>)</li>
+      <li>Philippe Laumay (<a href="http://www.kelkoo.com/">Kelkoo</a>)</li>
+      <li>Serge Lacourte (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+      <li>Frederic Maistre (Renault S.A.)</li>
+      <li>Richard Mathis</li>
+      <li>Jean-Frédéric Mesnil (RedHat)</li>
+      <li>Benoit Pelletier (<a href="http://www.bull.com/">Bull</a>)</li>
+      <li>Alex Porras (<a href="http://www.mediaocean.com/">MediaOcean</a>)</li>
+      <li>Guillaume Surrel (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+      <li>Nicolas Tachker (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+      <li>Tony Thompson</li>
+      <li>JC Waeny (<a href="http://www.dfjug.org">Brasilia Java Users Group</a>)</li>
+      </ul>
+
+      <p>If you feel forgotten, please <a href="mailto:joram-team@ow2.org">contact us</a>.</p>
+      </s2>
+    </s1>
+  </body>
+</document>
