@@ -454,6 +454,7 @@
   	<antcall target="bridge.jms.test11x"/>
   	<antcall target="bridge.jms.test12x"/>
    	<antcall target="bridge.jms.test13x"/>
+   	<antcall target="bridge.jms.test14x"/>
  </target>
 
   <target name="tests.schedqueue"
@@ -4681,8 +4682,18 @@
   <target name="bridge.jms.test13x" depends="init.a3props,compile"
           description=" --> Tests behavior of the acquisition queue during foreign server failures">
     <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="bridge.jms.test13xA"/>
+      <param name="testid" value="bridge.jms.test13x"/>
       <param name="className" value="joram.bridgejms.BridgeTest13x"/>
+      <param name="jndiconf" value="bridgejms/jndi.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers.xml"/>
+    </antcall>
+  </target>
+  
+  <target name="bridge.jms.test14x" depends="init.a3props,compile"
+          description=" --> Test the bridge with Bytes, Stream or Map messages">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.test14x"/>
+      <param name="className" value="joram.bridgejms.BridgeTest14x"/>
       <param name="jndiconf" value="bridgejms/jndi.properties"/>
       <param name="a3conf" value="bridgejms/a3servers.xml"/>
     </antcall>
