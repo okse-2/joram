@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -240,11 +240,6 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     return (int) ((logManager.garbageTime *100) / (System.currentTimeMillis() - startTime));
   }
 
-  public void resetGarbageRatio() {
-    logManager.garbageTime = 0L;
-    startTime = System.currentTimeMillis();
-  }
-  
   /**
    *  The Repository classname implementation.
    *  This value can be set for a particular server by setting the
@@ -427,7 +422,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   private final synchronized byte[] getFromLog(String dirName, String name) throws IOException {
     // First searches in the current transaction log a new value for the object.
     Object key = OperationKey.newKey(dirName, name);
-    byte[] buf = getFromLog(perThreadContext.get().getLog(), key);
+    byte[] buf = getFromLog(((Context) perThreadContext.get()).getLog(), key);
     if (buf != null) return buf;
     
     // Then search in the log files and repository.
@@ -459,9 +454,9 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
 
     Object key = OperationKey.newKey(dirName, name);
 
-    Hashtable<Object, Operation> log = perThreadContext.get().getLog();
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     Operation op = Operation.alloc(Operation.DELETE, dirName, name);
-    Operation old = log.put(key, op);
+    Operation old = (Operation) log.put(key, op);
     if (old != null) {
       if (old.type == Operation.CREATE) op.type = Operation.NOOP;
       old.free();
@@ -478,7 +473,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     // TODO (AF): Only the call to logManager.commit and the phase change needs to
     // be synchronized..
     
-    Hashtable<Object, Operation> log = perThreadContext.get().getLog();
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     if (! log.isEmpty()) {
       logManager.commit(log);
       log.clear();
@@ -607,7 +602,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     /**
      * Date of last garbage.
      */
-    long lastGarbageDate = 0L;
+    long lastGarbageTime = 0L;
     
     /** Coherence lock filename */
     static private final String LockPathname = "lock";
@@ -657,21 +652,17 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       } else if (list.length == 0) {
         logidx = 0;
       } else {
-        // Recovery of log files..
-        // Be careful, sort the log according to their index.
-        int idx[] = new int[list.length];
+        //  Recovery of log files..
+        Arrays.sort(list);
         for (int i=0; i<list.length; i++) {
-          idx[i] = Integer.parseInt(list[i].substring(4));
-        }
-        Arrays.sort(idx);
-        for (int i=0; i<idx.length; i++) {
-          logmon.log(BasicLevel.WARN, "NGTransaction.LogManager, rebuilds index: log#" + idx[i]);
+          logmon.log(BasicLevel.WARN, "NGTransaction.LogManager, rebuilds index: " + list[i]);
           
+          int idx = Integer.parseInt(list[i].substring(4));
           // Fix the log index to the lower index, it is needed if all log files
           // are garbaged.
-          if (logidx == -1) logidx = idx[i];
+          if (logidx == -1) logidx = idx;
           try {
-            LogFile logf = new LogFile(dir, idx[i], mode);
+            LogFile logf = new LogFile(dir, idx, mode);
             int optype = logf.read();
             if (optype == Operation.END) {
               // The log is empty
@@ -680,9 +671,9 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
             }
             
             // The index of current log is the bigger index of log with 'live' operations. 
-            logidx = idx[i];
+            logidx = idx;
             logFile[logidx%nbLogFile] = logf;
-            // current is fixed after the log reading
+            // current if fixed after the log reading
 
             while (optype == Operation.COMMIT) {
               String dirName;
@@ -702,23 +693,17 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
 
                 Object key = OperationKey.newKey(dirName, name);
 
-//                byte buf[] = null;
+                byte buf[] = null;
                 if ((optype == Operation.SAVE) || (optype == Operation.CREATE)) {
-                  // TODO (AF): Fix a potential bug if there is a crash during a garbage.
-                  // A newly created object can be saved in repository then not deleted.
-                  // May be we can test if the corresponding file exist.
-                  optype = Operation.SAVE;
-                  
-//                  buf = new byte[logFile[logidx%nbLogFile].readInt()];
-//                  logFile[logidx%nbLogFile].readFully(buf);
+                  buf = new byte[logFile[logidx%nbLogFile].readInt()];
+                  logFile[logidx%nbLogFile].readFully(buf);
 
-                  logFile[logidx%nbLogFile].skipBytes(logFile[logidx%nbLogFile].readInt());
+//                  logFile[logidx%nbLogFile].skipBytes(logFile[logidx%nbLogFile].readInt());
                 }
 
                 if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
                   logmon.log(BasicLevel.DEBUG,
-                             "NGTransaction.LogManager, OPERATION=" + optype + ", " + name);
-//                           "NGTransaction.LogManager, OPERATION=" + optype + ", " + name + " buf=" + Arrays.toString(buf));
+                             "NGTransaction.LogManager, OPERATION=" + optype + ", " + name + " buf=" + Arrays.toString(buf));
                 
                 Operation old = log.get(key);
                 if (old != null) {
@@ -758,7 +743,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
                         old.logptr = ptr;
                       }
                     }
-                  } else if (old.type == Operation.DELETE) {
+                  } else if (old.type == Operation.DELETE) { 
                     if ((optype == Operation.CREATE) || (optype == Operation.SAVE)) {
                       // The resulting operation is a save 
                       old.type = Operation.SAVE;
@@ -1195,12 +1180,13 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
         logFile[logf.logidx%nbLogFile] = null;
       }
       
-      lastGarbageDate = System.currentTimeMillis();
-      garbageTime += lastGarbageDate - start;
+      long end = System.currentTimeMillis();
+      lastGarbageTime = end;
+      garbageTime += end - start;
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
-                   "NTransaction.LogFile.garbage() - end: " + (lastGarbageDate - start));
+                   "NTransaction.LogFile.garbage() - end: " + (end - start));
     }
 
     void stop() {
@@ -1289,8 +1275,8 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     }
 
     public void renameTo() {
-      maxUsedIdx += 1;
       new File(dir, "log#" + logidx).renameTo(new File(dir, "log#" + maxUsedIdx));
+      maxUsedIdx += 1;
     }
   }
   

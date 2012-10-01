@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,8 +36,6 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AddDomainRequest;
 import org.objectweb.joram.shared.admin.AddServerRequest;
-import org.objectweb.joram.shared.admin.AdminCommandConstant;
-import org.objectweb.joram.shared.admin.AdminCommandReply;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.AdminCommandRequest;
@@ -73,11 +71,11 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.common.Debug;
 
 /**
- * The <code>AdminWrapper</code> class allows to set an administrator
+ * The <code>Admin</code> class allows to set an administrator
  * connection to a given JORAM server, and provides administration and
  * monitoring methods at a server/platform level.
  */
-public class AdminWrapper implements AdminItf {
+public class AdminWrapper {
   /** The description of the server the module is connected to. */
   private Server server = null;
   
@@ -1118,132 +1116,5 @@ public class AdminWrapper implements AdminItf {
       throw new ConnectException("Admin connection not established.");
 
     requestor.abort();
-  }
-  
-  /**
-   * Invokes the specified static method with the specified parameters on the
-   * chosen server. The parameters types of the invoked method must be java
-   * primitive types, the java objects wrapping them or String type.
-   * 
-   * @param serverId the identifier of the server.
-   * @param className the name of the class holding the static method
-   * @param methodName the name of the invoked method
-   * @param parameterTypes the list of parameters
-   * @param args the arguments used for the method call
-   * @return the result of the invoked method after applying
-   *         {@link Object#toString()} method
-   * @throws ConnectException If the connection fails.
-   * @throws AdminException If the invocation can't be done or fails
-   */
-  public String invokeStaticServerMethod(int serverId, String className, String methodName,
-      Class<?>[] parameterTypes, Object[] args) throws ConnectException, AdminException {
-
-    if (parameterTypes == null && (args != null && args.length > 0)) {
-      throw new AdminException("Parameter types array is null while args array is not null or empty.");
-    }
-    if (args == null && (parameterTypes != null && parameterTypes.length > 0)) {
-      throw new AdminException("Args array is null while parameter types array is not null or empty.");
-    }
-    if (parameterTypes != null && args != null && parameterTypes.length != args.length) {
-      throw new AdminException("Parameter types array size do not match args array size.");
-    }
-    Properties props = new Properties();
-    props.setProperty(AdminCommandConstant.INVOKE_CLASS_NAME, className);
-    props.setProperty(AdminCommandConstant.INVOKE_METHOD_NAME, methodName);
-    if (parameterTypes != null) {
-      for (int i = 0; i < parameterTypes.length; i++) {
-        props.setProperty(AdminCommandConstant.INVOKE_METHOD_ARG + i, parameterTypes[i].getName());
-        if (args[i] != null) {
-          props.setProperty(AdminCommandConstant.INVOKE_METHOD_ARG_VALUE + i, args[i].toString());
-        }
-      }
-    }
-    AdminCommandReply reply = null;
-    reply = (AdminCommandReply) processAdmin(DestinationConstants.getNullId(serverId),
-          AdminCommandConstant.CMD_INVOKE_STATIC, props);
-    if (reply.getProp() == null) {
-      return null;
-    }
-    return reply.getProp().getProperty(AdminCommandConstant.INVOKE_METHOD_RESULT);
-  }
-  
-  /**
-   * Adds an AMQP server and starts a live connection with it, accessible via
-   * the url provided. A server is uniquely identified by the given
-   * name. Adding an existing server won't do anything.
-   * 
-   * @param serverId the serverId
-   * @param urls the amqp url list identifying the servers separate by space.
-   * ex: amqp://user:pass@localhost:5672/?name=serv1 amqp://user:pass@localhost:5678/?name=serv2
-   * 
-   * @return the result of the method
-   * @throws ConnectException If the connection fails.
-   * @throws AdminException If the invocation can't be done or fails
-   */
-  public String addAMQPBridgeConnection(int serverId, String urls) throws ConnectException, AdminException {
-  	return invokeStaticServerMethod(
-  			serverId,
-  			"org.objectweb.joram.mom.dest.amqp.AmqpConnectionService",
-  			"addServer",
-  			new Class[] { String.class },
-  			new Object[] { urls });
-  }
-  
-  /**
-   * Removes the live connection to the specified AMQP server.
-   * 
-   * @param serverId the serverId
-   * @param names the name identifying the server or list of name separate by space
-   * @return the result of the method
-   * @throws ConnectException If the connection fails.
-   * @throws AdminException If the invocation can't be done or fails
-   */
-  public String deleteAMQPBridgeConnection(int serverId, String names) throws ConnectException, AdminException {
-  	return invokeStaticServerMethod(
-  			serverId,
-  			"org.objectweb.joram.mom.dest.amqp.AmqpConnectionService",
-  			"deleteServer",
-  			new Class[] { String.class },
-  			new Object[] { names });
-  }
-  
-  /**
-   * Adds a JMS server and starts a live connection with it, accessible via
-   * the url provided. A server is uniquely identified by the given
-   * name. Adding an existing server won't do anything.
-   * 
-   * @param serverId the serverId
-   * @param urls the jms url list identifying the servers separate by space.
-   * ex: jndi_url/?name=cnx1&cf=cfName&jndiFactoryClass=com.xxx.yyy&user=user1&pass=pass1&clientID=clientID 
-   * 
-   * @return the result of the method
-   * @throws ConnectException If the connection fails.
-   * @throws AdminException If the invocation can't be done or fails
-   */
-  public String addJMSBridgeConnection(int serverId, String urls) throws ConnectException, AdminException {
-  	return invokeStaticServerMethod(
-  			serverId,
-  			"org.objectweb.joram.mom.dest.jms.JMSConnectionService",
-  			"addServer",
-  			new Class[] { String.class },
-  			new Object[] { urls });
-  }
-  
-  /**
-   * Removes the live connection to the specified JMS server.
-   * 
-   * @param serverId the serverId
-   * @param names the name identifying the server or list of name separate by space
-   * @return the result of the method
-   * @throws ConnectException If the connection fails.
-   * @throws AdminException If the invocation can't be done or fails
-   */
-  public String deleteJMSPBridgeConnection(int serverId, String names) throws ConnectException, AdminException {
-  	return invokeStaticServerMethod(
-  			serverId,
-  			"org.objectweb.joram.mom.dest.jms.JMSConnectionService",
-  			"deleteServer",
-  			new Class[] { String.class },
-  			new Object[] { names });
   }
 }

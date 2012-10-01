@@ -25,23 +25,15 @@ import java.util.Properties;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.dest.AdminTopic.DestinationDesc;
-import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
-import org.objectweb.joram.shared.DestinationConstants;
-import org.objectweb.joram.shared.admin.ClearQueue;
-import org.objectweb.joram.shared.admin.ClearSubscription;
 import org.objectweb.joram.shared.admin.CreateUserRequest;
-import org.objectweb.joram.shared.admin.DeleteQueueMessage;
-import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
 import org.objectweb.joram.shared.admin.SetReader;
 import org.objectweb.joram.shared.admin.SetWriter;
-import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.common.Debug;
 
 /**
@@ -85,30 +77,14 @@ public class JoramHelper {
   /**
    * Instantiating the destination class or retrieving the destination.
    * 
-   * @param destName      destination name
-   * @param adminId       Agent Id. of the administrator (null for TopicAdmin)
-   * @param destClassName destination class name
-   * @param type          destination type
-   * @param properties    destination properties
-   * @param freerw        if true rights all users can read and write the destination.
-   * @return destination AgentId
-   * @throws Exception
-   */
-  public final static AgentId createDestination(String destName, AgentId adminId, String destClassName,
-      byte type, Properties properties, boolean freerw) throws Exception {
-    return createDestination(destName, adminId, destClassName, type, properties, freerw, freerw);
-  }
-  
-  /**
-   * Instantiating the destination class or retrieving the destination.
-   * 
    * @param destNane      destination name
-   * @param adminId       Agent Id. of the administrator (null for TopicAdmin)
+   * @param adminId       other admin (null for TopicAdmin)
    * @param destClassName destination class name
    * @param type          destination type
    * @param properties    destination properties
-   * @param freerw        if true rights all users can read and write the destination.
-   * @param freerw        if true rights all users can read and write the destination.
+   * @param fromClassName 
+   * @param jndiLookup    true lookup in jndi
+   * @param jndiRebind    true re-bind destination in jndi
    * @return destination AgentId
    * @throws Exception
    */
@@ -118,8 +94,7 @@ public class JoramHelper {
       String destClassName,
       byte type,
       Properties properties,
-      boolean freeReading,
-      boolean freeWriting) throws Exception {
+      boolean freerw) throws Exception {
     AgentId destId = null;
     StringBuffer strbuf = new StringBuffer();
     DestinationDesc destDesc = null;
@@ -138,15 +113,13 @@ public class JoramHelper {
       logger.log(BasicLevel.DEBUG, "JoramHelper.createDestination info = " + strbuf.toString());
     strbuf.setLength(0);     
 
-    if (freeReading) {
-     try {
+    if (freerw) {
+      try {
         AdminTopic.setRightAndSave(new SetReader(null, destId.toString()), null, "-1");
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, "JoramHelper.createDestination, Cannot set FreeReader", exc);
       }
-    }
-    if (freeWriting) {
       try {
         AdminTopic.setRightAndSave(new SetWriter(null, destId.toString()), null, "-1");
       } catch (Exception exc) {
@@ -157,77 +130,4 @@ public class JoramHelper {
 
     return destId;
   }
-
-  /**
-   * Delete a message in a queue
-   * @param queueName Name of the queue
-   * @param msgId ID of the message to be deleted
-   * @return
-   */
-  public final static boolean deleteQueueMessage(String queueName, String msgId) {
-    DestinationDesc queueDesc;
-    try {
-      queueDesc = AdminTopic.lookupDest(queueName, DestinationConstants.QUEUE_TYPE);
-    } catch (RequestException e) {
-      return false;
-    }
-    if(queueDesc==null) return false;
-    DeleteQueueMessage req = new DeleteQueueMessage(queueDesc.getId().toString(), msgId);
-    FwdAdminRequestNot not = new FwdAdminRequestNot(req, null, null);
-    Channel.sendTo(queueDesc.getId(), not);
-    return true;
-  }
-  
-  /**
-   * Deletes a message in a subscription
-   * @param userName Subscriber's name
-   * @param subName Subscription name
-   * @param msgId ID of the message to be deleted
-   * @return
-   */
-  public final static boolean deleteSubMessage(String userName, String subName, String msgId) {
-    AgentId userId = AdminTopic.lookupUser(userName);
-    if(userId==null)
-      return false;
-    DeleteSubscriptionMessage req =
-        new DeleteSubscriptionMessage(userId.toString(), subName, msgId);
-    FwdAdminRequestNot not = new FwdAdminRequestNot(req, null, null);
-    Channel.sendTo(userId, not);
-    return true;
-  }
-  
-  /**
-   * Clears all pending message of a queue
-   * @param queueName Name of the queue
-   * @return
-   */
-  public final static boolean clearQueue(String queueName) {
-    DestinationDesc queueDesc;
-    try {
-      queueDesc = AdminTopic.lookupDest(queueName, DestinationConstants.QUEUE_TYPE);
-      if(queueDesc==null) return false;
-    } catch (RequestException e) {
-      return false;
-    }
-    ClearQueue req = new ClearQueue(queueDesc.getId().toString());
-    FwdAdminRequestNot not = new FwdAdminRequestNot(req, null, null);
-    Channel.sendTo(queueDesc.getId(), not);
-    return true;
-  }
-  
-  /**
-   * Clears all pending message of a subscription
-   * @param userName Subscriber's name
-   * @param subName Subscription name
-   * @return
-   */
-  public final static boolean clearSubscription(String userName, String subName) {
-    AgentId userId = AdminTopic.lookupUser(userName);
-    ClearSubscription req =
-        new ClearSubscription(userId.toString(), subName);
-    FwdAdminRequestNot not = new FwdAdminRequestNot(req, null, null);
-    Channel.sendTo(userId, not);
-    return true;
-  }
-
 }

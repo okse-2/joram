@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,15 +29,16 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * The class <code>A3CMLDomain</code> describes an agent server domain.
  */
 public class A3CMLDomain implements Serializable {
-  /** Define serialVersionUID for interoperability. */
+  /**
+   * 
+   */
   private static final long serialVersionUID = 1L;
-  
   /** Name of the domain. */
   public String name = null;
   /** Full name of Java class */
   public String network = null;
   /** Description of alls servers in domain */
-  public Vector<A3CMLServer> servers = null;
+  public Vector servers = null;
   /**
    * Server Id. of router (1st hop) to access this domain from current node,
    * if -1 the domain is not accessible.
@@ -66,8 +67,7 @@ public class A3CMLDomain implements Serializable {
     if (Log.logger.isLoggable(BasicLevel.DEBUG))
       Log.logger.log(BasicLevel.DEBUG, 
                      "A3CMLDomain.addServer(" + server + ')');
-    if (servers == null)
-      servers = new Vector<A3CMLServer>();
+    if (servers == null) servers = new Vector();
     servers.addElement(server);
   }
 
@@ -105,18 +105,18 @@ public class A3CMLDomain implements Serializable {
   public A3CMLDomain duplicate() throws Exception {
     A3CMLDomain clone = new A3CMLDomain(name,network);
     if (servers != null) {
-      for (Enumeration<A3CMLServer> s = servers.elements(); s.hasMoreElements(); )
-        clone.addServer(s.nextElement().duplicate());
+      for (Enumeration s = servers.elements(); s.hasMoreElements(); )
+        clone.addServer(((A3CMLServer) s.nextElement()).duplicate());
     }
     clone.gateway = gateway;
     return clone;
   }
 
-  public A3CMLDomain duplicate(Hashtable<Short, A3CMLServer> context) throws Exception {
-    A3CMLDomain clone = new A3CMLDomain(name, network);
+  public A3CMLDomain duplicate(Hashtable context) throws Exception {
+    A3CMLDomain clone = new A3CMLDomain(name,network);
     if (servers != null) {
-      for (Enumeration<A3CMLServer> s = servers.elements(); s.hasMoreElements(); )
-        clone.addServer((s.nextElement()).duplicate(context));
+      for (Enumeration s = servers.elements(); s.hasMoreElements(); )
+        clone.addServer(((A3CMLServer) s.nextElement()).duplicate(context));
     }
     clone.gateway = gateway;
     return clone;

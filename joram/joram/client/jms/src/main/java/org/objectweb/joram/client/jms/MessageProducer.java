@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -51,13 +51,13 @@ import fr.dyade.aaa.common.Debug;
  */
 public class MessageProducer implements javax.jms.MessageProducer {
   /** Default delivery mode. */
-  private int deliveryMode = Message.DEFAULT_DELIVERY_MODE;
+  private int deliveryMode = javax.jms.DeliveryMode.PERSISTENT;
 
   /** Default priority. */
-  private int priority = Message.DEFAULT_PRIORITY;
+  private int priority = 4;
 
   /** Default time to live. */
-  private long timeToLive = Message.DEFAULT_TIME_TO_LIVE;
+  private long timeToLive = 0;
 
   /**
    * <code>true</code> if the client requests not to use the message
@@ -106,10 +106,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
   }
 
   /**
-   * API method, not taken into account.
-   * Message IDs are always enabled.
-   * 
-   * @param value indicates if message IDs are disabled, not taken in account.
+   * API method; not taken into account.
    *
    * @exception IllegalStateException  If the producer is closed.
    */
@@ -119,13 +116,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
   }
 
   /**
-   * API method.
    * Sets the producer's default delivery mode.
-   * <p>
-   * Delivery mode is set to PERSISTENT by default.
-   * 
-   * @param deliveryMode  the message delivery mode for this message producer; legal values are
-   *                      DeliveryMode.NON_PERSISTENT and DeliveryMode.PERSISTENT.
+   * API method.
    *
    * @exception IllegalStateException  If the producer is closed.
    * @exception JMSException  When setting an invalid delivery mode.
@@ -142,17 +134,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
   }
 
   /**
-   * API method.
    * Sets the producer's default priority.
-   * <p>
-   * The JMS API defines ten levels of priority value, with 0 as the lowest priority
-   * and 9 as the highest. Clients should consider priorities 0-4 as gradations of normal
-   * priority and priorities 5-9 as gradations of expedited priority.
-   * <p>
-   * Priority is set to 4 by default (Message.DEFAULT_PRIORITY).
-   * 
-   * @param priority the message priority for this message producer; must be a value
-   *                 between 0 and 9.
+   * API method.
    *
    * @exception IllegalStateException  If the producer is closed.
    * @exception JMSException  When setting an invalid priority.
@@ -168,13 +151,9 @@ public class MessageProducer implements javax.jms.MessageProducer {
   }
 
   /**
+   * Sets the default duration of time in milliseconds that a produced
+   * message should be retained by the provider.
    * API method.
-   * Sets the default duration of time in milliseconds that a produced message should
-   * be retained by the provider.
-   * <p>
-   * Time to live is set to zero by default (Message.DEFAULT_TIME_TO_LIVE).
-   * 
-   * @param timeToLive the message time to live in milliseconds; zero is unlimited.
    *
    * @exception IllegalStateException  If the producer is closed.
    */
@@ -187,17 +166,6 @@ public class MessageProducer implements javax.jms.MessageProducer {
 
   /**
    * API method.
-   * Sets whether message timestamps are disabled.
-   * <p>
-   * Since timestamps take some effort to create and increase a message's size, Joram
-   * optimizes message overhead if it is given a hint that the timestamp is not used by
-   * an application. By calling the setDisableMessageTimestamp method on this message
-   * producer, a JMS client enables this potential optimization for all messages sent
-   * by this message producer (the produced messages have the timestamp set to zero).
-   * <p>
-   * Message timestamps are enabled by default.
-   * 
-   * @param value indicates if message timestamps are disabled.
    *
    * @exception IllegalStateException  If the producer is closed.
    */
@@ -209,10 +177,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
   }
 
   /**
-   * API method.
    * Gets the destination associated with this MessageProducer.
-   * 
-   * @return the destination associated with this MessageProducer.
+   * API method.
    *
    * @exception IllegalStateException  If the producer is closed.
    */
@@ -225,9 +191,6 @@ public class MessageProducer implements javax.jms.MessageProducer {
 
   /**
    * API method.
-   * Gets an indication of whether message IDs are disabled, always false.
-   * 
-   * @return false.
    *
    * @exception IllegalStateException  If the producer is closed.
    */
@@ -239,10 +202,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
   }
 
   /**
+   * Gets the producer's default delivery mode.
    * API method.
-   * Gets the producer's default delivery mode, by default Message.DEFAULT_DELIVERY_MODE.
-   * 
-   * @return the message delivery mode for this message producer. 
    *
    * @exception IllegalStateException  If the producer is closed.
    */
@@ -254,10 +215,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
   }
 
   /**
+   * Gets the producer's default priority.
    * API method.
-   * Gets the producer's default priority, by default Message.DEFAULT_PRIORITY.
-   * 
-   * @return the message priority for this message producer.
    *
    * @exception IllegalStateException  If the producer is closed.
    */
@@ -269,12 +228,10 @@ public class MessageProducer implements javax.jms.MessageProducer {
   }
 
   /**
+   * Gets the default duration in milliseconds that a produced message
+   * should be retained by the provider.
    * API method.
-   * Gets the default duration in milliseconds that a produced message should be
-   * retained by the provider, by default Message.DEFAULT_TIME_TO_LIVE.
-   * 
-   * @return the message time to live in milliseconds; zero is unlimited.
-   * 
+   *
    * @exception IllegalStateException  If the producer is closed.
    */
   public synchronized long getTimeToLive() throws JMSException {
@@ -286,9 +243,6 @@ public class MessageProducer implements javax.jms.MessageProducer {
 
   /**
    * API method.
-   * Gets an indication of whether message timestamps are disabled.
-   * 
-   * @return an indication of whether message timestamps are disabled.
    *
    * @exception IllegalStateException  If the producer is closed.
    */
@@ -301,10 +255,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
 
 
   /**
-   * API method.
-   * Sends a message with the MessageProducer's default delivery parameters.
-   * 
-   * @param message the message to send.
+   * Sends a message with the default delivery parameters.
    *
    * @exception UnsupportedOperationException  If the dest is unidentified.
    * @exception IllegalStateException  If the producer is closed, or if the
@@ -319,13 +270,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
   }
 
   /**
-   * API method.
-   * Sends a message to the destination with given delivery parameters.
-   * 
-   * @param message       the message to send.
-   * @param deliveryMode  the delivery mode to use.
-   * @param priority      the priority for this message.
-   * @param timeToLive    the message's lifetime in milliseconds.
+   * Sends a message with given delivery parameters.
    *
    * @exception UnsupportedOperationException  If the dest is unidentified.
    * @exception IllegalStateException  If the producer is closed, or if the
@@ -343,16 +288,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
                                 }
 
   /**
-   * API method.
-   * Sends a message to a destination for an unidentified message producer using default
-   * delivery parameters.
-   * <p>
-   * Typically, a message producer is assigned a destination at creation time; however the
-   * JMS API also supports unidentified message producers, which require that the destination
-   * be supplied every time a message is sent.
-   * 
-   * @param dest    the destination to send this message to.
-   * @param message the message to send.
+   * Sends a message with default delivery parameters for an unidentified 
+   * message producer.
    *
    * @exception UnsupportedOperationException  When the producer did not
    *              properly identify itself.
@@ -373,19 +310,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
                                 }
 
   /**
-   * API method.
-   * Sends a message to a destination for an unidentified message producer with
-   * given delivery parameters.
-   * <p>
-   * Typically, a message producer is assigned a destination at creation time; however the
-   * JMS API also supports unidentified message producers, which require that the destination
-   * be supplied every time a message is sent.
-   * 
-   * @param dest          the destination to send this message to.
-   * @param message       the message to send.
-   * @param deliveryMode  the delivery mode to use.
-   * @param priority      the priority for this message.
-   * @param timeToLive    the message's lifetime in milliseconds.
+   * Sends a message with given delivery parameters for an unidentified
+   * message producer.
    *
    * @exception UnsupportedOperationException  When the producer did not
    *              properly identify itself.
@@ -410,11 +336,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
                                 }
 
   /**
-   * API method.
    * Closes the message producer.
-   * <p>
-   * In order to free significant resources allocated on behalf of a MessageProducer,
-   * clients should close them when they are not needed.
+   * API method.
    *
    * @exception JMSException  Actually never thrown.
    */

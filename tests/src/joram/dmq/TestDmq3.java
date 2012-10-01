@@ -26,13 +26,15 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
 
 import framework.TestCase;
 
@@ -55,7 +57,7 @@ public class TestDmq3 extends TestCase {
 
       Context ictx = new InitialContext();
       Queue queue = (Queue) ictx.lookup("queue");
-      Queue dmq = (Queue) ictx.lookup("dmq");
+      DeadMQueue dmq = (DeadMQueue) ictx.lookup("dmq");
       ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
       ictx.close();
 
@@ -63,6 +65,7 @@ public class TestDmq3 extends TestCase {
       Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       Session sessionc1 = cnx.createSession(true, Session.AUTO_ACKNOWLEDGE);
+
       cnx.start();
 
       // create a producer and a consumer
@@ -104,7 +107,7 @@ public class TestDmq3 extends TestCase {
    * Admin : Create queue and a user anonymous use jndi
    */
   public void admin() throws Exception {
-    // connection 
+    // conexion 
     AdminModule.connect("localhost", 2560, "root", "root", 60);
     // create a Queue   
     org.objectweb.joram.client.jms.Queue queue = org.objectweb.joram.client.jms.Queue.create("queue");
@@ -112,7 +115,7 @@ public class TestDmq3 extends TestCase {
     queue.setFreeReading();
     queue.setFreeWriting();
 
-    Queue dmq = (Queue) Queue.create(0);
+    DeadMQueue dmq = (DeadMQueue) DeadMQueue.create(0);
     dmq.setFreeReading();
     dmq.setFreeWriting();
     AdminModule.setDefaultDMQ(0, dmq);

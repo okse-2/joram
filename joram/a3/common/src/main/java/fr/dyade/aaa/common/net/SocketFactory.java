@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,10 +31,14 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
 
+
 /**
  * This class wraps multiples implementations of the java.net.Socket class.
  */
 public abstract class SocketFactory {
+  /**
+   * Logger statique des objets de la classe SocketFactory.
+   */
   static Logger logger = Debug.getLogger(SocketFactory.class.getName());
 
   /**
@@ -51,7 +55,7 @@ public abstract class SocketFactory {
   public static SocketFactory getDefaultFactory() {
     SocketFactory socketFactory = null;
     try {
-      Class<?> factoryClass = Class.forName(DefaultFactory);
+      Class factoryClass = Class.forName(DefaultFactory);
       Method method = factoryClass.getMethod("getFactory", (Class[]) null);
       socketFactory = (SocketFactory) method.invoke(null, (Object[]) null);
     } catch (Exception exc) {
@@ -71,7 +75,7 @@ public abstract class SocketFactory {
   public static SocketFactory getFactory(String sfcn) {
     SocketFactory socketFactory = null;
     try {
-      Class<?> factoryClass = Class.forName(sfcn);
+      Class factoryClass = Class.forName(sfcn);
       Method method = factoryClass.getMethod("getFactory", (Class[]) null);
       socketFactory = (SocketFactory) method.invoke(null, (Object[]) null);
     } catch (Exception exc) {
@@ -136,7 +140,7 @@ public abstract class SocketFactory {
   public static SocketFactory getSocketFactory() throws Exception {
     if (factory == null) {
       // Tries to load the more recent version
-      Class<?> clazz = null;
+      Class clazz = null;
       for (int i = 0; i < factoryClasses.length; i++) {
         try {
           clazz = Class.forName(factoryClasses[i]);

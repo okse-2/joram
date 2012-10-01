@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@ package fr.dyade.aaa.common;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
 
 /**
  * The Daemon class represents a basic active component in a server. It
@@ -120,11 +121,8 @@ public abstract class Daemon implements Runnable {
 
   /**
    * Allocates a new Daemon object.
-   * Be careful, the use of this constructor is not recommended as it does not
-   * dissociate the corresponding logger.
    *
    * @param name	the name of the new Daemon
-   * @deprecated
    */
   protected Daemon(String name) {
     this(name, null);
@@ -141,7 +139,7 @@ public abstract class Daemon implements Runnable {
 
     if (logmon == null) {
       // Get a default logging monitor from MonologMonitorFactory
-      this.logmon = Debug.getLogger(getClass().getName());
+      this.logmon = Debug.getLogger(getClass().getName() + '.' + name);
       this.logmon.log(BasicLevel.DEBUG, getName() + ", created.");
     } else {
       this.logmon = logmon;
@@ -151,7 +149,7 @@ public abstract class Daemon implements Runnable {
     canStop = false;
     thread = null;
   }
-  
+
   /**
    * Marks the daemon's thread as either a daemon thread a user thread.
    * This method must be called before the daemon is started. 

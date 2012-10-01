@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -24,15 +24,14 @@
  */
 package classic;
 
-import javax.jms.QueueConnectionFactory;
-import javax.jms.TopicConnectionFactory;
-
-import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+
 
 /**
  * Administers an agent server for the classic samples.
@@ -40,28 +39,28 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 public class ClassicAdmin {
 
   public static void main(String[] args) throws Exception {
+    
     System.out.println();
     System.out.println("Classic administration...");
 
     AdminModule.connect("root", "root", 60);
 
     Queue queue = Queue.create("queue");
-    queue.setFreeReading();
-    queue.setFreeWriting();
     Topic topic = Topic.create("topic");
-    topic.setFreeReading();
-    topic.setFreeWriting();
     
     User.create("anonymous", "anonymous");
 
+    queue.setFreeReading();
+    topic.setFreeReading();
+    queue.setFreeWriting();
+    topic.setFreeWriting();
 
-    ConnectionFactory cf =
+    javax.jms.ConnectionFactory cf =
       TcpConnectionFactory.create("localhost", 16010);
-    cf.getParameters().addOutInterceptor("classic.Interceptor");
-    QueueConnectionFactory qcf =
-      TcpConnectionFactory.create("localhost", 16010);
-    TopicConnectionFactory tcf =
-      TcpConnectionFactory.create("localhost", 16010);
+    javax.jms.QueueConnectionFactory qcf =
+      QueueTcpConnectionFactory.create("localhost", 16010);
+    javax.jms.TopicConnectionFactory tcf =
+      TopicTcpConnectionFactory.create("localhost", 16010);
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);

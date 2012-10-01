@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,50 +26,52 @@ package org.objectweb.joram.client.jms;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+
 /**
  * Implements the <code>javax.jms.XAQueueConnection</code> interface.
  */
-public class XAQueueConnection extends QueueConnection implements javax.jms.XAQueueConnection {
+public class XAQueueConnection extends QueueConnection
+    implements javax.jms.XAQueueConnection {
 
   /** Resource manager instance. */
   private XAResourceMngr rm;
 
   /**
    * Creates an <code>XAQueueConnection</code> instance.
+   *
+   * @param factoryParameters  The factory parameters.
+   * @param requestChannel     The actual connection to wrap.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
    */
-  public XAQueueConnection() {
-    super();
+  public XAQueueConnection(FactoryParameters factoryParameters,
+                           RequestChannel requestChannel) throws JMSException
+  {
+    super(factoryParameters, requestChannel);
     rm = new XAResourceMngr(this);
   }
-
+  
   /**
    * API method.
-   * Creates a QueueSession object.
    * 
-   * @param transacted      indicates whether the session is transacted.
-   * @param acknowledgeMode indicates whether the consumer or the client will acknowledge any
-   *                        messages it receives; ignored if the session is transacted. Legal
-   *                        values are Session.AUTO_ACKNOWLEDGE, Session.CLIENT_ACKNOWLEDGE,
-   *                        and Session.DUPS_OK_ACKNOWLEDGE.
-   * @return A newly created session.
-   * 
-   * @exception IllegalStateException If the connection is closed.
-   * @exception JMSException In case of an invalid acknowledge mode.
+   * @exception IllegalStateException  If the connection is closed.
+   * @exception JMSException  In case of an invalid acknowledge mode.
    */
-  public javax.jms.QueueSession createQueueSession(boolean transacted,
-                                                   int acknowledgeMode) throws JMSException {
+  public javax.jms.QueueSession
+         createQueueSession(boolean transacted, int acknowledgeMode)
+    throws JMSException {
     return super.createQueueSession(transacted, acknowledgeMode);
   }
 
-  /**
+  /** 
    * API method.
-   * Creates an XAQueueSession object.
-   * 
-   * @return  A newly created session.
-   * 
-   * @exception IllegalStateException If the connection is closed.
+   *
+   * @exception IllegalStateException  If the connection is closed.
    */
-  public javax.jms.XAQueueSession createXAQueueSession() throws JMSException {
+  public javax.jms.XAQueueSession createXAQueueSession() throws JMSException
+  {
     checkClosed();
     QueueSession s = new QueueSession(this, true, 0, getRequestMultiplexer());
     XAQueueSession xas = new XAQueueSession(this, s, rm);
@@ -77,23 +79,26 @@ public class XAQueueConnection extends QueueConnection implements javax.jms.XAQu
     return xas;
   }
 
-  /**
+  /** 
    * Method inherited from interface <code>XAConnection</code>.
-   * 
-   * @exception IllegalStateException If the connection is closed.
-   * @exception JMSException In case of an invalid acknowledge mode.
+   *
+   * @exception IllegalStateException  If the connection is closed.
+   * @exception JMSException  In case of an invalid acknowledge mode.
    */
-  public javax.jms.Session createSession(boolean transacted,
-                                         int acknowledgeMode) throws JMSException {
+  public javax.jms.Session
+         createSession(boolean transacted, int acknowledgeMode)
+         throws JMSException
+  {
     return super.createSession(transacted, acknowledgeMode);
   }
 
-  /**
+  /** 
    * Method inherited from interface <code>XAConnection</code>.
-   * 
-   * @exception IllegalStateException If the connection is closed.
+   *
+   * @exception IllegalStateException  If the connection is closed.
    */
-  public javax.jms.XASession createXASession() throws JMSException {
+  public javax.jms.XASession createXASession() throws JMSException
+  {
     checkClosed();
     Session s = new Session(this, true, 0, getRequestMultiplexer());
     XASession xas = new XASession(this, s, rm);
@@ -102,7 +107,8 @@ public class XAQueueConnection extends QueueConnection implements javax.jms.XAQu
   }
 
   /**
-   * return XAResourceMngr of this connection. see connector
+   * return XAResourceMngr of this connection.
+   * see connector
    */
   public XAResourceMngr getXAResourceMngr() {
     return rm;

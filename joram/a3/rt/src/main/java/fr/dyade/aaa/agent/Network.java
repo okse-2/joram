@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -776,17 +776,19 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    */
   protected void deliver(Message msg) throws Exception {
     // Get real from serverId.
-    final short source = msg.getSource();
+    short source = msg.getSource();
 
     // Test if the message is really for this node (final destination or
     // router).
-    final short dest = msg.getDest();
+    short dest = msg.getDest();
     if (dest != AgentServer.getServerId()) {
       logmon.log(BasicLevel.ERROR,
                  getName() + ", recv bad msg#" + msg.getStamp() +
                  " really to " + dest +
                  " by " + source);
-      throw new Exception("recv bad msg#" + msg.getStamp() + " really to " + dest + " by " + source);
+      throw new Exception("recv bad msg#" + msg.getStamp() +
+                          " really to " + dest +
+                          " by " + source);
     }
 
 //     if ((last != -1) && (msg.getStamp() != (last +1)))
@@ -817,31 +819,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
     if (todo == DELIVER) {
       // Deliver the message and save it.
-      
-//      // SDF generation
-//      StringBuffer strbuf = null;
-//      if (AgentServer.sdf != null) {
-//        strbuf = new StringBuffer();
-//        strbuf.append("<transfert from=\"").append(source);
-//        strbuf.append("\" to=\"").append(dest);
-//        strbuf.append("\" srcid=\"").append(msg.getStamp());
-//      }
-//      int srcid = msg.getStamp();
-      
       Channel.post(msg); nbMessageIn += 1;
 
-//      // SDF generation
-//      if (AgentServer.sdf != null) {
-//        strbuf.append("\" targetid=\"").append(msg.getStamp());
-//        strbuf.append("\" notification=\"").append(StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp()));
-//        strbuf.append("\" logpointer=\"10\" timestamp=\"").append(System.currentTimeMillis()).append("\"/>\n");
-//        AgentServer.sdf.println(strbuf.toString());
-//      }
-//      
-//      if (AgentServer.logsdf.isLoggable(BasicLevel.INFO))
-//        AgentServer.logsdf.log(BasicLevel.INFO,
-//                               "transfert_from " + source + ' ' + dest + ' ' + srcid + ' ' + msg.getStamp() + ' ' + StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp()));
-      
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ", deliver msg#" + msg.getStamp());
 

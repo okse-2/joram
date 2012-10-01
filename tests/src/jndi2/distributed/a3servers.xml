@@ -10,16 +10,16 @@
   <server id="1" name="s1" hostname="localhost">
     <network domain="D0" port="27301"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="8091"/>    
-    <service class="fr.dyade.aaa.jndi2.distributed.DistributedJndiServer" args="16681 0"/>
+    <service class="fr.dyade.aaa.jndi2.distributed.DistributedJndiServer" args="16601 0"/>
   </server>
   <server id="2" name="s2" hostname="localhost">
     <network domain="D0" port="27302"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="8092"/>
-    <service class="fr.dyade.aaa.jndi2.distributed.DistributedJndiServer" args="16682 0"/>
+    <service class="fr.dyade.aaa.jndi2.distributed.DistributedJndiServer" args="16602 0"/>
   </server>
   <server id="3" name="s3" hostname="localhost">
     <network domain="D0" port="27303"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="8093"/>
-    <service class="fr.dyade.aaa.jndi2.distributed.DistributedJndiServer" args="16683 0 1"/>
+    <service class="fr.dyade.aaa.jndi2.distributed.DistributedJndiServer" args="16603 0 1"/>
   </server>
 </config>

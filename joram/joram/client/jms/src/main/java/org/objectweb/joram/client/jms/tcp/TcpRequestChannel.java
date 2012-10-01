@@ -50,8 +50,6 @@ public class TcpRequestChannel implements RequestChannel {
   private static Logger logger = Debug.getLogger(TcpRequestChannel.class.getName());
 
   private ReliableTcpClient tcpClient = null;
-  
-  private Identity identity = null;
 
   /**
    * Creates a <code>TcpConnection</code> instance.
@@ -105,7 +103,6 @@ public class TcpRequestChannel implements RequestChannel {
     }
     tcpClient.init(params, identity, params.cnxPendingTimer > 0);
     tcpClient.addServerAddress(params.getHost(), params.getPort());
-    this.identity = identity;
   }
 
   public void setTimer(Timer timer) {
@@ -140,9 +137,5 @@ public class TcpRequestChannel implements RequestChannel {
 
   public void closing() {
     tcpClient.stopReconnections();
-  }
-  
-  public Identity getIdentity() {
-    return identity;
   }
 }

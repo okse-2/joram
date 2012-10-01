@@ -48,8 +48,8 @@ public class test12 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer(s1);
-    killAgentServer(s2);
+    crashAgentServer(s1);
+    crashAgentServer(s2);
   }
 
   public static void main(String args[]) {

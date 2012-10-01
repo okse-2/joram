@@ -25,12 +25,10 @@ package org.ow2.joram.admin;
 import java.lang.management.ManagementFactory;
 
 import javax.management.MBeanServer;
-import javax.management.MBeanServerInvocationHandler;
 import javax.management.MBeanServerNotification;
 import javax.management.Notification;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
-import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
 import fr.dyade.aaa.agent.AgentServer;
@@ -41,7 +39,12 @@ import fr.dyade.aaa.agent.AgentServer;
  */
 public class JoramAdminJMX extends JoramAdmin {
 
+  static final String REGISTERED = "JMX.mbean.registered";
+  static final String UNREGISTERED = "JMX.mbean.unregistered";
+
   private MBeanServer mbeanServer;
+
+  ObjectName UserON, DestinationON;
 
   public JoramAdminJMX() {
     mbeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -54,64 +57,49 @@ public class JoramAdminJMX extends JoramAdmin {
   public void disconnect() {
   }
 
-  public void start() {
+  public void start(AdminListener adminListener) {
+
+    super.start(adminListener);
 
     NotificationListener jmxListener = new MyNotificationListener();
     NotificationFilter filter = new MyNotificationFilter();
 
-    if (AgentServer.getStatus() != AgentServer.Status.STARTED) {
-      try {
+    try {
+      UserON = new ObjectName("Joram#0:type=User,*");
+      DestinationON = new ObjectName("Joram#0:type=Destination,*");
 
-        System.setProperty("com.sun.management.jmxremote", "true");
+      System.setProperty("com.sun.management.jmxremote", "true");
 
-        mbeanServer.addNotificationListener(new ObjectName("JMImplementation:type=MBeanServerDelegate"),
-            jmxListener, filter, null);
+      mbeanServer.addNotificationListener(new ObjectName("JMImplementation:type=MBeanServerDelegate"),
+          jmxListener, filter, null);
 
-        AgentServer.init((short) 0, "./s0", null);
-        AgentServer.start();
+      AgentServer.init((short) 0, "./s0", null);
+      AgentServer.start();
 
-      } catch (Exception exc) {
-        System.out.println("FATAL: Error launching JORAM server.");
-        exc.printStackTrace();
-      }
+    } catch (Exception exc) {
+      System.out.println("FATAL: Error launching JORAM server.");
+      exc.printStackTrace();
     }
-
-    System.out.println("AgentServer#0 started.");
 
   }
 
   public void stop() {
+    super.stop();
   }
 
   class MyNotificationListener implements NotificationListener {
 
     public void handleNotification(Notification n, Object handback) {
-      MBeanServerNotification not = (MBeanServerNotification) n;
-
       try {
-        if (not.getType().equals(MBeanServerNotification.REGISTRATION_NOTIFICATION)) {
+        MBeanServerNotification not = (MBeanServerNotification) n;
+        ObjectName mbeanName = not.getMBeanName();
 
-          ObjectName mbeanName = not.getMBeanName();
-          if ("User".equals(mbeanName.getKeyProperty("type"))
-              || "Destination".equals(mbeanName.getKeyProperty("type"))) {
-            ObjectInstance objectInstance = mbeanServer.getObjectInstance(mbeanName);
-            Class clazz = Class.forName(objectInstance.getClassName() + "MBean");
-            Object bean = MBeanServerInvocationHandler.newProxyInstance(mbeanServer, mbeanName, clazz, false);
-            handleAdminObjectAdded(bean);
-          }
+        Object mbean = mbeanServer.getObjectInstance(mbeanName);
 
-        } else if (not.getType().equals(MBeanServerNotification.UNREGISTRATION_NOTIFICATION)) {
-          ObjectName mbeanName = not.getMBeanName();
-          if ("User".equals(mbeanName.getKeyProperty("type"))) {
-            if (mbeanName.getKeyProperty("sub") == null) {
-              users.remove(mbeanName.getKeyProperty("name"));
-            } else {
-              subscriptions.remove(mbeanName.getKeyProperty("sub"));
-            }
-          } else if ("Destination".equals(mbeanName.getKeyProperty("type"))) {
-            queues.remove(mbeanName.getKeyProperty("name"));
-            topics.remove(mbeanName.getKeyProperty("name"));
-          }
+        if (not.getType().equals(REGISTERED)) {
+          handleAdminObjectAdded(mbean);
+        } else if (not.getType().equals(UNREGISTERED)) {
+          handleAdminObjectRemoved(mbean);
         }
 
       } catch (Throwable exc) {

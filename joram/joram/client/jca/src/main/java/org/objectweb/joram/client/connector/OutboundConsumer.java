@@ -1,6 +1,5 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -28,18 +27,13 @@ import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>OutboundConsumer</code> instance wraps a JMS consumer
  * for a component involved in outbound messaging. 
  */
-public class OutboundConsumer implements javax.jms.MessageConsumer {
-  
-  public static Logger logger = Debug.getLogger(OutboundConsumer.class.getName());
-  
+public class OutboundConsumer implements javax.jms.MessageConsumer
+{
   /** The <code>OutboundSession</code> this consumer belongs to. */
   protected OutboundSession session;
   /** Wrapped JMS consumer. */
@@ -58,8 +52,10 @@ public class OutboundConsumer implements javax.jms.MessageConsumer {
   OutboundConsumer(MessageConsumer consumer, 
                    OutboundSession session) {
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "OutboundConsumer(" + consumer + ", " + session + ")");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundConsumer(" + consumer + 
+                                    ", " + session + ")");
     
     this.consumer = consumer;
     this.session = session;
@@ -71,7 +67,8 @@ public class OutboundConsumer implements javax.jms.MessageConsumer {
    * <code>IllegalStateException</code> instance.
    */
   public void setMessageListener(javax.jms.MessageListener messageListener)
-              throws JMSException {
+              throws JMSException
+  {
     checkValidity();
     throw new IllegalStateException("Invalid call on a component's producer.");
   }
@@ -80,7 +77,8 @@ public class OutboundConsumer implements javax.jms.MessageConsumer {
    * Forbidden call on a component's outbound consumer, throws a 
    * <code>IllegalStateException</code> instance.
    */
-  public javax.jms.MessageListener getMessageListener() throws JMSException {
+  public javax.jms.MessageListener getMessageListener() throws JMSException
+  {
     checkValidity();
     throw new IllegalStateException("Invalid call on a component's producer.");
   }
@@ -89,8 +87,9 @@ public class OutboundConsumer implements javax.jms.MessageConsumer {
    * Delegates the call to the wrapped JMS consumer.
    */
   public String getMessageSelector() throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " getMessageSelector()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " getMessageSelector()");
     
     checkValidity();
     return consumer.getMessageSelector();
@@ -100,8 +99,9 @@ public class OutboundConsumer implements javax.jms.MessageConsumer {
    * Delegates the call to the wrapped JMS consumer.
    */
   public javax.jms.Message receive(long timeOut) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " receive(" + timeOut + ")");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " receive(" + timeOut + ")");
 
     checkValidity();
     return consumer.receive(timeOut);
@@ -111,8 +111,9 @@ public class OutboundConsumer implements javax.jms.MessageConsumer {
    * Delegates the call to the wrapped JMS consumer.
    */
   public javax.jms.Message receive() throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " receive()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " receive()");
 
     checkValidity();
     return consumer.receive();
@@ -122,8 +123,9 @@ public class OutboundConsumer implements javax.jms.MessageConsumer {
    * Delegates the call to the wrapped JMS consumer.
    */
   public javax.jms.Message receiveNoWait() throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " receiveNoWait()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " receiveNoWait()");
 
     checkValidity();
     if (!session.isStarted())
@@ -135,15 +137,17 @@ public class OutboundConsumer implements javax.jms.MessageConsumer {
    * Delegates the call to the wrapped JMS consumer.
    */
   public void close() throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " close()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " close()");
 
     valid = false;
     consumer.close();
   }
 
   /** Checks the validity of the subscriber instance. */
-  protected void checkValidity() throws IllegalStateException {
+  protected void checkValidity() throws IllegalStateException
+  {
     session.checkValidity();
 
     if (! valid)

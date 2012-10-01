@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -288,8 +288,8 @@ public abstract class StreamNetwork extends Network {
     if (server == null)
       throw new ConnectException("Cannot connect to null server");
     
-    for (Enumeration<SocketAddress> e = server.getSockAddrs(); e.hasMoreElements();) {
-      SocketAddress sa = e.nextElement();
+    for (Enumeration e = server.getSockAddrs(); e.hasMoreElements();) {
+      SocketAddress sa = (SocketAddress) e.nextElement();
 
       if (this.logmon.isLoggable(BasicLevel.DEBUG))
         this.logmon.log(BasicLevel.DEBUG,
@@ -399,16 +399,6 @@ public abstract class StreamNetwork extends Network {
    * @exception IOException	for networking errors
    */
   ServerSocket createServerSocket(int port) throws IOException {
-    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-      StringBuffer strbuf = new StringBuffer();
-      strbuf.append(" createServerSocket(");
-      strbuf.append(", backlog=").append(backlog);
-      strbuf.append(", inLocalAddr=").append(inLocalAddr);
-      strbuf.append(')');
-      
-      logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
-    }
-
     return serverSocketFactory.createServerSocket(port, backlog, inLocalAddr);
   }
 
@@ -422,17 +412,6 @@ public abstract class StreamNetwork extends Network {
    * @exception IOException	for networking errors
    */ 
   void setSocketOption(Socket sock) throws SocketException {
-    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-      StringBuffer strbuf = new StringBuffer();
-      strbuf.append(" setSocketOption(");
-      strbuf.append(", TcpNoDelay=").append(TcpNoDelay);
-      strbuf.append(", SoLinger=").append(SoLinger);
-      strbuf.append(", SoTimeout=").append(SoTimeout);
-      strbuf.append(')');
-      
-      logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
-    }
-
     // TCP data coalescing - ie Nagle's algorithm
     sock.setTcpNoDelay(TcpNoDelay);
     // Read operation will block indefinitely until requested data arrives

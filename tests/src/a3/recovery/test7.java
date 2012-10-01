@@ -45,7 +45,7 @@ public class test7 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer(remote);
+    crashAgentServer(remote);
   }
 
   public static void main(String args[]) {

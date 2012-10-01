@@ -28,7 +28,6 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 
 /**
  * @author Yohann CINTRE
@@ -50,16 +49,9 @@ public class NewTopicClickHandler implements ClickHandler {
     try {
       if (form.validate()) {
         String nameValue = form.getValueAsString("nameItem");
-        int periodValue = Integer.parseInt(form.getValueAsString("periodItem"));
-        boolean freeReadingValue = ((CheckboxItem) form.getField("freeReadingItem")).getValueAsBoolean().booleanValue();
-        boolean freeWritingValue = ((CheckboxItem) form.getField("freeWritingItem")).getValueAsBoolean().booleanValue();
 
         TopicWTO newTopic = new TopicWTO();
         newTopic.setId(nameValue);
-        newTopic.setPeriod(periodValue);
-        newTopic.setFreeReading(freeReadingValue);
-        newTopic.setFreeWriting(freeWritingValue);
-
         presenter.createNewTopic(newTopic);
       }
     } catch (Exception e) {

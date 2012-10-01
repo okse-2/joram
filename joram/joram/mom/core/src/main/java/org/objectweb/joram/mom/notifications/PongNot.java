@@ -23,24 +23,12 @@
 package org.objectweb.joram.mom.notifications;
 
 import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.common.stream.Properties;
 
 /**
  * An empty notification, sent in response of a {@link PingNot}.
- * Should contain the metrics about current behavior of the destination.
  */
 public class PongNot extends Notification {
+
   private static final long serialVersionUID = 1L;
 
-  Properties stats;
-  
-  public PongNot(Properties stats) {
-    this.stats = stats;
-  }
-  
-  public Object get(String name) {
-    if (stats == null)
-      return null;
-    return stats.get(name);
-  }
 }

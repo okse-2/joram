@@ -27,7 +27,6 @@ package org.objectweb.joram.mom.dest.jmsbridge;
  * A <code>BridgeAckNot</code> notification carries the identifier of a
  * message successfully delivered by a JMS module to a foreign JMS server.
  */
-@Deprecated
 public class JMSBridgeAckNot extends fr.dyade.aaa.agent.Notification {
   /**
    * 

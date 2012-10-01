@@ -28,19 +28,19 @@ import java.util.Hashtable;
 import javax.jms.JMSException;
 
 /**
- * Clustered topic.
+ * this is a sample.
  */
 public class ClusterTopic extends ClusterDestination implements javax.jms.Topic {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /** 
-   * Constructs an empty cluster topic.
+   * Constructs an empty queue.
    */
   public ClusterTopic() {}
 
   /** 
-   * Constructs a cluster topic.
+   * Constructs a cluster queue.
    *
    * @param cluster  Hashtable of the cluster agent destination.
    */

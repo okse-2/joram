@@ -1,6 +1,5 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -30,18 +29,13 @@ import javax.jms.Message;
 import javax.jms.MessageProducer;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>OutboundProducer</code> instance wraps a JMS producer
  * for a component involved in outbound messaging. 
  */
-public class OutboundProducer implements javax.jms.MessageProducer {
-  
-  public static Logger logger = Debug.getLogger(OutboundProducer.class.getName());
-  
+public class OutboundProducer implements javax.jms.MessageProducer
+{
   /** The <code>OutboundSession</code> this producer belongs to. */
   protected OutboundSession session;
   /** The wrapped JMS producer. */
@@ -58,8 +52,10 @@ public class OutboundProducer implements javax.jms.MessageProducer {
    * @param session   The OutboundSession this producer belongs to.
    */
   OutboundProducer(MessageProducer producer, OutboundSession session) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "OutboundProducer(" + producer + ", " + session + ")");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundProducer(" + producer + 
+                                    ", " + session + ")");
 
     this.producer = producer;
     this.session = session;
@@ -146,8 +142,8 @@ public class OutboundProducer implements javax.jms.MessageProducer {
 
   /** Delegates the call to the wrapped producer. */
   public void send(Message message) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " send(" + message + ")");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " send(" + message + ")");
 
     checkValidity();
     producer.send(message);
@@ -159,8 +155,8 @@ public class OutboundProducer implements javax.jms.MessageProducer {
                    int priority,
                    long timeToLive)
     throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " send(" + message + 
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " send(" + message + 
                                     ", " + deliveryMode + 
                                     ", " + priority + 
                                     ", " + timeToLive + ")");
@@ -172,8 +168,9 @@ public class OutboundProducer implements javax.jms.MessageProducer {
   /** Delegates the call to the wrapped producer. */
   public void send(Destination dest, Message message) 
     throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " send(" + dest + ", " + message + ")");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " send(" + dest + ", " + message + ")");
 
     checkValidity();
     producer.send(dest, message);
@@ -186,8 +183,8 @@ public class OutboundProducer implements javax.jms.MessageProducer {
                    int priority,
                    long timeToLive)
     throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " send(" + dest + 
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " send(" + dest + 
                                     ", " + message + 
                                     ", " + deliveryMode + 
                                     ", " + priority + 
@@ -199,8 +196,8 @@ public class OutboundProducer implements javax.jms.MessageProducer {
 
   /** Delegates the call to the wrapped producer. */
   public void close() throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " close()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " close()");
 
     valid = false;
     producer.close();

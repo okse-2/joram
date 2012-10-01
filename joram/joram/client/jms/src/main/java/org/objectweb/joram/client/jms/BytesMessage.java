@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -38,28 +38,6 @@ import javax.jms.MessageNotWriteableException;
 
 /**
  * Implements the <code>javax.jms.BytesMessage</code> interface.
- * <p>
- * A BytesMessage object is used to send a message containing a stream of uninterpreted bytes.
- * It inherits from the Message interface and adds a bytes message body. The BytesMessage methods
- * are based largely on those found in java.io.DataInputStream and java.io.DataOutputStream.
- * <p>
- * The primitive types can be written explicitly using methods for each type. They may also be
- * written generically as objects. For instance, a call to BytesMessage.writeInt(6) is equivalent
- * to BytesMessage.writeObject(new Integer(6)).
- * <p>
- * When the message is first created, and when clearBody is called, the body of the message is in
- * write-only mode. After the first call to reset has been made, the message body is in read-only
- * mode. After a message has been sent, the client that sent it can retain and modify it without
- * affecting the message that has been sent. The same message object can be sent multiple times.
- * When a message has been received, the provider has called reset so that the message body is in
- * read-only mode for the client.
- * <p>
- * If clearBody is called on a message in read-only mode, the message body is cleared and the message
- * is in write-only mode.
- * <p>
- * If a client attempts to read a message in write-only mode, a MessageNotReadableException is thrown.
- * <p>
- * If a client attempts to write a message in read-only mode, a MessageNotWriteableException is thrown.
  */
 public final class BytesMessage extends Message implements javax.jms.BytesMessage {
   /** The array in which the written data is buffered. */
@@ -96,27 +74,18 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Gets the number of bytes of the message body when the message is in read-only mode.
-   * The value returned can be used to allocate a byte array. The value returned is the entire
-   * length of the message body, regardless of where the pointer for reading the message is
-   * currently located.
-   * 
-   * @return the number of bytes in the message's body.
    *
    * @exception MessageNotReadableException  If the message is WRITE-ONLY.
    */
   public long getBodyLength() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't get not readable message's  size.");
+      throw new MessageNotReadableException("Can't get not readable message's"
+                                            + " size.");
     return momMsg.body.length;
   } 
 
   /** 
    * API method.
-   * Clears out the message body.
-   * <p>
-   * Calling this method leaves the message body in the same state as an empty body in
-   * a newly created message.
    *
    * @exception JMSException  In case of an error while closing the output or
    *              input streams.
@@ -146,10 +115,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /** 
    * API method.
-   * Writes a boolean to the bytes message stream as a 1-byte value. The value true is written
-   * as the value (byte)1; the value false is written as the value (byte)0.
-   * 
-   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -160,9 +125,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
  
   /** 
    * API method.
-   * Writes a byte to the bytes message stream.
-   * 
-   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -173,9 +135,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
  
   /** 
    * API method.
-   * Writes a byte array to the bytes message stream.
-   * 
-   * @param value the byte array to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -186,11 +145,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /** 
    * API method.
-   * Writes a portion of a byte array to the bytes message stream.
-   * 
-   * @param value the byte array to be written.
-   * @param offset the initial offset within the byte array
-   * @param length the number of bytes to use
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -217,9 +171,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
  
   /** 
    * API method.
-   * Writes a char to the bytes message stream.
-   * 
-   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -230,9 +181,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
  
   /** 
    * API method.
-   * Writes a double to the bytes message stream.
-   * 
-   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -243,9 +191,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
  
   /** 
    * API method.
-   * Writes a float to the bytes message stream.
-   * 
-   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -256,9 +201,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
  
   /** 
    * API method.
-   * Writes an int to the bytes message stream.
-   * 
-   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -269,9 +211,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
  
   /** 
    * API method.
-   * Writes a long to the bytes message stream.
-   * 
-   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -282,9 +221,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /** 
    * API method.
-   * Writes a short to the bytes message stream.
-   * 
-   * @param value the value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -295,9 +231,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
  
   /** 
    * API method.
-   * Writes a string to the bytes message stream using UTF-8 encoding in a machine-independent manner.
-   * 
-   * @param value the String value to be written.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
@@ -308,12 +241,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /** 
    * API method.
-   * Writes an object to the bytes message stream.
-   * <p>
-   * This method works only for the objectified primitive object types (Integer, Double,
-   * Long ...), String objects, and byte arrays.
-   * 
-   * @param value the primitive Java object to be written; it must not be null.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception MessageFormatException  If the value type is invalid.
@@ -366,9 +293,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
   
   /**
    * API method.
-   * Reads a boolean from the bytes message stream.
-   * 
-   * @return the value read
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
@@ -392,9 +316,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Reads a byte from the bytes message stream.
-   * 
-   * @return the value read
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
@@ -418,9 +339,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Reads an unsigned byte from the bytes message stream.
-   * 
-   * @return the next byte from the bytes message stream, interpreted as an unsigned 8-bit number.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
@@ -444,9 +362,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Reads a short from the bytes message stream.
-   * 
-   * @return the value read
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
@@ -470,9 +385,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
   
   /**
    * API method.
-   * Reads an unsigned short from the bytes message stream.
-   * 
-   * @return the next two bytes from the bytes message stream, interpreted as an unsigned 16-bit integer.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
@@ -496,9 +408,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Reads a char from the bytes message stream.
-   * 
-   * @return the value read
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
@@ -522,9 +431,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Reads an int from the bytes message stream.
-   * 
-   * @return the value read
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
@@ -548,9 +454,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Reads a long from the bytes message stream.
-   * 
-   * @return the value read
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
@@ -574,9 +477,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Reads a float from the bytes message stream.
-   * 
-   * @return the value read
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
@@ -600,9 +500,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Reads a double from the bytes message stream.
-   * 
-   * @return the value read
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
@@ -626,23 +523,14 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Reads up to value.length bytes from the bytes message stream. A subsequent call
-   * reads the next increment, and so on.
-   * <p>
-   * A return value of the total number of bytes read less than the length of the array
-   * indicates that there are no more bytes left to be read from the stream. The next read
-   * of the stream returns -1.
-   * 
-   * @param value the buffer into which the data is read.
-   * @return the total number of bytes read into the buffer, or -1 if there is no more data
-   *         because the end of the stream has been reached.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
    */
   public int readBytes(byte[] value) throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as"
+                                            + " it is write-only.");
     int counter = 0;
 
     try {
@@ -666,28 +554,14 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Reads up to length bytes of the bytes message stream. A subsequent call reads the
-   * next increment, and so on.
-   * <p>
-   * A return value of the total number of bytes read less than the length parameter indicates
-   * that there are no more bytes left to be read from the stream. The next read of the stream
-   * returns -1.
-   * <p>
-   * If length is negative, or length is greater than the length of the array value, then an
-   * IndexOutOfBoundsException is thrown. No bytes will be read from the stream for this exception
-   * case.
-   * 
-   * @param value   the buffer into which the data is read.
-   * @param length  the number of bytes to read; must be less than or equal to value.length.
-   * @return the total number of bytes read into the buffer, or -1 if there is no more data
-   *         because the end of the stream has been reached.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
    */
   public int readBytes(byte[] value, int length) throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as"
+                                            + " it is write-only.");
     if (length > value.length || length < 0)
       throw new IndexOutOfBoundsException("Invalid length parameter: "
                                           + length);
@@ -714,10 +588,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /**
    * API method.
-   * Reads a string that has been encoded using a modified UTF-8 format from the bytes
-   * message stream.
-   * 
-   * @return a Unicode string from the bytes message stream.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
@@ -741,7 +611,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
   /** 
    * API method.
-   * Puts the message body in read-only mode and repositions the stream of bytes to the beginning.
    *
    * @exception JMSException  If an error occurs while closing the output
    *              stream.
@@ -785,6 +654,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
         new MessageFormatException("The message body could not be serialized.");
       jExc.setLinkedException(exc);
       throw jExc;
-    }
+    } 
   } 
 }

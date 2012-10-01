@@ -72,8 +72,8 @@ public class test8 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer(ServerPong1);
-    killAgentServer(ServerPong2);
+    crashAgentServer(ServerPong1);
+    crashAgentServer(ServerPong2);
     timer.cancel();
   }
 
@@ -130,7 +130,7 @@ public class test8 extends TestCase {
     public void react(AgentId from, Notification not) {
       try {
         if (not instanceof StartNot) {
-          String[] jvmargs = { "-DTransaction.UseLockFile=false", "-Dcom.sun.management.jmxremote" };
+          String[] jvmargs = { "-DNTNoLockFile=true", "-Dcom.sun.management.jmxremote" };
           System.out.println("start " + remote + " - " + bounce);
           startAgentServer(remote, jvmargs);
         } else if (not instanceof StopNot) {
@@ -139,7 +139,7 @@ public class test8 extends TestCase {
             TestCase.stopAgentServer(remote);
           } else {
             System.out.println("crash " + remote + " - " + bounce);
-            TestCase.killAgentServer(remote);
+            TestCase.crashAgentServer(remote);
           }
           if( remote == 1 ){
             nbStopTask0++;

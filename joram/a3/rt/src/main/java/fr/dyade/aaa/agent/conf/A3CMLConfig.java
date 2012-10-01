@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,16 +37,19 @@ public class A3CMLConfig implements Serializable {
   private static final long serialVersionUID = 1L;
 
   /** Hashtable of all domains */
-  public Hashtable<String, A3CMLDomain> domains = null;
+  public Hashtable domains = null;
   /** Hashtable of all servers (persistent and transient) */
-  public Hashtable<Short, A3CMLServer> servers = null;
+  public Hashtable servers = null;
   /** Hashtable of all global properties */
-  public Hashtable<String, A3CMLProperty> properties = null;
+  public Hashtable properties = null;
+  /** Hashtable of all clusters */
+  public Hashtable clusters = null;
 
   public A3CMLConfig() {
-    domains = new Hashtable<String, A3CMLDomain>();
-    servers = new Hashtable<Short, A3CMLServer>();
-    properties = new Hashtable<String, A3CMLProperty>();
+    domains = new Hashtable();
+    servers = new Hashtable();
+    properties = new Hashtable();
+    clusters = new Hashtable();
   }
 
   /**
@@ -105,6 +108,123 @@ public class A3CMLConfig implements Serializable {
   }
 
   /**
+   * Adds a cluster.
+   *
+   * @param cluster 	The description of added cluster.
+   * @exception DuplicateClusterException
+   *			If the cluster already exist.
+   */
+  public final void addCluster(A3CMLCluster cluster) throws DuplicateClusterException {
+    Short id = new Short(cluster.sid);
+    if (clusters.containsKey(id))
+      throw new DuplicateClusterException("Duplicate cluster " + cluster.sid);
+    clusters.put(id, cluster);
+  }
+
+  /**
+   * Returns the description of a cluster.
+   *
+   * @param sid 	The cluster identifier.
+   * @return	 	The cluster description if exist.
+   * @exception UnknownClusterException
+   * 		 	If the cluster does not exist.
+   */
+  public final A3CMLCluster getCluster(short sid) throws UnknownClusterException {
+    A3CMLCluster cluster = (A3CMLCluster) clusters.get(new Short(sid));
+    if (cluster == null)
+      throw new UnknownClusterException("Unknown cluster id. #" + sid);
+    return cluster;
+  }
+  
+  /**
+   * Returns the description of a cluster.
+   *
+   * @param name 	The cluster name.
+   * @return	 	The cluster description if exist.
+   * @exception UnknownClusterException
+   * 		 	If the cluster does not exist.
+   */
+  public final A3CMLCluster getCluster(String name) throws UnknownClusterException {
+    for (Enumeration c = clusters.elements(); c.hasMoreElements(); ) {
+      A3CMLCluster cluster = (A3CMLCluster) c.nextElement();
+      if (cluster.name.equals(name)) return cluster;
+    }
+    throw new UnknownClusterException("Unknown cluster id for cluster " + name);
+  }
+
+  /**
+   * Gets a cluster identifier from its name.
+   *
+   * @param name 	The cluster name.
+   * @return	 	The cluster identifier.
+   * @exception UnknownClusterException
+   * 		 	If the cluster does not exist.
+   */
+  public short getClusterIdByName(String name) throws UnknownClusterException {
+    for (Enumeration c = clusters.elements(); c.hasMoreElements(); ) {
+      A3CMLCluster cluster = (A3CMLCluster) c.nextElement();
+      if (cluster.name.equals(name)) return cluster.sid;
+    }
+    throw new UnknownClusterException("Unknown cluster " + name);
+  }
+
+
+  /**
+   * Returns true if the configuration contains a cluster with specified name.
+   *
+   * @param name cluster name
+   * @return	 true if contain name; false otherwise.
+   */
+  public final boolean containsCluster(String name) {
+    try {
+      getClusterIdByName(name);
+    } catch (UnknownClusterException exc) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Returns true if the configuration contains a cluster with specified id.
+   *
+   * @param sid  cluster id
+   * @return	 true if contain sid; false otherwise.
+   */
+  public final boolean containsCluster(short sid) {
+    return clusters.containsKey(new Short(sid));
+  }
+
+  /**
+   * Removes a cluster.
+   *
+   * @param sid  	The unique cluster identifier.
+   * @return	 	The cluster description if exists.
+   * @exception UnknownClusterException
+   * 		 	If the server does not exist.
+   */
+  public final A3CMLCluster removeCluster(short sid) throws UnknownClusterException {
+    A3CMLCluster cluster = null;
+    Short id = new Short(sid);
+    if (clusters.containsKey(id))
+      cluster = (A3CMLCluster) clusters.remove(id);
+    else
+      throw new UnknownClusterException("Unknown cluster id. #" + sid);
+    return cluster;
+  }
+  
+  /**
+   * Remove a cluster.
+   *
+   * @param name 	The cluster name.
+   * @return	 	The cluster description if exists.
+   * @exception UnknownClusterException
+   *			If the server does not exist.
+   */
+  public final A3CMLCluster removeCluster(String name) throws UnknownClusterException {
+    return removeCluster(getClusterIdByName(name));
+  }
+
+  /**
    * Adds a server.
    *
    * @param server	The description of added server.
@@ -116,8 +236,8 @@ public class A3CMLConfig implements Serializable {
     if (servers.containsKey(id))
       throw new DuplicateServerException("Duplicate server id. #" + server.sid);
     
-    for (Enumeration<A3CMLServer> s = servers.elements(); s.hasMoreElements(); ) {
-      A3CMLServer serv = s.nextElement();
+    for (Enumeration s = servers.elements(); s.hasMoreElements(); ) {
+      A3CMLServer serv = (A3CMLServer) s.nextElement();
       if (serv.name.equals(server.name))
         throw new DuplicateServerException("Duplicate server name. " + server.name);
     }
@@ -182,8 +302,8 @@ public class A3CMLConfig implements Serializable {
    * 		 	If the server does not exist.
    */
   public short getServerIdByName(String name) throws UnknownServerException {
-    for (Enumeration<A3CMLServer> s = servers.elements(); s.hasMoreElements(); ) {
-      A3CMLServer server = s.nextElement();
+    for (Enumeration s = servers.elements(); s.hasMoreElements(); ) {
+      A3CMLServer server = (A3CMLServer) s.nextElement();
       if (server.name.equals(name)) return server.sid;
     }
     throw new UnknownServerException("Unknown server " + name);
@@ -225,7 +345,31 @@ public class A3CMLConfig implements Serializable {
    * 		 	If the server does not exist.
    */
   public final A3CMLServer getServer(short sid) throws UnknownServerException {
-    A3CMLServer server = (A3CMLServer) servers.get(new Short(sid));
+    return getServer(sid, AgentServer.NULL_ID);
+  }
+
+  /**
+   * Returns the description of a server.
+   *
+   * @param sid 	The server identifier.
+   * @param cid 	The cluster identifier.
+   * @return	 	The server description if exist.
+   * @exception UnknownServerException
+   * 		 	If the server does not exist.
+   */
+  public final A3CMLServer getServer(short sid, short cid) throws UnknownServerException {
+    A3CMLServer server = null;
+    if (cid == AgentServer.NULL_ID)
+      server = (A3CMLServer) servers.get(new Short(sid));
+    else {
+      try {
+        A3CMLCluster cluster = getCluster(sid);
+        server = cluster.getServer(cid);
+      } catch (Exception exc) {
+        throw new UnknownServerException(exc.getMessage());
+      }
+    }
+    
     if (server == null)
       throw new UnknownServerException("Unknown server id. #" + sid);
     return server;
@@ -240,8 +384,8 @@ public class A3CMLConfig implements Serializable {
    * 		 	If the server does not exist.
    */
   public final A3CMLServer getServer(String name) throws UnknownServerException {
-    for (Enumeration<A3CMLServer> s = servers.elements(); s.hasMoreElements(); ) {
-      A3CMLServer server = s.nextElement();
+    for (Enumeration s = servers.elements(); s.hasMoreElements(); ) {
+      A3CMLServer server = (A3CMLServer) s.nextElement();
       if (server.name.equals(name)) return server;
     }
     throw new UnknownServerException("Unknown server id for server " + name);
@@ -290,10 +434,20 @@ public class A3CMLConfig implements Serializable {
   /**
    * Returns the specified property.
    */
-  public final A3CMLProperty getProperty(String name, short sid) 
-      throws Exception {
-    A3CMLServer server = getServer(sid);
-    return server.getProperty(name);
+  public final A3CMLProperty getProperty(String name, short sid, short cid) 
+    throws Exception {
+    A3CMLProperty prop = null;
+    if (cid == AgentServer.NULL_ID) {
+      A3CMLServer server = getServer(sid);
+      prop = server.getProperty(name);
+    } else {
+      A3CMLCluster cluster = getCluster(sid);
+      A3CMLServer server = cluster.getServer(cid);
+      prop = server.getProperty(name);
+      if (prop == null)
+        prop = cluster.getProperty(name);
+    }
+    return prop;
   }
 
   /**
@@ -369,21 +523,22 @@ public class A3CMLConfig implements Serializable {
    */
   public void configure(A3CMLServer root) throws Exception {
     short rootid = root.sid;
-    Vector<A3CMLDomain> toExplore = new Vector<A3CMLDomain>();
+    Vector toExplore = new Vector();
 
     // Temporary fix, reset visited and gateway fields
     reset();
 
     // Search alls directly accessible domains.
-    for (Enumeration<A3CMLNetwork> n = root.networks.elements(); n.hasMoreElements();) {
-      A3CMLNetwork network = n.nextElement();
+    for (Enumeration n = root.networks.elements(); n.hasMoreElements();) {
+      A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
 
-      A3CMLDomain domain = domains.get(network.domain);
+      A3CMLDomain domain = (A3CMLDomain) domains.get(network.domain);
       domain.gateway = rootid;
       domain.hops = 1;
       toExplore.addElement(domain);
 
-      Log.logger.log(BasicLevel.DEBUG, "configure - toExplore.add(" + domain + ")");
+      Log.logger.log(BasicLevel.DEBUG,
+                     "configure - toExplore.add(" + domain + ")");
     }
 
     root.visited = true;
@@ -400,8 +555,9 @@ public class A3CMLConfig implements Serializable {
         Log.logger.log(BasicLevel.DEBUG, "configure - explore(" + domain + ")");
 
       // Parse all nodes of this domain
-      for (Enumeration<A3CMLServer> s = domain.servers.elements(); s.hasMoreElements();) {
-        A3CMLServer server = s.nextElement();
+      for (Enumeration s = domain.servers.elements();
+      s.hasMoreElements();) {
+        A3CMLServer server = (A3CMLServer) s.nextElement();
 
         if (server.visited) continue;
 
@@ -421,9 +577,10 @@ public class A3CMLConfig implements Serializable {
 
         // If the server is a router then add the accessible domains
         // to the list.
-        for (Enumeration<A3CMLNetwork> n = server.networks.elements(); n.hasMoreElements();) {
-          A3CMLNetwork network = n.nextElement();
-          A3CMLDomain d2 = domains.get(network.domain);
+        for (Enumeration n = server.networks.elements();
+        n.hasMoreElements();) {
+          A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
+          A3CMLDomain d2 = (A3CMLDomain) domains.get(network.domain);
 
           if (Log.logger.isLoggable(BasicLevel.DEBUG))
             Log.logger.log(BasicLevel.DEBUG, "configure - parse(" + d2 + ")");
@@ -466,8 +623,8 @@ public class A3CMLConfig implements Serializable {
     }
 
     // verify that all declared servers are accessible
-    for (Enumeration<A3CMLServer> s = servers.elements(); s.hasMoreElements();) {
-      A3CMLServer server = s.nextElement();
+    for (Enumeration s = servers.elements(); s.hasMoreElements();) {
+      A3CMLServer server = (A3CMLServer) s.nextElement();
       if (Log.logger.isLoggable(BasicLevel.DEBUG))
         Log.logger.log(BasicLevel.DEBUG, "configure - verify " + server);
       if (! server.visited)
@@ -476,9 +633,9 @@ public class A3CMLConfig implements Serializable {
 
     // Search alls directly accessible domains, then set special routes
     // for HttpNetworks.
-    for (Enumeration<A3CMLNetwork> n = root.networks.elements(); n.hasMoreElements();) {
-      A3CMLNetwork network = n.nextElement();
-      A3CMLDomain domain = domains.get(network.domain);
+    for (Enumeration n = root.networks.elements(); n.hasMoreElements();) {
+      A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
+      A3CMLDomain domain = (A3CMLDomain) domains.get(network.domain);
 
       if (("fr.dyade.aaa.agent.HttpNetwork".equals(domain.network)) ||
           ("fr.dyade.aaa.agent.HttpsNetwork".equals(domain.network))) {
@@ -534,8 +691,8 @@ public class A3CMLConfig implements Serializable {
     }
 
     // add global properties in domainConf.
-    for (Enumeration<A3CMLProperty> p = properties.elements(); p.hasMoreElements(); ) {
-      A3CMLProperty property = p.nextElement();
+    for (Enumeration p = properties.elements(); p.hasMoreElements(); ) {
+      A3CMLProperty property = (A3CMLProperty) p.nextElement();
       domainConf.addProperty(property.duplicate());
     }
 
@@ -580,10 +737,10 @@ public class A3CMLConfig implements Serializable {
       Log.logger.log(BasicLevel.DEBUG,
                      "Config.getDomainConfig(" + listDomainName + ")");
 
-    Hashtable<Short, A3CMLServer> context = new Hashtable<Short, A3CMLServer>();
+    Hashtable context = new Hashtable();
 
     A3CMLConfig domainConf = new A3CMLConfig();
-    Vector<String> domainList = new Vector<String>();
+    Vector domainList = new Vector();
     for (int i = 0; i < listDomainName.length; i++)
       domainList.addElement(listDomainName[i]);
     
@@ -606,13 +763,13 @@ public class A3CMLConfig implements Serializable {
           } else
             j++;
         }
-        domainConf.servers.put(new Short(server.sid), server);
+        domainConf.servers.put(new Short(server.sid),server);
       }
     }
       
     // add global properties in domainConf.
-    for (Enumeration<A3CMLProperty> p = properties.elements(); p.hasMoreElements(); ) {
-      A3CMLProperty property = p.nextElement();
+    for (Enumeration p = properties.elements(); p.hasMoreElements(); ) {
+      A3CMLProperty property = (A3CMLProperty) p.nextElement();
       domainConf.addProperty(property.duplicate());
     }
     
@@ -823,6 +980,7 @@ public class A3CMLConfig implements Serializable {
     strBuf.append(",properties=").append(properties);
     strBuf.append(",domains=").append(domains);
     strBuf.append(",servers=").append(servers);
+    strBuf.append(",clusters=").append(clusters);
     strBuf.append(")");
 
     return strBuf.toString();
@@ -847,16 +1005,17 @@ public class A3CMLConfig implements Serializable {
    */
   public final String getServiceArgsHost(String hostname,
                                          String classname) throws Exception {
-    for (Enumeration<A3CMLServer> s = servers.elements(); s.hasMoreElements(); ) {
-      A3CMLServer server = s.nextElement();
+    for (Enumeration s = servers.elements(); s.hasMoreElements(); ) {
+      A3CMLServer server = (A3CMLServer) s.nextElement();
       if (server.hostname.equals(hostname)) {
-        try {
-          String args = getServiceArgs(server.sid, classname);
-          return args;
-        } catch (Exception exc) {}
+	try {
+	  String args = getServiceArgs(server.sid, classname);
+	  return args;
+	} catch (Exception exc) {}
       }
     }
-    throw new UnknownServiceException("Unknown service \"" + classname + "\" on host " + hostname);
+    throw new UnknownServiceException("Unknown service \"" + classname +
+                                      "\" on host " + hostname);
   }
 
   public boolean equals(Object obj) {
@@ -867,7 +1026,8 @@ public class A3CMLConfig implements Serializable {
 
       if (domains.equals(config.domains) &&
           servers.equals(config.servers) &&
-          properties.equals(config.properties))
+          properties.equals(config.properties) &&
+          clusters.equals(config.clusters))
         return true;
     }
     return false;
@@ -879,6 +1039,7 @@ public class A3CMLConfig implements Serializable {
     result = prime * result + ((domains == null) ? 0 : domains.hashCode());
     result = prime * result + ((properties == null) ? 0 : properties.hashCode());
     result = prime * result + ((servers == null) ? 0 : servers.hashCode());
+    result = prime * result + ((clusters == null) ? 0 : clusters.hashCode());
     return result;
   }
 
@@ -886,13 +1047,13 @@ public class A3CMLConfig implements Serializable {
    * reset visited and gateway fields.
    */
   public void reset() {
-    for (Enumeration<A3CMLServer> s = servers.elements(); s.hasMoreElements(); ) {
-      A3CMLServer server = s.nextElement();
+    for (Enumeration s = servers.elements(); s.hasMoreElements(); ) {
+      A3CMLServer server = (A3CMLServer) s.nextElement();
       server.visited = false;
       server.gateway = (short) -1;
     }
-    for (Enumeration<A3CMLDomain> d = domains.elements(); d.hasMoreElements(); ) {
-      A3CMLDomain domain = d.nextElement();
+    for (Enumeration d = domains.elements(); d.hasMoreElements(); ) {
+      A3CMLDomain domain = (A3CMLDomain) d.nextElement();
       domain.gateway = (short) -1;
     }
   }

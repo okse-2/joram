@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -72,39 +72,17 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
     return cnx;
   }
 
-  /** the name identifying the remote JMS provider */
-  private String name;
-  
-  public String getName() {
-    return name;
-  }
-  
   /** User identification for connecting to the foreign JMS server. */
   protected String userName = null;
-
-  /**
-   * @return the user name
-   */
-  public String getUserName() {
-    return userName;
-  }
 
   /** User password for connecting to the foreign JMS server. */
   protected String password = null;
 
   /** Name of the JNDI factory class to use. */
   protected String jndiFactory = null;
-  
-  public String getNamingFactory() {
-    return jndiFactory;
-  }
 
   /** JNDI URL. */
   protected String jndiUrl = null;
-  
-  public String getNamingURL() {
-    return jndiUrl;
-  }
 
   /** ConnectionFactory JNDI name. */
   protected String cnxFactName;
@@ -116,24 +94,25 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
     return cnxFactName;
   }
 
+  /**
+   * @return the user name
+   */
+  public String getUserName() {
+    return userName;
+  }
+
   /** JMS clientID field. */
   protected String clientID = null;
-  
-  public String getClientID() {
-    return clientID;
-  }
 
   /** Connection factory object for connecting to the foreign JMS server. */
   protected transient ConnectionFactory cnxFact = null;
 
-  public JMSModule(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl,
-                   String user, String password, String clientID) {
+  public JMSModule(String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
+      String password, String clientID) {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "JMSModule.<init>");
+      logger.log(BasicLevel.DEBUG, "<init>");
     }
 
-    this.name = name;
-    
     this.jndiFactory = jndiFactoryClass;
     this.jndiUrl = jndiUrl;
 
@@ -151,14 +130,14 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
 
   public void stopLiveConnection() {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "JMSModule.stopLiveConnection()");
+      logger.log(BasicLevel.DEBUG, "close()");
     }
 
     if (cnx != null) {
       try {
         cnx.setExceptionListener(null);
-      } catch (JMSException exc) {
-        logger.log(BasicLevel.WARN, "JMSModule.stopLiveConnection", exc);
+      } catch (JMSException exc1) {
+        logger.log(BasicLevel.ERROR, "", exc1);
       }
     }
 
@@ -166,7 +145,6 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
       try {
         cnx.stop();
       } catch (JMSException exc) {
-        logger.log(BasicLevel.WARN, "JMSModule.stopLiveConnection", exc);
       }
     }
 
@@ -174,7 +152,6 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
       try {
         reconnectionDaemon.stop();
       } catch (Exception exc) {
-        logger.log(BasicLevel.WARN, "JMSModule.stopLiveConnection", exc);
       }
     }
 
@@ -182,7 +159,6 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
       try {
         cnx.close();
       } catch (JMSException exc) {
-        logger.log(BasicLevel.WARN, "JMSModule.stopLiveConnection", exc);
       }
     }
 
@@ -205,11 +181,11 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
    */
   public void startLiveConnection() {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "JMSModule.startLiveConnection()");
+      logger.log(BasicLevel.DEBUG, "connect()");
     }
     if (notUsable) {
       if (logger.isLoggable(BasicLevel.ERROR)) {
-        logger.log(BasicLevel.ERROR, "JMSModule.startLiveConnection, not usable: " + notUsableMessage);
+        logger.log(BasicLevel.ERROR, "Not usable: " + notUsableMessage);
       }
       return;
     }
@@ -314,18 +290,15 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
    * Reacts by launching a reconnection process.
    */
   public void onException(JMSException exc) {
-  	if (logger.isLoggable(BasicLevel.WARN)) {
-  		logger.log(BasicLevel.WARN, "JMSModule.onException(" + exc + ')');
-  	}
-
-  	if (listeners != null) {
-  		for (Iterator<JmsListener> listener = listeners.iterator(); listener.hasNext();) {
-  			JmsListener type = listener.next();
-  			type.onException(exc);
-  		}
-  		listeners.clear();
-  	}
-  	reconnectionDaemon.start();
+    if (logger.isLoggable(BasicLevel.WARN)) {
+      logger.log(BasicLevel.WARN, "onException(" + exc + ')');
+    }
+    for (Iterator<JmsListener> listener = listeners.iterator(); listener.hasNext();) {
+      JmsListener type = listener.next();
+      type.onException(exc);
+    }
+    listeners.clear();
+    reconnectionDaemon.start();
   }
 
   public boolean isConnectionOpen() {
@@ -342,9 +315,9 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
   private String getMBeanName() {
     StringBuilder strbuf = new StringBuilder();
 
-    strbuf.append(JMSConnectionService.JMXBaseName).append(AgentServer.getServerId());
+    strbuf.append("JMS#").append(AgentServer.getServerId());
     strbuf.append(':');
-    strbuf.append("type=Connections,name=").append(name);
+    strbuf.append("type=Connections,name=").append(cnxFactName);
 
     return strbuf.toString();
   }
@@ -493,7 +466,7 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
     /** The daemon's loop. */
     public void run() {
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon.run()");
+        logmon.log(BasicLevel.DEBUG, "run()");
       }
 
       int attempts = 0;
@@ -501,6 +474,7 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
 
       try {
         while (running) {
+
           attempts++;
 
           if (attempts <= attempts1) {
@@ -514,12 +488,12 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
           canStop = true;
           try {
             if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon: attempt " + attempts + ", wait=" + interval);
+              logmon.log(BasicLevel.DEBUG, "attempt " + attempts + ", wait=" + interval);
             }
             Thread.sleep(interval);
 
             if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon: connect...");
+              logmon.log(BasicLevel.DEBUG, "connect...");
             }
             canStop = false;
 
@@ -531,13 +505,13 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
 
           } catch (Exception exc) {
             if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon: connection failed, continue... " + exc.getMessage());
+              logmon.log(BasicLevel.DEBUG, "connection failed, continue... " + exc.getMessage());
             }
             continue;
           }
 
           if (logmon.isLoggable(BasicLevel.DEBUG)) {
-            logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon: Connected using " + cnxFactName + " connection factory.");
+            logmon.log(BasicLevel.DEBUG, "Connected using " + cnxFactName + " connection factory.");
           }
           break;
         }

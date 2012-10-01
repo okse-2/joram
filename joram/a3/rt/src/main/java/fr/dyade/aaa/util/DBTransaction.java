@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -124,7 +124,7 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
       Statement s = conn.createStatement();
       ResultSet rs = s.executeQuery("SELECT name FROM JoramDB WHERE name LIKE '" + prefix + "%'");
 
-      Vector<String> v = new Vector<String>();
+      Vector v = new Vector();
       while (rs.next()) {
         v.add(rs.getString(1));
       }
@@ -193,8 +193,8 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
       logmon.log(BasicLevel.DEBUG, "DBTransaction, loadByteArray(" + fname + ")");
 
     // Searchs in the log a new value for the object.
-    Hashtable<String, DBOperation> log = perThreadContext.get().getLog();
-    DBOperation op = log.get(fname);
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
+    DBOperation op = (DBOperation) log.get(fname);
     if (op != null) {
       if (op.type == DBOperation.SAVE) {
         return op.value;
@@ -230,9 +230,9 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
       logmon.log(BasicLevel.DEBUG,
                  "DBTransaction, delete(" + fname + ")");
 
-    Hashtable<String, DBOperation> log = perThreadContext.get().getLog();
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     DBOperation op = DBOperation.alloc(DBOperation.DELETE, fname);
-    op = log.put(fname, op);
+    op = (DBOperation) log.put(fname, op);
     if (op != null) op.free();
   }
 
@@ -243,11 +243,11 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "DBTransaction, commit");
     
-    Hashtable<String, DBOperation> log = perThreadContext.get().getLog();
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     if (! log.isEmpty()) {
       DBOperation op = null;
-      for (Enumeration<DBOperation> e = log.elements(); e.hasMoreElements(); ) {
-        op = e.nextElement();
+      for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
+        op = (DBOperation) e.nextElement();
         if (op.type == DBOperation.SAVE) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
@@ -389,9 +389,10 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
 }
 
 final class DBOperation implements Serializable {
-  /** define serialVersionUID for interoperability */
+  /**
+   * 
+   */
   private static final long serialVersionUID = 1L;
-  
   static final int SAVE = 1;
   static final int DELETE = 2;
   static final int COMMIT = 3;

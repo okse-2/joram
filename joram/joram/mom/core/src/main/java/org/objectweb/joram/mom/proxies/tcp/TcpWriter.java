@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -56,7 +56,7 @@ public class TcpWriter extends Daemon {
   public TcpWriter(IOControl ioctrl,
                    AckedQueue replyQueue,
                    TcpConnection tcpConnection) {
-    super("tcpWriter." + tcpConnection.getKey(), logger);
+    super("tcpWriter." + tcpConnection.getKey());
     this.ioctrl = ioctrl;
     this.replyQueue = replyQueue;
     this.tcpConnection = tcpConnection;

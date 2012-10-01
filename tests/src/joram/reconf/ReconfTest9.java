@@ -80,18 +80,9 @@ public class ReconfTest9 extends ReconfTestBase {
 
       for (int i=2; i<nbServers; i++) {
         // First stop the server because it must be reachable in order to be stopped.
-        start = System.currentTimeMillis();
         AdminModule.stopServer(i);
-        end = System.currentTimeMillis();
-        
-        System.out.println("Stops server#" + i + "-> " + (end - start));
-
         // Then clean the configuration: the server is not reachable anymore.
-        start = System.currentTimeMillis();
         AdminModule.removeServer(i);
-        end = System.currentTimeMillis();
-        
-        System.out.println("Removes server#" + i + "-> " + (end - start));
       }
       
       checkQueue((short) 0);

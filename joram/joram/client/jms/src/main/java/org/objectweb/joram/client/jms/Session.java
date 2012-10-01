@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -60,7 +60,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * Implements the <code>javax.jms.Session</code> interface.
@@ -80,32 +79,11 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * its producers and consumers into atomic units.</li>
  * </ul>
  *  A session can create and service multiple message producers and consumers.
- *  The Session class defines the different acknowledge modes:
- * <ul>
- * <li>AUTO_ACKNOWLEDGE – With this acknowledgment mode, the session automatically
- * acknowledges a client's receipt of a message either when the session has successfully
- * returned from a call to receive or when the message listener the session has called
- * to process the message successfully returns.</li>
- * <li>CLIENT_ACKNOWLEDGE – With this acknowledgment mode, the client acknowledges a consumed
- * message by calling the message's acknowledge method.</li>
- * <li>DUPS_OK_ACKNOWLEDGE – This acknowledgment mode instructs the session to lazily acknowledge
- * the delivery of messages.</li>
- * <li>SESSION_TRANSACTED – This value is returned from the method getAcknowledgeMode if the
- * session is transacted.</li>
- * </ul>
  */
-public class Session implements javax.jms.Session, SessionMBean {
+public class Session implements javax.jms.Session {
 
   public static Logger logger = Debug.getLogger(Session.class.getName());
-  public static Logger trace = Debug.getLogger(Session.class.getName() + ".Message");
 
-  /**
-   *  With this acknowledgment mode, the client acknowledges a consumed message by calling
-   * the message's acknowledge method. Contrary to CLIENT_ACKNOWLEDGE mode this mode allows
-   * to acknowledge only the specified message.
-   */
-  public static int INDIVIDUAL_ACKNOWLEDGE = 4;
-  
   /**
    * Status of the session
    */
@@ -268,13 +246,6 @@ public class Session implements javax.jms.Session, SessionMBean {
    * thread.
    */
   private boolean recover;
-  
-  /**
-   * Indicates that the session has been close by a message listener.
-   * Doesn't need to be volatile because it is only used by the SessionDaemon
-   * thread.
-   */
-  private boolean toClose;
 
   /**
    * Status of the session: STOP, START, CLOSE
@@ -381,8 +352,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * by default false. 
    * 
    * @param asyncSend	if true sets asynchronous sending for this session.
-   * 
-   * @see FactoryParameters.asyncSend
+   * @see #asyncSend
    */
   public void setAsyncSend(boolean asyncSend) {
     this.asyncSend = asyncSend;
@@ -393,7 +363,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * <p>
    *  This attribute is inherited from Connection at initialization.
    *
-   * @see FactoryParameters.queueMessageReadMax
+   * @see FactoryParameters#queueMessageReadMax
    */
   private int queueMessageReadMax;
 
@@ -407,7 +377,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * @return    The maximum number of messages that can be read at once from
    *            a queue.
    *
-   * @see FactoryParameters.queueMessageReadMax
+   * @see #queueMessageReadMax
    */
   public final int getQueueMessageReadMax() {
     return queueMessageReadMax;
@@ -423,7 +393,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * @param queueMessageReadMax	The maximum number of messages that can be
    *				read at once from a queue.
    *
-   * @see FactoryParameters.queueMessageReadMax
+   * @see #queueMessageReadMax
    */
   public void setQueueMessageReadMax(int queueMessageReadMax) {
     this.queueMessageReadMax = queueMessageReadMax;
@@ -435,7 +405,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * <p>
    *  This attribute is inherited from Connection at initialization.
    * 
-   * @see FactoryParameters.topicAckBufferMax
+   * @see FactoryParameters#topicAckBufferMax
    */
   private int topicAckBufferMax;
 
@@ -448,7 +418,8 @@ public class Session implements javax.jms.Session, SessionMBean {
    * @return The Maximum number of acknowledgements that can be buffered when
    *         using Session.DUPS_OK_ACKNOWLEDGE mode.
    *
-   * @see FactoryParameters.topicAckBufferMax
+   * @see FactoryParameters#topicAckBufferMax
+   * @see #topicAckBufferMax
    */
   public final int getTopicAckBufferMax() {
     return topicAckBufferMax;
@@ -464,7 +435,8 @@ public class Session implements javax.jms.Session, SessionMBean {
    *			      can be buffered in Session.DUPS_OK_ACKNOWLEDGE
    *			      mode.
    *
-   * @see FactoryParameters.topicAckBufferMax
+   * @see FactoryParameters#topicAckBufferMax
+   * @see #topicAckBufferMax
    */
   public void setTopicAckBufferMax(int topicAckBufferMax) {
     this.topicAckBufferMax = topicAckBufferMax;
@@ -477,7 +449,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    *  This attribute is inherited from Connection at initialization,
    * default value is Integer.MAX_VALUE.
    *
-   * @see FactoryParameters.topicPassivationThreshold
+   * @see FactoryParameters#topicPassivationThreshold
    */
   private int topicPassivationThreshold;
 
@@ -493,7 +465,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * @return The maximum messages number over which the subscription
    *         is passivated.
    *
-   * @see FactoryParameters.topicPassivationThreshold
+   * @see #topicPassivationThreshold
    */
   public final int getTopicPassivationThreshold() {
     return topicPassivationThreshold;
@@ -511,7 +483,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * @param topicPassivationThreshold The maximum messages number over which
    *				      the subscription is passivated.
    *
-   * @see FactoryParameters.topicPassivationThreshold
+   * @see #topicPassivationThreshold
    */
   public void setTopicPassivationThreshold(int topicPassivationThreshold) {
     this.topicPassivationThreshold = topicPassivationThreshold;
@@ -524,7 +496,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    *  This attribute is inherited from Connection at initialization,
    * default value is 0.
    *
-   * @see FactoryParameters.topicActivationThreshold
+   * @see FactoryParameters#topicActivationThreshold
    */
   private int topicActivationThreshold;
 
@@ -537,10 +509,10 @@ public class Session implements javax.jms.Session, SessionMBean {
    *  This attribute is inherited from Connection at initialization,
    * default value is 0.
    *
+   * @see #topicActivationThreshold
+   *
    * @return The minimum messages number below which the subscription
    *         is activated.
-   *
-   * @see FactoryParameters.topicActivationThreshold
    */
   public final int getTopicActivationThreshold() {
     return topicActivationThreshold;
@@ -558,7 +530,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * @param topicActivationThreshold The minimum messages number below which
    *			   	     the subscription is activated.
    *
-   * @see FactoryParameters.topicActivationThreshold
+   * @see #topicActivationThreshold
    */
   public void setTopicActivationThreshold(int topicActivationThreshold) {
     this.topicActivationThreshold = topicActivationThreshold;
@@ -570,8 +542,6 @@ public class Session implements javax.jms.Session, SessionMBean {
    * <p>
    *  Default value is false, the subscription is handled synchronously so the
    * topic must be accessible.
-   * 
-   * @since JORAM 5.0.7
    */
   private boolean asyncSub = false;
 
@@ -583,8 +553,6 @@ public class Session implements javax.jms.Session, SessionMBean {
    * topic must be accessible.
    *
    * @return true if the subscription requests are asynchronously handled.
-   * 
-   * @since JORAM 5.0.7
    */
   public boolean isAsyncSub() {
     return asyncSub;
@@ -600,8 +568,6 @@ public class Session implements javax.jms.Session, SessionMBean {
    * topic must be accessible.
    *
    * @param asyncSub if true sets  asynchronous subscription for this session.
-   * 
-   * @since JORAM 5.0.7
    */
   public void setAsyncSub(boolean asyncSub) {
     this.asyncSub = asyncSub;
@@ -628,41 +594,12 @@ public class Session implements javax.jms.Session, SessionMBean {
 //    outInterceptors = pOutInterceptors;
 //  }
 
-  public String getJMXBeanName() {
-    StringBuffer buf = new StringBuffer();
-    buf.append(cnx.getJMXBeanName());
-    buf.append(",location=Session");
-    buf.append(",session=").append(getClass().getSimpleName()).append("_").append(ident);
-    return buf.toString();
-  }
-
-  public String registerMBean() {
-    String JMXBeanName = getJMXBeanName();
-    try {
-      MXWrapper.registerMBean(this, JMXBeanName);
-    } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Session.registerMBean: " + JMXBeanName, e);
-    }
-
-    return JMXBeanName;
-  }
-
-  public void unregisterMBean() {
-    try {
-      MXWrapper.unregisterMBean(getJMXBeanName());
-    } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Session.unregisterMBean: " + getJMXBeanName(), e);
-    }
-  }
-  
   /**
    * Opens a session.
    *
    * @param cnx  The connection the session belongs to.
    * @param transacted  <code>true</code> for a transacted session.
-   * @param acknowledgeMode  1 (auto), 2 (client), 3 (dups ok), 4 (individual).
+   * @param acknowledgeMode  1 (auto), 2 (client) or 3 (dups ok).
    *
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
@@ -672,7 +609,6 @@ public class Session implements javax.jms.Session, SessionMBean {
         && acknowledgeMode != javax.jms.Session.AUTO_ACKNOWLEDGE
         && acknowledgeMode != javax.jms.Session.CLIENT_ACKNOWLEDGE
         && acknowledgeMode != javax.jms.Session.DUPS_OK_ACKNOWLEDGE
-        && acknowledgeMode != INDIVIDUAL_ACKNOWLEDGE
         && !(cnx instanceof XAQueueConnection)
         && !(cnx instanceof XATopicConnection)
         && !(cnx instanceof XAConnection))
@@ -686,8 +622,8 @@ public class Session implements javax.jms.Session, SessionMBean {
     requestor = new Requestor(mtpx);
     receiveRequestor = new Requestor(mtpx);
 
-    autoAck = !transacted && !(acknowledgeMode == javax.jms.Session.CLIENT_ACKNOWLEDGE || acknowledgeMode == INDIVIDUAL_ACKNOWLEDGE);
-    
+    autoAck = !transacted && acknowledgeMode != javax.jms.Session.CLIENT_ACKNOWLEDGE;
+
     consumers = new Vector();
     producers = new Vector();
     browsers = new Vector();
@@ -719,8 +655,6 @@ public class Session implements javax.jms.Session, SessionMBean {
     //add interceptors...
     inInterceptors = cnx.getInInterceptors();
     outInterceptors = cnx.getOutInterceptors();
-    
-    registerMBean();
   }
 
   /**
@@ -732,14 +666,10 @@ public class Session implements javax.jms.Session, SessionMBean {
     this.status = status;
   }
 
-  public boolean isStarted() {
+  boolean isStarted() {
     return (status == Status.START);
   }
 
-  public String getStatus() {
-    return Status.toString(status);
-  }
-  
   /**
    * Sets the session mode.
    */
@@ -749,10 +679,6 @@ public class Session implements javax.jms.Session, SessionMBean {
     this.sessionMode = sessionMode;
   }
 
-  public String getSessionMode() {
-    return SessionMode.toString(sessionMode);
-  }
-  
   /**
    * Sets the request status.
    */
@@ -760,10 +686,6 @@ public class Session implements javax.jms.Session, SessionMBean {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Session.setRequestStatus(" + RequestStatus.toString(requestStatus) + ')');
     this.requestStatus = requestStatus;
-  }
-  
-  public String getRequestStatus() {
-    return RequestStatus.toString(requestStatus);
   }
   
   /**
@@ -805,17 +727,15 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   /**
    * API method.
-   * Returns the acknowledgement mode of the session. The acknowledgement mode is
-   * set at the time that the session is created. If the session is transacted, the
-   * acknowledgement mode is ignored.
-   * 
-   * @return If the session is not transacted, returns the current acknowledgement mode
-   * for the session. If the session is transacted, returns Session.SESSION_TRANSACTED.
-   * 
+   *
    * @exception JMSException  Actually never thrown.
    */
   public final int getAcknowledgeMode() throws JMSException {
     checkClosed();
+    return getAckMode();
+  }
+  
+  int getAckMode() {
     if (transacted)
       return Session.SESSION_TRANSACTED;
     return acknowledgeMode;
@@ -823,10 +743,7 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   /**
    * API method.
-   * Indicates whether the session is in transacted mode.
-   * 
-   * @return true if  the session is in transacted mode.
-   * 
+   *
    * @exception IllegalStateException  If the session is closed.
    */
   public synchronized final boolean getTransacted() throws JMSException {
@@ -854,14 +771,7 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   /**
    * API method.
-   * Sets the session's distinguished message listener, this is an expert facility not used
-   * by regular JMS clients.
-   * <p>
-   * When the distinguished message listener is set, no other form of message receipt in the
-   * session can be used; however, all forms of sending messages are still supported.
-   * 
-   * @param listener the message listener to associate with this session.
-
+   *
    * @exception JMSException  Actually never thrown.
    */
   public synchronized void setMessageListener(javax.jms.MessageListener messageListener) throws JMSException {
@@ -871,11 +781,7 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   /**
    * API method.
-   * Returns the session's distinguished message listener, this is an expert facility not
-   * used by regular JMS clients.
-   * 
-   * @return the message listener associated with this session
-   * 
+   *
    * @exception JMSException  Actually never thrown.
    */
   public synchronized javax.jms.MessageListener getMessageListener() throws JMSException {
@@ -883,12 +789,10 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
-   * API method.
    * Creates a Message object.
+   * API method.
    *
    * @exception IllegalStateException  If the session is closed.
-   * 
-   * @see Message
    */
   public synchronized javax.jms.Message createMessage() throws JMSException {
     checkClosed();
@@ -896,15 +800,10 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
+   * Creates a <code>TextMessage</code> object.
    * API method.
-   * Creates a TextMessage  object, a TextMessage object is used to send a message
-   * containing a String object.
-   * 
-   * @return a newly created TextMessage object.
    *
    * @exception IllegalStateException  If the session is closed.
-   * 
-   * @see TextMessage
    */
   public synchronized javax.jms.TextMessage createTextMessage() throws JMSException {
     checkClosed();
@@ -912,16 +811,10 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
+   * Creates a <code>TextMessage</code> object with the specified text.
    * API method.
-   * Creates a TextMessage  object, a TextMessage object is used to send a message
-   * containing a String object.
-   * 
-   * @param text  the string to use to initialize this message.
-   * @return a newly created TextMessage object.
-   * 
+   *
    * @exception IllegalStateException  If the session is closed.
-   * 
-   * @see TextMessage
    */
   public synchronized javax.jms.TextMessage createTextMessage(String text) throws JMSException {
     checkClosed();
@@ -931,15 +824,10 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
   
   /**
+   * Creates a <code>BytesMessage</code> object.
    * API method.
-   * Creates a <code>BytesMessage</code> object, a BytesMessage object could be used to send
-   * a message containing a stream of uninterpreted bytes.
    *
-   * @return a newly created ByteMessage object.
-   * 
    * @exception IllegalStateException  If the session is closed.
-   * 
-   * @see BytesMessage
    */
   public synchronized javax.jms.BytesMessage createBytesMessage() throws JMSException {
     checkClosed();
@@ -947,15 +835,10 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
+   * Creates a <code>MapMessage</code> object.
    * API method.
-   * Creates a <code>MapMessage</code> object,  a MapMessage object is used to send a set
-   * of name-value pairs, where names are String objects and values are primitive values.
-   * 
-   * @return a newly created MapMessage object.
-   * 
+   *
    * @exception IllegalStateException  If the session is closed.
-   * 
-   * @see MapMessage
    */
   public synchronized javax.jms.MapMessage createMapMessage() throws JMSException {
     checkClosed();
@@ -963,15 +846,10 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
+   * Creates a <code>ObjectMessage</code> object.
    * API method.
-   * Creates an ObjectMessage object, an ObjectMessage object is used to send a message that
-   * contains a serializable Java object.
-   * 
-   * @return a newly created ObjectMessage object.
-   * 
+   *
    * @exception IllegalStateException  If the session is closed.
-   * 
-   * @see ObjectMessage
    */
   public synchronized javax.jms.ObjectMessage createObjectMessage() throws JMSException {
     checkClosed();
@@ -979,16 +857,10 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
+   * Creates a <code>ObjectMessage</code> object.
    * API method.
-   * Creates an ObjectMessage object, an ObjectMessage object is used to send a message that
-   * contains a serializable Java object.
-   * 
-   * @param object  the object to use to initialize this message.
-   * @return a newly created ObjectMessage object.
    *
    * @exception IllegalStateException  If the session is closed.
-   * 
-   * @see ObjectMessage
    */
   public synchronized javax.jms.ObjectMessage createObjectMessage(java.io.Serializable obj)
       throws JMSException {
@@ -999,15 +871,10 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
+   * Creates a <code>StreamMessage</code> object.
    * API method.
-   * Creates a StreamMessage  object,  a StreamMessage object is used to send a self-defining
-   * stream of primitive values.
-   * 
-   * @return a newly created StreamMessage object.
    *
    * @exception IllegalStateException  If the session is closed.
-   * 
-   * @see StreamMessage
    */
   public synchronized javax.jms.StreamMessage createStreamMessage() throws JMSException {
     checkClosed();
@@ -1015,12 +882,11 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
-   * API method.
    * Creates a QueueBrowser object to peek at the messages on the specified queue using a message selector.
+   * API method
    * 
    * @param queue     the queue to browse
    * @param selector  the expression allowing to filter messages 
-   * @return a newly created QueueBrowser object.
    * 
    * @exception IllegalStateException       if the session is closed.
    * @exception InvalidDestinationException if an invalid destination is specified.
@@ -1036,12 +902,10 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
-   * API method.
    * Creates a QueueBrowser object to peek at the messages on the specified queue.
-   * 
+   * API method
    *
    * @param queue     the queue to browse
-   * @return a newly created QueueBrowser object.
    * 
    * @exception IllegalStateException       if the session is closed.
    * @exception InvalidDestinationException if an invalid destination is specified.
@@ -1055,13 +919,11 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
+   * Creates a MessageProducer to send messages to the specified destination.
    * API method.
-   * Creates a MessageProducer to send messages to the specified destination. A client uses a
-   * MessageProducer object to send messages to a destination.
    *
    * @param dest  the Destination to send to, or null if this is a producer which does not have
    *              a specified destination.
-   * @return 
    *              
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the connection is broken.
@@ -1077,20 +939,11 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
   
   /**
+   * Creates a MessageConsumer for the specified destination using a message selector.
    * API method.
-   * Creates a MessageConsumer for the specified destination using a message selector. A client
-   * uses a MessageConsumer object to receive messages that have been sent to a destination.
-   * <p>
-   * In some cases, a connection may both publish and subscribe to a topic. The consumer NoLocal
-   * attribute allows a consumer to inhibit the delivery of messages published by its own connection.
-   * The default value for this attribute is False. The noLocal value is only supported by destinations
-   * that are topics.
    * 
-   * @param dest      the Destination to access.
-   * @param selector  The selector allowing to filter messages.
-   * @param noLocal   if true, and the destination is a topic, inhibits the delivery of messages
-   *                  published by its own connection.
-   * @return the created MessageConsumer object.
+   * @param dest  the Destination to send to, or null if this is a producer which does not have
+   *              a specified destination.
    *
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the
@@ -1107,13 +960,13 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
+   * Creates a MessageConsumer for the specified destination using a
+   * message selector.
    * API method.
-   * Creates a MessageConsumer for the specified destination using a message selector. A client
-   * uses a MessageConsumer object to receive messages that have been sent to a destination.
    *
-   * @param dest      the Destination to access.
+   * @param dest      the Destination to send to, or null if this is a producer which does not have
+   *                  a specified destination.
    * @param selector  The selector allowing to filter messages.
-   * @return the created MessageConsumer object.
    *
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the
@@ -1130,13 +983,9 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
+   * Creates a MessageConsumer for the specified destination.
    * API method.
-   * Creates a MessageConsumer for the specified destination. A client uses a MessageConsumer
-   * object to receive messages that have been sent to a destination.
-   * 
-   * @param dest the Destination to access.
-   * @return the created MessageConsumer object.
-   * 
+   *
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the
    *              connection is broken.
@@ -1152,27 +1001,9 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
+   * Creates or retrieves a durable subscription with the specified name.
    * API method.
-   * Creates a durable subscriber to the specified topic, using a message selector and
-   * specifying whether messages published by its own connection should be delivered to it.
-   * <p>
-   * If a client needs to receive all the messages published on a topic, including the ones
-   * published while the subscriber is inactive, it needs to use a durable TopicSubscriber.
-   * Joram retains a record of durable subscriptions and insures that all messages from the
-   * topic's publishers are retained until they are acknowledged by this durable subscriber
-   * or they have expired.
-   * <p>
-   * A client can change an existing durable subscription by creating a durable TopicSubscriber
-   * with the same name and a new topic and/or message selector. Changing a durable subscriber
-   * is equivalent to unsubscribing (deleting) the old one and creating a new one.
-   * 
-   * @param topic     the non-temporary Topic to subscribe to.
-   * @param name      the name used to identify this subscription.
-   * @param selector  The selector allowing to filter messages. A value of null or an empty string
-   *                  indicates that there is no message selector for the message consumer.
-   * @param noLocal   if true, inhibits the delivery of messages published by its own connection.
-   * @return the created TopicSubscriber object.
-   * 
+   *
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
@@ -1191,22 +1022,8 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
+   * Creates or retrieves a durable subscription with the specified name.
    * API method.
-   * Creates a durable subscriber to the specified topic.
-   * <p>
-   * If a client needs to receive all the messages published on a topic, including the ones
-   * published while the subscriber is inactive, it needs to use a durable TopicSubscriber.
-   * Joram retains a record of durable subscriptions and insures that all messages from the
-   * topic's publishers are retained until they are acknowledged by this durable subscriber
-   * or they have expired.
-   * <p>
-   * A client can change an existing durable subscription by creating a durable TopicSubscriber
-   * with the same name and a new topic and/or message selector. Changing a durable subscriber
-   * is equivalent to unsubscribing (deleting) the old one and creating a new one.
-   * 
-   * @param topic     the non-temporary Topic to subscribe to.
-   * @param name      the name used to identify this subscription.
-   * @return the created TopicSubscriber object.
    *
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the 
@@ -1228,7 +1045,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * This method allows to create or retrieve a Queue with the given name
    * on the local server. First a destination with the specified name is searched
    * on the server, if it does not exist it is created. In any case a queue
-   * identity with its Joram specific address is returned.
+   * identity with its provider-specific address is returned.
    * <p>
    * If the given name is a provider-specific name (#x.y.z unique identifier)
    * a queue identity is returned with the specified identifier.
@@ -1239,13 +1056,8 @@ public class Session implements javax.jms.Session, SessionMBean {
    * creation of destination is an administrative task and is not to be initiated
    * by the JMS API.
    *
-   * @param name  the name of this queue.
-   * @return a queue with the given name.
-   * 
    * @exception IllegalStateException  If the session is closed.
    * @exception JMSException  If the topic creation failed.
-   * 
-   * @see Queue
    */
   public synchronized javax.jms.Queue createQueue(String name) throws JMSException {
     checkClosed();
@@ -1268,7 +1080,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * on the server, if it does not exist it is created. In any case a topic
    * identity with its provider-specific address is returned.
    * <p>
-   * If the given name is a Joram specific name (#x.y.z unique identifier)
+   * If the given name is a provider-specific name (#x.y.z unique identifier)
    * a topic identity is returned with the specified identifier.
    * <p>
    * API method.
@@ -1276,14 +1088,9 @@ public class Session implements javax.jms.Session, SessionMBean {
    * Clients that depend on this ability are not portable. Normally the physical
    * creation of destination is an administrative task and is not to be initiated
    * by the JMS API.
-   * 
-   * @param name  the name of this topic.
-   * @return a topic with the given name.
-   * 
+   *
    * @exception IllegalStateException  If the session is closed.
    * @exception JMSException  If the topic creation failed.
-   * 
-   * @see Topic
    */
   public synchronized javax.jms.Topic createTopic(String name) throws JMSException {
     checkClosed();
@@ -1332,16 +1139,10 @@ public class Session implements javax.jms.Session, SessionMBean {
   
   /**
    * API method.
-   * Creates a TemporaryQueue object. Its lifetime will be that of the Connection
-   * unless it is deleted earlier.
-   * 
-   * @return a temporary queue identity.
-   * 
+   *
    * @exception IllegalStateException  If the session is closed or if the
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
-   * 
-   * @see TemporaryQueue
    */
   public synchronized javax.jms.TemporaryQueue createTemporaryQueue() throws JMSException {
     checkClosed();
@@ -1354,16 +1155,10 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   /**
    * API method.
-   * Creates a TemporaryTopic object. Its lifetime will be that of the Connection
-   * unless it is deleted earlier.
-   * 
-   * @return a temporary topic identity.
    *
    * @exception IllegalStateException  If the session is closed or if the
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
-   * 
-   * @see TemporaryTopic
    */
   public synchronized javax.jms.TemporaryTopic createTemporaryTopic() throws JMSException {
     checkClosed();
@@ -1403,7 +1198,6 @@ public class Session implements javax.jms.Session, SessionMBean {
       
   /**
    * API method.
-   * Commits all messages done in this transaction and releases any locks currently held.
    *
    * @exception IllegalStateException  If the session is closed, or not
    *              transacted, or if the connection is broken.
@@ -1476,8 +1270,7 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   /**
    * API method.
-   * Rolls back any messages done in this transaction and releases any locks currently held.
-   * 
+   *
    * @exception IllegalStateException  If the session is closed, or not
    *              transacted.
    */
@@ -1511,9 +1304,7 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   /** 
    * API method.
-   * Stops message delivery in this session, and restarts message delivery with the
-   * oldest unacknowledged message.
-   * 
+   *
    * @exception IllegalStateException  If the session is closed, or transacted.
    */
   public synchronized void recover() throws JMSException {
@@ -1547,15 +1338,7 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   /**
    * API method.
-   * Unsubscribes a durable subscription that has been created by a client, this method
-   * deletes the state being maintained on behalf of the subscriber by the Joram server.
-   * <p>
-   * It is erroneous for a client to delete a durable subscription while there is an active
-   * MessageConsumer for the subscription, or while a consumed message is part of a pending
-   * transaction or has not been acknowledged in the session.
-   * 
-   * @param name the name used to identify this subscription.
-   * 
+   *
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
    * @exception InvalidDestinationException  If the subscription does not 
@@ -1585,32 +1368,15 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
-   * API method. Closes the session.
-   * <p>
-   * In order to free significant resources allocated on behalf of a session, clients should close
-   * sessions when they are not needed. Closing a session automatically close all related producers,
-   * and consumers and causes all temporary destinations to be deleted. 
-   * <p>
-   * This call will block until a receive call or message listener in progress has completed. A blocked
-   * message consumer receive call returns null when this session is closed. Closing a transacted session
-   * must roll back the transaction in progress.
-   * <p>
-   * This method is the only Session method that can be called concurrently.
-   * <p>
-   * Invoking any other Session method on a closed session must throw a JMSException.IllegalStateException.
-   * Closing a closed session must not throw an exception.
+   * Closes the session.
+   * API method.
    *
-   * @exception JMSException if the JMS provider fails to close the session due to some internal error.
+   * @exception JMSException
    */
   public void close() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Session.close()");
-    
-    if (daemon != null && daemon.isCurrentThread())
-      toClose = true;
-    else
-      closer.close();
-    unregisterMBean();
+    closer.close();
   }
 
   /**
@@ -1629,7 +1395,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       if (status == Status.CLOSE)
         return;
     }
-    
+
     // Don't synchronize the consumer closure because
     // it could deadlock with message listeners or
     // client threads still using the session.
@@ -1864,30 +1630,6 @@ public class Session implements javax.jms.Session, SessionMBean {
     }
   }
 
-  /**
-   * Method acknowledging one received message.
-   * Called by Message.
-   */
-  synchronized void acknowledge(Destination dest, String msgId) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Session.acknowledge(" + dest + ", " + msgId + ')');
-    checkClosed();
-    if (acknowledgeMode == INDIVIDUAL_ACKNOWLEDGE) {
-      Enumeration targets = deliveries.keys();
-      while (targets.hasMoreElements()) {
-        String target = (String) targets.nextElement();
-        if (target.equals(dest.getAdminName()) || target.equals(dest.getName())) {
-          MessageAcks acks = (MessageAcks) deliveries.get(target);
-          acks.remove(msgId);
-          Vector ackToSend = new Vector();
-          ackToSend.add(msgId);
-          mtpx.sendRequest(new SessAckRequest(dest.getName(), ackToSend, dest.isQueue()));
-          return;
-        }
-      }
-    }
-  }
-
   /** 
    * Method denying the received messages.
    *
@@ -1917,7 +1659,6 @@ public class Session implements javax.jms.Session, SessionMBean {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> acks = " + acks + ')');
       SessDenyRequest deny = new SessDenyRequest(target, acks.getIds(), acks.getQueueMode());
-      deny.setRedelivered(true);
       if (acks.getQueueMode()) {
         requestor.request(deny);
       } else {
@@ -1972,10 +1713,7 @@ public class Session implements javax.jms.Session, SessionMBean {
               prepareAck(targetName, msgId, queueMode);
             }
             msg.session = this;
-            if (trace.isLoggable(BasicLevel.INFO))
-              trace.log(BasicLevel.INFO,
-                         this + " handling message=" + msg + ", from=" + mc.dest.getAdminName() + '/' + mc.targetName);
-            // Executes IN interceptors
+            //Add in interception...
             if ((inInterceptors != null) && (!inInterceptors.isEmpty())) {
               for (Iterator it = inInterceptors.iterator(); it.hasNext();) {
                 MessageInterceptor interceptor = (MessageInterceptor) it.next();
@@ -1987,7 +1725,7 @@ public class Session implements javax.jms.Session, SessionMBean {
                   interceptor.handle(msg, this);
                 } catch (Throwable t) {
                   if (logger.isLoggable(BasicLevel.WARN))
-                    logger.log(BasicLevel.WARN, "Error during interception (continue anyway...)", t);
+                    logger.log(BasicLevel.WARN, "Warning while interception (continue anyway...)", t);
                 }
               }
             }
@@ -2215,11 +1953,10 @@ public class Session implements javax.jms.Session, SessionMBean {
    * but no concurrent call except a close which first stops
    * SessionDaemon.
    */
-  private void denyMessage(String targetName, String msgId, boolean queueMode, boolean redelivered) throws JMSException {
+  private void denyMessage(String targetName, String msgId, boolean queueMode) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Session.denyMessage(" + targetName + ',' + msgId + ',' + queueMode + ',' + redelivered + ')');
+      logger.log(BasicLevel.DEBUG, "Session.denyMessage(" + targetName + ',' + msgId + ',' + queueMode + ')');
     ConsumerDenyRequest cdr = new ConsumerDenyRequest(targetName, msgId, queueMode);
-    cdr.setRedelivered(redelivered);
     if (queueMode) {
       requestor.request(cdr);
     } else {
@@ -2242,8 +1979,8 @@ public class Session implements javax.jms.Session, SessionMBean {
   /**
    * Called by onMessages()
    */
-  void onMessage(org.objectweb.joram.shared.messages.Message momMsg,
-                 MessageConsumerListener mcl) throws JMSException {
+  void onMessage(org.objectweb.joram.shared.messages.Message momMsg, MessageConsumerListener mcl)
+      throws JMSException {
     String msgId = momMsg.id;
 
     if (!autoAck)
@@ -2256,30 +1993,11 @@ public class Session implements javax.jms.Session, SessionMBean {
       // Catching a JMSException means that the building of the Joram
       // message went wrong: denying the message:
       if (autoAck)
-        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode(), true);
+        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode());
       return;
     }
     msg.session = this;
-    if (trace.isLoggable(BasicLevel.INFO))
-      trace.log(BasicLevel.INFO,
-                 this + " handling message=" + msg + ", from=" + mcl.getDestName() + '/' + mcl.getTargetName());
-    // Executes IN interceptors
-    if ((inInterceptors != null) && (!inInterceptors.isEmpty())) {
-      for (Iterator it = inInterceptors.iterator(); it.hasNext();) {
-        MessageInterceptor interceptor = (MessageInterceptor) it.next();
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-                     "Intercepting the message after receiving by " + interceptor.getClass().getName());
-
-        try {
-          interceptor.handle(msg, this);
-        } catch (Throwable t) {
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, "Error during interception (continue anyway...)", t);
-        }
-      }
-    }
-
+    
     try {
       if (messageListener == null) {
         // Standard JMS (MessageConsumer)
@@ -2293,7 +2011,7 @@ public class Session implements javax.jms.Session, SessionMBean {
         logger.log(BasicLevel.DEBUG, "", exc);
 
       if (autoAck || mcl.isClosed()) {
-        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode(), false);
+        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode());
       }
       return;
     }
@@ -2302,7 +2020,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       // The session has been recovered by the
       // listener thread.
       if (autoAck) {
-        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode(), true);
+        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode());
       } else {
         doRecover();
         recover = false;
@@ -2311,11 +2029,6 @@ public class Session implements javax.jms.Session, SessionMBean {
       if (autoAck) {
         mcl.ack(msgId, acknowledgeMode);
       }
-    }
-    
-    if (toClose) {
-      doClose();
-      toClose = false;
     }
   }
 
@@ -2359,9 +2072,6 @@ public class Session implements javax.jms.Session, SessionMBean {
         throw mE;
       }
     }
-    if (trace.isLoggable(BasicLevel.INFO))
-      trace.log(BasicLevel.INFO,
-                 this + " sending message=" + joramMsg + ", to=" + dest.getAdminName());
     //Add out interception...
     if ((outInterceptors != null) && (!outInterceptors.isEmpty())) {
       for (Iterator it = outInterceptors.iterator(); it.hasNext();) {
@@ -2464,7 +2174,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    */
   private class SessionDaemon extends fr.dyade.aaa.common.Daemon {
     SessionDaemon() {
-      super("Connection#" + cnx + " - Session#" + ident, logger);
+      super("Connection#" + cnx + " - Session#" + ident);
     }
 
     public void run() {

@@ -20,7 +20,6 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -100,7 +99,14 @@ public class Notification implements Serializable, Cloneable {
    * The priority for this notification from 0 to 9, 9 being the highest. By
    * default, the priority is 4
    */
-  int priority = (byte) 4;
+  byte priority = (byte) 4;
+  
+  /**
+   * The agentId identifying the agent to which the notification is sent when it
+   * is expired.<br>
+   * Default value is null, which means the expired notification is lost.
+   */
+  AgentId deadNotificationAgentId = null;
   
   /**
    * Sets the priority for this notification.
@@ -123,13 +129,6 @@ public class Notification implements Serializable, Cloneable {
   public int getPriority() {
     return priority;
   }
-
-  /**
-   * The agentId identifying the agent to which the notification is sent when it
-   * is expired.<br>
-   * Default value is null, which means the expired notification is lost.
-   */
-  AgentId deadNotificationAgentId = null;
 
   /**
    * If the notification is stored independently that its containing message
@@ -206,50 +205,6 @@ public class Notification implements Serializable, Cloneable {
    */
   public void setDeadNotificationAgentId(AgentId deadNotificationAgentId) {
     this.deadNotificationAgentId = deadNotificationAgentId;
-  }
-  
-  private static final byte ExpirationSet = 0x10;
-  private static final byte ContextSet = 0x20;
-  private static final byte DeadNotificationAgentIdSet = 0x40;
-  
-  /**
-   *  The writeObject method is responsible for writing the state of the
-   * object for its particular class so that the corresponding readObject
-   * method can restore it.
-   * 
-   * @param out
-   * @throws IOException
-   */
-  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-    out.writeByte((priority&0x0F)|    // 4 bits
-                  ((expiration > 0)?ExpirationSet:0x00)|
-                  ((context!=null)?ContextSet:0x00)|
-                  ((deadNotificationAgentId!=null)?DeadNotificationAgentIdSet:0x00));
-    if (expiration > 0)
-      out.writeLong(expiration);
-    if(context != null)
-      out.writeObject(context);
-    if (deadNotificationAgentId!=null)
-      out.writeObject(deadNotificationAgentId);
-  }
-  
-  /**
-   *  The readObject method is responsible for reading from the stream and
-   * restoring the classes fields.
-   * 
-   * @param in
-   * @throws IOException
-   * @throws ClassNotFoundException
-   */
-  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-    byte tmp = in.readByte();
-    priority = tmp & 0x0F; // 4 bits
-    if ((tmp & ExpirationSet) != 0)
-      expiration = in.readLong();
-    if ((tmp & ContextSet) != 0)
-      context = in.readObject();
-    if ((tmp & DeadNotificationAgentIdSet) != 0)
-      deadNotificationAgentId = (AgentId) in.readObject();
   }
 
   /**

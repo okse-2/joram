@@ -74,7 +74,7 @@ public class Test2 extends TestCase {
       exc.printStackTrace();
       error(exc);
     } finally {
-      killAgentServer((short) 0);
+      crashAgentServer((short) 0);
       endTest();
     }
   }

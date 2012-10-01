@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -253,8 +253,9 @@ public class ServerConfigHelper {
         net.start();
       }
       
-      for (Enumeration<ServerDesc> e = AgentServer.elementsServerDesc(); e.hasMoreElements(); ) {
-        ServerDesc sd = e.nextElement();
+      for (Enumeration e = AgentServer.elementsServerDesc(); 
+           e.hasMoreElements(); ) {
+        ServerDesc sd = (ServerDesc)e.nextElement();
         if (sd.gateway == sid) {
           sd.gateway = -1;
           sd.setDomain(null);

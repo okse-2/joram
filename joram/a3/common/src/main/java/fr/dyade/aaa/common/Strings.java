@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -78,30 +78,30 @@ public class Strings {
       return;
     }
     if (obj instanceof List) {
-      toString(output, (List<?>) obj);
+      toString(output, (List) obj);
       return;
     }
     if (obj instanceof Collection) {
-      toString(output, (Collection<?>) obj);
+      toString(output, (Collection) obj);
       return;
     }
     if (obj instanceof Map) {
-      toString(output, (Map<?, ?>) obj);
+      toString(output, (Map) obj);
       return;
     }
     if (obj instanceof Map.Entry) {
-      toString(output, (Map.Entry<?, ?>) obj);
+      toString(output, (Map.Entry) obj);
       return;
     }
 
-    Class<?> type = obj.getClass();
+    Class type = obj.getClass();
     if (type.isArray()) {
       toString(output, obj, type.getComponentType());
       return;
     }
 
     try {
-      Class<?>[] argstype = new Class[1];
+      Class[] argstype = new Class[1];
       argstype[0] = Class.forName("java.lang.StringBuffer");
       Method method = type.getMethod("toString", argstype);
       Object[] args = new Object[1];
@@ -272,7 +272,7 @@ public class Strings {
    * @see #listBorder
    */
   public static final void toString(StringBuffer output,
-                                    Object obj, Class<?> type) {
+                                    Object obj, Class type) {
     toString(output, obj, type, listMax, listBorder);
   }
 
@@ -291,7 +291,7 @@ public class Strings {
    * @param listBorder  Controls the formatting of lists of objects.
    */
   public static final void toString(StringBuffer output,
-                                    Object obj, Class<?> type,
+                                    Object obj, Class type,
                                     int listMax, int listBorder) {
     if (obj == null) {
       output.append("null");
@@ -359,7 +359,7 @@ public class Strings {
       return;
     }
 
-    Class<?> type = tab.getClass();
+    Class type = tab.getClass();
     if (! type.isArray()) {
       toString(output, tab);
       return;
@@ -381,7 +381,7 @@ public class Strings {
     if (tab == null)
       return "null";
 
-    Class<?> type = tab.getClass();
+    Class type = tab.getClass();
     if (! type.isArray())
       return toString(tab);
 
@@ -1002,7 +1002,7 @@ public class Strings {
    * @see #listMax
    * @see #listBorder
    */
-  public static final void toString(StringBuffer output, List<?> list) {
+  public static final void toString(StringBuffer output, List list) {
     toString(output, list, listMax, listBorder);
   }
 
@@ -1023,7 +1023,7 @@ public class Strings {
    * @param listBorder  Controls the formatting of lists of objects.
    */
   public static final void toString(StringBuffer output,
-                                    List<?> list,
+                                    List list,
                                     int listMax,
                                     int listBorder) {
     if (list == null) {
@@ -1035,7 +1035,7 @@ public class Strings {
     int size = list.size();
     output.append(size);
     if (listMax == -1 || size <= listMax || size <= (listBorder*2)) {
-      for (Iterator<?> it = list.iterator(); it.hasNext();) {
+      for (Iterator it = list.iterator(); it.hasNext();) {
         output.append(",");
         toString(output, it.next());
       }
@@ -1063,7 +1063,7 @@ public class Strings {
    * @param list	the list of <code>Object</code> objects to print
    * @return		a string representation of the list
    */
-  public static final String toString(List<?> list) {
+  public static final String toString(List list) {
     if (list == null)
       return "null";
 
@@ -1086,7 +1086,7 @@ public class Strings {
    * @see #listMax
    * @see #listBorder
    */
-  public static final void toString(StringBuffer output, Collection<?> set) {
+  public static final void toString(StringBuffer output, Collection set) {
     toString(output, set, listMax, listBorder);
   }
   
@@ -1107,7 +1107,7 @@ public class Strings {
    * @param listBorder  Controls the formatting of lists of objects.
    */
   public static final void toString(StringBuffer output,
-                                    Collection<?> set,
+                                    Collection set,
                                     int listMax,
                                     int listBorder) {
     if (set == null) {
@@ -1120,7 +1120,7 @@ public class Strings {
     output.append(size);
     if (listMax != -1 && size > listMax)
       size = listBorder;
-    for (Iterator<?> it = set.iterator(); size > 0; size --) {
+    for (Iterator it = set.iterator(); size > 0; size --) {
       output.append(",");
       toString(output, it.next());
     }
@@ -1134,7 +1134,7 @@ public class Strings {
    * @param list	the collection to print
    * @return		a string representation of the list
    */
-  public static final String toString(Collection<?> set) {
+  public static final String toString(Collection set) {
     if (set == null)
       return "null";
 
@@ -1151,7 +1151,7 @@ public class Strings {
    * @param output	a buffer to print the object into
    * @param map		the map to print
    */
-  public static final void toString(StringBuffer output, Map<?, ?> map) {
+  public static final void toString(StringBuffer output, Map map) {
     if (map == null) {
       output.append("null");
       return;
@@ -1167,7 +1167,7 @@ public class Strings {
    * @param map		the map to print
    * @return		a string representation of the map
    */
-  public static final String toString(Map<?, ?> map) {
+  public static final String toString(Map map) {
     if (map == null)
       return "null";
 
@@ -1182,7 +1182,7 @@ public class Strings {
    * @param output	a buffer to print the object into
    * @param entry	the map entry to print
    */
-  public static final void toString(StringBuffer output, Map.Entry<?, ?> entry) {
+  public static final void toString(StringBuffer output, Map.Entry entry) {
     if (entry == null) {
       output.append("null");
       return;

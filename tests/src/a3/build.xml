@@ -34,9 +34,9 @@
 
   <target name="tests.all"
           description=" --> launch all a3 tests with various 'standard' configuration">
-    <!-- PoolNetwork + NGTransaction -->
+    <!-- PoolNetwork + NTransaction -->
     <antcall target="tests"/>
-    <!-- HttpNetwork + NGTransaction -->
+    <!-- HttpNetwork + NTransaction -->
     <antcall target="tests.http"/>
   </target>
 
@@ -133,8 +133,6 @@
     <ant dir="." antfile="build.xml" target="test1.base"/>
     <ant dir="." antfile="build.xml" target="test2.base"/>
     <ant dir="." antfile="build.xml" target="test3.base"/>
-  	<!--
-    -->
     <ant dir="." antfile="build.xml" target="test4.base"/>
     <ant dir="." antfile="build.xml" target="test5.base"/>
     <ant dir="." antfile="build.xml" target="test6.base"/>
@@ -173,7 +171,6 @@
     <ant dir="." antfile="build.xml" target="test8.recovery"/>
     <ant dir="." antfile="build.xml" target="test9.recovery"/>
     <ant dir="." antfile="build.xml" target="test10.recovery"/>
-  	<ant dir="." antfile="build.xml" target="test11.recovery"/>
   </target>
 
   <target name="tests.http.recovery">
@@ -240,7 +237,7 @@
      -->
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
     <property name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
-    <property name="transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
+    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
     <property name="nbMaxCnx" value="5"/>
     <property name="compressedFlows" value="false"/>
     <property name="maxMessageInFlow" value="10"/>
@@ -276,6 +273,7 @@
 
   <!-- A simple Agent test -->
   <target name="test1.base" depends="init.a3props,compile">
+    <!-- NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test1"/>
       <param name="testid" value="1"/>
@@ -286,6 +284,7 @@
 
   <!-- Another simple Agent test [Echo] -->
   <target name="test2.base" depends="init.a3props,compile">
+    <!-- NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test2"/>
       <param name="testid" value="1"/>
@@ -401,7 +400,7 @@
   <target name="test4.base" depends="test4-1.base,test4-2.base"/>
 
   <target name="test4-1.base" depends="init.a3props,compile">
-    <!-- 1 server -->
+    <!-- 1 server, NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test4"/>
       <param name="testid" value="1"/>
@@ -528,17 +527,19 @@
       <java classname="fr.dyade.aaa.agent.AgentServer"
             failonerror="no" fork="yes"
             dir="${test.dir}">
-        <jvmarg value="-DTransaction.UseLockFile=true"/>
         <classpath path="${project.class.path}"/>
         <arg line="0 ./s0"/>
       </java>
+      <!--<antcall target="server.start" inheritAll="true">
+        <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+        <param name="sid" value="0"/>
+      </antcall>-->
       <sequential>
         <sleep seconds="5"/>
         <java classname="a3.base.test6"
               failonerror="no" fork="yes"
               dir="${test.dir}">
           <classpath path="${project.class.path}"/>
-          <jvmarg value="-DTransaction.UseLockFile=true"/>
           <jvmarg value="-Dframework.TestCase.TestId=2"/>
           <jvmarg value="-Dframework.TestCase.OutFile=${report.file}"/>
           <jvmarg value="-DExcType=java.lang.Exception"/>
@@ -557,6 +558,7 @@
 
   <!-- Test a sendTo to an unkonwn server -->
   <target name="test8.base" depends="init.a3props,compile">
+    <!-- NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test8"/>
       <param name="testid" value="1"/>
@@ -567,6 +569,7 @@
 
   <!-- Test the agent deletion, simple -->
   <target name="test9.base" depends="init.a3props,compile">
+    <!-- NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test9"/>
       <param name="testid" value="1"/>
@@ -635,6 +638,7 @@
     - A test to verify that from field is correctly set in agentInitialize
     -->
   <target name="test14.base" depends="init.a3props,compile">
+    <!-- NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test14"/>
       <param name="testid" value="1"/>
@@ -716,7 +720,7 @@
   </target>
 
   <target name="test18.http.base" depends="init.a3props,compile">
-    <!-- 2 server, HttpNetwork -->
+    <!-- 2 server, NTransaction, HttpNetwork -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test18"/>
       <param name="testid" value="3"/>
@@ -1369,6 +1373,7 @@
       <param name="classname" value="a3.recovery.test11"/>
       <param name="testid" value="11"/>
       <param name="a3conf" value="recovery/a3servers1.xml"/>
+    	<param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
     </antcall>
   </target>
 

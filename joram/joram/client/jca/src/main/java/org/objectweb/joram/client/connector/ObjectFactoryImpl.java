@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -28,34 +28,30 @@ import javax.naming.Name;
 import javax.naming.Reference;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 /**
  * This class is a factory for building non managed outbound connection 
  * factories from their JNDI reference.
  */
-public class ObjectFactoryImpl implements javax.naming.spi.ObjectFactory {
-  
-  public static Logger logger = Debug.getLogger(ObjectFactoryImpl.class.getName());
-  
-	String cf =
-		"org.objectweb.joram.client.connector.OutboundConnectionFactory";
-	String qcf =
-		"org.objectweb.joram.client.connector.OutboundQueueConnectionFactory";
-	String tcf =
-		"org.objectweb.joram.client.connector.OutboundTopicConnectionFactory";
+public class ObjectFactoryImpl implements javax.naming.spi.ObjectFactory
+{
+  String cf =
+    "org.objectweb.joram.client.connector.OutboundConnectionFactory";
+  String qcf =
+    "org.objectweb.joram.client.connector.OutboundQueueConnectionFactory";
+  String tcf =
+    "org.objectweb.joram.client.connector.OutboundTopicConnectionFactory";
 
 
-	/** Returns a factory given its reference. */
-	public Object getObjectInstance(Object obj,
-			Name name,
-			Context ctx,
-			java.util.Hashtable env) throws Exception {
+  /** Returns a factory given its reference. */
+  public Object getObjectInstance(Object obj,
+                                  Name name,
+                                  Context ctx,
+                                  java.util.Hashtable env)
+    throws Exception {
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " getObjectInstance(" + obj + 
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getObjectInstance(" + obj + 
                                     ", " + name +
                                     ", " + ctx +
                                     ", " + env + ")");
@@ -63,13 +59,12 @@ public class ObjectFactoryImpl implements javax.naming.spi.ObjectFactory {
     Reference ref = (Reference) obj;
 
     String hostName = (String) ref.get("hostName").getContent();
-    Integer serverPort = new Integer((String) ref.get("serverPort").getContent());
+    Integer serverPort = 
+      new Integer((String) ref.get("serverPort").getContent());
     String userName = (String) ref.get("userName").getContent();
     String password = (String) ref.get("password").getContent();
     String identityClass = (String) ref.get("identityClass").getContent();
 
-    
-    
     ManagedConnectionFactoryImpl mcf = null;
 
     if (ref.getClassName().equals(cf))
@@ -80,19 +75,18 @@ public class ObjectFactoryImpl implements javax.naming.spi.ObjectFactory {
       mcf = new ManagedTopicConnectionFactoryImpl();
     else
       return null;
-    
-    // set ManagedConnectionFactoryConfig
+
     mcf.setCollocated(new Boolean(false));
     mcf.setHostName(hostName);
     mcf.setServerPort(serverPort);
     mcf.setUserName(userName);
     mcf.setPassword(password);
     mcf.setIdentityClass(identityClass);
-    //TODO: ? set connectingTimer, cnxPending, ...
 
     try {
       return mcf.createConnectionFactory();
-    } catch (Exception exc) {
+    }
+    catch (Exception exc) {
       return null;
     }
   }

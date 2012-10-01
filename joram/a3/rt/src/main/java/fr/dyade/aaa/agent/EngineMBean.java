@@ -86,48 +86,19 @@ public interface EngineMBean {
 
   public String dumpAgent(String id) throws Exception;
   
-  /**
-   * Returns true if the agent profiling is on.
-   * 
-   * @see fr.dyade.aaa.agent.EngineMBean#isAgentProfiling()
-   */
   public boolean isAgentProfiling();
   
-  /**
-   * Sets the agent profiling.
-   * If true, the cumulative time of reaction and commit is kept for each agent.
-   * In addition the total reaction and commit time is calculated for this engine.
-   * 
-   * @see fr.dyade.aaa.agent.EngineMBean#setAgentProfiling(boolean)
-   */
   public void setAgentProfiling(boolean agentProfiling);
   
   /**
-   * Returns the total reaction time calculated for this engine.
    * @return the reactTime
    */
   public long getReactTime();
-  
-  /**
-   * Reset the reaction time for this engine.
-   */
-  public void resetReactTime();
 
   /**
-   * Returns the total commit time calculated for this engine.
    * @return the commitTime
    */
   public long getCommitTime();
-  
-  /**
-   * Reset the commit time for this engine.
-   */
-  public void resetCommitTime();
-  
-  /**
-   * Reset react and commit time for this engine.
-   */
-  public void resetTimer();
 
   /**
    * Returns the load averages for the last minute.

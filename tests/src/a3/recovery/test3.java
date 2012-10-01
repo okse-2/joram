@@ -35,7 +35,7 @@ public class test3 extends TestCase {
   }
 
   protected void setUp() throws Exception {
-    startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false" });
+    startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true" });
 
     timeout = Long.getLong("timeout", 60000L).longValue();
 
@@ -48,7 +48,7 @@ public class test3 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer((short) 1);
+    crashAgentServer((short) 1);
   }
 
   public static void main(String args[]) {
@@ -100,9 +100,9 @@ public class test3 extends TestCase {
                          slave1,
                          ((UnknownAgent) not).agent);
           }
-          killAgentServer((short) 1);
+          crashAgentServer((short) 1);
 	  Thread.sleep(1000);
-          startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false" });
+          startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true" });
 
           sendTo(slave1, new Echo());
         } else if (state == 3) {
@@ -128,7 +128,7 @@ public class test3 extends TestCase {
           stopAgentServer((short) 1);
 	  // Wait in order to prevent WAIT status on TCP connection
 	  Thread.currentThread().sleep(2000L);
-          startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false" });
+          startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true" });
 
           sendTo(slave2, new Echo());
         } else if (state < 100) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,11 +42,14 @@ public class ReliableTcpConnection {
   public static final int CONNECT = 1;
   public static final int CONNECTING = 2;
 
-  public static final String[] statusNames = {"INIT", "CONNECT", "CONNECTING"};
+  public static final String[] statusNames =
+  {"INIT", "CONNECT", "CONNECTING"};
 
-  public static Logger logger = Debug.getLogger(ReliableTcpConnection.class.getName());
+  public static Logger logger = 
+      Debug.getLogger("fr.dyade.aaa.util.ReliableTcpConnection");
 
-  public static String WINDOW_SIZE_PROP_NAME = "fr.dyade.aaa.util.ReliableTcpConnection.windowSize";
+  public static String WINDOW_SIZE_PROP_NAME = 
+      "fr.dyade.aaa.util.ReliableTcpConnection.windowSize";
 
   public static int DEFAULT_WINDOW_SIZE = 100;
 

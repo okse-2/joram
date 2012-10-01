@@ -5,7 +5,7 @@
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
              args="root root"/>
     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
-             args="17010"/>
+             args="16010"/>
     <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
   </server>
 </config>

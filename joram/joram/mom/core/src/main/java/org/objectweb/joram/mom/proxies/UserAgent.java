@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
@@ -886,7 +886,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     AgentId destId;
     for (Iterator ctxs = contexts.values().iterator(); ctxs.hasNext();) {
       activeCtx = (ClientContext) ctxs.next();
-      activeCtx.setProxyAgent(this);
       ctxs.remove();
 
       // Denying the non acknowledged messages:
@@ -956,8 +955,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         try {
           MXWrapper.unregisterMBean(getSubMBeanName((String) subEntry.getKey()));
         } catch (Exception e1) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
+          if (logger.isLoggable(BasicLevel.WARN))
+            logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e1);
         }
       }
       // Reinitializing the durable ones.
@@ -1303,7 +1302,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       // Sending the exception to the client:
       doReply(new MomExceptionReply(request.getRequestId(), mE));
     } catch (Exception exc) {
-      logger.log(BasicLevel.ERROR, this + " - unexpected error during request: " + request, exc);
+      logger.log(BasicLevel.FATAL, this + " - unexpected error during request: " + request, exc);
 
       // Sending the exception to the client:
       doReply(new MomExceptionReply(request.getRequestId(), new MomException(exc.getMessage())));
@@ -1507,7 +1506,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     } else { // Existing durable subscription...
       cSub = (ClientSubscription) subsTable.get(subName);
 
-      if (cSub.getActive() > 0)
+      if (cSub.getActive())
         throw new StateException("The durable subscription " + subName + " has already been activated.");
 
       // Updated topic: updating the subscription to the previous topic.
@@ -1616,7 +1615,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
 
     // De-activating the subscription:
     activeCtx.removeSubName(subName);
-    sub.deactivate(false);
+    sub.deactivate();
 
     // Acknowledging the request:
     doReply(new ServerReply(req));
@@ -1656,8 +1655,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     try {
       MXWrapper.unregisterMBean(getSubMBeanName(subName));
     } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e);
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e);
     }
 
     // Acknowledging the request:
@@ -1690,16 +1689,16 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     ConsumerMessages consM = sub.deliver();
 
     if (consM != null && req.getReceiveAck()) {
-      // Immediate acknowledge
       Vector messageList = consM.getMessages();
       for (int i = 0; i < messageList.size(); i++) {
-        Message msg = (Message) messageList.elementAt(i);
-        sub.acknowledge(msg.getId());
+        Message msg = (Message)messageList.elementAt(i);
+        sub.acknowledge(msg.getIdentifier());
       }
     }
 
+    // Nothing to deliver but immediate delivery request: building an empty
+    // reply.
     if (consM == null && req.getTimeToLive() == -1) {
-      // Nothing to deliver but immediate delivery request: building an empty reply.
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> immediate delivery");
       sub.unsetReceiver();
@@ -1749,10 +1748,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     if (req.getQueueMode()) {
       AgentId qId = AgentId.fromString(req.getTarget());
       Vector ids = req.getIds();
-      DenyRequest dr = new DenyRequest(activeCtxId, req.getRequestId(), ids);
-      if (req.isRedelivered())
-        dr.setRedelivered(true);
-      sendNot(qId, dr);
+      sendNot(qId, new DenyRequest(activeCtxId, req.getRequestId(), ids));
 
       // Acknowledging the request unless forbidden:
       if (!req.getDoNotAck())
@@ -1764,7 +1760,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       if (sub == null)
         return;
 
-      sub.deny(req.getIds().iterator(), req.isRedelivered());
+      sub.deny(req.getIds().iterator());
 
       // Launching a delivery sequence:
       ConsumerMessages consM = sub.deliver();
@@ -1813,9 +1809,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     if (req.getQueueMode()) {
       AgentId qId = AgentId.fromString(req.getTarget());
       String id = req.getId();
-      DenyRequest denyRequest = new DenyRequest(activeCtxId, req.getRequestId(), id);
-      denyRequest.setRedelivered(req.isRedelivered());
-      sendNot(qId, denyRequest);
+      sendNot(qId, new DenyRequest(activeCtxId, req.getRequestId(), id));
 
       // Acknowledging the request, unless forbidden:
       if (!req.getDoNotAck())
@@ -1827,9 +1821,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       if (sub == null)
         return;
 
-      Vector<String> ids = new Vector<String>();
+      Vector ids = new Vector();
       ids.add(req.getId());
-      sub.deny(ids.iterator(), req.isRedelivered());
+      sub.deny(ids.iterator());
 
       // Launching a delivery sequence:
       ConsumerMessages consM = sub.deliver();
@@ -1925,9 +1919,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
    * in a given transaction.
    */
   private void doReact(XACnxRollback req) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "doReact(" + req + ')');
-    
     Xid xid = new Xid(req.getBQ(), req.getFI(), req.getGTI());
 
     String queueName;
@@ -1937,19 +1928,17 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       queueName = (String) queues.nextElement();
       qId = AgentId.fromString(queueName);
       ids = req.getQueueIds(queueName);
-      DenyRequest deny =  new DenyRequest(activeCtxId, req.getRequestId(), ids);
-      deny.setRedelivered(true);
-      sendNot(qId, deny);
+      sendNot(qId, new DenyRequest(activeCtxId, req.getRequestId(), ids));
     }
 
     String subName;
     ClientSubscription sub;
     ConsumerMessages consM;
-    for (Enumeration<String> subs = req.getSubs(); subs.hasMoreElements();) {
-      subName = subs.nextElement();
+    for (Enumeration subs = req.getSubs(); subs.hasMoreElements();) {
+      subName = (String) subs.nextElement();
       sub = (ClientSubscription) subsTable.get(subName);
       if (sub != null) {
-        sub.deny(req.getSubIds(subName).iterator(), true);
+        sub.deny(req.getSubIds(subName).iterator());
 
         consM = sub.deliver();
         if (consM != null && activeCtx.getActivated())
@@ -1967,12 +1956,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       SessAckRequest ack;
       while (! acks.isEmpty()) {
         ack = (SessAckRequest) acks.remove(0);
-        SessDenyRequest deny = new SessDenyRequest(ack.getTarget(),
-            ack.getIds(),
-            ack.getQueueMode(),
-            true);
-        deny.setRedelivered(true);
-        doReact(deny);
+        doReact(new SessDenyRequest(ack.getTarget(),
+                                    ack.getIds(),
+                                    ack.getQueueMode(),
+                                    true));
       }
     }
 
@@ -2143,7 +2130,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
             "Deactivate subscription " + subName + ", topic id = " + sub.getTopicId());
 
       if (sub.getDurable()) {
-        sub.deactivate(true);
+        sub.deactivate();
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Durable subscription" + subName + " de-activated.");
@@ -2156,8 +2143,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         try {
           MXWrapper.unregisterMBean(getSubMBeanName(subName));
         } catch (Exception e) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e);
+          if (logger.isLoggable(BasicLevel.WARN))
+            logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e);
         }
         TopicSubscription tSub = (TopicSubscription) topicsTable.get(sub
             .getTopicId());
@@ -2221,23 +2208,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
     sub.setActive(req.getActivate());
-
-    if (sub.getActive() > 0 ) {
-      ConsumerMessages consM = sub.deliver();
-      
-      if (consM != null) {
-        try {
-          setCtx(sub.getContextId());
-          if (activeCtx.getActivated())
-            doReply(consM);
-          else
-            activeCtx.addPendingDelivery(consM);
-        } catch (StateException pE) {
-          // The context is lost: nothing to do.
-        }
-      }
-    }
-
   }
   
   private void doReact(int key, CommitRequest req) {
@@ -2286,8 +2256,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
           ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
           if (sub != null) {
             sub.acknowledge(sar.getIds().iterator());
-            // TODO (AF): is it needed to save the proxy ?
-            // if (sub.getDurable())
             setSave();
           }
         }
@@ -2367,7 +2335,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
           Vector msgList = rep.getMessages();
           for (int i = 0; i < msgList.size(); i++) {
             Message msg = new Message((org.objectweb.joram.shared.messages.Message) msgList.elementAt(i));
-            String msgId = msg.getId();
+            String msgId = msg.getIdentifier();
 
             if (logger.isLoggable(BasicLevel.INFO))
               logger.log(BasicLevel.INFO, " -> denying message: " + msgId);
@@ -2407,7 +2375,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         Vector msgList = rep.getMessages();
         for (int i = 0; i < msgList.size(); i++) {
           Message msg = new Message((org.objectweb.joram.shared.messages.Message) msgList.elementAt(i));
-          String msgId = msg.getId();
+          String msgId = msg.getIdentifier();
 
           if (logger.isLoggable(BasicLevel.INFO))
             logger.log(BasicLevel.INFO, "Denying message: " + msgId);
@@ -2499,7 +2467,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       if (message.durableAcksCounter > 0) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> save message " + message);
-        // TODO (AF): The message saving does it need the proxy saving ?
         setSave();
         // Persisting the message.
         setMsgTxName(message);
@@ -2514,7 +2481,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       if (sub == null) continue;
 
       // If the subscription is active, launching a delivery sequence.
-      if (sub.getActive() > 0 ) {
+      if (sub.getActive()) {
         ConsumerMessages consM = sub.deliver();
         
         if (consM != null) {
@@ -2559,8 +2526,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
           try {
             MXWrapper.unregisterMBean(getSubMBeanName(name));
           } catch (Exception e1) {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
+            if (logger.isLoggable(BasicLevel.WARN))
+              logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e1);
           }
           sub.delete();
 
@@ -2568,9 +2535,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
             setCtx(sub.getContextId());
             activeCtx.removeSubName(name);
             doReply(new MomExceptionReply(rep.getCorrelationId(), exc));
-          } catch (StateException pExc) {
-            // The context is lost: nothing to do.
-          }
+          } catch (StateException pExc) {}
         }
         return;
       }
@@ -2579,9 +2544,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     try {
       setCtx(rep.getClientContext());
       doReply(new MomExceptionReply(rep.getCorrelationId(), exc));
-    } catch (StateException pExc) {
-      // The context is lost: nothing to do.
-    }
+    } catch (StateException pExc) {}
   }
   
   private String getSubMBeanName(String name) {
@@ -2632,8 +2595,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         try {
           MXWrapper.unregisterMBean(getSubMBeanName(name));
         } catch (Exception e1) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
+          if (logger.isLoggable(BasicLevel.WARN))
+            logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e1);
         }
         sub.delete();
 
@@ -2641,9 +2604,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
           setCtx(sub.getContextId());
           activeCtx.removeSubName(name);
           doReply(new MomExceptionReply(sub.getSubRequestId(), exc));
-        } catch (StateException pExc) {
-          // The context is lost: nothing to do.
-        }
+        } catch (StateException pExc) {}
       }
       return;
     }
@@ -2700,7 +2661,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         } catch (StateException se) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "", se);          
-          // Do nothing (the context doesn't exist any more).
+          // Do nothing (the contexte doesn't exist any more).
         }
       }
       if (logger.isLoggable(BasicLevel.INFO))
@@ -2904,7 +2865,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     String[] subNames = new String[subsTable.size()];
     String[] topicIds = new String[subsTable.size()];
     int[] messageCounts = new int[subsTable.size()];
-    int[] ackCounts = new int[subsTable.size()];
     boolean[] durable = new boolean[subsTable.size()];
     int i = 0;
     while (subsIterator.hasNext()) {
@@ -2913,12 +2873,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       ClientSubscription cs = (ClientSubscription) subEntry.getValue();
       topicIds[i] = cs.getTopicId().toString();
       messageCounts[i] = cs.getPendingMessageCount();
-      ackCounts[i] = cs.getDeliveredMessageCount();
       durable[i] = cs.getDurable();
       i++;
     }
     GetSubscriptionsRep reply = new GetSubscriptionsRep(
-      subNames, topicIds, messageCounts, ackCounts, durable);
+      subNames, topicIds, messageCounts, durable);
     replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
   }
 
@@ -2956,7 +2915,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     }
     if (cs != null) {
       GetSubscriptionRep reply = new GetSubscriptionRep(cs.getTopicId().toString(),
-          cs.getPendingMessageCount(), cs.getDeliveredMessageCount(), cs.getDurable());
+          cs.getPendingMessageCount(), cs.getDurable());
       replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
     } else {
       replyToTopic(new org.objectweb.joram.shared.admin.AdminReply(false, "Subscription not found: "
@@ -3042,9 +3001,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
   }
 
   private void replyToTopic(AdminReply reply, AgentId replyTo, String requestMsgId, String replyMsgId) {
-    if (replyTo == null) // In some cases the request needs no response
-      return;
-    
     org.objectweb.joram.shared.messages.Message message = MessageHelper.createMessage(replyMsgId,
         requestMsgId, replyTo.toString(), DestinationConstants.TOPIC_TYPE);
     try {
@@ -3125,7 +3081,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "UserAgent expired message " + message.getId());
+        logger.log(BasicLevel.DEBUG, "UserAgent expired message " + message.getIdentifier());
     }
     
     Iterator subs = subsTable.values().iterator();
@@ -3200,8 +3156,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       try {
         MXWrapper.unregisterMBean(getSubMBeanName(subName));
       } catch (Exception e) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e);
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e);
       }
     }
 

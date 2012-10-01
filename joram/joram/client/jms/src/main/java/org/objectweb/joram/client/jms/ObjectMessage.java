@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -31,14 +31,6 @@ import javax.jms.MessageNotWriteableException;
 
 /**
  * Implements the <code>javax.jms.ObjectMessage</code> interface.
- * <p>
- * An ObjectMessage object is used to send a message that contains a unique serializable
- * Java object. It inherits from the Message interface and adds a body containing a single
- * reference to an object.
- * <p>
- * When a client receives an ObjectMessage, it is in read-only mode. If a client attempts
- * to write to the message at this point, a MessageNotWriteableException is thrown. If
- * clearBody is called, the message can now be both read from and written to. 
  */
 public final class ObjectMessage extends Message implements javax.jms.ObjectMessage {
   /**
@@ -63,11 +55,6 @@ public final class ObjectMessage extends Message implements javax.jms.ObjectMess
 
   /**
    * API method.
-   * Sets the serializable object containing this message's data. It is important to note
-   * that an ObjectMessage contains a snapshot of the object at the time setObject() is called;
-   * subsequent modifications of the object will have no effect on the ObjectMessage body.
-   * 
-   * @param object the message's data.
    *
    * @exception MessageNotWriteableException  When trying to set an object if
    *              the message body is read-only.

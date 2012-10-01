@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -109,7 +109,7 @@ public class TcpConnectionListener extends Daemon {
    * @param timeout       the timeout
    */
   public TcpConnectionListener(TcpProxyService proxyService, int timeout) {
-    super("TcpConnectionListener", logger);
+    super("TcpConnectionListener");
     this.proxyService = proxyService;
     this.timeout = timeout;
     this.clockSynchroThreshold = Configuration.getLong(CLOCK_SYNCHRO_THRESHOLD, clockSynchroThreshold).longValue();

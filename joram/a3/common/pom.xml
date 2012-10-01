@@ -3,6 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.joram</groupId>
   <artifactId>a3-common</artifactId>
   <packaging>bundle</packaging>
   <name>JORAM :: a3 :: common</name>
@@ -11,7 +12,7 @@
   <parent>
     <groupId>org.ow2.joram</groupId>
     <artifactId>a3</artifactId>
-    <version>5.8.0-SNAPSHOT</version>
+    <version>5.7.1</version>
   </parent>
 
   <build>
@@ -30,8 +31,8 @@
               fr.dyade.aaa.common,
               fr.dyade.aaa.common.monitoring,
               fr.dyade.aaa.common.net,
-              fr.dyade.aaa.common.osgi,
               fr.dyade.aaa.common.stream,
+              fr.dyade.aaa.common.soap,
               fr.dyade.aaa.util.management</Export-Package>
             <Import-Package>javax.management;resolution:=optional,
               org.objectweb.util.monolog,

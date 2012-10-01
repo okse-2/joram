@@ -68,7 +68,7 @@ public class Test_Q5 extends TestCase {
         org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous", 0);
 
       Properties prop = new Properties();
-      prop.setProperty(AdminCommandConstant.INTERCEPTORS, "joram.interceptors.Exit1");
+      prop.put(AdminCommandConstant.INTERCEPTORS, "joram.interceptors.Exit1");
       
       org.objectweb.joram.client.jms.Queue queue = 
         org.objectweb.joram.client.jms.Queue.create(0, prop);

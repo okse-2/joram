@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -168,14 +168,8 @@ public class Topic extends Destination implements TopicMBean {
    * 
    * @param firstTime		true when first called by the factory
    */
-  public void initialize(boolean firstTime) {}
-
-  /**
-   * Finalizes the destination before it is garbaged.
-   * 
-   * @param lastime true if the destination is deleted
-   */
-  protected void finalize(boolean lastTime) {}
+  public void initialize(boolean firstTime) {
+  }
 
   /**
    * Returns a string representation of this destination.
@@ -385,7 +379,7 @@ public class Topic extends Destination implements TopicMBean {
    * hierarchical son.
    */
   protected void topicForwardNot(AgentId from, TopicForwardNot not) {
-    doClientMessages(from, not.messages, not.fromCluster, false);
+    doClientMessages(from, not.messages, not.fromCluster);
   }
 
   /**
@@ -489,11 +483,11 @@ public class Topic extends Destination implements TopicMBean {
    * to the cluster fellows if any.It may finally send
    * <code>TopicMsgsReply</code> instances to the valid subscribers.
    */
-  protected void doClientMessages(AgentId from, ClientMessages not, boolean throwsExceptionOnFullDest) {
-    doClientMessages(from, not, false, throwsExceptionOnFullDest);
+  protected void doClientMessages(AgentId from, ClientMessages not) {
+    doClientMessages(from, not, false);
   }
 
-  private void doClientMessages(AgentId from, ClientMessages not, boolean fromCluster, boolean throwsExceptionOnFullDest) {
+  private void doClientMessages(AgentId from, ClientMessages not, boolean fromCluster) {
     ClientMessages clientMsgs = preProcess(from, not);
     if (clientMsgs != null) {
       // Forwarding the messages to the father or the cluster fellows, if any:
@@ -703,15 +697,5 @@ public class Topic extends Destination implements TopicMBean {
 
   public long getNbMsgsReceiveSinceCreation() {
     return nbMsgsReceiveSinceCreation;
-  }
-
-	public String getTxName(String msgId) {
-	  // TODO Auto-generated method stub
-	  return null;
-  }
-	
-	// Flow Control related fields
-  protected fr.dyade.aaa.common.stream.Properties getStats() {
-    return null;
   }
 }

@@ -55,8 +55,8 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.events.CloseClickEvent;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
+import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -186,7 +186,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     userDetail.setData(new Record[] { new UserListRecord(presenter.getUser()) });
 
     chartUserWidth = (com.google.gwt.user.client.Window.getClientWidth() / 2) - 35;
-    chartUser = new AnnotatedTimeLine(createUserTable(), createOptions(), chartUserWidth + "px", "170px");
+    chartUser = new AnnotatedTimeLine(createUserTable(), createOptions(), "" + chartUserWidth, "170");
 
     columnForm = new DynamicForm();
     columnForm.setNumCols(4);
@@ -377,7 +377,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
         selectorFieldDSub, subRequestIdFieldDSub);
 
     chartSubWidth = (com.google.gwt.user.client.Window.getClientWidth() / 2) - 35;
-    chartSub = new AnnotatedTimeLine(createSubTable(), createOptions(), chartSubWidth + "px", "170px");
+    chartSub = new AnnotatedTimeLine(createSubTable(), createOptions(), "" + chartSubWidth, "170");
 
     subChart = new VLayout();
     subChart.setMargin(2);
@@ -587,7 +587,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     winModal.setShowModalMask(Boolean.TRUE);
     winModal.centerInPage();
     winModal.addCloseClickHandler(new CloseClickHandler() {
-      public void onCloseClick(CloseClickEvent event) {
+      public void onCloseClick(CloseClientEvent event) {
         winModal.destroy();
       }
     });

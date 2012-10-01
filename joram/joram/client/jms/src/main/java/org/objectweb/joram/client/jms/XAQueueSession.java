@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -43,20 +43,15 @@ public class XAQueueSession extends XASession implements javax.jms.XAQueueSessio
                  XAResourceMngr rm) throws JMSException {
     super(cnx, qs, rm);
   }
+
   
   /** Returns a String image of this session. */
   public String toString() {
     return "XAQueueSess:" + sess.getId();
   }
 
-  /**
-   * API method.
-   * Gets the queue session associated with this XAQueueSession.
-   * 
-   * @return the queue session object.
-   * 
-   * @exception JMSException if an internal error occurs. 
-   */ 
+
+  /** API method. */ 
   public javax.jms.QueueSession getQueueSession() throws JMSException {
     return (QueueSession) sess;
   }

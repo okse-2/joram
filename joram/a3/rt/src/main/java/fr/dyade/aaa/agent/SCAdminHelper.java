@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 public class SCAdminHelper {
   /** Hashtable that contain all <code>Process</code> of running AgentServer */
-  protected Hashtable<Short, Process> ASP = null;
+  protected Hashtable ASP = null;
 
   protected Logger logmon = null;
 
@@ -38,7 +38,7 @@ public class SCAdminHelper {
     // Get the logging monitor from current server MonologMonitorFactory
     logmon = Debug.getLogger("fr.dyade.aaa.agent.SCAdmin");
 
-    ASP = new Hashtable<Short, Process>();
+    ASP = new Hashtable();
   }
 
   /**
@@ -90,7 +90,7 @@ public class SCAdminHelper {
   public String startAgentServer(short sid,
                                  File dir,
                                  String[] jvmargs,
-                                 String[] args) throws Exception {
+				 String[] args) throws Exception {
     return startAgentServer(sid, dir, jvmargs, null, args);
   }
 
@@ -109,21 +109,21 @@ public class SCAdminHelper {
                                  File dir,
                                  String[] jvmargs,
                                  String className,
-                                 String[] args) throws Exception {
+				 String[] args) throws Exception {
     logmon.log(BasicLevel.DEBUG,
                "SCAdmin: start AgentServer#" + sid);
 
     Process p = (Process) ASP.get(new Short(sid));
     if (p != null) {
       try {
-        logmon.log(BasicLevel.DEBUG,
-                   "SCAdmin: AgentServer#" + sid + " -> " + p.exitValue());
+	logmon.log(BasicLevel.DEBUG,
+		    "SCAdmin: AgentServer#" + sid + " -> " + p.exitValue());
       } catch (IllegalThreadStateException exc) {
         // there is already another AS#sid running
-        logmon.log(BasicLevel.WARN,
-                   "SCAdmin: AgentServer#" + sid + " already running.");
+	logmon.log(BasicLevel.WARN,
+		    "SCAdmin: AgentServer#" + sid + " already running.");
         throw new IllegalStateException("AgentServer#" + sid +
-        " already running.");
+                                        " already running.");
       }
     }
 
@@ -156,10 +156,10 @@ public class SCAdminHelper {
 
     String javapath = 
       new File(new File(System.getProperty("java.home"), "bin"),
-      "java").getPath();
+               "java").getPath();
     String classpath = System.getProperty("java.class.path");
 
-    Vector<String> argv = new Vector<String>();
+    Vector argv = new Vector();
     argv.addElement(javapath);
     argv.addElement("-classpath");
     argv.addElement(classpath);
@@ -192,7 +192,7 @@ public class SCAdminHelper {
     } else {
       p = Runtime.getRuntime().exec(command, null, dir);
     }
-
+    
     return p;
   }
 
@@ -210,7 +210,7 @@ public class SCAdminHelper {
         StringBuffer strBuf = new StringBuffer();
         strBuf.append(line);
         while (((line = br.readLine()) != null) &&
-            (! line.equals(AgentServer.ENDSTRING))) {          
+               (! line.equals(AgentServer.ENDSTRING))) {          
           strBuf.append('\n');
           strBuf.append(line);
         }
@@ -247,7 +247,7 @@ public class SCAdminHelper {
     Process p = (Process) ASP.get(new Short(sid));
 
     logmon.log(BasicLevel.DEBUG,
-               "SCAdmin: kill AgentServer#" + sid + " [" + p + ']');
+                "SCAdmin: kill AgentServer#" + sid + " [" + p + ']');
 
     if (p != null) p.destroy();
   }
@@ -264,7 +264,7 @@ public class SCAdminHelper {
     Process p = (Process) ASP.get(new Short(sid));
 
     logmon.log(BasicLevel.DEBUG,
-               "SCAdmin: join AgentServer#" + sid + " [" + p + ']');
+                "SCAdmin: join AgentServer#" + sid + " [" + p + ']');
 
     // TODO: put it in previous method and set a Timer.
     if (p != null) return p.waitFor();
@@ -288,7 +288,7 @@ public class SCAdminHelper {
       int res = p.exitValue();
       return res;
     }
-
+    
     throw new UnknownServerException();
   }
 
@@ -341,7 +341,7 @@ public class SCAdminHelper {
     } catch (Throwable exc) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
-                   "SCAdmin: Can't stop server#" + sid, exc);
+                    "SCAdmin: Can't stop server#" + sid, exc);
       throw new Exception("Can't stop server#" + sid +
                           ": " + exc.getMessage());
     } finally {
@@ -385,8 +385,9 @@ public class SCAdminHelper {
     } catch (Throwable exc) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
-                   "SCAdmin: Can't crash server#" + sid, exc);
-      throw new Exception("Can't crash server#" + sid + ": " + exc.getMessage());
+                    "SCAdmin: Can't crash server#" + sid, exc);
+      throw new Exception("Can't crash server#" + sid +
+                          ": " + exc.getMessage());
     } finally {
       close(socket);
       socket = null;

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -68,7 +68,15 @@ public class TestCase extends BaseTestCase {
   protected void endEnv() {
     if (running) {
       // Stop the AgentServer
-      AgentServer.stop(false);
+      // Creates a thread to execute AgentServer.stop in order to
+      // avoid deadlock if called from an agent reaction.
+      Thread t = new Thread() {
+        public void run() {
+          AgentServer.stop();
+        }
+      };
+      t.setDaemon(true);
+      t.start();
       running = false;
     }
   }
@@ -95,6 +103,17 @@ public class TestCase extends BaseTestCase {
     }
   }
 
+  public static void startAgentServer(short sid, short cid, String[] jvmargs) throws Exception {
+    try {
+      getAdmin().startAgentServer(sid, cid, jvmargs);
+    } catch (IllegalStateException exc) {
+      exception(exc);
+      // The process is still alive, kill it!
+      getAdmin().killAgentServer(sid);
+      getAdmin().startAgentServer(sid, cid, jvmargs);
+    }
+  }
+
   public static void stopAgentServer(short sid) {
     try {
       getAdmin().stopAgentServer(sid);
@@ -116,6 +135,10 @@ public class TestCase extends BaseTestCase {
     } catch (Exception exc) {
       exception(exc);
     }
+  }
+
+  public static void crashAgentServer(short sid) {
+    killAgentServer(sid);
   }
 
   public static void killAgentServer(short sid) {

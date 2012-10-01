@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,7 +39,7 @@ public class SubscriptionWTOConverter {
    *         object
    */
   public static SubscriptionWTO getSubscriptionWTO(ClientSubscriptionMBean sub) {
-    SubscriptionWTO result = new SubscriptionWTO(sub.getName(), (sub.getActive()!=0), sub.getDurable(),
+    SubscriptionWTO result = new SubscriptionWTO(sub.getName(), sub.getActive(), sub.getDurable(),
         sub.getNbMaxMsg(), sub.getContextId(), (int) sub.getNbMsgsDeliveredSinceCreation(),
         (int) sub.getNbMsgsSentToDMQSinceCreation(), sub.getPendingMessageCount(), sub.getSelector(),
         sub.getSubRequestId());

@@ -22,17 +22,20 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.io.Serializable;
 import java.util.Properties;
 
-import org.objectweb.joram.shared.excepts.MessageValueException;
-import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
 
-public class DistributionModule {
+public class DistributionModule implements Serializable {
+
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   public static Logger logger = Debug.getLogger(DistributionModule.class.getName());
 
   /** The property name for the distribution handler class name. */
@@ -40,30 +43,23 @@ public class DistributionModule {
 
   /** Holds the distribution logic. */
   private DistributionHandler distributionHandler;
-  
-  private boolean isAsyncDistribution = false;
 
-  public DistributionModule(String className, Properties properties, boolean firstTime) {
+  public DistributionModule(String className, Properties properties) {
     try {
-      distributionHandler = (DistributionHandler) Class.forName(className).newInstance();
+      Class clazz = Class.forName(className);
+      distributionHandler = (DistributionHandler) clazz.newInstance();
     } catch (Exception exc) {
       logger.log(BasicLevel.ERROR, "DistributionModule: can't create distribution handler.", exc);
     }
-    setProperties(properties, firstTime);
+    setProperties(properties);
   }
 
   /**
    * Resets the distribution properties.
    */
-  public void setProperties(Properties properties, boolean firstTime) {
+  public void setProperties(Properties properties) {
     if (distributionHandler != null) {
-      distributionHandler.init(properties, firstTime);
-    }
-    
-    if (properties.containsKey(DistributionQueue.ASYNC_DISTRIBUTION_OPTION)) {
-    	try {
-    		isAsyncDistribution = ConversionHelper.toBoolean(properties.get(DistributionQueue.ASYNC_DISTRIBUTION_OPTION));
-    	} catch (MessageValueException exc) {	}
+      distributionHandler.init(properties);
     }
   }
   
@@ -72,18 +68,7 @@ public class DistributionModule {
   }
 
   public void processMessage(Message fullMessage) throws Exception {
-  	if (logger.isLoggable(BasicLevel.DEBUG)) {
-  		logger.log(BasicLevel.DEBUG, "DistributionModule.processMessage(" + fullMessage.id + ") isAsyncDistribution = " + isAsyncDistribution);
-  	}
-  	if (!isAsyncDistribution) {
-  		distributionHandler.distribute(fullMessage);
-  	} else {
-  		// the message are send by distributionDaemon.
-  		throw new Exception("async distribution is on.");
-  	}
+    distributionHandler.distribute(fullMessage);
   }
 
-  public DistributionHandler getDistributionHandler() {
-  	return distributionHandler;
-  }
 }

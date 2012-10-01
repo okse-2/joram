@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
- * Copyright (C) 2004 Bull SA
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,15 +26,13 @@ package org.objectweb.joram.client.jms;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+
+import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 /**
  * Connection used within global transactions; an instance of this class
  * acts as a resource manager.
- * <p>
- * The XAConnection class extends the capability of Connection by providing an
- * XASession. This class offers support to transactional environments. Client
- * programs are strongly encouraged to use the transactional support available
- * in their environment, rather than use these XA interfaces directly.
  */
 public class XAConnection extends Connection 
     implements javax.jms.XAConnection {
@@ -44,27 +42,30 @@ public class XAConnection extends Connection
 
   /**
    * Creates a <code>XAConnection</code> instance.
+   *
+   * @param factoryParameters  The factory parameters.
+   * @param requestChannel     The actual connection to wrap.
+   *
+   * @exception JMSSecurityException   If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
    */
-  public XAConnection() {
-    super();
+  public XAConnection(FactoryParameters factoryParameters,
+                      RequestChannel requestChannel)
+    throws JMSException {
+    super(factoryParameters, requestChannel);
     rm = new XAResourceMngr(this);
   }
 
   /** 
    * Creates a non-XA session.
-   * 
-   * @param transacted  indicates whether the session is transacted.
-   * @param acknowledgeMode indicates whether the consumer or the client will acknowledge any messages
-   *                        it receives; ignored if the session is transacted. Legal values are
-   *                        Session.AUTO_ACKNOWLEDGE, Session.CLIENT_ACKNOWLEDGE, and Session.DUPS_OK_ACKNOWLEDGE.
-   * @return A newly created session.
    *
    * @exception IllegalStateException  If the connection is closed.
    * @exception JMSException           In case of an invalid acknowledge mode.
    */
   public javax.jms.Session
          createSession(boolean transacted, int acknowledgeMode)
-         throws JMSException {
+         throws JMSException
+  {
     return super.createSession(transacted, acknowledgeMode);
   }
 
@@ -73,7 +74,8 @@ public class XAConnection extends Connection
    *
    * @exception IllegalStateException  If the connection is closed.
    */
-  public javax.jms.XASession createXASession() throws JMSException {
+  public javax.jms.XASession createXASession() throws JMSException
+  {
     checkClosed();
     Session s = new Session(this, true, 0, getRequestMultiplexer());
     XASession xas = new XASession(this, s, rm);

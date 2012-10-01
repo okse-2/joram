@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -79,23 +79,6 @@ public final class ConsumerDenyRequest extends AbstractJmsRequest {
     return doNotAck;
   }
 
-  /** true if the message has already been delivered.  */
-  private boolean redelivered = false;
-  
-  /**
-   * @return the redelivered
-   */
-  public boolean isRedelivered() {
-    return redelivered;
-  }
-
-  /**
-   * @param redelivered the redelivered to set
-   */
-  public void setRedelivered(boolean redelivered) {
-    this.redelivered = redelivered;
-  }
-
   protected int getClassId() {
     return CONSUMER_DENY_REQUEST;
   }
@@ -152,7 +135,6 @@ public final class ConsumerDenyRequest extends AbstractJmsRequest {
     StreamUtil.writeTo(id, os);
     StreamUtil.writeTo(queueMode, os);
     StreamUtil.writeTo(doNotAck, os);
-    StreamUtil.writeTo(redelivered, os);
   }
 
   /**
@@ -166,6 +148,5 @@ public final class ConsumerDenyRequest extends AbstractJmsRequest {
     id = StreamUtil.readStringFrom(is);
     queueMode = StreamUtil.readBooleanFrom(is);
     doNotAck = StreamUtil.readBooleanFrom(is);
-    redelivered = StreamUtil.readBooleanFrom(is);
   }
 }

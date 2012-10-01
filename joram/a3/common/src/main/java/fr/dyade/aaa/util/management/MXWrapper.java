@@ -21,29 +21,31 @@ package fr.dyade.aaa.util.management;
 import java.util.List;
 import java.util.Set;
 
+import com.scalagent.jmx.JMXServer;
+
 public final class MXWrapper {
-  /**
-   * Name of the property allowing the use of the A3 runtime without the JMX management
-   * framework. The additional property MXServer allows to configure the name of the
-   * implementation class of the MXServer interface (by default com.scalagent.jmx.JMXServer).
-   */
+
   public final static String NO_JMX = "JoramNoJMX";
 
-  private static MXServer mxserver = null;
+  private static JMXServer mxserver = null;
 
-  static {
-    // Initializes the JMX Wrapper
-    if (! Boolean.getBoolean(NO_JMX)) {
-      try {
-        mxserver = (MXServer) Class.forName(System.getProperty("MXServer", "com.scalagent.jmx.JMXServer")).newInstance();
-      } catch (Exception exc) {
-        mxserver= null;
+  private static boolean firstTime = true;
+
+  private static void init() {
+    if (firstTime) {
+      firstTime = false;
+      // Initializes the JMX Wrapper
+      boolean noJmx = Boolean.getBoolean(NO_JMX);
+      if (!noJmx) {
+        mxserver = new JMXServer();
       }
     }
   }
 
   public static String objectName(String domain, String name) {
-    return new StringBuffer().append(domain).append(':').append(name).toString();
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append(domain).append(':').append(name);
+    return strbuf.toString();
   }
 
   public static void registerMBean(Object bean, String domain, String name) throws Exception {
@@ -51,6 +53,7 @@ public final class MXWrapper {
   }
 
   public static void registerMBean(Object bean, String fullName) throws Exception {
+    init();
     if (mxserver != null)
       mxserver.registerMBean(bean, fullName);
   }
@@ -60,29 +63,41 @@ public final class MXWrapper {
   }
 
   public static void unregisterMBean(String fullName) throws Exception {
+    init();
     if (mxserver != null)
       mxserver.unregisterMBean(fullName);
   }
 
-  public static void setMXServer(MXServer server) {
+  public static void setMXServer(JMXServer server) {
     mxserver = server;
   }
 
+  public static JMXServer getMXServer() {
+    return mxserver;
+  }
+
   public static Object getAttribute(String objectName, String attribute) throws Exception {
-    if (mxserver != null)
-      return mxserver.getAttribute(objectName, attribute);
-    return null;
+    init();
+    if (mxserver == null) {
+      return null;
+    }
+    return mxserver.getAttribute(objectName, attribute);
   }
 
-  public static Set<String> queryNames(String objectName) throws Exception {
-    if (mxserver != null)
-      return mxserver.queryNames(objectName);
-    return null;
+  public static Set queryNames(String objectName) throws Exception {
+    init();
+    if (mxserver == null) {
+      return null;
+    }
+    return mxserver.queryNames(objectName);
   }
 
-  public static List<String> getAttributeNames(String mBean) throws Exception {
-    if (mxserver != null)
-      return mxserver.getAttributeNames(mBean);
-    return null;
+  public static List getAttributeNames(String mBean) throws Exception {
+    init();
+    if (mxserver == null) {
+      return null;
+    }
+    return mxserver.getAttributeNames(mBean);
   }
+
 }

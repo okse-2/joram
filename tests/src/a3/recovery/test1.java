@@ -43,7 +43,7 @@ public class test1 extends TestCase {
   static Random rand = null;
   
   protected void setUp() throws Exception {
-    startAgentServer(ServerPong, new String[] { "-DTransaction.UseLockFile=false" });
+    startAgentServer(ServerPong, new String[] { "-DNTNoLockFile=true" });
 
     int bounce = Integer.getInteger("bounce", 1500).intValue();
     timeout = 250L * bounce;
@@ -80,19 +80,19 @@ public class test1 extends TestCase {
         TestCase.stopAgentServer(ServerPong);
       } else {
         System.out.println("crash");
-        TestCase.killAgentServer(ServerPong);
+        TestCase.crashAgentServer(ServerPong);
       }
       // Wait in order to prevent WAIT status on TCP connection
       Thread.currentThread().sleep(500L);
       // Start server#1
-      TestCase.startAgentServer(ServerPong, new String[] { "-DTransaction.UseLockFile=false" });
+      TestCase.startAgentServer(ServerPong, new String[] { "-DNTNoLockFile=true" });
     }
 
 //    timer.schedule(new StopTask(ping.getId(), new StopNot()), 5000L, 15000L);
   }
 
   protected void tearDown() {
-    killAgentServer(ServerPong);
+    crashAgentServer(ServerPong);
   }
 
 

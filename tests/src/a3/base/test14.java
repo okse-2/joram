@@ -36,7 +36,7 @@ public class test14 extends TestCase {
   protected void setUp() throws Exception {
     timeout = 15000L;
 
-    startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false" });
+    startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true" });
 
     Test14Master master = new Test14Master();
     Test14Slave slave = new Test14Slave((short) 1);
@@ -47,7 +47,7 @@ public class test14 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer((short) 1);
+    crashAgentServer((short) 1);
   }
 
   public static void main(String args[]) {
@@ -79,8 +79,8 @@ public class test14 extends TestCase {
                                 "a3.base.test14$Test14Not");
           TestCase.assertTrue(((Test14Not) not).creation);
           // Stop, then start AgentServer#1
-          killAgentServer((short) 1);
-          startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false" });
+          crashAgentServer((short) 1);
+          startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true" });
           // Then send a not to slave in order to reload it !!
           sendTo(slave, new Notification());
           break;

@@ -23,12 +23,8 @@
 package org.objectweb.joram.client.connector;
 
 import javax.resource.ResourceException;
-
-import org.objectweb.joram.client.jms.ConnectionMetaData;
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
+import org.objectweb.joram.client.jms.ConnectionMetaData;
 
 /**
  * A <code>ManagedConnectionMetaDataImpl</code> instance provides information
@@ -36,9 +32,6 @@ import fr.dyade.aaa.common.Debug;
  */
 public class ManagedConnectionMetaDataImpl
              implements javax.resource.spi.ManagedConnectionMetaData {
-  
-  public static Logger logger = Debug.getLogger(ManagedConnectionMetaDataImpl.class.getName());
-  
   /** Name of the user associated with the managed connection. */
   private String userName;
 
@@ -46,8 +39,8 @@ public class ManagedConnectionMetaDataImpl
    * Constructs a <code>ManagedConnectionMetaDataImpl</code> instance.
    */
   public ManagedConnectionMetaDataImpl(String userName) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ManagedConnectionMetaDataImpl(" + userName + ")");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "ManagedConnectionMetaDataImpl(" + userName + ")");
 
     this.userName = userName;
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -57,7 +57,7 @@ public final class ServerDesc implements Serializable {
    * The descriptor of an HA server contains one <code>SocketAddress</code>
    * for each of its constituent.
    */
-  private Vector<SocketAddress> sockAddrs = null;
+  private Vector sockAddrs = null;
   /**
    * Description of services running on this server.
    */
@@ -92,7 +92,7 @@ public final class ServerDesc implements Serializable {
                     int port) {
     this.sid = sid;
     this.name = name;
-    sockAddrs = new Vector<SocketAddress>();
+    sockAddrs = new Vector();
     sockAddrs.addElement(new SocketAddress(hostname,port));
   }
 
@@ -176,7 +176,7 @@ public final class ServerDesc implements Serializable {
    * In case of an HA server, gets the IP address of all the components
    * of the HA configuration.
    */
-  Enumeration<SocketAddress> getSockAddrs() {
+  Enumeration getSockAddrs() {
     return sockAddrs.elements();
   }
   
@@ -202,8 +202,8 @@ public final class ServerDesc implements Serializable {
   }
 
 
-  public Class<MessageConsumer> getDomainType() {
-    return (Class<MessageConsumer>) domain.getClass();
+  public Class getDomainType() {
+    return domain.getClass();
   }
 
   /**

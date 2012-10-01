@@ -302,9 +302,9 @@ public interface JoramAdminMBean {
    * @exception ConnectException  If the connection is closed or broken.
    * @exception AdminException    Never thrown.
    * 
-   * @see #getAllDestinations(int)
+   * @see #getDestinations(int)
    */
-  public void getLocalDestinations() throws ConnectException, AdminException;
+  public void getDestinations() throws ConnectException, AdminException;
 
   /**
    * This method creates and registers MBeans for all the destinations of
@@ -317,7 +317,7 @@ public interface JoramAdminMBean {
    * 
    * @see #getDestinations()
    */
-  public void getAllDestinations(int serverId) throws ConnectException, AdminException;
+  public void getDestinations(int serverId) throws ConnectException, AdminException;
 
   /**
    * Creates or retrieves a queue destination on the underlying JORAM server,
@@ -328,9 +328,9 @@ public interface JoramAdminMBean {
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    * 
-   * @see #queueCreate(int, String)
+   * @see #createQueue(int, String)
    */
-  public void queueCreate(String name) throws AdminException, ConnectException;
+  public void createQueue(String name) throws AdminException, ConnectException;
 
   /**
    * Creates or retrieves a queue destination on the underlying JORAM server,
@@ -342,7 +342,7 @@ public interface JoramAdminMBean {
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    */
-  public void queueCreate(int serverId, String name) throws AdminException, ConnectException;
+  public void createQueue(int serverId, String name) throws AdminException, ConnectException;
 
   /**
    * Creates or retrieves a topic destination on the underlying JORAM server,
@@ -353,9 +353,9 @@ public interface JoramAdminMBean {
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    * 
-   * @see #topicCreate(int, String)
+   * @see #createTopic(int, String)
    */
-  public void topicCreate(String name) throws AdminException, ConnectException;
+  public void createTopic(String name) throws AdminException, ConnectException;
 
   /**
    * Creates or retrieves a topic destination on the underlying JORAM server,
@@ -367,7 +367,7 @@ public interface JoramAdminMBean {
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    */
-  public void topicCreate(int serverId, String name) throws AdminException, ConnectException;
+  public void createTopic(int serverId, String name) throws AdminException, ConnectException;
 
 
   /**
@@ -377,9 +377,9 @@ public interface JoramAdminMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException    Never thrown.
    * 
-   * @see #getAllUsers(int)
+   * @see #getUsers(int)
    */
-  public void getLocalUsers() throws ConnectException, AdminException;
+  public void getUsers() throws ConnectException, AdminException;
 
   /**
    * This method creates and registers MBeans for all the users of
@@ -392,7 +392,7 @@ public interface JoramAdminMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException    If the request fails.
    */
-  public void getAllUsers(int serverId) throws ConnectException, AdminException;
+  public void getUsers(int serverId) throws ConnectException, AdminException;
   
   /**
    * Creates or retrieves a user on the underlying JORAM server.
@@ -403,9 +403,9 @@ public interface JoramAdminMBean {
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
    * 
-   * @see #userCreate(String, String, int, String)
+   * @see #createUser(String, String, int, String)
    */
-  public void userCreate(String name, String password) throws AdminException, ConnectException;
+  public void createUser(String name, String password) throws AdminException, ConnectException;
 
   /**
    * Creates or retrieves a user on the underlying JORAM server.
@@ -417,9 +417,9 @@ public interface JoramAdminMBean {
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
    * 
-   * @see #userCreate(String, String, int, String)
+   * @see #createUser(String, String, int, String)
    */
-  public void userCreate(String name, String password,
+  public void createUser(String name, String password,
                          String identityClass) throws AdminException, ConnectException;
 
   /**
@@ -432,9 +432,9 @@ public interface JoramAdminMBean {
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
    * 
-   * @see #userCreate(String, String, int, String)
+   * @see #createUser(String, String, int, String)
    */
-  public void userCreate(String name, String password,
+  public void createUser(String name, String password,
                          int serverId) throws AdminException, ConnectException;
 
   /**
@@ -448,7 +448,7 @@ public interface JoramAdminMBean {
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
    */
-  public void userCreate(String name, String password,
+  public void createUser(String name, String password,
                          int serverId,
                          String identityClass) throws ConnectException, AdminException;
 

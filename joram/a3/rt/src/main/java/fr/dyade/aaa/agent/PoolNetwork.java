@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2008 CSSI
  *
  * This library is free software; you can redistribute it and/or
@@ -69,7 +69,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   WatchDog watchDog = null;
 
   /** Synchronized vector of active (i.e. connected) sessions. */
-  List<NetSession> activeSessions;
+  List activeSessions;
 
   /**
    * Defines if the streams between servers are compressed or not.
@@ -305,13 +305,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       sessions[idx] = new NetSession(getName(), id);
       sessions[idx].init();
 
-      try {
-        MXWrapper.registerMBean(new NetSessionWrapper(this, id),
-                                "AgentServer", getMBeanName(id));
-      } catch (Exception exc) {
-        logmon.log(BasicLevel.WARN, getName() + ".addServer - jmx failed: " + getMBeanName(id), exc);
-      }
-
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
         StringBuffer strbuf = new StringBuffer();
         strbuf.append(getName()).append(" after addServer:");
@@ -322,11 +315,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       }
 
     } catch (Exception exc) {
-      logmon.log(BasicLevel.ERROR, getName() + ", addServer failed", exc);
+      logmon.log(BasicLevel.FATAL, getName() + " addServer failed", exc);
     }
     
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + ", addServer ok");
+      logmon.log(BasicLevel.DEBUG, getName() + " addServer ok");
   }
 
   /**
@@ -347,12 +340,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     // First we have to verify that the server is defined.
     // Be careful, this test is already done in superclass.
     if (index(id) < 0) return;
-
-    try {
-      MXWrapper.unregisterMBean("AgentServer", getMBeanName(id));
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.WARN, getName() + ".delServer - jmx failed: " + getMBeanName(id), exc);
-    }
 
     try {
       super.delServer(id);
@@ -379,7 +366,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       }
 
     } catch (Exception exc) {
-      logmon.log(BasicLevel.ERROR, getName() + " delServer failed", exc);
+      logmon.log(BasicLevel.FATAL, getName() + " delServer failed", exc);
     }
     
     if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -413,15 +400,15 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             MXWrapper.registerMBean(new NetSessionWrapper(this, servers[i]),
                                     "AgentServer", getMBeanName(servers[i]));
           } catch (Exception exc) {
-            logmon.log(BasicLevel.WARN, getName() + ".start - jmx failed: " + getMBeanName(servers[i]), exc);
+            logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
           }
         }
       }
 
       if (nbMaxCnx != -1) {
-        activeSessions = new Vector<NetSession>(nbMaxCnx);
+        activeSessions = new Vector(nbMaxCnx);
       } else {
-        activeSessions = new Vector<NetSession>(servers.length - 1);
+        activeSessions = new Vector(servers.length - 1);
       }
 
       wakeOnConnection.start();
@@ -454,9 +441,10 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     for (int i=0; i<sessions.length; i++) {
       if (sessions[i] != null) {
         try {
-          MXWrapper.unregisterMBean("AgentServer", getMBeanName(sessions[i].sid));
+          MXWrapper.unregisterMBean("AgentServer",
+                                    getMBeanName(sessions[i].sid));
         } catch (Exception exc) {
-          logmon.log(BasicLevel.WARN, getName() + ".stop - jmx failed: " + getMBeanName(sessions[i].sid), exc);
+          logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
         }
         if (sessions[i].isRunning()) {
           sessions[i].stop();
@@ -632,7 +620,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     ServerSocket listen = null;
 
     WakeOnConnection(String name, Logger logmon) throws IOException {
-      super(name + ".wakeOnConnection", logmon);
+      super(name + ".wakeOnConnection");
       // Create the listen socket in order to verify the port availability.
       listen = createServerSocket();
       // Overload logmon definition in Daemon
@@ -708,7 +696,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
   final class Dispatcher extends Daemon {
     Dispatcher(String name, Logger logmon) {
-      super(name + ".dispatcher", logmon);
+      super(name + ".dispatcher");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
     }
@@ -795,7 +783,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     private Object lock;
 
     WatchDog(String name, Logger logmon) {
-      super(name + ".watchdog", logmon);
+      super(name + ".watchdog");
       lock = new Object();
       // Overload logmon definition in Daemon
       this.logmon = logmon;
@@ -863,7 +851,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     NetSession session = null;
     
     Sender(NetSession session, String name, Logger logmon) {
-      super(name + ".sender", logmon);
+      super(name + ".sender");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
       this.session = session;

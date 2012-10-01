@@ -1,4 +1,20 @@
-include ../Makefile.global
+LIBDIR = ../../src
+INCDIR = ../../src
+
+###############################
+# i86-cygwin
+#CCOPT = -g -I$(INCDIR)
+#LDFLAGS = -g
+#LIBXORAM = libxoram.dll
+###############################
+# i86-linux
+CCOPT = -g -fPIC -I$(INCDIR)
+LDFLAGS = -lrt
+LIBXORAM = libxoram.so
+###############################
+
+CC = g++ $(CCOPT)
+LD = g++ $(CCOPT) $(LDFLAGS)
 
 clean:
 	rm -f *.exe *.o *~

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,7 +36,6 @@ import org.objectweb.joram.client.connector.OutboundConnection;
 import org.objectweb.joram.client.connector.OutboundConsumer;
 import org.objectweb.joram.client.connector.OutboundProducer;
 import org.objectweb.joram.client.connector.OutboundSession;
-import org.objectweb.joram.client.jms.admin.AdminModule;
 
 import framework.TestCase;
 
@@ -55,24 +54,11 @@ public class ConnectorTest1 extends TestCase {
       colocated = Boolean.getBoolean("colocated");
       System.out.println("colocated=" + colocated);
       
-      JoramAdapter ja= new JoramAdapter() ;
-      ja.setName("ra");
-      
-      if (! colocated) {
+      if (! colocated)
         startAgentServer((short) 0);
-        ja.setHostName("localhost");
-        ja.setServerPort(17010);
-      } else {
-      	ja.setStartJoramServer(true);
-      	ja.setStorage("s0");
-      }
       
-      ja.setServerId((short) 0);
-      ja.setPlatformConfigDir(".");
-      ja.setAdminFileXML("joramAdmin.xml");
-      ja.setAdminFileExportXML("joramAdminExport.xml");
-      
-      ja.setCollocated(new Boolean(colocated));
+      JoramAdapter ja= new JoramAdapter() ;
+      ja.setCollocatedServer(new Boolean(colocated));
       ja.start(new ResourceBootstrapContext(new JWorkManager(1, 5, 5000)));
       
       Thread.sleep(5000);
@@ -88,15 +74,7 @@ public class ConnectorTest1 extends TestCase {
 
       ManagedConnectionFactoryImpl mcf = new ManagedConnectionFactoryImpl();
       mcf.setResourceAdapter(ja);
-      mcf.setUserName("anonymous");
-      mcf.setPassword("anonymous");
-      if (! colocated) {
-      	mcf.setCollocated(false);
-      	mcf.setHostName("localhost");
-      	mcf.setServerPort(17010);
-      } else {
-      	mcf.setCollocated(true);
-      }
+
       ManagedConnectionImpl mci = (ManagedConnectionImpl) mcf.createManagedConnection(null,null);
 
       OutboundConnection oc = (OutboundConnection) mci.getConnection(null,null);
@@ -119,12 +97,6 @@ public class ConnectorTest1 extends TestCase {
       TextMessage msg1 =(TextMessage)  cons.receive();
       assertEquals("with queue", msg1.getText());
 
-      if (! colocated) {
-      	AdminModule.connect("localhost", 17010, "root", "root");
-      } else {
-      	AdminModule.collocatedConnect("root", "root");
-      }
-      
       assertTrue("queue is not empty", ((org.objectweb.joram.client.jms.Queue) queue).getPendingMessages() == 0);
 
       msg = os.createTextMessage("with topic");
@@ -224,7 +196,6 @@ public class ConnectorTest1 extends TestCase {
       assertTrue("counter3=" + counter3 + " should be 101", counter3 == 101);
       
       ja.stop();
-      AdminModule.disconnect();
     } catch(Throwable exc) {
       exc.printStackTrace();
       error(exc);

@@ -1,12 +1,12 @@
-# Doxyfile 1.5.0
+# Doxyfile 1.4.7
 
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = Xoram
-PROJECT_NUMBER         = 5.8
-OUTPUT_DIRECTORY       = C:/cygwin/home/freyssin/OW2Joram/xoram/apidoc
-CREATE_SUBDIRS         = YES
+PROJECT_NAME           = Xoram2
+PROJECT_NUMBER         = beta
+OUTPUT_DIRECTORY       = "C:/Documents and Settings/freyssin.SCALAGENT/Bureau/html2"
+CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 USE_WINDOWS_ENCODING   = YES
 BRIEF_MEMBER_DESC      = YES
@@ -24,8 +24,8 @@ ABBREVIATE_BRIEF       = "The $name class" \
                          the
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
-FULL_PATH_NAMES        = NO
-STRIP_FROM_PATH        = C:/cygwin/home/freyssin/OW2Joram/xoram/apidoc
+FULL_PATH_NAMES        = YES
+STRIP_FROM_PATH        = "C:/Documents and Settings/freyssin.SCALAGENT/"
 STRIP_FROM_INC_PATH    = 
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = NO
@@ -82,7 +82,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = C:/cygwin/home/freyssin/OW2Joram/xoram/src
+INPUT                  = C:/cygwin/home/freyssin/owjoram2/xoram
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \

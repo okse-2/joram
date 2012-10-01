@@ -5,52 +5,236 @@
 
   <formats>
     <format>zip</format>
-    <!-- <format>tar.gz</format> -->
+<!--    <format>tar.gz</format>-->
   </formats>
 
-  <dependencySets>
+  <dependencySets> 
     <!-- ship/bundle -->
     <dependencySet>
       <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.apache.geronimo.specs:geronimo-jms_1.1_spec</include>
-        <include>org.objectweb.joram:jcup</include>
-        <include>org.ow2.joram:joram-shared</include>
-        <include>org.ow2.joram:joram-mom-core</include>
-        <include>org.ow2.joram:joram-client-jms</include>
-        <include>org.ow2.joram:a3-common</include>
-        <include>org.ow2.joram:a3-rt</include>
-        <include>org.ow2.joram:a3-osgi</include>
-        <include>org.ow2.joram:jndi-shared</include>
-        <include>org.ow2.joram:jndi-server</include>
-        <include>org.ow2.joram:jndi-client</include>
-        <include>org.ow2.jonas.osgi:monolog</include>
-        <include>org.ow2.joram:joram-mom-extensions-amqp</include>
-        <include>commons-io:commons-io</include>
-        <include>org.ow2.joram:joram-mom-extensions-ftp</include>
-        <include>org.ow2.joram:joram-mom-extensions-jmsbridge</include>
-        <include>org.ow2.joram:joram-mom-extensions-mail</include>
-        <include>org.ow2.joram:joram-mom-extensions-collector</include>
-        <include>org.ow2.joram:joram-mom-extensions-scheduler</include>
-        <include>org.ow2.joram:joram-tools-jasp</include>
-        <include>org.apache.felix:org.apache.felix.shell</include>
-        <include>org.apache.felix:org.apache.felix.shell.remote</include>
-        <include>org.apache.felix:org.apache.felix.shell.tui</include>
-        <include>org.apache.felix:org.apache.felix.gogo.runtime</include>
-        <include>org.apache.felix:org.apache.felix.gogo.command</include>
-        <include>org.apache.felix:org.apache.felix.gogo.shell</include>
-        <include>org.osgi:org.osgi.compendium</include>
-        <include>org.ow2.joram:joram-mom-amqp</include>
-        <include>org.ow2.joram:shell-mom</include>
-        <include>org.ow2.joram:shell-jndi</include>
-        <include>org.ow2.joram:shell-a3</include>
+        <include>org.apache.geronimo.specs:geronimo-jms_1.1_spec
+        </include>
       </includes>
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>false</unpack>
     </dependencySet>
-
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.objectweb.joram:jcup</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:joram-shared</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:joram-mom-core</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:joram-client-jms</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:a3-common</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:a3-rt</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:a3-osgi</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:jndi-shared</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:jndi-server</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:jndi-client</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping> <!-- ow_monolog.jar -->
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.jonas.osgi:monolog</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:joram-mom-extensions-amqp</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:joram-mom-extensions-ftp</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:joram-mom-extensions-jmsbridge</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:joram-mom-extensions-mail</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:joram-mom-extensions-collector</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:joram-mom-extensions-scheduler</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:joram-tools-jasp</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.apache.felix:org.apache.felix.shell</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.apache.felix:org.apache.felix.shell.remote
+        </include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.apache.felix:org.apache.felix.shell.tui</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    
     <!-- ship/lib -->
     <dependencySet>
       <outputDirectory>/ship/lib</outputDirectory>
@@ -58,15 +242,71 @@
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
         <include>javax.activation:activation</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/lib</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>jgroups:jgroups-all</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/lib</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
         <include>org.ow2.spec.ee:ow2-connector-1.5-spec</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/lib</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
         <include>org.ow2.jonas.osgi:monolog</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/lib</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
         <include>javax.mail:mail</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/lib</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>soap:soap</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/lib</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
         <include>org.ow2.joram:joram-client-jca</include>
       </includes>
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>false</unpack>
     </dependencySet>
-
+    
     <!-- ship/bin -->
     <dependencySet>
       <outputDirectory>/ship/bin</outputDirectory>
@@ -78,7 +318,7 @@
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>false</unpack>
     </dependencySet>
-
+    
     <!-- ship/conf -->
     <dependencySet>
       <outputDirectory>/ship/conf</outputDirectory>
@@ -90,7 +330,7 @@
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>true</unpack>
     </dependencySet>
-
+    
     <!-- ship/licenses -->
     <dependencySet>
       <outputDirectory>/ship/licenses</outputDirectory>
@@ -102,6 +342,6 @@
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>true</unpack>
     </dependencySet>
-
+    
   </dependencySets>
 </assembly>

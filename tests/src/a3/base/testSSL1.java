@@ -42,7 +42,7 @@ public class testSSL1 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer((short) 1);
+    crashAgentServer((short) 1);
   }
 
   public static void main(String args[]) throws Exception  {

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C)  2001 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,20 +46,12 @@ public class test3 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer((short) 1);
-    if (router) killAgentServer((short) 2);
+    crashAgentServer((short) 1);
+    if (router) crashAgentServer((short) 2);
   }
 
   public static void main(String args[]) {
     new test3().runTest(args);
-  }
-
-  static class BigNot extends Notification {
-    byte[] heap = null;
-
-    BigNot() {
-      heap = new byte[50 * 1024 * 1024];
-    }
   }
 
   static class Test extends Agent {
@@ -87,12 +79,12 @@ public class test3 extends TestCase {
                                    AgentId.FactoryIdStamp));
           assertEquals(not.getClass().getName(),
                        "fr.dyade.aaa.agent.AgentCreateReply");
-          sendTo(echo, new BigNot());
+          sendTo(echo, new Notification());
           break;
         case 2:
           assertEquals(echo, from) ;
           assertEquals(not.getClass().getName(),
-                       "a3.base.test3$BigNot");
+                       "fr.dyade.aaa.agent.Notification");
           endTest();
           // never reached
         }

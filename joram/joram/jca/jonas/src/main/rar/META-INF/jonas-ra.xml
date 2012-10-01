@@ -43,6 +43,18 @@
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
   <jonas-config-property>
+    <jonas-config-property-name>URL</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>user</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>password</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
     <jonas-config-property-name>loginTimeout</jonas-config-property-name>
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
@@ -59,15 +71,27 @@
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
   <jonas-config-property>
-    <jonas-config-property-name>Name</jonas-config-property-name>
+    <jonas-config-property-name>CollocatedServer</jonas-config-property-name>
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
   <jonas-config-property>
-    <jonas-config-property-name>JndiName</jonas-config-property-name>
+    <jonas-config-property-name>PlatformConfigDir</jonas-config-property-name>
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
   <jonas-config-property>
-    <jonas-config-property-name>Collocated</jonas-config-property-name>
+    <jonas-config-property-name>PersistentPlatform</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>ServerId</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>ServerName</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>AdminFile</jonas-config-property-name>
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
   <jonas-config-property>
@@ -79,106 +103,21 @@
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
   <jonas-config-property>
-    <jonas-config-property-name>RootName</jonas-config-property-name>
-    <jonas-config-property-value></jonas-config-property-value>
-  </jonas-config-property>
-  <jonas-config-property>
-    <jonas-config-property-name>RootPasswd</jonas-config-property-name>
-    <jonas-config-property-value></jonas-config-property-value>
-  </jonas-config-property>
-  <jonas-config-property>
-    <jonas-config-property-name>IdentityClass</jonas-config-property-name>
-    <jonas-config-property-value></jonas-config-property-value>
-  </jonas-config-property>
-  <jonas-config-property>
     <jonas-config-property-name>ConnectingTimer</jonas-config-property-name>
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
   <jonas-config-property>
-    <jonas-config-property-name>StartJoramServer</jonas-config-property-name>
+    <jonas-config-property-name>CnxPendingTimer</jonas-config-property-name>
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
   <jonas-config-property>
-    <jonas-config-property-name>PlatformConfigDir</jonas-config-property-name>
+    <jonas-config-property-name>TxPendingTimer</jonas-config-property-name>
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
   <jonas-config-property>
-    <jonas-config-property-name>ServerId</jonas-config-property-name>
+    <jonas-config-property-name>DeleteDurableSubscription</jonas-config-property-name>
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
-  <jonas-config-property>
-    <jonas-config-property-name>Storage</jonas-config-property-name>
-    <jonas-config-property-value></jonas-config-property-value>
-  </jonas-config-property>
-  <jonas-config-property>
-    <jonas-config-property-name>AdminFileXML</jonas-config-property-name>
-    <jonas-config-property-value></jonas-config-property-value>
-  </jonas-config-property>
-  
-  <jonas-connection-definition>
-    <description>org.objectweb.joram.client.connector.ManagedConnectionFactoryImpl</description>
-    <jndi-name>CF</jndi-name>
-    <jonas-config-property>
-      <jonas-config-property-name>UserName</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>Password</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>IdentityClass</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>Collocated</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>HostName</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>ServerPort</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>OutInterceptors</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>InInterceptors</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>outLocalAddress</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>outLocalPort</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>ConnectingTimer</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>CnxPendingTimer</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>TxPendingTimer</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>multiThreadSync</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>multiThreadSyncDelay</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-  </jonas-connection-definition>
   <jonas-connection-definition>
     <description>org.objectweb.joram.client.connector.ManagedQueueConnectionFactoryImpl</description>
     <jndi-name>QCF</jndi-name>
@@ -191,50 +130,9 @@
       <jonas-config-property-value></jonas-config-property-value>
     </jonas-config-property>
     <jonas-config-property>
-      <jonas-config-property-name>IdentityClass</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
       <jonas-config-property-name>Collocated</jonas-config-property-name>
       <jonas-config-property-value></jonas-config-property-value>
     </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>HostName</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>ServerPort</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>OutInterceptors</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>InInterceptors</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>ConnectingTimer</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>CnxPendingTimer</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>TxPendingTimer</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>multiThreadSync</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>multiThreadSyncDelay</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-
   </jonas-connection-definition>
   <jonas-connection-definition>
     <description>org.objectweb.joram.client.connector.ManagedTopicConnectionFactoryImpl</description>
@@ -248,47 +146,23 @@
       <jonas-config-property-value></jonas-config-property-value>
     </jonas-config-property>
     <jonas-config-property>
-      <jonas-config-property-name>IdentityClass</jonas-config-property-name>
+      <jonas-config-property-name>Collocated</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+  </jonas-connection-definition>
+  <jonas-connection-definition>
+    <description>org.objectweb.joram.client.connector.ManagedConnectionFactoryImpl</description>
+    <jndi-name>CF</jndi-name>
+    <jonas-config-property>
+      <jonas-config-property-name>UserName</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+    <jonas-config-property>
+      <jonas-config-property-name>Password</jonas-config-property-name>
       <jonas-config-property-value></jonas-config-property-value>
     </jonas-config-property>
     <jonas-config-property>
       <jonas-config-property-name>Collocated</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>HostName</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>ServerPort</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>OutInterceptors</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>InInterceptors</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>ConnectingTimer</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>CnxPendingTimer</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>TxPendingTimer</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>multiThreadSync</jonas-config-property-name>
-      <jonas-config-property-value></jonas-config-property-value>
-    </jonas-config-property>
-    <jonas-config-property>
-      <jonas-config-property-name>multiThreadSyncDelay</jonas-config-property-name>
       <jonas-config-property-value></jonas-config-property-value>
     </jonas-config-property>
   </jonas-connection-definition>

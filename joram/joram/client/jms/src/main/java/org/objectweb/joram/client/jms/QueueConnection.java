@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,10 +23,10 @@
  */
 package org.objectweb.joram.client.jms;
 
-import javax.jms.IllegalStateException;
-import javax.jms.InvalidDestinationException;
-import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
+import javax.jms.IllegalStateException;
+
+import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 /**
  * Implements the <code>javax.jms.QueueConnection</code> interface.
@@ -34,24 +34,20 @@ import javax.jms.JMSException;
 public class QueueConnection extends Connection implements javax.jms.QueueConnection {
   /**
    * Creates a <code>QueueConnection</code> instance.
+   *
+   * @param factoryParameters  The factory parameters.
+   * @param requestChannel     The actual connection to wrap.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
    */
-  public QueueConnection() {
-    super();
+  public QueueConnection(FactoryParameters factoryParameters,
+                         RequestChannel requestChannel) throws JMSException {
+    super(factoryParameters, requestChannel);
   }
 
   /**
    * API method.
-   * Creates a connection consumer for this connection, this is an expert facility needed
-   * for applications servers.
-   * 
-   * @param dest        the queue to access.
-   * @param selector    only messages with properties matching the message selector expression
-   *                    are delivered. A value of null or an empty string indicates that there
-   *                    is no message selector for this message consumer.
-   * @param sessionPool the server session pool to associate with this connection consumer
-   * @param maxMessages the maximum number of messages that can be assigned to a server session
-   *                    at one time.
-   * @return The connection consumer.
    * 
    * @exception IllegalStateException  If the connection is closed.
    * @exception InvalidSelectorException  If the selector syntax is wrong.
@@ -68,14 +64,6 @@ public class QueueConnection extends Connection implements javax.jms.QueueConnec
 
   /**
    * API method.
-   * Creates a QueueSession object.
-   * 
-   * @param transacted      indicates whether the session is transacted.
-   * @param acknowledgeMode indicates whether the consumer or the client will acknowledge any
-   *                        messages it receives; ignored if the session is transacted. Legal
-   *                        values are Session.AUTO_ACKNOWLEDGE, Session.CLIENT_ACKNOWLEDGE, and
-   *                        Session.DUPS_OK_ACKNOWLEDGE.
-   * @return A newly created session.
    * 
    * @exception IllegalStateException  If the connection is closed.
    * @exception JMSException  In case of an invalid acknowledge mode.

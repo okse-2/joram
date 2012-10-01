@@ -3,6 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.joram</groupId>
   <artifactId>jndi-server</artifactId>
   <packaging>bundle</packaging>
   <name>JORAM :: jndi :: server</name>
@@ -11,7 +12,7 @@
   <parent>
     <groupId>org.ow2.joram</groupId>
     <artifactId>jndi</artifactId>
-    <version>5.8.0-SNAPSHOT</version>
+    <version>5.7.1</version>
   </parent>
 
   <build>

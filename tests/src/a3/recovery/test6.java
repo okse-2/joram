@@ -42,9 +42,9 @@ public class test6 extends TestCase {
     ServerPing = Integer.getInteger("Ping", ServerPing).shortValue();
     ServerPong = Integer.getInteger("Pong", ServerPong).shortValue();
 
-    startAgentServer(ServerPing, new String[] { "-DTransaction.UseLockFile=false" });
+    startAgentServer(ServerPing, new String[] { "-DNTNoLockFile=true" });
     if (ServerPong != ServerPing)
-      startAgentServer(ServerPong, new String[] { "-DTransaction.UseLockFile=false" });
+      startAgentServer(ServerPong, new String[] { "-DNTNoLockFile=true" });
 
     // int bounce = Integer.getInteger("bounce", 325).intValue();
     int bounce = 5000;
@@ -69,8 +69,8 @@ public class test6 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer(ServerPing);
-    if (ServerPong != ServerPing) killAgentServer(ServerPong);
+    crashAgentServer(ServerPing);
+    if (ServerPong != ServerPing) crashAgentServer(ServerPong);
   }
 
 
@@ -102,10 +102,10 @@ public class test6 extends TestCase {
             TestCase.stopAgentServer(test6.ServerPing);
           } else {
             System.out.println("crash");
-            TestCase.killAgentServer(test6.ServerPing);
+            TestCase.crashAgentServer(test6.ServerPing);
           }
           // Start server#1
-          TestCase.startAgentServer(test6.ServerPing, new String[] { "-DTransaction.UseLockFile=false" });
+          TestCase.startAgentServer(test6.ServerPing, new String[] { "-DNTNoLockFile=true" });
           Thread.sleep(2000L);
           nbStopTask++;
           if (nbStopTask > 20)

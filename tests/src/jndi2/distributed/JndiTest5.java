@@ -87,7 +87,7 @@ public class JndiTest5 extends TestCase {
       Hashtable env1 = new Hashtable();
       env1.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env1.put(NAMING_HOST_PROP, LOCALHOST);
-      env1.put(NAMING_PORT_PROP, "16681");
+      env1.put(NAMING_PORT_PROP, "16601");
 
       InitialContext ctx1 = new InitialContext(env1);
       ctx1.lookup("/A");

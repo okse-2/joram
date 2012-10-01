@@ -27,19 +27,19 @@ import java.util.TimerTask;
 
 /**
  * This class computes the load average of the server using Unix algorithm.
- * This task needs to be scheduled every 5 seconds.
+ * This task needs is scheduled every 5 seconds.
  */
 public abstract class AverageLoadTask extends TimerTask {
   /** number of bits of precision */
-  private final static long FSHIFT = 11;   
+  private static long FSHIFT = 11;   
   /** 1.0 as fixed-point */
-  private final static long FIXED_1 =  (1<<FSHIFT);  
+  private static long FIXED_1 =  (1<<FSHIFT);  
   /** 1/exp(5sec/1min) as fixed-point */
-  private final static long EXP_1 =  1884;   
+  private static long EXP_1 =  1884;   
   /** 1/exp(5sec/5min) */
-  private final static long EXP_5 =  2014;   
+  private static long EXP_5 =  2014;   
   /** 1/exp(5sec/15min) */
-  private final static long EXP_15 = 2037;   
+  private static long EXP_15 = 2037;   
 
   /** load averages for the last minute. */
   long averageLoad1 = 0;
@@ -98,12 +98,6 @@ public abstract class AverageLoadTask extends TimerTask {
     averageLoad1 = computeLoad(averageLoad1, EXP_1, active_tasks);
     averageLoad5 = computeLoad(averageLoad5, EXP_5, active_tasks);
     averageLoad15 = computeLoad(averageLoad15, EXP_15, active_tasks);
-  }
-  
-  public void reset() {
-    averageLoad1 = 0L;
-    averageLoad5 = 0L;
-    averageLoad15 = 0L;
   }
   
   /**

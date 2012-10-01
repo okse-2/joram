@@ -31,22 +31,17 @@ import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import fr.dyade.aaa.common.Configuration;
-
 /**
  *
  */
 public class Activator implements BundleActivator {
-	final public static String STOMP_URI = "stomp.uri";
-	private BundleContext context = null;
-	ConnectionFactory cf = null;
+  ConnectionFactory cf = null;
   StompConnect connect = null;
   
   /**
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
   public void start(BundleContext context) throws Exception {
-  	this.context = context;
     cf = new LocalConnectionFactory();
 
     Properties props = new Properties();
@@ -57,10 +52,6 @@ public class Activator implements BundleActivator {
     Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
     connect = new StompConnect();
-    String uri = getProperty(STOMP_URI); // default: uri = tcp://localhost:61613
-    if (uri != null) {
-    	connect.setUri(uri);
-    }
     connect.setConnectionFactory(cf);
     connect.start();
   }
@@ -73,11 +64,4 @@ public class Activator implements BundleActivator {
     connect = null;
   }
 
-  private String getProperty(String propName) {
-    String propValue = Configuration.getProperty(propName);
-    if (propValue != null) {
-      return propValue;
-    }
-    return context.getProperty(propName);
-  }
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -36,19 +36,18 @@ public class AckedQueue implements java.io.Serializable {
   /** logger */
   public static Logger logger = Debug.getLogger(AckedQueue.class.getName());
 
-  private Vector<ProxyMessage> list;
+  private Vector list;
 
   private int current;
 
   public AckedQueue() {
-    list = new Vector<ProxyMessage>();
+    list = new Vector();
     current = 0;
   }
 
   public void push(ProxyMessage msg) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AckedQueue.push(" + msg + ')');
-    
     synchronized (list) {
       list.addElement(msg);
       list.notify();
@@ -58,12 +57,12 @@ public class AckedQueue implements java.io.Serializable {
   public ProxyMessage get() throws InterruptedException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AckedQueue.get()");
-    
     synchronized (list) { 
       while ((list.size() - current) == 0) {
         list.wait();
       }      
-      ProxyMessage msg = list.elementAt(current);
+      ProxyMessage msg = 
+        (ProxyMessage)list.elementAt(current);
       current++;
       return msg;
     }
@@ -72,18 +71,20 @@ public class AckedQueue implements java.io.Serializable {
   public void ack(long ackId) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AckedQueue.ack(" + ackId + ')');
-    
     synchronized (list) {
       while (list.size() > 0) {
-        ProxyMessage m = list.elementAt(0);
+        ProxyMessage m = 
+          (ProxyMessage)list.elementAt(0);
         if (ackId < m.getId())  return;
 
         // acked
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "AckedQueue acked " + m.getId());
-        
         list.removeElementAt(0);
-        if (current > 0) current--;
+        if (current > 0) {
+          current--;
+        }
+
       }
     }
   }
@@ -91,7 +92,6 @@ public class AckedQueue implements java.io.Serializable {
   public void reset() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AckedQueue.reset()");
-    
     current = 0;
   }
 }

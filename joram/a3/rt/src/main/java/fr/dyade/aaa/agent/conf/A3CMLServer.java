@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,9 @@ import java.util.Vector;
  * The class <code>Server</code> describes an agent server.
  */
 public class A3CMLServer implements Serializable {
-  /** Define serialVersionUID for interoperability. */
+  /**
+   * 
+   */
   private static final long serialVersionUID = 1L;
   public short sid = -1;
   public String name = null;
@@ -39,11 +41,11 @@ public class A3CMLServer implements Serializable {
    * server.
    */
   public int port = -1;
-  public Hashtable<Short, A3CMLNat> nat = null;
-  public Vector<A3CMLNetwork> networks = null;
-  public Vector<A3CMLService> services = null;
+  public Hashtable nat = null;
+  public Vector networks = null;
+  public Vector services = null;
   public String jvmArgs = null;
-  public Hashtable<String, A3CMLProperty> properties = null;
+  public Hashtable properties = null;
   /**
    * True if the server is already visited during configuration phase.
    */
@@ -69,8 +71,8 @@ public class A3CMLServer implements Serializable {
     else
       this.name = name;
     this.hostname = hostname;
-    this.services = new Vector<A3CMLService>();
-    this.networks = new Vector<A3CMLNetwork>();
+    this.services = new Vector();
+    this.networks = new Vector();
   }
 
   public void addNetwork(A3CMLNetwork newNetwork) throws Exception {
@@ -113,7 +115,7 @@ public class A3CMLServer implements Serializable {
 
   public A3CMLProperty addProperty(A3CMLProperty prop) {
     if (properties == null)
-      properties = new Hashtable<String, A3CMLProperty>();
+      properties = new Hashtable();
     return (A3CMLProperty) properties.put(prop.name, prop);
   }
   
@@ -136,7 +138,7 @@ public class A3CMLServer implements Serializable {
 
   public A3CMLNat addNat(A3CMLNat natElement) {
     if (nat == null)
-      nat = new Hashtable<Short, A3CMLNat>();
+      nat = new Hashtable();
     return (A3CMLNat) nat.put(new Short(natElement.sid), natElement);
   }
 
@@ -195,12 +197,12 @@ public class A3CMLServer implements Serializable {
     return null;
   }
 
-  public A3CMLServer duplicate(Hashtable<Short, A3CMLServer> context) throws Exception {
+  public A3CMLServer duplicate(Hashtable context) throws Exception {
     A3CMLServer clone = null;
     Short serverSid = new Short(sid);
     if (!context.containsKey(serverSid)) {
       clone = duplicate();
-      context.put(serverSid, clone);
+      context.put(serverSid,clone);
     } else
       clone = (A3CMLServer) context.get(serverSid);
     return clone;
@@ -211,8 +213,9 @@ public class A3CMLServer implements Serializable {
                                         name, 
                                         hostname);
     if (networks != null) {
-      for (Enumeration<A3CMLNetwork> n = networks.elements(); n.hasMoreElements(); )
-        clone.networks.addElement(n.nextElement().duplicate());
+      for (Enumeration n = networks.elements(); n.hasMoreElements(); )
+        clone.networks.addElement(
+          ((A3CMLNetwork) n.nextElement()).duplicate());
     }
     clone.gateway = gateway;
     clone.domain = domain;
@@ -221,23 +224,25 @@ public class A3CMLServer implements Serializable {
     // super class
     clone.visited = visited;
     if (services != null) {
-      for (Enumeration<A3CMLService> e = services.elements(); e.hasMoreElements(); )
-        clone.services.addElement(e.nextElement().duplicate());
+      for (Enumeration e = services.elements(); e.hasMoreElements(); )
+        clone.services.addElement(
+          ((A3CMLService) e.nextElement()).duplicate());
     }
     if (properties != null) {
-      for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
+      for (Enumeration e = properties.keys(); e.hasMoreElements(); ) {
         
-        String pName = e.nextElement();
-        A3CMLProperty prop = properties.get(pName);
+        String pName = (String) e.nextElement();
+        A3CMLProperty prop = (A3CMLProperty) properties.get(pName);
         if (prop != null) {
-          if (clone.properties == null) clone.properties = new Hashtable<String, A3CMLProperty>();
+          if (clone.properties == null) clone.properties = new Hashtable();
           clone.properties.put(pName, prop.duplicate());
         }
       }
     }
     if (nat != null) {
-      for (Enumeration<A3CMLNat> e = nat.elements(); e.hasMoreElements(); )
-        clone.addNat(e.nextElement().duplicate());
+      for (Enumeration e = nat.elements(); e.hasMoreElements(); )
+        clone.addNat(
+          ((A3CMLNat) e.nextElement()).duplicate());
     }
     clone.jvmArgs = jvmArgs;
 

@@ -52,15 +52,11 @@ public class DistributionQueue extends Queue {
   public static final long DEFAULT_PERIOD = 1000;
 
   public static final String BATCH_DISTRIBUTION_OPTION = "distribution.batch";
-  
-  public static final String ASYNC_DISTRIBUTION_OPTION = "distribution.async";
 
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   private transient DistributionModule distributionModule;
-  
-  private transient DistributionDaemon distributionDaemon;
   
   /** The acquisition class name. */
   private String distributionClassName;
@@ -72,18 +68,11 @@ public class DistributionQueue extends Queue {
    * the queue waiting for previous ones to be sent.
    */
   private boolean batchDistribution;
-  
-  /**
-   * Tells if daemon distribution is active.
-   * On true, the batchDistribution is set.
-   */
-  private boolean isAsyncDistribution;
 
   private Properties properties;
 
   public DistributionQueue() {
     super();
-    fixed = true;
   }
 
   /**
@@ -96,25 +85,19 @@ public class DistributionQueue extends Queue {
     super.setProperties(properties, firstTime);
 
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "DistributionQueue.setProperties prop = " + properties);
+      logger.log(BasicLevel.DEBUG, "DistributionQueue.<init> prop = " + properties);
     }
 
     this.properties = properties;
 
     batchDistribution = false;
-    isAsyncDistribution = false;
 
-    if (properties != null) {
-    	if (properties.containsKey(BATCH_DISTRIBUTION_OPTION)) {
-    		try {
-    			batchDistribution = ConversionHelper.toBoolean(properties.get(BATCH_DISTRIBUTION_OPTION));
-    		} catch (MessageValueException exc) {
-    			logger.log(BasicLevel.ERROR, "DistributionModule: can't parse batch option.", exc);
-    		}
-    	}
-    	isAsyncDistribution = isAsyncDistribution(properties);
-    	if (isAsyncDistribution)
-    		batchDistribution = true;
+    if (properties != null && properties.containsKey(BATCH_DISTRIBUTION_OPTION)) {
+      try {
+        batchDistribution = ConversionHelper.toBoolean(properties.get(BATCH_DISTRIBUTION_OPTION));
+      } catch (MessageValueException exc) {
+        logger.log(BasicLevel.ERROR, "DistributionModule: can't parse batch option.", exc);
+      }
     }
 
     if (firstTime) {
@@ -124,62 +107,26 @@ public class DistributionQueue extends Queue {
       }
       if (distributionClassName == null) {
         throw new RequestException("Distribution class name not found: " + DistributionModule.CLASS_NAME
-                                   + " property must be set on queue creation.");
+            + " property must be set on queue creation.");
       }
 
       // Check the existence of the distribution class and the presence of a no-arg constructor.
       try {
-        Class.forName(distributionClassName).getConstructor();
+        String className = distributionClassName;
+        Class.forName(className).getConstructor();
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR, "DistributionQueue: error with distribution class.", exc);
         throw new RequestException(exc.getMessage());
       }
     } else {
-      distributionModule.setProperties(properties,firstTime);
-      
-    	if (distributionDaemon == null && isAsyncDistribution) {
-    		// start distributionDaemon
-    		distributionDaemon = new DistributionDaemon(distributionModule.getDistributionHandler(), getName(), this);
-    		distributionDaemon.start();
-    	} else if (distributionDaemon != null && !isAsyncDistribution) {
-    		// stop distributionDaemon
-    		distributionDaemon.close();
-    		distributionDaemon = null;
-    		if (properties.containsKey(BATCH_DISTRIBUTION_OPTION)) {
-      		try {
-      			batchDistribution = ConversionHelper.toBoolean(properties.get(BATCH_DISTRIBUTION_OPTION));
-      		} catch (MessageValueException exc) {
-      			logger.log(BasicLevel.ERROR, "DistributionModule: can't parse batch option.", exc);
-      		}
-      	}
-    	}
-
-      //TODO: if isAsyncDistribution change, call wakeup.
-    	
+      distributionModule.setProperties(properties);
     }
   }
 
-  private boolean isAsyncDistribution(Properties properties) {
-  	if (properties.containsKey(ASYNC_DISTRIBUTION_OPTION)) {
-  		try {
-  			return ConversionHelper.toBoolean(properties.get(ASYNC_DISTRIBUTION_OPTION));
-  		} catch (MessageValueException exc) {
-  			logger.log(BasicLevel.ERROR, "DistributionModule: can't parse DaemonDistribution option.", exc);
-  		}	
-  	}
-  	return false;
-  }
-  
   public void initialize(boolean firstTime) {
     super.initialize(firstTime);
     if (distributionModule == null) {
-      distributionModule = new DistributionModule(distributionClassName, properties, firstTime);
-    }
-    if (properties != null)
-    	isAsyncDistribution = isAsyncDistribution(properties);
-    if (distributionDaemon == null && isAsyncDistribution) {
-    	distributionDaemon = new DistributionDaemon(distributionModule.getDistributionHandler(), getName(), this);
-    	distributionDaemon.start();
+      distributionModule = new DistributionModule(distributionClassName, properties);
     }
   }
 
@@ -187,9 +134,6 @@ public class DistributionQueue extends Queue {
     super.agentFinalize(lastTime);
     if (distributionModule != null) {
       distributionModule.close();
-    }
-    if (distributionDaemon != null) {
-    	distributionDaemon.close();
     }
   }
 
@@ -202,11 +146,9 @@ public class DistributionQueue extends Queue {
       logger.log(BasicLevel.DEBUG, "DistributionQueue.preProcess(" + from + ", " + cm + ')');
     }
     if (!batchDistribution && messages.size() > 0) {
-    	// we already have an Exception, because messages.size>0
-    	// so return immediately the new client messages
       return cm;
     }
-    
+
     List msgs = cm.getMessages();
     for (Iterator ite = msgs.iterator(); ite.hasNext();) {
       Message msg = (Message) ite.next();
@@ -215,21 +157,9 @@ public class DistributionQueue extends Queue {
         nbMsgsDeliverSinceCreation++;
         ite.remove();
       } catch (Exception exc) {
-      	if (!isAsyncDistribution) {
-      		if (logger.isLoggable(BasicLevel.WARN)) {
-      			logger.log(BasicLevel.WARN, "DistributionQueue.preProcess: distribution error.", exc);
-      		}
-      	} else {
-      		// a processMessage exception is normal with async mode.
-      		if (distributionDaemon != null) {
-      			// use msg.id ?
-      			distributionDaemon.push(msg);
-      		} else {
-      			if (logger.isLoggable(BasicLevel.WARN)) {
-        			logger.log(BasicLevel.WARN, "DistributionQueue.preProcess: distribution distributionDaemon = null but we are in async distribution mode.", exc);
-        		}
-      		}
-      	}
+        if (logger.isLoggable(BasicLevel.WARN)) {
+          logger.log(BasicLevel.WARN, "DistributionModule: distribution error.", exc);
+        }
         // if we don't do batch distribution, stop on first error
         if (!batchDistribution) {
           break;
@@ -243,38 +173,6 @@ public class DistributionQueue extends Queue {
     return null;
   }
 
-  @Override
-  protected void postProcess(ClientMessages msgs) {
-    super.postProcess(msgs);
-    if (distributionDaemon != null) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "DistributionQueue.postProcess(...)");
-      List ackList = distributionDaemon.getAckList();
-      if (ackList != null) {
-        // Bug fix (JORAM-74): delete anew the forwarded messages
-        // Replaces the call to removeMessages(ackList) by a similar code deleting the
-        // related messages.
-        String id = null;
-        Iterator itMessages = ackList.iterator();
-        while (itMessages.hasNext()) {
-          id = (String) itMessages.next();
-          int i = 0;
-          org.objectweb.joram.mom.messages.Message message = null;
-          while (i < messages.size()) {
-            message = (org.objectweb.joram.mom.messages.Message) messages.get(i);
-            if (id.equals(message.getId())) {
-              messages.remove(i);
-              message.delete();
-              if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "DistributionQueue.postProcess removes " + id);
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
-  
   public String toString() {
     return "DistributionQueue:" + getId().toString();
   }
@@ -283,39 +181,7 @@ public class DistributionQueue extends Queue {
    * wake up, and cleans the queue.
    */
   public void wakeUpNot(WakeUpNot not) {
-  	if (logger.isLoggable(BasicLevel.DEBUG) && !isAsyncDistribution) {
-      logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot(" + not + ')');
-  	}
-  	// Cleans outdated waiting messages
     super.wakeUpNot(not);
- 
-    // delete the ackQueue
-    if (distributionDaemon != null) {
-    	List ackList = distributionDaemon.getAckList();
-    	if (ackList != null) {
-    	  // Bug fix (JORAM-74): delete anew the forwarded messages
-    	  // Replaces the call to removeMessages(ackList) by a similar code deleting the
-    	  // related messages.
-    	  String id = null;
-    	  Iterator itMessages = ackList.iterator();
-    	  while (itMessages.hasNext()) {
-    	    id = (String) itMessages.next();
-    	    int i = 0;
-    	    org.objectweb.joram.mom.messages.Message message = null;
-    	    while (i < messages.size()) {
-    	      message = (org.objectweb.joram.mom.messages.Message) messages.get(i);
-    	      if (id.equals(message.getId())) {
-    	        messages.remove(i);
-    	        message.delete();
-    	        if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot removes " + id);
-    	        break;
-    	      }
-    	    }
-    	  }
-    	}
-    }
-    
     for (Iterator ite = messages.iterator(); ite.hasNext();) {
       org.objectweb.joram.mom.messages.Message msg = (org.objectweb.joram.mom.messages.Message) ite.next();
       try {
@@ -324,17 +190,11 @@ public class DistributionQueue extends Queue {
         ite.remove();
         msg.delete();
       } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.DEBUG) && !isAsyncDistribution) {
-          logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot redelivery number " + msg.getDeliveryCount()
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "Distribution redelivery number " + msg.getDeliveryCount()
               + " failed.", exc);
-        } else if (logger.isLoggable(BasicLevel.DEBUG)) {
-        	logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot redelivery " + msg.getId() + " number " + msg.getDeliveryCount());
         }
-        
-        // increase the delivery count
-        if (distributionDaemon == null)
-        	msg.incDeliveryCount();
-        
+        msg.incDeliveryCount();
         // If message considered as undeliverable, add it to the list of dead messages:
         if (isUndeliverable(msg)) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
@@ -348,30 +208,6 @@ public class DistributionQueue extends Queue {
           dmqManager.sendToDMQ();
           continue;
         }
-        
-        if (distributionDaemon != null) {
-        	synchronized (distributionDaemon) {
-        		// Wakeup the daemon, because the distributionDaemon can wait 
-        		// after a distribution exception
-        		distributionDaemon.notify();
-        	}
-        }
-        
-        if (logger.isLoggable(BasicLevel.DEBUG) && distributionDaemon != null) {
-          logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot distributionDaemon = " + distributionDaemon + 
-          		", distributionDaemon.isEmpty() = " + distributionDaemon.isEmpty());
-        }
-        
-        if (distributionDaemon != null) {
-        	if (!distributionDaemon.isEmpty()) {
-        		// needless to push an other message 
-        		// because the distributionDaemon can't distribute message now.
-        		break;
-        	} else {
-        		distributionDaemon.push(msg.getFullMessage());
-        	}
-        }
-        
         if (!batchDistribution) {
           break;
         }

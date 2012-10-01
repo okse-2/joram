@@ -89,9 +89,10 @@ public class JMSConnectorServer extends JMXConnectorServer implements MessageLis
   
   private MBeanServer mbs = null;
   
-  Connection cnx = null;
   Session session, session2;
   MessageProducer producer, producer2;
+  Queue qToto;
+  Object handback;
   long key = 0L;
   HashMap<Long, MyNotificationListener> listeners;
   
@@ -105,10 +106,6 @@ public class JMSConnectorServer extends JMXConnectorServer implements MessageLis
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "JMSConnectorServer.start()");
 
-    if (! stopped) // The connector is already started
-      return;
-    if (cnx != null) // A stopped connector cannot be started
-      throw new IOException("Connector has been stopped.");
     stopped = false;    
     
     listeners = new HashMap();
@@ -122,6 +119,7 @@ public class JMSConnectorServer extends JMXConnectorServer implements MessageLis
         credentials = (String[]) env.get("jmx.remote.credentials");
       
       // Creates the Connection
+      Connection cnx = null;
       if ((credentials != null) && (credentials.length == 2)) {
         cnx = connectionFactory.createConnection(credentials[0], credentials[1]);
       } else {
@@ -156,13 +154,10 @@ public class JMSConnectorServer extends JMXConnectorServer implements MessageLis
   }
 
   public void stop() throws IOException {
-    if (! stopped) {
+    // TODO(AF):
+    if (!stopped) {
       stopped = true;
-      try {
-        cnx.close();
-      } catch (JMSException exc) {
-        throw new IOException(exc);
-      }
+      // .....
     }
   }
 

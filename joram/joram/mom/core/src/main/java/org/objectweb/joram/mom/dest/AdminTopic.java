@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -553,19 +553,13 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
    * distributing them to the appropriate reactions.
    */ 
   private void processAdminRequests(AgentId replyTo,
-                                    String msgId,
-                                    AdminRequest request,
-                                    AgentId from) {
+                            String msgId,
+                            AdminRequest request,
+                            AgentId from) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ".processAdminRequests(" + msgId + ',' + request + ')');
-
+    
     String info = null;
-    if (request == null) {
-      info = strbuf.append("Unexpected null request to AdminTopic on server [") .append(serverId).append("]").toString();
-      strbuf.setLength(0);
-      distributeReply(replyTo, msgId, new AdminReply(false, info));
-      return;
-    }
 
     // state change, so save.
     setSave();
@@ -631,11 +625,17 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, exc);
 
-      info = strbuf.append("Request [").append(request.getClass().getName())
-          .append("], sent to AdminTopic on server [").append(serverId)
-          .append("], successful [false]: ")
-          .append(exc.getMessage()).toString();
-      strbuf.setLength(0);
+      if (request == null) {
+        info = strbuf.append("Unexpected request to AdminTopic on server [")
+        .append(serverId).append("]: ").append(exc.getMessage()).toString();
+        strbuf.setLength(0);
+      } else {
+        info = strbuf.append("Request [").append(request.getClass().getName())
+        .append("], sent to AdminTopic on server [").append(serverId)
+        .append("], successful [false]: ")
+        .append(exc.getMessage()).toString();
+        strbuf.setLength(0);
+      }
 
       distributeReply(replyTo, msgId, new AdminReply(false, info));
     }
@@ -1111,7 +1111,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   private void doProcess(AgentId replyTo, String msgId) {
     try {
       A3CMLConfig config = AgentServer.getConfig();
-      A3CMLServer a3cmlServer = config.getServer(AgentServer.getServerId());
+      A3CMLServer a3cmlServer = config.getServer(AgentServer.getServerId(), AgentServer.getClusterId());
       distributeReply(replyTo, msgId,
                       new GetLocalServerRep(a3cmlServer.sid,
                                             a3cmlServer.name,
@@ -1715,13 +1715,14 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
       i++;
     }
 
-    Class<?> clazz = Class.forName(className);
+    Class clazz = Class.forName(className);
     Method method = clazz.getMethod(methodName,
         (Class[]) paramClasses.toArray(new Class[paramClasses.size()]));
-    if (! Modifier.isStatic(method.getModifiers()))
+    if (Modifier.isStatic(method.getModifiers())) {
+      return method.invoke(null, paramValues.toArray());
+    } else {
       throw new IllegalArgumentException("Specified method must be static: " + method);
-
-    return method.invoke(null, paramValues.toArray());
+    }
   }
 
   /** 
@@ -1920,19 +1921,6 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
       }
     }
     return desc;
-  }
-  
-  /**
-   * Retrieves an existing user
-   * 
-   * @param name  The name of the user
-   */
-  public static AgentId lookupUser(String name) {
-    AgentId proxId = null;
-    if (name != null && name.length() > 0) {
-      proxId = (AgentId) ref.proxiesTable.get(name);
-    }
-    return proxId;
   }
   
   /**

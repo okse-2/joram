@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -44,7 +44,7 @@ public class Channel {
    */
   static Channel newInstance() throws Exception {
     String cname = AgentServer.getProperty("Channel", "fr.dyade.aaa.agent.Channel");
-    Class<?> cclass = Class.forName(cname);
+    Class cclass = Class.forName(cname);
     channel = (Channel) cclass.newInstance();
     return channel;
   }
@@ -56,14 +56,15 @@ public class Channel {
    * subclasses).
    */
   protected Channel() {
-    consumers = new Vector<MessageConsumer>();
+    consumers = new Vector();
 
     // Get the logging monitor from current server MonologLoggerFactory
-    logmon = Debug.getLogger(Debug.A3Engine + ".#" + AgentServer.getServerId());
+    logmon = Debug.getLogger(Debug.A3Engine +
+                             ".#" + AgentServer.getServerId());
     logmon.log(BasicLevel.DEBUG, toString() + " created.");
   }
 
-  static Vector<MessageConsumer> consumers = null;
+  static Vector consumers = null;
 
   /**
    * Sends a notification to an agent. It may be used anywhere,
@@ -123,10 +124,10 @@ public class Channel {
       }
       cons.post(msg);
     } catch (UnknownServerException exc) {
-      channel.logmon.log(BasicLevel.ERROR,
-                         channel.toString() + ", can't post message: " + msg, exc);
-      if ((msg.from != null) && (msg.from.stamp != AgentId.NullIdStamp))
-        post(Message.alloc(AgentId.localId, msg.from, new UnknownAgent(msg.to, msg.not)));
+      channel.logmon.log(BasicLevel.WARN,
+                         channel.toString() + ", can't post message: " + msg,
+                         exc);
+      // TODO: Post an ErrorNotification
     }
   }
 
@@ -175,8 +176,8 @@ public class Channel {
    *	error when accessing the local persistent storage
    */
   void directSendTo(AgentId from,
-                    AgentId to,
-                    Notification not) {
+		    AgentId to,
+		    Notification not) {
     MessageConsumer consumer = null;
     Message msg = null;
 
@@ -199,28 +200,8 @@ public class Channel {
     }
 
     try {
-      AgentServer.getTransaction().begin();      
+      AgentServer.getTransaction().begin();
       consumer.post(msg);
-      
-//      if (AgentServer.sdf != null) {
-//        // SDF generation
-//        StringBuffer strbuf = new StringBuffer();
-//        strbuf.append("<sendto agent=\"").append(msg.to);
-//        strbuf.append("\" notification=\"").append(StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp()));
-//        strbuf.append("\" info=\"").append(msg.not.getClass().getSimpleName());
-//        strbuf.append("\" flowid=\"0\">\n");
-//        strbuf.append("<comment>").append(msg.not).append("</comment>\n" + "</sendto>\n");
-//
-//        AgentServer.sdf.println(strbuf.toString());
-//      }
-//      
-//      if (AgentServer.logsdf.isLoggable(BasicLevel.INFO))
-//        AgentServer.logsdf.log(BasicLevel.INFO,
-//                             "  sendto " + msg.to + ' ' + StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp()));
-      
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, toString() + ".directSendTo() -> " + msg.getStamp());
-
       consumer.save();
       AgentServer.getTransaction().commit(false);
       // then commit and validate the message.

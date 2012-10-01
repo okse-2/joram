@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -91,7 +91,7 @@ public class TcpServer {
     boolean stopping = false;
 
     protected Monitor(String name, int timeout, TcpServer tcpServer) {
-      super(name, Trace.logger);
+      super(name);
       this.timeout = timeout;
       this.tcpServer = tcpServer;
     }

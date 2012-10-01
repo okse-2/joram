@@ -42,7 +42,7 @@ public abstract class Record implements Serializable {
   public String toString() {
     StringBuffer buf = new StringBuffer();
     buf.append('(' + super.toString());
-    buf.append(",name = " + name+')');
+    buf.append(",name = " + name);
     return buf.toString();
   }
 }

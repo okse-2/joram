@@ -39,10 +39,7 @@ import javax.mail.Session;
 import javax.mail.Store;
 
 import org.objectweb.joram.mom.dest.AcquisitionHandler;
-import org.objectweb.joram.mom.dest.AcquisitionModule;
 import org.objectweb.joram.mom.dest.ReliableTransmitter;
-import org.objectweb.joram.shared.excepts.MessageValueException;
-import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -62,6 +59,7 @@ public class MailAcquisition implements AcquisitionHandler {
   private Folder folder = null;
 
   public void retrieve(ReliableTransmitter transmitter) throws Exception {
+
     List toExpunge = new ArrayList();
     javax.mail.Message[] msgs = popMail(popServer, popUser, popPassword, expunge);
     List list = null;
@@ -92,7 +90,7 @@ public class MailAcquisition implements AcquisitionHandler {
         }
       }
 
-      transmitter.transmit(list, persistent);
+      transmitter.transmit(list, null);
       closeFolder(toExpunge, expunge);
     }
   }
@@ -157,17 +155,7 @@ public class MailAcquisition implements AcquisitionHandler {
     }
   }
 
-  boolean persistent = true;
-  
   public void setProperties(Properties properties) {
-    if (properties.containsKey(AcquisitionModule.PERSISTENT_PROPERTY)) {
-      try {
-        persistent = ConversionHelper.toBoolean(properties.get(AcquisitionModule.PERSISTENT_PROPERTY));
-      } catch (MessageValueException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
     popServer = properties.getProperty("popServer", popServer);
     popUser = properties.getProperty("popUser", popUser);
     popPassword = properties.getProperty("popPassword", popPassword);

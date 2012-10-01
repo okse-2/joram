@@ -174,7 +174,7 @@ public class Requestor implements ReplyListener, ErrorListener {
       } else if (status == Status.DONE) {
         // Status
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> request #" + requestId + " done : " + reply);
+          logger.log(BasicLevel.DEBUG, " -> request #" + requestId + " done");
         if (reply instanceof MomExceptionReply) {
           JMSException jmsExc = RequestMultiplexer.buildJmsException((MomExceptionReply) reply);
           throw jmsExc;

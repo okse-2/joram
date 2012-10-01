@@ -47,7 +47,7 @@ public final class MessageSoftRef {
    * The SoftReference to the message, which permits to the message to be
    * garbaged in response to memory demand.
    */
-  private SoftReference<Message> softRef = null;
+  private SoftReference softRef = null;
 
   /**
    * The stamp of the referenced message. It is useful to avoid reloading
@@ -74,7 +74,7 @@ public final class MessageSoftRef {
   private AgentId deadNotAgentId;
 
   MessageSoftRef(Message msg) {
-    this.softRef = new SoftReference<Message>(msg);
+    this.softRef = new SoftReference(msg);
     this.stamp = msg.stamp;
     if (msg.not != null) {
       this.expiration = msg.not.expiration;
@@ -140,7 +140,7 @@ public final class MessageSoftRef {
     if (msg == null) {
       try {
         msg = Message.load(name);
-        softRef = new SoftReference<Message>(msg);
+        softRef = new SoftReference(msg);
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, "SoftReference: reload from disk " + msg);
       } catch (Exception exc) {

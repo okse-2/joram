@@ -28,14 +28,14 @@ import java.util.Hashtable;
 import javax.jms.JMSException;
 
 /**
- * Clustered queue.
+ * this is a sample.
  */
 public class ClusterQueue extends ClusterDestination implements javax.jms.Queue {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /** 
-   * Constructs an empty cluster queue.
+   * Constructs an empty queue.
    */
   public ClusterQueue() {}
 

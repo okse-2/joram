@@ -1,6 +1,5 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -32,18 +31,14 @@ import org.objectweb.joram.client.jms.TemporaryQueue;
 import javax.jms.Connection;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 /**
  * An <code>OutboundReceiver</code> instance wraps a JMS PTP consumer
  * for a component involved in outbound messaging. 
  */
-public class OutboundReceiver extends OutboundConsumer implements javax.jms.QueueReceiver {
-  
-  public static Logger logger = Debug.getLogger(OutboundReceiver.class.getName());
-  
+public class OutboundReceiver extends OutboundConsumer
+                              implements javax.jms.QueueReceiver
+{
   /** Queue instance to consume messages from. */
   private Queue queue;
 
@@ -58,8 +53,9 @@ public class OutboundReceiver extends OutboundConsumer implements javax.jms.Queu
     super(consumer, session);
     this.queue = queue;
     
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "OutboundReceiver(" + queue + 
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundReceiver(" + queue + 
                                     ", " + consumer + 
                                     ", " + session + ")");
     
@@ -75,8 +71,8 @@ public class OutboundReceiver extends OutboundConsumer implements javax.jms.Queu
 
   /** Returns the consumer's queue. */
   public Queue getQueue() throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " getQueue() = " + queue);
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getQueue() = " + queue);
 
     checkValidity();
     return queue;

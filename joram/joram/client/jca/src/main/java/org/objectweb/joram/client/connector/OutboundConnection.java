@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,27 +22,11 @@
  */
 package org.objectweb.joram.client.connector;
 
+import javax.jms.*;
+import javax.jms.IllegalStateException;
 import java.util.Vector;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionConsumer;
-import javax.jms.ConnectionMetaData;
-import javax.jms.Destination;
-import javax.jms.ExceptionListener;
-import javax.jms.IllegalStateException;
-import javax.jms.JMSException;
-import javax.jms.ServerSessionPool;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.XAConnection;
-import javax.resource.ResourceException;
-import javax.resource.spi.ManagedConnection;
-
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * An <code>OutboundConnection</code> instance is a handler for a physical
@@ -51,10 +34,8 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * transparently use this physical connection possibly within a transaction
  * (local or global).
  */
-public class OutboundConnection implements Connection, OutboundConnectionMBean {
-  
-  public static Logger logger = Debug.getLogger(OutboundConnection.class.getName());
-  
+public class OutboundConnection implements javax.jms.Connection
+{
   /** The managed connection this "handle" belongs to. */
   ManagedConnectionImpl managedCx;
   /** The physical connection this "handle" handles. */
@@ -70,15 +51,17 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
    * @param managedCx  The managed connection building the handle.
    * @param xac        The underlying physical connection to handle.
    */
-  OutboundConnection(ManagedConnectionImpl managedCx, XAConnection xac) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "OutboundConnection(" + managedCx + ", " + xac + ")");
+  OutboundConnection(ManagedConnectionImpl managedCx, 
+                     XAConnection xac) {
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundConnection(" + managedCx + 
+                                    ", " + xac + ")");
 
     this.managedCx = managedCx;
     this.xac = xac;
     sessions = new Vector();
-    
-    registerMBean();
   }
 
   /**
@@ -86,8 +69,9 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
    * throws a <code>IllegalStateException</code> instance.
    */
   public void setClientID(String clientID) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " setClientID(" + clientID + ")");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " setClientID(" + clientID + ")");
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
@@ -101,8 +85,9 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
    */
   public void setExceptionListener(ExceptionListener listener)
     throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " setExceptionListener(" + listener + ")");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " setExceptionListener(" + listener + ")");
 
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
@@ -120,43 +105,21 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
    */
   public Session createSession(boolean transacted, int acknowledgeMode)
     throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createSession(" + transacted + 
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createSession(" + transacted + 
                                     ", " + acknowledgeMode + ")");
 
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-    	logger.log(BasicLevel.DEBUG, this + " createSession managedCx.session = " + managedCx.session);
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createSession sess = " + managedCx.session);
 
     Session sess = managedCx.session;
-    if (sess == null) {
-    	try {
-    		sess = xac.createSession(false, acknowledgeMode);
-    	} catch (IllegalStateException e) {
-    		if (logger.isLoggable(BasicLevel.DEBUG))
-    			logger.log(BasicLevel.DEBUG, this + " createSession (IllegalStateException)" + e);
-    		logger.log(BasicLevel.WARN, this + " createSession reconnection in progress...");
-    		try {
-    			if (managedCx.isReconnected()) {
-    				ManagedConnection mc = managedCx.mcf.createManagedConnection(managedCx.subject, managedCx.cxRequest);
-    				OutboundConnection outboundConnection = (OutboundConnection) mc.getConnection(managedCx.subject, managedCx.cxRequest);
-    				outboundConnection.managedCx.associateConnection(this);
-    			} else {
-    				if (logger.isLoggable(BasicLevel.DEBUG))
-    					logger.log(BasicLevel.DEBUG, this + " createSession : managed connection is not reconnected.");
-    				throw new JMSException(this + " createSession : managed connection is not reconnected.");
-    			}
-    			sess = xac.createSession(false, acknowledgeMode);
-    		} catch (ResourceException exc) {
-    			if (logger.isLoggable(BasicLevel.WARN))
-    				logger.log(BasicLevel.WARN, this + " createSession (ResourceException)", exc);
-    		}
-    	}
-    	if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + " createSession sess = " + sess);
-    }
+    if (sess == null)
+      sess = xac.createSession(false, acknowledgeMode);
 
     return new OutboundSession(sess, this, transacted);
   }
@@ -165,11 +128,13 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
    * Forbidden call on an application or component's outbound connection,
    * throws a <code>IllegalStateException</code> instance.
    */
-  public String getClientID() throws JMSException {
+  public String getClientID() throws JMSException
+  {
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new IllegalStateException("Forbidden call on a component's connection.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
   
   /**
@@ -178,7 +143,8 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
    * @exception javax.jms.IllegalStateException  If the handle is invalid.
    * @exception javax.jms.JMSException           Generic exception.
    */
-  public ConnectionMetaData getMetaData() throws JMSException {
+  public ConnectionMetaData getMetaData() throws JMSException
+  {
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
@@ -189,11 +155,13 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
    * Forbidden call on an application or component's outbound connection,
    * throws a <code>IllegalStateException</code> instance.
    */
-  public ExceptionListener getExceptionListener() throws JMSException {
+  public ExceptionListener getExceptionListener() throws JMSException
+  {
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new IllegalStateException("Forbidden call on a component's connection.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
   
   /**
@@ -203,8 +171,8 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
    * @exception javax.jms.JMSException           Generic exception.
    */
   public void start() throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " start()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " start()");
 
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
@@ -215,8 +183,8 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
       OutboundSession session = (OutboundSession) sessions.get(i);
       session.start();
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + " start session = " + session);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " start session = " + session);
     }
   }
 
@@ -226,13 +194,14 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
    */
   public void stop() throws JMSException {
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " stop()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " stop()");
 
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new IllegalStateException("Forbidden call on a component's connection.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
 
   /**
@@ -248,7 +217,8 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new IllegalStateException("Forbidden call on a component's connection.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
 
   /**
@@ -261,11 +231,13 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
                                          String messageSelector,
                                          ServerSessionPool sessionPool,
                                          int maxMessages)
-         throws JMSException {
+         throws JMSException
+  {
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new IllegalStateException("Forbidden call on a component's connection.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
 
   /**
@@ -277,20 +249,18 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
   public synchronized void close() throws JMSException {
     valid = false;
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " close()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " close()");
 
     for (int i = 0; i < sessions.size(); i++) {
       OutboundSession session = (OutboundSession) sessions.get(i);
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + " close() session = " + session);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " close() session = " + session);
 
       session.close();
     }
 
     managedCx.closeHandle(this);
-    
-    unregisterMBean();
   }
 
   /**
@@ -307,66 +277,15 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
    * close all session.
    */
   public void cleanup() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " cleanup()");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " cleanup()");
     org.objectweb.joram.client.jms.Connection cnx = 
       (org.objectweb.joram.client.jms.Connection) xac;
     cnx.cleanup();
   }
 
-  public String toString() {
-    return "OutboundConnection[" + xac.toString() + "]@" + hashCode();
-  }
-  
-  public String getJMXBeanName(XAConnection cnx) {
-    if (! (cnx instanceof org.objectweb.joram.client.jms.Connection)) return null;
-    StringBuffer buf = new StringBuffer();
-    buf.append(((org.objectweb.joram.client.jms.Connection) cnx).getJMXBeanName());
-    buf.append(",location=OutboundConnection");
-    buf.append(",OutboundConnection=").append("OutboundConnection@").append(hashCode());
-    return buf.toString();
-  }
-
-  public String registerMBean() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "OutboundConnection.registerMBean: " + this);
-    String JMXBeanName = getJMXBeanName(xac);
-    try {
-      if (JMXBeanName != null)
-        MXWrapper.registerMBean(this, JMXBeanName);
-    } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "OutboundConnection.registerMBean: " + JMXBeanName, e);
-    }
-
-    return JMXBeanName;
-  }
-
-  public void unregisterMBean() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "OutboundConnection.unregisterMBean: " + this);
-    try {
-      MXWrapper.unregisterMBean(getJMXBeanName(xac));
-    } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "OutboundConnection.unregisterMBean: " + getJMXBeanName(xac), e);
-    }
-  }
-
-  public int getNumberOfSession() {
-    return sessions.size();
-  }
-
-  public String[] getSessions() {
-    String[] sessTab = new String[sessions.size()];
-    for (int i = 0; i < sessions.size(); i++) {
-      OutboundSession outboundSess = (OutboundSession) sessions.get(i);
-      try {
-        sessTab[i] = outboundSess.sess.toString();
-      } catch (Exception e) {
-        sessTab[i] = "unknown";
-      }
-    }
-    return sessTab;
+  public String toString()
+  {
+    return "OutboundConnection[" + xac.toString() + "]";
   }
 }

@@ -1,6 +1,5 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -18,27 +17,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent D.T.)
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
  * Contributor(s):
  */
 package cluster.queue;
 
-import java.util.*;
 import javax.jms.*;
-
-class Counter {
-  int counter = 0;
-  
-  Counter() {}
-  
-  void inc() {
-    counter += 1;
-  }
-  
-  int get() {
-    return counter;
-  }
-}
 
 /**
  * Implements the <code>javax.jms.MessageListener</code> interface.
@@ -49,8 +33,7 @@ public class MsgListener implements MessageListener {
   long startTime = -1;
   int sleep;
   int nbMsgSleep;
-  Hashtable<String, Counter> stats;
-  
+
   public MsgListener() {}
 
   public MsgListener(String ident) {
@@ -58,7 +41,6 @@ public class MsgListener implements MessageListener {
     int sleep = Integer.getInteger("sleep", 10).intValue();
     int nbMsgSleep = Integer.getInteger("nbMsgSleep", 10).intValue();
     System.out.println("sleep = " + sleep + ", nbMsgSleep=" + nbMsgSleep);
-    stats = new Hashtable<String, Counter>();
   }
 
   public void onMessage(Message msg) {
@@ -67,25 +49,28 @@ public class MsgListener implements MessageListener {
       if (nbMsg == 1)
         startTime = System.currentTimeMillis();
       long time = System.currentTimeMillis();
+      System.out.println("LastTime = " + time);
       time = time - startTime;
+      System.out.println("time = " + time + " nbMsg=" + nbMsg);
 
-      String location = (String) msg.getStringProperty("location");
-      Counter counter = stats.get(location);
-      if (counter == null) {
-        counter = new Counter();
-        counter.inc();
-        stats.put(location, counter);
-      } else {
-        counter.inc();
+      if (msg instanceof TextMessage) {
+        if (ident == null) 
+          System.out.println(((TextMessage) msg).getText());
+        else
+          System.out.println(ident + ": " + ((TextMessage) msg).getText());
+      } else if (msg instanceof ObjectMessage) {
+        if (ident == null) 
+          System.out.println(((ObjectMessage) msg).getObject());
+        else
+          System.out.println(ident + ": " + ((ObjectMessage) msg).getObject());
       }
-      
-      if ((nbMsg % 100) == 99) {
-        System.out.println("time = " + time + " nbMsg=" + nbMsg);
-        for (Enumeration<String> e = stats.keys(); e.hasMoreElements();) {
-          String key = e.nextElement();
-          System.out.println(key + " -> "+ stats.get(key).get());
-        }
+
+      if (sleep > 0 && (nbMsg % nbMsgSleep) == 0) {
+        try {
+          Thread.sleep(sleep);
+        } catch (Exception e) {}
       }
+
     } catch (JMSException jE) {
       System.err.println("Exception in listener: " + jE);
     }

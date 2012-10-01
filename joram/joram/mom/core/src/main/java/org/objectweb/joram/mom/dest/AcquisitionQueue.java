@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,6 @@ package org.objectweb.joram.mom.dest;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.ClientMessages;
-import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -40,6 +39,7 @@ import fr.dyade.aaa.common.Debug;
  * using an {@link AcquisitionModule}.
  */
 public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
+
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -56,74 +56,6 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
 
   /** The number of produced messages. */
   private long msgCount = 0;
-
-  /**
-   * Returns the number of acquired messages processed by the destination.
-   * 
-   * @return the number of acquired messages processed by the destination.
-   */
-  public final long getHandledMsgCount() {
-    return msgCount;
-  }
-  
-  /** The threshold of messages send by the handler in the engine */
-  private long diff_max = 20;
-  private long diff_min = 10;
-  
-  private String ACQ_QUEUE_MAX_MSG = "acquisition.max_msg";
-  private String ACQ_QUEUE_MIN_MSG = "acquisition.min_msg";
-  
-  /**
-   * Returns the maximum number of acquired messages waiting to be handled by
-   * the destination. When the number of messages waiting to be handled is greater
-   * the acquisition handler is temporarily stopped.
-   * 
-   * @return the maximum number of acquired messages waiting to be handled by
-   * the destination.
-   */
-  public final long getDiffMax() {
-    return diff_max;
-  }
-  
-  /**
-   * Returns the minimum threshold of acquired messages waiting to be handled by
-   * the destination for restarting the acquisition handler.
-   * 
-   * @return the minimum threshold of acquired messages waiting to be handled by
-   * the destination.
-   */
-  public final long getDiffMin() {
-    return diff_min;
-  }
-  
-  /** The threshold of pending messages in the queue */
-  private long pending_max = 20;
-  private long pending_min = 10;
-  
-  private String ACQ_QUEUE_MAX_PND = "acquisition.max_pnd";
-  private String ACQ_QUEUE_MIN_PND = "acquisition.min_pnd";
-  
-  /**
-   * Returns the maximum number of waiting messages in the destination. When the number
-   * of waiting messages is greater the acquisition handler is temporarily stopped.
-   * 
-   * @return the maximum number of waiting messages in the destination.
-   */
-  public final long getPendingMax() {
-    return pending_max;
-  }
-  
-  /**
-   * Returns the minimum threshold of waiting messages in the destination for restarting
-   * the acquisition handler.
-   * 
-   * @return the minimum threshold of waiting messages in the destination.
-   */
-  public final long getPendingMin() {
-    return pending_min;
-  }
-  
-  private boolean pause = false;
 
   /** The acquisition class name. */
   private String acquisitionClassName;
@@ -149,11 +81,6 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
       logger.log(BasicLevel.DEBUG, "AcquisitionQueue.setProperties prop = " + properties);
     }
     this.properties = properties;
-    
-    diff_max = Long.parseLong(properties.getProperty(ACQ_QUEUE_MAX_MSG, String.valueOf(diff_max)));
-    diff_min = Long.parseLong(properties.getProperty(ACQ_QUEUE_MIN_MSG, String.valueOf(diff_min)));
-    pending_max = Long.parseLong(properties.getProperty(ACQ_QUEUE_MAX_PND, String.valueOf(pending_max)));
-    pending_min = Long.parseLong(properties.getProperty(ACQ_QUEUE_MIN_PND, String.valueOf(pending_min)));
 
     // Acquisition class name can only be set the first time.
     if (firstTime) {
@@ -182,42 +109,9 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
       acquisitionModule = new AcquisitionModule(this, acquisitionClassName, properties);
     }
   }
-  
-  /**
-   * Returns the number of messages acquired by the acquisition handler.
-   * Be careful this counter is reseted at each time the server starts.
-   * 
-   * @return the number of messages acquired by the acquisition handler.
-   */
-  public final long getAcquiredMsgCount() {
-    return AcquisitionModule.getCount();
-  }
 
-  private transient long acquisitionNotNb = 0;
-  
-  public void react(AgentId from, Notification not) throws Exception { 	
-    try {
-      long diff = AcquisitionModule.getCount() - acquisitionNotNb;
-      int pending = getPendingMessageCount();
-
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.ERROR, "AcquisitionQueue.react: " + pause + ", " + diff + ", " + pending);
-
-      if (!pause && ((diff >= diff_max) || (pending >= pending_max))){
-        stopHandler(properties);
-        pause = true;
-      } else if (pause && (diff <= diff_min) && (pending <= pending_min)){
-        startHandler(properties);
-        pause = false;
-      }
-
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.ERROR, "AcquisitionQueue.react: " + pause + ", " + diff + ", " + pending);
-    } catch (Throwable t) {
-      logger.log(BasicLevel.ERROR, "AcquisitionQueue: error in react.", t);
-    }
+  public void react(AgentId from, Notification not) throws Exception {
     if (not instanceof AcquisitionNot) {
-      acquisitionNotNb += 1;
       acquisitionNot((AcquisitionNot) not);
     } else {
       super.react(from, not);
@@ -292,17 +186,16 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     }
     // Test if the message has already been received to avoid duplicates
     if (lastMessageId != null && lastMessageId.equals(not.getId())) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
         logger.log(BasicLevel.DEBUG, "Message already received, drop the message " + not);
+      }
       return;
     }
     lastMessageId = not.getId();
     ClientMessages clientMessages = acquisitionModule.acquisitionNot(not, msgCount);
     if (clientMessages != null) {
       msgCount += clientMessages.getMessageCount();
-      try {
-        addClientMessages(clientMessages, false);
-      } catch (AccessException e) {/* never happens */}
+      addClientMessages(clientMessages);
     }
   }
 

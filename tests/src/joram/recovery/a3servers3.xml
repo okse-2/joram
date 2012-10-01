@@ -2,7 +2,6 @@
 <config>
   <property name="Engine" value="@engine@"/>
   <property name="Transaction" value="@transaction@"/>
-  <property name="Transaction.UseLockFile" value="false" />
 
   <domain name="D1" network="@network@"/>
 

@@ -58,38 +58,6 @@
     </s1>
    
     <s1 name="Latest News">
-    
-      <s2 name="October 10, 2011: 2 new tutorials are available.">
-      <p>Two short tutorials are available in the <a href="doc/tutorials.html">tutorial</a> section. The first
-      shows the use of the web administration console of Joram and the second allows benchmarking of Joram.</p>
-      </s2>
-    
-      <s2 name="October 03, 2011: JORAM JMX/JMS Connector tutorial is available.">
-      <p>A short tutorial demonstrating the use of JORAM JMX/JMS connector is available in the
-      <a href="doc/tutorials.html">tutorial</a> section.</p>
-      </s2>
-
-      <s2 name="September 09, 2011: JORAM 5.7.0 release is available.">
-      <p>This release introduces some improvements and bug fixes, essentially:</p>
-      <ul>
-        <li>A new JMS bridge component using a connection pool similarly to the AMQP bridge.</li>
-        <li>Persistent handling of transaction properties and enhancements in NGTransaction component.</li>
-        <li>A new AliasQueue destination forwarding messages to a remote Joram destination.</li>
-        <li>A Xoram component (C/C++ client API), corrected and updated.</li>
-      </ul>
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
-      and in Maven repository.</p>
-      <p>It is tagged in SVN (JORAM_5_7_0), the complete list of changes can be viewed either in
-      <a href="dev/versions.html">code updates</a> or in
-      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
-      </s2>
-
-      <s2 name="July 13, 2011: JORAM/AMQP 1.0 is released">
-      <p>Joram team is proud to announce the final version of the implementation of the specification AMQP v0.9.1.
-      This version successfully passed interoperability testing with RabbitMQ and QPID, it is available in Maven
-      reprository.</p>
-			</s2>
-
       <s2 name="July 13, 2011: JORAM 5.6.0 release is available.">
       <p>This release introduces some improvements and bug fixes, essentially:</p>
       <ul>
@@ -117,15 +85,56 @@
       <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
       </s2>
 
-      <s2 name="November 24-25, 2010: OW2 Annual Conference, Paris, France.">
-      <p>During the <a href="http://www.ow2.org/view/Events/OW2AnnualConference2010">OW2 Annual Conference</a>,
-      Serge Lacourte (<a href="www.scalagent.com">ScalAgent D.T.</a>) presents two very different Use Cases of Joram.
-      They demonstrate the ability of Joram to adapt to very different deployment environments,
-      thanks to the very high configuration capability of its architecture.</p>
-      <p>
-      The slide show is available on the OW2 web site:
-      <a href="http://www.ow2.org/xwiki/bin/download/Events2010AnnualConference/Program/JORAM-S-Lacourte.pdf">Configuration from clustering to WAN distribution with Joram</a>.
-			</p>
+      <s2 name="March 28, 2011: JORAM 5.5.0 release is available.">
+      <p>This release introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Implementation of an AMQP bridge mechanism based on acquisition / distribution
+        destinations. The implementation allows load-balancing and fail-over through
+        multiples AMQP providers.
+        A detailed description is available in section 4.6.10 of the
+        <a href="doc/Joram-en.pdf">user's guide</a>.</li>
+        <li>Achievement of an interception mechanism for processing messages in the MOM.
+        Interceptors can be located on destinations and on connection in/out channels.
+        A detailed description is available in section 3.5 of the
+				<a href="doc/Joram-en.pdf">user's guide</a>.</li>
+        <li>Implementation of a recovery mechanism for the JCA connector with automatic reconnection.</li>
+        <li>Enhancements on clustering destinations.</li>
+        <li>Configuration for the default syncOnWrite mechanism on persistence handling.</li>
+        <li>Bug fix: Removes useless timeout during JNDI service stop.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>This version is bundled in Jonas 5.2.</p>
+      <p>It is tagged in SVN (JORAM_5_5_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+
+      <s2 name="October 27, 2010: JORAM 5.4.0 release is available.">
+      <p>This release introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Design of an extension framework for JMS destinations. In a first time it
+				defines 2 destinations for acquisition (create JMS message from external data)
+				and distribution (create external data from JMS message) and a simple interface
+				to implement for acquisition and distribution modules.</li>
+        <li>Implementation of Acquisition and Distribution modules are provided to replace
+        Collector, Mail, Monitoring and JMS bridge destinations.</li>
+        <li>Implementation of a STOMP proxy allowing Joram access through STOMP protocol.</li>
+        <li>Possibility to create or retrieve destinations using symbolic name through
+        Session.create[Queue|Topic].</li>
+        <li>Adds many monitoring and statistics JMX attributes.</li>
+        <li>Numerous changes in administration offering better functionnalities and
+        performances.</li>
+        <li>Bug fix: in the JMS bridge, previously the use of receiveNoWait cause a NPE in
+				server and an infinite wait for the client.</li>
+        <li>Bug fix: Potential client blocking when sending a message with a TTL to a local
+        destination (A cause of this problem can be a bad clock synchronization).</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven
+      repository.</p>
+      <p>It is tagged in SVN (JORAM_5_4_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
       </s2>
 
       <s2 name="May 18, 2010: JORAM Architecture Designer plugin 1.0.0 is available">

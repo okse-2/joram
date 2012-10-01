@@ -46,7 +46,7 @@ public class test9 extends TestCase {
   static int  nbStopTask =0;
 
   protected void setUp() throws Exception {
-    startAgentServer(ServerPong, new String[] { "-DTransaction.UseLockFile=false" });
+    startAgentServer(ServerPong, new String[] { "-DNTNoLockFile=true" });
 
     int bounce = Integer.getInteger("bounce", 150).intValue();
     // bounce = 100;
@@ -68,7 +68,7 @@ public class test9 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer(ServerPong);
+    crashAgentServer(ServerPong);
   }
 
 
@@ -150,12 +150,12 @@ public class test9 extends TestCase {
             TestCase.stopAgentServer(test9.ServerPong);
           } else {
             System.out.println("crash");
-            TestCase.killAgentServer(test9.ServerPong);
+            TestCase.crashAgentServer(test9.ServerPong);
           }
           // Wait in order to prevent WAIT status on TCP connection
           Thread.sleep(500L);
           // Start server#1
-          TestCase.startAgentServer(test9.ServerPong, new String[] { "-DTransaction.UseLockFile=false" });
+          TestCase.startAgentServer(test9.ServerPong, new String[] { "-DNTNoLockFile=true" });
           nbStopTask++;
           if (nbStopTask > 20)
             endTest();

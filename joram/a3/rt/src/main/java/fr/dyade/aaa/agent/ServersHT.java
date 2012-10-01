@@ -1,23 +1,3 @@
-/*
- * Copyright (C) 2005 - 2012 ScalAgent Distributed Technologies
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or any later version.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA.
- *
- * Initial developer(s): ScalAgent Distributed Technologies
- */
 package fr.dyade.aaa.agent;
 
 import java.util.Enumeration;
@@ -38,6 +18,9 @@ public class ServersHT {
   private static final float loadFactor = 0.75f;
   /** The table is rehashed each time its size exceeds this threshold. */
   private int threshold;
+
+  /** The number of times this Hashtable has been modified. */
+  private transient int modCount = 0;
 
   /**
    * Constructs a new, empty hashtable with the default initial 
@@ -63,7 +46,7 @@ public class ServersHT {
    * @return  an enumeration of the keys in this hashtable.
    * @see     Enumeration
    */
-  public synchronized Enumeration<Short> keys() {
+  public synchronized Enumeration keys() {
     return new Enumerator(KEYS);
   }
 
@@ -75,7 +58,7 @@ public class ServersHT {
    * @return  an enumeration of the values in this hashtable.
    * @see     java.util.Enumeration
    */
-  public synchronized Enumeration<ServerDesc> elements() {
+  public synchronized Enumeration elements() {
     return new Enumerator(VALUES);
   }
 
@@ -108,6 +91,7 @@ public class ServersHT {
     int newCapacity = oldCapacity * 2 + 1;
     ServerDescEntry newMap[] = new ServerDescEntry[newCapacity];
 
+    modCount++;
     threshold = (int)(newCapacity * loadFactor);
     table = newMap;
 
@@ -148,6 +132,7 @@ public class ServersHT {
       }
     }
 
+    modCount++;
     if (count >= threshold) {
       // Rehash the table if the threshold is exceeded
       rehash();
@@ -176,6 +161,7 @@ public class ServersHT {
     int index = (sid & 0x7FFF) % tab.length;
     for (ServerDescEntry e = tab[index], prev = null ; e != null ; prev = e, e = e.next) {
       if (e.desc.sid == sid) {
+        modCount++;
         if (prev != null) {
           prev.next = e.next;
         } else {
@@ -195,6 +181,7 @@ public class ServersHT {
    */
   public synchronized void clear() {
     ServerDescEntry tab[] = table;
+    modCount++;
     for (int index = tab.length; --index >= 0; )
       tab[index] = null;
     count = 0;
@@ -256,7 +243,15 @@ public class ServersHT {
     ServerDescEntry[] table = ServersHT.this.table;
     int index = table.length;
     ServerDescEntry entry = null;
+    ServerDescEntry lastReturned = null;
     int type;
+
+    /**
+     * The modCount value that the iterator believes that the backing
+     * List should have.  If this expectation is violated, the iterator
+     * has detected concurrent modification.
+     */
+    protected int expectedModCount = modCount;
 
     Enumerator(int type) {
       this.type = type;
@@ -286,7 +281,7 @@ public class ServersHT {
       entry = et;
       index = i;
       if (et != null) {
-        ServerDescEntry e = entry;
+        ServerDescEntry e = lastReturned = entry;
         entry = e.next;
         return (type == KEYS)?((Object) new Short(e.desc.sid)):((Object) e.desc);
       }

@@ -60,12 +60,12 @@ public class JndiTest3 extends TestCase {
       Hashtable env1 = new Hashtable();
       env1.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env1.put(NAMING_HOST_PROP, LOCALHOST);
-      env1.put(NAMING_PORT_PROP, "16681");
+      env1.put(NAMING_PORT_PROP, "16601");
 
       Hashtable env2 = new Hashtable();
       env2.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env2.put(NAMING_HOST_PROP, LOCALHOST);
-      env2.put(NAMING_PORT_PROP, "16683");
+      env2.put(NAMING_PORT_PROP, "16603");
 
       InitialContext ctx0 = new InitialContext(env0);
       InitialContext ctx1 = new InitialContext(env1);

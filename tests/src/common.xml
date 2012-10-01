@@ -31,7 +31,6 @@
   <property name="testlib.dir" location="../../lib"/>
   <property name="felix.dir" location="${ship.dir}/bin"/>
   <property name="bundle.dir" location="${ship.dir}/bundle"/>
-  <property name="bin.dir" location="${ship.dir}/bin"/>
   <!-- creates the directory when no file has been extracted -->
   <mkdir dir="${testlib.dir}"/>
 
@@ -48,9 +47,6 @@
       <include name="*.jar"/>
     </fileset>
     <fileset dir="${bundle.dir}">
-      <include name="*.jar"/>
-    </fileset>
-    <fileset dir="${bin.dir}">
       <include name="*.jar"/>
     </fileset>
     <pathelement path="${obj.dir}"/>

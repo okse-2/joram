@@ -119,7 +119,8 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
     countLabel = new Label(Application.messages.serverWidget_count());
     countLabel.setHeight(20);
     countLabel.setStyleName("title1");
-    countChart = new AnnotatedTimeLine(createTableCount(), createOptions(), (pageWidth - 50) + "px", "200px");
+    countChart = new AnnotatedTimeLine(createTableCount(), createOptions(),
+        Integer.toString(pageWidth - 150), "200");
 
     countForm = new DynamicForm();
     countForm.setNumCols(8);
@@ -194,8 +195,8 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
     serverLabel = new Label(Application.messages.serverWidget_engine());
     serverLabel.setHeight(20);
     serverLabel.setStyleName("title1");
-    serverChart = new AnnotatedTimeLine(createTableServer(), createOptions(), (pageWidth - 50) + "px",
-        "200px");
+    serverChart = new AnnotatedTimeLine(createTableServer(), createOptions(),
+        Integer.toString(pageWidth - 150), "200");
 
     serverForm = new DynamicForm();
     serverForm.setNumCols(6);
@@ -226,7 +227,6 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
       });
       vShowNetworkBox.setElementAt(check, it);
     }
-    enableDisableCheckboxEngine();
 
     CheckboxItem[] arrNetwork = new CheckboxItem[vShowNetworkBox.size()];
     vShowNetworkBox.toArray(arrNetwork);

@@ -104,8 +104,4 @@ public class ConnectionRequest
   {
     return ("Unified:" + userName).hashCode();
   }
-  
-  public String toString() {
-    return "ConnectionRequest:Unified:" + userName + "@"+ hashCode();
-  }
 }

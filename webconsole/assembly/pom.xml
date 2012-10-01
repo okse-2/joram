@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.objectweb.joram</groupId>
   <artifactId>webconsole-assembly</artifactId>
   <packaging>pom</packaging>
   <name>JORAM :: webconsole :: assembly</name>
   <description>Web console assembly.</description>
-
+  
   <parent>
-    <groupId>org.ow2.joram</groupId>
+    <groupId>org.objectweb.joram</groupId>
     <artifactId>webconsole</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
   </parent>
-
+       
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2-beta-5</version>
         <executions>
-          <!-- ============= webconsole ===================== -->
+          <!-- ============= webconsole =====================-->
           <execution>
             <id>webconsole</id>
             <phase>package</phase>
@@ -39,33 +41,33 @@
     </plugins>
   </build>
 
-  <dependencies>
+  <dependencies>  
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.configadmin</artifactId>
       <version>1.2.8</version>
-    </dependency>
+   </dependency>
+   <dependency>
+     <groupId>org.ops4j.pax.web</groupId>
+     <artifactId>pax-web-jetty-bundle</artifactId>
+     <version>0.7.4</version>
+   </dependency>
+   <dependency>
+     <groupId>org.ops4j.pax.web</groupId>
+     <artifactId>pax-web-extender-war</artifactId>
+     <version>0.7.4</version>
+   </dependency>
     <dependency>
-      <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-jetty-bundle</artifactId>
-      <version>0.7.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-extender-war</artifactId>
-      <version>0.7.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>webconsole-admin</artifactId>
       <version>${project.version}</version>
       <type>war</type>
     </dependency>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>licenses</artifactId>
       <version>${joram.version}</version>
       <type>jar</type>
     </dependency>
-  </dependencies>
+  </dependencies>  
 </project>

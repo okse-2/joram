@@ -50,7 +50,7 @@ public interface DistributionHandler {
    * @param properties
    *          The initial set of properties.
    */
-  public void init(Properties properties, boolean firstTime);
+  public void init(Properties properties);
 
   /**
    * Closes this handler and releases any system resources associated to it.

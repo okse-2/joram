@@ -36,10 +36,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.AMQP.Queue.DeclareOk;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownSignalException;
@@ -55,28 +52,7 @@ public class AmqpAcquisition implements AcquisitionDaemon {
 
   private static final Logger logger = Debug.getLogger(AmqpAcquisition.class.getName());
 
-  /** the name of the queue to declare */
   private static final String QUEUE_NAME_PROP = "amqp.QueueName";
-  /**
-   * True if we are declaring a queue passively; i.e., check if it exists.
-   * Default value is true.
-   */
-  private static final String QUEUE_PASSIVE_PROP = "amqp.Queue.DeclarePassive";
-  /**
-   * True if we are declaring an exclusive queue (restricted to this connection).
-   * Default value is false.
-   */
-  private static final String QUEUE_EXCLUSIVE_PROP = "amqp.Queue.DeclareExclusive";
-  /**
-   * True if we are declaring a durable queue (the queue will survive a server restart).
-   * Default value is true.
-   */
-  private static final String QUEUE_DURABLE_PROP = "amqp.Queue.DeclareDurable";
-  /**
-   * True if we are declaring an autodelete queue (server will delete it when no longer in use).
-   * Default value is false.
-   */
-  private static final String QUEUE_AUTODELETE_PROP = "amqp.Queue.DeclareAutoDelete";
 
   private static final String UPDATE_PERIOD_PROP = "amqp.ConnectionUpdatePeriod";
 
@@ -95,11 +71,6 @@ public class AmqpAcquisition implements AcquisitionDaemon {
   /** The name of the foreign AMQP queue. */
   private String amqpQueue = null;
 
-  private boolean amqpQueuePassive = true;
-  private boolean amqpQueueExclusive = true;
-  private boolean amqpQueueDurable = true;
-  private boolean amqpQueueAutoDelete = true;
-  
   private volatile boolean closing = false;
 
   public void start(Properties properties, ReliableTransmitter transmitter) {
@@ -109,11 +80,6 @@ public class AmqpAcquisition implements AcquisitionDaemon {
     if (amqpQueue == null) {
       logger.log(BasicLevel.ERROR, "The amqp queue name property " + QUEUE_NAME_PROP + " must be specified.");
     }
-
-    amqpQueuePassive = Boolean.parseBoolean(properties.getProperty(QUEUE_PASSIVE_PROP, "true"));
-    amqpQueueExclusive = Boolean.parseBoolean(properties.getProperty(QUEUE_EXCLUSIVE_PROP, "false"));
-    amqpQueueDurable = Boolean.parseBoolean(properties.getProperty(QUEUE_DURABLE_PROP, "true"));
-    amqpQueueAutoDelete = Boolean.parseBoolean(properties.getProperty(QUEUE_AUTODELETE_PROP, "false"));
 
     long updatePeriod = 5000L;
     try {
@@ -148,7 +114,7 @@ public class AmqpAcquisition implements AcquisitionDaemon {
       for (Channel channel : channels.values()) {
         try {
           channel.close();
-        } catch (Exception exc) {
+        } catch (IOException exc) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
             logger.log(BasicLevel.DEBUG, "Error while stopping AmqpAcquisition.", exc);
           }
@@ -170,15 +136,11 @@ public class AmqpAcquisition implements AcquisitionDaemon {
                 + connection.getName());
           }
           try {
-            Channel channel = connection.getConnection().createChannel();
-            if (amqpQueuePassive) {
-              channel.queueDeclarePassive(amqpQueue);
-            } else {
-              channel.queueDeclare(amqpQueue, amqpQueueDurable, amqpQueueExclusive, amqpQueueAutoDelete, null);
-            }
-            AmqpConsumer consumer = new AmqpConsumer(channel, connection.getName());
-            channel.basicConsume(amqpQueue, false, consumer);
-            channels.put(connection.getName(), channel);
+            Channel chan = connection.getConnection().createChannel();
+            chan.queueDeclarePassive(amqpQueue);
+            AmqpConsumer consumer = new AmqpConsumer(chan, connection.getName());
+            chan.basicConsume(amqpQueue, false, consumer);
+            channels.put(connection.getName(), chan);
           } catch (Exception e) {
             logger.log(BasicLevel.ERROR,
                 "Error while starting consumer on connection: " + connection.getName(), e);
@@ -250,12 +212,11 @@ public class AmqpAcquisition implements AcquisitionDaemon {
       }
       
       if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, name + ": New incoming message " + properties.getMessageId() + " -> " + message);
+        logger.log(BasicLevel.DEBUG, name + ": New incoming message : " + message);
       }
 
-      // Sends a notification containing the message to the acquisition destination
-      // then acknowledge the message.
       transmitter.transmit(message, properties.getMessageId());
+
       getChannel().basicAck(envelope.getDeliveryTag(), false);
     }
 

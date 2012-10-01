@@ -25,11 +25,11 @@ package com.scalagent.appli.client.presenter;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.command.session.LoginAction;
+import com.scalagent.appli.client.command.session.LoginHandler;
 import com.scalagent.appli.client.command.session.LoginResponse;
 import com.scalagent.appli.client.event.session.LoginValidEvent;
 import com.scalagent.appli.client.widget.LoginWidget;
 import com.scalagent.engine.client.BaseRPCServiceAsync;
-import com.scalagent.engine.client.command.Handler;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -53,7 +53,7 @@ public class LoginPresenter extends BasePresenter<LoginWidget, BaseRPCServiceAsy
    * It send the login information to the server and wait for the response
    */
   public void sendLogin(String login, String password) {
-    service.execute(new LoginAction(login, password), new Handler<LoginResponse>(eventBus) {
+    service.execute(new LoginAction(login, password), new LoginHandler(eventBus) {
       @Override
       public void onSuccess(LoginResponse response) {
         if (response.isSuccess()) {

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,8 @@
  */
 package org.objectweb.joram.mom.dest.jms;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -43,14 +38,12 @@ public class JMSConnectionService {
   private static final Logger logger = Debug.getLogger(JMSConnectionService.class.getName());
 
   private static JMSConnections singleton;
-  
-  final static String JMXBaseName = "BridgeJMS#";
 
   public synchronized static JMSConnections getInstance() {
     if (singleton == null) {
       singleton = new JMSConnections();
       try {
-        MXWrapper.registerMBean(singleton, JMXBaseName + AgentServer.getServerId(), "type=Connections");
+        MXWrapper.registerMBean(singleton, "JMS#" + AgentServer.getServerId(), "type=Connections");
       } catch (Exception e) {
         logger.log(BasicLevel.DEBUG, "registerMBean", e);
       }
@@ -58,76 +51,31 @@ public class JMSConnectionService {
     return singleton;
   }
 
-  /**
-   * @param urls The url list separate by space
-   * urls = "jndi_url/?name=cnx1&cf=cfName&jndiFactoryClass=com.xxx.yyy&user=user1&pass=pass1&clientID=clientID jndi_url/?name=cnx2&cf=cfName2&jndiFactoryClass=com.xxx.zzz&user=user1&pass=pass2&clientID=clientID2"
-   * in url, use %26 instead of & if needed.
-   */
-  public static void addServer(String urls) {
-  	String name = null;
-  	String cf = null;
-    String jndiFactoryClass = null;
-    String jndiUrl = null;
-    String user = null;
-    String password = null;
-    String clientID = null;
-    URL url = null;
-    if (urls != null && urls.length() > 0) {
-    	StringTokenizer st = new StringTokenizer(urls);
-    	while (st.hasMoreTokens()) {
-    		try {
-    			url = new URL(null, st.nextToken(), new MyURLStreamHandler());
-    		} catch (Exception e) {
-    			if (logger.isLoggable(BasicLevel.ERROR)) {
-      			logger.log(BasicLevel.ERROR, "JMSConnectionService.addServer : Exception ", e);
-      		}
-  				continue;
-  			}
-    		String query = url.getQuery();
-    		String[] tab = query.split("&|%26");
-    		Properties prop = new Properties();
-    		for (int i = 0; i < tab.length; i++) {
-    			String[] split = tab[i].split("=");
-    			prop.put(split[0],split[1]);
-    		}
-    		
-    		name = prop.getProperty("name");
-    		cf = prop.getProperty("cf");
-    		jndiFactoryClass = prop.getProperty("jndiFactoryClass");
-    		user =  prop.getProperty("user");
-    		password =  prop.getProperty("pass");
-    		clientID =  prop.getProperty("clientID");
-    		jndiUrl = url.toString().substring(0, url.toString().indexOf('?'));
-    		
-    		getInstance().addServer(name, cf, jndiFactoryClass, jndiUrl, user, password, clientID);
-    	}
-    }
+  public static void addServer(String cnxFactoryName) {
+    getInstance().addServer(cnxFactoryName);
   }
 
-  public static void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl) {
-    getInstance().addServer(name, cnxFactoryName, jndiFactoryClass, jndiUrl);
+  public static void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl) {
+    getInstance().addServer(cnxFactoryName, jndiFactoryClass, jndiUrl);
   }
 
-  public static void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
+  public static void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
       String password) {
-    getInstance().addServer(name, cnxFactoryName, jndiFactoryClass, jndiUrl, user, password);
+    getInstance().addServer(cnxFactoryName, jndiFactoryClass, jndiUrl, user, password);
   }
 
-  public static void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
+  public static void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
       String password, String clientID) {
-    getInstance().addServer(name, cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, clientID);
+    getInstance().addServer(cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, clientID);
   }
 
   /**
-   * Removes the live connection to the specified JMS server.
+   * Removes the live connection to the specified AMQP server.
    * 
-   * @param name the name identifying the server or list of name separate by space
+   * @param name the name identifying the server
    */
-  public static void deleteServer(String names) {
-  	StringTokenizer token = new StringTokenizer(names, " ");
-  	while (token.hasMoreTokens()) {
-  		getInstance().deleteServer(token.nextToken());
-  	}
+  public static void deleteServer(String name) {
+    getInstance().deleteServer(name);
   }
 
   /**
@@ -138,24 +86,50 @@ public class JMSConnectionService {
   }
 
   /**
-   * Initializes the service. Starts a connection with servers if urls set.
+   * Initializes the service. Starts a connection with one server.
    */
   public static void init(String args, boolean firstTime) throws Exception {
-  	if (firstTime) {
-  		if (args != null && args.length() > 0) {
-  			addServer(args);
-  		}
-  	} else {
-  		getInstance().readSavedConf();
-  	}
+    if (firstTime) {
+      String cf = "cf";
+      String jndiFactoryClass = null;
+      String jndiUrl = null;
+      String user = null;
+      String password = null;
+      String clientID = null;
+      if (args != null && args.length() > 0) {
+        StringTokenizer st = new StringTokenizer(args);
+        if (st.hasMoreTokens()) {
+          cf = st.nextToken();
+        }
+        if (st.hasMoreTokens()) {
+          jndiFactoryClass = st.nextToken();
+        }
+        if (st.hasMoreTokens()) {
+          jndiUrl = st.nextToken();
+        }
+        if (st.hasMoreTokens()) {
+          user = st.nextToken();
+        }
+        if (st.hasMoreTokens()) {
+          password = st.nextToken();
+        }
+        if (st.hasMoreTokens()) {
+          clientID = st.nextToken();
+        }
+        getInstance().addServer(cf, jndiFactoryClass, jndiUrl, user, password, clientID);
+      }
+    } else {
+      getInstance().readSavedConf();
+    }
+
   }
 
   /**
-   * Stops all connections to JMSBridge servers.
+   * Stops all connections to AMQP servers.
    */
   public static void stopService() {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "Stopping JMSConnectionService service.");
+      logger.log(BasicLevel.DEBUG, "Stopping AmqpConnectionHandler service.");
     }
     getInstance().stop();
   }
@@ -175,10 +149,4 @@ public class JMSConnectionService {
     return injection;
   }
 
-  static class MyURLStreamHandler extends URLStreamHandler {
-		@Override
-		protected URLConnection openConnection(URL u) throws IOException {
-			throw new IOException("sorry, not possible to openConnection with this URL (juste use to parse) " + u);
-		}
-	}
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -24,6 +24,7 @@
 package org.objectweb.joram.client.jms.admin;
 
 import java.net.ConnectException;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
@@ -69,25 +70,8 @@ import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
- * The <code>User</code> class is a utility class needed for administering Joram users.
- * <p>
- * The User class is a factory for Joram's users through the create static methods, the
- * User object provides Joram specific administration and monitoring methods.
- * <p>
- * The User object provides methods to add and remove Interceptors, such an interceptor
- * can handle each incoming and outgoing message. Interceptors can read and also modify
- * the messages. This enables filtering, transformation or content enrichment, for example
- * adding a property into the message. Also Interceptors can stop the Interceptor chain by
- * simply returning false to their intercept method invocation, in this case the transmission
- * of the message is stopped.
- * <p>
- * There is two distinct chains of interceptors:<ul>
- * <li>The first one “interceptors_in” handles each message that’s entering the server (result
- * of a send method on a connection from the selected user).</li>
- * <li>The second one “interceptors_out” handles each message that’s exiting the server (result
- * of a receive method on a connection from the selected user).</li>
- * <ul>
- * These two interceptor chains are configurable for each user.
+ * The <code>User</code> class is a utility class needed for administering
+ * JORAM users.
  */
 public class User extends AdministeredObject implements UserMBean {
   /** define serialVersionUID for interoperability */
@@ -135,10 +119,7 @@ public class User extends AdministeredObject implements UserMBean {
     return name;
   }
 
-  /** 
-   * Returns <code>true</code> if the parameter object is a Joram user wrapping
-   * the same Joram's User.
-   */
+  /** Provides a reliable way to compare <code>User</code> instances. */
   public boolean equals(Object o) {
     if (! (o instanceof User))
       return false;
@@ -194,7 +175,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception AdminException  If the platform's reply is invalid, or if
    *              the request failed.
    */
-  private final AdminReply doRequest(AdminRequest request) throws AdminException, ConnectException {
+  public final AdminReply doRequest(AdminRequest request) throws AdminException, ConnectException {
     return getWrapper().doRequest(request);
   }
 
@@ -303,17 +284,13 @@ public class User extends AdministeredObject implements UserMBean {
 
   // Object name of the MBean if it is registered.
   transient protected String JMXBeanName = null;
-  
-  public static String getJMXBeanName(String base, User user) {
-    int sid = Integer.parseInt(user.proxyId.substring(user.proxyId.indexOf('.') +1, user.proxyId.lastIndexOf('.')));
-    StringBuffer buf = new StringBuffer();
-    buf.append(base);
-    buf.append(":type=User,location=server#").append(sid).append(",name=").append(user.getName()).append('[').append(user.getProxyId()).append(']');
-    return buf.toString();
-  }
 
   public String registerMBean(String base) {
-    JMXBeanName = getJMXBeanName(base, this);
+    int sid = Integer.parseInt(proxyId.substring(proxyId.indexOf('.') +1, proxyId.lastIndexOf('.')));
+    StringBuffer buf = new StringBuffer();
+    buf.append(base);
+    buf.append(":type=User,location=server#").append(sid).append(",name=").append(getName()).append('[').append(getProxyId()).append(']');
+    JMXBeanName = buf.toString();
     
     try {
       MXWrapper.registerMBean(this, JMXBeanName);
@@ -585,12 +562,11 @@ public class User extends AdministeredObject implements UserMBean {
     String[] subNames = reply.getSubNames();
     String[] topicIds = reply.getTopicIds();
     int[] messageCounts = reply.getMessageCounts();
-    int[] ackCounts = reply.getDeliveredMessageCount();
     boolean[] durable = reply.getDurable();
 
     Subscription[] res = new Subscription[subNames.length];
     for (int i = 0; i < res.length; i++) {
-      res[i] = new Subscription(subNames[i], topicIds[i], messageCounts[i], ackCounts[i], durable[i]);
+      res[i] = new Subscription(subNames[i], topicIds[i], messageCounts[i], durable[i]);
     }
     return res;
   }
@@ -616,12 +592,11 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public Subscription getSubscription(String subName) throws AdminException, ConnectException {
     GetSubscriptionRep reply = (GetSubscriptionRep) doRequest(new GetSubscription(proxyId, subName));
-    Subscription sub = new Subscription(subName, reply.getTopicId(), reply.getMessageCount(), reply.getDeliveredMessageCount(), reply.getDurable());
+    Subscription sub = new Subscription(subName, reply.getTopicId(), reply.getMessageCount(), reply.getDurable());
 
     return sub;
   }
 
-  /** used by MBean jmx */
   public String getSubscriptionString(String subName) throws AdminException, ConnectException {
     return getSubscription(subName).toString();
   }
@@ -632,17 +607,6 @@ public class User extends AdministeredObject implements UserMBean {
     return reply.getMessageIds();
   }
 
-  /**
-   * Returns a copy of a message of the subscription.
-   * 
-   * @param subName       The name of the related subscription.
-   * @param msgId         The identifier of the message.
-   * @return The message
-   * 
-   * @throws AdminException
-   * @throws ConnectException
-   * @throws JMSException
-   */
   public Message getMessage(String subName,
                             String msgId) throws AdminException, ConnectException, JMSException {
     GetSubscriptionMessageRep reply = 
@@ -852,5 +816,24 @@ public class User extends AdministeredObject implements UserMBean {
   public void fromReference(Reference ref) throws NamingException {
     name = (String) ref.get("user.name").getContent();
     proxyId = (String) ref.get("user.id").getContent();
+  }
+
+  /**
+   * Codes an <code>User</code> instance as a Hashtable for traveling 
+   * through the SOAP protocol.
+   */
+  public Hashtable code() {
+    Hashtable h = new Hashtable();
+    h.put("name", name);
+    h.put("proxyId", proxyId);
+    return h;
+  }
+
+  /**
+   * Decodes an <code>User</code> which traveled through the SOAP protocol.
+   */
+  public void decode(Hashtable h) {
+    name = (String) h.get("name");
+    proxyId = (String) h.get("proxyId");
   }
 }

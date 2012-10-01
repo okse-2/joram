@@ -73,7 +73,7 @@ public class Test1 extends TestCase {
       properties.put("java.naming.factory.host", "localhost");
       properties.put("java.naming.factory.port", "16600");
     
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.NTransaction" });
 
       Thread.sleep(1000);
@@ -190,11 +190,11 @@ public class Test1 extends TestCase {
       assertTrue("Expected list failure (record)", 
                  expectedExc != null);
 
-      killAgentServer((short)0);
+      crashAgentServer((short)0);
         
       Thread.sleep(1000);
       
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.ATransaction" });
       
       Thread.sleep(1000);
@@ -258,11 +258,11 @@ public class Test1 extends TestCase {
       assertTrue("Expected list failure (destroyed context)", 
                  expectedExc != null);
 
-      killAgentServer((short)0);
+      crashAgentServer((short)0);
         
       Thread.sleep(1000);
       
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false",
+      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.NTransaction" });
       
       Thread.sleep(1000);
@@ -277,11 +277,11 @@ public class Test1 extends TestCase {
         error(exc);
       }
 
-      killAgentServer((short)0);
+      crashAgentServer((short)0);
 
       endTest();
     } catch (Exception exc2) {
-      killAgentServer((short) 0);
+      crashAgentServer((short) 0);
       exc2.printStackTrace();
       error(exc2);
       endTest();
