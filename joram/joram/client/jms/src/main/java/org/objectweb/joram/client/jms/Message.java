@@ -1095,6 +1095,13 @@ public class Message implements javax.jms.Message {
   }
 
   /**
+   * Prepare a JMS message for sending.
+   */
+  public static void prepareJMSMessage(Message msg) throws JMSException {
+    msg.prepare();
+  }
+  
+  /**
    * Method preparing the message for sending; resets header values, and
    * serializes the body (done in subclasses).
 
