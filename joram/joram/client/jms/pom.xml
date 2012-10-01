@@ -3,16 +3,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.objectweb.joram</groupId>
+  <groupId>org.ow2.joram</groupId>
   <artifactId>joram-client-jms</artifactId>
   <packaging>bundle</packaging>
   <name>JORAM :: joram :: client :: jms</name>
   <description>Builds the Joram client jms project.</description>
 
   <parent>
-    <groupId>org.objectweb.joram</groupId>
+    <groupId>org.ow2.joram</groupId>
     <artifactId>joram-client</artifactId>
-    <version>5.7.0</version>
+    <version>5.7.1</version>
   </parent>
 
   <properties>
@@ -105,7 +105,7 @@
       <artifactId>geronimo-jms_1.1_spec</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.objectweb.joram</groupId>
+      <groupId>org.ow2.joram</groupId>
       <artifactId>joram-shared</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -114,7 +114,7 @@
       to be re architecture
     -->
     <dependency>
-      <groupId>org.objectweb.joram</groupId>
+      <groupId>org.ow2.joram</groupId>
       <artifactId>joram-mom-core</artifactId>
       <version>${project.version}</version>
     </dependency>

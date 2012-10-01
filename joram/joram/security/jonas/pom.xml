@@ -3,16 +3,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.objectweb.joram</groupId>
+  <groupId>org.ow2.joram</groupId>
   <artifactId>joram-security-jonas</artifactId>
   <packaging>bundle</packaging>
   <name>JORAM :: joram :: security :: jonas</name>
   <description>Builds the Joram security jonas project.</description>
 
   <parent>
-    <groupId>org.objectweb.joram</groupId>
+    <groupId>org.ow2.joram</groupId>
     <artifactId>joram-security</artifactId>
-    <version>5.7.0</version>
+    <version>5.7.1</version>
   </parent>
 
   <build>
@@ -34,7 +34,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.objectweb.joram</groupId>
+      <groupId>org.ow2.joram</groupId>
       <artifactId>joram-shared</artifactId>
       <version>${project.version}</version>
     </dependency>

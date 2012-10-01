@@ -2,21 +2,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-  <groupId>org.objectweb.joram</groupId>
+  <groupId>org.ow2.joram</groupId>
   <artifactId>joram-jca-remote</artifactId>
   <packaging>rar</packaging>
   <name>JORAM :: joram :: jca :: remote</name>
   <description>Builds the Joram jca remote project.</description>
 
 	<parent>
-		<groupId>org.objectweb.joram</groupId>
+		<groupId>org.ow2.joram</groupId>
     <artifactId>joram-jca</artifactId>
-		<version>5.7.0</version>
+		<version>5.7.1</version>
 	</parent>
   
   <dependencies>
     <dependency>
-      <groupId>org.objectweb.joram</groupId>
+      <groupId>org.ow2.joram</groupId>
       <artifactId>joram-client-jca</artifactId>
       <version>${project.version}</version>
       <exclusions>
@@ -45,30 +45,30 @@
           <artifactId>commons-dbcp</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.objectweb.joram</groupId>
+          <groupId>org.ow2.joram</groupId>
           <artifactId>a3-common</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.objectweb.joram</groupId>
+          <groupId>org.ow2.joram</groupId>
           <artifactId>a3-rt</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.objectweb.joram</groupId>
+          <groupId>org.ow2.joram</groupId>
           <artifactId>joram-mom</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.objectweb.joram</groupId>
+          <groupId>org.ow2.joram</groupId>
           <artifactId>joram-mom-core</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.objectweb.joram</groupId>
+      <groupId>org.ow2.joram</groupId>
       <artifactId>jndi-client</artifactId>
       <version>${project.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>org.objectweb.joram</groupId>
+          <groupId>org.ow2.joram</groupId>
           <artifactId>a3-common</artifactId>
         </exclusion>
       </exclusions>
