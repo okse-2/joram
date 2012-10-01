@@ -3,16 +3,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.objectweb.joram</groupId>
+  <groupId>org.ow2.joram</groupId>
   <artifactId>joram-mom-extensions-jmsbridge</artifactId>
   <packaging>bundle</packaging>
   <name>JORAM :: joram :: mom :: extensions :: jmsbridge</name>
   <description>Builds the Joram jmsbridge extension project.</description>
 
   <parent>
-    <groupId>org.objectweb.joram</groupId>
+    <groupId>org.ow2.joram</groupId>
     <artifactId>joram-mom-extensions</artifactId>
-    <version>5.7.0</version>
+    <version>5.7.1</version>
   </parent>
 
   <build>
@@ -55,12 +55,12 @@
       <artifactId>geronimo-jms_1.1_spec</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.objectweb.joram</groupId>
+      <groupId>org.ow2.joram</groupId>
       <artifactId>joram-mom-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.objectweb.joram</groupId>
+      <groupId>org.ow2.joram</groupId>
       <artifactId>joram-client-jms</artifactId>
       <version>${project.version}</version>
     </dependency>

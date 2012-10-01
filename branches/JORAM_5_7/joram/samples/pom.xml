@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-  <groupId>org.objectweb.joram</groupId>
+  <groupId>org.ow2.joram</groupId>
   <artifactId>joram-samples</artifactId>
   <packaging>pom</packaging>
   <name>JORAM :: joram :: samples</name>
@@ -10,8 +10,8 @@
 
 	<parent>
 		<artifactId>parent</artifactId>
-		<groupId>org.objectweb.joram</groupId>
-		<version>5.7.0</version>
+		<groupId>org.ow2.joram</groupId>
+		<version>5.7.1</version>
 	</parent>
 
   <build>
@@ -44,7 +44,7 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>org.objectweb.joram</groupId>
+                  <groupId>org.ow2.joram</groupId>
                   <artifactId>joram-assembly</artifactId>
                   <type>zip</type>
                   <excludes>**/pom.*,**/META-INF/**</excludes>
@@ -63,7 +63,7 @@
   
   <dependencies>
     <dependency>
-      <groupId>org.objectweb.joram</groupId>
+      <groupId>org.ow2.joram</groupId>
       <artifactId>joram-assembly</artifactId>
       <version>${project.version}</version>
       <type>zip</type>

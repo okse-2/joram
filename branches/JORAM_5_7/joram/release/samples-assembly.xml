@@ -48,7 +48,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:joram-shared</include>
+        <include>org.ow2.joram:joram-shared</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -57,7 +57,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:joram-mom-core</include>
+        <include>org.ow2.joram:joram-mom-core</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -66,7 +66,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:joram-client-jms</include>
+        <include>org.ow2.joram:joram-client-jms</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -75,7 +75,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:a3-common</include>
+        <include>org.ow2.joram:a3-common</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -84,7 +84,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:a3-rt</include>
+        <include>org.ow2.joram:a3-rt</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -93,7 +93,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:a3-osgi</include>
+        <include>org.ow2.joram:a3-osgi</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -102,7 +102,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:jndi-shared</include>
+        <include>org.ow2.joram:jndi-shared</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -111,7 +111,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:jndi-server</include>
+        <include>org.ow2.joram:jndi-server</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -120,7 +120,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:jndi-client</include>
+        <include>org.ow2.joram:jndi-client</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -138,7 +138,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:joram-mom-extensions-amqp</include>
+        <include>org.ow2.joram:joram-mom-extensions-amqp</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -147,7 +147,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:joram-mom-extensions-ftp</include>
+        <include>org.ow2.joram:joram-mom-extensions-ftp</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -156,7 +156,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:joram-mom-extensions-jmsbridge</include>
+        <include>org.ow2.joram:joram-mom-extensions-jmsbridge</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -165,7 +165,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:joram-mom-extensions-mail</include>
+        <include>org.ow2.joram:joram-mom-extensions-mail</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -174,7 +174,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:joram-mom-extensions-collector</include>
+        <include>org.ow2.joram:joram-mom-extensions-collector</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -183,7 +183,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:joram-mom-extensions-scheduler</include>
+        <include>org.ow2.joram:joram-mom-extensions-scheduler</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -192,7 +192,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:joram-tools-jasp</include>
+        <include>org.ow2.joram:joram-tools-jasp</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -285,7 +285,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:joram-client-jca</include>
+        <include>org.ow2.joram:joram-client-jca</include>
       </includes>
       <unpack>false</unpack>
     </dependencySet>
@@ -307,7 +307,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:conf</include>
+        <include>org.ow2.joram:conf</include>
       </includes>
       <unpack>true</unpack>
     </dependencySet>
@@ -318,7 +318,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:licenses</include>
+        <include>org.ow2.joram:licenses</include>
       </includes>
       <unpack>true</unpack>
     </dependencySet>

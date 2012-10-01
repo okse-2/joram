@@ -3,16 +3,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.objectweb.joram</groupId>
+  <groupId>org.ow2.joram</groupId>
   <artifactId>joram-mom</artifactId>
   <packaging>pom</packaging>
   <name>JORAM :: joram :: mom</name>
   <description>Builds the Joram mom project.</description>
 
   <parent>
-    <groupId>org.objectweb.joram</groupId>
+    <groupId>org.ow2.joram</groupId>
     <artifactId>joram</artifactId>
-    <version>5.7.0</version>
+    <version>5.7.1</version>
   </parent>
   
   <modules>
