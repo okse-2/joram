@@ -307,6 +307,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
             if (msg != null) {
               org.objectweb.joram.client.jms.Message clientMessage = 
                 org.objectweb.joram.client.jms.Message.convertJMSMessage(msg);
+              org.objectweb.joram.client.jms.Message.prepareJMSMessage(clientMessage);
               if (logger.isLoggable(BasicLevel.DEBUG))
                 logger.log(BasicLevel.DEBUG, "receiveNoWait: clientMessage=" + clientMessage);
 
@@ -559,6 +560,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
           }
           org.objectweb.joram.client.jms.Message clientMessage = 
             org.objectweb.joram.client.jms.Message.convertJMSMessage(jmsMessage);
+          org.objectweb.joram.client.jms.Message.prepareJMSMessage(clientMessage);
           Message momMessage = clientMessage.getMomMsg();
           if (isXA) {
             try {
