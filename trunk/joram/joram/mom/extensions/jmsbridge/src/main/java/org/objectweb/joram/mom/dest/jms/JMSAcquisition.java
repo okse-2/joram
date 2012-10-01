@@ -221,6 +221,7 @@ public class JMSAcquisition implements AcquisitionDaemon {
         org.objectweb.joram.client.jms.Message clientMessage = null;
         try {
           clientMessage = org.objectweb.joram.client.jms.Message.convertJMSMessage(jmsMessage);
+          org.objectweb.joram.client.jms.Message.prepareJMSMessage(clientMessage);
         } catch (JMSException conversionExc) {
           // Conversion error: denying the message.
           if (logger.isLoggable(BasicLevel.WARN))
