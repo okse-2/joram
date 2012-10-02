@@ -77,6 +77,8 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
    * Returns the maximum number of acquired messages waiting to be handled by
    * the destination. When the number of messages waiting to be handled is greater
    * the acquisition handler is temporarily stopped.
+   * <p>
+   * A value lesser or equal to 0 disables the mechanism.
    * 
    * @return the maximum number of acquired messages waiting to be handled by
    * the destination.
@@ -106,6 +108,8 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
   /**
    * Returns the maximum number of waiting messages in the destination. When the number
    * of waiting messages is greater the acquisition handler is temporarily stopped.
+   * <p>
+   * A value lesser or equal to 0 disables the mechanism.
    * 
    * @return the maximum number of waiting messages in the destination.
    */
@@ -195,7 +199,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
 
   private transient long acquisitionNotNb = 0;
   
-  public void react(AgentId from, Notification not) throws Exception { 	
+  public void react(AgentId from, Notification not) throws Exception {
     try {
       long diff = AcquisitionModule.getCount() - acquisitionNotNb;
       int pending = getPendingMessageCount();
@@ -203,7 +207,9 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.ERROR, "AcquisitionQueue.react: " + pause + ", " + diff + ", " + pending);
 
-      if (!pause && ((diff >= diff_max) || (pending >= pending_max))){
+      if (!pause && 
+          (((diff_max > 0) && (diff >= diff_max)) || 
+           ((pending_max > 0) && (pending >= pending_max)))) {
         stopHandler(properties);
         pause = true;
       } else if (pause && (diff <= diff_min) && (pending <= pending_min)){

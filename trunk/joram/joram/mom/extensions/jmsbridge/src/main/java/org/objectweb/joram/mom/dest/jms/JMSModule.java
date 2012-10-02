@@ -558,7 +558,13 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
 
   private transient List<JmsListener> listeners;
 
-  public void addExceptionListener(JmsListener listener) {
+  void removeExceptionListener(JmsListener listener) {
+    if ((listeners != null) && (listener != null)) {
+      listeners.remove(listener);
+    }
+  }
+  
+  void addExceptionListener(JmsListener listener) {
     if (listeners == null) {
       listeners = new ArrayList<JmsListener>();
     }
