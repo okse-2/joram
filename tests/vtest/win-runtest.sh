@@ -4,15 +4,15 @@
 #################################
 
 #ensure existence of environment variable VTEST_HOME
-if [ -z "$VTEST_HOME" ]
-then
-    echo "variable VTEST_HOME doesn't exist"
-    echo "please set variable VTEST_HOME to the Vtest \"runtest\" script path"
-    exit 1
-else
-    echo "VTEST_HOME set to $VTEST_HOME"
-fi
+# if [ -z "$VTEST_HOME" ]
+# then
+#     echo "variable VTEST_HOME doesn't exist"
+#     echo "please set variable VTEST_HOME to the Vtest \"runtest\" script path"
+#     else
+#     echo "VTEST_HOME set to $VTEST_HOME"
+# fi
 
+VTEST_HOME="/cygdrive/c/vtest"
 date=`date +%x`
 date=`echo $date | sed -e s:/:.:g`
 LOGFILE=$VTEST_HOME/"vtest-$date.log"
