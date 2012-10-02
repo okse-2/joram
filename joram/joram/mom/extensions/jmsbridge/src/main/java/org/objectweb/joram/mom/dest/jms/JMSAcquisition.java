@@ -66,7 +66,7 @@ public class JMSAcquisition implements AcquisitionDaemon {
   private ReliableTransmitter transmitter;
 
   // Use a vector as it is used by 2 different threads
-  private Map<String, Session> sessions = new Hashtable<String, Session>();
+  private Map<String, JmsListener> listeners = new Hashtable<String, JmsListener>();
 
   /** If routing prop has been set, it defines a list of connection to use. */
   private List<String> connectionNames = null;
@@ -133,24 +133,26 @@ public class JMSAcquisition implements AcquisitionDaemon {
     connectionUpdater.removeUpdateListener(this);
     
     closing = true;
-    synchronized (sessions) {
-      for (Session session : sessions.values()) {
+    synchronized (listeners) {
+      for (JmsListener listener : listeners.values()) {
         try {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "Close JMS session: " + session);
+            logger.log(BasicLevel.DEBUG, "Close JMS session: " + listener.session);
 
-          session.close();
+          listener.session.close();
           
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "JMS session closed: " + session);
+            logger.log(BasicLevel.DEBUG, "JMS session closed: " + listener.session);
         } catch (JMSException exc) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
             logger.log(BasicLevel.DEBUG, "Error while stopping JmsAcquisition.", exc);
           }
         }
+        // Remove ExceptionListener from JMSModule
+        listener.connection.removeExceptionListener(listener);
       }
       
-      sessions.clear();
+      listeners.clear();
       closing = false;
     }
   }
@@ -158,9 +160,11 @@ public class JMSAcquisition implements AcquisitionDaemon {
   /**
    * Create a new JMS consumer for each connection available.
    */
-  public synchronized void updateConnections(List<JMSModule> connections) {
+  public synchronized void updateConnections() {
+    List<JMSModule> connections = JMSConnectionService.getInstance().getConnections();
+
     for (JMSModule connection : connections) {
-      if (!sessions.containsKey(connection.getCnxFactName())) {
+      if (!listeners.containsKey(connection.getCnxFactName())) {
         if (connectionNames == null || connectionNames.contains(connection.getCnxFactName())) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
             logger.log(BasicLevel.DEBUG,
@@ -184,11 +188,11 @@ public class JMSAcquisition implements AcquisitionDaemon {
               logger.log(BasicLevel.DEBUG, "setConsumer: consumer=" + consumer);
             }
   
-            JmsListener listener = new JmsListener(session, connection.getCnxFactName());
+            JmsListener listener = new JmsListener(session, connection);
             consumer.setMessageListener(listener);
             connection.getCnx().start();
             connection.addExceptionListener(listener);
-            sessions.put(connection.getCnxFactName(), session);
+            listeners.put(connection.getCnxFactName(), listener);
           } catch (Exception e) {
             logger.log(BasicLevel.ERROR,
                 "Error while starting consumer on connection: " + connection.getCnxFactName(), e);
@@ -199,14 +203,12 @@ public class JMSAcquisition implements AcquisitionDaemon {
   }
 
   class JmsListener implements MessageListener {
-
-    private String name;
-
+    private JMSModule connection;
     private Session session;
 
-    public JmsListener(Session session, String name) {
+    public JmsListener(Session session, JMSModule connection) {
       this.session = session;
-      this.name = name;
+      this.connection = connection;
     }
 
     /**
@@ -215,7 +217,7 @@ public class JMSAcquisition implements AcquisitionDaemon {
      */
     public void onMessage(javax.jms.Message jmsMessage) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, name + ".onMessage(" + jmsMessage + ')');
+        logger.log(BasicLevel.DEBUG, connection.getCnxFactName() + ".onMessage(" + jmsMessage + ')');
 
       try {
         org.objectweb.joram.client.jms.Message clientMessage = null;
@@ -225,7 +227,9 @@ public class JMSAcquisition implements AcquisitionDaemon {
         } catch (JMSException conversionExc) {
           // Conversion error: denying the message.
           if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, name + ".onMessage: rollback, can not convert message.", conversionExc);
+            logger.log(BasicLevel.WARN,
+                       connection.getCnxFactName() + ".onMessage: rollback, can not convert message.",
+                       conversionExc);
 
           session.rollback();
           return;
@@ -233,23 +237,25 @@ public class JMSAcquisition implements AcquisitionDaemon {
         transmitter.transmit(clientMessage.getMomMsg(), jmsMessage.getJMSMessageID());
 
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, name + ".onMessage: Try to commit.");
+          logger.log(BasicLevel.DEBUG, connection.getCnxFactName() + ".onMessage: Try to commit.");
 
         session.commit();
       } catch (JMSException exc) {
         // Commit or rollback failed: nothing to do.
-        logger.log(BasicLevel.ERROR, name + ".onMessage(" + jmsMessage + ')', exc);
+        logger.log(BasicLevel.ERROR,
+                   connection.getCnxFactName() + ".onMessage(" + jmsMessage + ')', exc);
       } catch (Throwable t) {
-        logger.log(BasicLevel.ERROR, name + ".onMessage(" + jmsMessage + ')', t);
+        logger.log(BasicLevel.ERROR,
+                   connection.getCnxFactName() + ".onMessage(" + jmsMessage + ')', t);
       }
     }
 
     public void onException(JMSException exception) {
       if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, name + ": Consumer error for session " + session);
+        logger.log(BasicLevel.DEBUG, connection.getCnxFactName() + ": Consumer error for session " + session);
       }
       if (!closing) {
-        sessions.remove(name);
+        listeners.remove(connection.getCnxFactName());
       }
     }
 
@@ -260,8 +266,8 @@ public class JMSAcquisition implements AcquisitionDaemon {
    * acquisition destinations.
    */
   private static class ConnectionUpdater extends Daemon {
-
-    private List<JMSAcquisition> listeners = new ArrayList<JMSAcquisition>();
+    // List of all acquisition modules using to update
+    private List<JMSAcquisition> modules = new ArrayList<JMSAcquisition>();
 
     private long period;
 
@@ -307,13 +313,11 @@ public class JMSAcquisition implements AcquisitionDaemon {
             logmon.log(BasicLevel.DEBUG, "update connections");
           }
 
-          List<JMSModule> currentConnections = JMSConnectionService.getInstance().getConnections();
+          synchronized (modules) {
+            if (modules.size() == 0) stop();
 
-          synchronized (listeners) {
-            if (listeners.size() == 0) stop();
-
-            for (JMSAcquisition listener : listeners) {
-              listener.updateConnections(currentConnections);
+            for (JMSAcquisition listener : modules) {
+              listener.updateConnections();
             }
           }
         }
@@ -331,22 +335,20 @@ public class JMSAcquisition implements AcquisitionDaemon {
     public void close() {
     }
 
-    protected void addUpdateListener(JMSAcquisition listener) {
-      synchronized (listeners) {
-        listeners.add(listener);
-        if (listeners.size() == 1) {
+    protected void addUpdateListener(JMSAcquisition module) {
+      synchronized (modules) {
+        modules.add(module);
+        if (modules.size() == 1) {
           start();
         }
       }
-
-      List<JMSModule> existingConnections = JMSConnectionService.getInstance().getConnections();
-      listener.updateConnections(existingConnections);
+      module.updateConnections();
     }
 
-    protected void removeUpdateListener(JMSAcquisition listener) {
-      synchronized (listeners) {
-        listeners.remove(listener);
-        if (listeners.size() == 0) stop();
+    protected void removeUpdateListener(JMSAcquisition module) {
+      synchronized (modules) {
+        modules.remove(module);
+        if (modules.size() == 0) stop();
       }
     }
   }
