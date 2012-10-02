@@ -29,7 +29,7 @@ import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 /**
  * Implements the <code>javax.jms.QueueConnectionFactory</code> interface.
  *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link ConnectionFactory}.
+ * @deprecated Replaced next to Joram 5.2.1 by ConnectionFactory.
  */
 public abstract class QueueConnectionFactory extends AbstractConnectionFactory implements javax.jms.QueueConnectionFactory {
   /** define serialVersionUID for interoperability */

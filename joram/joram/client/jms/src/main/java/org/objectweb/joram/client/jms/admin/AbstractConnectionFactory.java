@@ -23,8 +23,6 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.util.Hashtable;
-
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.naming.NamingException;

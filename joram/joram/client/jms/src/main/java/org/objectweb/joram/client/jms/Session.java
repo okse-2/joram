@@ -326,7 +326,6 @@ public class Session implements javax.jms.Session, SessionMBean {
    * by default false. 
    *
    * @return true if messages produced are implicitly acknowledged.
-   * @see #implicitAck
    */
   public boolean isImplicitAck() {
     return implicitAck;
@@ -343,7 +342,6 @@ public class Session implements javax.jms.Session, SessionMBean {
    * by default false. 
    * 
    * @param implicitAck if true sets implicit acknowledge for this session.
-   * @see #implicitAck
    */
   public void setImplicitAck(boolean implicitAck) {
     this.implicitAck = implicitAck;
@@ -365,7 +363,6 @@ public class Session implements javax.jms.Session, SessionMBean {
    * by default false. 
    *
    * @return true if messages produced are asynchronously sent.
-   * @see #asyncSend
    */
   public boolean isAsyncSend() {
     return asyncSend;
@@ -612,22 +609,26 @@ public class Session implements javax.jms.Session, SessionMBean {
   private List inInterceptors;
   private List outInterceptors;
 
-//  /**
+//
 //   * Sets the list of IN message interceptors.
 //   * @param pInInterceptors
-//   */
+//
 //  public void setInMessageInterceptors(List pInInterceptors) {
 //    inInterceptors = pInInterceptors;
 //  }
 //
-//  /**
+//
 //   * Sets the OUT message interceptor.
 //   * @param pOutInterceptor
-//   */
+//
 //  public void setOutMessageInterceptors(List pOutInterceptors) {
 //    outInterceptors = pOutInterceptors;
 //  }
 
+  /**
+   * Returns the MBean name.
+   * @return the MBean name.
+   */
   public String getJMXBeanName() {
     StringBuffer buf = new StringBuffer();
     buf.append(cnx.getJMXBeanName());
@@ -864,9 +865,9 @@ public class Session implements javax.jms.Session, SessionMBean {
 
    * @exception JMSException  Actually never thrown.
    */
-  public synchronized void setMessageListener(javax.jms.MessageListener messageListener) throws JMSException {
+  public synchronized void setMessageListener(javax.jms.MessageListener listener) throws JMSException {
     checkSessionMode(SessionMode.APP_SERVER);
-    this.messageListener = messageListener;
+    this.messageListener = listener;
   }
 
   /**
@@ -990,11 +991,11 @@ public class Session implements javax.jms.Session, SessionMBean {
    * 
    * @see ObjectMessage
    */
-  public synchronized javax.jms.ObjectMessage createObjectMessage(java.io.Serializable obj)
+  public synchronized javax.jms.ObjectMessage createObjectMessage(java.io.Serializable object)
       throws JMSException {
     checkClosed();
     ObjectMessage message = new ObjectMessage();
-    message.setObject(obj);
+    message.setObject(object);
     return message;
   }
 
@@ -1230,7 +1231,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * on the server, if it does not exist it is created. In any case a queue
    * identity with its Joram specific address is returned.
    * <p>
-   * If the given name is a provider-specific name (#x.y.z unique identifier)
+   * If the given name is a provider-specific name ("#x.y.z" unique identifier)
    * a queue identity is returned with the specified identifier.
    * <p>
    * API method.
@@ -1268,7 +1269,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * on the server, if it does not exist it is created. In any case a topic
    * identity with its provider-specific address is returned.
    * <p>
-   * If the given name is a Joram specific name (#x.y.z unique identifier)
+   * If the given name is a Joram specific name ("#x.y.z" unique identifier)
    * a topic identity is returned with the specified identifier.
    * <p>
    * API method.

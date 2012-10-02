@@ -36,7 +36,7 @@ import org.objectweb.joram.shared.security.Identity;
  * A <code>QueueTcpConnectionFactory</code> instance is a factory of
  * TCP connections for PTP communication.
  *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link TcpConnectionFactory}.
+ * @deprecated Replaced next to Joram 5.2.1 by TcpConnectionFactory.
  */
 public class QueueTcpConnectionFactory extends QueueConnectionFactory {
   /** define serialVersionUID for interoperability */

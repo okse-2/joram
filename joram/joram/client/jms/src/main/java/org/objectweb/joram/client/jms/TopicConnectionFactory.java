@@ -29,7 +29,7 @@ import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 /**
  * Implements the <code>javax.jms.TopicConnectionFactory</code> interface.
  *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link ConnectionFactory}.
+ * @deprecated Replaced next to Joram 5.2.1 by ConnectionFactory.
  */
 public abstract class TopicConnectionFactory extends AbstractConnectionFactory implements javax.jms.TopicConnectionFactory {
   /** define serialVersionUID for interoperability */

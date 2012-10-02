@@ -35,7 +35,7 @@ import org.objectweb.joram.shared.security.Identity;
  * A <code>QueueLocalConnectionFactory</code> instance is a factory of
  * local connections for PTP communication.
  *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link LocalConnectionFactory}.
+ * @deprecated Replaced next to Joram 5.2.1 by LocalConnectionFactory.
  */
 public class QueueLocalConnectionFactory extends QueueConnectionFactory {
   /** define serialVersionUID for interoperability */

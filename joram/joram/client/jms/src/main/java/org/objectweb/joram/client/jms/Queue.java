@@ -580,8 +580,8 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	 * @throws ConnectException
 	 * @throws AdminException
 	 */
-	public void addRemoteDestination(String newId) throws ConnectException, AdminException {
-		doRequest(new AddRemoteDestination(agentId, newId));
+	public void addRemoteDestination(String destId) throws ConnectException, AdminException {
+		doRequest(new AddRemoteDestination(agentId, destId));
 	}
 	
 	/**
@@ -591,8 +591,8 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	 * @throws ConnectException
 	 * @throws AdminException
 	 */
-	public void delRemoteDestination(String newId) throws ConnectException, AdminException {
-		doRequest(new DelRemoteDestination(agentId, newId));
+	public void delRemoteDestination(String destId) throws ConnectException, AdminException {
+		doRequest(new DelRemoteDestination(agentId, destId));
 	}
 
 	public void sendDestinationsWeights(int[] weights) throws ConnectException, AdminException {

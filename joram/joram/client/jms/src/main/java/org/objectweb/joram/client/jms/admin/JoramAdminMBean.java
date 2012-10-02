@@ -315,7 +315,7 @@ public interface JoramAdminMBean {
    * @exception ConnectException  If the connection is closed or broken.
    * @exception AdminException    Never thrown.
    * 
-   * @see #getDestinations()
+   * @see #getLocalDestinations()
    */
   public void getAllDestinations(int serverId) throws ConnectException, AdminException;
 

@@ -73,13 +73,13 @@ public final class ObjectMessage extends Message implements javax.jms.ObjectMess
    *              the message body is read-only.
    * @exception MessageFormatException        If object serialization fails.
    */
-  public void setObject(Serializable obj) throws JMSException {
+  public void setObject(Serializable object) throws JMSException {
     if (RObody)
       throw new MessageNotWriteableException("Can't set an object as the message body is read-only.");
 
     try {
       clearBody();
-      momMsg.setObject(obj);
+      momMsg.setObject(object);
     } catch (Exception exc) {
       throw new MessageFormatException("Object serialization failed: " + exc);
     }

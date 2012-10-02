@@ -178,12 +178,6 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 
   /**
    * Creates a <code>Connection</code> instance.
-   *
-   * @param factoryParameters  The factory parameters.
-   * @param requestChannel  The actual connection to wrap.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
    */
   public Connection() {
     // AF: This method shouldn't be public but it is actually used by AbstractFactory
@@ -557,16 +551,16 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
       createDurableConnectionConsumer(javax.jms.Topic topic, 
                                       String subName,
                                       String selector,
-                                      javax.jms.ServerSessionPool sessPool,
+                                      javax.jms.ServerSessionPool sessionPool,
                                       int maxMessages) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  stringImage + ".createDurableConnectionConsumer(" + topic + ',' + subName + ',' + selector + ',' +
-                 sessPool + ',' + maxMessages + ')');
+                 sessionPool + ',' + maxMessages + ')');
     checkClosed();
     if (subName == null) 
       throw new JMSException("Invalid subscription name: " + subName);
-    return createConnectionConsumer(topic, subName, selector, sessPool, maxMessages);
+    return createConnectionConsumer(topic, subName, selector, sessionPool, maxMessages);
   }
   
   private synchronized javax.jms.ConnectionConsumer
