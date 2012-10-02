@@ -34,7 +34,7 @@ import org.objectweb.joram.shared.security.Identity;
  * An <code>XALocalConnectionFactory</code> instance is a factory of
  * local connections dedicated to XA communication.
  *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link LocalConnectionFactory}.
+ * @deprecated Replaced next to Joram 5.2.1 by LocalConnectionFactory.
  */
 public class XALocalConnectionFactory extends org.objectweb.joram.client.jms.XAConnectionFactory {
   /** define serialVersionUID for interoperability */

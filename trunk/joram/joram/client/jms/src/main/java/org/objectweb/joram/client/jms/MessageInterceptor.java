@@ -27,27 +27,28 @@ import javax.jms.Session;
 
 /**
  * Session level message interceptor interface.
- * The <code>MessageInterceptor</code> should be implemented by any class
- * whose instances are intended to intercept either or both following 
- * operations within  a {@link javax.jms.Session.Session JMS Session}:
+ * The <code>MessageInterceptor</code> should be implemented by any class whose
+ * instances are intended to intercept either or both following operations within
+ * a {@link Session JMS Session}:
  * <ul>
- * <li>{@link javax.jms.MessageProducer#send(Message) sending a message}</li>
- * <li>{@link javax.jms.MessageConsumer#receive() receiving a message}</li>
+ * <li>{@link MessageProducer sending a message}</li>
+ * <li>{@link MessageConsumer receiving a message}</li>
  * </ul>
- * The <code>interceptor</code> can be attached to a 
- * {@link javax.jms.Session.Session JMS Session} through configuration
- * (see <code>joramAdmin.xml</code>) as <code>IN</code> 
- * (when consuming a message) or <code>OUT</code> (when producing a message)
+ * The <code>interceptor</code> can be attached to a {@link Session JMS Session}
+ * through configuration (see <code>joramAdmin.xml</code>) as <code>IN</code> 
+ * when consuming a message or <code>OUT</code> when producing a message)
  * interceptor.
+ * 
  * @author benammoura
  */
 public interface MessageInterceptor {
 	/**
-	 * handles a message before proceeding.
-	 * <br>By convention, the implementation can modify 
-	 * the original message or the current runtime context, 
-	 * and return no <code>out</code> value. It also avoids
-	 * to throw any exception within this method.
+	 * Handles a message before proceeding.
+	 * <p>
+	 * By convention, the implementation can modify the original message or the current
+	 * runtime context, and return no <code>out</code> value. It also avoids to throw any
+	 * exception within this method.
+	 * 
 	 * @param pMessage the message to handle.
 	 * @param pSession the current session of the JMS interaction
 	 */

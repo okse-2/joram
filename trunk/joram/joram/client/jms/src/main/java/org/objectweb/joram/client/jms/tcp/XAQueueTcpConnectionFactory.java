@@ -35,7 +35,7 @@ import org.objectweb.joram.shared.security.Identity;
  * An <code>XAQueueTcpConnectionFactory</code> instance is a factory of
  * TCP connections for XA PTP communication.
  *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link TcpConnectionFactory}.
+ * @deprecated Replaced next to Joram 5.2.1 by TcpConnectionFactory.
  */
 public class XAQueueTcpConnectionFactory extends org.objectweb.joram.client.jms.XAQueueConnectionFactory {
   /** define serialVersionUID for interoperability */

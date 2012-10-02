@@ -36,7 +36,7 @@ import org.objectweb.joram.shared.security.Identity;
  * A <code>TopicTcpConnectionFactory</code> instance is a factory of
  * TCP connections for Pub/Sub communication.
  *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link TcpConnectionFactory}.
+ * @deprecated Replaced next to Joram 5.2.1 by TcpConnectionFactory.
  */
 public class TopicTcpConnectionFactory extends TopicConnectionFactory {
   /** define serialVersionUID for interoperability */

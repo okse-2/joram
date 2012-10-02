@@ -117,10 +117,12 @@ public class JMSAcquisitionQueue {
    * <li>priority - Tells the JMS priority of produced messages, default is 4 (JMS default).</li>
    * <li>acquisition.max_msg - The maximum number of messages between the last message acquired by the handler
    * and the message correctly handled by the acquisition destination, default is 20. When the number of messages
-   * waiting to be handled is greater the acquisition handler is temporarily stopped.</li>
+   * waiting to be handled is greater the acquisition handler is temporarily stopped. A value lesser or equal to
+   * 0 disables the mechanism.</li>
    * <li>acquisition.min_msg - The minimum number of message to restart the acquisition, default is 10.</li>
    * <li>acquisition.max_pnd - The maximum number of pending messages on the acquisition destination, default is 20.
-   * When the number of waiting messages is greater the acquisition handler is temporarily stopped.</li>
+   * When the number of waiting messages is greater the acquisition handler is temporarily stopped. A value lesser
+   * or equal to 0 disables the mechanism.</li>
    * <li>acquisition.min_pnd - The minimum number of pending messages to restart the acquisition, default is 10.</li>
    * <li>jms.ConnectionUpdatePeriod - Period between two update phases allowing the discovering of new
    * Connections.</li>

@@ -1130,8 +1130,7 @@ public class AdminWrapper implements AdminItf {
    * @param methodName the name of the invoked method
    * @param parameterTypes the list of parameters
    * @param args the arguments used for the method call
-   * @return the result of the invoked method after applying
-   *         {@link Object#toString()} method
+   * @return the result of the invoked method after applying the toString method
    * @throws ConnectException If the connection fails.
    * @throws AdminException If the invocation can't be done or fails
    */
@@ -1173,8 +1172,8 @@ public class AdminWrapper implements AdminItf {
    * name. Adding an existing server won't do anything.
    * 
    * @param serverId the serverId
-   * @param urls the amqp url list identifying the servers separate by space.
-   * ex: amqp://user:pass@localhost:5672/?name=serv1 amqp://user:pass@localhost:5678/?name=serv2
+   * @param urls the amqp url list identifying the servers separate by space, for example:
+   * "amqp://user:pass@localhost:5672/?name=serv1 amqp://user:pass@localhost:5678/?name=serv2"
    * 
    * @return the result of the method
    * @throws ConnectException If the connection fails.
@@ -1213,8 +1212,8 @@ public class AdminWrapper implements AdminItf {
    * name. Adding an existing server won't do anything.
    * 
    * @param serverId the serverId
-   * @param urls the jms url list identifying the servers separate by space.
-   * ex: jndi_url/?name=cnx1&cf=cfName&jndiFactoryClass=com.xxx.yyy&user=user1&pass=pass1&clientID=clientID 
+   * @param urls the jms url list identifying the servers separate by space, for example:
+   * "jndi_url/?name=cnx1&cf=cfName&jndiFactoryClass=com.xxx.yyy&user=user1&pass=pass1&clientID=clientID"
    * 
    * @return the result of the method
    * @throws ConnectException If the connection fails.

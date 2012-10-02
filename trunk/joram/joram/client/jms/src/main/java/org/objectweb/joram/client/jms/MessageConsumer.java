@@ -336,7 +336,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    * message consumer is closed. A timeout of zero never expires, and the call blocks
    * indefinitely.
    * 
-   * @param timeout the timeout value (in milliseconds).
+   * @param timeOut the timeout value (in milliseconds).
    * @return the next message available for this message consumer, or null if the timeout
    *         expires or this message consumer is concurrently closed.
    *

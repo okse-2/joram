@@ -115,11 +115,6 @@ public class JMSAcquisitionTopic {
    * <li>persistent - Tells if produced messages will be persistent, default is true (JMS default).</li>
    * <li>expiration - Tells the life expectancy of produced messages, default is 0 (JMS default time to live).</li>
    * <li>priority - Tells the JMS priority of produced messages, default is 4 (JMS default).</li>
-   * <li>acquisition.max_msg - The maximum number of messages between the last message acquired by the handler
-   * and the message correctly handled by the acquisition destination, default is 10. Over, stop the acquisition.</li>
-   * <li>acquisition.min_msg - The minimum number of message to restart the acquisition, default is 0.</li>
-   * <li>acquisition.max_pnd - The maximum number of pending messages on the acquisition destination, default is 20.</li>
-   * <li>acquisition.max_pnd - The minimum number of pending messages to restart the acquisition, default is 10.</li>
    * <li>jms.ConnectionUpdatePeriod - Period between two update phases allowing the discovering of new
    * Connections.</li>
    * <li>jms.DurableSubscriptionName - If the XMQ destination is a topic, this property sets the name of the

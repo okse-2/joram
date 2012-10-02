@@ -57,7 +57,7 @@ public final class TextMessage extends Message implements javax.jms.TextMessage 
    * API method.
    * Sets a String as the body of the message.
    * 
-   * @param string the String containing the message's data.
+   * @param text the String containing the message's data.
    *
    * @exception MessageNotWriteableException  When trying to set the text
    *              if the message body is read-only.

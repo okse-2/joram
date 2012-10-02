@@ -30,7 +30,7 @@ import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 /**
  * Implements the <code>javax.jms.XAConnectionFactory</code> interfaces: Queue, Topic and unified.
  * @see javax.jms.XAConnectionFactory
- * @deprecated Replaced next to Joram 5.2.1 by {@link ConnectionFactory}.
+ * @deprecated Replaced next to Joram 5.2.1 by ConnectionFactory.
  */
 public abstract class XAConnectionFactory extends AbstractConnectionFactory
   implements javax.jms.XAConnectionFactory, javax.jms.XAQueueConnectionFactory, javax.jms.XATopicConnectionFactory {

@@ -44,7 +44,7 @@ public class QueueConnection extends Connection implements javax.jms.QueueConnec
    * Creates a connection consumer for this connection, this is an expert facility needed
    * for applications servers.
    * 
-   * @param dest        the queue to access.
+   * @param queue       the queue to access.
    * @param selector    only messages with properties matching the message selector expression
    *                    are delivered. A value of null or an empty string indicates that there
    *                    is no message selector for this message consumer.

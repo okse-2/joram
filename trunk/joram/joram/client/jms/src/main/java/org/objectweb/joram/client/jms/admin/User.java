@@ -86,7 +86,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * of a send method on a connection from the selected user).</li>
  * <li>The second one “interceptors_out” handles each message that’s exiting the server (result
  * of a receive method on a connection from the selected user).</li>
- * <ul>
+ * </ul>
  * These two interceptor chains are configurable for each user.
  */
 public class User extends AdministeredObject implements UserMBean {

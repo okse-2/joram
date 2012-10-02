@@ -41,7 +41,6 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.net.SocketFactory;
-import fr.dyade.aaa.common.net.SocketFactory13;
 
 /**
  * A <code>FactoryParameters</code> instance holds a
@@ -134,7 +133,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
    * Allows to define a specific factory for socket in order to by-pass
    * compatibility problem between JDK version.
    * Currently there is two factories, The default factory one for JDK
-   * since 1.4, and {@link SocketFactory13} for JDK prior to 1.4.
+   * since 1.4, and SocketFactory13 for JDK prior to 1.4.
    */
   public String socketFactory = SocketFactory.DefaultFactory;
   
@@ -229,8 +228,8 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
    * List of Message interceptors while receiving a message.
    * <br>These interceptors are called when <code>Session#receive()</code> is called.
    * <br>The execution follows the order of the elements within the list.
-   * <br>This property is facultative. If set, then the
-   * {@link MessageInterceptor#handle(javax.jms.Message) callback method of the IN interceptors}
+   * <br>This property is facultative. If set, then the {@link MessageInterceptor}
+   * <code>handle</code> callback method of the IN interceptors}
    * are called. 
    */
   public final List inInterceptors = new ArrayList();
@@ -238,8 +237,8 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
    * List of Message interceptors while sending a message.
    * <br>These interceptors are called when <code>Session#send()</code> is called.
    * <br>The execution follows the order of the elements within the list.
-   * <br>This property is facultative. If set, then the 
-   * {@link MessageInterceptor#handle(javax.jms.Message) callback method of the OUT interceptors}
+   * <br>This property is facultative. If set, then the  {@link MessageInterceptor}
+   * <code>handle</code> callback method of the OUT interceptors}
    * are called. 
    */
   public final List outInterceptors = new ArrayList();
