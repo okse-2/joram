@@ -51,7 +51,7 @@ if [[ $TEST_RESULT -gt 0 ]]; then
     #save contents when test failed
     mv $VTEST_HOME/ERROR-* results;
     jar cf $ZIPFILE results;
-    mv $ZIPFILE $VTEST_HOME
+    mv $ZIPFILE ~
     exit 1;
 else
     echo "TEST OK";
@@ -60,6 +60,6 @@ else
     # cp $VTEST_HOME/joram/src/joram/report.txt results/joram-report.txt;
     # cp $VTEST_HOME/joram/src/jms/report.txt results/jms-report.txt;
     jar cf $ZIPFILE results;
-    mv $ZIPFILE $VTEST_HOME
+    mv $ZIPFILE ~
     exit 0;
 fi
