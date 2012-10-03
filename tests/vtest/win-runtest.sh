@@ -16,7 +16,7 @@ VTEST_HOME="/cygdrive/c/vtest"
 date=`date +%x`
 date=`echo $date | sed -e s:/:.:g`
 LOGFILE=$VTEST_HOME/"vtest-$date.log"
-ZIPFILE=$VTEST_HOME/"result.zip"
+ZIPFILE="result.zip"
 
 #extracting joram source so as to test updated trunk artifacts
 svn co svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
@@ -51,6 +51,7 @@ if [[ $TEST_RESULT -gt 0 ]]; then
     #save contents when test failed
     mv $VTEST_HOME/ERROR-* results;
     jar cf $ZIPFILE results;
+    mv $ZIPFILE $VTEST_HOME
     exit 1;
 else
     echo "TEST OK";
@@ -59,5 +60,6 @@ else
     # cp $VTEST_HOME/joram/src/joram/report.txt results/joram-report.txt;
     # cp $VTEST_HOME/joram/src/jms/report.txt results/jms-report.txt;
     jar cf $ZIPFILE results;
+    mv $ZIPFILE $VTEST_HOME
     exit 0;
 fi
