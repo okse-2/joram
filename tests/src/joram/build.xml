@@ -436,6 +436,10 @@
   </target>
 
   <target name="tests.bridge.jms.new" description=" --> launch all bridge tests (acquisition/distribution framework)">
+    <antcall target="bridge.jms.admintest1xA"/>
+    <antcall target="bridge.jms.admintest1xB"/>
+    <antcall target="bridge.jms.admintest2xA"/>
+    <antcall target="bridge.jms.admintest2xB"/>
     <antcall target="bridge.jms.test1x"/>
     <antcall target="bridge.jms.test2x"/>
     <antcall target="bridge.jms.test3x"/>
@@ -4482,6 +4486,48 @@
   </target>
 
   <!-- New bridge (using acquisition/distribution framework) tests -->
+  <target name="bridge.jms.admintest1xA" depends="init.a3props,compile"
+           description=" --> Creates bridge queues through the administration API.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.admintest1xA"/>
+      <param name="className" value="joram.bridgejms.BridgeAdminTest1a"/>
+      <param name="jndiconf" value="bridgejms/jndi.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers.xml"/>
+    </antcall>
+  </target>
+	
+  <target name="bridge.jms.admintest1xB" depends="init.a3props,compile"
+           description=" --> Creates bridge topics through the administration API.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.admintest1xB"/>
+      <param name="className" value="joram.bridgejms.BridgeAdminTest1b"/>
+      <param name="jndiconf" value="bridgejms/jndi.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers.xml"/>
+    </antcall>
+  </target>
+	
+  <target name="bridge.jms.admintest2xA" depends="init.a3props,compile"
+           description=" --> Creates bridge queues through the XML administration scripts.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.admintest2x"/>
+      <param name="className" value="joram.bridgejms.BridgeAdminTest2"/>
+      <param name="jndiconf" value="bridgejms/jndi.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers.xml"/>
+    	<param name="joramAdmin" value="bridgejms/joramAdmin-A.xml"/>
+    </antcall>
+  </target>
+	
+  <target name="bridge.jms.admintest2xB" depends="init.a3props,compile"
+           description=" --> Creates bridge topics through the XML administration scripts.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.admintest2x"/>
+      <param name="className" value="joram.bridgejms.BridgeAdminTest2"/>
+      <param name="jndiconf" value="bridgejms/jndi.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers.xml"/>
+    	<param name="joramAdmin" value="bridgejms/joramAdmin-B.xml"/>
+    </antcall>
+  </target>
+
   <target name="bridge.jms.test1x" depends="init.a3props,compile"
            description=" --> producer on foreign queue, consumer on bridge queue (using acquisition framework)">
        <antcall target="bridge.jms.test" inheritAll="true">
@@ -4782,6 +4828,10 @@
   <!-- start bridgeamqp test -->
 	
   <target name="tests.bridge.amqp" description=" --> launch all amqp bridge tests">
+  	<antcall target="bridge.amqp.adminTest1a"/>
+  	<antcall target="bridge.amqp.adminTest1b"/>
+    <antcall target="bridge.amqp.adminTest2a"/>
+    <antcall target="bridge.amqp.adminTest2b"/>
     <antcall target="bridge.amqp.test1"/>
     <antcall target="bridge.amqp.test2"/>
     <antcall target="bridge.amqp.test3"/>
@@ -4792,13 +4842,91 @@
   <target name="server.amqp" description=" --> start an amqp server" depends="init.a3props">
     <antcall target="init.test" inheritAll="true">
       <param name="a3conf" value="amqp_a3servers.xml" />
-	</antcall>
-	<java classname="fr.dyade.aaa.agent.AgentServer" failonerror="no" fork="no" dir="${test.dir}">
-	  <classpath path="${project.class.path}"/>
-	  <jvmarg line="-Dcom.sun.management.jmxremote"/>
-	  <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
-	  <arg line="1 ./s1"/>
-	</java>
+	  </antcall>
+	  <java classname="fr.dyade.aaa.agent.AgentServer" failonerror="no" fork="no" dir="${test.dir}">
+	    <classpath path="${project.class.path}"/>
+	    <jvmarg line="-Dcom.sun.management.jmxremote"/>
+	    <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+	    <arg line="1 ./s1"/>
+	  </java>
+  </target>
+
+  <target name="bridge.amqp.adminTest1a" depends="init.a3props,compile"
+	        description=" --> Creates 2 bridge queues through the administration API.">
+	<parallel>
+	  <antcall target="server.amqp" />
+	  <sequential>
+		<sleep seconds="2"/>
+		<antcall target="test.run" inheritAll="true">
+		  <param name="testid" value="bridge.amqp.adminTest1a"/>
+		  <param name="className" value="joram.bridgeamqp.AdminTest1a"/>
+		  <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+		  <param name="isOSGi" value="true"/>
+		  <param name="jndiconf" value="bridgeamqp/jndi.properties"/>
+		  <param name="a3conf" value="bridgeamqp/a3servers1.xml"/>
+		  <param name="jvmargs" value=""/>
+		</antcall>
+	  </sequential>
+	</parallel>
+  </target>
+
+  <target name="bridge.amqp.adminTest1b" depends="init.a3props,compile"
+	        description=" --> Creates 2 bridge topics through the administration API.">
+	<parallel>
+	  <antcall target="server.amqp" />
+	  <sequential>
+		<sleep seconds="2"/>
+		<antcall target="test.run" inheritAll="true">
+		  <param name="testid" value="bridge.amqp.adminTest1b"/>
+		  <param name="className" value="joram.bridgeamqp.AdminTest1b"/>
+		  <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+		  <param name="isOSGi" value="true"/>
+		  <param name="jndiconf" value="bridgeamqp/jndi.properties"/>
+		  <param name="a3conf" value="bridgeamqp/a3servers1.xml"/>
+		  <param name="jvmargs" value=""/>
+		</antcall>
+	  </sequential>
+	</parallel>
+  </target>
+
+  <target name="bridge.amqp.adminTest2a" depends="init.a3props,compile"
+	        description=" --> Creates 2 bridge queues through the XML administration scripts.">
+	<parallel>
+	  <antcall target="server.amqp" />
+	  <sequential>
+		<sleep seconds="2"/>
+		<antcall target="test.run" inheritAll="true">
+		  <param name="testid" value="bridge.amqp.adminTest2a"/>
+		  <param name="className" value="joram.bridgeamqp.AdminTest2"/>
+		  <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+		  <param name="isOSGi" value="true"/>
+		  <param name="jndiconf" value="bridgeamqp/jndi.properties"/>
+		  <param name="a3conf" value="bridgeamqp/a3servers1.xml"/>
+    	<param name="joramAdmin" value="bridgeamqp/joramAdmin-A.xml"/>
+		  <param name="jvmargs" value=""/>
+		</antcall>
+	  </sequential>
+	</parallel>
+  </target>
+
+  <target name="bridge.amqp.adminTest2b" depends="init.a3props,compile"
+	        description=" --> Creates 2 bridge topics through the XML administration scripts.">
+	<parallel>
+	  <antcall target="server.amqp" />
+	  <sequential>
+		<sleep seconds="2"/>
+		<antcall target="test.run" inheritAll="true">
+		  <param name="testid" value="bridge.amqp.adminTest2b"/>
+		  <param name="className" value="joram.bridgeamqp.AdminTest2"/>
+		  <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+		  <param name="isOSGi" value="true"/>
+		  <param name="jndiconf" value="bridgeamqp/jndi.properties"/>
+		  <param name="a3conf" value="bridgeamqp/a3servers1.xml"/>
+    	<param name="joramAdmin" value="bridgeamqp/joramAdmin-B.xml"/>
+		  <param name="jvmargs" value=""/>
+		</antcall>
+	  </sequential>
+	</parallel>
   </target>
 
   <target name="bridge.amqp.test1" depends="init.a3props,compile"
