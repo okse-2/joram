@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s):
  * Contributor(s): 
  */
 package joram.bridgejms;
@@ -84,10 +84,11 @@ public class BridgeTest13x extends TestCase implements MessageListener {
       
         // Setting the bridge properties
         Properties prop = new Properties();
+        // Disables flow control
+//        prop.setProperty("acquisition.max_msg", "0");
+//        prop.setProperty("acquisition.max_pnd", "0");
         prop.setProperty("jms.ConnectionUpdatePeriod", "1000");
         prop.setProperty("period", "1000");
-//        prop.setProperty("acquisition.max_msg", "5000");
-//        prop.setProperty("acquisition.max_pnd", "5000");
         // Creating a Queue bridge on server 0:
         Queue joramInQueue = JMSAcquisitionQueue.create(0, "joramInQueue", "foreignQueue", prop);
         joramInQueue.setFreeReading();
@@ -171,6 +172,7 @@ public class BridgeTest13x extends TestCase implements MessageListener {
       System.out.println("Foreign server stopped: " + nbmsg);
       startAgentServer((short) 1, new String[]{"-DTransaction.UseLockFile=false"});
       //          System.out.println("Foreign server started.");
+      Thread.sleep(1000);
     } catch (Exception e) {
       e.printStackTrace();
     }    
