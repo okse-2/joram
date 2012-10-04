@@ -34,9 +34,9 @@ import javax.jms.TextMessage;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.AMQPDistributionQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.mom.dest.amqp.AmqpDistribution;
 
 import framework.TestCase;
 
@@ -80,8 +80,6 @@ public class Test5 extends TestCase {
 
         // Setting the bridge properties
         Properties prop2 = new Properties();
-        prop2.setProperty("distribution.className", AmqpDistribution.class.getName());
-        prop2.setProperty("amqp.QueueName", "amqpQueue");
         prop2.setProperty("amqp.Queue.DeclarePassive", "false");
         prop2.setProperty("amqp.Queue.DeclareExclusive", "false");
         prop2.setProperty("amqp.Queue.DeclareDurable", "true");
@@ -91,7 +89,7 @@ public class Test5 extends TestCase {
         prop2.setProperty("period", "1000");      
         prop2.put("distribution.async", "" + async);
 
-        Queue joramOutQueue = Queue.create(0, "BridgeOutQueue", Queue.DISTRIBUTION_QUEUE, prop2);
+        Queue joramOutQueue = AMQPDistributionQueue.create(0, "BridgeOutQueue", "amqpQueue", prop2);
         joramOutQueue.setFreeWriting();
         System.out.println("joramOutQueue = " + joramOutQueue);
 
