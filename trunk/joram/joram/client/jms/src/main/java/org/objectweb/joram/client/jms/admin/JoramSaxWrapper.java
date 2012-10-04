@@ -135,6 +135,17 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_TOPIC = "Topic";
   /** Syntaxic name for Dead message Queue element */
   static final String ELT_DMQUEUE = "DMQueue";
+  
+  static final String ELT_JMS_ACQUISITION_QUEUE = "JMSAcquisitionQueue";
+  static final String ELT_JMS_ACQUISITION_TOPIC = "JMSAcquisitionTopic";
+  static final String ELT_JMS_DISTRIBUTION_QUEUE = "JMSDistributionQueue";
+  static final String ELT_JMS_DISTRIBUTION_TOPIC = "JMSDistributionTopic";
+  
+  static final String ELT_AMQP_ACQUISITION_QUEUE = "AMQPAcquisitionQueue";
+  static final String ELT_AMQP_ACQUISITION_TOPIC = "AMQPAcquisitionTopic";
+  static final String ELT_AMQP_DISTRIBUTION_QUEUE = "AMQPDistributionQueue";
+  static final String ELT_AMQP_DISTRIBUTION_TOPIC = "AMQPDistributionTopic";
+  
   /** Syntaxic name for property element */
   static final String ELT_PROPERTY = "property";
   /** Syntaxic name for reader element */
@@ -208,6 +219,8 @@ public class JoramSaxWrapper extends DefaultHandler {
   /** Syntaxic name for urls attribute */
   static final String ATT_URLS = "urls";
 
+  static final String ATT_FOREIGN = "foreign";
+  
   static final String DFLT_CF = "org.objectweb.joram.client.jms.tcp.TcpConnectionFactory";
 
   String name = null;
@@ -221,22 +234,23 @@ public class JoramSaxWrapper extends DefaultHandler {
   int timeout = -1;
   int serverId = -1;
   String className = null;
+  String foreign = null;
   String user = null;
   String type = null;
   Properties properties = null;
   String identityClass = null;
 
   String jndiName = null;
-  Hashtable toBind = new Hashtable();
+  Hashtable<String, AdministeredObject> toBind = new Hashtable<String, AdministeredObject>();
 
-  Vector readers = new Vector();
-  Vector writers = new Vector();
+  Vector<String> readers = new Vector<String>();
+  Vector<String> writers = new Vector<String>();
   boolean freeReading = false;
   boolean freeWriting = false;
 
-  List inInterceptorClassname= new ArrayList();
-  List outInterceptorClassname= new ArrayList();
-  List currentInterceptorList;
+  List<String> inInterceptorClassname= new ArrayList<String>();
+  List<String> outInterceptorClassname= new ArrayList<String>();
+  List<String> currentInterceptorList;
   
   InitialContext jndiCtx = null;
   
@@ -281,16 +295,16 @@ public class JoramSaxWrapper extends DefaultHandler {
   }
   
   /** Contains ConnectionFactory defined in the current script */
-  Hashtable cfs = new Hashtable();
+  Hashtable<String, AbstractConnectionFactory> cfs = new Hashtable<String, AbstractConnectionFactory>();
   /** Contains all users defined in the current script */
-  Hashtable users = new Hashtable();
+  Hashtable<String, User> users = new Hashtable<String, User>();
   /** Contains all queues defined in the current script */
-  Hashtable queues = new Hashtable();
+  Hashtable<String, Queue> queues = new Hashtable<String, Queue>();
   /** Contains all topics defined in the current script */
-  Hashtable topics = new Hashtable();
+  Hashtable<String, Topic> topics = new Hashtable<String, Topic>();
 
   /** Temporary set of cluster's elements */
-  Hashtable cluster = new Hashtable();
+  Hashtable<String, String> cluster = new Hashtable<String, String>();
 
   String dmq = null;
   int threshold = -1;
@@ -549,60 +563,23 @@ public class JoramSaxWrapper extends DefaultHandler {
         className = atts.getValue(ATT_CLASSNAME);
         dmq = atts.getValue(ATT_DMQ);
       } else if (rawName.equals(ELT_QUEUE)) {
-        name = atts.getValue(ATT_NAME);
-        properties = null;
-        try {
-          String value = atts.getValue(ATT_SERVERID);
-          if (value == null)
-            serverId =  getWrapper().getLocalServerId();
-          else
-            serverId = Integer.parseInt(value);
-        } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for serverId: " + atts.getValue(ATT_SERVERID));
-        } catch (ConnectException exc) {
-          throw new SAXException("error getting serverId: " + exc.getMessage());
-        } catch (AdminException exc) {
-          throw new SAXException("error getting serverId: " + exc.getMessage());
-        }
+        getQueueAtts(atts);
         className = atts.getValue(ATT_CLASSNAME);
-        dmq = atts.getValue(ATT_DMQ);
-        try {
-          String value = atts.getValue(ATT_THRESHOLD);
-          if (value == null)
-            threshold = -1;
-          else
-            threshold = Integer.parseInt(value);
-        } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for threshold: " + atts.getValue(ATT_THRESHOLD));
-        }
-        try {
-          String value = atts.getValue(ATT_NBMAXMSG);
-          if (value == null)
-            nbMaxMsg = -1;
-          else
-            nbMaxMsg = Integer.parseInt(value);
-        } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for nbMaxMsg: " + atts.getValue(ATT_NBMAXMSG));
-        }
       } else if (rawName.equals(ELT_TOPIC)) {
-        name = atts.getValue(ATT_NAME);
-        properties = null;
-        try {
-          String value = atts.getValue(ATT_SERVERID);
-          if (value == null)
-            serverId =  getWrapper().getLocalServerId();
-          else
-            serverId = Integer.parseInt(value);
-        } catch (NumberFormatException exc) {
-          throw new SAXException("bad value for serverId: " + atts.getValue(ATT_SERVERID));
-        } catch (ConnectException exc) {
-          throw new SAXException("error getting serverId: " + exc.getMessage());
-        } catch (AdminException exc) {
-          throw new SAXException("error getting serverId: " + exc.getMessage());
-        }
+        getTopicAtts(atts);
         className = atts.getValue(ATT_CLASSNAME);
-        dmq = atts.getValue(ATT_DMQ);
-        parent = atts.getValue(ATT_PARENT);
+      } else if ((rawName.equals(ELT_JMS_ACQUISITION_QUEUE)) ||
+                 (rawName.equals(ELT_JMS_DISTRIBUTION_QUEUE)) ||
+                 (rawName.equals(ELT_AMQP_ACQUISITION_QUEUE)) ||
+                 (rawName.equals(ELT_AMQP_DISTRIBUTION_QUEUE))) {
+        getQueueAtts(atts);
+        foreign = atts.getValue(ATT_FOREIGN);
+      } else if ((rawName.equals(ELT_JMS_ACQUISITION_TOPIC)) ||
+                 (rawName.equals(ELT_JMS_DISTRIBUTION_TOPIC)) ||
+                 (rawName.equals(ELT_AMQP_ACQUISITION_TOPIC)) ||
+                 (rawName.equals(ELT_AMQP_DISTRIBUTION_TOPIC))) {
+        getTopicAtts(atts);
+        foreign = atts.getValue(ATT_FOREIGN);
       } else if (rawName.equals(ELT_DMQUEUE)) {
         name = atts.getValue(ATT_NAME);
         properties = null;
@@ -732,6 +709,63 @@ public class JoramSaxWrapper extends DefaultHandler {
                  "bad value for port: " + value + ", use default one " + port,
                  new Exception("bad value for port: " + value));
     }
+  }
+  
+  private void getQueueAtts(Attributes atts) throws SAXException {
+    name = atts.getValue(ATT_NAME);
+    properties = null;
+    try {
+      String value = atts.getValue(ATT_SERVERID);
+      if (value == null)
+        serverId =  getWrapper().getLocalServerId();
+      else
+        serverId = Integer.parseInt(value);
+    } catch (NumberFormatException exc) {
+      throw new SAXException("bad value for serverId: " + atts.getValue(ATT_SERVERID));
+    } catch (ConnectException exc) {
+      throw new SAXException("error getting serverId: " + exc.getMessage());
+    } catch (AdminException exc) {
+      throw new SAXException("error getting serverId: " + exc.getMessage());
+    }
+    dmq = atts.getValue(ATT_DMQ);
+    try {
+      String value = atts.getValue(ATT_THRESHOLD);
+      if (value == null)
+        threshold = -1;
+      else
+        threshold = Integer.parseInt(value);
+    } catch (NumberFormatException exc) {
+      throw new SAXException("bad value for threshold: " + atts.getValue(ATT_THRESHOLD));
+    }
+    try {
+      String value = atts.getValue(ATT_NBMAXMSG);
+      if (value == null)
+        nbMaxMsg = -1;
+      else
+        nbMaxMsg = Integer.parseInt(value);
+    } catch (NumberFormatException exc) {
+      throw new SAXException("bad value for nbMaxMsg: " + atts.getValue(ATT_NBMAXMSG));
+    }
+  }
+  
+  void getTopicAtts(Attributes atts) throws SAXException {
+    name = atts.getValue(ATT_NAME);
+    properties = null;
+    try {
+      String value = atts.getValue(ATT_SERVERID);
+      if (value == null)
+        serverId =  getWrapper().getLocalServerId();
+      else
+        serverId = Integer.parseInt(value);
+    } catch (NumberFormatException exc) {
+      throw new SAXException("bad value for serverId: " + atts.getValue(ATT_SERVERID));
+    } catch (ConnectException exc) {
+      throw new SAXException("error getting serverId: " + exc.getMessage());
+    } catch (AdminException exc) {
+      throw new SAXException("error getting serverId: " + exc.getMessage());
+    }
+    dmq = atts.getValue(ATT_DMQ);
+    parent = atts.getValue(ATT_PARENT);
   }
   
   /**
@@ -936,7 +970,7 @@ public class JoramSaxWrapper extends DefaultHandler {
             
             dest = getWrapper().createTopic(serverId, name, className, properties);
           } else
-            throw new Exception("type " + type + " bad value. (queue or topic)");
+            throw new Exception("type " + type + " bad value (queue or topic).");
 
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "destination = " + dest);
@@ -944,23 +978,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           properties = null;
 
           configureDestination(dest);
-
-          // Bind the destination in JNDI.
-          // Be Careful, currently only one binding is handled.
-          if (isSet(jndiName))
-            toBind.put(jndiName, dest);
-          jndiName = null;
-          // Register the destination in order to handle it later.
-          String name = dest.getAdminName();
-          if (! isSet(name))
-            name = dest.getName();
-          if (dest instanceof Queue) {
-            queues.put(name, dest);
-          } else {
-            // It's a Topic
-            topics.put(name, dest);
-          }
-          // Fix DMQ if any
+          registerDestination(dest);
           setDestinationDMQ(name, dest, dmq);
         } else if (rawName.equals(ELT_QUEUE)) {
           if (className == null)
@@ -972,23 +990,9 @@ public class JoramSaxWrapper extends DefaultHandler {
           properties = null;
 
           configureDestination(queue);
-
-          if (threshold > 0)
-            queue.setThreshold(threshold);
-
-          if (nbMaxMsg > 0)
-            queue.setNbMaxMsg(nbMaxMsg);
-
-          // Bind the queue in JNDI.
-          // Be Careful, currently only one binding is handled.
-          if (isSet(jndiName))
-            toBind.put(jndiName, queue);
-          jndiName = null;
-          // Register the queue in order to handle it later (cluster, etc.)
-          String name = queue.getAdminName();
-          if (! isSet(name)) name = queue.getName();
-          queues.put(name, queue);
-          // Fix DMQ if any
+          if (threshold > 0) queue.setThreshold(threshold);
+          if (nbMaxMsg > 0) queue.setNbMaxMsg(nbMaxMsg);
+          registerDestination(queue);
           setDestinationDMQ(name, queue, dmq);
         } else if (rawName.equals(ELT_TOPIC)) {
           if (className == null)
@@ -1000,7 +1004,6 @@ public class JoramSaxWrapper extends DefaultHandler {
           properties = null;
 
           configureDestination(topic);
-
           if (isSet(parent)) {
             // TODO (AF): may be we should search the parent topic: JNDI? Joram?
             if (topics.containsKey(parent)) {
@@ -1010,16 +1013,175 @@ public class JoramSaxWrapper extends DefaultHandler {
                    "Topic.create(): Unknown parent: " + parent);
             }
           }
-          // Bind the topic in JNDI.
-          // Be Careful, currently only one binding is handled.
-          if (isSet(jndiName))
-            toBind.put(jndiName, topic);
-          jndiName = null;
-          // Register the topic in order to handle it later (cluster, etc.)
-          String name = topic.getAdminName();
-          if (! isSet(name)) name = topic.getName();
-          topics.put(name, topic);
-          // Fix DMQ if any
+          registerDestination(topic);
+          setDestinationDMQ(name, topic, dmq);
+        } else if (rawName.equals(ELT_JMS_ACQUISITION_QUEUE)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (!properties.containsKey("acquisition.className"))
+            properties.setProperty("acquisition.className", JMSAcquisitionQueue.JMSAcquisition);
+          if (!properties.containsKey("jms.DestinationName"))
+            properties.setProperty("jms.DestinationName", foreign);
+          Queue queue = (Queue) getWrapper().createQueue(serverId, name, Queue.ACQUISITION_QUEUE, properties);
+
+          properties = null;
+          foreign = null;
+
+          configureDestination(queue);
+          if (threshold > 0) queue.setThreshold(threshold);
+          if (nbMaxMsg > 0) queue.setNbMaxMsg(nbMaxMsg);
+          registerDestination(queue);
+          setDestinationDMQ(name, queue, dmq);
+        } else if (rawName.equals(ELT_JMS_DISTRIBUTION_QUEUE)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (!properties.containsKey("distribution.className"))
+            properties.setProperty("distribution.className", JMSDistributionQueue.JMSDistribution);
+          if (!properties.containsKey("jms.DestinationName"))
+            properties.setProperty("jms.DestinationName", foreign);
+          Queue queue = (Queue) getWrapper().createQueue(serverId, name, Queue.DISTRIBUTION_QUEUE, properties);
+
+          properties = null;
+          foreign = null;
+
+          configureDestination(queue);
+          if (threshold > 0) queue.setThreshold(threshold);
+          if (nbMaxMsg > 0) queue.setNbMaxMsg(nbMaxMsg);
+          registerDestination(queue);
+          setDestinationDMQ(name, queue, dmq);
+        } else if (rawName.equals(ELT_AMQP_ACQUISITION_QUEUE)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (!properties.containsKey("acquisition.className"))
+            properties.setProperty("acquisition.className", AMQPAcquisitionQueue.AMQPAcquisition);
+          if (!properties.containsKey("amqp.QueueName"))
+            properties.setProperty("amqp.QueueName", foreign);
+          Queue queue = (Queue) getWrapper().createQueue(serverId, name, Queue.ACQUISITION_QUEUE, properties);
+          
+          properties = null;
+          foreign = null;
+
+          configureDestination(queue);
+          if (threshold > 0) queue.setThreshold(threshold);
+          if (nbMaxMsg > 0) queue.setNbMaxMsg(nbMaxMsg);
+          registerDestination(queue);
+          setDestinationDMQ(name, queue, dmq);
+        } else if (rawName.equals(ELT_AMQP_DISTRIBUTION_QUEUE)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (!properties.containsKey("distribution.className"))
+            properties.setProperty("distribution.className", AMQPDistributionQueue.AMQPDistribution);
+          if (!properties.containsKey("amqp.QueueName"))
+            properties.setProperty("amqp.QueueName", foreign);
+          Queue queue = (Queue) getWrapper().createQueue(serverId, name, Queue.DISTRIBUTION_QUEUE, properties);
+          
+          properties = null;
+          foreign = null;
+
+          configureDestination(queue);
+          if (threshold > 0) queue.setThreshold(threshold);
+          if (nbMaxMsg > 0) queue.setNbMaxMsg(nbMaxMsg);
+          registerDestination(queue);
+          setDestinationDMQ(name, queue, dmq);
+        } else if (rawName.equals(ELT_JMS_ACQUISITION_TOPIC)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (!properties.containsKey("acquisition.className"))
+            properties.setProperty("acquisition.className", JMSAcquisitionTopic.JMSAcquisition);
+          if (!properties.containsKey("jms.DestinationName"))
+            properties.setProperty("jms.DestinationName", foreign);
+          Topic topic = (Topic) getWrapper().createTopic(serverId, name, Topic.ACQUISITION_TOPIC, properties);
+
+          properties = null;
+          foreign = null;
+
+          configureDestination(topic);
+          if (isSet(parent)) {
+            // TODO (AF): may be we should search the parent topic: JNDI? Joram?
+            if (topics.containsKey(parent)) {
+              topic.setParent((Topic) topics.get(parent));
+            } else {
+              logger.log(BasicLevel.ERROR, "Topic.create(): Unknown parent: " + parent);
+            }
+          }
+          registerDestination(topic);
+          setDestinationDMQ(name, topic, dmq);
+        } else if (rawName.equals(ELT_JMS_DISTRIBUTION_TOPIC)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (!properties.containsKey("distribution.className"))
+            properties.setProperty("distribution.className", JMSDistributionTopic.JMSDistribution);
+          if (!properties.containsKey("jms.DestinationName"))
+            properties.setProperty("jms.DestinationName", foreign);
+          Topic topic = (Topic) getWrapper().createTopic(serverId, name, Topic.DISTRIBUTION_TOPIC, properties);
+
+          properties = null;
+          foreign = null;
+
+          configureDestination(topic);
+          if (isSet(parent)) {
+            // TODO (AF): may be we should search the parent topic: JNDI? Joram?
+            if (topics.containsKey(parent)) {
+              topic.setParent((Topic) topics.get(parent));
+            } else {
+              logger.log(BasicLevel.ERROR, "Topic.create(): Unknown parent: " + parent);
+            }
+          }
+          registerDestination(topic);
+          setDestinationDMQ(name, topic, dmq);
+        } else if (rawName.equals(ELT_AMQP_ACQUISITION_TOPIC)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (!properties.containsKey("acquisition.className"))
+            properties.setProperty("acquisition.className", AMQPAcquisitionTopic.AMQPAcquisition);
+          if (!properties.containsKey("amqp.QueueName"))
+            properties.setProperty("amqp.QueueName", foreign);
+          Topic topic = (Topic) getWrapper().createTopic(serverId, name, Topic.ACQUISITION_TOPIC, properties);
+          
+          properties = null;
+          foreign = null;
+
+          configureDestination(topic);
+          if (isSet(parent)) {
+            // TODO (AF): may be we should search the parent topic: JNDI? Joram?
+            if (topics.containsKey(parent)) {
+              topic.setParent((Topic) topics.get(parent));
+            } else {
+              logger.log(BasicLevel.ERROR, "Topic.create(): Unknown parent: " + parent);
+            }
+          }
+          registerDestination(topic);
+          setDestinationDMQ(name, topic, dmq);
+        } else if (rawName.equals(ELT_AMQP_DISTRIBUTION_TOPIC)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (!properties.containsKey("distribution.className"))
+            properties.setProperty("distribution.className", AMQPDistributionTopic.AMQPDistribution);
+          if (!properties.containsKey("amqp.QueueName"))
+            properties.setProperty("amqp.QueueName", foreign);
+          Topic topic = (Topic) getWrapper().createTopic(serverId, name, Topic.DISTRIBUTION_TOPIC, properties);
+          
+          properties = null;
+          foreign = null;
+
+          configureDestination(topic);
+          if (isSet(parent)) {
+            // TODO (AF): may be we should search the parent topic: JNDI? Joram?
+            if (topics.containsKey(parent)) {
+              topic.setParent((Topic) topics.get(parent));
+            } else {
+              logger.log(BasicLevel.ERROR, "Topic.create(): Unknown parent: " + parent);
+            }
+          }
+          registerDestination(topic);
           setDestinationDMQ(name, topic, dmq);
         } else if (rawName.equals(ELT_DMQUEUE)) {
           className = "org.objectweb.joram.mom.dest.Queue";
@@ -1031,15 +1193,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           properties = null;
 
           configureDestination(dmq);
-
-          // Bind the destination in JNDI.
-          // Be Careful, currently only one binding is handled.
-          if (isSet(jndiName))
-            toBind.put(jndiName, dmq);
-          jndiName = null;
-          // Register the DMQ in order to handle it later.
-          if (isSet(name))
-            queues.put(name, dmq);
+          registerDestination(dmq);
         } else if (rawName.equals(ELT_PROPERTY)) {
         } else if (rawName.equals(ELT_READER)) {
           readers.add(user);
@@ -1066,7 +1220,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           }
           cluster.clear();
 
-          // Bind the destination in JNDI.
+          // Bind the ClusterConnectionFactory in JNDI.
           // Be Careful, currently only one binding is handled.
           if (isSet(jndiName))
             toBind.put(jndiName, clusterCF);
@@ -1089,11 +1243,6 @@ public class JoramSaxWrapper extends DefaultHandler {
           cluster.clear();
 
           configureDestination(clusterQueue);
-          // Bind the destination in JNDI.
-          // Be Careful, currently only one binding is handled.
-          if (isSet(jndiName))
-            toBind.put(jndiName, clusterQueue);
-          jndiName = null;
         } else if (rawName.equals(ELT_CLUSTER_TOPIC)) {
           Map.Entry entries[] = new Map.Entry [cluster.size()];
           cluster.entrySet().toArray(entries);
@@ -1112,11 +1261,6 @@ public class JoramSaxWrapper extends DefaultHandler {
           cluster.clear();
 
           configureDestination(clusterTopic);
-          // Bind the destination in JNDI.
-          // Be Careful, currently only one binding is handled.
-          if (isSet(jndiName))
-            toBind.put(jndiName, clusterTopic);
-          jndiName = null;
         } else if (rawName.equals(ELT_IN_INTERCEPTORS)){
       	  //NOTHING-TO-DO  
         } else if (rawName.equals(ELT_OUT_INTERCEPTORS)){
@@ -1158,15 +1302,15 @@ public class JoramSaxWrapper extends DefaultHandler {
     properties = null;
     //Add interceptors if any
     if ((inInterceptorClassname!=null) && (!inInterceptorClassname.isEmpty())) {
-      for (Iterator it=inInterceptorClassname.iterator(); it.hasNext(); ) {
-        String iicn = (String) it.next();
+      for (Iterator<String> it=inInterceptorClassname.iterator(); it.hasNext(); ) {
+        String iicn = it.next();
         cf.getParameters().addInInterceptor(iicn);
       }
       inInterceptorClassname.clear();
     }
     if ((outInterceptorClassname != null) && (!outInterceptorClassname.isEmpty())) {
-      for (Iterator it=outInterceptorClassname.iterator(); it.hasNext(); ) {
-        String oicn = (String) it.next();
+      for (Iterator<String> it=outInterceptorClassname.iterator(); it.hasNext(); ) {
+        String oicn = it.next();
         cf.getParameters().addOutInterceptor(oicn);
       }
       outInterceptorClassname.clear();
@@ -1195,8 +1339,29 @@ public class JoramSaxWrapper extends DefaultHandler {
         dest.setWriter(u);
     }
     writers.clear();
-  }
 
+    // Bind the destination in JNDI.
+    // Be Careful, currently only one binding is handled.
+    if (isSet(jndiName))
+      toBind.put(jndiName, dest);
+    jndiName = null;
+  }
+  
+  void registerDestination(Destination dest) {
+    // Register the destination in order to handle it later.
+    String name = dest.getAdminName();
+    if (! isSet(name))
+      name = dest.getName();
+    if (dest instanceof Queue) {
+      queues.put(name, (Queue) dest);
+    } else if (dest instanceof Topic) {
+      topics.put(name, (Topic) dest);
+    } else  {
+      logger.log(BasicLevel.ERROR,
+                 "Bad destination type: " + dest, new Exception("Bad destination type."));
+    }
+
+  }
   void setDestinationDMQ(String name, Destination dest, String dmq) throws Exception {
     if (isSet(dmq)) {
       if (queues.containsKey(dmq)) {
@@ -1229,8 +1394,8 @@ public class JoramSaxWrapper extends DefaultHandler {
       if (jndiCtx == null)
         jndiCtx = new javax.naming.InitialContext();
 
-      for (Enumeration e = toBind.keys(); e.hasMoreElements();) {
-        String name = (String) e.nextElement();
+      for (Enumeration<String> e = toBind.keys(); e.hasMoreElements();) {
+        String name = e.nextElement();
         StringBuffer buff = null;
         StringTokenizer st = null;
         if (name.startsWith(SCN)) {
