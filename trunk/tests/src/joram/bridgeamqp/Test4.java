@@ -33,9 +33,9 @@ import javax.jms.TextMessage;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.AMQPAcquisitionQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.mom.dest.amqp.AmqpAcquisition;
 
 import framework.TestCase;
 
@@ -76,15 +76,13 @@ public class Test4 extends TestCase {
 
         // Setting the bridge properties
         Properties prop1 = new Properties();
-        prop1.setProperty("acquisition.className", AmqpAcquisition.class.getName());
-        prop1.setProperty("amqp.QueueName", "amqpQueue");
         prop1.setProperty("amqp.Queue.DeclarePassive", "false");
         prop1.setProperty("amqp.Queue.DeclareExclusive", "false");
         prop1.setProperty("amqp.Queue.DeclareDurable", "true");
         prop1.setProperty("amqp.Queue.DeclareAutoDelete", "false");
         prop1.setProperty("amqp.ConnectionUpdatePeriod", "1000");
 
-        Queue joramInQueue = Queue.create(0, "queue", Queue.ACQUISITION_QUEUE, prop1);
+        Queue joramInQueue = AMQPAcquisitionQueue.create(0, "queue", "amqpQueue", prop1);
         joramInQueue.setFreeReading();
         joramInQueue.setFreeWriting();
         System.out.println("joramInQueue = " + joramInQueue);
