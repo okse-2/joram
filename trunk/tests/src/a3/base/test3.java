@@ -58,7 +58,7 @@ public class test3 extends TestCase {
     byte[] heap = null;
 
     BigNot() {
-      heap = new byte[50 * 1024 * 1024];
+      heap = new byte[1024 * 1024];
     }
   }
 
