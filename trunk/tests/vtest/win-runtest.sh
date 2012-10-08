@@ -36,7 +36,7 @@ cd src;
 echo "on launching ant custom.tests.vtest"
 
 cmd <<EOF
-ant tests.jms.all >> antrun.txt 
+ant custom.tests.vtest >> antrun.txt 
 EOF
 
 #ant vtest.check.reports >> $LOGFILE 2>&1 
@@ -44,6 +44,7 @@ TEST_RESULT=$?;
 
 mkdir results ;
 cp $LOGFILE results ;
+cp antrun.txt results;
 
 #getting test exit code
 if [[ $TEST_RESULT -gt 0 ]]; then
