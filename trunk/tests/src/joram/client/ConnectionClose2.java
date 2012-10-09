@@ -26,6 +26,7 @@ package joram.client;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
@@ -59,6 +60,8 @@ public class ConnectionClose2 extends TestCase {
   private MessageProducer producer;
   
   private MessageConsumer consumer;
+  
+  static boolean closed = false;
   
   public void run() {
     try {
@@ -109,12 +112,27 @@ public class ConnectionClose2 extends TestCase {
           }
         }.start();
 
-        Thread.sleep(500);
-
-        //System.out.println("Close #" + i);
-        connection.close();
+        new Thread() {
+          public void run() {
+            try {
+              Thread.sleep(1000);
+            } catch (InterruptedException e) {}
+            try {
+              connection.close();
+              closed = true;
+            } catch (JMSException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+          }
+        }.start();
       }
       
+      for (int i=0; i<10; i++) {
+        Thread.sleep(1000);
+        if (closed) break;
+      }
+      assertTrue("Connection is not closed", closed);
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
