@@ -22,6 +22,9 @@
  */
 package joram.noreg;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
@@ -147,7 +150,16 @@ public class Test17 extends BaseTest implements ExceptionListener, MessageListen
       Sender17 sender = new Sender17(cnx2, sess2, producer);
       new Thread(sender).start();
 
-      
+      Timer timer = new Timer();
+      TimerTask task = new TimerTask() {
+        public void run() {
+          AgentServer.stop();
+          fail("Aborted.");
+          endTest();
+        }
+      };
+      timer.schedule(task, 300000);
+
       int nbClose = 0;
 
       while (nbMsg < 5000) {
