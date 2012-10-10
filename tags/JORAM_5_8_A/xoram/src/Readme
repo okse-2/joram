@@ -1,0 +1,120 @@
+
+        I - Compilation de Joram
+        ========================
+
+2) Creation d'une livraison binaire de Joram
+--------------------------------------------
+
+cd <JORAM_DIR>/joram/src
+ant clean ship
+
+
+        II - Compilation de Xoram
+        =========================
+
+Attention, il faut modifier le makefile pour choisir la cible de compilation,
+Windows/Cygwin ou Linux. 
+
+cd <JORAM_DIR>/xoram/src
+make clean xoram
+
+        III - Test de Xoram
+        ===================
+
+1) Compilation des tests
+------------------------
+
+Attention, il faut modifier le fichier Makefile.global du répertoire test pour choisir la
+cible de compilation, Windows/Cygwin ou Linux. 
+
+Window#1: cd <JORAM_DIR>/xoram/src
+Window#1: make clean tests
+
+
+2) Lancement de Joram
+---------------------
+
+Window#2: cd <JORAM_DIR>/joram/samples/src/joram
+Window#2: ant clean compile
+Window#2: ant reset single_server
+          --> AgentServer#0 started: OK
+
+3) Administration de Joram
+--------------------------
+  L'ensemble des exemples fournis dans le répertoire tests/base et tests/perfs
+de xoram utilisent maintenant l'API d'administration intégrée de Xoram. Il n'y a
+donc plus lieu d'utiliser les targets d'administration des samples de Joram.
+
+	Les tests du wrapper C nécessitent eux soit d'exécuter les tests de Xoram au
+préalable, soit d'utiliser le target classic_admin des samples Joram.
+
+TODO(AF): Reporter l'API d'administration dans le wrapper.
+
+4) Lancement des exemples de base
+---------------------------------
+Window#1: export LD_LIBRARY_PATH=<JORAM_DIR>/xoram/src
+
+Window#1: cd <JORAM_DIR>/xoram/src
+
+Window#1: ../tests/base/test1.exe
+connected -> 0
+##### Cnx state(1): 1
+##### Cnx state(0): 0
+##### Cnx state(1): 1
+##### Cnx state(0): 0
+##### bye
+
+Window#1: ../tests/base/test2.exe
+connected -> 1
+##### Message sent on queue: ID:0.0.1028c1m1
+##### Message received: ID:0.0.1028c1m1
+
+Window#1: ../tests/base/test3.exe
+connected -> 2
+##### Message sent on topic: ID:0.0.1028c2m1
+##### Message received: ID:0.0.1028c2m1
+
+Window#1: ../tests/base/test5.exe
+connected -> 4
+##### Message sent on queue: ID:0.0.1028c4m1
+##### Message sent on topic: ID:0.0.1028c4m2
+##### Message received: ID:0.0.1028c4m1
+##### Message received: ID:0.0.1028c4m2
+
+Window#1: ../tests/base/test6.exe
+connected -> 5
+##### Message sent on queue: ID:0.0.1028c5m1
+##### Message sent on queue: ID:0.0.1028c5m2
+##### Message sent on queue: ID:0.0.1028c5m3
+##### Message sent on queue: ID:0.0.1028c5m4
+##### Message sent on queue: ID:0.0.1028c5m5
+##### Message sent on topic: ID:0.0.1028c5m6
+##### Message received: ID:0.0.1028c5m1
+##### Message received: ID:0.0.1028c5m6
+##### Message received: ID:0.0.1028c5m2
+##### Message received: ID:0.0.1028c5m3
+##### Message received: ID:0.0.1028c5m4
+##### Message received: ID:0.0.1028c5m5
+
+Window#1: ../tests/base/test7.exe
+connected -> 6
+##### Message sent on queue: ID:0.0.1028c6m1
+##### Message sent on queue: ID:0.0.1028c6m2
+##### Message sent on queue: ID:0.0.1028c6m3
+##### Message sent on queue: ID:0.0.1028c6m4
+##### Message sent on queue: ID:0.0.1028c6m5
+##### Message sent on topic: ID:0.0.1028c6m6
+##### Message received: ID:0.0.1028c6m1
+
+5) Lancement de tous les tests
+------------------------------
+	Pour lancer tous les tests il suffit d'utiliser le script lauchtests du
+répertoire src. Ce script compile Xoram et exécute un à un tous les tests,
+le résultat est visible dans le fichier report.txt du répertoire tests.
+
+	Ce script suppose un serveur Joram actif sur la machine (cf. section 2).
+
+Window#1: cd <JORAM_DIR>/xoram/src
+Window#1: ./launchtests
+
+

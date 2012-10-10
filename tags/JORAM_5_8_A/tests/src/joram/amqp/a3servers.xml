@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config>
+  <property name="Transaction" value="fr.dyade.aaa.util.NTransaction"/>
+  <property name="AMQP.heartbeat" value="10"/>
+  
+  <server id="0" name="s0" hostname="localhost">
+     <service class="fr.dyade.aaa.agent.AdminProxy" args="7890"/>
+     <service class="org.ow2.joram.mom.amqp.AMQPService" args="5672"/>
+  </server>
+
+</config>

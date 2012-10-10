@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<config>
+  <domain name="D1" network="fr.dyade.aaa.agent.PoolNetwork"/>
+	
+  <property name="Transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
+  <property name="Transaction.NbLogFile" value="64"/>
+  <property name="Transaction.MaxLogFileSize" value="16"/>
+
+  <server id="101" name="P1" hostname="10.0.0.2">
+    <network domain="D1" port="16151"/>
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
+             args="root root"/>
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
+             args="16101"/>
+    <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
+  </server>
+
+  <server id="102" name="P2" hostname="10.0.0.3">
+    <network domain="D1" port="16152"/>
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
+             args="root root"/>
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
+             args="16102"/>
+  </server>
+
+  <server id="1" name="W1" hostname="10.0.0.4">
+    <network domain="D1" port="16051"/>
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
+             args="root root"/>
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
+             args="16001"/>
+  </server>
+
+</config>
