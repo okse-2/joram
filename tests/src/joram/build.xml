@@ -467,6 +467,7 @@
     <antcall target="schedqueue.test2"/>
     <antcall target="schedqueue.test3"/>
     <antcall target="schedqueue.test4"/>
+    <antcall target="schedqueue.test5"/>
   </target>
 
   <target name="tests.clusterTopic"
@@ -550,6 +551,7 @@
     <antcall target="collector.TestQ2"/>
   	<antcall target="collector.TestQ3"/>
   	<antcall target="collector.TestQ4"/>
+  	<antcall target="collector.AdminTest1"/>
   </target>
 
 	<target name="tests.interceptors"
@@ -5110,6 +5112,18 @@
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
+
+  <target name="schedqueue.test5" depends="init.a3props,compile"
+          description=" --> check the creation of SchedulerQueue through XML administration scripts">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.schedqueue.Test5"/>
+      <param name="testid" value="schedqueue.test5"/>
+      <param name="jndiconf" value="schedqueue/jndi.properties"/>
+      <param name="a3conf" value="schedqueue/a3servers.xml"/>
+    	<param name="joramAdmin" value="schedqueue/joramAdmin.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
   <!-- end scheduler test -->
 
 
@@ -5646,6 +5660,19 @@
       <param name="className" value="joram.monitoring.TestMonitoringQueue3"/>
       <param name="jndiconf" value="monitoring/jndi.properties"/>
       <param name="a3conf" value="monitoring/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="collector.AdminTest1" depends="init.a3props,compile"
+          description=" --> Test collector creation through XML administration scripts">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="collector.AdminTest1"/>
+      <param name="className" value="joram.collector.AdminTest1"/>
+      <param name="jndiconf" value="collector/jndi.properties"/>
+      <param name="a3conf" value="collector/a3servers.xml"/>
+    	<param name="joramAdmin" value="collector/joramAdmin.xml"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
