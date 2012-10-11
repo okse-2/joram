@@ -23,15 +23,19 @@
  */
 package classic;
 
+import java.util.Enumeration;
+
 import javax.jms.*;
 
 /**
  * Implements the <code>javax.jms.MessageListener</code> interface.
  */
 public class MsgListener implements MessageListener {
-  String ident = null;
+  private String ident = null;
 
-  public MsgListener() {}
+  public MsgListener() {
+    ident = "listener";
+  }
 
   public MsgListener(String ident) {
     this.ident = ident;
@@ -39,16 +43,21 @@ public class MsgListener implements MessageListener {
 
   public void onMessage(Message msg) {
     try {
+      Destination destination = msg.getJMSDestination();
+      Destination replyTo = msg.getJMSReplyTo();
+
+      System.out.println(ident + " receives message from=" + destination + ",replyTo=" + replyTo);
+      Enumeration e = msg.getPropertyNames();
+      while (e.hasMoreElements()) {
+        String key = (String) e.nextElement();
+        String value = msg.getStringProperty(key);
+        System.out.println("\t" + key + " = " + value);
+      }
+
       if (msg instanceof TextMessage) {
-        if (ident == null) 
-          System.out.println(((TextMessage) msg).getText());
-        else
-          System.out.println(ident + ": " + ((TextMessage) msg).getText());
+        System.out.println(ident + ": " + ((TextMessage) msg).getText());
       } else if (msg instanceof ObjectMessage) {
-        if (ident == null) 
-          System.out.println(((ObjectMessage) msg).getObject());
-        else
-          System.out.println(ident + ": " + ((ObjectMessage) msg).getObject());
+        System.out.println(ident + ": " + ((ObjectMessage) msg).getObject());
       }
     } catch (JMSException jE) {
       System.err.println("Exception in listener: " + jE);
