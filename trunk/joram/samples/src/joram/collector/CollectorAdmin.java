@@ -25,7 +25,10 @@ package collector;
 import java.util.Properties;
 
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.CollectorQueue;
+import org.objectweb.joram.client.jms.admin.CollectorTopic;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.messages.Message;
@@ -47,20 +50,22 @@ public class CollectorAdmin {
     Properties prop = new Properties();
     prop.setProperty("expiration", "0");
     prop.setProperty("persistent", "true");
-    prop.setProperty("acquisition.period", "10000");
-    prop.setProperty("acquisition.className", "com.scalagent.joram.mom.dest.collector.URLAcquisition");
-    prop.setProperty("collector.url", url);
-    prop.setProperty("collector.type", "" + Message.BYTES);
+    prop.setProperty("acquisition.period", "0");
     
-    Queue queue = Queue.create(0, "queue", Queue.ACQUISITION_QUEUE, prop);
-//    Topic topic = Topic.create(0, "topic", Topic.ACQUISITION_TOPIC, prop);
+    Queue queue = CollectorQueue.create(0, "queue", url, prop);
+
+    prop = new Properties();
+    prop.setProperty("expiration", "0");
+    prop.setProperty("persistent", "true");
+    prop.setProperty("acquisition.period", "5000");
+    Topic topic = CollectorTopic.create(0, "topic", url, prop);
     
     User.create("anonymous", "anonymous");
 
     queue.setFreeReading();
     queue.setFreeWriting();
-//    topic.setFreeReading();
-//    topic.setFreeWriting();
+    topic.setFreeReading();
+    topic.setFreeWriting();
 
     javax.jms.ConnectionFactory cf =
       TcpConnectionFactory.create("localhost", 16010);
@@ -68,7 +73,7 @@ public class CollectorAdmin {
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);
     jndiCtx.bind("queue", queue);
-//    jndiCtx.bind("topic", topic);
+    jndiCtx.bind("topic", topic);
     jndiCtx.close();
 
     AdminModule.disconnect();
