@@ -37,6 +37,7 @@ import javax.naming.InitialContext;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.MonitoringTopic;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.mom.dest.MonitoringAcquisition;
@@ -99,10 +100,9 @@ public class TestMonitoringTopic1 extends TestCase implements MessageListener {
     Properties properties = new Properties();
     properties.put("acquisition.period", "2000");
     properties.put("Joram#0:name=JoramAdminTopic,*", "DestinationId");
-    properties.put("acquisition.className", MonitoringAcquisition.class.getName());
     
     // create a Topic   
-    Topic topic = Topic.create(0, "MonitoringTopic", Destination.ACQUISITION_TOPIC, properties);
+    Topic topic = MonitoringTopic.create(0, "MonitoringTopic", properties);
 
     // create a user
     User.create("anonymous", "anonymous");

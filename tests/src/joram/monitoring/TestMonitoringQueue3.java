@@ -39,6 +39,7 @@ import javax.naming.InitialContext;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.MonitoringQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.mom.dest.MonitoringAcquisition;
@@ -124,9 +125,7 @@ public class TestMonitoringQueue3 extends TestCase implements MessageListener {
     // create a user
     User.create("anonymous", "anonymous");
     
-    Properties properties = new Properties();
-    properties.put("acquisition.className", MonitoringAcquisition.class.getName());
-    Queue queue = Queue.create(0, "MonitoringQueue", Destination.ACQUISITION_QUEUE, properties);
+    Queue queue = MonitoringQueue.create(0, "MonitoringQueue");
     
     // set permissions
     queue.setFreeReading();

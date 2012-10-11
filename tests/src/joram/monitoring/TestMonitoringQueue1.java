@@ -38,6 +38,7 @@ import javax.naming.InitialContext;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.MonitoringQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.mom.dest.MonitoringAcquisition;
@@ -100,10 +101,9 @@ public class TestMonitoringQueue1 extends TestCase implements MessageListener {
     Properties properties = new Properties();
     properties.put("acquisition.period", "2000");
     properties.put("Joram#0:*", "DestinationId");
-    properties.put("acquisition.className", MonitoringAcquisition.class.getName());
     
     // create a Queue   
-    Queue queue = Queue.create(0, "MonitoringQueue", Destination.ACQUISITION_QUEUE, properties);
+    Queue queue = MonitoringQueue.create(0, "MonitoringQueue", properties);
 
     // create a user
     User.create("anonymous", "anonymous");
