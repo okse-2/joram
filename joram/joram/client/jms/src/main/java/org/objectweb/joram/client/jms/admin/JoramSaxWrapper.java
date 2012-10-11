@@ -149,6 +149,8 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_SCHEDULER_QUEUE = "SchedulerQueue";
   static final String ELT_COLLECTOR_QUEUE = "CollectorQueue";
   static final String ELT_COLLECTOR_TOPIC = "CollectorTopic";
+  static final String ELT_MONITORING_QUEUE = "MonitoringQueue";
+  static final String ELT_MONITORING_TOPIC = "MonitoringTopic";
 
   /** Syntaxic name for property element */
   static final String ELT_PROPERTY = "property";
@@ -592,6 +594,10 @@ public class JoramSaxWrapper extends DefaultHandler {
       } else if (rawName.equals(ELT_COLLECTOR_TOPIC)) {
         getTopicAtts(atts);
         url = atts.getValue(ATT_URL);
+      } else if (rawName.equals(ELT_MONITORING_QUEUE)) {
+        getQueueAtts(atts);
+      } else if (rawName.equals(ELT_MONITORING_TOPIC)) {
+        getTopicAtts(atts);
       } else if (rawName.equals(ELT_DMQUEUE)) {
         name = atts.getValue(ATT_NAME);
         properties = null;
@@ -1249,13 +1255,51 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (properties == null)
             properties = new Properties();
           if (!properties.containsKey("acquisition.className"))
-            properties.setProperty("acquisition.className", CollectorQueue.URLAcquisition);
+            properties.setProperty("acquisition.className", CollectorTopic.URLAcquisition);
           if (!properties.containsKey("collector.url"))
             properties.setProperty("collector.url", url);
           Topic topic = (Topic) getWrapper().createTopic(serverId, name, Topic.ACQUISITION_TOPIC, properties);
           
           properties = null;
           url = null;
+
+          configureDestination(topic);
+          if (isSet(parent)) {
+            // TODO (AF): may be we should search the parent topic: JNDI? Joram?
+            if (topics.containsKey(parent)) {
+              topic.setParent((Topic) topics.get(parent));
+            } else {
+              logger.log(BasicLevel.ERROR, "Topic.create(): Unknown parent: " + parent);
+            }
+          }
+          registerDestination(topic);
+          setDestinationDMQ(name, topic, dmq);
+        } else if (rawName.equals(ELT_MONITORING_QUEUE)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (properties == null)
+            properties = new Properties();
+          if (!properties.containsKey("acquisition.className"))
+            properties.setProperty("acquisition.className", MonitoringQueue.JMXAcquisition);
+          Queue queue = (Queue) getWrapper().createQueue(serverId, name, Queue.ACQUISITION_QUEUE, properties);
+          properties = null;
+
+          configureDestination(queue);
+          if (threshold > 0) queue.setThreshold(threshold);
+          if (nbMaxMsg > 0) queue.setNbMaxMsg(nbMaxMsg);
+          registerDestination(queue);
+          setDestinationDMQ(name, queue, dmq);
+        } else if (rawName.equals(ELT_MONITORING_TOPIC)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (properties == null)
+            properties = new Properties();
+          if (!properties.containsKey("acquisition.className"))
+            properties.setProperty("acquisition.className", MonitoringTopic.JMXAcquisition);
+          Topic topic = (Topic) getWrapper().createTopic(serverId, name, Topic.ACQUISITION_TOPIC, properties);
+          properties = null;
 
           configureDestination(topic);
           if (isSet(parent)) {
