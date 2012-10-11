@@ -27,15 +27,16 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
+import javax.jms.Topic;
 import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
 /**
- * Updates properties on the URL acquisition queue to change the acquisition
- * period and URL.
+ * Sends a message to the URL acquisition queue to trigger the acquisition
+ * with the specified URL.
  */
-public class Producer {
+public class Trigger {
   static Context ictx = null;
 
   public static void main(String[] args) throws Exception {
@@ -44,7 +45,7 @@ public class Producer {
 
     ictx = new InitialContext();
     Queue queue = (Queue) ictx.lookup("queue");
-//    Topic topic = (Topic) ictx.lookup("topic");
+    Topic topic = (Topic) ictx.lookup("topic");
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
     ictx.close();
 
@@ -53,13 +54,8 @@ public class Producer {
     MessageProducer producer = sess.createProducer(null);
 
     Message msg = sess.createMessage();
-    msg.setStringProperty("expiration", "0");
-    msg.setStringProperty("persistent", "true");
-    msg.setStringProperty("acquisition.period", "30000");
     msg.setStringProperty("collector.url", "http://www.gnu.org/licenses/lgpl-3.0.txt");
-    msg.setStringProperty("collector.type", "5");
     producer.send(queue, msg);
-//    producer.send(topic, msg);
 
     System.out.println("messages sent.");
 
