@@ -1019,6 +1019,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (properties == null)
+            properties = new Properties();
           if (!properties.containsKey("acquisition.className"))
             properties.setProperty("acquisition.className", JMSAcquisitionQueue.JMSAcquisition);
           if (!properties.containsKey("jms.DestinationName"))
@@ -1037,6 +1039,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (properties == null)
+            properties = new Properties();
           if (!properties.containsKey("distribution.className"))
             properties.setProperty("distribution.className", JMSDistributionQueue.JMSDistribution);
           if (!properties.containsKey("jms.DestinationName"))
@@ -1055,6 +1059,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (properties == null)
+            properties = new Properties();
           if (!properties.containsKey("acquisition.className"))
             properties.setProperty("acquisition.className", AMQPAcquisitionQueue.AMQPAcquisition);
           if (!properties.containsKey("amqp.QueueName"))
@@ -1073,6 +1079,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (properties == null)
+            properties = new Properties();
           if (!properties.containsKey("distribution.className"))
             properties.setProperty("distribution.className", AMQPDistributionQueue.AMQPDistribution);
           if (!properties.containsKey("amqp.QueueName"))
@@ -1091,6 +1099,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (properties == null)
+            properties = new Properties();
           if (!properties.containsKey("acquisition.className"))
             properties.setProperty("acquisition.className", JMSAcquisitionTopic.JMSAcquisition);
           if (!properties.containsKey("jms.DestinationName"))
@@ -1115,6 +1125,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (properties == null)
+            properties = new Properties();
           if (!properties.containsKey("distribution.className"))
             properties.setProperty("distribution.className", JMSDistributionTopic.JMSDistribution);
           if (!properties.containsKey("jms.DestinationName"))
@@ -1139,6 +1151,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (properties == null)
+            properties = new Properties();
           if (!properties.containsKey("acquisition.className"))
             properties.setProperty("acquisition.className", AMQPAcquisitionTopic.AMQPAcquisition);
           if (!properties.containsKey("amqp.QueueName"))
@@ -1163,6 +1177,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        rawName + ".create(" + serverId + "," + name + "," + foreign + "," + properties + ")");
+          if (properties == null)
+            properties = new Properties();
           if (!properties.containsKey("distribution.className"))
             properties.setProperty("distribution.className", AMQPDistributionTopic.AMQPDistribution);
           if (!properties.containsKey("amqp.QueueName"))
