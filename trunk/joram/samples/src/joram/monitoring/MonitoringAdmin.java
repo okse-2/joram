@@ -29,6 +29,8 @@ import javax.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.MonitoringQueue;
+import org.objectweb.joram.client.jms.admin.MonitoringTopic;
 
 /**
  * Creates 2 monitoring destinations: a queue and topic.
@@ -46,29 +48,21 @@ public class MonitoringAdmin {
     AdminModule.connect(cf, "root", "root");
     
     Properties topicProps = new Properties();
-    topicProps.put("acquisition.className", "org.objectweb.joram.mom.dest.MonitoringAcquisition");
     topicProps.put("acquisition.period", "5000");
     topicProps.put("Joram#0:type=Destination,name=queue",
                    "NbMsgsDeliverSinceCreation,NbMsgsReceiveSinceCreation,PendingMessageCount,NbMsgsSentToDMQSinceCreation");
     topicProps.put("Joram#0:type=Destination,name=topic",
                    "NbMsgsDeliverSinceCreation,NbMsgsReceiveSinceCreation,NbMsgsSentToDMQSinceCreation");
     
-    Topic mTopic = Topic.create(0, "MonitoringTopic", Topic.ACQUISITION_TOPIC, topicProps);
+    Topic mTopic = MonitoringTopic.create(0, "MonitoringTopic", topicProps);
     mTopic.setFreeReading();
     mTopic.setFreeWriting();
     jndiCtx.bind("MonitoringTopic", mTopic);
     
-    Properties queueProps = new Properties();
-    queueProps.put("acquisition.className", "org.objectweb.joram.mom.dest.MonitoringAcquisition");
-    Queue mQueue = Queue.create(0, "MonitoringQueue", Queue.ACQUISITION_QUEUE, queueProps);
+    Queue mQueue = MonitoringQueue.create(0, "MonitoringQueue");
     mQueue.setFreeReading();
     mQueue.setFreeWriting();
     jndiCtx.bind("MonitoringQueue", mQueue);
-    
-//    User.create("anonymous", "anonymous");
-
-//     cf = TcpConnectionFactory.create("localhost", 16010);
-//    jndiCtx.bind("cf", cf);
 
     jndiCtx.close();
     AdminModule.disconnect();
