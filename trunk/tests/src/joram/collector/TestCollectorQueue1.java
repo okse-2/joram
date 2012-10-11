@@ -37,15 +37,14 @@ import javax.naming.InitialContext;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.CollectorQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-
-import com.scalagent.joram.mom.dest.collector.URLAcquisition;
 
 import framework.TestCase;
 
 /**
- * Tests receive the history of the JORAM svn using the CollectorQueue.
+ * Tests receive the LGPL license using the CollectorQueue.
  */
 public class TestCollectorQueue1 extends TestCase implements MessageListener {
 
@@ -103,12 +102,9 @@ public class TestCollectorQueue1 extends TestCase implements MessageListener {
     properties.setProperty("expiration", "0");
     properties.setProperty("persistent", "true");
     properties.setProperty("acquisition.period", "5000");
-    properties.setProperty("collector.url", url);
-    properties.setProperty("collector.type", "" + org.objectweb.joram.shared.messages.Message.BYTES);
-    properties.setProperty("acquisition.className", URLAcquisition.class.getName());
         
     // create a Queue   
-    Queue queue = Queue.create(0, "CollectorQueue", Destination.ACQUISITION_QUEUE, properties);
+    Queue queue = CollectorQueue.create(0, "CollectorQueue", url, properties);
 
     // create a user
     User.create("anonymous", "anonymous");
