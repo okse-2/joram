@@ -102,8 +102,7 @@ public class JMSAcquisitionQueue {
   public static Queue create(int serverId,
                              String name,
                              String dest) throws ConnectException, AdminException {
-    Properties props = new Properties();
-    return create(serverId, name, dest, props);
+    return create(serverId, name, dest, null);
   }
 
   /**
@@ -150,6 +149,8 @@ public class JMSAcquisitionQueue {
                              String name,
                              String dest,
                              Properties props) throws ConnectException, AdminException {
+    if (props == null)
+      props = new Properties();
     if (!props.containsKey("acquisition.className"))
       props.setProperty("acquisition.className", JMSAcquisition);
     if (!props.containsKey("jms.DestinationName"))

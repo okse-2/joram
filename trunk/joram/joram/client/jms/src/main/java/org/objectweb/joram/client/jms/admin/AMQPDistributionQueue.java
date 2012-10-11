@@ -102,8 +102,7 @@ public class AMQPDistributionQueue {
   public static Queue create(int serverId,
                              String name,
                              String dest) throws ConnectException, AdminException {
-    Properties props = new Properties();
-    return create(serverId, name, dest, props);
+    return create(serverId, name, dest, null);
   }
 
   /**
@@ -149,6 +148,8 @@ public class AMQPDistributionQueue {
                              String name,
                              String dest,
                              Properties props) throws ConnectException, AdminException {
+    if (props == null)
+      props = new Properties();
     if (!props.containsKey("distribution.className"))
       props.setProperty("distribution.className", AMQPDistribution);
     if (!props.containsKey("amqp.QueueName"))
