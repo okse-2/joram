@@ -37,26 +37,16 @@
 
   
   <User name="anonymous" password="anonymous"/>
-
-  <Queue name="bridgeQueue" serverId="1"
-         className="org.objectweb.joram.mom.dest.DistributionQueue">
-    <property name="jms.DestinationName" value="queue"/>
-    <property name="distribution.className" value="org.objectweb.joram.mom.dest.jms.JMSDistribution"/>
   
+	<JMSDistributionQueue name="bridgeQueue" foreign="queue" serverId="1">
     <freeWriter/>
-    
     <jndi name="bridgeQueue"/>
-  </Queue>
-  
-  <Topic name="bridgeTopic" serverId="1"
-         className="org.objectweb.joram.mom.dest.AcquisitionTopic">
-    <property name="jms.DestinationName" value="topic"/>
-    <property name="acquisition.className" value="org.objectweb.joram.mom.dest.jms.JMSAcquisition"/>
-  
+  </JMSDistributionQueue>
+
+	<JMSAcquisitionTopic name="bridgeTopic" foreign="topic" serverId="1">
     <freeReader/>
     <freeWriter/>
-    
     <jndi name="bridgeTopic"/>
-  </Topic>
+  </JMSAcquisitionTopic>
   
 </JoramAdmin>

@@ -29,6 +29,8 @@ import javax.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.JMSAcquisitionTopic;
+import org.objectweb.joram.client.jms.admin.JMSDistributionQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
@@ -47,23 +49,13 @@ public class BridgeAdmin {
     
     User.create("anonymous", "anonymous");
 
-    // Setting the bridge queue properties
-    Properties prop = new Properties();
-    prop.setProperty("jms.DestinationName", "queue"); // Foreign Queue JNDI name: foreignDest
-    prop.setProperty("distribution.className", "org.objectweb.joram.mom.dest.jms.JMSDistribution");
-
     // Creating a Queue bridge on server 1:
-    Queue bridgeQueue = Queue.create(1, Queue.DISTRIBUTION_QUEUE, prop);
+    Queue bridgeQueue = JMSDistributionQueue.create(1, "queue");
     bridgeQueue.setFreeWriting();
     System.out.println("joram queue = " + bridgeQueue);
 
-    // Setting the bridge topic properties
-    prop = new Properties();
-    prop.setProperty("jms.DestinationName", "topic"); // Foreign Queue JNDI name: foreignDest
-    prop.setProperty("acquisition.className", "org.objectweb.joram.mom.dest.jms.JMSAcquisition");
-
     // Creating a Topic bridge on server 1:
-    Topic bridgeTopic = Topic.create(1, Topic.ACQUISITION_TOPIC, prop);
+    Topic bridgeTopic = JMSAcquisitionTopic.create(1, "topic");
     bridgeTopic.setFreeReading();
     System.out.println("joram topic = " + bridgeTopic);
     
