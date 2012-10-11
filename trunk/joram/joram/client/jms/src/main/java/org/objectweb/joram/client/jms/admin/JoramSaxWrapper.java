@@ -145,7 +145,9 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_AMQP_ACQUISITION_TOPIC = "AMQPAcquisitionTopic";
   static final String ELT_AMQP_DISTRIBUTION_QUEUE = "AMQPDistributionQueue";
   static final String ELT_AMQP_DISTRIBUTION_TOPIC = "AMQPDistributionTopic";
-  
+
+  static final String ELT_SCHEDULER_QUEUE = "SchedulerQueue";
+
   /** Syntaxic name for property element */
   static final String ELT_PROPERTY = "property";
   /** Syntaxic name for reader element */
@@ -580,6 +582,8 @@ public class JoramSaxWrapper extends DefaultHandler {
                  (rawName.equals(ELT_AMQP_DISTRIBUTION_TOPIC))) {
         getTopicAtts(atts);
         foreign = atts.getValue(ATT_FOREIGN);
+      } else if (rawName.equals(ELT_SCHEDULER_QUEUE)) {
+        getQueueAtts(atts);
       } else if (rawName.equals(ELT_DMQUEUE)) {
         name = atts.getValue(ATT_NAME);
         properties = null;
@@ -1199,6 +1203,17 @@ public class JoramSaxWrapper extends DefaultHandler {
           }
           registerDestination(topic);
           setDestinationDMQ(name, topic, dmq);
+        } else if (rawName.equals(ELT_SCHEDULER_QUEUE)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       rawName + ".create(" + serverId + "," + name + ")");
+          Queue queue = (Queue) getWrapper().createQueue(serverId, name, Queue.SCHEDULER_QUEUE, properties);
+          properties = null;
+          configureDestination(queue);
+          if (threshold > 0) queue.setThreshold(threshold);
+          if (nbMaxMsg > 0) queue.setNbMaxMsg(nbMaxMsg);
+          registerDestination(queue);
+          setDestinationDMQ(name, queue, dmq);
         } else if (rawName.equals(ELT_DMQUEUE)) {
           className = "org.objectweb.joram.mom.dest.Queue";
           if (logger.isLoggable(BasicLevel.DEBUG))
