@@ -32,6 +32,7 @@ import javax.jms.TextMessage;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.SchedulerQueue;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
@@ -59,7 +60,7 @@ public class Test2 extends framework.TestCase{
       AdminModule.connect("localhost", 16010, "root", "root", 60);
 
       User user = User.create("anonymous", "anonymous");
-      Queue queue = Queue.create(0, "schedulerQ", Queue.SCHEDULER_QUEUE, null);
+      Queue queue = SchedulerQueue.create(0, "schedulerQ");
       queue.setFreeReading();
       queue.setFreeWriting();
 
@@ -73,14 +74,14 @@ public class Test2 extends framework.TestCase{
 
       cnx.start();
 
-      long scheduleDate = System.currentTimeMillis() + 50000;
+      long scheduleDate = System.currentTimeMillis() + 15000;
       TextMessage msg = sess.createTextMessage();
       msg.setText("message 1");
       msg.setLongProperty("scheduleDate", scheduleDate);
       System.out.println("send");
       prod_a.send(msg);
 
-      scheduleDate = System.currentTimeMillis() + 10000;
+      scheduleDate = System.currentTimeMillis() + 5000;
       msg = sess.createTextMessage();
       msg.setText("message 2");
       msg.setLongProperty("scheduleDate", scheduleDate);

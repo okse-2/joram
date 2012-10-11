@@ -30,6 +30,7 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.SchedulerQueue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
@@ -64,7 +65,7 @@ public class Test4 extends framework.TestCase {
       AdminModule.connect(cf, "root", "root");
 
       User user = User.create("anonymous", "anonymous");
-      Queue queue = Queue.create(0, "schedulerQ", Queue.SCHEDULER_QUEUE, null);
+      Queue queue = SchedulerQueue.create(0, "schedulerQ");
       queue.setFreeReading();
       queue.setFreeWriting();
 
