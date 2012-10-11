@@ -993,19 +993,23 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
-  
-  <!-- Runs the producer client -->
-  <target name="collector_producer" depends="simple_init"
-    description="--> Starts a collector Producer client">
-    <java classname="collector.Producer" failonerror="no" fork="yes" dir="${run.dir}">
+	
+  <!-- Setup the classic configuration -->
+  <target name="collector_adminxml" depends="simple_init"
+          description="-->  Runs XML administration script for collector sample">
+    <copy file="${src.dir}/collector/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
     </java>
   </target>
-
-  <!-- Runs the consumer client -->
-  <target name="collector_consumer" depends="simple_init"
-    description="--> Starts a collector Consumer client">
-    <java classname="collector.Consumer" failonerror="no" fork="yes" dir="${run.dir}">
+	
+  <!-- Runs the trigger client -->
+  <target name="collector_trigger" depends="simple_init"
+    description="--> Starts a collector trigger client">
+    <java classname="collector.Trigger" failonerror="no" fork="yes" dir="${run.dir}">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
