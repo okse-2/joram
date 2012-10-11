@@ -962,7 +962,19 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
-  
+	
+  <!-- Setup the classic configuration -->
+  <target name="monitoring_adminxml" depends="simple_init"
+          description="-->  Runs XML administration script for monitoring sample">
+    <copy file="${src.dir}/monitoring/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
+    </java>
+  </target>
+
   <!-- Runs the monitoring -->
   <target name="monitoring_monitor" depends="simple_init"
     description="--> Starts a monitoring client">
