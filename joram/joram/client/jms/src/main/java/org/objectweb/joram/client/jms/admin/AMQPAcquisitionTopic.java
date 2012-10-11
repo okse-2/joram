@@ -102,8 +102,7 @@ public class AMQPAcquisitionTopic {
   public static Topic create(int serverId,
                              String name,
                              String dest) throws ConnectException, AdminException {
-    Properties props = new Properties();
-    return create(serverId, name, dest, props);
+    return create(serverId, name, dest, null);
   }
 
   /**
@@ -145,6 +144,8 @@ public class AMQPAcquisitionTopic {
                              String name,
                              String dest,
                              Properties props) throws ConnectException, AdminException {
+    if (props == null)
+      props = new Properties();
     if (!props.containsKey("acquisition.className"))
       props.setProperty("acquisition.className", AMQPAcquisition);
     if (!props.containsKey("amqp.QueueName"))
