@@ -27,6 +27,7 @@ import javax.jms.ConnectionConsumer;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import javax.jms.QueueConnection;
 import javax.jms.QueueSession;
 import javax.jms.ServerSessionPool;
 import javax.jms.Session;
@@ -43,7 +44,7 @@ import fr.dyade.aaa.common.Debug;
  * component to transparently use this physical connection possibly within
  * a transaction (local or global).
  */
-public class OutboundQueueConnection extends OutboundConnection implements javax.jms.QueueConnection {
+public class OutboundQueueConnection extends OutboundConnection implements QueueConnection {
   
   public static Logger logger = Debug.getLogger(OutboundQueueConnection.class.getName());
   
@@ -94,5 +95,10 @@ public class OutboundQueueConnection extends OutboundConnection implements javax
                                   int maxMessages) throws JMSException {
     throw new IllegalStateException("Forbidden call on a component's "
                                     + "connection.");
+  }
+  
+  public boolean cnxEquals(Object obj) {
+    return (obj instanceof QueueConnection)
+           && xac.equals(obj);
   }
 }

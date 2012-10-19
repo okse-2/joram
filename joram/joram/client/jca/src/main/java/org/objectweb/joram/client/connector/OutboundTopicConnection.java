@@ -29,6 +29,7 @@ import javax.jms.JMSException;
 import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 import javax.jms.Topic;
+import javax.jms.TopicConnection;
 import javax.jms.TopicSession;
 import javax.jms.XATopicConnection;
 
@@ -43,7 +44,7 @@ import fr.dyade.aaa.common.Debug;
  * component to transparently use this physical connection possibly within
  * a transaction (local or global).
  */
-public class OutboundTopicConnection extends OutboundConnection implements javax.jms.TopicConnection {
+public class OutboundTopicConnection extends OutboundConnection implements TopicConnection {
   
   public static Logger logger = Debug.getLogger(OutboundTopicConnection.class.getName());
   
@@ -102,5 +103,10 @@ public class OutboundTopicConnection extends OutboundConnection implements javax
     throws JMSException {
     throw new IllegalStateException("Forbidden call on a component's "
                                     + "connection.");
+  }
+  
+  public boolean cnxEquals(Object obj) {
+    return (obj instanceof TopicConnection)
+           && xac.equals(obj);
   }
 }
