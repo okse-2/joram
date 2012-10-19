@@ -272,6 +272,8 @@ public class ManagedConnectionImpl
 
       if (session == null) {
         OutboundConnection outboundCnx = null;
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, this + " getXAResource handles = " + handles);
         for (java.util.Enumeration e = handles.elements(); e.hasMoreElements(); ) {
           outboundCnx = (OutboundConnection) e.nextElement();
           if (outboundCnx.cnxEquals(cnx)) {
@@ -287,12 +289,12 @@ public class ManagedConnectionImpl
         if (outboundCnx != null) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, this + " getXAResource  outboundCnx = " + outboundCnx +
-                                          "\n  outboundCnx.sess = " + outboundCnx.sessions);
+                "\n  outboundCnx.sess = " + outboundCnx.sessions);
 
           OutboundSession outboundSession = null;
           if (outboundCnx.sessions.size() > 0) {
             outboundSession = (OutboundSession) outboundCnx.sessions.get(0);
-
+            
             if (!(outboundSession.sess instanceof XASession)) {
               if (logger.isLoggable(BasicLevel.DEBUG))
                 logger.log(BasicLevel.DEBUG, this + " getXAResource  outboundSession.sess = " + outboundSession.sess);
@@ -309,29 +311,52 @@ public class ManagedConnectionImpl
 
               if (xaResourceMngr == null)
                 xaResourceMngr = new org.objectweb.joram.client.jms.XAResourceMngr(
-                  (org.objectweb.joram.client.jms.Connection) outboundCnx.xac);
+                    (org.objectweb.joram.client.jms.Connection) outboundCnx.xac);
 
               if (logger.isLoggable(BasicLevel.DEBUG))
                 logger.log(BasicLevel.DEBUG, this + " getXAResource  xaResourceMngr = " + xaResourceMngr);
 
               org.objectweb.joram.client.jms.Session sess =
-                (org.objectweb.joram.client.jms.Session) outboundSession.sess;
+                  (org.objectweb.joram.client.jms.Session) outboundSession.sess;
               // set Session transacted = true
               sess.setTransacted(true);
 
               session = new org.objectweb.joram.client.jms.XASession(
-                (org.objectweb.joram.client.jms.Connection) outboundCnx.xac,
-                sess,
-                xaResourceMngr);
+                  (org.objectweb.joram.client.jms.Connection) outboundCnx.xac,
+                  sess,
+                  xaResourceMngr);
 
               if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, this + " getXAResource  session = " + session);
+                logger.log(BasicLevel.DEBUG, this + " getXAResource  session = " + session +
+                    "\noutboundSession.sess = " + outboundSession.sess + ", sess.class = " + outboundSession.sess.getClass().getName() + 
+                    ", getAcknowledgeMode = " + outboundSession.getAcknowledgeMode() + ", getTransacted = " + outboundSession.getTransacted() + 
+                    ", isStarted = " + outboundSession.isStarted());
+            } else {
+              // the outboundSession.sess is an instance of a XASession
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, this + " getXAResource outboundSession.sess = " + outboundSession.sess + 
+                    ", sess.class = " + outboundSession.sess.getClass().getName() + ", getAcknowledgeMode = " + outboundSession.getAcknowledgeMode() + 
+                    ", getTransacted = " + outboundSession.getTransacted() + ", isStarted = " + outboundSession.isStarted());
             }
+            
           } else {
+            // No session available, create a new XASession.
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, this + " getXAResource createXASession");
-            session = cnx.createXASession();
+             session = cnx.createXASession();
+
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, this + " getXAResource session = " + session + ", session.class = " + session.getClass().getName() + 
+                  ", getAcknowledgeMode = " + session.getAcknowledgeMode() + ", getTransacted = " + session.getTransacted());
           }
+          
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, this + " getXAResource xaresource = " + ((org.objectweb.joram.client.jms.XASession) session).getXAResource() + ", transacted = " + ((org.objectweb.joram.client.jms.XASession) session).getTransacted());
+
+        } else {
+          // never arrived.
+          if (logger.isLoggable(BasicLevel.WARN))
+            logger.log(BasicLevel.WARN, this + " getXAResource  outboundCnx = null.");
         }
       } else if (session instanceof org.objectweb.joram.client.jms.XASession) {
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -339,6 +364,10 @@ public class ManagedConnectionImpl
         // set Session transacted = true
         ((org.objectweb.joram.client.jms.XASession)session).getDelegateSession().setTransacted(true);
 
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, this + " getXAResource session = " + session + ", session.class = " + session.getClass().getName() + 
+              ", getAcknowledgeMode = " + session.getAcknowledgeMode() + ", getTransacted = " + session.getTransacted());
+        
         // TODO
         // cnx.sessions.add((org.objectweb.joram.client.jms.Session) session);
       } else if (! (session instanceof javax.jms.XASession)) {
@@ -433,7 +462,7 @@ public class ManagedConnectionImpl
   }
 
   /**
-   * Invalidates the created handles and prepares the physical connection
+   * Remove the created handles and prepares the physical connection
    * to be put back into a connection pool.
    *
    * @exception ResourceException  Never thrown.
@@ -450,6 +479,13 @@ public class ManagedConnectionImpl
       handle.cleanup();
     }
     session = null;
+    try {
+      // Clear the handles. 
+      handles.clear();
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, e);
+    }
   }
 
   /**
