@@ -63,9 +63,7 @@ public class OutboundSession implements javax.jms.Session {
     cnx.sessions.add(this);
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "OutboundSession(" + sess + 
-                                    ", " + cnx + ")" + 
-                                    "  cnx.sessions = " +  cnx.sessions);
+      logger.log(BasicLevel.DEBUG, "OutboundSession(" + sess + ", " + cnx + ") cnx.sessions = " +  cnx.sessions);
   }
  
   /**
@@ -80,9 +78,7 @@ public class OutboundSession implements javax.jms.Session {
     cnx.sessions.add(this);
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "OutboundSession(" + sess + 
-                                    ", " + cnx + ")" + 
-                                    "  cnx.sessions = " +  cnx.sessions);
+      logger.log(BasicLevel.DEBUG, "OutboundSession(" + sess + ", " + cnx + ", " + transacted + ") cnx.sessions = " +  cnx.sessions);
   }
 
   /**
@@ -444,5 +440,9 @@ public class OutboundSession implements javax.jms.Session {
 
    if (! validity)
      throw new IllegalStateException("Invalid state: session is closed.");
+  }
+  
+  public String toString() {
+    return "Outbound [" + sess.toString() + "]@" + hashCode();
   }
 }
