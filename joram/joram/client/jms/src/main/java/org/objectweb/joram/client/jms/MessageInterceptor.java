@@ -49,8 +49,8 @@ public interface MessageInterceptor {
 	 * runtime context, and return no <code>out</code> value. It also avoids to throw any
 	 * exception within this method.
 	 * 
-	 * @param pMessage the message to handle.
-	 * @param pSession the current session of the JMS interaction
+	 * @param message the message to handle.
+	 * @param session the current session of the JMS interaction
 	 */
-	public void handle(Message pMessage, Session pSession);
+	public void handle(Message message, Session session);
 }
