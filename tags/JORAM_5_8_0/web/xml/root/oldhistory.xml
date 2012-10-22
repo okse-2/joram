@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>History</title>
+    <filename>oldhistory.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="JORAM History">
+
+      <subtitle>May 13, 2005: JORAM 4.2.3 maintenance release and 4.3 preview</subtitle>
+      <p>The JORAM 4.2.3 maintenance release is now available for download. It basically includes
+           bug fixes, their complete list is available in the 
+           <a href="dev/versions.html">Code Update</a> page. </p>
+      <p>The next JORAM 4.3 version will include new features :</p>
+      <ul>
+      <li>JMX management improved and extended</li>
+      <li>Performance improvements</li>
+      <li>Handling of large message transmission (called swap out mode)</li>
+      <li>Complete SSL support with handling of encrypted client to server communications</li>
+      </ul>
+    
+      <subtitle>March 31, 2005: JORAM 4.2 final release is available</subtitle>
+      <p>The Joram 4.2 release features high availability, enhanced management facilities and improved performances.
+        </p>
+	<ul>
+	  <li><strong>High Availability</strong> Joram 4.2 provides the active replication of Joram servers and 
+          underlying agent servers, as well as replicated JORAM clients. It transparently handles network handover 
+          and server failover. This version currently relies on the use of  JGroups.</li>
+	  <li><strong>Dynamic Configuration</strong> Joram 4.2 provide facilities to remotely add and remove Joram
+          servers dynamically, using the Joram Administration API. This key feature, combined with upgraded JMX 
+          implementation, initiates a new set of management facilities for Joram.</li>
+	  <li><strong>Upgraded JMX management</strong></li>
+	  <li><strong>Architecture and Performance improvements</strong>. Joram V4.2 provides a packaged version of
+          a wide set of deep changes within the Joram and underlying bus architectures that lead to performance 
+          improvements compared to prior version V4.1. Communication protocols are concerned by this evolution, thus 
+          preventing backward compatibility with prior Joram versions.</li>
+	  <li><strong>JDK 1.5 support</strong></li>
+	</ul>
+
+        <p>This version has been partly sponsored by France Telecom R&amp;D</p>
+      <p> Sponsoring helps maintain a high quality message oriented middleware available to the community and makes
+        its constant evolution a reality that anyone can benefit from. Contact the joram-team@ow2.org if you want
+        to participate and sustain the shared development effort of JORAM as the enterprise-class alternative to 
+        proprietary messaging system.</p>
+
+      <subtitle>March 11,2005: JORAM 4.2 release candidate 2 is available.</subtitle>
+      <p>The JORAM 4.2 RC2 contains mainly bug and fixes along with upgraded JMX management facilites.</p>
+
+      <subtitle>January 10, 2005: JORAM 4.2 release candidate 1 is available</subtitle>
+      <p>Joram 4.2 RC1 provides new features as high-availability, dynamic configuration, 
+        and a lot of fixes and improvements.</p>
+	<ul>
+	  <li><strong>High Availability</strong> Joram V4.2 provides the active replication of Joram servers and 
+          underlying agent servers, as well as replicated JORAM clients. It transparently handles network handover 
+          and server failover. This version currently relies on the use of  JGroups.</li>
+	  <li><strong>Dynamic Configuration</strong> Joram V4.2 provide facilities to remotely add and remove Joram
+          servers dynamically, using the Joram Administration API. This key feature, combined with upgraded JMX 
+          implementation, initiates a new set of management facilities for Joram.</li>
+	  <li><strong>Architecture and Performance improvements</strong>. Joram V4.2 provides a packaged version of
+          a wide set of deep changes within the Joram and underlying bus architectures that lead to performance 
+          improvements compared to prior version V4.1. Communication protocols are concerned by this evolution, thus 
+          preventing backward compatibility with prior Joram versions.</li>
+	</ul>
+        <p>This version has been sponsored by France Telecom R&amp;D</p>
+      <p> Sponsoring helps maintain a high quality message oriented middleware available to the community and makes
+        its constant evolution a reality that anyone can benefit from. Contact the joram-team@ow2.org if you want
+        to participate and sustain the shared development effort of JORAM as the enterprise-class alternative to 
+        proprietary messaging system.</p>
+
+      <subtitle>January 7, 2005: JORAM 4.1.5 maintenance release is available</subtitle>
+      <p>Joram 4.1.5 is a maintenance release with bug fixes and configuration improvements.</p>
+
+      <subtitle>December 22,2004: JORAM 4.1.4 maintenance release is available</subtitle>
+      <p>Joram 4.1.4 is a maintenance release with bug fixes and configuration improvements.</p>
+
+      <subtitle>December 2004: New suite of professional services on JORAM</subtitle>
+      <p>Please check the <a href="support.html">Joram Support pages</a> or <a href="http://www.scalagent.com">ScalAgent website</a>.</p>
+
+      <subtitle>November 9, 2004: JORAM 4.1.2 maintenance release is available</subtitle>
+      <p>Joram 4.1.2 is a maintenance release with bug fixes and performance improvements. This version is embedded in the last JOnAS build (4.2.0)</p>
+
+      <subtitle>October 13, 2004: JORAM 4.1.1 maintenance release is available</subtitle>
+      <p>Joram 4.1.1 is a maintenance release with bug fixes and updates of the underlying network communication system.</p>
+
+      <subtitle>September 14, 2004: JORAM 4.1 is available</subtitle>
+      <p>Joram 4.1 is finally available for download. It provides the following new features as well
+	 as fixes and improvements : </p>
+      <ul>
+	<li>The Joram 4.1 JCA 1.5 RA, handles:
+	  <ul>
+	    <li>Inbound (asynchronous message flow) and Outbound (synchronous message flow) communications</li>
+	    <li>Support of distributed (XA) and local transactions.</li>
+	    <li>Automatic recovery of indoubt Xids via XAResource.recover().</li> 
+	    <li>Deployment as a Resource Adapter to an external JORAM server.</li>
+	    <li>Deployment in collocated mode : a JORAM server is started and stopped at RA deployment and undeployment.</li>
+	  </ul>
+	</li>
+	<li>The clustered queue feature provides a load-balancing mechanism. It is made up of several queues
+	exchanging messages depending on their load. This new feature is sponsored by France Telecom R&amp;D,
+	as will be the future High-Availability Joram server to be released in the next version. </li>
+      </ul>
+      <p>JORAM 4.1 is used by JOnAS to undergo the J2EE 1.4 certification, and has already passed all tests 
+	concerning JMS in this TCK.</p>
+      <p>The new packages are available in the <a href="download/index.html">download area</a>. The CVS tag is 
+	joram4_1_0 (<a href="http://forge.objectweb.org/cvs/?group_id=4">CVS repository</a>).</p>
+      <p>The documentation has also been deeply updated with a new all-in-one manual.</p>
+
+      <subtitle>October 20-21: JORAM Training Session, Grenoble, France</subtitle>
+      <p>A two-day training session on JORAM is scheduled and will be delivered in french language.
+	The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
+      <p>This training session is targeted at architects and system designers that intend to integrate 
+	the JORAM component within a global distributed solution. It includes a significant part of 
+	experimentations and case studies based on real-world application scenarios.</p>
+      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer 
+	of the JORAM component. We offer to share our expertise through a training session that provides
+	 the key knowledge to use and deploy a JORAM system that fits your requirements.
+	This two-day session details the design principles of JORAM and describes the best practices 
+	to take advantage of its advanced properties in complex networked environments.</p>
+      <p>Detailed information about this training session is available online 
+	<a href="http://www.scalagent.com/spip.php?article314">(PDF, in french only)</a></p>
+
+      <subtitle>July 1st, 2004: Report of the 1st JORAM Users' Day</subtitle>
+      <p>The first JORAM Users' Day has been held last June 17 th in Paris.
+	 This event was the first successful attempt within the ObjectWeb community 
+	 to have direct exchanges between users and designers/developers of an 
+	 ObjectWeb component.</p>
+      <p>The Report as well as some of the presentations are available online at
+	  the ScalAgent Distributed Technologies web site : </p>
+      <ul>
+	<li>Report as <a href="http://www.scalagent.com/pages/en/products/joram-userday040617-report.htm">HTML</a>
+	  or <a href="http://www.scalagent.com/pages/en/datasheet/040617-JORAM-Day-report.pdf">PDF</a></li>
+	<li><a href="http://www.scalagent.com/pages/en/datasheet/040617-JoramDay-Intro-UK.pdf">
+	 Introduction by Roland Balter (ScalAgent Distributed Technologies)(PDF)</a>
+	 </li>
+	<li><a href="http://www.scalagent.com/pages/en/datasheet/040617-ObjectWeb-Joram.pdf">
+	Next Generation Open Source by J.P. Laisné (President of the 
+	 Objectweb consortium)(PDF in french)</a>
+	 </li>
+       <li><a href="http://www.scalagent.com/pages/en/datasheet/040617-EPFL-joram_day.pdf">
+	 JMSGroups: Towards JMS-Compliant Group Communication by A. Kupsys 
+	 (EPFL Switzerland) (PDF)</a>
+	 </li>
+      </ul>
+      <p>The discussion about JORAM is open especially for those who have not been
+	 able to join the Users' Day. Any contribution is welcome on the main
+	 JORAM mailing list.</p>		 
+
+      <subtitle>May 3, 2004: JORAM users' day announcement</subtitle>
+      <p>ObjectWeb and the JORAM core development team are setting up
+      a JORAM Users' Day on June 17th in Paris (place to be defined later).</p>
+      <p>This day is intended to be the first attempt of direct exchanges
+      between members of the JORAM community. The meeting is an opportunity
+      to report on the credibility of the JORAM solution and to raise
+      questions and answers about the durability and evolution of this open
+      source product.</p>
+      <p>Details about the JORAM Users Day can be found
+      <a href="current/doc/JORAM-Day.pdf">here</a>.</p>
+      <p>A french version of this annoucement is also available at:
+      <a href="http://www.scalagent.com/pages/fr/products/joram-usergroup.htm">
+      http://www.scalagent.com/pages/fr/products/joram-usergroup.htm</a>.</p>
+			
+      <subtitle>February 13, 2004: JORAM 4.0 is released and provides major
+      new features!</subtitle>
+      <p>JORAM 4.0 is the first release of a new JORAM generation with even
+      more features and architecturing capabilities.</p>
+      <p>This new version introduces the following new
+      functionnalities:</p>
+      <ul>
+        <li><strong>Collocated communication protocol</strong>: when a client
+        and its JORAM server run collocated in a same JVM, they may now
+        communicate through a "local" optimised connection rather than a 
+        TCP connection. This feature will highly impact the use of JORAM with
+        JOnAS for example, when set as collocated.</li>
+      </ul>
+      <ul>
+        <li><strong>Distributed JNDI server</strong>: this latest version of
+        JORAM's naming server may now be deployed on many JORAM servers, 
+        so that naming information is accessible from multiple points. 
+        Client applications do not depend anymore on a single central JNDI
+        server.</li>
+      </ul>
+      <ul>
+        <li><strong>Universal JMS bridge</strong>: JORAM may be configured
+        for establishing a link to any JMS compliant foreign JMS provider.
+        This feature allows JORAM client applications to actually communicate
+        with foreign JMS destinations totally transparently.</li>
+      </ul>
+      <p><strong>Administration methods</strong> have been largely 
+      modified for simplifying the evolution of management following
+      the new JORAM releases. Old admin and monitoring classes
+      have been kept but this will be temporary.</p>
+      <p>This new version also introduces a <strong>new sources
+      tree</strong>, which may be quickly described as follows:</p>
+      <ul>
+        <li><code>com/scalagent</code>: sources of the kJoram client
+        layer</li> 
+        <li><code>fr/dyade/</code>: sources of the agent platform</li>
+        <li><code>org/objectweb/joram</code>: sources of the MOM and JORAM
+        client layers</li>
+      </ul>
+      <p>New packages have been released, the CVS tag is
+      <strong>joram4_0_0</strong>.</p>
+
+      <subtitle>November 7, 2003: the first major
+      contribution from JORAM ever growing community</subtitle>
+      <p>JORAM 3.7 includes the long expected graphical tool for
+      administering and monitoring the state of a JORAM platform.
+      Thanks to Alexander Fedorowicz, an active contributor, this tool is
+      made available to the whole JORAM community.</p>
+      <p>The tool allows to administer and monitor a JORAM platform made of
+      one or many interconnected JORAM servers. It allows to create and delete
+      destinations, users, and also to bind them to JORAM's naming server.</p>
+      <p>The tool sources are available in CVS and in the sources package. It
+      is provided as an independent library in the binary distribution.
+      </p>
+      <p>This latest release is also available through a CVS checkout, tag
+        <strong>joram3_7_0</strong>.</p>
+
+      <subtitle>August 7, 2003: JORAM 3.6 connects J2ME devices!</subtitle>
+      <p>JORAM 3.6 follows the 3.4 release in addressing the opening of the
+      JORAM platform to <strong>heterogenous</strong> client applications. Where
+      JORAM 3.4, with the support of SOAP as client communication protocol,
+      opened the platform to non-Java applications, the 3.6 release, with
+      its new kJORAM libraries, allows J2ME applications to use JORAM messaging
+      functionnalities. A J2ME application is a lightweight Java application
+      deployed and running on a mobile device such as a PDA or a smart
+      phone.</p>
+      <p>kJORAM is available in specific packages and also by checking out
+      the <strong>joram</strong> CVS module, tag <strong>joram3_6_0</strong>.
+      </p>
+
+      <subtitle>June 24th, 2003: JORAM 3.5 is available.</subtitle>
+      <p>JORAM 3.5 is available in the CVS repository (joram3_5_0 tag) as well
+      as packaged. This version is based on the 3.4 release and includes
+      the <strong>SOAP</strong> proxy.
+      On top of that, it provides a totally refactored <strong>message
+      persistence</strong> management.
+      </p>
+      <p>The latest 3.4 update (joram3_4_3) has also been packaged.</p>
+      <p>JORAM is now released under the <strong>LGPL</strong> licence.</p>
+
+      <subtitle>March 19th, 2003: new JORAM releases.</subtitle>
+      <p>JORAM 3.3 is now available as a packaged version.
+     As a reminder, it provides a new administration implementation. In CVS it
+     is now tagged joram3_3_1. Compared to joram3_3_0, it is a maintenance
+     version, correcting a few bugs.
+     </p>
+      <p>JORAM 3.4 is available only in the CVS distribution. This
+     release tagged joram3_4_0 supports the SOAP protocol as a link between
+     a Joram client and a Joram platform. It rearchitectures the JMS proxy
+     server side, and the JMS connection client side, for supporting multiple 
+     protocols (currently TCP and SOAP).</p>
+
+      <subtitle>December 11th, 2002: a new JORAM version tagged 3_3_0 is
+      available in the CVS distribution.</subtitle>
+      <p>This new version provides a totally refactored <strong>administration</strong> 
+      protocol. Administration is now based on JMS communication and is much
+      more flexible than the past implementation. Hopefully it will make
+      contributing easier; JORAM's administration still misses graphical tools
+      and JMX support, and any contribution would be highly appreciated.
+      </p>
+      <p>This new administration implementation comes with a new administration
+      interface. Old administration codes should go on working even if they now
+      use deprecated methods. 
+      </p>
+
+     <subtitle>October 21st, 2002: JORAM 3.2 provides new features!</subtitle>
+      <p>The main added values of Joram 3.2.0 are the new implementations of
+         <strong>hierarchical topics</strong> and <strong>dead message queues</strong>.
+      </p>
+      <p>According to the JMS specification, topics might have a hierarchical
+         structure allowing clients to subscribe or publish to given subtopics.
+         Joram's fully distributed structure allows a topic hierarchy to be
+         spread over many servers.
+      </p>
+      <p>A dead message queue is a destination getting undeliverable messages.
+         Messages might be considered undeliverable because they expired 
+         before delivery, because they were sent on a non accessible
+         destination or because they are constantly denied when consumed.
+      </p>
+      <p>This new version also provides a <strong>flow control mechanism</strong> in
+         order to prevent a Joram platform to be overloaded by a heavily
+         producing client.
+      </p>
+
+     <subtitle>June 10th, 2002: JORAM now implements the new JMS 1.1
+        specification!</subtitle>
+      <p><strong>Joram 3.1.0 fully implements JMS 1.1</strong> providing unified
+        messaging interfaces for the Point-to-Point and Pub/Sub
+        domains. In the previous versions of Joram and JMS, the
+        client programming model made a strong distinction between
+        these two domains. Now, the domain unification simplifies
+        the model and allows to include PTP and Pub/Sub messaging in
+        a same transaction.</p>
+      <p>No need to modify existing applications: code written for
+        the previous Joram and JMS versions will work as is with
+        these new versions.</p>
+      
+
+      <subtitle>7th june 2002: JORAM 3.0.4 available (cvs tag: joram3_0_4-1)</subtitle>
+      
+      <p>
+        This version is a maintenance version of JORAM, it includes
+        corrections of bugs in XA and ASF classes. 
+        The JORAM CVS repository has been branched after this release:
+        next version of JORAM will implement JMS 1.1. The branch
+        corresponding to JMS 1.0.2b is jms1_0_2b. 
+      </p>
+
+
+      <subtitle>26th March 2002: JORAM 3.0.1 available (cvs tag: joram3_0_1)</subtitle>
+      
+      <p>
+	This version corrects all bugs discovered by JORAM community
+	since the release of JORAM 3.0.0. These corrections were already available
+	in CVS repository.
+      </p>
+
+
+      <subtitle>20th March 2002: JMS Test Suite released</subtitle>
+
+      <p><strong>A JMS Test Suite</strong> has been released under LGPL.<br />
+	This suite tests JMS features. All code of the test suite is
+	pure JMS without any dependency to JORAM.</p>
+
+      <subtitle>11th March 2002: JORAM 3.0.0 available (cvs tag: joram3_0_0)</subtitle>
+      
+      <p>
+	Compared to JORAM previous versions, this new release is a complete
+	re-factoring of the code base. It gets rid of the
+	previous limitations and defects. The JMS specification is now fully
+	implemented, JORAM provides authentication and security
+	features, and introduces a distributed implementation of the Topic
+	destination. Its clean and sound code basis guarantees fast
+	and easy future developements and enhancements.<br/>
+	A suite of tests based on JUnit will be very soon proposed for
+	download.
+      </p>
+      
+
+      <subtitle>16th January 2002: JORAM 2.2 (cvs tag:
+	joram2_2)</subtitle>
+      <p>This version adds support for Ant build
+	system.
+      </p>
+
+
+      <subtitle>14th September 2001: JORAM 2.1.1 (cvs tag: joram2_1_1)</subtitle>
+    
+      <p>This version corrects some bugs concerning the selectors. <code>Null</code>
+      selectors are now authorized, syntax is systematically checked and Strings
+      syntax has been enlarged to characters such as '/', ';', ...</p>
+
+
+      <subtitle>31st August 2001: JORAM 2.1.0 (cvs tag: joram2_1_0)</subtitle>
+
+      <ul>
+	<li><strong>New feature:</strong> message selection (see JMS spec section 3.8).</li>
+	<li><strong>Bug:</strong> the problem when sending objects not "known" by the agents
+	  server inside an ObjectMessage does not occur anymore. No need now to add this
+	  object's class in the agents server classpath.</li>
+      </ul>
+      
+      
+      <subtitle>15th May 2001: JORAM 2.0.1 (cvs tag: joram2_0_1)</subtitle>
+      
+      <p>This version closely follows the 2.0.0 and provides improvements in the
+	management of closing sockets, and a better handling of stopping threads when
+	closing <code>Sessions</code>, <code>ConnectionConsumers</code> and <code>Connections</code>.</p>
+      
+      
+      <subtitle>7th May 2001: JORAM 2.0.0 (cvs tag: joram2_0_0) fully implements the
+	Application Server Facilities (ASF)</subtitle>
+      
+      <ul>
+	<li><strong>New features</strong>: ASF part of the specification, synchronous reception on topics
+	  and asynchronous reception on queues have been implemented.</li>
+	<li>JORAM and JOnAS provide <strong>Message Driven Beans</strong> support.</li>
+	<li><strong>Bugs</strong> have been fixed: <code>ConnectionFactories</code> accept now more than one active
+	  Connection at a time, and problems while running JORAM under Solaris are
+	  solved.</li>
+      </ul>
+      
+      
+      <subtitle>5th December 2000: JORAM included in JOnAS</subtitle>
+      
+      <p>JOnAS tagged <strong>2.2.2</strong> includes JORAM in its distribution. JOnAS 2.2.2 / JORAM
+	1.1.0 allow using JMS from Enterprise Java Beans and have been successfully
+	tested on AIX, Linux, Solaris, NT and Windows 2000.</p>
+      
+      
+      <subtitle>10th October 2000: JORAM is now tagged 1.1.0 (cvs tag: joram1_1_0)</subtitle>
+      
+      <ul>
+	<li><strong>New feature:</strong> JORAM now includes a <strong>JNDI</strong> "light" implementation (JNDI 1.1.2).</li>
+
+	<li><strong>XA</strong> classes have been successfully tested through 
+        JOnAS EJB implementation.</li>
+
+	<li>Persistence and lookup <strong>bugs</strong> fixed.</li>
+      </ul>
+      
+      <subtitle>31st August 2000 : JORAM implements more</subtitle>
+      
+      <ul>
+	<li><strong>XA</strong> classes, allowing JMS operations to be involved in a distributed
+	  transaction, are available.</li>
+	<li><strong>Transacted</strong> mode completed.</li>
+	<li>External <strong>JNDI</strong> now usable.</li>
+      </ul>
+      
+
+      <subtitle>26th May 2000 : JORAM first open source version available !</subtitle>
+
+      
+    </s1>
+  </body>
+
+</document>
+      

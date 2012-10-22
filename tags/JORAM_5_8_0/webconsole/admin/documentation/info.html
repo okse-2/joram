@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+	
+		<title>AdminJoram : Information</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="author" content="Yohann CITNRE" />
+		
+	    <style type="text/css">
+			body {
+				font-family: Verdana, Arial, Helvetica, sans-serif;
+				font-size: 85%;
+			}
+
+			h1,h2,h3,h4 {
+				padding: 10px;
+				background-color: #F0F0F0;
+				border-bottom: 1px solid #DDD;
+			}
+        </style>
+	</head>
+
+	<body>
+		<div id="content-inner">				
+
+			<h2>General Information</h2>
+			<p></p>
+			
+			<h3>Documentation</h3>
+			<ul>
+				<li>A HowTo file detailing the steps to edit or run the project can be found <a href="howto.html">here</a></li>
+				<li>Javadoc ca be found <a href="javadoc/index.html">here</a></li>
+			</ul>
+			<br />
+			
+			<h3>MVP</h3>
+			<p>
+				The software use a MVP architecture associated with an EventBus.<br />
+				<br />
+
+				Model-view-presenter (MVP) is a user interface design pattern engineered to facilitate 
+				automated unit testing and improve the separation of concerns in presentation logic.
+
+				<ul>
+	    			<li> The model is an interface defining the data to be displayed or otherwise acted upon in 
+	    			the user interface.</li>
+	    			<li> The view is an interface that displays data (the model) and routes user commands 
+	    			(events) to the presenter to act upon that data.</li>
+	    			<li> The presenter acts upon the model and the view. It retrieves data from repositories 
+	    			(the model), persists it, and formats it for display in the view.</li>
+				</ul>
+				See <a href="http://en.wikipedia.org/wiki/Model_View_Presenter">MVP on Wikipedia</a> for more details.<br />
+				<br />
+			</p>
+			
+			<h3>EventBus (HandlerManager)</h3>
+			<p>
+				The EventBus help handling changes in the UI. <br />
+				First, presenters have to subscribe the a specified type of event (for example
+				"New Topic", "Updated Queue" or Deleted Message).<br />
+				When retrieved on the client-side cache, data are processed and event are created 
+				on the EventBus according to the type of data (New, Updated or Deleted data).<br />
+				The EventBus then automatically informs presenters which have subscribed to the specified
+				type of event that the data have changed. <br />
+				The presenter then handle change update data on the UI (View).<br />
+				<br />
+				Using this pattern help updating multiple presenter with on single event without
+				caring of how many presenters have to be updated. Once the event have been created on the
+				EventBus the subscription system send update information to all presenter that need this update.
+				<br />
+				<br />
+				See <a href="http://google-web-toolkit.googlecode.com/svn/javadoc/1.6/com/google/gwt/event/shared/HandlerManager.html">GWT HandlerManager</a> for more details.<br />
+				<br />
+			</p>
+			
+			<h3>Useful links</h3>	
+				You can find more details about the MVP / EventBus patterns on the Google I/O conference
+				<a href="http://code.google.com/intl/fr/events/io/2009/sessions/GoogleWebToolkitBestPractices.html">Google Web Toolkit Architecture: Best Practices For Architecting Your GWT App</a>.
+			</p>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,2808 @@
+Jul 19, 2012 11:11:52 AM elasticity.services.ElasticityService initService
+INFO: Initialization completed.
+Jul 19, 2012 11:12:02 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 9
+Jul 19, 2012 11:12:02 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 128
+Jul 19, 2012 11:12:02 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 13
+Jul 19, 2012 11:12:14 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 108
+Jul 19, 2012 11:12:14 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 355
+Jul 19, 2012 11:12:14 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 36
+Jul 19, 2012 11:12:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 11:12:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 852
+Jul 19, 2012 11:12:24 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 85
+Jul 19, 2012 11:12:34 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 11:12:34 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 949
+Jul 19, 2012 11:12:34 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 95
+Jul 19, 2012 11:12:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 11:12:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 1190
+Jul 19, 2012 11:12:45 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 12
+Jul 19, 2012 11:12:55 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 11:12:55 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 1440
+Jul 19, 2012 11:12:55 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 14
+Jul 19, 2012 11:13:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 11:13:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 1753
+Jul 19, 2012 11:13:05 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 18
+Jul 19, 2012 11:13:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 166
+Jul 19, 2012 11:13:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 1833
+Jul 19, 2012 11:13:15 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 18
+Jul 19, 2012 11:13:25 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 11:13:25 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 2369
+Jul 19, 2012 11:13:25 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 24
+Jul 19, 2012 11:13:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 11:13:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 2462
+Jul 19, 2012 11:13:35 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 25
+Jul 19, 2012 11:13:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 11:13:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 2713
+Jul 19, 2012 11:13:45 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 27
+Jul 19, 2012 11:13:55 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 148
+Jul 19, 2012 11:13:55 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 2956
+Jul 19, 2012 11:13:55 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 30
+Jul 19, 2012 11:14:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 11:14:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 3364
+Jul 19, 2012 11:14:05 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 34
+Jul 19, 2012 11:14:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 11:14:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 3484
+Jul 19, 2012 11:14:16 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 35
+Jul 19, 2012 11:14:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 206
+Jul 19, 2012 11:14:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 3652
+Jul 19, 2012 11:14:26 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 37
+Jul 19, 2012 11:14:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 233
+Jul 19, 2012 11:14:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4000
+Jul 19, 2012 11:14:36 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40
+Jul 19, 2012 11:14:46 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 11:14:46 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4449
+Jul 19, 2012 11:14:46 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44
+Jul 19, 2012 11:14:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 458
+Jul 19, 2012 11:14:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4051
+Jul 19, 2012 11:14:56 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41
+Jul 19, 2012 11:15:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 186
+Jul 19, 2012 11:15:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000
+Jul 19, 2012 11:15:06 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50
+Jul 19, 2012 11:15:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 71
+Jul 19, 2012 11:15:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5015
+Jul 19, 2012 11:15:16 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50
+Jul 19, 2012 11:15:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 173
+Jul 19, 2012 11:15:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5196
+Jul 19, 2012 11:15:26 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52
+Jul 19, 2012 11:15:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 550
+Jul 19, 2012 11:15:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5029
+Jul 19, 2012 11:15:36 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50
+Jul 19, 2012 11:15:46 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1408
+Jul 19, 2012 11:15:46 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5176
+Jul 19, 2012 11:15:46 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52
+Jul 19, 2012 11:15:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2398
+Jul 19, 2012 11:15:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5084
+Jul 19, 2012 11:15:56 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51
+Jul 19, 2012 11:16:01 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2989 0
+Jul 19, 2012 11:16:01 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 2127 0
+Jul 19, 2012 11:16:01 AM elasticity.services.ElasticityService testScaleUp
+INFO: Added new worker successfully.
+Jul 19, 2012 11:16:11 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1188 0
+Jul 19, 2012 11:16:11 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5123 3094
+Jul 19, 2012 11:16:11 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 31
+Jul 19, 2012 11:16:21 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 508 55
+Jul 19, 2012 11:16:21 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4897 2624
+Jul 19, 2012 11:16:21 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 49 26
+Jul 19, 2012 11:16:32 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 106 0
+Jul 19, 2012 11:16:32 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4853 2536
+Jul 19, 2012 11:16:32 AM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 1..
+Jul 19, 2012 11:16:32 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 49 20
+Jul 19, 2012 11:16:42 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 54 0
+Jul 19, 2012 11:16:42 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 2171
+Jul 19, 2012 11:16:42 AM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 2..
+Jul 19, 2012 11:16:42 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 15
+Jul 19, 2012 11:16:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1104 111
+Jul 19, 2012 11:16:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 1575
+Jul 19, 2012 11:16:52 AM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 3..
+Jul 19, 2012 11:16:52 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 10
+Jul 19, 2012 11:17:02 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2416 0
+Jul 19, 2012 11:17:02 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 1427
+Jul 19, 2012 11:17:02 AM elasticity.services.ElasticityService testScaleDown
+INFO: Cancelled scaling down plan.
+Jul 19, 2012 11:17:02 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4000 2536
+Jul 19, 2012 11:17:02 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 25
+Jul 19, 2012 11:17:12 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2367 253
+Jul 19, 2012 11:17:12 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5027 2625
+Jul 19, 2012 11:17:12 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4021 2625
+Jul 19, 2012 11:17:12 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 26
+Jul 19, 2012 11:17:22 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2262 0
+Jul 19, 2012 11:17:22 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5122 3536
+Jul 19, 2012 11:17:22 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4097 3536
+Jul 19, 2012 11:17:22 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 35
+Jul 19, 2012 11:17:32 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1551 196
+Jul 19, 2012 11:17:32 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5232 3912
+Jul 19, 2012 11:17:32 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 39
+Jul 19, 2012 11:17:43 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1716 94
+Jul 19, 2012 11:17:43 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5119 3500
+Jul 19, 2012 11:17:43 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 35
+Jul 19, 2012 11:17:53 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2034 136
+Jul 19, 2012 11:17:53 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4000
+Jul 19, 2012 11:17:53 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4000 4000
+Jul 19, 2012 11:17:53 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 40
+Jul 19, 2012 11:18:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1769 53
+Jul 19, 2012 11:18:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4500
+Jul 19, 2012 11:18:03 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 45
+Jul 19, 2012 11:18:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1714 0
+Jul 19, 2012 11:18:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4506
+Jul 19, 2012 11:18:13 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 45
+Jul 19, 2012 11:18:23 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1535 0
+Jul 19, 2012 11:18:23 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5240 4597
+Jul 19, 2012 11:18:23 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 46
+Jul 19, 2012 11:18:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1956 390
+Jul 19, 2012 11:18:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4887 4630
+Jul 19, 2012 11:18:33 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 49 46
+Jul 19, 2012 11:18:44 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2130 15
+Jul 19, 2012 11:18:44 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5153 5267
+Jul 19, 2012 11:18:44 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4122 5267
+Jul 19, 2012 11:18:44 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 53
+Jul 19, 2012 11:18:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1697 1160
+Jul 19, 2012 11:18:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5220 5000
+Jul 19, 2012 11:18:54 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 50
+Jul 19, 2012 11:19:04 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2209 1395
+Jul 19, 2012 11:19:04 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000
+Jul 19, 2012 11:19:04 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4000 5000
+Jul 19, 2012 11:19:04 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 50
+Jul 19, 2012 11:19:14 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2075 2457
+Jul 19, 2012 11:19:14 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000
+Jul 19, 2012 11:19:14 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50
+Jul 19, 2012 11:20:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 14737 16035 0
+Jul 19, 2012 11:20:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 23086 22103 0
+Jul 19, 2012 11:20:15 AM elasticity.services.ElasticityService testScaleUp
+INFO: Added new worker successfully.
+Jul 19, 2012 11:20:25 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 14348 17743 1479
+Jul 19, 2012 11:20:25 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4414 2897 3121
+Jul 19, 2012 11:20:25 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 3531 2317 3121
+Jul 19, 2012 11:20:25 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 35 23 31
+Jul 19, 2012 11:20:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 15149 16547 1390
+Jul 19, 2012 11:20:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4485 4411 4879
+Jul 19, 2012 11:20:35 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 3588 3528 4879
+Jul 19, 2012 11:20:35 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 36 35 49
+Jul 19, 2012 11:20:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 14544 15952 1819
+Jul 19, 2012 11:20:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4698 4705 5000
+Jul 19, 2012 11:20:45 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 3758 3764 5000
+Jul 19, 2012 11:20:45 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 38 38 50
+Jul 19, 2012 11:20:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 14101 15130 1853
+Jul 19, 2012 11:20:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4602 4652 5395
+Jul 19, 2012 11:20:56 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 3681 3721 5395
+Jul 19, 2012 11:20:56 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 37 37 54
+Jul 19, 2012 11:21:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 13653 15050 2639
+Jul 19, 2012 11:21:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4576 4530 5105
+Jul 19, 2012 11:21:06 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 45 51
+Jul 19, 2012 11:21:11 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 13926 14699 2895 0
+Jul 19, 2012 11:21:11 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 2101 2193 2500 0
+Jul 19, 2012 11:21:11 AM elasticity.services.ElasticityService testScaleUp
+INFO: Added new worker successfully.
+Jul 19, 2012 11:21:21 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 12508 13748 1989 213
+Jul 19, 2012 11:21:21 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4599 4555 5000 3276
+Jul 19, 2012 11:21:21 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 3679 3644 5000 3276
+Jul 19, 2012 11:21:21 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 37 36 50 33
+Jul 19, 2012 11:21:32 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 11394 12011 1093 0
+Jul 19, 2012 11:21:32 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4939 5294 5024 3481
+Jul 19, 2012 11:21:32 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 3951 4235 5024 3481
+Jul 19, 2012 11:21:32 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 42 50 35
+Jul 19, 2012 11:21:42 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 10028 10315 607 183
+Jul 19, 2012 11:21:42 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4977 5089 5353 3248
+Jul 19, 2012 11:21:42 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 3981 4071 5353 3248
+Jul 19, 2012 11:21:42 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 41 54 32
+Jul 19, 2012 11:21:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 8552 9278 369 15
+Jul 19, 2012 11:21:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5023 5090 5123 2855
+Jul 19, 2012 11:21:52 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4018 4072 5123 2855
+Jul 19, 2012 11:21:52 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 41 51 29
+Jul 19, 2012 11:22:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 7431 8193 43 0
+Jul 19, 2012 11:22:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5213 5099 5000 2932
+Jul 19, 2012 11:22:03 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4170 4079 5000 2932
+Jul 19, 2012 11:22:03 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 41 50 29
+Jul 19, 2012 11:22:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 6341 6773 0 211
+Jul 19, 2012 11:22:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5248 5369 5191 2708
+Jul 19, 2012 11:22:13 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4198 4295 5191 2708
+Jul 19, 2012 11:22:13 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 43 52 27
+Jul 19, 2012 11:22:23 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 5165 5815 282 199
+Jul 19, 2012 11:22:23 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5039 5013 4809 2632
+Jul 19, 2012 11:22:23 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4031 4010 4809 2632
+Jul 19, 2012 11:22:23 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 40 48 26
+Jul 19, 2012 11:22:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 4283 5112 296 0
+Jul 19, 2012 11:22:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5126 5048 5000 2914
+Jul 19, 2012 11:22:33 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4100 4038 5000 2914
+Jul 19, 2012 11:22:33 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 40 50 29
+Jul 19, 2012 11:22:44 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 3285 4228 197 0
+Jul 19, 2012 11:22:44 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5254 5237 5113 2914
+Jul 19, 2012 11:22:44 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4203 4189 5113 2914
+Jul 19, 2012 11:22:44 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 42 51 29
+Jul 19, 2012 11:22:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2445 3229 529 140
+Jul 19, 2012 11:22:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5120 5215 5283 3048
+Jul 19, 2012 11:22:54 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4096 4172 5283 3048
+Jul 19, 2012 11:22:54 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 42 53 30
+Jul 19, 2012 11:23:04 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1577 2391 1058 168
+Jul 19, 2012 11:23:04 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5007 5104 3228
+Jul 19, 2012 11:23:04 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5000 4005 5104 3228
+Jul 19, 2012 11:23:04 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 40 51 32
+Jul 19, 2012 11:23:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1206 1047 971 159
+Jul 19, 2012 11:23:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5350 5338 5171 3264
+Jul 19, 2012 11:23:15 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 53 52 33
+Jul 19, 2012 11:23:25 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1264 1137 382 36
+Jul 19, 2012 11:23:25 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5150 5155 5329 3000
+Jul 19, 2012 11:23:25 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 52 53 30
+Jul 19, 2012 11:23:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1355 838 233 0
+Jul 19, 2012 11:23:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 5000 2855
+Jul 19, 2012 11:23:35 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 50 29
+Jul 19, 2012 11:23:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1351 1142 319 0
+Jul 19, 2012 11:23:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5135 5146 5000 2900
+Jul 19, 2012 11:23:45 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 51 50 29
+Jul 19, 2012 11:23:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1391 1099 0 0
+Jul 19, 2012 11:23:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5109 5036 5225 2914
+Jul 19, 2012 11:23:56 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 50 52 29
+Jul 19, 2012 11:24:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1257 1012 471 33
+Jul 19, 2012 11:24:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5256 5318 5192 3054
+Jul 19, 2012 11:24:06 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 53 52 31
+Jul 19, 2012 11:24:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1562 1059 691 0
+Jul 19, 2012 11:24:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 5083 2980
+Jul 19, 2012 11:24:16 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 51 30
+Jul 19, 2012 11:24:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1333 1059 1232 0
+Jul 19, 2012 11:24:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5343 5278 5000 3611
+Jul 19, 2012 11:24:27 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 53 50 36
+Jul 19, 2012 11:24:37 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1887 1486 846 455
+Jul 19, 2012 11:24:37 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5157 5222 5416 3186
+Jul 19, 2012 11:24:37 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 52 54 32
+Jul 19, 2012 11:24:47 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2186 1821 1172 0
+Jul 19, 2012 11:24:47 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 5084 3676
+Jul 19, 2012 11:24:47 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4000 5000 5084 3676
+Jul 19, 2012 11:24:47 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 50 51 37
+Jul 19, 2012 11:24:58 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1304 2251 2293 68
+Jul 19, 2012 11:24:58 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5284 5223 5000 4231
+Jul 19, 2012 11:24:58 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5284 4178 4000 4231
+Jul 19, 2012 11:24:58 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 42 40 42
+Jul 19, 2012 11:25:08 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2456 2133 1504 244
+Jul 19, 2012 11:25:08 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5216 5277 5266 4593
+Jul 19, 2012 11:25:08 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4172 4221 5266 4593
+Jul 19, 2012 11:25:08 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 42 53 46
+Jul 19, 2012 11:25:18 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2130 1727 1995 153
+Jul 19, 2012 11:25:18 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 5234 5120
+Jul 19, 2012 11:25:18 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4000 5000 5234 5120
+Jul 19, 2012 11:25:18 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 50 52 51
+Jul 19, 2012 11:25:29 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1320 2014 3180 0
+Jul 19, 2012 11:25:29 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5224 5149 5000 5380
+Jul 19, 2012 11:25:29 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5224 4119 4000 5380
+Jul 19, 2012 11:25:29 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 41 40 54
+Jul 19, 2012 11:25:39 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2120 868 2015 1401
+Jul 19, 2012 11:25:39 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5150 5269 5188 5000
+Jul 19, 2012 11:25:39 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4120 5269 4150 5000
+Jul 19, 2012 11:25:39 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 53 42 50
+Jul 19, 2012 11:25:49 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1855 2204 1808 1931
+Jul 19, 2012 11:25:49 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5126 5082 5312 5000
+Jul 19, 2012 11:25:49 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5126 4065 5312 5000
+Jul 19, 2012 11:25:49 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 41 53 50
+Jul 19, 2012 11:26:00 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2357 2051 2882 1943
+Jul 19, 2012 11:26:00 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5107 5061 5000 5496
+Jul 19, 2012 11:26:00 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4085 4048 4000 5496
+Jul 19, 2012 11:26:00 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 40 40 55
+Jul 19, 2012 11:26:10 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1958 1453 2725 4116
+Jul 19, 2012 11:26:10 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5323 5376 5199 5004
+Jul 19, 2012 11:26:10 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5323 5376 4159 4003
+Jul 19, 2012 11:26:10 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 54 42 40
+Jul 19, 2012 11:26:20 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 3172 2739 2133 3765
+Jul 19, 2012 11:26:20 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5070 5063 5301 5062
+Jul 19, 2012 11:26:20 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 51 53 51
+Jul 19, 2012 11:27:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 5581 5390 6896 5368 0
+Jul 19, 2012 11:27:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 22128 22083 21000 22423 0
+Jul 19, 2012 11:27:05 AM elasticity.services.ElasticityService testScaleUp
+INFO: Added new worker successfully.
+Jul 19, 2012 11:27:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 4842 4604 5864 5482 1304
+Jul 19, 2012 11:27:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5372 5398 5500 5015 4000
+Jul 19, 2012 11:27:15 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4297 4318 4400 4012 4000
+Jul 19, 2012 11:27:15 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 43 44 40 40
+Jul 19, 2012 11:27:25 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 4591 4318 6166 5182 888
+Jul 19, 2012 11:27:25 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5019 5000 5066 5000
+Jul 19, 2012 11:27:25 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4000 4015 4000 4052 5000
+Jul 19, 2012 11:27:25 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 40 40 41 50
+Jul 19, 2012 11:27:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 4156 3899 5728 3935 765
+Jul 19, 2012 11:27:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5254 5261 5020 5434 5350
+Jul 19, 2012 11:27:36 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4203 4208 4016 4347 5350
+Jul 19, 2012 11:27:36 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 42 40 43 54
+Jul 19, 2012 11:27:46 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 3566 3231 4552 4044 1963
+Jul 19, 2012 11:27:46 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5246 5239 5476 5000 5150
+Jul 19, 2012 11:27:46 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4196 4191 4380 4000 5150
+Jul 19, 2012 11:27:46 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 42 44 40 52
+Jul 19, 2012 11:27:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 3200 2919 4581 3754 2699
+Jul 19, 2012 11:27:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 5004 5089 5000
+Jul 19, 2012 11:27:56 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 50 51 50
+Jul 19, 2012 11:28:04 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2855 2627 4846 3438 2630 450
+Jul 19, 2012 11:28:04 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 3313 3288 3000 3316 3263 0
+Jul 19, 2012 11:28:04 AM elasticity.services.ElasticityService testScaleUp
+INFO: Added new worker successfully.
+Jul 19, 2012 11:28:14 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1545 970 3174 2007 1892 2614
+Jul 19, 2012 11:28:14 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5687 5712 5625 5595 5237 2500
+Jul 19, 2012 11:28:14 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5687 5712 4500 4476 5237 2000
+Jul 19, 2012 11:28:14 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 57 57 45 45 52 20
+Jul 19, 2012 11:28:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1798 1609 2429 1257 2911 1466
+Jul 19, 2012 11:28:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 5375 5022 4000 3000
+Jul 19, 2012 11:28:24 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5000 5000 4300 5022 3200 3000
+Jul 19, 2012 11:28:24 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 43 50 32 30
+Jul 19, 2012 11:28:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1484 1195 1619 1033 961 81
+Jul 19, 2012 11:28:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5352 5386 5048 5478 5320 4256
+Jul 19, 2012 11:28:35 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 54 50 55 53 43
+Jul 19, 2012 11:28:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1206 948 269 348 64 87
+Jul 19, 2012 11:28:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5148 5114 5452 5018 5180 3744
+Jul 19, 2012 11:28:45 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 51 55 50 52 37
+Jul 19, 2012 11:28:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 584 285 685 302 0 0
+Jul 19, 2012 11:28:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5210 5259 5000 4982 4252 3057
+Jul 19, 2012 11:28:56 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 53 50 50 43 31
+Jul 19, 2012 11:29:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 539 744 369 349 0 0
+Jul 19, 2012 11:29:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5290 4741 4741 4500 4397 3172
+Jul 19, 2012 11:29:06 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 47 47 45 44 32
+Jul 19, 2012 11:29:17 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 750 290 578 166 63 0
+Jul 19, 2012 11:29:17 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5020 4759 4570 4351 3200
+Jul 19, 2012 11:29:17 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 48 46 44 32
+Jul 19, 2012 11:29:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 488 105 380 264 320 0
+Jul 19, 2012 11:29:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5357 5446 5121 4712 4500 3214
+Jul 19, 2012 11:29:27 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 54 51 47 45 32
+Jul 19, 2012 11:29:37 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 748 481 211 260 0 0
+Jul 19, 2012 11:29:37 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5143 4534 4879 4232 4474 3202
+Jul 19, 2012 11:29:37 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 45 49 42 45 32
+Jul 19, 2012 11:29:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 701 211 725 342 424 0
+Jul 19, 2012 11:29:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5195 5273 5000 4986 4526 3520
+Jul 19, 2012 11:29:48 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 53 50 50 45 35
+Jul 19, 2012 11:29:58 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 644 328 369 451 229 24
+Jul 19, 2012 11:29:58 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5305 5227 5000 4500 4500 3135
+Jul 19, 2012 11:29:58 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 52 50 45 45 31
+Jul 19, 2012 11:30:09 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 672 203 746 451 600 181
+Jul 19, 2012 11:30:09 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5237 5312 5000 5000 4621 3264
+Jul 19, 2012 11:30:09 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 53 50 50 46 33
+Jul 19, 2012 11:30:19 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 854 370 246 251 123 341
+Jul 19, 2012 11:30:19 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5263 5188 5500 5000 4879 3236
+Jul 19, 2012 11:30:19 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 52 55 50 49 32
+Jul 19, 2012 11:30:30 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 694 277 786 491 627 97
+Jul 19, 2012 11:30:30 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5250 5258 5000 5000 4601 3341
+Jul 19, 2012 11:30:30 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 53 50 50 46 33
+Jul 19, 2012 11:30:40 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 969 395 286 400 553 641
+Jul 19, 2012 11:30:40 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5250 5242 5500 5040 4899 3159
+Jul 19, 2012 11:30:40 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 52 55 50 49 32
+Jul 19, 2012 11:30:51 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 725 167 766 531 619 96
+Jul 19, 2012 11:30:51 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5359 5406 5000 4960 4604 3392
+Jul 19, 2012 11:30:51 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 54 50 50 46 34
+Jul 19, 2012 11:31:01 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1054 515 321 404 418 196
+Jul 19, 2012 11:31:01 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5141 5094 5500 5008 4896 3577
+Jul 19, 2012 11:31:01 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 51 55 50 49 36
+Jul 19, 2012 11:31:12 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 831 225 780 571 424 180
+Jul 19, 2012 11:31:12 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5337 5376 5007 4992 4627 3338
+Jul 19, 2012 11:31:12 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 54 50 50 46 33
+Jul 19, 2012 11:31:23 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1029 545 361 414 618 154
+Jul 19, 2012 11:31:23 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5163 5124 5493 5050 4873 3499
+Jul 19, 2012 11:31:23 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 51 55 51 49 35
+Jul 19, 2012 11:31:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 842 170 644 596 303 331
+Jul 19, 2012 11:31:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5359 5465 5153 4950 4668 3194
+Jul 19, 2012 11:31:33 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 55 52 50 47 32
+Jul 19, 2012 11:31:43 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1144 675 571 645 543 0
+Jul 19, 2012 11:31:43 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5141 5035 5347 5032 4832 3231
+Jul 19, 2012 11:31:43 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 50 53 50 48 32
+Jul 19, 2012 11:31:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 857 234 691 206 402 251
+Jul 19, 2012 11:31:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5356 5427 5126 5468 4618 3269
+Jul 19, 2012 11:31:54 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 54 51 55 46 33
+Jul 19, 2012 11:32:04 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1144 625 401 1209 373 0
+Jul 19, 2012 11:32:04 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5144 5073 5374 4528 4882 3236
+Jul 19, 2012 11:32:04 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 51 54 45 49 32
+Jul 19, 2012 11:32:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1030 422 749 281 426 256
+Jul 19, 2012 11:32:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5208 5314 5114 5472 4609 3264
+Jul 19, 2012 11:32:15 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 53 51 55 46 33
+Jul 19, 2012 11:32:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 964 580 566 724 693 0
+Jul 19, 2012 11:32:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5292 5186 5386 5047 4891 3331
+Jul 19, 2012 11:32:26 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 52 54 50 49 33
+Jul 19, 2012 11:32:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 864 368 832 556 168 0
+Jul 19, 2012 11:32:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5382 5397 5072 4953 4800 3545
+Jul 19, 2012 11:32:36 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 54 51 50 48 35
+Jul 19, 2012 11:32:47 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1170 655 536 670 293 46
+Jul 19, 2012 11:32:47 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5118 5134 5370 5089 4700 3124
+Jul 19, 2012 11:32:47 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 51 54 51 47 31
+Jul 19, 2012 11:32:57 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 873 350 667 111 379 0
+Jul 19, 2012 11:32:57 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5388 5469 5271 5411 4801 3428
+Jul 19, 2012 11:32:57 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 55 53 54 48 34
+Jul 19, 2012 11:33:08 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1194 640 521 745 23 36
+Jul 19, 2012 11:33:08 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5112 5000 5287 4569 4699 3072
+Jul 19, 2012 11:33:08 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 50 53 46 47 31
+Jul 19, 2012 11:33:18 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 956 427 986 141 566 147
+Jul 19, 2012 11:33:18 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5352 5413 5078 5431 4594 3296
+Jul 19, 2012 11:33:18 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 54 51 54 46 33
+Jul 19, 2012 11:33:28 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1234 555 366 399 0 0
+Jul 19, 2012 11:33:28 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5148 5087 5422 5000 4864 3135
+Jul 19, 2012 11:33:28 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 51 54 50 49 31
+Jul 19, 2012 11:33:39 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1137 636 1146 277 636 183
+Jul 19, 2012 11:33:39 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5193 5249 5000 5138 4596 3191
+Jul 19, 2012 11:33:39 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 52 50 51 46 32
+Jul 19, 2012 11:33:49 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1074 620 416 634 383 0
+Jul 19, 2012 11:33:49 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5307 5251 5500 4862 4946 3129
+Jul 19, 2012 11:33:49 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 53 55 49 49 31
+Jul 19, 2012 11:34:00 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1094 605 1180 166 569 161
+Jul 19, 2012 11:34:00 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5257 5321 5000 5481 4549 3249
+Jul 19, 2012 11:34:00 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 53 50 55 45 32
+Jul 19, 2012 11:34:11 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1204 760 726 918 398 0
+Jul 19, 2012 11:34:11 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5243 5179 5500 5068 4951 3071
+Jul 19, 2012 11:34:11 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 52 55 51 50 31
+Jul 19, 2012 11:34:21 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1072 554 1182 186 415 0
+Jul 19, 2012 11:34:21 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5317 5389 5027 5351 4711 3410
+Jul 19, 2012 11:34:21 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 54 50 54 47 34
+Jul 19, 2012 11:34:32 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1224 820 526 859 0 61
+Jul 19, 2012 11:34:32 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5183 5111 5473 5142 4717 3019
+Jul 19, 2012 11:34:32 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 51 55 51 47 30
+Jul 19, 2012 11:34:42 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1281 735 1126 262 510 125
+Jul 19, 2012 11:34:42 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5151 5247 5025 5299 4632 3233
+Jul 19, 2012 11:34:42 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 52 50 53 46 32
+Jul 19, 2012 11:34:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1169 605 491 567 198 0
+Jul 19, 2012 11:34:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5349 5253 5475 5200 4940 3033
+Jul 19, 2012 11:34:52 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 53 55 52 49 30
+Jul 19, 2012 11:35:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1267 743 1121 318 538 68
+Jul 19, 2012 11:35:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5200 5269 5000 5277 4577 3116
+Jul 19, 2012 11:35:03 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 53 50 53 46 31
+Jul 19, 2012 11:35:14 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1199 875 651 607 78 0
+Jul 19, 2012 11:35:14 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5300 5231 5500 5226 4923 3004
+Jul 19, 2012 11:35:14 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 52 55 52 49 30
+Jul 19, 2012 11:35:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1156 657 1185 259 183 186
+Jul 19, 2012 11:35:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5330 5363 5070 5431 4824 3114
+Jul 19, 2012 11:35:24 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 54 51 54 48 31
+Jul 19, 2012 11:35:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1327 913 799 1042 356 0
+Jul 19, 2012 11:35:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5170 5137 5430 5046 4676 2990
+Jul 19, 2012 11:35:35 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 51 54 50 47 30
+Jul 19, 2012 11:35:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1157 733 1297 699 213 70
+Jul 19, 2012 11:35:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5334 5356 5001 5479 5000 3220
+Jul 19, 2012 11:35:45 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 54 50 55 50 32
+Jul 19, 2012 11:35:55 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1593 1017 879 1034 505 310
+Jul 19, 2012 11:35:55 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5166 5144 5499 5000 5000 3290
+Jul 19, 2012 11:35:55 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 51 55 50 50 33
+Jul 19, 2012 11:36:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1278 792 1405 736 640 308
+Jul 19, 2012 11:36:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5289 5296 5000 5500 5000 3191
+Jul 19, 2012 11:36:06 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 53 50 55 50 32
+Jul 19, 2012 11:36:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1906 1427 1177 1236 165 87
+Jul 19, 2012 11:36:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5211 5204 5500 5000 5500 3495
+Jul 19, 2012 11:36:16 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 52 55 50 55 35
+Jul 19, 2012 11:36:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2514 1712 1413 736 693 369
+Jul 19, 2012 11:36:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5109 5114 5000 5500 5000 3314
+Jul 19, 2012 11:36:27 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4087 5114 5000 5500 5000 3314
+Jul 19, 2012 11:36:27 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 51 50 55 50 33
+Jul 19, 2012 11:36:37 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1376 1783 2000 1746 938 20
+Jul 19, 2012 11:36:37 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5391 5386 5413 5000 5243 4000
+Jul 19, 2012 11:36:37 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 54 54 50 52 40
+Jul 19, 2012 11:36:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1402 2087 2416 1913 1452 131
+Jul 19, 2012 11:36:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5085 5067 5087 5302 5257 4000
+Jul 19, 2012 11:36:48 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5085 4053 4069 5302 5257 4000
+Jul 19, 2012 11:36:48 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 41 41 53 53 40
+Jul 19, 2012 11:36:58 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2326 1622 1743 2639 2049 124
+Jul 19, 2012 11:36:58 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5236 5312 5145 5198 5133 4297
+Jul 19, 2012 11:36:58 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4188 5312 5145 4158 4106 4297
+Jul 19, 2012 11:36:58 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 53 51 42 41 43
+Jul 19, 2012 11:37:09 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1810 2601 2080 2193 1325 620
+Jul 19, 2012 11:37:09 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5179 5121 5355 5016 5367 4703
+Jul 19, 2012 11:37:09 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5179 4096 4284 4012 5367 4703
+Jul 19, 2012 11:37:09 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 41 43 40 54 47
+Jul 19, 2012 11:37:19 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2018 1834 2222 1600 2703 507
+Jul 19, 2012 11:37:19 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5390 5372 5073 5484 5072 5284
+Jul 19, 2012 11:37:19 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4312 5372 4058 5484 4057 5284
+Jul 19, 2012 11:37:19 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 54 41 55 41 53
+Jul 19, 2012 11:37:30 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2198 2885 1648 2686 1587 1100
+Jul 19, 2012 11:37:30 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5110 5128 5427 5022 5428 5216
+Jul 19, 2012 11:37:30 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4088 4102 5427 4017 5428 5216
+Jul 19, 2012 11:37:30 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 41 54 40 54 52
+Jul 19, 2012 11:37:40 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1900 2505 2713 2124 2953 2096
+Jul 19, 2012 11:37:40 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5240 5203 5015 5478 5078 5205
+Jul 19, 2012 11:37:40 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5240 4162 4012 4382 4062 4164
+Jul 19, 2012 11:37:40 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 42 40 44 41 42
+Jul 19, 2012 11:37:51 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2891 2576 2410 2708 2887 2013
+Jul 19, 2012 11:37:51 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5260 5297 5485 5059 5415 5295
+Jul 19, 2012 11:37:51 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 53 55 51 54 53
+Jul 19, 2012 11:38:38 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 4773 4520 5431 2346 4965 4199 0
+Jul 19, 2012 11:38:38 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 23533 23556 23000 23868 23007 23000 0
+Jul 19, 2012 11:38:38 AM elasticity.services.ElasticityService testScaleUp
+INFO: Added new worker successfully.
+Jul 19, 2012 11:38:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 3901 3360 4963 2419 5144 3881 1667
+Jul 19, 2012 11:38:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5467 5444 5379 5073 5221 5364 3346
+Jul 19, 2012 11:38:48 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4373 4355 4303 4058 4176 4291 3346
+Jul 19, 2012 11:38:48 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 44 43 41 42 43 33
+Jul 19, 2012 11:38:59 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 3937 3535 5081 1995 4940 3698 655
+Jul 19, 2012 11:38:59 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5085 5097 5121 5279 5279 5201 5154
+Jul 19, 2012 11:38:59 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4068 4077 4096 5279 4223 4160 5154
+Jul 19, 2012 11:38:59 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 41 41 53 42 42 52
+Jul 19, 2012 11:39:10 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 3096 2715 4086 2102 3640 2934 1123
+Jul 19, 2012 11:39:10 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5415 5403 5500 5234 5500 5435 5201
+Jul 19, 2012 11:39:10 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4332 4322 4400 4187 4400 4348 5201
+Jul 19, 2012 11:39:10 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 43 44 42 44 43 52
+Jul 19, 2012 11:39:20 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2427 1925 3446 1944 3462 2165 1635
+Jul 19, 2012 11:39:20 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5353 5486 5382 5487 5200 5445 5299
+Jul 19, 2012 11:39:20 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4282 5486 4305 5487 4160 4356 5299
+Jul 19, 2012 11:39:20 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 55 43 55 42 44 53
+Jul 19, 2012 11:39:31 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1631 2390 2746 2099 2645 1994 1907
+Jul 19, 2012 11:39:31 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5147 5025 5118 5308 5300 5055 5314
+Jul 19, 2012 11:39:31 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5147 4020 4094 4246 4240 5055 5314
+Jul 19, 2012 11:39:31 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 40 41 42 42 51 53
+Jul 19, 2012 11:39:41 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1806 1480 1781 1399 1454 1690 2310
+Jul 19, 2012 11:39:41 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5477 5489 5424 5192 5346 5372 5186
+Jul 19, 2012 11:39:41 AM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 5477 5489 5424 5192 5346 5372 4148
+Jul 19, 2012 11:39:41 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 55 55 54 52 53 54 41
+Jul 19, 2012 11:39:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1541 1029 1526 749 1660 1876 925
+Jul 19, 2012 11:39:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5218 5233 5076 5500 5154 5229 5500
+Jul 19, 2012 11:39:52 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 52 51 55 52 52 55
+Jul 19, 2012 11:40:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1411 1035 1171 1104 1353 1459 88
+Jul 19, 2012 11:40:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5305 5267 5500 5000 5380 5398 5204
+Jul 19, 2012 11:40:03 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 53 55 50 54 54 52
+Jul 19, 2012 11:40:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1481 820 1022 279 589 691 85
+Jul 19, 2012 11:40:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5222 5256 5061 5469 5280 5358 5296
+Jul 19, 2012 11:40:13 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 53 51 55 53 54 53
+Jul 19, 2012 11:40:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 330 43 276 249 540 974 400
+Jul 19, 2012 11:40:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5278 5275 5439 4936 5340 5143 5000
+Jul 19, 2012 11:40:24 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 53 54 49 53 51 50
+Jul 19, 2012 11:40:34 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 196 425 166 314 73 215 200
+Jul 19, 2012 11:40:34 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5500 4969 5500 4595 5325 5446 4481
+Jul 19, 2012 11:40:34 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 55 50 55 46 53 54 45
+Jul 19, 2012 11:40:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 577 790 1181 329 607 793 0
+Jul 19, 2012 11:40:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5120 4618 4500 4500 4675 4643 4544
+Jul 19, 2012 11:40:45 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 46 45 45 47 46 45
+Jul 19, 2012 11:40:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 316 40 226 759 355 419 90
+Jul 19, 2012 11:40:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5380 5382 5500 4500 5416 5411 4556
+Jul 19, 2012 11:40:56 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 54 55 45 54 54 46
+Jul 19, 2012 11:41:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 437 618 987 339 586 314 155
+Jul 19, 2012 11:41:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5254 4794 4515 4500 4642 4659 4419
+Jul 19, 2012 11:41:06 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 48 45 45 46 47 44
+Jul 19, 2012 11:41:17 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 526 785 271 590 620 29 0
+Jul 19, 2012 11:41:17 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5246 4706 5485 4604 4942 5341 4570
+Jul 19, 2012 11:41:17 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 47 55 46 49 53 46
+Jul 19, 2012 11:41:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 246 0 911 604 482 457 160
+Jul 19, 2012 11:41:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5500 5500 4791 4396 4675 4739 4430
+Jul 19, 2012 11:41:27 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 55 55 48 44 47 47 44
+Jul 19, 2012 11:41:38 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 634 901 601 314 865 184 52
+Jul 19, 2012 11:41:38 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5111 4591 5209 5000 4825 5261 4876
+Jul 19, 2012 11:41:38 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 46 52 50 48 53 49
+Jul 19, 2012 11:41:49 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 411 135 321 709 583 304 0
+Jul 19, 2012 11:41:49 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5389 5409 5500 4500 4956 5000 4564
+Jul 19, 2012 11:41:49 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 54 55 45 50 50 46
+Jul 19, 2012 11:41:59 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 521 712 887 399 456 0 50
+Jul 19, 2012 11:41:59 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5267 4797 4550 4500 4804 5069 4560
+Jul 19, 2012 11:41:59 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 48 46 45 48 51 46
+Jul 19, 2012 11:42:10 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 646 885 351 650 3 124 0
+Jul 19, 2012 11:42:10 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5233 4703 5450 4552 4998 4931 4650
+Jul 19, 2012 11:42:10 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 47 55 46 50 49 47
+Jul 19, 2012 11:42:20 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 366 590 965 121 0 0 370
+Jul 19, 2012 11:42:20 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5500 5000 4613 4789 5148 5054 4350
+Jul 19, 2012 11:42:20 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 55 50 46 48 51 51 44
+Jul 19, 2012 11:42:31 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 800 542 426 84 140 164 0
+Jul 19, 2012 11:42:31 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5052 5033 5387 4659 4594 4946 4780
+Jul 19, 2012 11:42:31 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 50 54 47 46 49 48
+Jul 19, 2012 11:42:41 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 539 370 774 102 0 84 100
+Jul 19, 2012 11:42:41 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5358 4903 4632 4776 4767 4951 4720
+Jul 19, 2012 11:42:41 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 49 46 48 48 50 47
+Jul 19, 2012 11:42:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 855 424 331 140 95 89 0
+Jul 19, 2012 11:42:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5122 5109 5094 4398 4733 5049 4820
+Jul 19, 2012 11:42:52 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 51 51 44 47 50 48
+Jul 19, 2012 11:43:02 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 601 244 571 0 97 190 125
+Jul 19, 2012 11:43:02 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5355 4896 4900 4780 4687 4881 4680
+Jul 19, 2012 11:43:02 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 49 49 48 47 49 47
+Jul 19, 2012 11:43:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 741 110 149 0 35 24 0
+Jul 19, 2012 11:43:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5113 4890 5072 4590 4813 5119 4845
+Jul 19, 2012 11:43:13 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 49 51 46 48 51 48
+Jul 19, 2012 11:43:23 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 316 217 172 179 153 218 155
+Jul 19, 2012 11:43:23 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5494 4878 5193 4456 4661 4882 4655
+Jul 19, 2012 11:43:23 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 55 49 52 45 47 49 47
+Jul 19, 2012 11:43:34 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 588 99 0 0 65 59 370
+Jul 19, 2012 11:43:34 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5011 4750 5030 4689 4839 5118 4457
+Jul 19, 2012 11:43:34 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 48 50 47 48 51 45
+Jul 19, 2012 11:43:44 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 241 294 154 383 109 177 377
+Jul 19, 2012 11:43:44 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5359 4983 4932 4311 4725 4945 4543
+Jul 19, 2012 11:43:44 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 50 49 43 47 49 45
+Jul 19, 2012 11:43:55 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 550 484 370 0 76 82 391
+Jul 19, 2012 11:43:55 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5165 4585 4647 4690 4775 5055 4500
+Jul 19, 2012 11:43:55 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 46 46 47 48 51 45
+Jul 19, 2012 11:44:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 183 365 0 369 100 187 405
+Jul 19, 2012 11:44:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5419 4973 5012 4310 4768 5000 4500
+Jul 19, 2012 11:44:05 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 50 50 43 48 50 45
+Jul 19, 2012 11:44:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 602 151 0 218 197 671 0
+Jul 19, 2012 11:44:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4724 4658 4967 4500 4732 4500 4907
+Jul 19, 2012 11:44:16 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 47 50 45 47 45 49
+Jul 19, 2012 11:44:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 186 89 0 225 77 217 814
+Jul 19, 2012 11:44:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5328 4842 5014 4500 4780 5000 4093
+Jul 19, 2012 11:44:26 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 48 50 45 48 50 41
+Jul 19, 2012 11:44:37 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 232 171 505 239 211 532 53
+Jul 19, 2012 11:44:37 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4811 4682 4507 4500 4720 4550 4500
+Jul 19, 2012 11:44:37 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48 47 45 45 47 46 45
+Jul 19, 2012 11:44:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 442 122 7 253 420 338 160
+Jul 19, 2012 11:44:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4689 4818 5000 4500 4432 4950 4500
+Jul 19, 2012 11:44:48 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 48 50 45 44 50 45
+Jul 19, 2012 11:44:58 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0 441 267 821 104 0
+Jul 19, 2012 11:44:58 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5159 4929 4500 4500 4068 4745 4477
+Jul 19, 2012 11:44:58 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 49 45 45 41 47 45
+Jul 19, 2012 11:45:09 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 366 348 535 740 197 94 0
+Jul 19, 2012 11:45:09 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4841 4571 4500 4000 4472 4585 4027
+Jul 19, 2012 11:45:09 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48 46 45 40 45 46 40
+Jul 19, 2012 11:45:19 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 180 0 244 288 35 228 18
+Jul 19, 2012 11:45:19 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4926 4703 4500 4657 4670 4287
+Jul 19, 2012 11:45:19 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 49 47 45 47 47 43
+Jul 19, 2012 11:45:30 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 559 858 751 0 0 0 47
+Jul 19, 2012 11:45:30 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4540 4074 4297 4384 4304 4452 3878
+Jul 19, 2012 11:45:30 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 41 43 44 43 45 39
+Jul 19, 2012 11:45:40 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 190 0 128 569 117 112 199
+Jul 19, 2012 11:45:40 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4960 4967 4856 4116 4567 4771 4061
+Jul 19, 2012 11:45:40 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 49 41 46 48 41
+Jul 19, 2012 11:45:51 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 468 811 485 0 0 226 0
+Jul 19, 2012 11:45:51 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4645 4083 4144 4153 4151 4277 4076
+Jul 19, 2012 11:45:51 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 41 41 42 42 43 41
+Jul 19, 2012 11:46:01 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 261 590 65 92 61 41 0
+Jul 19, 2012 11:46:01 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4855 4450 4722 4347 4254 4586 4114
+Jul 19, 2012 11:46:01 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 49 45 47 43 43 46 41
+Jul 19, 2012 11:46:12 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 487 270 151 0 0 160 49
+Jul 19, 2012 11:46:12 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4581 4343 4278 3991 4299 4414 3997
+Jul 19, 2012 11:46:12 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 43 43 40 43 44 40
+Jul 19, 2012 11:46:22 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 667 17 0 28 0 69 44
+Jul 19, 2012 11:46:22 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4419 4610 4250 4009 4312 4500 4083
+Jul 19, 2012 11:46:22 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 46 43 40 43 45 41
+Jul 19, 2012 11:46:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 191 335 57 0 330 71 156
+Jul 19, 2012 11:46:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4414 4047 4250 4037 3984 4500 3931
+Jul 19, 2012 11:46:33 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 40 43 40 40 45 39
+Jul 19, 2012 11:46:44 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 153 0 0 44 0 78 70
+Jul 19, 2012 11:46:44 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4586 4257 4371 3963 4351 4500 4069
+Jul 19, 2012 11:46:44 AM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 1..
+Jul 19, 2012 11:46:44 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 43 44 40 44 45 33
+Jul 19, 2012 11:46:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 275 0 0 51 261 502 0
+Jul 19, 2012 11:46:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4334 4237 4404 4000 4149 4014 3387
+Jul 19, 2012 11:46:54 AM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 2..
+Jul 19, 2012 11:46:54 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 42 44 40 41 40 24
+Jul 19, 2012 11:47:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 460 239 21 131 0 117 0
+Jul 19, 2012 11:47:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4666 4506 4400 4000 4386 4486 2400
+Jul 19, 2012 11:47:05 AM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 3..
+Jul 19, 2012 11:47:05 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 45 44 40 44 45 16
+Jul 19, 2012 11:47:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 394 250 401 96 0 0 0
+Jul 19, 2012 11:47:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4833 4687 4825 4500 4565 4627 1600
+Jul 19, 2012 11:47:15 AM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 4..
+Jul 19, 2012 11:47:15 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48 47 48 45 46 46 8
+Jul 19, 2012 11:47:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 575 309 210 309 271 0 0
+Jul 19, 2012 11:47:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4667 4813 4931 4053 4549 4615 805
+Jul 19, 2012 11:47:26 AM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 5..
+Jul 19, 2012 11:47:26 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 48 49 41 45 46 1
+Jul 19, 2012 11:47:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 275 134 289 491 520 86 0
+Jul 19, 2012 11:47:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 4889 4447 4643 4918 110
+Jul 19, 2012 11:47:37 AM elasticity.services.ElasticityService testScaleDown
+INFO: Removed extra worker successfully.
+Jul 19, 2012 11:47:37 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 49 44 46 49
+Jul 19, 2012 11:47:50 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1327 1440 926 0 341 234
+Jul 19, 2012 11:47:50 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5893 5671 6201 5961 5857 6224
+Jul 19, 2012 11:47:50 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 59 57 62 60 59 62
+Jul 19, 2012 11:48:01 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 980 719 229 185 241 132
+Jul 19, 2012 11:48:01 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5107 5329 5229 4379 5000 5116
+Jul 19, 2012 11:48:01 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 53 52 44 50 51
+Jul 19, 2012 11:48:11 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 625 436 171 0 125 252
+Jul 19, 2012 11:48:11 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5472 5231 4954 4496 5018 4980
+Jul 19, 2012 11:48:11 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 55 52 50 45 50 50
+Jul 19, 2012 11:48:22 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 370 374 290 179 211 272
+Jul 19, 2012 11:48:22 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5028 4769 4796 4240 4937 5020
+Jul 19, 2012 11:48:22 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 48 48 42 49 50
+Jul 19, 2012 11:48:32 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 96 0 100 66 621 442
+Jul 19, 2012 11:48:32 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5155 5074 5000 4424 4545 4730
+Jul 19, 2012 11:48:32 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 51 50 44 45 47
+Jul 19, 2012 11:48:43 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 340 159 120 481 243 357
+Jul 19, 2012 11:48:43 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4845 4926 5000 4000 4820 4770
+Jul 19, 2012 11:48:43 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48 49 50 40 48 48
+Jul 19, 2012 11:48:53 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0 135 1 456 638
+Jul 19, 2012 11:48:53 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5280 5094 5000 4500 4680 4605
+Jul 19, 2012 11:48:53 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 51 50 45 47 46
+Jul 19, 2012 11:49:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 88 155 511 518 382
+Jul 19, 2012 11:49:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5140 5012 5000 4000 4619 4895
+Jul 19, 2012 11:49:03 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 50 50 40 46 49
+Jul 19, 2012 11:49:14 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0 175 26 291 822
+Jul 19, 2012 11:49:14 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5140 5113 5000 4500 4881 4500
+Jul 19, 2012 11:49:14 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 51 50 45 49 45
+Jul 19, 2012 11:49:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 147 228 190 541 535 319
+Jul 19, 2012 11:49:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4968 4887 5000 4000 4623 4895
+Jul 19, 2012 11:49:24 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 49 50 40 46 49
+Jul 19, 2012 11:49:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0 210 61 321 767
+Jul 19, 2012 11:49:35 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5182 5071 5000 4484 4877 4605
+Jul 19, 2012 11:49:35 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 51 50 45 49 46
+Jul 19, 2012 11:49:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 243 263 581 526 278
+Jul 19, 2012 11:49:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5195 4929 4873 4016 4591 4861
+Jul 19, 2012 11:49:45 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 49 49 40 46 49
+Jul 19, 2012 11:49:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 44 145 166 346 677
+Jul 19, 2012 11:49:56 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5220 5063 5127 4347 4909 4639
+Jul 19, 2012 11:49:56 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 51 51 43 49 46
+Jul 19, 2012 11:50:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 317 253 265 411 493 332
+Jul 19, 2012 11:50:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4903 4937 4932 4153 4626 4852
+Jul 19, 2012 11:50:06 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 49 49 49 42 46 49
+Jul 19, 2012 11:50:17 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 96 145 190 165 381 657
+Jul 19, 2012 11:50:17 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5084 5000 5068 4380 4874 4648
+Jul 19, 2012 11:50:17 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 50 51 44 49 46
+Jul 19, 2012 11:50:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 183 300 541 549 358
+Jul 19, 2012 11:50:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5278 5000 4988 4120 4578 4909
+Jul 19, 2012 11:50:27 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 50 50 41 46 49
+Jul 19, 2012 11:50:38 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 412 663 325 151 416 482
+Jul 19, 2012 11:50:38 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4803 4507 5012 4424 4922 4591
+Jul 19, 2012 11:50:38 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48 45 50 44 49 46
+Jul 19, 2012 11:50:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 32 218 330 576 765 377
+Jul 19, 2012 11:50:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5335 4993 4918 4076 4528 5000
+Jul 19, 2012 11:50:48 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 50 49 41 45 50
+Jul 19, 2012 11:50:59 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 106 183 250 224 356 472
+Jul 19, 2012 11:50:59 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5071 5000 5082 4379 4972 5000
+Jul 19, 2012 11:50:59 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 50 51 44 50 50
+Jul 19, 2012 11:51:09 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 198 26 556 451 102
+Jul 19, 2012 11:51:09 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5326 5000 5257 4121 4551 4677
+Jul 19, 2012 11:51:09 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 50 53 41 46 47
+Jul 19, 2012 11:51:20 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 49 718 685 285 396 292
+Jul 19, 2012 11:51:20 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5168 4500 4743 4259 4949 4823
+Jul 19, 2012 11:51:20 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 45 47 43 49 48
+Jul 19, 2012 11:51:30 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 427 233 0 531 689 357
+Jul 19, 2012 11:51:30 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4935 5000 5405 4241 4567 4854
+Jul 19, 2012 11:51:30 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 49 50 54 42 46 49
+Jul 19, 2012 11:51:41 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 52 636 830 246 486 17
+Jul 19, 2012 11:51:41 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5239 4537 4595 4500 4933 5079
+Jul 19, 2012 11:51:41 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 45 46 45 49 51
+Jul 19, 2012 11:51:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 62 263 0 766 781 337
+Jul 19, 2012 11:51:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5261 4963 5445 4000 4652 4902
+Jul 19, 2012 11:51:52 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 50 54 40 47 49
+Jul 19, 2012 11:52:02 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 448 854 278 273 392
+Jul 19, 2012 11:52:02 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5369 4743 4555 4452 4848 4755
+Jul 19, 2012 11:52:02 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 47 46 45 48 48
+Jul 19, 2012 11:52:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 278 489 463 610 129 17
+Jul 19, 2012 11:52:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5131 4757 5000 4048 4578 4855
+Jul 19, 2012 11:52:13 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 48 50 40 46 49
+Jul 19, 2012 11:52:23 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 569 713 472 94 172 0
+Jul 19, 2012 11:52:23 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4780 4550 5000 4364 4862 4884
+Jul 19, 2012 11:52:23 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48 46 50 44 49 49
+Jul 19, 2012 11:52:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 716 67 61 28 0 0
+Jul 19, 2012 11:52:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4720 4950 4889 3977 4600 4877
+Jul 19, 2012 11:52:33 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 50 49 40 46 49
+Jul 19, 2012 11:52:44 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 750 399 0 0 179 122
+Jul 19, 2012 11:52:44 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4650 4500 4526 4047 4460 4794
+Jul 19, 2012 11:52:44 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 45 45 40 45 48
+Jul 19, 2012 11:52:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 559 0 0 0 95 0
+Jul 19, 2012 11:52:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4850 4993 4770 4014 4519 4929
+Jul 19, 2012 11:52:54 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 49 50 48 40 45 49
+Jul 19, 2012 11:53:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 251 52 0 80 200 341
+Jul 19, 2012 11:53:05 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4807 4507 4524 3856 4481 4571
+Jul 19, 2012 11:53:05 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48 45 45 39 45 46
+Jul 19, 2012 11:53:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 399 0 0 0 209 0
+Jul 19, 2012 11:53:15 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4693 4664 4503 4080 4500 4952
+Jul 19, 2012 11:53:15 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 47 45 41 45 50
+Jul 19, 2012 11:53:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 151 238 252 219 251 954
+Jul 19, 2012 11:53:26 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4336 4288 3808 4418 4048
+Jul 19, 2012 11:53:26 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 43 43 38 44 40
+Jul 19, 2012 11:53:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 138 0 0 252 647 22
+Jul 19, 2012 11:53:36 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4599 4573 3854 4082 4917
+Jul 19, 2012 11:53:36 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 46 46 39 41 49
+Jul 19, 2012 11:53:47 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 117 173 160 458 256 827
+Jul 19, 2012 11:53:47 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4401 4427 3626 4500 4083
+Jul 19, 2012 11:53:47 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 44 44 36 45 41
+Jul 19, 2012 11:53:57 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 181 0 0 275 748 391
+Jul 19, 2012 11:53:57 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4595 4572 3874 4000 4500
+Jul 19, 2012 11:53:57 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 46 46 39 40 45
+Jul 19, 2012 11:54:08 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 159 189 191 294 767 180
+Jul 19, 2012 11:54:08 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4405 4428 3730 4000 4500
+Jul 19, 2012 11:54:08 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 44 44 37 40 45
+Jul 19, 2012 11:54:18 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 103 243 191 351 95
+Jul 19, 2012 11:54:18 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4707 4500 4269 3770 4000 4155
+Jul 19, 2012 11:54:18 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 45 43 38 40 42
+Jul 19, 2012 11:54:29 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 401 610 201 288 0 0
+Jul 19, 2012 11:54:29 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4293 4000 3979 3500 3990 4218
+Jul 19, 2012 11:54:29 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 40 40 35 40 42
+Jul 19, 2012 11:54:39 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 267 456 404 0 71 0
+Jul 19, 2012 11:54:39 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4415 4102 4252 3872 4010 4200
+Jul 19, 2012 11:54:39 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 41 43 39 40 42
+Jul 19, 2012 11:54:50 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 134 458 162 192 0 0
+Jul 19, 2012 11:54:50 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4585 3898 3895 3499 4028 4219
+Jul 19, 2012 11:54:50 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 39 39 35 40 42
+Jul 19, 2012 11:55:00 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 384 567 239 5 42 0
+Jul 19, 2012 11:55:00 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4328 4048 4101 3629 3972 4214
+Jul 19, 2012 11:55:00 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 40 41 36 40 42
+Jul 19, 2012 11:55:10 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 187 0 0 0 0 213
+Jul 19, 2012 11:55:10 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4172 3926 3905 3487 4061 3994
+Jul 19, 2012 11:55:10 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 39 39 35 41 40
+Jul 19, 2012 11:55:21 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 104 0 0 0 176 233
+Jul 19, 2012 11:55:21 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4169 3957 3942 3515 3939 4000
+Jul 19, 2012 11:55:21 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 40 39 35 39 40
+Jul 19, 2012 11:55:31 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 214 110 71 17 96 248
+Jul 19, 2012 11:55:31 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4193 3799 3751 3498 4000 4000
+Jul 19, 2012 11:55:31 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 38 38 35 40 40
+Jul 19, 2012 11:55:42 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 324 30 0 0 106 268
+Jul 19, 2012 11:55:42 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4138 4110 3994 3537 4000 4000
+Jul 19, 2012 11:55:42 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 41 40 35 40 40
+Jul 19, 2012 11:55:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 255 161 0 52 126 283
+Jul 19, 2012 11:55:52 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4182 3811 3995 3463 4000 4000
+Jul 19, 2012 11:55:52 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 38 40 35 40 40
+Jul 19, 2012 11:56:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 284 0 0 0 141 303
+Jul 19, 2012 11:56:03 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4129 4058 4015 3571 4000 4000
+Jul 19, 2012 11:56:03 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 41 40 36 40 40
+Jul 19, 2012 11:56:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 259 0 71 187 161 0
+Jul 19, 2012 11:56:13 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4148 3942 3902 3429 4000 4246
+Jul 19, 2012 11:56:13 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 39 39 34 40 42
+Jul 19, 2012 11:56:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 374 0 0 75 176 538
+Jul 19, 2012 11:56:24 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4041 3990 4038 3500 4000 3754
+Jul 19, 2012 11:56:24 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 40 40 35 40 38
+Jul 19, 2012 11:56:34 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 253 1 0 122 196 0
+Jul 19, 2012 11:56:34 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4078 4039 3962 3500 4000 4309
+Jul 19, 2012 11:56:34 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 40 40 35 40 43
+Jul 19, 2012 11:56:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 117 126 73 62 396 173
+Jul 19, 2012 11:56:45 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4127 3820 4000 3500 3786 4191
+Jul 19, 2012 11:56:45 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 38 40 35 38 42
+Jul 19, 2012 11:56:55 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 89 0 77 152 536 44
+Jul 19, 2012 11:56:55 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4209 3966 4000 3500 3714 4277
+Jul 19, 2012 11:56:55 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 40 40 35 37 43
+Jul 19, 2012 11:57:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 114 0 103 167 0 213
+Jul 19, 2012 11:57:06 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4030 3995 4000 3500 4251 4223
+Jul 19, 2012 11:57:06 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 40 40 35 43 42
+Jul 19, 2012 11:57:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 9 0 105 187 571 80
+Jul 19, 2012 11:57:16 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4056 4010 4000 3500 3749 4005
+Jul 19, 2012 11:57:16 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 40 40 35 37 40
+Jul 19, 2012 11:57:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 79 0 143 197 0 443
+Jul 19, 2012 11:57:27 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4069 4025 4000 3500 4238 3995
+Jul 19, 2012 11:57:27 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 40 40 35 42 40
+Jul 19, 2012 11:57:37 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0 0 222 506 166
+Jul 19, 2012 11:57:37 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4130 4020 4131 3500 3762 4185
+Jul 19, 2012 11:57:37 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 40 41 35 38 42
+Jul 19, 2012 11:57:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 36 268 90 326 673
+Jul 19, 2012 11:57:48 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4110 3984 3869 3556 4000 3815
+Jul 19, 2012 11:57:48 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 40 39 36 40 38
+Jul 19, 2012 11:57:58 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0 0 357 341 139
+Jul 19, 2012 11:57:58 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4125 4046 4170 3444 4000 4259
+Jul 19, 2012 11:57:58 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 40 42 34 40 43
+Jul 19, 2012 11:58:09 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 44 71 0 64 366 628
+Jul 19, 2012 11:58:09 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4066 3954 4233 3618 4000 3741
+Jul 19, 2012 11:58:09 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 40 42 36 40 37
+Jul 19, 2012 11:58:19 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 86 432 0 191 163
+Jul 19, 2012 11:58:19 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4159 4000 3702 3749 4000 3914
+Jul 19, 2012 11:58:19 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 40 37 37 40 39
+Jul 19, 2012 11:58:30 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 101 0 537 99 0
+Jul 19, 2012 11:58:30 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4215 4000 4238 3133 3891 3934
+Jul 19, 2012 11:58:30 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 40 42 31 39 39
+Jul 19, 2012 11:58:40 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0 568 212 51 0
+Jul 19, 2012 11:58:40 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4220 4035 3657 3500 4109 3940
+Jul 19, 2012 11:58:40 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 40 37 35 41 39
+Jul 19, 2012 11:58:51 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 136 0 232 141 353
+Jul 19, 2012 11:58:51 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4220 3965 4278 3500 4000 3712
+Jul 19, 2012 11:58:51 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 40 43 35 40 37
+Jul 19, 2012 11:59:01 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 33 98 603 247 136 0
+Jul 19, 2012 11:59:01 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4095 4000 3722 3500 4000 3913
+Jul 19, 2012 11:59:01 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 40 37 35 40 39
+Jul 19, 2012 11:59:12 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 149 171 0 267 127 98
+Jul 19, 2012 11:59:12 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4091 4000 4313 3500 4081 3996
+Jul 19, 2012 11:59:12 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 40 43 35 41 40
+Jul 19, 2012 11:59:22 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 174 638 277 206 0
+Jul 19, 2012 11:59:22 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4269 4000 3687 3500 3919 3844
+Jul 19, 2012 11:59:22 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 40 37 35 39 38
+Jul 19, 2012 11:59:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 94 211 0 297 0 323
+Jul 19, 2012 11:59:33 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4231 4000 4343 3500 4106 3747
+Jul 19, 2012 11:59:33 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 40 43 35 41 37
+Jul 19, 2012 11:59:43 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 231 663 312 251 0
+Jul 19, 2012 11:59:43 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4309 4000 3657 3500 3894 3813
+Jul 19, 2012 11:59:43 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 40 37 35 39 38
+Jul 19, 2012 11:59:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 134 0 0 332 214 96
+Jul 19, 2012 11:59:54 AM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4191 4251 4373 3500 4000 3927
+Jul 19, 2012 11:59:54 AM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 43 44 35 40 39
+Jul 19, 2012 12:00:04 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 56 571 793 152 41 0
+Jul 19, 2012 12:00:04 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4216 3749 3627 3500 4000 3683
+Jul 19, 2012 12:00:04 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42 37 36 35 40 37
+Jul 19, 2012 12:00:15 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 74 0 0 374 316 88
+Jul 19, 2012 12:00:15 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4284 4298 4347 3500 4000 3939
+Jul 19, 2012 12:00:15 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 43 43 35 40 39
+Jul 19, 2012 12:00:25 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 346 610 357 6 0 12
+Jul 19, 2012 12:00:25 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4028 3702 3653 3500 3805 3638
+Jul 19, 2012 12:00:25 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 37 37 35 38 36
+Jul 19, 2012 12:00:35 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 92 423 0 331 328
+Jul 19, 2012 12:00:35 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4352 4174 4000 3876 4195 4000
+Jul 19, 2012 12:00:35 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 42 40 39 42 40
+Jul 19, 2012 12:00:46 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0 0 273 352 380
+Jul 19, 2012 12:00:46 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4367 4319 4435 3624 4261 3975
+Jul 19, 2012 12:00:46 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 43 44 36 43 40
+Jul 19, 2012 12:00:56 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0 745 0 242 329
+Jul 19, 2012 12:00:56 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4409 4314 3594 3892 4239 3682
+Jul 19, 2012 12:00:56 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 43 36 39 42 37
+Jul 19, 2012 12:01:07 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 230 123 0 308 178 581
+Jul 19, 2012 12:01:07 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4344 4193 4425 3608 4406 3843
+Jul 19, 2012 12:01:07 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 42 44 36 44 38
+Jul 19, 2012 12:01:17 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 64 0 334 0 553 0
+Jul 19, 2012 12:01:17 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4345 4046 3927 4094 4315
+Jul 19, 2012 12:01:17 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 43 40 39 41 43
+Jul 19, 2012 12:01:28 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 321 199 0 334 211 216
+Jul 19, 2012 12:01:28 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4470 4155 4429 3573 4357 4185
+Jul 19, 2012 12:01:28 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 42 44 36 44 42
+Jul 19, 2012 12:01:38 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 405 1 246 0 76 0
+Jul 19, 2012 12:01:38 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4530 4500 4071 3948 4643 4423
+Jul 19, 2012 12:01:38 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 45 41 39 46 44
+Jul 19, 2012 12:01:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 346 40 0 0 0 340
+Jul 19, 2012 12:01:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4500 4435 3914 4688 4077
+Jul 19, 2012 12:01:49 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 45 44 39 47 41
+Jul 19, 2012 12:01:59 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 443 84 314 0 407 221
+Jul 19, 2012 12:01:59 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4500 4065 3914 4312 4142
+Jul 19, 2012 12:01:59 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 45 41 39 43 41
+Jul 19, 2012 12:02:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 744 348 301 183 58 49
+Jul 19, 2012 12:02:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4500 4500 3724 4580 4358
+Jul 19, 2012 12:02:10 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 45 45 37 46 44
+Jul 19, 2012 12:02:20 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 545 716 377 115 0 0
+Jul 19, 2012 12:02:20 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4706 4500 4500 4000 4755 4465
+Jul 19, 2012 12:02:20 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 45 45 40 48 45
+Jul 19, 2012 12:02:31 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 45 796 409 167 0 0
+Jul 19, 2012 12:02:31 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5294 4500 4500 4000 4758 4519
+Jul 19, 2012 12:02:31 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 45 45 40 48 45
+Jul 19, 2012 12:02:41 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 602 803 338 16 0 0
+Jul 19, 2012 12:02:41 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4663 4500 4500 3973 4850 4512
+Jul 19, 2012 12:02:41 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 45 45 40 49 45
+Jul 19, 2012 12:02:52 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 61 133 76 205 0 5
+Jul 19, 2012 12:02:52 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5337 4913 4711 3950 4976 4504
+Jul 19, 2012 12:02:52 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 49 47 40 50 45
+Jul 19, 2012 12:03:02 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 733 721 301 35 0 17
+Jul 19, 2012 12:03:02 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4607 4587 4519 4075 4944 4500
+Jul 19, 2012 12:03:02 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 46 45 41 49 45
+Jul 19, 2012 12:03:13 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 335 133 386 64 17
+Jul 19, 2012 12:03:13 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5392 5000 4909 4002 5137 4500
+Jul 19, 2012 12:03:13 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 50 49 40 51 45
+Jul 19, 2012 12:03:23 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 816 827 720 0 0 0
+Jul 19, 2012 12:03:23 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4555 4500 4361 4408 4908 4500
+Jul 19, 2012 12:03:23 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 45 44 44 49 45
+Jul 19, 2012 12:03:34 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 25 351 351 708 271 0
+Jul 19, 2012 12:03:34 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5446 5000 4932 4092 5121 4832
+Jul 19, 2012 12:03:34 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 50 49 41 51 48
+Jul 19, 2012 12:03:44 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 118 866 771 220 397 0
+Jul 19, 2012 12:03:44 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5303 4500 4568 4378 4971 4480
+Jul 19, 2012 12:03:44 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 45 46 44 50 45
+Jul 19, 2012 12:03:55 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 265 391 481 738 433 142
+Jul 19, 2012 12:03:55 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5197 5000 4826 4122 5000 4688
+Jul 19, 2012 12:03:55 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 50 48 41 50 47
+Jul 19, 2012 12:04:05 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 33 406 701 0 61 242
+Jul 19, 2012 12:04:05 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5325 5000 4674 4853 5475 4500
+Jul 19, 2012 12:04:05 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 50 47 49 55 45
+Jul 19, 2012 12:04:16 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 305 426 443 148 632 0
+Jul 19, 2012 12:04:16 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5175 4926 4795 4050 4525 4582
+Jul 19, 2012 12:04:16 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 49 48 41 45 46
+Jul 19, 2012 12:04:26 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 376 836 746 288 417 322
+Jul 19, 2012 12:04:26 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5070 4574 4705 4355 5000 4418
+Jul 19, 2012 12:04:26 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 46 47 44 50 44
+Jul 19, 2012 12:04:37 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 145 0 222 723 632 0
+Jul 19, 2012 12:04:37 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5430 5456 5194 4242 5000 4868
+Jul 19, 2012 12:04:37 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 55 52 42 50 49
+Jul 19, 2012 12:04:47 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 435 976 546 280 122 2
+Jul 19, 2012 12:04:47 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5041 4544 4806 4159 5000 4632
+Jul 19, 2012 12:04:47 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 45 48 42 50 46
+Jul 19, 2012 12:04:58 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 80 0 362 468 437 0
+Jul 19, 2012 12:04:58 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5459 5486 5107 4341 5000 4627
+Jul 19, 2012 12:04:58 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 55 55 51 43 50 46
+Jul 19, 2012 12:05:08 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1020 992 221 156 0 183
+Jul 19, 2012 12:05:08 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4540 4514 4868 4185 4987 4373
+Jul 19, 2012 12:05:08 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 45 49 42 50 44
+Jul 19, 2012 12:05:19 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 120 11 214 528 361 0
+Jul 19, 2012 12:05:19 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5460 5500 5324 4315 5053 4667
+Jul 19, 2012 12:05:19 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 55 55 53 43 51 47
+Jul 19, 2012 12:05:29 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 947 982 331 17 87 317
+Jul 19, 2012 12:05:29 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4616 4500 4701 4227 4960 4333
+Jul 19, 2012 12:05:29 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 45 47 42 50 43
+Jul 19, 2012 12:05:40 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 260 61 218 523 481 0
+Jul 19, 2012 12:05:40 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5384 5500 5261 4273 5028 4657
+Jul 19, 2012 12:05:40 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 55 53 43 50 47
+Jul 19, 2012 12:05:50 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 376 1069 346 97 132 323
+Jul 19, 2012 12:05:50 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5207 4500 4739 4239 4972 4343
+Jul 19, 2012 12:05:50 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 45 47 42 50 43
+Jul 19, 2012 12:06:01 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 400 111 195 333 241 0
+Jul 19, 2012 12:06:01 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5293 5500 5332 4261 5001 4637
+Jul 19, 2012 12:06:01 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 55 53 43 50 46
+Jul 19, 2012 12:06:11 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 545 946 371 84 0 252
+Jul 19, 2012 12:06:11 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5115 4500 4668 4103 5176 4363
+Jul 19, 2012 12:06:11 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 45 47 41 52 44
+Jul 19, 2012 12:06:22 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 325 501 304 80 412 0
+Jul 19, 2012 12:06:22 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5385 5000 4745 4248 4823 4672
+Jul 19, 2012 12:06:22 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 50 47 42 48 47
+Jul 19, 2012 12:06:32 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 717 671 471 271 0 392
+Jul 19, 2012 12:06:32 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 4755 4240 5262 4328
+Jul 19, 2012 12:06:32 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 48 42 53 43
+Jul 19, 2012 12:06:43 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 260 541 156 305 622 0
+Jul 19, 2012 12:06:43 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5500 5000 5000 4218 4738 4702
+Jul 19, 2012 12:06:43 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 55 50 50 42 47 47
+Jul 19, 2012 12:06:53 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 660 706 292 293 0 422
+Jul 19, 2012 12:06:53 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5075 5000 4870 4191 5362 4298
+Jul 19, 2012 12:06:53 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 50 49 42 54 43
+Jul 19, 2012 12:07:04 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 306 909 100 103 282 0
+Jul 19, 2012 12:07:04 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5333 4671 4847 4226 5138 4732
+Jul 19, 2012 12:07:04 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 47 48 42 51 47
+Jul 19, 2012 12:07:14 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1157 886 371 148 0 0
+Jul 19, 2012 12:07:14 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4608 4829 4783 4274 5397 4720
+Jul 19, 2012 12:07:14 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 48 48 43 54 47
+Jul 19, 2012 12:07:25 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 345 556 132 50 317 167
+Jul 19, 2012 12:07:25 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5484 5000 4815 4225 5103 4548
+Jul 19, 2012 12:07:25 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 55 50 48 42 51 45
+Jul 19, 2012 12:07:35 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 787 631 244 113 0 182
+Jul 19, 2012 12:07:35 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5017 5000 4871 4275 5437 4500
+Jul 19, 2012 12:07:35 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 49 43 54 45
+Jul 19, 2012 12:07:46 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 455 116 118 0 352 197
+Jul 19, 2012 12:07:46 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4983 5000 4622 4248 5063 4500
+Jul 19, 2012 12:07:46 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 46 42 51 45
+Jul 19, 2012 12:07:56 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 879 661 265 193 0 217
+Jul 19, 2012 12:07:56 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 4952 4252 5477 4500
+Jul 19, 2012 12:07:56 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 50 43 55 45
+Jul 19, 2012 12:08:07 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 615 371 256 268 492 232
+Jul 19, 2012 12:08:07 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 4764 4000 5023 4500
+Jul 19, 2012 12:08:07 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 48 40 50 45
+Jul 19, 2012 12:08:17 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 840 696 326 24 17 252
+Jul 19, 2012 12:08:17 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5015 5000 4976 4406 5500 4500
+Jul 19, 2012 12:08:17 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 50 44 55 45
+Jul 19, 2012 12:08:28 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 373 0 0 153 532 267
+Jul 19, 2012 12:08:28 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5062 5151 4788 4094 5000 4500
+Jul 19, 2012 12:08:28 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 52 48 41 50 45
+Jul 19, 2012 12:08:38 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 912 623 249 11 54 256
+Jul 19, 2012 12:08:38 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4849 5032 4203 5500 4500
+Jul 19, 2012 12:08:38 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 48 50 42 55 45
+Jul 19, 2012 12:08:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 679 97 0 0 554 296
+Jul 19, 2012 12:08:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 4825 4263 5000 4500
+Jul 19, 2012 12:08:49 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 48 43 50 45
+Jul 19, 2012 12:08:59 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 479 419 2 0 75 303
+Jul 19, 2012 12:08:59 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5138 5000 4855 4316 5500 4500
+Jul 19, 2012 12:08:59 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 50 49 43 55 45
+Jul 19, 2012 12:09:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0 16 89 1089 10
+Jul 19, 2012 12:09:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4956 4938 4766 4218 4500 4500
+Jul 19, 2012 12:09:10 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 49 48 42 45 45
+Jul 19, 2012 12:09:20 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 352 190 135 368 379
+Jul 19, 2012 12:09:20 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4917 4562 4734 4074 5000 4000
+Jul 19, 2012 12:09:20 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 49 46 47 41 50 40
+Jul 19, 2012 12:09:31 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 47 0 243 417 605 158
+Jul 19, 2012 12:09:31 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4989 4959 4592 3926 5000 4166
+Jul 19, 2012 12:09:31 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 46 39 50 42
+Jul 19, 2012 12:09:41 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 35 473 16 146 203 165
+Jul 19, 2012 12:09:41 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4541 4908 4003 4914 4205
+Jul 19, 2012 12:09:41 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 45 49 40 49 42
+Jul 19, 2012 12:09:52 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 62 0 610 182 78 0
+Jul 19, 2012 12:09:52 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4981 4065 3907 4839 4010
+Jul 19, 2012 12:09:52 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 41 39 48 40
+Jul 19, 2012 12:10:02 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 581 491 532 225 263 0
+Jul 19, 2012 12:10:02 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4519 4435 3640 4747 4012
+Jul 19, 2012 12:10:02 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 45 44 36 47 40
+Jul 19, 2012 12:10:13 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 83 5 197 325 311 0
+Jul 19, 2012 12:10:13 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4932 4533 3950 4770 4104
+Jul 19, 2012 12:10:13 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 49 45 40 48 41
+Jul 19, 2012 12:10:23 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 597 67 0 34 0 6
+Jul 19, 2012 12:10:23 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4568 4192 3500 4560 4003
+Jul 19, 2012 12:10:23 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 46 42 35 46 40
+Jul 19, 2012 12:10:33 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 466 242 167 0 25 9
+Jul 19, 2012 12:10:33 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4613 4479 4275 3598 4670 4000
+Jul 19, 2012 12:10:33 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 45 43 36 47 40
+Jul 19, 2012 12:10:44 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 548 197 29 0 234 24
+Jul 19, 2012 12:10:44 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4387 4269 4216 3602 4500 4000
+Jul 19, 2012 12:10:44 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 43 42 36 45 40
+Jul 19, 2012 12:10:54 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 390 527 160 0 0 0
+Jul 19, 2012 12:10:54 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4636 4252 4284 3614 4741 4023
+Jul 19, 2012 12:10:54 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 43 43 36 47 40
+Jul 19, 2012 12:11:05 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 519 317 0 0 321 57
+Jul 19, 2012 12:11:05 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4364 4369 4189 3607 4282 3977
+Jul 19, 2012 12:11:05 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 44 42 36 43 40
+Jul 19, 2012 12:11:15 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 263 108 0 0 256 569
+Jul 19, 2012 12:11:15 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4572 4513 4209 3604 4477 3500
+Jul 19, 2012 12:11:15 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 45 42 36 45 35
+Jul 19, 2012 12:11:26 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 130 0 0 132 64 88
+Jul 19, 2012 12:11:26 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4371 4363 4212 3475 4603 4000
+Jul 19, 2012 12:11:26 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 1..
+Jul 19, 2012 12:11:26 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 44 42 35 46 32
+Jul 19, 2012 12:11:36 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 382 119 329 0 386 235
+Jul 19, 2012 12:11:36 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4328 4255 3890 3639 4397 3000
+Jul 19, 2012 12:11:36 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 2..
+Jul 19, 2012 12:11:36 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 43 39 36 44 24
+Jul 19, 2012 12:11:47 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 129 94 0 0 293 0
+Jul 19, 2012 12:11:47 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4686 4446 4248 3616 4500 2714
+Jul 19, 2012 12:11:47 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 3..
+Jul 19, 2012 12:11:47 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 44 42 36 45 16
+Jul 19, 2012 12:11:57 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 622 405 160 0 0 0
+Jul 19, 2012 12:11:57 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4564 4554 4252 3612 4807 1600
+Jul 19, 2012 12:11:57 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 4..
+Jul 19, 2012 12:11:57 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 46 43 36 48 8
+Jul 19, 2012 12:12:08 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 256 358 315 81 123 0
+Jul 19, 2012 12:12:08 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4967 4711 4033 3633 4693 805
+Jul 19, 2012 12:12:08 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 5..
+Jul 19, 2012 12:12:08 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 47 40 36 47 1
+Jul 19, 2012 12:12:18 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 345 540 561 45 42 0
+Jul 19, 2012 12:12:18 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5012 4789 4467 3830 5000 100
+Jul 19, 2012 12:12:19 PM elasticity.services.ElasticityService testScaleDown
+INFO: Removed extra worker successfully.
+Jul 19, 2012 12:12:19 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 48 45 38 50
+Jul 19, 2012 12:12:31 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 363 0 430 0 691
+Jul 19, 2012 12:12:31 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 6000 6236 5500 5073 6000
+Jul 19, 2012 12:12:31 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 60 62 55 51 60
+Jul 19, 2012 12:12:42 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 82 283 555 487 603
+Jul 19, 2012 12:12:42 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4764 4257 3597 4680
+Jul 19, 2012 12:12:42 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 48 43 36 47
+Jul 19, 2012 12:12:52 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 597 534 0 0
+Jul 19, 2012 12:12:52 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5191 4500 4243 3523 4704
+Jul 19, 2012 12:12:52 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 45 42 35 47
+Jul 19, 2012 12:13:03 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 405 50 91 160 105
+Jul 19, 2012 12:13:03 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4809 4922 4220 3477 4616
+Jul 19, 2012 12:13:03 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48 49 42 35 46
+Jul 19, 2012 12:13:13 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 661 459 0 0 0
+Jul 19, 2012 12:13:13 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4514 4578 4187 3429 4717
+Jul 19, 2012 12:13:13 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 46 42 34 47
+Jul 19, 2012 12:13:24 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 178 107 231 0 433
+Jul 19, 2012 12:13:24 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4986 4304 4119 3416 4283
+Jul 19, 2012 12:13:24 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 43 41 34 43
+Jul 19, 2012 12:13:34 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 259 0 0 0 0
+Jul 19, 2012 12:13:34 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4543 4054 3407 4747
+Jul 19, 2012 12:13:34 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 45 41 34 47
+Jul 19, 2012 12:13:44 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 65 0 194 0 0
+Jul 19, 2012 12:13:44 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4186 3920 3419 4719
+Jul 19, 2012 12:13:44 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 1..
+Jul 19, 2012 12:13:44 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 42 39 34 38
+Jul 19, 2012 12:13:55 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 374 148 0 71 177
+Jul 19, 2012 12:13:55 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4500 4399 4117 3329 3547
+Jul 19, 2012 12:13:55 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 2..
+Jul 19, 2012 12:13:55 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 44 41 33 28
+Jul 19, 2012 12:14:05 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 658 554 0 0 0
+Jul 19, 2012 12:14:05 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4579 4568 4294 3371 3083
+Jul 19, 2012 12:14:05 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 3..
+Jul 19, 2012 12:14:05 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 46 43 34 19
+Jul 19, 2012 12:14:15 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 236 304 128 0
+Jul 19, 2012 12:14:15 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5361 4934 4515 3484 2102
+Jul 19, 2012 12:14:15 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 4..
+Jul 19, 2012 12:14:15 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 49 45 35 9
+Jul 19, 2012 12:14:26 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 286 88 144 71 0
+Jul 19, 2012 12:14:26 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5060 5066 4406 3645 822
+Jul 19, 2012 12:14:26 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 5..
+Jul 19, 2012 12:14:26 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 51 44 36 1
+Jul 19, 2012 12:14:36 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 530 204 333 389 0
+Jul 19, 2012 12:14:36 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5005 5000 4668 3585 200
+Jul 19, 2012 12:14:37 PM elasticity.services.ElasticityService testScaleDown
+INFO: Removed extra worker successfully.
+Jul 19, 2012 12:14:37 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 47 36
+Jul 19, 2012 12:14:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1178 1550 0 0
+Jul 19, 2012 12:14:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 6232 5500 5964 4810
+Jul 19, 2012 12:14:49 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 62 55 60 48
+Jul 19, 2012 12:14:59 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 964 605 421 34
+Jul 19, 2012 12:14:59 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5263 5292 4536 3869
+Jul 19, 2012 12:14:59 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 53 45 39
+Jul 19, 2012 12:15:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 998 192 0 253
+Jul 19, 2012 12:15:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5208 4871 3736
+Jul 19, 2012 12:15:10 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 52 49 37
+Jul 19, 2012 12:15:20 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 669 168 363 286
+Jul 19, 2012 12:15:20 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 4629 3550
+Jul 19, 2012 12:15:20 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 46 36
+Jul 19, 2012 12:15:30 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 444 392 122
+Jul 19, 2012 12:15:30 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5323 4675 4500 3460
+Jul 19, 2012 12:15:30 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 47 45 35
+Jul 19, 2012 12:15:41 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 121 403 378 17
+Jul 19, 2012 12:15:41 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5177 4825 4093 3490
+Jul 19, 2012 12:15:41 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 48 41 35
+Jul 19, 2012 12:15:51 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 349 724 67 0
+Jul 19, 2012 12:15:51 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4500 4407 3401
+Jul 19, 2012 12:15:51 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 45 44 34
+Jul 19, 2012 12:16:01 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 370 0 148 0
+Jul 19, 2012 12:16:01 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4544 4000 3417
+Jul 19, 2012 12:16:01 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 45 40 34
+Jul 19, 2012 12:16:12 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 300 295 0 0
+Jul 19, 2012 12:16:12 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4867 4349 4198 3409
+Jul 19, 2012 12:16:12 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 49 43 42 34
+Jul 19, 2012 12:16:22 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 202 0 0 146
+Jul 19, 2012 12:16:22 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4633 4310 4222 3273
+Jul 19, 2012 12:16:22 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 43 42 33
+Jul 19, 2012 12:16:32 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 22 148 173
+Jul 19, 2012 12:16:32 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4625 4297 4080 3068
+Jul 19, 2012 12:16:32 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 1..
+Jul 19, 2012 12:16:32 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 43 41 25
+Jul 19, 2012 12:16:43 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 166 15 90 0
+Jul 19, 2012 12:16:43 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4527 4372 4071 2911
+Jul 19, 2012 12:16:43 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 2..
+Jul 19, 2012 12:16:43 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 44 41 18
+Jul 19, 2012 12:16:53 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 230 0 0 0
+Jul 19, 2012 12:16:53 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4848 4603 4279 1814
+Jul 19, 2012 12:16:53 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 3..
+Jul 19, 2012 12:16:53 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48 46 43 12
+Jul 19, 2012 12:17:03 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 146 370 150 0
+Jul 19, 2012 12:17:03 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5158 4525 4150 1221
+Jul 19, 2012 12:17:03 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 4..
+Jul 19, 2012 12:17:03 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 45 42 6
+Jul 19, 2012 12:17:13 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 100 301 20 0
+Jul 19, 2012 12:17:13 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5342 4734 4350 619
+Jul 19, 2012 12:17:13 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 5..
+Jul 19, 2012 12:17:13 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 53 47 44 1
+Jul 19, 2012 12:17:24 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 416 337 14 0
+Jul 19, 2012 12:17:24 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4766 4650 152
+Jul 19, 2012 12:17:24 PM elasticity.services.ElasticityService testScaleDown
+INFO: Removed extra worker successfully.
+Jul 19, 2012 12:17:24 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 48 47
+Jul 19, 2012 12:17:37 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 705 350 137
+Jul 19, 2012 12:17:37 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 6000 6000 5716
+Jul 19, 2012 12:17:37 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 60 60 57
+Jul 19, 2012 12:17:47 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 293 668 862
+Jul 19, 2012 12:17:47 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4500 4284
+Jul 19, 2012 12:17:47 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 45 43
+Jul 19, 2012 12:17:57 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 310 696 0
+Jul 19, 2012 12:17:57 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5038 4500 4790
+Jul 19, 2012 12:17:57 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 45 48
+Jul 19, 2012 12:18:07 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 467 32 56
+Jul 19, 2012 12:18:07 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4962 4505 4210
+Jul 19, 2012 12:18:07 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 45 42
+Jul 19, 2012 12:18:17 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 193 374 271
+Jul 19, 2012 12:18:17 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4252 4000
+Jul 19, 2012 12:18:17 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 43 40
+Jul 19, 2012 12:18:28 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 18 0 0
+Jul 19, 2012 12:18:28 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4424 4319
+Jul 19, 2012 12:18:28 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 1..
+Jul 19, 2012 12:18:28 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 44 35
+Jul 19, 2012 12:18:38 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 75 68 0
+Jul 19, 2012 12:18:38 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4319 3572
+Jul 19, 2012 12:18:38 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 2..
+Jul 19, 2012 12:18:38 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 43 26
+Jul 19, 2012 12:18:48 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0 14
+Jul 19, 2012 12:18:48 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5381 4385 2609
+Jul 19, 2012 12:18:48 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 3..
+Jul 19, 2012 12:18:48 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 54 44 17
+Jul 19, 2012 12:18:58 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 521 261 0
+Jul 19, 2012 12:18:58 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5119 4615 1892
+Jul 19, 2012 12:18:58 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 4..
+Jul 19, 2012 12:18:58 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 51 46 9
+Jul 19, 2012 12:19:09 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1293 359 0
+Jul 19, 2012 12:19:09 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 991
+Jul 19, 2012 12:19:09 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 5..
+Jul 19, 2012 12:19:09 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 50 1
+Jul 19, 2012 12:19:19 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2208 1321 3
+Jul 19, 2012 12:19:19 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 5000 117
+Jul 19, 2012 12:19:19 PM elasticity.services.ElasticityService testScaleDown
+INFO: Cancelled scaling down plan.
+Jul 19, 2012 12:19:19 PM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4000 5000 4319
+Jul 19, 2012 12:19:19 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 50 43
+Jul 19, 2012 12:19:29 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 723 354 0
+Jul 19, 2012 12:19:29 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5177 5000 3462
+Jul 19, 2012 12:19:29 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 52 50 35
+Jul 19, 2012 12:19:39 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 5 52 0
+Jul 19, 2012 12:19:39 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4823 4372 2818
+Jul 19, 2012 12:19:39 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 1..
+Jul 19, 2012 12:19:39 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48 44 23
+Jul 19, 2012 12:19:50 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 217 0 0
+Jul 19, 2012 12:19:50 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4147 4488 2282
+Jul 19, 2012 12:19:50 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 2..
+Jul 19, 2012 12:19:50 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 45 17
+Jul 19, 2012 12:20:00 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 554 0 0
+Jul 19, 2012 12:20:00 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4353 4551 1767
+Jul 19, 2012 12:20:00 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 3..
+Jul 19, 2012 12:20:00 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 46 11
+Jul 19, 2012 12:20:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 210 20 0
+Jul 19, 2012 12:20:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4758 4589 1135
+Jul 19, 2012 12:20:10 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 4..
+Jul 19, 2012 12:20:10 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48 46 6
+Jul 19, 2012 12:20:20 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 213 84 0
+Jul 19, 2012 12:20:20 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4742 4627 607
+Jul 19, 2012 12:20:20 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 5..
+Jul 19, 2012 12:20:20 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 46 1
+Jul 19, 2012 12:20:31 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 95 223 0
+Jul 19, 2012 12:20:31 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 4873 100
+Jul 19, 2012 12:20:31 PM elasticity.services.ElasticityService testScaleDown
+INFO: Removed extra worker successfully.
+Jul 19, 2012 12:20:31 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 49
+Jul 19, 2012 12:20:43 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 607 535
+Jul 19, 2012 12:20:43 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5495 5639
+Jul 19, 2012 12:20:43 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 55 56
+Jul 19, 2012 12:20:53 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 208 478
+Jul 19, 2012 12:20:53 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5005 4723
+Jul 19, 2012 12:20:53 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 47
+Jul 19, 2012 12:21:03 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 85 283
+Jul 19, 2012 12:21:03 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4703 4401
+Jul 19, 2012 12:21:03 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 47 44
+Jul 19, 2012 12:21:14 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 185 267
+Jul 19, 2012 12:21:14 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4297 4237
+Jul 19, 2012 12:21:14 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 42
+Jul 19, 2012 12:21:24 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 123 109
+Jul 19, 2012 12:21:24 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4427 4453
+Jul 19, 2012 12:21:24 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 1..
+Jul 19, 2012 12:21:24 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 44 36
+Jul 19, 2012 12:21:34 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 244
+Jul 19, 2012 12:21:34 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4558 3547
+Jul 19, 2012 12:21:34 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 2..
+Jul 19, 2012 12:21:34 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 27
+Jul 19, 2012 12:21:44 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 71 0
+Jul 19, 2012 12:21:44 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5008 2972
+Jul 19, 2012 12:21:44 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 3..
+Jul 19, 2012 12:21:44 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 18
+Jul 19, 2012 12:21:54 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 566 0
+Jul 19, 2012 12:21:54 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5007 2178
+Jul 19, 2012 12:21:54 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 4..
+Jul 19, 2012 12:21:54 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 9
+Jul 19, 2012 12:22:04 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 1976 0
+Jul 19, 2012 12:22:04 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 1150
+Jul 19, 2012 12:22:04 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 5..
+Jul 19, 2012 12:22:04 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 1
+Jul 19, 2012 12:22:15 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 3846 0
+Jul 19, 2012 12:22:15 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 160
+Jul 19, 2012 12:22:15 PM elasticity.services.ElasticityService testScaleDown
+INFO: Cancelled scaling down plan.
+Jul 19, 2012 12:22:15 PM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4000 4453
+Jul 19, 2012 12:22:15 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 45
+Jul 19, 2012 12:22:25 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 2106 105
+Jul 19, 2012 12:22:25 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 3540
+Jul 19, 2012 12:22:25 PM elasticity.services.ElasticityService regulateRates
+FINE: Regulated rates: 4000 3540
+Jul 19, 2012 12:22:25 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40 35
+Jul 19, 2012 12:22:35 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 843 135
+Jul 19, 2012 12:22:35 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5000 3000
+Jul 19, 2012 12:22:35 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 50 30
+Jul 19, 2012 12:22:45 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 231 0
+Jul 19, 2012 12:22:45 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4558 2463
+Jul 19, 2012 12:22:45 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 46 25
+Jul 19, 2012 12:22:55 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 174
+Jul 19, 2012 12:22:55 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4051 2037
+Jul 19, 2012 12:22:55 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 1..
+Jul 19, 2012 12:22:55 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 16
+Jul 19, 2012 12:23:05 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 112
+Jul 19, 2012 12:23:05 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4138 1838
+Jul 19, 2012 12:23:05 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 2..
+Jul 19, 2012 12:23:05 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 41 12
+Jul 19, 2012 12:23:15 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 99 0
+Jul 19, 2012 12:23:15 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4253 1443
+Jul 19, 2012 12:23:15 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 3..
+Jul 19, 2012 12:23:15 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43 8
+Jul 19, 2012 12:23:26 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0 0
+Jul 19, 2012 12:23:26 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4491 864
+Jul 19, 2012 12:23:26 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 4..
+Jul 19, 2012 12:23:26 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 4
+Jul 19, 2012 12:23:36 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 81 0
+Jul 19, 2012 12:23:36 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4509 434
+Jul 19, 2012 12:23:36 PM elasticity.services.ElasticityService testScaleDown
+INFO: Trying to remove extra worker, 5..
+Jul 19, 2012 12:23:36 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 45 1
+Jul 19, 2012 12:23:46 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 63 0
+Jul 19, 2012 12:23:46 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4821 115
+Jul 19, 2012 12:23:46 PM elasticity.services.ElasticityService testScaleDown
+INFO: Removed extra worker successfully.
+Jul 19, 2012 12:23:46 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 48
+Jul 19, 2012 12:23:58 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 60
+Jul 19, 2012 12:23:58 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 5679
+Jul 19, 2012 12:23:58 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 57
+Jul 19, 2012 12:24:08 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:24:08 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 4260
+Jul 19, 2012 12:24:08 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 43
+Jul 19, 2012 12:24:19 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:24:19 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 3950
+Jul 19, 2012 12:24:19 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 40
+Jul 19, 2012 12:24:29 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:24:29 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 3700
+Jul 19, 2012 12:24:29 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 37
+Jul 19, 2012 12:24:39 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 17
+Jul 19, 2012 12:24:39 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 3487
+Jul 19, 2012 12:24:39 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 35
+Jul 19, 2012 12:24:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 195
+Jul 19, 2012 12:24:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 3103
+Jul 19, 2012 12:24:49 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 31
+Jul 19, 2012 12:24:59 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 132
+Jul 19, 2012 12:24:59 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 3000
+Jul 19, 2012 12:24:59 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 30
+Jul 19, 2012 12:25:09 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:25:09 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 2810
+Jul 19, 2012 12:25:09 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 28
+Jul 19, 2012 12:25:19 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:25:19 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 2427
+Jul 19, 2012 12:25:19 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 24
+Jul 19, 2012 12:25:29 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:25:29 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 2188
+Jul 19, 2012 12:25:29 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 22
+Jul 19, 2012 12:25:39 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:25:39 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 1937
+Jul 19, 2012 12:25:39 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 19
+Jul 19, 2012 12:25:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:25:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 1678
+Jul 19, 2012 12:25:49 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 17
+Jul 19, 2012 12:25:59 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 38
+Jul 19, 2012 12:25:59 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 1451
+Jul 19, 2012 12:25:59 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 15
+Jul 19, 2012 12:26:09 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:26:09 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 1219
+Jul 19, 2012 12:26:09 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 12
+Jul 19, 2012 12:26:19 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:26:19 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 924
+Jul 19, 2012 12:26:19 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 92
+Jul 19, 2012 12:26:29 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:26:29 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 656
+Jul 19, 2012 12:26:29 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 66
+Jul 19, 2012 12:26:39 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:26:39 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 424
+Jul 19, 2012 12:26:39 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 42
+Jul 19, 2012 12:26:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:26:49 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 128
+Jul 19, 2012 12:26:49 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 13
+Jul 19, 2012 12:27:00 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:27:00 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:27:00 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1
+Jul 19, 2012 12:27:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:27:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:27:10 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1
+Jul 19, 2012 12:27:20 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:27:20 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:27:20 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1
+Jul 19, 2012 12:27:30 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:27:30 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:27:30 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1
+Jul 19, 2012 12:27:40 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:27:40 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:27:40 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1
+Jul 19, 2012 12:27:50 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:27:50 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:27:50 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1
+Jul 19, 2012 12:28:00 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:28:00 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:28:00 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1
+Jul 19, 2012 12:28:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:28:10 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:28:10 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1
+Jul 19, 2012 12:28:21 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:28:21 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:28:21 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1
+Jul 19, 2012 12:28:31 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:28:31 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:28:31 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1
+Jul 19, 2012 12:28:41 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:28:41 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:28:41 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1
+Jul 19, 2012 12:28:51 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored loads: 0
+Jul 19, 2012 12:28:51 PM elasticity.services.ElasticityService monitorWorkers
+FINE: Monitored rates: 0
+Jul 19, 2012 12:28:51 PM elasticity.services.ElasticityService updateWeights
+FINE: Computed weights: 1

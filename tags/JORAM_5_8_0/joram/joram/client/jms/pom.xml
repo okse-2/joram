@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>joram-client-jms</artifactId>
+  <packaging>bundle</packaging>
+  <name>JORAM :: joram :: client :: jms</name>
+  <description>Builds the Joram client jms project.</description>
+
+  <parent>
+    <groupId>org.ow2.joram</groupId>
+    <artifactId>joram-client</artifactId>
+    <version>5.8.0</version>
+  </parent>
+
+  <properties>
+    <version.filter.value>${project.version}</version.filter.value>
+    <protocol.filter.value>${joram.protocol}</protocol.filter.value>
+  </properties>
+
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Implementation-Version>${project.version}</Implementation-Version> 
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-Activator>org.objectweb.joram.client.osgi.Activator</Bundle-Activator>
+            <Import-Package>com.scalagent.jmx,
+              fr.dyade.aaa.agent;resolution:=optional,
+              fr.dyade.aaa.common,
+              fr.dyade.aaa.common.net,
+              fr.dyade.aaa.common.stream,
+              fr.dyade.aaa.util.management,
+              javax.jms,
+              javax.management;resolution:=optional,
+              javax.naming,
+              javax.naming.spi,
+              javax.net,
+              javax.net.ssl,
+              javax.transaction,
+              javax.transaction.xa,
+              javax.xml.parsers,
+              org.objectweb.joram.mom.dest;resolution:=optional,
+              org.objectweb.joram.mom.notifications;resolution:=optional,
+              org.objectweb.joram.mom.proxies;resolution:=optional,
+              org.objectweb.joram.mom.proxies.local;resolution:=optional,
+              org.objectweb.joram.shared,
+              org.objectweb.joram.shared.admin,
+              org.objectweb.joram.shared.client,
+              org.objectweb.joram.shared.excepts,
+              org.objectweb.joram.shared.messages,
+              org.objectweb.joram.shared.security,
+              org.objectweb.joram.shared.security.jaas;resolution:=optional,
+              org.objectweb.joram.shared.selectors,
+              org.objectweb.joram.shared.stream,
+              fr.dyade.aaa.jndi2.msg;resolution:=optional,
+              fr.dyade.aaa.jndi2.client;resolution:=optional,
+              fr.dyade.aaa.jndi2.scn;resolution:=optional,
+              org.objectweb.util.monolog,
+              org.objectweb.util.monolog.api,
+              org.osgi.framework,
+              org.osgi.service.cm,
+              org.osgi.util.tracker,
+              org.xml.sax,
+              org.xml.sax.helpers</Import-Package>
+            <Export-Package>org.objectweb.joram.client.jms,
+              org.objectweb.joram.client.jms.admin,
+              org.objectweb.joram.client.jms.admin.server,
+              org.objectweb.joram.client.jms.connection,
+              org.objectweb.joram.client.jms.ha.local,
+              org.objectweb.joram.client.jms.ha.tcp,
+              org.objectweb.joram.client.jms.local,
+              org.objectweb.joram.client.jms.tcp,
+              org.objectweb.joram.client.osgi</Export-Package>
+              <DynamicImport-Package>*</DynamicImport-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jms_1.1_spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-shared</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!--
+      joram-mom-core dependence need for LocalConnection !!! 
+      to be re architecture
+    -->
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-mom-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+</project>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    JORAM: Java(TM) Open Reliable Asynchronous Messaging
+    Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
+   
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or any later version.
+   
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+   
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+    USA.
+   
+    Initial developer(s): ScalAgent Distributed Technologies
+    Contributor(s): 
+ -->
+<module rename-to='appli'>
+	<!-- Inherit the core Web Toolkit stuff.                        -->
+	<inherits name='com.google.gwt.user.User'/>
+
+  	<!-- Inherit the smart GWT style sheet.  You can change         -->
+  	<!-- the theme of your GWT application by uncommenting          -->
+  	<!-- any one of the following lines and change AdminJoram.html  -->
+    <inherits name='com.smartclient.theme.enterprise.EnterpriseResources' />
+    <!-- inherits name='com.smartclient.theme.enterpriseblue.EnterpriseBlueResources' /--> 
+    <!-- inherits name='com.smartclient.theme.graphite.GraphiteResources' /--> 
+
+  	<!-- Other module inherits    									--> 
+    <inherits name='com.smartgwt.SmartGwtNoScript' />
+  	<inherits name='com.google.gwt.visualization.Visualization'/>
+    
+    <!-- Logging section                                            -->
+    <inherits name="com.allen_sauer.gwt.log.gwt-log-OFF" />
+    
+    <!-- inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" />
+    <set-property name="log_WindowLogger" value="ENABLED" />
+    <set-property name="log_DivLogger" value="DISABLED" />
+    <set-property name="compiler.emulatedStack" value="true" />
+    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>
+    <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/-->
+
+  	<!-- Specify the app entry point class.                         -->
+    <entry-point class='com.scalagent.appli.client.Application'/>
+
+  	<!-- Specify the paths for translatable code                    -->
+  	<source path='appli/client'/>
+  	<source path='appli/shared'/>
+  	<source path='engine/client'/>
+  	<source path='engine/shared'/>
+    
+ 	<!-- set-property  name="user.agent" value="gecko1_8"></set-property-->
+</module>

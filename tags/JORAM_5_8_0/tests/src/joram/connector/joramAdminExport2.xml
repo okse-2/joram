@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<JoramAdmin>
+  <AdminModule>
+    <connect host="localhost" port="17010"
+             name="root" password="root"/>
+  </AdminModule>
+  
+  <Queue name="anotherQueue">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="anotherQueue"/>
+  </Queue>
+</JoramAdmin>
