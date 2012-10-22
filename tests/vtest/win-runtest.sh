@@ -18,10 +18,10 @@ date=`echo $date | sed -e s:/:.:g`
 LOGFILE=$VTEST_HOME/"vtest-$date.log"
 ZIPFILE="result.zip"
 
-#extracting joram source so as to test updated trunk artifacts
-svn co svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
+#extracting joram source so as to test updated tags/JORAM_5_8_0 artifacts
+svn co svn://svn.forge.objectweb.org/svnroot/joram/tags/JORAM_5_8_0/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
 cd $VTEST_HOME/joram-src ;
-echo "installing joram trunk"
+echo "installing joram JORAM_5_8_0"
 mvn install >> $LOGFILE 2>&1
 
 #following command suppose that svn check out has been made into path $VTEST_HOME/joram
