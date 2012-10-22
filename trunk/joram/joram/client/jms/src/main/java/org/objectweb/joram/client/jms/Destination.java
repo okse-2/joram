@@ -400,7 +400,11 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * external targets. The nature of data forwarder is configurable through properties.
    */
   public static final String DISTRIBUTION_TOPIC = "org.objectweb.joram.mom.dest.DistributionTopic";
-  
+  /**
+   * Constant defining the implementation class for a FTP Queue.
+   */
+  public static final String FTP_QUEUE = "com.scalagent.joram.mom.dest.ftp.FtpQueue";
+
   /**
    * Administration method creating or retrieving a destination with a given name on a
    * given server, and returning its identifier.
