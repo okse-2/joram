@@ -29,9 +29,9 @@ import org.objectweb.joram.client.jms.Queue;
 /**
  * The <code>SchedulerQueue</code> class allows administrators to create scheduled queues.
  * <p>
- * A scheduler queue is a standard JMS queue extended with a timer behavior. When a scheduler
+ * A scheduled queue is a standard JMS queue extended with a timer behavior. When a scheduler
  * queue receives a message with a property called 'scheduleDate' (typed as a long) then the
- * message is not available for delivery before the date specified by the property. .
+ * message is not available for delivery before the date specified by the property.
  */
 public class SchedulerQueue {
   /**
