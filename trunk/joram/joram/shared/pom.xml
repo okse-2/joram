@@ -11,7 +11,7 @@
   <parent>
     <artifactId>joram</artifactId>
     <groupId>org.ow2.joram</groupId>
-    <version>5.8.0-SNAPSHOT</version>
+    <version>5.9.0-SNAPSHOT</version>
   </parent>
 
   <properties>
