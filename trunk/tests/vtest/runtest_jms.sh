@@ -14,10 +14,10 @@ else
 fi
 
 #change to "tags/JORAM_X_Y_Z" when producing a release
-$VERSION_URL="trunk"
+VERSION_URL="trunk"
 
 #value should be synchronized whith vtest configuration (test.properties file)
-$JORAM_TEST_DIR="joram-test"
+JORAM_TEST_DIR="joram-test"
 
 date=`date +%x`
 date=`echo $date | sed -e s:/:.:g`
