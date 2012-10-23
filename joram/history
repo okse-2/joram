@@ -77,6 +77,11 @@ Allows to use any queue as DMQ in XML script (JORAM-37).
 +------------+-----------------------------------------------------------------	 
 Allows to fix any factory parameters in XML configuration scripts (JORAM-46).	 
 +------------+-----------------------------------------------------------------	 
+JORAM-43: Adds a specific logger allowing to trace message sending and receiving.
++------------+-----------------------------------------------------------------	 
+Bug fix (JORAM-44): Enable the interception mechanism with implicit receipt
+mode.
++------------+-----------------------------------------------------------------	 
 Avoids a possible NPE during a reaction to an AgentCreatRequest (JORAM-39).
 +------------+-----------------------------------------------------------------	 
 Bug fix (JORAM-35): correct handling of message's priority during serialization.
