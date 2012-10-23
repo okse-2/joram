@@ -40,7 +40,7 @@ mvn install >> $LOGFILE 2>&1
 #launching tests
 cd src;
 echo "on launching ant custom.tests.vtest"
-ant tests.jms.all >> $LOGFILE 2>&1 
+ant tests.jms.all -Dship.dir=../../../joram-src/ship>> $LOGFILE 2>&1 
 TEST_RESULT=$?;
 
 mkdir results ;
