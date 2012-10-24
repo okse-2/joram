@@ -11,8 +11,108 @@
   </properties>
 
 	<body>
+      <s1 name="October 23, 2012: JORAM 5.8.0 release is available.">
+        <p>Joram 5.8.0 is available in the SVN repository with tag JORAM_5_8_0.</p>
+        <s2 name="New features and improvements">
+        <ul>
+        <li>
+          Refactoring of the JCA resource adapter allowing to deploy many resource adapter
+          in an application server. This enhanced JCA connector includes a new configuration
+          mechanism allowing user friendly configuration.
+        </li>
+        <li>Enhancements of the JMS bridge.</li>
+        <li>Enhancements of the AMQP bridge.</li>
+        <li>Adds an individual acknowledge mode in addition to JMS specification.</li>
+        <li>Joram's MBeans extension.</li>
+        <li>Adds a specific logger allowing to trace message sending and receiving client side.</li>
+        <li>
+          Adds specific ConnectionFactory elements, these factories can be used either
+          through the administration API or the XML configuration scripts. Factory parameters
+          can now be defined in XML configuration scripts.
+        </li>
+        <li>
+          Adds specific factories for specialized destination:<ul>
+            <li>Mail acquisition and distribution destinations.</li>
+            <li>FTP queue.</li>
+            <li>Monitoring queue and topic.</li>
+            <li>Collector queue and topic.</li>
+            <li>SchedulerQueue.</li>
+            <li>JMS and AMQP bridges.</li>
+          </ul>
+          These factories can be used either through the administration API or the XML
+          configuration scripts.
+        </li>
+        <li>
+          Allows the configuration of the JMS and AMQP bridge connection services:<ul>
+            <li>Add elements to define either an AMQP or JMS bridge connection to a Joram server
+            through the XML cpnfiguration scripts.</li>
+            <li>Add methods to add or delete either an AMQP or JMS bridge connection to a Joram
+            server through the administration API.</li>
+          </ul>
+		  Use URLs to describes each connection factory. 
+        </li>
+        </ul>
+        </s2>
+
+        <s2 name="Bug fixes">
+        <ul>
+        <li>Fix a potential NPE when declaring a bridge destination without properties.	</li>
+        <li>Allows to disable the regulation mechanism between the acquisition handler and
+        the queue.</li>
+        <li>Bug fix (JORAM-80): Bytes, Stream and Map messages are now correctly handled by
+        the JMS bridge.</li>
+        <li>Bug fix (JORAM-77): Messages whose field is positioned JMSReplyTo are not correctly
+        retransmitted by the JMS bridge acquisition. Additionally this patch fixes two problems
+        in the JMSAcquisition class:<ul>
+        <li>Sessions are now transacted which allows the use of commit/rollack.</li>
+        <li>rrors are correctly handled by the message listener.</li>
+        </ul>
+        </li>
+        <li>Bug fix (JORAM-74): Fix a synchronization issue in the bridge daemon, avoid
+        duplication of message during connection recovery.</li>
+        <li>Bug fix (JORAM-75): Bad handling of connections in the JCA connector, some
+        connections are not correctly freed.</li>
+        <li>JMS Bridge connection pool: Fix issues when defining a connection without name
+        or with an already defined name (JORAM-70, JORAM-71).</li>
+        <li>Avoids exceeding the limit of the number of characters for the identifier of a
+        persistent object in MySQL Transaction component.	 </li>
+        <li>JORAM-61: Avoid a possible ConcurrentModificationException when restarting a
+        server with active subscription during a crash.</li>
+        <li>JORAM-32: Directly throw an exception for the user when sending a message on
+        a full local queue. </li>
+        <li>Bug fix (JORAM-59): Previously a message denied and then correctly consumed by
+        the customer could be reissued after stopping and restarting the server.</li>
+        <li>JORAM-41: Right handling of redelivered attribute.</li>
+        <li>JORAM-33 : Add the possibility to disable the mechanism of pre-requesting of
+        the messages in a listener mode. (queueMessageReadMax =0)</li>
+        <li>Allows to use any queue as DMQ in XML script (JORAM-37).	</li>
+        <li>Bug fix (JORAM-44): Enable the interception mechanism with implicit receipt mode.</li>
+        <li>Avoids a possible NPE during a reaction to an AgentCreatRequest (JORAM-39).</li>
+        <li>Bug fix (JORAM-35): correct handling of message's priority during serialization.</li>
+        <li>Bug fix (JORAM-30): avoid potential loss of messages by an AMQP bridge during server shutdown.
+        The persistent properties of acquisitionNot is now depending of the messages included.</li>
+        <li>Bug fix (JORAM-16): Allow the reconnection of the JMS bridge detecting a connection
+        issue even if the remote JMS provider do not thrown an exception on ExceptionListener.</li>
+        <li>Bug fix (JORAM-23): Avoids starvation of listener when using flow control.
+        Previously after reactivation of the subscription the supply of the listener's
+        queue is resumed only if new messages comes from topic.
+        Changes to limiting the number of messages per request between the subscription
+        and the listener after restarting of a subscription (JORAM-22).</li>
+        <li>Fix a memory leak (JORAM-20): no longer create a new logging topic for each created daemon.</li>
+        <li>Bug fix in NGTransaction rebuild of the memory transaction log.	 
+        Fix a bad behavior (JORAM-18) allowing the proliferation of unused log files.</li>
+        <li>Until now a message to an unknown server was simply destroyed. Now when the sender is
+        identified an error message is sent to the corresponding agent.
+        This patch fixes the problems JORAM-12 and JORAM-14.</li>
+        <li>JORAM-10 : Fix possible NPE during server stop with JMS Bridge.</li>
+        <li>JORAM-9 : Fix FileNotFoundException using raconfig tools.</li>
+        <li>JORAM-3 : Fix a NullPointerException on server restart after a crash during XA transactions.</li>
+        </ul>
+        </s2>
+        </s1>
+
 		<s1 name="September 14, 2011: JORAM 5.7.0 release is available.">
-			<p>Joram 5.7.0 is available in the SVN repository with tag JORAM_5_6_0.</p>
+			<p>Joram 5.7.0 is available in the SVN repository with tag JORAM_5_7_0.</p>
 			<s2 name="New features and improvements">
 				<ul>
 					<li>A new JMS bridge component using a connection pool similarly to the

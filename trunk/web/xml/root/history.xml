@@ -12,6 +12,55 @@
 
   <body>
     <s1 name="JORAM History">
+
+      <s2 name="October 23, 2012: JORAM 5.8.0 release is available.">
+      <p>This release introduces many improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>
+          Refactoring of the JCA resource adapter allowing to deploy many resource adapter
+          in an application server. This enhanced JCA connector includes a new configuration
+          mechanism allowing user friendly configuration.
+        </li>
+        <li>Enhancements of the JMS bridge.</li>
+        <li>Enhancements of the AMQP bridge.</li>
+        <li>Adds an individual acknowledge mode in addition to JMS specification.</li>
+        <li>Joram's MBeans extension.</li>
+        <li>Adds a specific logger allowing to trace message sending and receiving client side.</li>
+        <li>
+          Adds specific ConnectionFactory elements, these factories can be used either
+          through the administration API or the XML configuration scripts. Factory parameters
+          can now be defined in XML configuration scripts.
+        </li>
+        <li>
+          Adds specific factories for specialized destination:<ul>
+            <li>Mail acquisition and distribution destinations.</li>
+            <li>FTP queue.</li>
+            <li>Monitoring queue and topic.</li>
+            <li>Collector queue and topic.</li>
+            <li>SchedulerQueue.</li>
+            <li>JMS and AMQP bridges.</li>
+          </ul>
+          These factories can be used either through the administration API or the XML
+          configuration scripts.
+        </li>
+        <li>
+          Allows the configuration of the JMS and AMQP bridge connection services:<ul>
+            <li>Add elements to define either an AMQP or JMS bridge connection to a Joram server
+            through the XML cpnfiguration scripts.</li>
+            <li>Add methods to add or delete either an AMQP or JMS bridge connection to a Joram
+            server through the administration API.</li>
+          </ul>
+		  Use URLs to describes each connection factory. 
+        </li>
+        <li>Fix LGPL license removing unapropriate ASF.</li>
+        <li>A Xoram component (C/C++ client API), corrected and updated.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>It is tagged in SVN (JORAM_5_8_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
     
       <s2 name="October 10, 2011: 2 new tutorials are available.">
       <p>Two short tutorials are available in the <a href="doc/tutorials.html">tutorial</a> section. The first
