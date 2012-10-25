@@ -39,9 +39,9 @@
 			
       <s2 name="API documentation">
       <ul>
-        <li>Browsing the user <a href="../current/javadoc/">Joram javadoc</a>.</li>
-        <li>For advanced user and programmer a detailed documentation generated with Doxygen is available <a href="../current/joramdox/html/index.html">here</a>.</li>
-				<li>Browsing the <a href="../current/xoramdox/html/index.html">Xoram 1.3.0/52 apidoc</a>.</li>
+        <li>the complete project documentation:  <a href="../current/javadoc/">Joram javadoc</a>.</li>
+        <li>A detailed documentation of the client part of Joram generated with Doxygen is available <a href="../current/joramdox/html/index.html">here</a>.</li>
+		<li>Browsing the <a href="../current/xoramdox/html/index.html">Xoram 1.3.0/52 apidoc</a>.</li>
       </ul>
       <p>The JavaDoc of the version in development is generated each day at 00:00 AM CEST, it is available at:
 	    <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/JavaDoc/target/apidocs/index.html">here</a>.</p>
