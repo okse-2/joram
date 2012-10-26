@@ -14,7 +14,6 @@ else
 fi
 
 #change to "tags/JORAM_X_Y_Z" when producing a release
-VERSION_URL="trunk"
 
 #value should be synchronized whith vtest configuration (test.properties file)
 JORAM_TEST_DIR="joram-test"
@@ -25,7 +24,7 @@ LOGFILE=$VTEST_HOME/"vtest-$date.log"
 ZIPFILE=$VTEST_HOME/"result.zip"
 
 #extracting joram source so as to test updated trunk artifacts
-svn co svn://svn.forge.objectweb.org/svnroot/joram/$VERSION_URL/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
+svn co svn://svn.forge.objectweb.org/svnroot/joram/$1/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
 cd $VTEST_HOME/joram-src ;
 echo "installing joram trunk"
 mvn install >> $LOGFILE 2>&1
