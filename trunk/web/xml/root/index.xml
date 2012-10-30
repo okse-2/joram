@@ -29,7 +29,13 @@
     </table>
     
     <s2 name="Joram needs your feedback.">
-      <p><strong>Please fill in this <a href="http://www.esurveyspro.com/Survey.aspx?id=06ddfdce-68b1-489b-a145-9e54b2666438">very short survey</a> !</strong></p>
+    <table border="0" width="100%">
+  	<tr>
+	  <td align="left"><img src="images/HelpBookBlue.png" alt="HelpUs" height="48" width="48" border="0" hspace="2"/></td>
+	  <td align="right"><p><strong>Please fill in this <a href="http://www.esurveyspro.com/Survey.aspx?id=06ddfdce-68b1-489b-a145-9e54b2666438">very short survey</a> !</strong></p>
+	  </td>
+	</tr>
+	</table>
     </s2>
     
     </s1>
