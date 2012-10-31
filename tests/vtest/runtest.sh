@@ -1,7 +1,8 @@
 #!/bin/bash
-#################################
-# Vtest linux script for JORAM  #
-#################################
+###################################
+# Vtest linux script for JORAM    #
+# $1 = version, sous form url SVN #
+###################################
 
 #ensure existence of environment variable VTEST_HOME
 if [ -z "$VTEST_HOME" ]
@@ -19,13 +20,13 @@ LOGFILE=$VTEST_HOME/"vtest-$date.log"
 ZIPFILE=$VTEST_HOME/"result.zip"
 
 #extracting joram source so as to test updated trunk artifacts
-svn co svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
+svn co svn://svn.forge.objectweb.org/svnroot/joram/$1/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
 cd $VTEST_HOME/joram-src ;
 echo "installing joram trunk"
 mvn install >> $LOGFILE 2>&1
 
 #following command suppose that svn check out has been made into path $VTEST_HOME/joram
-cd $VTEST_HOME/joram ;
+cd $VTEST_HOME/joram-test ;
 
 #installing joram tests using maven
 echo "installing joram tests"
@@ -50,9 +51,9 @@ if [[ $TEST_RESULT -gt 0 ]]; then
     exit 1;
 else
     echo "TEST OK";
-    cp $VTEST_HOME/joram/src/jndi2/report.txt results/jndi2-report.txt;
-    cp $VTEST_HOME/joram/src/joram/report.txt results/joram-report.txt;
-    cp $VTEST_HOME/joram/src/jms/report.txt results/jms-report.txt;
+    cp $VTEST_HOME/joram-test/src/jndi2/report.txt results/jndi2-report.txt;
+    cp $VTEST_HOME/joram-test/src/joram/report.txt results/joram-report.txt;
+    cp $VTEST_HOME/joram-test/src/jms/report.txt results/jms-report.txt;
     jar cf $ZIPFILE results;
     exit 0;
 fi
