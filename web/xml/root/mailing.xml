@@ -23,10 +23,6 @@
     <p>For keeping an eye on the forum, please
     <a href="http://mail.ow2.org/wws/arc/joram">subscribe</a>.</p>
 
-    <subtitle>Follows all modifications in JORAM SVN</subtitle>
-    <p>For keeping an eye on the JORAM's SVN code base, please 
-    <a href="http://mail.ow2.org/wws/arc/joram-commits">subscribe</a>.</p>
-
     <subtitle>Support for using JORAM within the JOnAS application server</subtitle>
     <p>For questions or feedbacks related to using JMS within JOnAS components,
     or to the JORAM/JOnAS integration, or to specific JORAM/JOnAS architecturing

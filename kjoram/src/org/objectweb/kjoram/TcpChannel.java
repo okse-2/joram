@@ -90,7 +90,7 @@ public class TcpChannel extends Channel {
     in = null;
   }
 
-  public final static byte[] magic = {'J', 'O', 'R', 'A', 'M', 5, 3, 53};
+  public final static byte[] magic = {'J', 'O', 'R', 'A', 'M', 5, 2, 52};
 
   /* (non-Javadoc)
    * @see org.objectweb.kjoram.Channel#connect()

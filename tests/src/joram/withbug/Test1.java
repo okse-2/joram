@@ -37,31 +37,31 @@ import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
-import framework.BaseTestCase;
 
 class MsgList53 implements MessageListener {
-  public void onMessage(Message msg) {
-    try {
-      int index = msg.getIntProperty("Index");
-      if (index <= 2) {
-        System.out.println("receives msg#" + index);
-        //         msg.acknowledge();
-      } else {
-        System.out.println("should not receives msg#" + index + ", ignore");
-      }
-      if (index == 2) {
-        synchronized (Test1.lock) {
-          System.out.println("notify");
-          Test1.lock.notify();
-        }
-      }
-    } catch (Throwable exc) {
-      exc.printStackTrace();
+    public void onMessage(Message msg) {
+	try {
+	    int index = msg.getIntProperty("Index");
+	    
+	    if (index <= 2) {
+		System.out.println("receives msg#" + index);
+		//         msg.acknowledge();
+	    } else {
+		System.out.println("should not receives msg#" + index + ", ignore");
+	    }
+	    if (index == 2) {
+		synchronized(Test1.lock) {
+		    System.out.println("notify");
+		    Test1.lock.notify();
+		}
+	    }
+	} catch(Throwable exc) {
+	    exc.printStackTrace();
+	}
     }
-  }
 }
 
-public class Test1 extends BaseTestCase {
+public class Test1 extends BaseTest {
   static Object lock = null;
 
   public static void main (String args[])  {
@@ -106,9 +106,9 @@ public class Test1 extends BaseTestCase {
 		System.out.println("send msgs");
 		sess1.close();
 		
-        // synchronized(lock) {
+		// synchronized(lock) {
 		lock.wait();
-        System.out.println("before close");
+		System.out.println("before close");
 		cons2.close();
 		sess2.close();
 		System.out.println("after close");

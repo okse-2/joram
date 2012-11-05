@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,10 +17,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):  ScalAgent Distributed Technologies
- * Contributor(s): 
+ * Initial developer(s):  ScalAgent D.T.
+ * Contributor(s):
  */
 package joram.reconf;
+
+import java.io.File;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
@@ -47,7 +49,7 @@ public class ReconfTest5 extends ReconfTestBase {
   public void run() {
     try {
       String network = HttpNetwork.class.getName();
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false" });
+      startAgentServer((short)0, (File)null, new String[] {"-DNTNoLockFile=true"});
 
       AdminModule.connect("localhost", 2560, "root", "root", 60);
       User.create("anonymous", "anonymous", 0);
@@ -60,8 +62,7 @@ public class ReconfTest5 extends ReconfTestBase {
 
       AdminModule.addServer(1, "localhost", "D0", 0, "s1");
       deployAgentServer((short) 1, "./s1");
-      startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false",
-          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
+      startAgentServer((short) 1, new File("./s1"), new String[] {"-DNTNoLockFile=true"});
 
       checkQueue((short) 1);
       
@@ -69,8 +70,7 @@ public class ReconfTest5 extends ReconfTestBase {
       
       AdminModule.addServer(2, "localhost", "D0", 0, "s2");
       deployAgentServer((short) 2, "./s2");
-      startAgentServer((short) 2, new String[] { "-DTransaction.UseLockFile=false",
-          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });
+      startAgentServer((short) 2, new File("./s2"), new String[] {"-DNTNoLockFile=true"});
 
       checkQueue((short) 2);
 
@@ -80,9 +80,9 @@ public class ReconfTest5 extends ReconfTestBase {
 
       AdminModule.disconnect();
       
-      killAgentServer((short) 0);
+      crashAgentServer((short) 0);
       Thread.sleep(1000L);
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false" });
+      startAgentServer((short)0, (File)null, new String[] {"-DNTNoLockFile=true"});
       Thread.sleep(1000L);
 
       AdminModule.connect("localhost", 2560, "root", "root", 60);
@@ -95,19 +95,17 @@ public class ReconfTest5 extends ReconfTestBase {
       // Stops the server S1 then restart it
       
       AdminModule.stopServer(1);
-      Thread.sleep(2000L);
-      startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false",
-          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
+      Thread.sleep(1000L);
+      startAgentServer((short) 1, new File("./s1"), new String[] {"-DNTNoLockFile=true"});
 
       checkQueue((short) 1);
       checkQueue((short) 2);
       
       // Crash the server S2 then restart it
       
-      killAgentServer((short) 2);
+      crashAgentServer((short) 2);
       Thread.sleep(1000L);
-      startAgentServer((short) 2, new String[] { "-DTransaction.UseLockFile=false",
-          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });
+      startAgentServer((short)2, new File("./s2"), new String[] {"-DNTNoLockFile=true"});
       
       // Removes the servers S1 and S2, and the domain D0
       
@@ -126,8 +124,6 @@ public class ReconfTest5 extends ReconfTestBase {
       error(exc);
     } finally {
       stopAgentServer((short) 0);
-      killAgentServer((short) 1);
-      killAgentServer((short) 2);
       endTest();
     }
   }

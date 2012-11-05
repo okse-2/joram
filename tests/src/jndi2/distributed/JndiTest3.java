@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,12 +23,13 @@
 
 package jndi2.distributed;
 
-import java.util.Hashtable;
 
-import javax.naming.InitialContext;
-import javax.naming.NameNotFoundException;
+import java.io.*;
+import java.util.*;
+import javax.naming.*;
 
 import framework.TestCase;
+
 
 /**
  * Tests:
@@ -49,40 +50,46 @@ public class JndiTest3 extends TestCase {
 
   public void run() {
     try {
-      startAgentServer((short) 0, new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
-      startAgentServer((short) 1, new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
-
+      startAgentServer(
+        (short)0, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+      startAgentServer(
+        (short)1, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});      
+    
       Hashtable env0 = new Hashtable();
       env0.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env0.put(NAMING_HOST_PROP, LOCALHOST);
-      env0.put(NAMING_PORT_PROP, "16600");
+      env0.put(NAMING_PORT_PROP, "16400");
 
       Hashtable env1 = new Hashtable();
       env1.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env1.put(NAMING_HOST_PROP, LOCALHOST);
-      env1.put(NAMING_PORT_PROP, "16681");
+      env1.put(NAMING_PORT_PROP, "16401");
 
       Hashtable env2 = new Hashtable();
       env2.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env2.put(NAMING_HOST_PROP, LOCALHOST);
-      env2.put(NAMING_PORT_PROP, "16683");
-
+      env2.put(NAMING_PORT_PROP, "16403");
+    
       InitialContext ctx0 = new InitialContext(env0);
       InitialContext ctx1 = new InitialContext(env1);
       InitialContext ctx2 = new InitialContext(env2);
-
+      
       Thread.sleep(3000);
 
       ctx0.createSubcontext("/A");
       ctx1.createSubcontext("/A/B");
       ctx1.createSubcontext("/A/B/C");
 
-      stopAgentServer((short) 0);
-
+      stopAgentServer((short)0);
+      
       Thread.sleep(3000);
-
-      startAgentServer((short) 3, new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
-
+      
+      startAgentServer(
+        (short)3, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+      
       Thread.sleep(3000);
 
       NameNotFoundException nnfe = null;
@@ -96,12 +103,12 @@ public class JndiTest3 extends TestCase {
       ctx2.createSubcontext("/A/B/C/D");
 
     } catch (Exception exc) {
-      error(exc);
-      // In case the exception occurred before stopping the server 0
-      stopAgentServer((short) 0);
+      error(exc);      
     } finally {
-      stopAgentServer((short) 1);
-      stopAgentServer((short) 3);
+      //stopAgentServer((short)0);
+      stopAgentServer((short)1);
+      //stopAgentServer((short)2);
+      stopAgentServer((short)3);
       endTest();
     }
   }

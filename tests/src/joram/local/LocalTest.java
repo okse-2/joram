@@ -24,10 +24,14 @@
 package joram.local;
 
 
+import java.util.Enumeration;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
+import javax.jms.QueueBrowser;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueReceiver;
@@ -41,6 +45,7 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
+
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -52,8 +57,7 @@ import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
 import framework.TestCase;
 
 /**
- * Test local : try to send a message and receive it with a queue and with a
- * topic
+ * Test local : try to send a message and receive it with a queue and with a topic
  */
 public class LocalTest extends TestCase {
   public LocalTest() {
@@ -63,14 +67,14 @@ public class LocalTest extends TestCase {
   public void run() {
     try {
       System.getProperties().put("Transaction", "fr.dyade.aaa.util.NullTransaction");
-      fr.dyade.aaa.agent.AgentServer.init(new String[] { "0", "s0" });
+      fr.dyade.aaa.agent.AgentServer.init(new String[]{"0", "s0"});
       fr.dyade.aaa.agent.AgentServer.start();
 
+      AdminModule.connect("localhost", 2560, "root", "root", 60);
+
+      User user = User.create("anonymous", "anonymous", 0);
+
       ConnectionFactory cf = LocalConnectionFactory.create();
-      AdminModule.connect(cf, "root", "root");
-
-      User.create("anonymous", "anonymous", 0);
-
       QueueConnectionFactory qcf = QueueLocalConnectionFactory.create();
       TopicConnectionFactory tcf = TopicLocalConnectionFactory.create();
 
@@ -83,17 +87,17 @@ public class LocalTest extends TestCase {
       queue.setFreeWriting();
 
       AdminModule.disconnect();
-
+      
       try {
         // Test1 - Queue and Topic unified
         Connection cnx = cf.createConnection();
         Session sess1 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
         MessageProducer producer = sess1.createProducer(null);
-
+        
         Session sess2 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
         MessageConsumer qconsumer = sess2.createConsumer(queue);
         MessageConsumer tconsumer = sess2.createConsumer(topic);
-
+       
         cnx.start();
 
         TextMessage msg1 = sess1.createTextMessage();
@@ -101,15 +105,15 @@ public class LocalTest extends TestCase {
         producer.send(queue, msg1);
 
         TextMessage msg2 = (TextMessage) qconsumer.receive();
-
+ 
         assertTrue(msg1.getText().equals(msg2.getText()));
-
+        
         msg1 = sess1.createTextMessage();
         msg1.setText("Test Topic LocalConnectionFactory");
         producer.send(topic, msg1);
 
         msg2 = (TextMessage) tconsumer.receive();
-
+ 
         assertTrue(msg1.getText().equals(msg2.getText()));
 
         cnx.close();
@@ -124,33 +128,33 @@ public class LocalTest extends TestCase {
         QueueSender sender = sess1.createSender(queue);
 
         QueueSession sess2 = cnx.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-        QueueReceiver receiver = sess2.createReceiver(queue);
-
+        QueueReceiver receiver = sess2.createReceiver(queue);    
+        
         cnx.start();
 
         // Send a message
         TextMessage msg1 = sess1.createTextMessage();
         msg1.setText("Test QueueLocalConnectionFactory");
         sender.send(msg1);
-
+        
         TextMessage msg2 = (TextMessage) receiver.receive();
-
+ 
         assertTrue(msg1.getText().equals(msg2.getText()));
-
+        
         cnx.close();
       } catch (Exception exc) {
         throw exc;
       }
-
+      
       try {
         // Test3 - Topic pub/sub
         TopicConnection cnx = tcf.createTopicConnection();
         TopicSession sess1 = cnx.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
         TopicPublisher publisher = sess1.createPublisher(topic);
-
+        
         TopicSession sess2 = cnx.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
         TopicSubscriber subscriber = sess2.createSubscriber(topic);
-
+        
         cnx.start();
 
         TextMessage msg1 = sess1.createTextMessage();
@@ -158,9 +162,9 @@ public class LocalTest extends TestCase {
         publisher.send(msg1);
 
         TextMessage msg2 = (TextMessage) subscriber.receive();
-
+ 
         assertTrue(msg1.getText().equals(msg2.getText()));
-
+        
         cnx.close();
       } catch (Exception exc) {
         throw exc;
@@ -168,8 +172,9 @@ public class LocalTest extends TestCase {
     } catch (Exception exc) {
       error(exc);
     } finally {
+      // stopAgentServer((short)0);
       fr.dyade.aaa.agent.AgentServer.stop();
-      endTest();
+      endTest();     
     }
   }
 

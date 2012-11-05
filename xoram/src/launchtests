@@ -26,4 +26,3 @@ make clean tests
 ../tests/perfs/test4 producer & ../tests/perfs/test4 consumer
 ../tests/perfs/test5 producer & ../tests/perfs/test5 consumer
 
-../tests/wrapper/test1

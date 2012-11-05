@@ -23,6 +23,7 @@
 package joram.client;
 
 
+import java.io.File;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -56,8 +57,8 @@ public class ClientTest24 extends TestCase {
 
   public void run() {
     try {
-      startAgentServer((short) 0, new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
-      Thread.sleep(2000);
+      startAgentServer((short) 0, (File) null,
+          new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
 
       ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
       AdminModule.connect(cf);

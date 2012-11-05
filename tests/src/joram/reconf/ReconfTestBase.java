@@ -75,24 +75,17 @@ public class ReconfTestBase extends TestCase {
    * @param sid   the unique id of the server to check.
    * @throws Exception
    */
-  public static Queue checkQueue(short sid) throws Exception {
+  public static void checkQueue(short sid) throws Exception {
     Queue queue = Queue.create(sid);
     queue.setFreeReading();
     queue.setFreeWriting();
 
     ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
-    
-    checkQueue(cf, queue);
-    
-    return queue;
-  }
-  
-  public static void checkQueue(ConnectionFactory cf, javax.jms.Queue queue) throws Exception {
-    Connection cnx = cf.createConnection("anonymous", "anonymous");
-    Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    Connection connection = cf.createConnection("anonymous", "anonymous");
+    Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     MessageProducer producer = session.createProducer(queue);
     MessageConsumer consumer = session.createConsumer(queue);
-    cnx.start();
+    connection.start();
 
     TextMessage msg1 = session.createTextMessage("testcheck-" + System.currentTimeMillis());
     producer.send(msg1);
@@ -101,7 +94,7 @@ public class ReconfTestBase extends TestCase {
     assertEquals("check JMSMessageID", msg1.getJMSMessageID(), msg2.getJMSMessageID());
     assertEquals("check text", msg1.getText(), msg2.getText());
     
-    cnx.close();
+    connection.close();
   }
 
 }

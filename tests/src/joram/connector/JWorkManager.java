@@ -126,7 +126,7 @@ public class JWorkManager implements WorkManager {
           // exit from thread
           return;
         } catch (WorkException e) {
-          ConnectorTest1.error(e);
+          Connector.error(e);
         }
       }
     }

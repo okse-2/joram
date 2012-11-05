@@ -22,27 +22,29 @@
  */
 package joram.client;
 
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Session;
 import javax.jms.TopicSubscriber;
 
 
-import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
 
 /**
- *  Tests that when the a connection fails the heart-beat mechanism allows to detect it
- * and releases the reliable subscriptions:
- *  - Create a durable subscription.
- *  - Kill the client (to make the TCP connection fail  without a close).
- *  - Wait for delay (see build.xml).
- *  - Start the client again (ClientTest16_2).
- *  - Create anew the durable subscriber.
+ * Tests that when the connectingTimer of a
+ * connection fails, the reliable subscriptions
+ * are released.
+ *
+ * Create a durable subscription.
+ * Kill the client (to make the TCP connection fail
+ * without a close)
+ * Wait for <connecting timer> (see build.xml)
+ * Start the client again (ClientTest16_2)
+ * Create a durable subscriber.
+ *
  */
 public class ClientTest16 extends TestCase {
 
@@ -52,23 +54,35 @@ public class ClientTest16 extends TestCase {
 
   public void run() {
     try {
-      AdminModule.connect("localhost", 2560, "root", "root", 20);
+      AdminModule.connect("localhost", 2560,
+                          "root", "root", 20);
 
-      User user = User.create("anonymous", "anonymous", 0);
+      org.objectweb.joram.client.jms.admin.User user = 
+        org.objectweb.joram.client.jms.admin.User.create(
+          "anonymous", "anonymous", 0);
 
-      Topic topic = Topic.create(0, "test_topic");
+      org.objectweb.joram.client.jms.Topic topic = 
+        org.objectweb.joram.client.jms.Topic.create(0, "test_topic");
       topic.setFreeReading();
       topic.setFreeWriting();
+      
+      ConnectionFactory cf = 
+        org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
+          "localhost", 2560);
+      ((org.objectweb.joram.client.jms.tcp.TcpConnectionFactory)cf).
+	  getParameters().cnxPendingTimer = 500; // milliseconds
+      ((org.objectweb.joram.client.jms.tcp.TcpConnectionFactory)cf).
+      getParameters().connectingTimer = 2; //seconds
 
-      ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
-      ((TcpConnectionFactory)cf).getParameters().cnxPendingTimer = 500; // milliseconds
-      ((TcpConnectionFactory)cf).getParameters().connectingTimer = 2; //seconds
+      Connection connection = cf.createConnection(
+        "anonymous", "anonymous");
+      
+      Session recSession = connection.createSession(
+        false,
+        Session.AUTO_ACKNOWLEDGE);
 
-      Connection connection = cf.createConnection("anonymous", "anonymous");
-
-      Session recSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-      TopicSubscriber consumer = recSession.createDurableSubscriber(topic, "test_sub");
+      TopicSubscriber consumer = 
+        recSession.createDurableSubscriber(topic, "test_sub");
 
       connection.start();
 

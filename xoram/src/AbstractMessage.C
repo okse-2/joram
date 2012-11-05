@@ -124,11 +124,11 @@ AbstractMessage* AbstractMessage::read(InputStream *is) throw (IOException) {
   case TEMP_DEST_DELETE_REQUEST:
     reply = new TempDestDeleteRequest();
     break;
-  case SESS_CREATE_DEST_REPLY:
-    reply = new SessCreateDestReply();
+  case SESS_CREATE_TDREPLY:
+    reply = new SessCreateTDReply();
     break;
-  case SESS_CREATE_DEST_REQUEST:
-    reply = new SessCreateDestRequest();
+  case SESS_CREATE_TTREQUEST:
+    reply = new SessCreateTTRequest();
     break;
 
   default:
@@ -1500,33 +1500,33 @@ TempDestDeleteRequest::~TempDestDeleteRequest() {
 
 
 /**
- * Constructs a <code>SessCreateDestReply</code> instance.
+ * Constructs a <code>SessCreateTDReply</code> instance.
  */
-SessCreateDestReply::SessCreateDestReply() : AbstractReply() {
-  classid = SESS_CREATE_DEST_REPLY;
+SessCreateTDReply::SessCreateTDReply() : AbstractReply() {
+  classid = SESS_CREATE_TDREPLY;
 }
 
 /**
- * Constructs a <code>SessCreateDestReply</code> instance.
+ * Constructs a <code>SessCreateTDReply</code> instance.
  *
  * @param request  The replied request.
  * @param agentId  String identifier of the destination agent.
  */
-SessCreateDestReply::SessCreateDestReply(AbstractRequest* req, char* agentId)  : AbstractReply(req->getRequestId()) {
-  classid = SESS_CREATE_DEST_REPLY;
+SessCreateTDReply::SessCreateTDReply(AbstractRequest* req, char* agentId)  : AbstractReply(req->getRequestId()) {
+  classid = SESS_CREATE_TDREPLY;
   this->agentId = agentId;
 }
 
-SessCreateDestReply::~SessCreateDestReply() {
+SessCreateTDReply::~SessCreateTDReply() {
 }
 
 /** Sets the destination identifier. */
-void SessCreateDestReply::setAgentId(char* agentId) {
+void SessCreateTDReply::setAgentId(char* agentId) {
   this->agentId = agentId;
 }
 
 /** Returns the temporary destination's agent identifier. */
-char* SessCreateDestReply::getAgentId() {
+char* SessCreateTDReply::getAgentId() {
   return agentId;
 }
 
@@ -1540,7 +1540,7 @@ char* SessCreateDestReply::getAgentId() {
  *
  * @param os the stream to write the object to
  */
-void SessCreateDestReply::writeTo(OutputStream* os) throw(IOException) {
+void SessCreateTDReply::writeTo(OutputStream* os) throw(IOException) {
   AbstractReply::writeTo(os);
   if (os->writeString(agentId) == -1) throw IOException();
 }
@@ -1551,55 +1551,14 @@ void SessCreateDestReply::writeTo(OutputStream* os) throw(IOException) {
  *
  * @param is the stream to read data from in order to restore the object
  */
-void SessCreateDestReply::readFrom(InputStream* is) throw(IOException) {
+void SessCreateTDReply::readFrom(InputStream* is) throw(IOException) {
   AbstractReply::readFrom(is);
   if (is->readString(&agentId) == -1) throw IOException();
 }
 
-SessCreateDestRequest::SessCreateDestRequest() : AbstractRequest((char*) NULL) {
-  classid = SESS_CREATE_DEST_REQUEST;
+SessCreateTTRequest::SessCreateTTRequest() : AbstractRequest((char*) NULL) {
+  classid = SESS_CREATE_TTREQUEST;
 }
 
-SessCreateDestRequest::SessCreateDestRequest(byte type) : AbstractRequest((char*) NULL) {
-	classid = SESS_CREATE_DEST_REQUEST;
-	this->type = type;
-	this->name = (char*) NULL;
-}
-
-SessCreateDestRequest::SessCreateDestRequest(byte type, char* name) : AbstractRequest((char*) NULL) {
-	classid = SESS_CREATE_DEST_REQUEST;
-	this->type = type;
-	this->name = name;
-}
-
-SessCreateDestRequest::~SessCreateDestRequest() {
-
-}
-
-/* ***** ***** ***** ***** *****
- * Streamable interface
- * ***** ***** ***** ***** ***** */
-
-/**
- *  The object implements the writeTo method to write its contents to
- *  the output stream.
- *
- * @param os the stream to write the object to
- */
-void SessCreateDestRequest::writeTo(OutputStream* os) throw(IOException) {
-  AbstractRequest::writeTo(os);
-  if (os->writeByte(type) == -1) throw IOException();
-  if (os->writeString(name) == -1) throw IOException();
-}
-
-/**
- *  The object implements the readFrom method to restore its contents from
- * the input stream.
- *
- * @param is the stream to read data from in order to restore the object
- */
-void SessCreateDestRequest::readFrom(InputStream* is) throw(IOException) {
-  AbstractRequest::readFrom(is);
-  if (is->readByte(&type) == -1) throw IOException();
-  if (is->readString(&name) == -1) throw IOException();
+SessCreateTTRequest::~SessCreateTTRequest() {
 }

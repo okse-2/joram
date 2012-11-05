@@ -1,0 +1,9 @@
+Bundle-Activator: com.scalagent.joram.osgi.client.Activator
+Bundle-Name: Joram client
+Export-Package: com.scalagent.joram.osgi.client.service,javax.jms
+Bundle-Description: A bundle that allows to connect to a Joram server
+Bundle-Vendor: Scalagent D.T.
+Bundle-Version: 0.0.1
+Manifest-Version: 1.0
+Bundle-ClassPath: .,joram-client.jar,joram-shared.jar,jms.jar,JCup.jar,jakarta-regexp-1.2.jar,ow_monolog.jar
+Import-Package: org.osgi.framework,org.xml.sax,org.xml.sax.helpers,javax.xml.parsers,javax.naming,javax.naming.spi

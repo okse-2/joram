@@ -53,11 +53,11 @@ public class DMQWatcher {
     
     for (int i=0; i<3; i++) {
       TextMessage msg = (TextMessage) consumer.receive();
-      System.out.println("\nreceives: \"" + msg.getText() + "\", " +
-                         "JMS_JORAM_ERRORCOUNT=" + msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
-      System.out.println("JMS_JORAM_ERRORCAUSE_1=" + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1") + ", " +
-                         "JMS_JORAM_ERRORCODE_1=" + msg.getStringProperty("JMS_JORAM_ERRORCODE_1"));
+      System.out.println("\nreceives: " + msg.getText());
+      System.out.println("JMS_JORAM_ERRORCOUNT=" + msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
       System.out.println("JMSXDeliveryCount=" + msg.getIntProperty("JMSXDeliveryCount"));
+      System.out.println("JMS_JORAM_ERRORCAUSE_1=" + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+      System.out.println("JMS_JORAM_ERRORCODE_1=" + msg.getStringProperty("JMS_JORAM_ERRORCODE_1"));
     }
 
     cnx.close();

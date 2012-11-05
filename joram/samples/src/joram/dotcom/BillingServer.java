@@ -65,8 +65,8 @@ public class BillingServer {
       TopicSubscriber ts = tsession.createSubscriber(topicOrders);
       
       // creating a FifoQueue to hold incoming messages
-      fr.dyade.aaa.common.Queue queue ;
-      queue = new fr.dyade.aaa.common.Queue() ;
+      fr.dyade.aaa.util.Queue queue ;
+      queue = new fr.dyade.aaa.util.Queue() ;
 	  		
       // arise the MessageListener 
       TopicListener billingListener = new TopicListener(tsession, queue);
@@ -106,7 +106,7 @@ class BillingTreatment implements Runnable {
   /** TopicSession created by BillingServer, to be closed in thread. */
   TopicSession tsession ;
   /** FifoQueue holding OrderMessages received from topicOrders. */
-  fr.dyade.aaa.common.Queue queue ;
+  fr.dyade.aaa.util.Queue queue ;
   
   /**
    * Creates the thread.
@@ -115,7 +115,7 @@ class BillingTreatment implements Runnable {
    * @param tc			TopicConnection created by BillingServer.
    * @param tsession		TopicSession created by BillingServer.
    */
-  BillingTreatment(fr.dyade.aaa.common.Queue queue, TopicConnection tc, TopicSession tsession) {
+  BillingTreatment(fr.dyade.aaa.util.Queue queue, TopicConnection tc, TopicSession tsession) {
     this.queue = queue ;
     this.tc = tc ;
     this.tsession = tsession ;

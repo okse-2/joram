@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2008 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C)  2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,9 +22,7 @@
  */
 package a3.base;
 
-import fr.dyade.aaa.agent.Agent;
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.*;
 import framework.TestCase;
 
 /**
@@ -51,8 +49,6 @@ public class test21 extends TestCase {
     }
     if (router) startAgentServer((short) nb);
 
-    Thread.sleep(2000L);
-
     int bounce = Integer.getInteger("bounce", 500).intValue();
     timeout = 1000 * bounce;
 
@@ -74,9 +70,9 @@ public class test21 extends TestCase {
 
   protected void tearDown() {
     for (int i=1; i<nb; i++) {
-      killAgentServer((short) i);
+      crashAgentServer((short) i);
     }
-    if (router) killAgentServer((short) nb);
+    if (router) crashAgentServer((short) nb);
   }
 
 
@@ -150,7 +146,7 @@ public class test21 extends TestCase {
                      "a3.base.test21$Ball");
         if (not instanceof Ball) {
           Ball ball = (Ball) not;
-          assertEquals(bounce, ball.bounce);
+          assertEquals(ball.bounce, bounce);
           if (ball.bounce == 0) {
             sendTo(coordinator, new StopNot());
           } else {

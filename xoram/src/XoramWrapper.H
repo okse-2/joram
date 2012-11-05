@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- *
+ * 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -93,32 +93,30 @@ extern "C" {
   char* receive_no_wait_message(char* consumer);
   char* create_message(char* session);
   void delete_message(char* message);
-  void set_body(char* message, int length, byte* body);
-  void get_body(char* message, int* length, byte** body);
   void clear_properties(char* message);
   boolean get_boolean_property(char* message, char* name);
   byte get_byte_property(char* message, char* name);
   double get_double_property(char* message, char* name);
   float get_float_property(char* message, char* name);
-  int get_int_property(char* message, char* name);
+  int get_int_property(char* message, char* name); 
   long get_long_property(char* message, char* name);
   short get_short_property(char* message, char* name);
-  char* get_string_property(char* message, char* name);
-  void set_boolean_property(char* message, char* name, boolean value);
+  char* get_string_property(char* message, char* name); 
+  void set_boolean_property(char* message, char* name, boolean value); 
   void set_byte_property(char* message, char* name, byte value);
-  void set_double_property(char* message, char* name, double value);
-  void set_float_property(char* message, char* name, float value);
-  void set_int_property(char* message, char* name, int value);
-  void set_long_property(char* message, char* name, long value);
-  void set_short_property(char* message, char* name, short value);
-  void set_string_property(char* message, char* name, char* value);
-  char* clone_message(char* message);
-  long long get_timestamp(char* message);
-  char* get_reply_to(char* message);
-  char* get_destination(char* message);
-  void set_destination(char* message, char* destination);
-  char* get_message_id(char* message);
-  boolean get_redelivered(char* message);
+  void set_double_property(char* message, char* name, double value); 
+  void set_float_property(char* message, char* name, float value); 
+  void set_int_property(char* message, char* name, int value); 
+  void set_long_property(char* message, char* name, long value); 
+  void set_short_property(char* message, char* name, short value); 
+  void set_string_property(char* message, char* name, char* value); 
+  char* clone_message(char* message); 
+  long long get_timestamp(char* message); 
+  char* get_reply_to(char* message); 
+  char* get_destination(char* message); 
+  void set_destination(char* message, char* destination); 
+  char* get_message_id(char* message); 
+  boolean get_redelivered(char* message); 
 #ifdef __cplusplus
 }
 #endif

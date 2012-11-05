@@ -1,32 +1,9 @@
 /*
- * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001 - 2009 ScalAgent Distributed Technologies
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or any later version.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA.
- *
- * Initial developer(s): ScalAgent D.T.
- * Contributor(s): 
+ * Copyright (C) 2001 - SCALAGENT
  */
 package a3.recovery;
 
-import fr.dyade.aaa.agent.Agent;
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.DeleteNot;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.agent.UnknownAgent;
+import fr.dyade.aaa.agent.*;
 import framework.TestCase;
 
 public class test3 extends TestCase {
@@ -35,7 +12,7 @@ public class test3 extends TestCase {
   }
 
   protected void setUp() throws Exception {
-    startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false" });
+    startAgentServer((short) 1);
 
     timeout = Long.getLong("timeout", 60000L).longValue();
 
@@ -48,7 +25,7 @@ public class test3 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer((short) 1);
+    crashAgentServer((short) 1);
   }
 
   public static void main(String args[]) {
@@ -100,9 +77,9 @@ public class test3 extends TestCase {
                          slave1,
                          ((UnknownAgent) not).agent);
           }
-          killAgentServer((short) 1);
+          crashAgentServer((short) 1);
 	  Thread.sleep(1000);
-          startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false" });
+          startAgentServer((short) 1);
 
           sendTo(slave1, new Echo());
         } else if (state == 3) {
@@ -128,7 +105,7 @@ public class test3 extends TestCase {
           stopAgentServer((short) 1);
 	  // Wait in order to prevent WAIT status on TCP connection
 	  Thread.currentThread().sleep(2000L);
-          startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false" });
+          startAgentServer((short) 1);
 
           sendTo(slave2, new Echo());
         } else if (state < 100) {

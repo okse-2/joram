@@ -30,47 +30,42 @@ import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import fr.dyade.aaa.agent.AgentServer;
 
 /**
- * Test local connection without sever init and with server init.
+ *
  */
-public class Test2 extends framework.TestCase {
-  public static void main(String args[]) throws Exception {
+public class Test2  extends framework.TestCase{
+  public static void main (String args[]) throws Exception {
     new Test2().run();
   }
-
-  public void run() {
+  
+  public void run(){
     try {
-      Exception expectedExc = null;
       try {
         System.out.println("Should throw an Exception.");
-        ConnectionFactory cf = LocalConnectionFactory.create();
-        cf.createConnection();
+        ConnectionFactory cf =  LocalConnectionFactory.create();
+        Connection cnx = cf.createConnection();
       } catch (Exception exc) {
         exc.printStackTrace();
-        expectedExc = exc;
       }
-      assertNotNull(expectedExc);
 
       AgentServer.init((short) 0, "s0", null);
 
-      expectedExc = null;
       try {
-        System.out.println("Should throw an exception.");
-        ConnectionFactory cf = LocalConnectionFactory.create();
-        Connection cnx = cf.createConnection();
-        cnx.close();
+        System.out.println("Should print a WARN.");
+        ConnectionFactory cf =  LocalConnectionFactory.create();
+        //	Connection cnx = cf.createConnection();
+        //	cnx.close();
       } catch (Exception exc) {
         exc.printStackTrace();
-        expectedExc = exc;
       }
-      assertNotNull(expectedExc);
 
       AgentServer.start();
 
+
       Thread.sleep(1000L);
-    } catch (Throwable exc) {
+    }catch(Throwable exc){
       exc.printStackTrace();
       error(exc);
-    } finally {
+    }finally {
       AgentServer.stop();
       endTest();
     }

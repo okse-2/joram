@@ -3,27 +3,31 @@
   <domain name="D0" network="fr.dyade.aaa.agent.SimpleNetwork"/>
   <server id="0" name="s0" hostname="localhost">
      <network domain="D0" port="27300"/>
+     <service class="fr.dyade.aaa.agent.AgentAdmin" args="0"/>
      <service class="fr.dyade.aaa.agent.AdminProxy" args="7890"/>
      <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
      <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16010"/>
      <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
   </server>
-  <server id="1" name="s1" hostname="localhost">
+<server id="1" name="s1" hostname="localhost">
      <network domain="D0" port="27301"/>
+     <service class="fr.dyade.aaa.agent.AgentAdmin" args="1"/>
      <service class="fr.dyade.aaa.agent.AdminProxy" args="7891"/>
      <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
      <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16011"/>
      <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16401"/>
   </server>
-  <server id="2" name="s2" hostname="localhost">
+<server id="2" name="s2" hostname="localhost">
      <network domain="D0" port="27302"/>
+     <service class="fr.dyade.aaa.agent.AgentAdmin" args="2"/>
      <service class="fr.dyade.aaa.agent.AdminProxy" args="7892"/>
      <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
      <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16012"/>
      <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16402"/>
   </server>
-  <server id="3" name="s3" hostname="localhost">
+<server id="3" name="s3" hostname="localhost">
      <network domain="D0" port="27303"/>
+     <service class="fr.dyade.aaa.agent.AgentAdmin" args="3"/>
      <service class="fr.dyade.aaa.agent.AdminProxy" args="7893"/>
      <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
      <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16013"/>

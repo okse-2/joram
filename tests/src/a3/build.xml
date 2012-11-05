@@ -15,44 +15,18 @@
     </patternset>
   </target>
 
-  <target name="tests"
-          description=" --> launch all tests with default configuration: base, recovery, perf">
-    <ant dir="." antfile="build.xml" target="tests.base"/>
-    <ant dir="." antfile="build.xml" target="tests.recovery"/>
-    <ant dir="." antfile="build.xml" target="tests.perf"/>
-  </target>
-
-  <target name="tests.http"
-          description=" -->  launch all http tests">
-    <ant dir="." antfile="build.xml" target="tests.http.base"/>
-    <ant dir="." antfile="build.xml" target="tests.http.recovery"/>
-  </target>
-
-  <!--
-    - Launch all a3 tests with various network 'standard' configuration.
-    -->
-
   <target name="tests.all"
-          description=" --> launch all a3 tests with various 'standard' configuration">
-    <!-- PoolNetwork + NGTransaction -->
-    <antcall target="tests"/>
-    <!-- HttpNetwork + NGTransaction -->
-    <antcall target="tests.http"/>
-  </target>
-
-  <!--
-    - Launch all a3 tests with various network implementation.
-    - We should exclude centralized tests.
-    -->
-	
-  <target name="tests.network"
-          description=" --> launch all a3 tests with various network implementation">
+          description=" --> launch all a3 tests">
     <ant dir="." antfile="build.xml" target="tests.simple"/>
     <ant dir="." antfile="build.xml" target="tests.pool"/>
     <ant dir="." antfile="build.xml" target="tests.ng"/>
     <ant dir="." antfile="build.xml" target="tests.udp"/>
     <ant dir="." antfile="build.xml" target="tests.http"/>
   </target>
+
+  <!--
+    - We should divide tests: centralized vs distributed.
+    -->
 
   <target name="tests.simple"
           description=" --> launch tests with SimpleNetwork">
@@ -82,59 +56,23 @@
     </antcall>
   </target>
 
-  <!--
-    - Launch all a3 tests with various transaction implementation.
-    - We should exclude tests defined with NullTransaction.
-    -->
+  <target name="tests"
+          description=" --> launch tests: base, recovery, perf">
+    <ant dir="." antfile="build.xml" target="tests.base"/>
+    <ant dir="." antfile="build.xml" target="tests.recovery"/>
+    <ant dir="." antfile="build.xml" target="tests.perf"/>
+  </target>
 
-  <target name="tests.transaction"
-          description=" --> launch all a3 tests with various transaction implementation">
-    <ant dir="." antfile="build.xml" target="tests.atransaction"/>
-    <ant dir="." antfile="build.xml" target="tests.jtransaction"/>
-    <ant dir="." antfile="build.xml" target="tests.ntransaction"/>
-    <ant dir="." antfile="build.xml" target="tests.ngtransaction"/>
-  </target>
-	
-  <target name="tests.jtransaction"
-          description=" --> launch tests with JTransaction">
-    <antcall target="tests">
-      <param name="transaction" value="fr.dyade.aaa.util.JTransaction"/>
-    </antcall>
-  </target>
-	
-  <target name="tests.atransaction"
-          description=" --> launch tests with ATransaction">
-    <antcall target="tests">
-      <param name="transaction" value="fr.dyade.aaa.util.ATransaction"/>
-    </antcall>
-  </target>
-	
-  <target name="tests.ntransaction"
-          description=" --> launch tests with NTransaction">
-    <antcall target="tests">
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-    </antcall>
-  </target>
-	
-  <target name="tests.ngtransaction"
-          description=" --> launch tests with NGTransaction">
-    <antcall target="tests">
-      <param name="transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
-    </antcall>
-  </target>
-  
-  <target name="tests.base.osgi"
-          description=" --> launch all a3 tests">
-    <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
-    <antcall target="tests.base"/>
+  <target name="tests.http"
+          description=" -->  launch all http tests">
+    <ant dir="." antfile="build.xml" target="tests.http.base"/>
+    <ant dir="." antfile="build.xml" target="tests.http.recovery"/>
   </target>
 
   <target name="tests.base">
     <ant dir="." antfile="build.xml" target="test1.base"/>
     <ant dir="." antfile="build.xml" target="test2.base"/>
     <ant dir="." antfile="build.xml" target="test3.base"/>
-  	<!--
-    -->
     <ant dir="." antfile="build.xml" target="test4.base"/>
     <ant dir="." antfile="build.xml" target="test5.base"/>
     <ant dir="." antfile="build.xml" target="test6.base"/>
@@ -173,7 +111,6 @@
     <ant dir="." antfile="build.xml" target="test8.recovery"/>
     <ant dir="." antfile="build.xml" target="test9.recovery"/>
     <ant dir="." antfile="build.xml" target="test10.recovery"/>
-  	<ant dir="." antfile="build.xml" target="test11.recovery"/>
   </target>
 
   <target name="tests.http.recovery">
@@ -203,12 +140,6 @@
     <!-- Initialization of the run directory -->
     <delete dir="${test.dir}"/>
     <mkdir dir="${test.dir}"/>
-    
-    <copy file="config.properties" todir="${test.dir}"/>
-    <property name="bundle.dir" location="${ship.dir}/bundle" />
-    <replace file="${test.dir}/config.properties" token="@BUNDLE_DIR@" value="${bundle.dir}" />
-    <replace file="${test.dir}/config.properties" token="\" value="/" />
-    <replace file="${test.dir}/config.properties" token="@@@" value="\" />
 
     <copy file="${a3conf}" tofile="${test.dir}/a3servers.xml"/>
     <replace file="${test.dir}/a3servers.xml"
@@ -225,13 +156,6 @@
            	 token="@maxMessageInFlow@" value="${maxMessageInFlow}"/>
 
     <copy file="a3debug.cfg" tofile="${test.dir}/a3debug.cfg"/>
-    
-    <jar jarfile="${obj.dir}/test-bundle.jar" manifest="${src.dir}/a3/manifest.mf">
-      <fileset dir="${obj.dir}">
-        <include name="a3/**/*.class"/>
-        <include name="framework/*.class"/>
-      </fileset>
-    </jar>
   </target>
 
   <target name="init.a3props">
@@ -240,7 +164,7 @@
      -->
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
     <property name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
-    <property name="transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
+    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
     <property name="nbMaxCnx" value="5"/>
     <property name="compressedFlows" value="false"/>
     <property name="maxMessageInFlow" value="10"/>
@@ -257,7 +181,7 @@
       <classpath path="${project.class.path}"/>
       <jvmarg value="-Dframework.TestCase.TestId=${testid}"/>
       <jvmarg value="-Dframework.TestCase.OutFile=${report.file}"/>
-      <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote ${jvmargs}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer ${jvmargs}"/>
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y ${jvmargs}" -->
       <arg line="0 ./s0"/>
     </java>
@@ -276,6 +200,7 @@
 
   <!-- A simple Agent test -->
   <target name="test1.base" depends="init.a3props,compile">
+    <!-- NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test1"/>
       <param name="testid" value="1"/>
@@ -286,6 +211,7 @@
 
   <!-- Another simple Agent test [Echo] -->
   <target name="test2.base" depends="init.a3props,compile">
+    <!-- NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test2"/>
       <param name="testid" value="1"/>
@@ -401,7 +327,7 @@
   <target name="test4.base" depends="test4-1.base,test4-2.base"/>
 
   <target name="test4-1.base" depends="init.a3props,compile">
-    <!-- 1 server -->
+    <!-- 1 server, NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test4"/>
       <param name="testid" value="1"/>
@@ -528,17 +454,19 @@
       <java classname="fr.dyade.aaa.agent.AgentServer"
             failonerror="no" fork="yes"
             dir="${test.dir}">
-        <jvmarg value="-DTransaction.UseLockFile=true"/>
         <classpath path="${project.class.path}"/>
         <arg line="0 ./s0"/>
       </java>
+      <!--<antcall target="server.start" inheritAll="true">
+        <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+        <param name="sid" value="0"/>
+      </antcall>-->
       <sequential>
         <sleep seconds="5"/>
         <java classname="a3.base.test6"
               failonerror="no" fork="yes"
               dir="${test.dir}">
           <classpath path="${project.class.path}"/>
-          <jvmarg value="-DTransaction.UseLockFile=true"/>
           <jvmarg value="-Dframework.TestCase.TestId=2"/>
           <jvmarg value="-Dframework.TestCase.OutFile=${report.file}"/>
           <jvmarg value="-DExcType=java.lang.Exception"/>
@@ -557,6 +485,7 @@
 
   <!-- Test a sendTo to an unkonwn server -->
   <target name="test8.base" depends="init.a3props,compile">
+    <!-- NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test8"/>
       <param name="testid" value="1"/>
@@ -567,6 +496,7 @@
 
   <!-- Test the agent deletion, simple -->
   <target name="test9.base" depends="init.a3props,compile">
+    <!-- NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test9"/>
       <param name="testid" value="1"/>
@@ -635,6 +565,7 @@
     - A test to verify that from field is correctly set in agentInitialize
     -->
   <target name="test14.base" depends="init.a3props,compile">
+    <!-- NTransaction -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test14"/>
       <param name="testid" value="1"/>
@@ -716,7 +647,7 @@
   </target>
 
   <target name="test18.http.base" depends="init.a3props,compile">
-    <!-- 2 server, HttpNetwork -->
+    <!-- 2 server, NTransaction, HttpNetwork -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test18"/>
       <param name="testid" value="3"/>
@@ -972,7 +903,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="0 ./s0"/>
     </java>
   </target>
@@ -982,7 +913,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="1 ./s1"/>
     </java>
   </target>
@@ -992,7 +923,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="2 ./s2"/>
     </java>
   </target>
@@ -1002,7 +933,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="1 ./s1"/>
     </java>
   </target>
@@ -1012,7 +943,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="2 ./s2"/>
     </java>
   </target>
@@ -1035,7 +966,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}/server0">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="0 ./s0"/>
     </java>
   </target>
@@ -1046,7 +977,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}/server0">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="0 ./s0"/>
     </java>
   </target>
@@ -1057,7 +988,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}/server1">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="1 ./s1"/>
     </java>
   </target>
@@ -1068,7 +999,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}/server2">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="2 ./s2"/>
     </java>
   </target>
@@ -1356,18 +1287,7 @@
   <target name="test10.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test10"/>
-      <param name="testid" value="10"/>
-      <param name="a3conf" value="recovery/a3servers1.xml"/>
-    </antcall>
-  </target>
-
-  <!--
-    - Test the Transaction behavior during init/start/stop/reset sequence.
-    -->
-  <target name="test11.recovery" depends="init.a3props,compile">
-    <antcall target="test.run" inheritAll="true">
-      <param name="classname" value="a3.recovery.test11"/>
-      <param name="testid" value="11"/>
+      <param name="testid" value="1"/>
       <param name="a3conf" value="recovery/a3servers1.xml"/>
     </antcall>
   </target>
@@ -1462,62 +1382,6 @@
       <param name="jvmargs" value="-DRecv=0 -DSend=0 -Dbounce=99"/>
     </antcall>
   </target>
-	
-  <!--  -->
-  <target name="test4.perf" depends="init.a3props,compile">
-    <antcall target="test.run" inheritAll="true">
-      <param name="classname" value="a3.perf.test4"/>
-      <param name="testid" value="test4.perf"/>
-      <param name="a3conf" value="perf/a3serversX.xml"/>
-    	<param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
-      <param name="jvmargs" value="-DnbRound=50 -DnbMsgPerRound=1000 -Dballast=10000"/>
-    </antcall>
-  <!-- 
-    <antcall target="test.run" inheritAll="true">
-      <param name="classname" value="a3.perf.test4"/>
-      <param name="testid" value="test4.perf"/>
-      <param name="a3conf" value="perf/a3serversX.xml"/>
-    	<param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
-      <param name="jvmargs" value="-DnbRound=20 -DnbMsgPerRound=1000 -Dballast=5000"/>
-    </antcall>
-    <antcall target="test.run" inheritAll="true">
-      <param name="classname" value="a3.perf.test4"/>
-      <param name="testid" value="test4.perf"/>
-      <param name="a3conf" value="perf/a3serversX.xml"/>
-    	<param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
-      <param name="jvmargs" value="-DnbRound=20 -DnbMsgPerRound=1000 -Dballast=10000"/>
-    </antcall>
-    <antcall target="test.run" inheritAll="true">
-      <param name="classname" value="a3.perf.test4"/>
-      <param name="testid" value="test4.perf"/>
-      <param name="a3conf" value="perf/a3serversX.xml"/>
-    	<param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
-      <param name="jvmargs" value="-DnbRound=15 -DnbMsgPerRound=1000 -Dballast=50000"/>
-    </antcall>
-    <antcall target="test.run" inheritAll="true">
-      <param name="classname" value="a3.perf.test4"/>
-      <param name="testid" value="test4.perf"/>
-      <param name="a3conf" value="perf/a3serversX.xml"/>
-    	<param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
-      <param name="jvmargs" value="-DnbRound=10 -DnbMsgPerRound=1000 -Dballast=100000"/>
-    </antcall>
-    
-    <antcall target="test.run" inheritAll="true">
-      <param name="classname" value="a3.perf.test4"/>
-      <param name="testid" value="test4.perf"/>
-      <param name="a3conf" value="perf/a3serversX.xml"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jvmargs" value="-DnbRound=10 -DnbMsgPerRound=20000 -Dballast=100000"/>
-    </antcall>
-    <antcall target="test.run" inheritAll="true">
-      <param name="classname" value="a3.perf.test4"/>
-      <param name="testid" value="test4.perf"/>
-      <param name="a3conf" value="perf/a3serversX.xml"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
-      <param name="jvmargs" value="-DnbRound=10 -DnbMsgPerRound=20000 -Dballast=100000"/>
-    </antcall>
- -->
-  </target>
 
   <!-- Another Agent test [Tree] -->
   <target name="test5.perf" depends="test5-1.perf,test5-2.perf"/>
@@ -1559,7 +1423,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="0 ./s0"/>
     </java>
   </target>
@@ -1569,7 +1433,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="0 ./s0"/>
     </java>
   </target>

@@ -60,7 +60,7 @@ public class MessageHeaderTest extends PTPTestCase {
       sender.setPriority(9);
       sender.send(message);
       assertEquals(
-          "3.4.9 After completion of the send it holds the value specified by the "
+          "§3.4.9 After completion of the send it holds the value specified by the "
               + "method sending the message.\n", 9, message.getJMSPriority());
 
       Message msg = receiver.receive(TestConfig.TIMEOUT);
@@ -80,10 +80,10 @@ public class MessageHeaderTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setJMSPriority(0);
       sender.send(message);
-      assertTrue("3.4.9 When a message is sent this value is ignored.\n",
+      assertTrue("§3.4.9 When a message is sent this value is ignored.\n",
           message.getJMSPriority() != 0);
       assertEquals(
-          "3.4.9 After completion of the send it holds the value specified by the "
+          "§3.4.9 After completion of the send it holds the value specified by the "
               + "method sending the message.\n", Message.DEFAULT_PRIORITY,
           message.getJMSPriority());
 
@@ -105,7 +105,7 @@ public class MessageHeaderTest extends PTPTestCase {
 
       Message msg = receiver.receive(TestConfig.TIMEOUT);
       assertEquals(
-          "3.4.9 When a message is received its JMSExpiration header field contains this same "
+          "§3.4.9 When a message is received its JMSExpiration header field contains this same "
               + "value [i.e. set on return of the send method].\n", message
               .getJMSExpiration(), msg.getJMSExpiration());
     } catch (JMSException e) {
@@ -123,15 +123,15 @@ public class MessageHeaderTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       sender.send(message);
       assertTrue(
-          "3.4.3 When the send method returns it contains a provider-assigned value.\n",
+          "§3.4.3 When the send method returns it contains a provider-assigned value.\n",
           message.getJMSMessageID() != null);
       assertTrue(
-          "3.4.3 All JMSMessageID values must start with the prefix 'ID:'.\n",
+          "§3.4.3 All JMSMessageID values must start with the prefix 'ID:'.\n",
           message.getJMSMessageID().startsWith("ID:"));
 
       Message msg = receiver.receive(TestConfig.TIMEOUT);
       assertTrue(
-          "3.4.3 All JMSMessageID values must start with the prefix 'ID:'.\n",
+          "§3.4.3 All JMSMessageID values must start with the prefix 'ID:'.\n",
           msg.getJMSMessageID().startsWith("ID:"));
     } catch (JMSException e) {
       fail(e);
@@ -147,7 +147,7 @@ public class MessageHeaderTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setJMSMessageID("ID:foo");
       sender.send(message);
-      assertTrue("3.4.3 When a message is sent this value is ignored.\n",
+      assertTrue("§3.4.3 When a message is sent this value is ignored.\n",
           message.getJMSMessageID() != "ID:foo");
       Message msg = receiver.receive(TestConfig.TIMEOUT);
     } catch (JMSException e) {
@@ -171,10 +171,10 @@ public class MessageHeaderTest extends PTPTestCase {
       // field
       message.setJMSDeliveryMode(DeliveryMode.NON_PERSISTENT);
       sender.send(message);
-      assertTrue("3.4.2 When a message is sent this value is ignored", message
+      assertTrue("§3.4.2 When a message is sent this value is ignored", message
           .getJMSDeliveryMode() != DeliveryMode.NON_PERSISTENT);
       assertEquals(
-          "3.4.2 After completion of the send it holds the delivery mode specified "
+          "§3.4.2 After completion of the send it holds the delivery mode specified "
               + "by the sending method (persistent by default).\n",
           Message.DEFAULT_DELIVERY_MODE, message.getJMSDeliveryMode());
 
@@ -202,16 +202,16 @@ public class MessageHeaderTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setJMSDestination(anotherQueue);
       sender.send(message);
-      assertTrue("3.4.1 When a message is sent this value is ignored.\n",
+      assertTrue("§3.4.1 When a message is sent this value is ignored.\n",
           message.getJMSDestination() != anotherQueue);
       assertEquals(
-          "3.4.1 After completion of the send it holds the destination object specified "
+          "§3.4.1 After completion of the send it holds the destination object specified "
               + "by the sending method.\n", senderQueue, message
               .getJMSDestination());
 
       Message msg = receiver.receive(TestConfig.TIMEOUT);
       assertEquals(
-          "3.4.1 When a message is received, its destination value must be equivalent  "
+          "§3.4.1 When a message is received, its destination value must be equivalent  "
               + " to the value assigned when it was sent.\n", ((Queue) message
               .getJMSDestination()).getQueueName(), ((Queue) msg
               .getJMSDestination()).getQueueName());

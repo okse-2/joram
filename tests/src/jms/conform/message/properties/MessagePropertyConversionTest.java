@@ -36,7 +36,7 @@ import jms.framework.PTPTestCase;
 /**
  * Test the conversion of primitive types for the <code>javax.jms.Message</code>
  * properties. <br />
- * See JMS Specification, 3.5.4 Property Value Conversion and the corresponding
+ * See JMS Specification, §3.5.4 Property Value Conversion and the corresponding
  * table (p.33-34). <br />
  * The method name <code>testXXX2YYY</code> means that we test if a property
  * which has been set as a <code>XXX</code> type can be read as a
@@ -95,7 +95,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setStringProperty("pi", "not_a_number");
       message.getDoubleProperty("pi");
-      fail("3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
+      fail("§3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
           + " if the numeric's valueOf() method does not accept the String value as a valid representation.\n");
     } catch (java.lang.NumberFormatException e) {
     } catch (JMSException e) {
@@ -130,7 +130,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setStringProperty("pi", "not_a_number");
       message.getFloatProperty("pi");
-      fail("3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
+      fail("§3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
           + " if the numeric's valueOf() method does not accept the String value as a valid representation.\n");
     } catch (java.lang.NumberFormatException e) {
     } catch (JMSException e) {
@@ -165,7 +165,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setStringProperty("pi", "3.14159");
       message.getLongProperty("pi");
-      fail("3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
+      fail("§3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
           + " if the numeric's valueOf() method does not accept the String value as a valid representation.\n");
     } catch (java.lang.NumberFormatException e) {
     } catch (JMSException e) {
@@ -199,7 +199,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setStringProperty("pi", "3.14159");
       message.getIntProperty("pi");
-      fail("3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
+      fail("§3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
           + " if the numeric's valueOf() method does not accept the String value as a valid representation.\n");
     } catch (java.lang.NumberFormatException e) {
     } catch (JMSException e) {
@@ -233,7 +233,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setStringProperty("pi", "3.14159");
       message.getShortProperty("pi");
-      fail("3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
+      fail("§3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
           + " if the numeric's valueOf() method does not accept the String value as a valid representation.\n");
     } catch (java.lang.NumberFormatException e) {
     } catch (JMSException e) {
@@ -267,7 +267,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setStringProperty("pi", "3.14159");
       message.getByteProperty("pi");
-      fail("3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
+      fail("§3.5.4 The String to numeric conversions must throw the java.lang.NumberFormatException "
           + " if the numeric's valueOf() method does not accept the String value as a valid representation.\n");
     } catch (java.lang.NumberFormatException e) {
     } catch (JMSException e) {
@@ -359,7 +359,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setDoubleProperty("prop", 127.0);
       message.getFloatProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -375,7 +375,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setDoubleProperty("prop", 127.0);
       message.getLongProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -391,7 +391,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setDoubleProperty("prop", 127.0);
       message.getIntProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -408,7 +408,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to short
       message.setDoubleProperty("prop", 127.0);
       message.getShortProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -425,7 +425,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to byte
       message.setDoubleProperty("prop", 127.0);
       message.getByteProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -443,7 +443,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can be converted to boolean
       message.setDoubleProperty("prop", 127.0);
       message.getBooleanProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -501,7 +501,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setFloatProperty("prop", 127.0F);
       message.getLongProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -517,7 +517,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setFloatProperty("prop", 127.0F);
       message.getIntProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -534,7 +534,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to short
       message.setFloatProperty("prop", 127.0F);
       message.getShortProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -551,7 +551,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to byte
       message.setFloatProperty("prop", 127.0F);
       message.getByteProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -569,7 +569,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can be converted to boolean
       message.setFloatProperty("prop", 127.0F);
       message.getBooleanProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -600,7 +600,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setLongProperty("prop", 127L);
       message.getDoubleProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -616,7 +616,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setLongProperty("prop", 127L);
       message.getFloatProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -646,7 +646,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setLongProperty("prop", 127L);
       message.getIntProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -663,7 +663,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to short
       message.setLongProperty("prop", 127L);
       message.getShortProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -680,7 +680,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to byte
       message.setLongProperty("prop", 127L);
       message.getByteProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -698,7 +698,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can be converted to boolean
       message.setLongProperty("prop", 127L);
       message.getBooleanProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -729,7 +729,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setIntProperty("prop", (int) 127);
       message.getDoubleProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -745,7 +745,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setIntProperty("prop", (int) 127);
       message.getFloatProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -790,7 +790,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to short
       message.setIntProperty("prop", Integer.MAX_VALUE);
       message.getShortProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -807,7 +807,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to byte
       message.setIntProperty("prop", Integer.MAX_VALUE);
       message.getByteProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -825,7 +825,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can be converted to boolean
       message.setIntProperty("prop", Integer.MAX_VALUE);
       message.getBooleanProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -856,7 +856,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setShortProperty("prop", (short) 127);
       message.getDoubleProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -872,7 +872,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setShortProperty("prop", (short) 127);
       message.getFloatProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -930,7 +930,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setShortProperty("prop", (short) 127);
       message.getByteProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -948,7 +948,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to boolean
       message.setShortProperty("prop", (short) 127);
       message.getBooleanProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -979,7 +979,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setByteProperty("prop", (byte) 127);
       message.getDoubleProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -995,7 +995,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       message.setByteProperty("prop", (byte) 127);
       message.getFloatProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -1069,7 +1069,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to boolean
       message.setByteProperty("prop", (byte) 127);
       message.getBooleanProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -1101,7 +1101,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to double
       message.setBooleanProperty("prop", true);
       message.getDoubleProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -1118,7 +1118,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to float
       message.setBooleanProperty("prop", true);
       message.getFloatProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -1135,7 +1135,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to long
       message.setBooleanProperty("prop", true);
       message.getLongProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -1152,7 +1152,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to int
       message.setBooleanProperty("prop", true);
       message.getIntProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -1169,7 +1169,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to short
       message.setBooleanProperty("prop", true);
       message.getShortProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);
@@ -1186,7 +1186,7 @@ public class MessagePropertyConversionTest extends PTPTestCase {
       // store a value that can't be converted to byte
       message.setBooleanProperty("prop", true);
       message.getByteProperty("prop");
-      fail("3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
+      fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
       fail(e);

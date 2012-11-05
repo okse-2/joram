@@ -19,26 +19,26 @@
  
   <User name="dmq" password="dmq" serverId="0"/>
   
-  <Queue name="defaultdmq" serverId="0">
+  <DMQueue name="defaultdmq" serverId="0">
     <reader user="dmq"/>
     <writer user="dmq"/>
     <jndi name="defaultdmq"/>
-  </Queue>
+  </DMQueue>
 
-  <Queue name="dmq" serverId="0">
+  <DMQueue name="dmq" serverId="0">
     <reader user="dmq"/>
     <writer user="dmq"/>
     <jndi name="dmq"/>
-  </Queue>
+  </DMQueue>
 
   
-  <Queue name="dmq1" serverId="0">
+  <DMQueue name="dmq1" serverId="0">
     <reader user="dmq"/>
     <writer user="dmq"/>
     <jndi name="dmq1"/>
-  </Queue>
+  </DMQueue>
 
-  <Server serverId="0" dmq="defaultdmq" threshold="10"/>
+ <Server serverId="0" dmq="defaultdmq" threshold="10"/>
   
   <User name="anonymous" password="anonymous" serverId="0" dmq="dmq1" threshold="2"/>
   

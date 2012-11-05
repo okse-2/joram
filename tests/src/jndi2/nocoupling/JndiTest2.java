@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,21 +20,24 @@
  * Initial developer(s): (ScalAgent D.T.)
  * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
+ 
 package jndi2.nocoupling;
 
+
+import java.io.File;
 import java.util.Hashtable;
 
 import javax.naming.InitialContext;
 
 import framework.TestCase;
 
+
 /**
  * Tests: test with 2 servers
- * <ul>
- * <li>start server 0. bind and create subcontext</li>
- * <li>start server 1 and kill server 0</li>
- * <li>lookup with server 1</li>
- * </ul>
+ *    - start server 0. bind and create subcontext
+ *    - start server 1 and kill server 0
+ *    - lookup with server 1
+ *
  */
 public class JndiTest2 extends TestCase {
   public static String NAMING_FACTORY_PROP = "java.naming.factory.initial";
@@ -49,61 +52,66 @@ public class JndiTest2 extends TestCase {
 
   public void run() {
     try {
-      startAgentServer((short) 0, new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
+	startAgentServer(
+			 (short)0, (File)null, 
+			 new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+     
+		
+	
 
-      Thread.sleep(2000);
+	Hashtable env0 = new Hashtable();
+	env0.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
+	env0.put(NAMING_HOST_PROP, LOCALHOST);
+	env0.put(NAMING_PORT_PROP, "16400");
+	
 
-      Hashtable env0 = new Hashtable();
-      env0.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
-      env0.put(NAMING_HOST_PROP, LOCALHOST);
-      env0.put(NAMING_PORT_PROP, "16600");
+	InitialContext ctx0 = new InitialContext(env0);
+	Exception excp=null;
+	try{
+	    ctx0.bind("/B","B");
+	    ctx0.createSubcontext("/A");
+	    ctx0.bind("/A/D","D");
+	    Thread.sleep(3000);
+	}catch(Exception exc){
+	    excp=exc;
+	}
+	assertEquals(null,excp);
 
-      InitialContext ctx0 = new InitialContext(env0);
-      Exception excp = null;
-      try {
-        ctx0.bind("/B", "B");
-        ctx0.createSubcontext("/A");
-        ctx0.bind("/A/D", "D");
-        Thread.sleep(3000);
-      } catch (Exception exc) {
-        excp = exc;
-      }
-      assertEquals(null, excp);
+	startAgentServer(
+			 (short)1, (File)null, 
+			 new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+     
+	
+	Hashtable env1 = new Hashtable();
+	env1.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
+	env1.put(NAMING_HOST_PROP, LOCALHOST);
+	env1.put(NAMING_PORT_PROP, "16401");
+	
+	InitialContext ctx1 = new InitialContext(env1);
 
-      startAgentServer((short) 1, new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
+	Thread.sleep(5000);
+	stopAgentServer((short)0);
+	 
+	String look = (String) ctx1.lookup("/B");
+	assertEquals("B",look);
+	
+	look = (String) ctx1.lookup("/A/D");
+	assertEquals("D",look);
+	
 
-      Thread.sleep(2000);
-
-      Hashtable env1 = new Hashtable();
-      env1.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
-      env1.put(NAMING_HOST_PROP, LOCALHOST);
-      env1.put(NAMING_PORT_PROP, "16681");
-
-      InitialContext ctx1 = new InitialContext(env1);
-
-      Thread.sleep(30000);
-      stopAgentServer((short) 0);
-
-      String look = (String) ctx1.lookup("/B");
-      assertEquals("B", look);
-
-      look = (String) ctx1.lookup("/A/D");
-      assertEquals("D", look);
-
-      System.out.println("End test2");
-
-    } catch (Exception exc) {
-      exc.printStackTrace();
-      error(exc);
-      // In case the exception occurred before stopping the server 0
-      stopAgentServer((short) 0);
+	System.out.println("End test2");
+	
+    } catch (Exception exc) {   
+	exc.printStackTrace();
+	error(exc);      
     } finally {
-      stopAgentServer((short) 1);
-      endTest();
+	//stopAgentServer((short)0);
+	stopAgentServer((short)1);
+	endTest();
     }
   }
-
-  public static void main(String args[]) {
-    new JndiTest2().run();
-  }
+    
+    public static void main(String args[]) {
+	new JndiTest2().run();
+    }
 }

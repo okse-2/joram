@@ -65,7 +65,7 @@ public class Test13 extends BaseTest{
 	    cnx1.start();
 
 	    for (int i=0; i<10000; i++) {
-        Message m = cons.receive(1L);
+		Message m = cons.receive(10L);
 		assertEquals(null,m);
 		//	if ((i % 1000) == 0L)
 		// System.out.println("i=" + i);

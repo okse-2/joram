@@ -41,22 +41,6 @@
 #define DEBUG    (FALSE)
 #endif /* DEBUG */
 
-#ifndef NO_TYPE
-#define NO_TYPE 0x00
-#endif
-#ifndef QUEUE_TYPE
-#define QUEUE_TYPE 0x02
-#endif
-#ifndef QUEUE_TEMP_TYPE
-#define QUEUE_TEMP_TYPE 0x12
-#endif
-#ifndef TOPIC_TYPE
-#define TOPIC_TYPE 0x01
-#endif
-#ifndef TOPIC_TEMP_TYPE
-#define TOPIC_TEMP_TYPE 0x11
-#endif
-
 typedef char byte;
 typedef byte boolean;
 

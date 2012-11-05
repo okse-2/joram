@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,49 +24,45 @@ package monitoring;
 
 import java.util.Properties;
 
-import javax.jms.ConnectionFactory;
-
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.MonitoringQueue;
-import org.objectweb.joram.client.jms.admin.MonitoringTopic;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
-/**
- * Creates 2 monitoring destinations: a queue and topic.
- * This code needs a previous administration phase creating at least
- * a connection factory.
- */
 public class MonitoringAdmin {
   
   public static void main(String[] args) throws Exception {
+    
     System.out.println("Monitoring administration...");
 
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    ConnectionFactory cf = (ConnectionFactory) jndiCtx.lookup("cf");
+    AdminModule.connect("root", "root", 60);
     
-    AdminModule.connect(cf, "root", "root");
+    Queue queue = Queue.create("MonitoredQueue");
+    queue.setFreeReading();
+    queue.setFreeWriting();
     
     Properties topicProps = new Properties();
-    topicProps.put("acquisition.period", "5000");
-    topicProps.put("Joram#0:type=Destination,name=queue",
-                   "NbMsgsDeliverSinceCreation,NbMsgsReceiveSinceCreation,PendingMessageCount,NbMsgsSentToDMQSinceCreation");
-    topicProps.put("Joram#0:type=Destination,name=topic",
-                   "NbMsgsDeliverSinceCreation,NbMsgsReceiveSinceCreation,NbMsgsSentToDMQSinceCreation");
+    topicProps.put("period", "2000");
+    topicProps.put("MBeanMonitoring:Joram#0:type=Destination,name=MonitoredQueue",
+        "NbMsgsDeliverSinceCreation, NbMsgsReceiveSinceCreation, PendingMessageCount");
     
-    Topic mTopic = MonitoringTopic.create(0, "MonitoringTopic", topicProps);
-    mTopic.setFreeReading();
-    mTopic.setFreeWriting();
-    jndiCtx.bind("MonitoringTopic", mTopic);
+    Topic topic = Topic.create(0, "MonitoringTopic", "org.objectweb.joram.mom.dest.MonitoringTopic",
+        topicProps);
+    topic.setFreeReading();
+    topic.setFreeWriting();
     
-    Queue mQueue = MonitoringQueue.create(0, "MonitoringQueue");
-    mQueue.setFreeReading();
-    mQueue.setFreeWriting();
-    jndiCtx.bind("MonitoringQueue", mQueue);
+    User.create("anonymous", "anonymous");
 
+    javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
+
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    jndiCtx.bind("cf", cf);
+    jndiCtx.bind("queue", queue);
+    jndiCtx.bind("MonitoringTopic", topic);
     jndiCtx.close();
+
     AdminModule.disconnect();
-    
     System.out.println("Admin closed.");
   }
 }

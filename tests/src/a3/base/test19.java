@@ -63,7 +63,7 @@ public class test19 extends TestCase {
   }
   
   protected void tearDown() {
-    killAgentServer((short) 1);
+    crashAgentServer((short) 1);
   }
 
   static class DMQAgent extends Agent {

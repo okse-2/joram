@@ -36,7 +36,7 @@ import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.util.Configuration;
 
 /**
  * Simple test for measure travel time. Several different parameter

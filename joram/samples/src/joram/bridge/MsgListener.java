@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - ScalAgent DT
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,7 +40,7 @@ public class MsgListener implements MessageListener {
   public void onMessage(Message msg) {
     try {
       if (msg instanceof TextMessage)
-        System.out.println(who + " receive on acquisition topic: " + ((TextMessage) msg).getText());
+        System.out.println(who + " receive : " + ((TextMessage) msg).getText());
     }
     catch (JMSException exc) {
       System.err.println("Exception in listener: " + exc);

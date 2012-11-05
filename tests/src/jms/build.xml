@@ -26,11 +26,6 @@
           tofile="${test.dir}/test.properties" />
     <copy file="providers/admin/provider.properties"
           tofile="${test.dir}/provider.properties" />
-
-    <copy file="config.properties" todir="${test.dir}"/>
-    <property name="bundle.dir" location="${ship.dir}/bundle" />
-    <replace file="${test.dir}/config.properties" token="@BUNDLE_DIR@" value="${bundle.dir}" />
-    <replace file="${test.dir}/config.properties" token="\" value="/" />
   </target>
 
   <!-- jms test -->
@@ -40,12 +35,6 @@
       <param name="className" value="jms.main.Tests" />
     </antcall>
   </target>
-  
-  <target name="jms.test.osgi"
-          description=" --> launch all jms tests">
-    <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
-    <antcall target="jms.test"/>
-  </target>
   <!-- end jms test -->
 
   <target name="test.run">
@@ -54,7 +43,7 @@
     <java classname="${className}" failonerror="no" fork="yes"
           maxmemory="256m" dir="${test.dir}">
       <classpath path="${project.class.path}" />
-      <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -Dframework.TestCase.TestId=0 -Dframework.TestCase.OutFile=${report.file} ${jvmargs}" />
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dframework.TestCase.TestId=0 -Dframework.TestCase.OutFile=${report.file} ${jvmargs}" />
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
       <arg line="${arg}" />
     </java>

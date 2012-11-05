@@ -45,9 +45,17 @@ import framework.TestCase;
  * Stop the server during the producer's loop.
  * 
  * The producer must be interrupted.
- * The connection is closed by the demultiplexer daemon.
- * A second close is explicitely done to check that the test doesn't hang (a hanging producer
+ * The connection is closed by the demultiplexer
+ * daemon.
+ * A second close is explicitely done to check
+ * that the test doesn't hang (a hanging producer
  * is not detected by the test).
+ * 
+ * 
+ * @author feliot
+ *
+ * TODO To change the template for this generated type comment go to
+ * Window - Preferences - Java - Code Style - Code Templates
  */
 public class ConnectionClose3 extends TestCase {
   
@@ -113,7 +121,8 @@ public class ConnectionClose3 extends TestCase {
   private void startAgentServer() throws Exception {
       //System.out.println("Start agent server");
     startAgentServer(
-        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+        (short)0, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
   }
   
   private void connect(boolean heartBeat) throws Exception {

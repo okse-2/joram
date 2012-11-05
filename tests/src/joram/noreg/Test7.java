@@ -32,7 +32,7 @@ import javax.jms.Session;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
-import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.util.Configuration;
 
 /**
  * check system property and create multiple queue
@@ -107,11 +107,8 @@ public class Test7 extends BaseTest {
 
       for (int i=0; i<NbMsg; i++) {
         for (int j=0; j<NbDest; j++) {
-          msg = (BytesMessage) cons[j].receive(120000);
-          if (msg == null) {
-            assertTrue("NbMsg: " + i + ", NbDest: " + j + " should not be null", false);
-            break;
-          }
+          msg = (BytesMessage) cons[j].receive(3000);
+          assertNotNull(msg);
         }
 
         //	System.out.println("message received: " + i);

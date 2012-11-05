@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,11 +17,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):  ScalAgent Distributed Technologies
+ * Initial developer(s):  ScalAgent D.T.
  * Contributor(s): 
  */
 package joram.reconf;
 
+import java.io.File;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
@@ -29,13 +30,10 @@ import org.objectweb.joram.client.jms.admin.User;
 import fr.dyade.aaa.agent.SimpleNetwork;
 
 /**
- * Tests basic server reconfiguration: a unique server in the initial configuration
- *  - Adds a domain D0.
- *  - Adds 5 servers (S1, S2, S3, S4 and S5) in the domain D0, then starts them.
- *  - Crashes S1 then removes it.
- *  - Adds S6 in the domain D0.
- *  - Crashes S3, restarts it, then removes it.
- *  - Iteratively removes the servers S2, S3, S4, S5 and S6, then the unused domain (D0).
+ * Tests basic server reconfiguration: 2 initial servers in a SimpleNetwork domain
+ *  - Adds a third server (S2) in the domain D0, then removes it.
+ *  - Adds a third server (S3) in the domain D0, then removes it.
+ *  - Removes S2 and the useless dommain (D0).
  *  
  * This test works with classic networks: SimpleNetwork, PoolNetwork, etc.
  */
@@ -48,7 +46,7 @@ public class ReconfTest4 extends ReconfTestBase {
   public void run() {
     try {
       String network = System.getProperty("Network", SimpleNetwork.class.getName());
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false" });
+      startAgentServer((short)0, (File)null, new String[] {"-DNTNoLockFile=true"});
 
       Thread.sleep(1000L);
 
@@ -61,36 +59,31 @@ public class ReconfTest4 extends ReconfTestBase {
 
       AdminModule.addServer(1, "localhost", "D0", 17771, "s1");
       deployAgentServer((short) 1, "./s1");
-      startAgentServer((short) 1, new String[] { "-DTransaction.UseLockFile=false",
-          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
+      startAgentServer((short) 1, new File("./s1"), new String[] {"-DNTNoLockFile=true"});
       
       checkQueue((short) 1);
 
       AdminModule.addServer(2, "localhost", "D0", 17772, "s2");
       deployAgentServer((short) 2, "./s2");
-      startAgentServer((short) 2, new String[] { "-DTransaction.UseLockFile=false",
-          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });
+      startAgentServer((short) 2, new File("./s2"), new String[] {"-DNTNoLockFile=true"});
       
       checkQueue((short) 2);
 
       AdminModule.addServer(3, "localhost", "D0", 17773, "s3");
       deployAgentServer((short) 3, "./s3");
-      startAgentServer((short) 3, new String[] { "-DTransaction.UseLockFile=false",
-          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s3/a3servers.xml" });
+      startAgentServer((short) 3, new File("./s3"), new String[] {"-DNTNoLockFile=true"});
       
       checkQueue((short) 3);
 
       AdminModule.addServer(4, "localhost", "D0", 17774, "s4");
       deployAgentServer((short) 4, "./s4");
-      startAgentServer((short) 4, new String[] { "-DTransaction.UseLockFile=false",
-          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s4/a3servers.xml" });
+      startAgentServer((short) 4, new File("./s4"), new String[] {"-DNTNoLockFile=true"});
       
       checkQueue((short) 4);
 
       AdminModule.addServer(5, "localhost", "D0", 17775, "s5");
       deployAgentServer((short) 5, "./s5");
-      startAgentServer((short) 5, new String[] { "-DTransaction.UseLockFile=false",
-          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s5/a3servers.xml" });
+      startAgentServer((short) 5, new File("./s5"), new String[] {"-DNTNoLockFile=true"});
       
       checkQueue((short) 0);
       checkQueue((short) 1);
@@ -101,7 +94,7 @@ public class ReconfTest4 extends ReconfTestBase {
       
       // Stops the server S1
 
-      killAgentServer((short) 1);
+      crashAgentServer((short) 1);
       Thread.sleep(1000L);
       
       checkQueue((short) 0);
@@ -123,8 +116,7 @@ public class ReconfTest4 extends ReconfTestBase {
       
       AdminModule.addServer(6, "localhost", "D0", 17776, "s6");
       deployAgentServer((short) 6, "./s6");
-      startAgentServer((short) 6, new String[] { "-DTransaction.UseLockFile=false",
-          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s6/a3servers.xml" });
+      startAgentServer((short) 6, new File("./s6"), new String[] {"-DNTNoLockFile=true"});
       
       checkQueue((short) 0);
       checkQueue((short) 2);
@@ -135,10 +127,9 @@ public class ReconfTest4 extends ReconfTestBase {
 
       // Stops the server S1 then restart it
 
-      killAgentServer((short) 3);
+      crashAgentServer((short) 3);
       Thread.sleep(1000L);
-      startAgentServer((short) 3, new String[] { "-DTransaction.UseLockFile=false",
-          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s3/a3servers.xml" });
+      startAgentServer((short) 3, new File("./s3"), new String[] {"-DNTNoLockFile=true"});
       Thread.sleep(1000L);
       
       checkQueue((short) 0);
@@ -153,28 +144,20 @@ public class ReconfTest4 extends ReconfTestBase {
       // Then clean the configuration: the server is not reachable anymore.
       AdminModule.removeServer(2);
 
-      checkQueue((short) 3);
-
       // First stop the server because it must be reachable in order to be stopped.
       AdminModule.stopServer(3);
       // Then clean the configuration: the server is not reachable anymore.
       AdminModule.removeServer(3);
-      
-      checkQueue((short) 4);
 
       // First stop the server because it must be reachable in order to be stopped.
       AdminModule.stopServer(4);
       // Then clean the configuration: the server is not reachable anymore.
       AdminModule.removeServer(4);
-      
-      checkQueue((short) 5);
 
       // First stop the server because it must be reachable in order to be stopped.
       AdminModule.stopServer(5);
       // Then clean the configuration: the server is not reachable anymore.
       AdminModule.removeServer(5);
-      
-      checkQueue((short) 6);
 
       // First stop the server because it must be reachable in order to be stopped.
       AdminModule.stopServer(6);
@@ -191,12 +174,6 @@ public class ReconfTest4 extends ReconfTestBase {
       error(exc);
     } finally {
       stopAgentServer((short) 0);
-      killAgentServer((short) 1);
-      killAgentServer((short) 2);
-      killAgentServer((short) 3);
-      killAgentServer((short) 4);
-      killAgentServer((short) 5);
-      killAgentServer((short) 6);
       endTest();
     }
   }

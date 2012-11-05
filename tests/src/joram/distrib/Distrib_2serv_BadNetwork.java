@@ -167,7 +167,10 @@ public class Distrib_2serv_BadNetwork extends TestCase {
 
         int index = msg.getIntProperty("index");
 
-        assertEquals(index, next);
+        if (index != next) {
+          errors++;
+          next = index;
+        }
         next--;
 
         if (index == 0) {

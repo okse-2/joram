@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+<config>
+
+  <property name="a.intranetConnector.ActivationPeriod" value="10000"/>
+  <property name="a.scalagentConnector.ActivationPeriod" value="10000"/>
+
+  <domain name="a.intranetConnector" network="fr.dyade.aaa.agent.HttpNetwork"/>
+  <domain name="a.scalagentConnector" network="fr.dyade.aaa.agent.HttpNetwork"/>
+  <domain name="a.applicationDomain" network="fr.dyade.aaa.agent.SimpleNetwork"/>
+  <domain name="D0" network="fr.dyade.aaa.agent.SimpleNetwork"/>
+
+  <server hostname="SYLFELINE" id="3" name="a.scalagent">
+    <network domain="a.scalagentConnector" port="0"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8010"/>
+    <service class="fr.dyade.aaa.agent.HttpDebug" args="8020"/>
+    <service class="fr.dyade.aaa.task.Scheduler" args=""/>
+  </server>
+
+  <server hostname="SYLFELINE" id="2" name="a.moonbooster">
+    <nat sid="3" hostname="193.170.2.127" port="2222"/>
+    <nat sid="1" hostname="193.170.1.127" port="1111"/>
+    <network domain="a.intranetConnector" port="6100"/>
+    <network domain="a.applicationDomain" port="6030"/>
+    <network domain="a.scalagentConnector" port="6200"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="6010"/>
+    <service class="fr.dyade.aaa.agent.HttpDebug" args="6020"/>
+    <service class="fr.dyade.aaa.task.Scheduler" args=""/>
+  </server>
+
+  <server hostname="moorea.scalagent.fr" id="1" name="a.intranet">
+    <network domain="a.intranetConnector" port="0"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="7010"/>
+    <service class="fr.dyade.aaa.agent.HttpDebug" args="7020"/>
+    <service class="fr.dyade.aaa.task.Scheduler" args=""/>
+  </server>
+
+  <server hostname="localhost" id="0" name="s0">
+    <network domain="D0" port="16000"/>
+    <network domain="a.applicationDomain" port="26000"/>
+    <service class="fr.dyade.aaa.agent.AgentAdmin" args=""/>
+  </server>
+
+</config>

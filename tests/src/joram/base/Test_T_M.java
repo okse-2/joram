@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,110 +32,111 @@ import javax.jms.Topic;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-
 import framework.TestCase;
 
+
+
 /**
- * Test : The message received by the consumer is the same that the message sent
- * by the producer Use a Topic
+ * Test :
+ *     The message received by the consumer is the same that the message sent by the producer 
+ *     Use a Topic
  */
-public class Test_T_M extends TestCase implements javax.jms.MessageListener {
+public class Test_T_M extends TestCase implements javax.jms.MessageListener  {
 
-  private Message pMsg; // store message send by producer
-
-  public static void main(String[] args) {
-    new Test_T_M().run();
-  }
-
-  public void run() {
-    try {
-      System.out.println("server start");
-      startAgentServer((short) 0);
-
-      admin();
-      System.out.println("admin config ok");
-
-      Context ictx = new InitialContext();
-      Topic topic = (Topic) ictx.lookup("topic");
-      ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
-      ictx.close();
-
-      Connection cnx = cf.createConnection();
-      Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      cnx.start();
-
-      // create a producer and a consumer
-      MessageProducer producer = sessionp.createProducer(topic);
-      MessageConsumer consumer = sessionc.createConsumer(topic);
-
-      // the consumer records on the topic
-      consumer.setMessageListener(this);
-      Message msg = sessionp.createMessage();
-      setProducerMessage(msg);
-      producer.send(msg);
-
-      // Wait to receive the message.
-      Thread.sleep(1000);
-
-      cnx.close();
-    } catch (Throwable exc) {
-      exc.printStackTrace();
-      error(exc);
-    } finally {
-      System.out.println("Server stop ");
-      stopAgentServer((short) 0);
-      endTest();
+    private Message pMsg; // store message send by pruducer
+    public static void main(String[] args) {
+	new Test_T_M().run();
     }
-  }
+          
+    public void run() {
+	try {
+	    System.out.println("server start");
+	    startAgentServer((short)0);
+	   
+	   
+	    admin();
+	    System.out.println("admin config ok");
+	    
+	    Context  ictx = new InitialContext();
+	    Topic topic = (Topic) ictx.lookup("topic");
+   	    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
+	    ictx.close();
 
-  /**
-   * Admin : Create topic and a user anonymous use jndi
-   */
-  public void admin() throws Exception {
-    // connection 
-    AdminModule.connect("localhost", 2560, "root", "root", 60);
-    // create a Topic   
-    org.objectweb.joram.client.jms.Topic topic = org.objectweb.joram.client.jms.Topic.create("topic");
-
-    // create a user
-    User.create("anonymous", "anonymous");
-
-    // set permissions
-    topic.setFreeReading();
-    topic.setFreeWriting();
-
-    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
-
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    jndiCtx.bind("cf", cf);
-    jndiCtx.bind("topic", topic);
-    jndiCtx.close();
-
-    AdminModule.disconnect();
-  }
-
-  public void onMessage(Message message) {
-    System.out.println("message received");
-    try {
-      Message msgP = getProducerMessage();
-      //test messages
-      assertEquals(msgP.getJMSMessageID(), message.getJMSMessageID());
-      assertEquals(msgP.getJMSType(), message.getJMSType());
-      assertEquals(msgP.getJMSDestination(), message.getJMSDestination());
-    } catch (javax.jms.JMSException JE) {
-      JE.printStackTrace();
+	    Connection cnx = cf.createConnection();
+	    Session sessionp = cnx.createSession(false,
+						Session.AUTO_ACKNOWLEDGE);
+	    Session sessionc = cnx.createSession(false,
+						Session.AUTO_ACKNOWLEDGE);
+	    cnx.start();
+	    
+	    // create a producer and a consumer
+	    MessageProducer producer = sessionp.createProducer(topic);
+	    MessageConsumer consumer = sessionc.createConsumer(topic);
+	   
+	    // the consumer records on the topic
+	    consumer.setMessageListener(this);
+	    Message msg = sessionp.createMessage();
+	    producer.send(msg);
+	    setProducerMessage(msg);
+	    cnx.close();
+	} catch (Throwable exc) {
+	    exc.printStackTrace();
+	    error(exc);
+	} finally {
+	    System.out.println("Server stop ");
+	    stopAgentServer((short)0);
+	    endTest(); 
+	}
     }
-  }
+    
+    /**
+     * Admin : Create topic and a user anonymous
+     *   use jndi
+     */
+    public void admin() throws Exception {
+	// conexion 
+	org.objectweb.joram.client.jms.admin.AdminModule.connect("localhost", 2560,
+								 "root", "root", 60);
+	// create a Topic   
+	org.objectweb.joram.client.jms.Topic topic =
+	    (org.objectweb.joram.client.jms.Topic) org.objectweb.joram.client.jms.Topic.create("topic"); 
 
-  public void setProducerMessage(Message message) {
-    pMsg = message;
-  }
+        // create a user
+	org.objectweb.joram.client.jms.admin.User user =
+	    org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous");
+	// set permissions
+	topic.setFreeReading();
+	topic.setFreeWriting();
 
-  public Message getProducerMessage() {
-    return pMsg;
+      	javax.jms.ConnectionFactory cf =
+	    org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create("localhost", 2560);
+
+	javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+	jndiCtx.bind("cf", cf);
+	jndiCtx.bind("topic", topic);
+	jndiCtx.close();
+	   
+	org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
+    }
+
+
+    public void onMessage(Message message) {
+	System.out.println("message receive");
+	try{
+	    Message msgP = getProducerMessage();
+	    //test messages
+	    assertEquals(msgP.getJMSMessageID(),message.getJMSMessageID());
+	    assertEquals(msgP.getJMSType(),message.getJMSType());
+	    assertEquals(msgP.getJMSDestination(),message.getJMSDestination());
+	}catch(javax.jms.JMSException JE){
+	    JE.printStackTrace( );
+	}
+    }
+    public void setProducerMessage(Message message){
+	pMsg=message;
+    }
+    public Message getProducerMessage(){
+	return pMsg;
   }
 }
+

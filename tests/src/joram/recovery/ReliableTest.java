@@ -24,6 +24,7 @@
 package joram.recovery;
 
 
+import java.io.File;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -66,7 +67,8 @@ public class ReliableTest extends TestCase {
       //System.out.println("start server");
 
     startAgentServer(
-        (short)0, new String[]{
+        (short)0, (File)null, 
+        new String[]{
       "-DTransaction=fr.dyade.aaa.util.NTransaction"});
 
     Thread.sleep(2000);

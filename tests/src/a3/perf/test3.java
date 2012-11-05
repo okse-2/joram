@@ -63,9 +63,9 @@ public class test3 extends TestCase {
 
   protected void tearDown() {
     if (ServerPing != 0)
-      killAgentServer(ServerPing);
+      crashAgentServer(ServerPing);
     if ((ServerPong != 0) && (ServerPong != ServerPing))
-      killAgentServer(ServerPong);
+      crashAgentServer(ServerPong);
   }
 
   public static void main(String args[]) {

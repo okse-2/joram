@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
- * Contributor(s): 
+ * Initial developer(s): Freyssinet Andre (ScalAgent D.T.)
+ * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
 package joram.dursub;
 
@@ -36,69 +36,99 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import fr.dyade.aaa.agent.AgentServer;
 
 /**
- * Test durable subscription:
- * - Create a durable subscriber with name "dursub1".
- * - Create another durable subscriber with the same subscription name and verify
- *   that using an already active subscription generate an exception.
- * - Close the session of the active subscriber.
- * - Create a subscriber to the durable subscription and verify that it is ok.
- * - Close the connection.
- * - Create a subscriber to the durable subscription and verify that it is ok.
+ * TEST : creation of durable subscriber. If already active during cretion there is an exception 
+ *
  */
 public class Test1 extends framework.TestCase {
+  static Topic topic = null;
+  static ConnectionFactory cf = null;
+
+  static String host = "localhost";
+  static int port = 2560;
+
+  public Test1() {
+    super();
+  }
+
   public static void main(String[] args) throws Exception {
     new Test1().run(args);
   }
 
+  protected void AdminConnect() throws Exception {
+    AdminModule.connect(host, port, "root", "root", 60);
+  }
+
+  protected ConnectionFactory createConnectionFactory() throws Exception {
+    return TcpConnectionFactory.create(host, port);
+  }
+
+  protected void startServer() throws Exception {
+    AgentServer.init((short) 0, "./s0", null);
+    AgentServer.start();
+
+    Thread.sleep(1000L);
+  }
+
+  protected void stopServer() throws Exception {
+  }
+
   public void run(String[] args) throws Exception {
-    try{
-      startAgentServer((short)0);
-      Thread.sleep(1000L);
-
-      ConnectionFactory cf =  TcpConnectionFactory.create("localhost", 2560);
-      ((TcpConnectionFactory) cf).getParameters().connectingTimer = 10;
-      AdminModule.connect(cf, "root", "root");
-
-      User.create("anonymous", "anonymous", 0);
+      try{
       
-      Topic topic = Topic.create();
-      topic.setFreeReading();
-      topic.setFreeWriting();
-
-      AdminModule.disconnect();
-
-      Connection cnx1 = cf.createConnection();
-      cnx1.start();
-      
-      Session sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageConsumer cons1= sess1.createDurableSubscriber(topic, "dursub1");
-
-      Connection cnx2 = cf.createConnection();
-      JMSException exc = null;
-      try {
-        Session sess2 = cnx2.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        MessageConsumer cons2 = sess2.createDurableSubscriber(topic, "dursub1");
-      } catch (JMSException e) {
-        exc = e;
+	  if (! Boolean.getBoolean("ServerOutside"))
+	      startServer();
+	  
+	  host = System.getProperty("hostname", host);
+	  port = Integer.getInteger("port", port).intValue();
+	  
+	  AdminConnect();
+	  
+	  topic = Topic.create();
+	  cf =  createConnectionFactory();
+	  
+	  User user = User.create("anonymous", "anonymous", 0);
+	  topic.setFreeReading();
+	  topic.setFreeWriting();
+	  
+	  org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
+	  
+	  Connection cnx = cf.createConnection();
+	  Session sess1 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	  MessageConsumer cons1= sess1.createDurableSubscriber(topic, "dursub1");
+	  
+	  try {
+	      Session sess2 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	      MessageConsumer cons2 = sess2.createDurableSubscriber(topic, "dursub1");
+	  } catch (JMSException exc) {
+	      //System.out.println(" The durable subscription has already been activated");
+	      assertTrue(exc instanceof  javax.jms.JMSException);
+	      // exc.printStackTrace();
+	  }
+	  
+	  sess1.close();
+	  
+	  try {
+	      Session sess2 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	      MessageConsumer cons2 = sess2.createDurableSubscriber(topic, "dursub1");
+	  } catch (JMSException exc) {
+	      // exc.printStackTrace();
+	  }
+	  
+	  cnx.close();
+	  
+	  cnx = cf.createConnection();
+	  try {
+	      Session sess3 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	      MessageConsumer cons3 = sess3.createDurableSubscriber(topic, "dursub1");
+	  } catch (JMSException exc) {
+	     exc.printStackTrace();
+	  }
+      }catch(Throwable exc){
+	  exc.printStackTrace();
+	  error(exc);
+      }finally{
+	  AgentServer.stop();
+	  endTest();
       }
-      assertTrue(exc != null);
-
-      sess1.close();
-      Session sess2 = cnx2.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageConsumer cons2 = sess2.createDurableSubscriber(topic, "dursub1");
-
-      cnx1.close();
-      cnx2.close();
-
-      cnx1 = cf.createConnection();
-      Session sess3 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageConsumer cons3 = sess3.createDurableSubscriber(topic, "dursub1");
-    } catch(Throwable exc){
-      exc.printStackTrace();
-      error(exc);
-    } finally{
-      stopAgentServer((short)0);
-      endTest(); 
-    }
   }
 }

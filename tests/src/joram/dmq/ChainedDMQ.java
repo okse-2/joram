@@ -29,6 +29,7 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.Context;
@@ -36,7 +37,7 @@ import javax.naming.InitialContext;
 
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.MessageErrorConstants;
 
@@ -71,12 +72,12 @@ public class ChainedDMQ extends TestCase {
 
       Context ictx = new InitialContext();
       Queue queue = (Queue) ictx.lookup("queue");
-      Queue dmqueue0 = (Queue) ictx.lookup("dmqueue0");
-      Queue dmqueue1 = (Queue) ictx.lookup("dmqueue1");
-      Queue dmqueue2 = (Queue) ictx.lookup("dmqueue2");
-      Queue dmqueue3 = (Queue) ictx.lookup("dmqueue3");
-      Queue dmqueue4 = (Queue) ictx.lookup("dmqueue4");
-      Queue dmqueue5 = (Queue) ictx.lookup("dmqueue5");
+      DeadMQueue dmqueue0 = (DeadMQueue) ictx.lookup("dmqueue0");
+      DeadMQueue dmqueue1 = (DeadMQueue) ictx.lookup("dmqueue1");
+      DeadMQueue dmqueue2 = (DeadMQueue) ictx.lookup("dmqueue2");
+      DeadMQueue dmqueue3 = (DeadMQueue) ictx.lookup("dmqueue3");
+      DeadMQueue dmqueue4 = (DeadMQueue) ictx.lookup("dmqueue4");
+      DeadMQueue dmqueue5 = (DeadMQueue) ictx.lookup("dmqueue5");
       ConnectionFactory cf0 = (ConnectionFactory) ictx.lookup("cf0");
       ictx.close();
 
@@ -204,41 +205,27 @@ public class ChainedDMQ extends TestCase {
    * Admin : Create queue and a user anonymous use jndi
    */
   public void admin() throws Exception {
+
     Properties prop = new Properties();
     prop.setProperty("period", "1000");
 
     // connection
     AdminModule.connect("localhost", 2560, "root", "root", 60);
-    
     // create a Queue
     org.objectweb.joram.client.jms.Queue queue = org.objectweb.joram.client.jms.Queue.create(0, prop);
-    queue.setFreeReading();
-    queue.setFreeWriting();
-    
-    // create DMQs
-    Queue dmqueue0 = (Queue) Queue.create(0);
-    dmqueue0.setFreeReading();
-    dmqueue0.setFreeWriting();
+    // create a DMQueue
+    DeadMQueue dmqueue0 = (DeadMQueue) DeadMQueue.create(0);
+    DeadMQueue dmqueue1 = (DeadMQueue) DeadMQueue.create(0);
+    DeadMQueue dmqueue2 = (DeadMQueue) DeadMQueue.create(0);
+    DeadMQueue dmqueue3 = (DeadMQueue) DeadMQueue.create(0);
+    DeadMQueue dmqueue4 = (DeadMQueue) DeadMQueue.create(0);
+    DeadMQueue dmqueue5 = (DeadMQueue) DeadMQueue.create(0);
+
     dmqueue0.setNbMaxMsg(DMQ0_MAX_SIZE);
-    Queue dmqueue1 = (Queue) Queue.create(0);
-    dmqueue1.setFreeReading();
-    dmqueue1.setFreeWriting();
     dmqueue1.setNbMaxMsg(DMQ1_MAX_SIZE);
-    Queue dmqueue2 = (Queue) Queue.create(0);
-    dmqueue2.setFreeReading();
-    dmqueue2.setFreeWriting();
     dmqueue2.setNbMaxMsg(DMQ2_MAX_SIZE);
-    Queue dmqueue3 = (Queue) Queue.create(0);
-    dmqueue3.setFreeReading();
-    dmqueue3.setFreeWriting();
     dmqueue3.setNbMaxMsg(DMQ3_MAX_SIZE);
-    Queue dmqueue4 = (Queue) Queue.create(0);
-    dmqueue4.setFreeReading();
-    dmqueue4.setFreeWriting();
     dmqueue4.setNbMaxMsg(DMQ4_MAX_SIZE);
-    Queue dmqueue5 = (Queue) Queue.create(0);
-    dmqueue5.setFreeReading();
-    dmqueue5.setFreeWriting();
 
     dmqueue0.setDMQ(dmqueue1);
     dmqueue1.setDMQ(dmqueue2);
@@ -246,10 +233,19 @@ public class ChainedDMQ extends TestCase {
     dmqueue3.setDMQ(dmqueue4);
     dmqueue4.setDMQ(dmqueue5);
 
-    queue.setDMQ(dmqueue0);
-
     // create a user
     org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous", 0);
+    // set permissions
+    queue.setFreeReading();
+    queue.setFreeWriting();
+    dmqueue0.setFreeReading();
+    dmqueue1.setFreeReading();
+    dmqueue2.setFreeReading();
+    dmqueue3.setFreeReading();
+    dmqueue4.setFreeReading();
+    dmqueue5.setFreeReading();
+
+    queue.setDMQ(dmqueue0);
 
     ConnectionFactory cf0 = TcpConnectionFactory.create("localhost", 2560);
 

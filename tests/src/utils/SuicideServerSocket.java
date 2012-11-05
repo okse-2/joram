@@ -27,18 +27,18 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.util.Timer;
+import fr.dyade.aaa.util.TimerTask;
 
 public class SuicideServerSocket extends ServerSocket {
   
-  static Logger logger = Debug.getLogger(SuicideServerSocket.class.getName());
+  private static Logger logger = Debug.getLogger(SuicideServerSocket.class.getName());
 
   private static int MIN_SURVIVAL_TIME = AgentServer.getInteger("ServerSocketMinSurvivalTime", 10000).intValue();
 
@@ -48,16 +48,12 @@ public class SuicideServerSocket extends ServerSocket {
 
   public SuicideServerSocket(int port, int backlog, InetAddress bindAddr) throws IOException {
     super(port, backlog, bindAddr);
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "Server socket creation on port: " + port);
-    }
+    logger.log(BasicLevel.ERROR, "Server socket creation on port: " + port);
   }
 
   public SuicideServerSocket(int port, int backlog) throws IOException {
     super(port, backlog);
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "Server socket creation on port: " + port);
-    }
+    logger.log(BasicLevel.ERROR, "Server socket creation on port: " + port);
   }
   
   public Socket accept() throws IOException {
@@ -68,7 +64,7 @@ public class SuicideServerSocket extends ServerSocket {
 
     try {
       int extraTime = RAND.nextInt(MAX_EXTRA_TIME);
-      Timer timer = new Timer(true);
+      Timer timer = new Timer();
       timer.schedule(new SuicideSocketTask(socket, timer), MIN_SURVIVAL_TIME + extraTime);
       if (logger.isLoggable(BasicLevel.DEBUG)) {
         logger.log(BasicLevel.DEBUG, "Server socket will be destroyed in " + (MIN_SURVIVAL_TIME + extraTime) + " ms.");

@@ -30,9 +30,7 @@ Daemon::Daemon() {
   running = FALSE;
 }
 
-Daemon::~Daemon() {
-  if(DEBUG) printf("~Daemon()\n");
-}
+Daemon::~Daemon() {}
 
 boolean Daemon::isRunning() {
   return running;

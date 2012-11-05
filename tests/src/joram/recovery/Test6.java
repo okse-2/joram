@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,126 +38,121 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import fr.dyade.aaa.agent.AgentServer;
 
 /**
- * Tests recovery with 2 servers and a durable subscriber.
- * <ul>
- * <li>Start 2 servers.</li>
- * <li>Send 2 messages.</li>
- * <li>Stop second server.</li>
- * <li>Send 2 messages.</li>
- * <li>Stop first server.</li>
- * <li>Restart the 2 servers and check reception of four messages.</li>
- * </ul>
+ * test recovery with 2 server and a durablesubscriber. start 2 server. send message.
+ * stop first server. send 2 message. restart 2 server and check receive four message
+ *
  */
 public class Test6 extends framework.TestCase {
-  public static void main(String args[]) {
-    new Test6().run();
+  public static void main (String args[]) {
+      new Test6().run();
   }
+    public void run(){
+	try {
+	    startAgentServer((short) 1);
+	    AgentServer.init((short) 0, "./s0", null);
+	    AgentServer.start();
+	    Thread.sleep(1000L);
 
-  public void run() {
-    try {
-      startAgentServer((short) 1);
-      AgentServer.init((short) 0, "./s0", null);
-      AgentServer.start();
-      Thread.sleep(1000L);
+	    AdminModule.connect("root", "root", 60);
+	    Topic topic = Topic.create(1, "Topic");
+	    topic.setFreeReading();
+	    topic.setFreeWriting();
+	    User user0 = User.create("anonymous", "anonymous", 0);
+	    User user1 = User.create("anonymous", "anonymous", 1);
+	    AdminModule.disconnect();
 
-      AdminModule.connect("root", "root", 60);
-      Topic topic = Topic.create(1, "Topic");
-      topic.setFreeReading();
-      topic.setFreeWriting();
-      User.create("anonymous", "anonymous", 0);
-      User.create("anonymous", "anonymous", 1);
-      AdminModule.disconnect();
+	    ConnectionFactory cf0 =  LocalConnectionFactory.create();
+	    ConnectionFactory cf1 =  TcpConnectionFactory.create("localhost", 16011);
 
-      ConnectionFactory cf0 = LocalConnectionFactory.create();
-      ConnectionFactory cf1 = TcpConnectionFactory.create("localhost", 16011);
+	    Connection cnx = cf1.createConnection();
+	    Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	    MessageConsumer consumer = session.createDurableSubscriber(topic, "subname");
+	    session.close();
+	    cnx.close();
 
-      Connection cnx = cf1.createConnection();
-      Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageConsumer consumer = session.createDurableSubscriber(topic, "subname");
-      session.close();
-      cnx.close();
+	    //System.out.println("Subscription done");
 
-      //System.out.println("Subscription done");
+	    cnx = cf0.createConnection();
+	    session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	    MessageProducer producer = session.createProducer(topic);
+	    Message msg = session.createMessage();
+	    msg.setStringProperty("name", "msg#1");
+	    producer.send(msg);
+	    msg.setStringProperty("name", "msg#2");
+	    producer.send(msg);
 
-      cnx = cf0.createConnection();
-      session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageProducer producer = session.createProducer(topic);
-      Message msg = session.createMessage();
-      msg.setStringProperty("name", "msg#1");
-      producer.send(msg);
-      msg.setStringProperty("name", "msg#2");
-      producer.send(msg);
+	    //System.out.println("Messages #1, #2 sent");
 
-      //System.out.println("Messages #1, #2 sent");
+	    Thread.sleep(1000L);
+	    stopAgentServer((short) 1);
 
-      Thread.sleep(1000L);
-      stopAgentServer((short) 1);
+	    System.out.println("Server#1 stopped");
 
-      System.out.println("Server#1 stopped");
+	    msg.setStringProperty("name", "msg#3");
+	    producer.send(msg);
+	    msg.setStringProperty("name", "msg#4");
+	    producer.send(msg);
+	    session.close();
+	    cnx.close();
 
-      msg.setStringProperty("name", "msg#3");
-      producer.send(msg);
-      msg.setStringProperty("name", "msg#4");
-      producer.send(msg);
-      session.close();
-      cnx.close();
+	    //System.out.println("Messages #3, #4 sent");
 
-      //System.out.println("Messages #3, #4 sent");
+	    Thread.sleep(1000L);
+	    AgentServer.stop();
+	    AgentServer.reset();
+	    Thread.sleep(1000L);
 
-      Thread.sleep(1000L);
-      AgentServer.stop();
-      AgentServer.reset();
-      Thread.sleep(1000L);
+	    System.out.println("Server#0 stopped");
 
-      System.out.println("Server#0 stopped");
+	    startAgentServer((short) 1);
 
-      startAgentServer((short) 1);
+	    AgentServer.init((short) 0, "./s0", null);
+	    AgentServer.start();
+	    Thread.sleep(1000L);
 
-      AgentServer.init((short) 0, "./s0", null);
-      AgentServer.start();
-      Thread.sleep(2000L);
+	    System.out.println("Servers #0, #1 started");
 
-      System.out.println("Servers #0, #1 started");
+	    cnx = cf1.createConnection();
+	    session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	    consumer = session.createDurableSubscriber(topic, "subname");
+	    cnx.start();
 
-      cnx = cf1.createConnection();
-      session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      consumer = session.createDurableSubscriber(topic, "subname");
-      cnx.start();
+	    //System.out.println("before receive");
+	    msg = consumer.receive();
+	    
+	    //System.out.println("receives: " + msg.getStringProperty("name"));
+	    assertEquals("msg#1", msg.getStringProperty("name"));
+	    msg = consumer.receive();
+	    
+	    //System.out.println("receives: " + msg.getStringProperty("name"));
+	    assertEquals("msg#2", msg.getStringProperty("name"));
+	    msg = consumer.receive();
+	    
+	    //System.out.println("receives: " + msg.getStringProperty("name"));
+	    assertEquals("msg#3", msg.getStringProperty("name"));
+	    msg = consumer.receive();
+	    
+	    //System.out.println("receives: " + msg.getStringProperty("name"));
+	    assertEquals("msg#4", msg.getStringProperty("name"));
+	    session.close();
 
-      //System.out.println("before receive");
-      msg = consumer.receive();
-      //System.out.println("receives: " + msg.getStringProperty("name"));
-      assertEquals("msg#1", msg.getStringProperty("name"));
 
-      msg = consumer.receive();
-      //System.out.println("receives: " + msg.getStringProperty("name"));
-      assertEquals("msg#2", msg.getStringProperty("name"));
+	    session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	    session.unsubscribe("subname");
+	    session.close();
+	    cnx.close();
 
-      msg = consumer.receive();
-      //System.out.println("receives: " + msg.getStringProperty("name"));
-      assertEquals("msg#3", msg.getStringProperty("name"));
+	    Thread.sleep(1000L);
+	 
+	} catch (Throwable exc) {
+	    exc.printStackTrace();
+	    error(exc);
+	}finally{
+	    stopAgentServer((short) 1);
+	    AgentServer.stop(); 
+	    endTest();
+	}
 
-      msg = consumer.receive();
-      //System.out.println("receives: " + msg.getStringProperty("name"));
-      assertEquals("msg#4", msg.getStringProperty("name"));
-
-      session.close();
-
-      session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      session.unsubscribe("subname");
-      session.close();
-      cnx.close();
-
-      Thread.sleep(1000L);
-
-    } catch (Throwable exc) {
-      exc.printStackTrace();
-      error(exc);
-    } finally {
-      stopAgentServer((short) 1);
-      AgentServer.stop();
-      endTest();
+	
     }
-
-  }
 }

@@ -3,6 +3,7 @@
   <domain name="D0" network="fr.dyade.aaa.agent.SimpleNetwork"/>
   <server id="0" name="s0" hostname="localhost">
      <network domain="D0" port="27300"/>
+     <service class="fr.dyade.aaa.agent.AgentAdmin" args="0"/>
      <service class="fr.dyade.aaa.agent.AdminProxy" args="7890"/>
      <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
      <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16010"/>

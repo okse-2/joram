@@ -29,45 +29,45 @@ import fr.dyade.aaa.agent.AgentServer;
  *
  */
 public class Test8 extends framework.TestCase{
+
   public static void main (String args[]) throws Exception {
-    new Test8().run();
+      new Test8().run();
   }
-  
-  public void run() {
-    try {
-      AgentServer.init((short) 0, "./s0", null);
-      System.out.println("init");
-      Thread.sleep(5000L);
-      AgentServer.start();
-      System.out.println("start");
-      Thread.sleep(5000L);
-      AgentServer.stop();
-      System.out.println("stop");
-      Thread.sleep(5000L);
-      AgentServer.reset();
-      System.out.println("reset");
-      Thread.sleep(5000L);
-      AgentServer.init((short) 0, "./s0", null);
-      System.out.println("init");
-      Thread.sleep(5000L);
-      AgentServer.start();
-      System.out.println("start");
-      Thread.sleep(5000L);
-      AgentServer.stop();
-      System.out.println("stop");
-      Thread.sleep(5000L);
-      AgentServer.start();
-      System.out.println("start");
-      Thread.sleep(5000L);
-      AgentServer.stop();
-      System.out.println("stop");
-      Thread.sleep(5000L);
-    } catch (Throwable exc) {
-      exc.printStackTrace();
-      error(exc);
-    } finally {
-      AgentServer.stop();
-      endTest();
+    public void run(){
+	try{
+	    AgentServer.init((short) 0, "./s0", null);
+	    System.out.println("init");
+	    Thread.sleep(15000L);
+	    AgentServer.start();
+	    System.out.println("start");
+	    Thread.sleep(15000L);
+	    AgentServer.stop();
+	    System.out.println("stop");
+	    Thread.sleep(15000L);
+	    AgentServer.reset();
+	    System.out.println("reset");
+	    Thread.sleep(15000L);
+	    AgentServer.init((short) 0, "./s0", null);
+	    System.out.println("init");
+	    Thread.sleep(15000L);
+	    AgentServer.start();
+	    System.out.println("start");
+	    Thread.sleep(15000L);
+	    AgentServer.stop();
+	    System.out.println("stop");
+	    Thread.sleep(15000L);
+	    AgentServer.start();
+	    System.out.println("start");
+	    Thread.sleep(15000L);
+	    AgentServer.stop();
+	    System.out.println("stop");
+	    Thread.sleep(15000L);
+	}catch(Throwable exc){
+	    exc.printStackTrace();
+	    error(exc);
+	}finally{
+	 AgentServer.stop();
+	 endTest();
+	}
     }
-  }
 }

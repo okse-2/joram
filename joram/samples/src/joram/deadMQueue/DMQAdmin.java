@@ -28,6 +28,7 @@ import javax.jms.ConnectionFactory;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
@@ -39,14 +40,13 @@ public class DMQAdmin {
   public static void main(String[] args) throws Exception {
     System.out.println("DMQ administration...");
 
-    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
-    
-    AdminModule.connect(cf, "root", "root");
+    AdminModule.connect("root", "root", 60);
 
     User.create("anonymous", "anonymous", 0);    
 
+    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
 
-    Queue dmq = Queue.create(0);
+    DeadMQueue dmq = (DeadMQueue) DeadMQueue.create(0);
     dmq.setFreeReading();
     dmq.setFreeWriting();
     
@@ -58,20 +58,16 @@ public class DMQAdmin {
     queue1.setThreshold(2);
     
     Queue queue2 = Queue.create(0);
-    queue2.setDMQ(dmq);
 
-//    Queue queue3 = Queue.create(0);
+    queue2.setDMQ(dmq);
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("queue1", queue1);
     jndiCtx.bind("queue2", queue2);
-//    jndiCtx.bind("queue3", queue3);
     jndiCtx.bind("dmq", dmq);
     jndiCtx.bind("cf", cf);
     jndiCtx.close();
 
-//    queue3.delete();
-    
     AdminModule.disconnect();
     System.out.println("Admin closed.");
   }

@@ -7,30 +7,26 @@
 
   <description>JORAM (Java Open Reliable Asynchronous Messaging) is an open source implementation of the JMS (Java Message Service) API.</description>
 
-  <keywords>JORAM,Java,Open,Reliable,Asynchronous,Messaging,JMS,Java,Message,Service,AMQP,TR069,message,oriented,middleware,MOM,agent,Agents,Anytime,Anywhere,AAA,platform,ScalAgent,open,source,free,software,LGPL</keywords>
+  <keywords>JORAM,Java,Open,Reliable,Asynchronous,Messaging,JMS,Java,Message,Service,message,oriented,middleware,MOM,agent,Agents,Anytime,Anywhere,AAA,platform,ScalAgent,open,source,free,software,LGPL</keywords>
 
   <body>    
     <menu>
       <legend>Project Links</legend>
       <menuitem><a href="index.html">Home</a></menuitem>
       <menuitem><a href="technical.html">Specification</a></menuitem>
-      <menuitem><a href="features.html">Features</a></menuitem>
-      <menuitem><a href="faq/index.html">F.A.Q.</a></menuitem>
-      <menuitem><a href="doc/starting.html">Getting Started</a></menuitem>
       <menuitem><a href="download/index.html">Download</a></menuitem>
       <menuitem><a href="doc/index.html">Documentation</a></menuitem>
-      <menuitem><a href="doc/tutorials.html">Tutorials</a></menuitem>
+      <menuitem><a href="license.html">Licenses</a></menuitem>
       <menuitem><a href="history.html">History</a></menuitem>
     </menu>
 
     <menu>
       <legend>Developers' Corner</legend>
       <menuitem><a href="dev/corner.html">Welcome</a></menuitem>
-      <menuitem><a href="dev/roadMap.html">Road map</a></menuitem>
-      <menuitem><a href="dev/versions.html">Code updates</a></menuitem>
+      <menuitem><connect href="dev/roadMap.xml">Road map</connect></menuitem>
+      <menuitem><connect href="dev/versions.xml">Code updates</connect></menuitem>
       <menuitem><a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram">SVN repository</a></menuitem>
       <menuitem><a href="http://forge.objectweb.org/projects/joram">ObjectWeb Forge site</a></menuitem>
-      <menuitem><a href="license.html">Licenses</a></menuitem>
     </menu>
 
     <menu>

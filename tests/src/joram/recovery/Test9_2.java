@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -120,7 +120,6 @@ public class Test9_2 extends framework.TestCase {
       Thread.sleep(5000L);
 
       startAgentServer((short) 1);
-      Thread.sleep(2000L);
       System.out.println("Server #1 started");
 
       cnx = cf1.createConnection();

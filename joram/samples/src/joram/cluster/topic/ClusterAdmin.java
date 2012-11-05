@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -49,9 +49,9 @@ public class ClusterAdmin {
     User.create("anonymous", "anonymous", 1);
     User.create("anonymous", "anonymous", 2); 
 
-    ConnectionFactory cf0 = TcpConnectionFactory.create("localhost", 16010);
-    ConnectionFactory cf1 = TcpConnectionFactory.create("localhost", 16011);
-    ConnectionFactory cf2 = TcpConnectionFactory.create("localhost", 16012);
+    ConnectionFactory cf0 = (ConnectionFactory) TcpConnectionFactory.create("localhost", 16010);
+    ConnectionFactory cf1 = (ConnectionFactory) TcpConnectionFactory.create("localhost", 16011);
+    ConnectionFactory cf2 = (ConnectionFactory) TcpConnectionFactory.create("localhost", 16012);
 
     ictx.bind("cf0", cf0);
     ictx.bind("cf1", cf1);

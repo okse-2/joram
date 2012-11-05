@@ -68,8 +68,8 @@ public class InventoryServer {
       TopicSubscriber ts = tsession.createSubscriber(topicOrders);
       
       // creating a FifoQueue to hold incoming messages from topicOrders 
-      fr.dyade.aaa.common.Queue queue ;
-      queue = new fr.dyade.aaa.common.Queue() ;
+      fr.dyade.aaa.util.Queue queue ;
+      queue = new fr.dyade.aaa.util.Queue() ;
 	  		
       // arise the MessageListener 
       TopicListener inventoryListener = new TopicListener(tsession, queue);
@@ -114,7 +114,7 @@ class InventoryTreatment implements Runnable, Servers {
   /** QueueSender sending OrderMessages. */
   QueueSender qs ;
   /** FifoQueue holding OrderMessages received from topicOrders. */
-  fr.dyade.aaa.common.Queue queue ;
+  fr.dyade.aaa.util.Queue queue ;
   /** OrderMessage hold by FifoQueue. */
   OrderMessage orderMsg ;
   /** Lock to wait for graphical interaction. */
@@ -129,7 +129,7 @@ class InventoryTreatment implements Runnable, Servers {
    * @param tc			TopicConnection created by InventoryServer.
    * @param tsession		TopicSession created by InventoryServer.
    */
-  InventoryTreatment(fr.dyade.aaa.common.Queue queue, TopicConnection tc, TopicSession tsession) {
+  InventoryTreatment(fr.dyade.aaa.util.Queue queue, TopicConnection tc, TopicSession tsession) {
     this.queue = queue ;
     this.tc = tc ;
     this.tsession = tsession ;

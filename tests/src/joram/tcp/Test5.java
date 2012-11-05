@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,10 +23,10 @@
 
 package joram.tcp;
 
+import java.io.File;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
 
 import framework.TestCase;
 
@@ -48,8 +48,8 @@ public class Test5 extends TestCase {
   public void run() {
     try {
       startAgentServer(
-        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
-      Thread.sleep(2500);
+        (short)0, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
       
       ConnectionFactory qcf =
         org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
@@ -58,7 +58,7 @@ public class Test5 extends TestCase {
       JMSException se = null;
       try {
         qcf.createConnection("root", "toto");
-      } catch (JMSSecurityException exc) {
+      } catch (JMSException exc) {
         se = exc;
       }
       assertTrue("JMSSecurityException not raised", se != null);

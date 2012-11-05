@@ -7,12 +7,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- *
+ * 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -93,7 +93,7 @@ class Message : Streamable {
   int type;
 
   byte* body;
-
+ 
   /** A simple message carries an empty body. */
   const static int SIMPLE = 0;
   /** A text message carries a String body. */
@@ -123,7 +123,7 @@ class Message : Streamable {
    * By default, the priority is 4?
    */
   int priority;
-
+ 
   /** The message expiration time, by default 0 for infinite time-to-live. */
   long long expiration;
 
@@ -141,37 +141,27 @@ class Message : Streamable {
   /** The message destination identifier. */
   char* toId;
   /** The message destination type. */
-  byte toType;
+  char toType;
 
   /** The reply to destination identifier. */
   char* replyToId;
   /** <code>true</code> if the "reply to" destination is a queue. */
-  byte replyToType;
+  char replyToType;
 
   /** The correlation identifier field. */
   char* correlationId;
-  
-  /**
-   * The JMSType header field contains a message type identifier supplied by a
-   * client when a message is sent.
-   */
-  char* jmsType;
 
   Properties* properties;
+  Properties* optionalHeader; // TODO: Useless
 
   void checkPropertyName(char* name) throw (MessageFormatException);
 
-  const static short typeFlag = 0x0001;
-  const static short replyToIdFlag = 0x0002;
-  const static short replyToTypeFlag = 0x0004;
-  const static short propertiesFlag = 0x0008;
-  const static short priorityFlag = 0x0010;
-  const static short expirationFlag = 0x0020;
-  const static short correlationIdFlag = 0x0040;
-  const static short deliveryCountFlag = 0x0080;
-  const static short jmsTypeFlag = 0x0100;
-  const static short redeliveredFlag = 0x0200;
-  const static short persistentFlag = 0x0400;
+  const static int redeliveredFlag =   0x00000004;
+  const static int persistentFlag =    0x00000008;
+  const static int deletedDestFlag =   0x00000010;
+  const static int expiredFlag =       0x00000020;
+  const static int notWriteableFlag =  0x00000040;
+  const static int undeliverableFlag = 0x00000080;
 
  public:
   /**
@@ -179,11 +169,8 @@ class Message : Streamable {
    * Constructs a bright new <code>Message</code>.
    */
   Message();
-
+  
   ~Message();
-
-  void setBody(int length, byte* body);
-  void getBody(int* length, byte** body);
 
   /**
    * Acknowledges all consumed messages of the session of this message.
@@ -209,7 +196,7 @@ class Message : Streamable {
    * Sets the correlation ID for the message.
    */
   void setCorrelationID(char* correlationID);
-
+         
   /**
    * Returns <code>true</code> if the message is persistent.
    */

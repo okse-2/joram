@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package classic;
 
@@ -29,28 +29,35 @@ import javax.naming.*;
 /**
  * Consumes messages from the queue and from the topic.
  */
-public class Consumer {
+public class Consumer
+{
   static Context ictx = null; 
 
-  public static void main(String[] args) throws Exception {
-    System.out.println("Listens to " + args[0]);
+  public static void main(String[] args) throws Exception
+  {
+    System.out.println();
+    System.out.println("Listens to the queue and to the topic...");
 
     ictx = new InitialContext();
-    Destination dest = (Destination) ictx.lookup(args[0]);
+    Queue queue = (Queue) ictx.lookup("queue");
+    Topic topic = (Topic) ictx.lookup("topic");
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
     ictx.close();
 
     Connection cnx = cf.createConnection();
     Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageConsumer recv = sess.createConsumer(dest);
+    MessageConsumer recv = sess.createConsumer(queue);
+    MessageConsumer subs = sess.createConsumer(topic);
 
-    recv.setMessageListener(new MsgListener("Listener on " + args[0]));
+    recv.setMessageListener(new MsgListener("Queue listener"));
+    subs.setMessageListener(new MsgListener("Topic listener"));
 
     cnx.start();
 
     System.in.read();
     cnx.close();
 
+    System.out.println();
     System.out.println("Consumer closed.");
   }
 }

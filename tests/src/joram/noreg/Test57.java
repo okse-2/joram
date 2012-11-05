@@ -57,7 +57,6 @@ public class Test57 extends BaseTest {
     try{
       System.out.println("server start");
       TestCase.startAgentServer((short)0);
-      Thread.sleep(2000);
 
       writeIntoFile("===================== start test 57 =====================");
       MsgSize = Integer.getInteger("MsgSize", MsgSize/1024).intValue() *1024;
@@ -74,7 +73,7 @@ public class Test57 extends BaseTest {
       cf = TcpBaseTest.createConnectionFactory();
       AdminModule.connect(cf);
       dest = createDestination(destc);
-      User.create("anonymous", "anonymous", 0);
+      User user = User.create("anonymous", "anonymous", 0);
       dest.setFreeReading();
       dest.setFreeWriting();
       org.objectweb.joram.client.jms.admin.AdminModule.disconnect();

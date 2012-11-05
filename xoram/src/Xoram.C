@@ -149,17 +149,6 @@ class TcpChannel : public Channel {
     }
   }
 
-  long long currentTimeMillis() {
-    long long time;
-    struct timespec ts;
-
-    clock_gettime(CLOCK_REALTIME, &ts);
-    time = ((long long)ts.tv_sec) *1000;
-    time += ts.tv_nsec /1000000;
-
-    return time;
-  }
-
   virtual void connect()  {
     if (status != INIT) throw IllegalStateException();
     status = CONNECTING;
@@ -187,15 +176,10 @@ class TcpChannel : public Channel {
     in = new InputStream();
 
     // Joram magic number: should be defined in another way..
-    byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 8, 58};
+    byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 2, 52};
 
     // Writes the Joram magic number
     if (out->writeBuffer(magic, 8) ==-1) throw IOException();
-    // Writes the current date
-    long long date = currentTimeMillis();
-    if (out->writeLong(date) == -1) throw IOException();
-    if(DEBUG)
-      printf("write date OK = %lld\n", date);
 
     // Writes the identity using SimpleIdentity convention
     if (out->writeString("") ==-1) throw IOException();
@@ -210,12 +194,6 @@ class TcpChannel : public Channel {
 
       if (out->writeDataTo(sock) == -1) throw IOException();
       if (in->readFrom(sock) == -1) throw IOException();
-
-    // read dt
-    long long dt;
-    if (in->readLong(&dt) == -1) throw IOException();
-    if(DEBUG)
-      printf("read dt = %lld\n", dt);
 
       int res;
       if (in->readInt(&res) == -1) throw IOException();
@@ -241,8 +219,7 @@ class TcpChannel : public Channel {
       }
     }
 
-    if(DEBUG)
-      printf("connected -> %d\n", key);
+    printf("connected -> %d\n", key);
 
     TcpMessage* pendingMsg = (TcpMessage*) NULL;
     for (int i = 0; i < pendingMessages->size(); i++) {
@@ -382,8 +359,6 @@ RequestMultiplexer::RequestMultiplexer(Connection* cnx,
 RequestMultiplexer::~RequestMultiplexer() {
   if(DEBUG)
     printf("~RequestMultiplexer(): requestsTable = 0x%x, exceptionListener = 0x%x\n", requestsTable, exceptionListener);
-  cnx = (Connection*) NULL;
-  channel = (Channel*) NULL;
   if (requestsTable != (Vector<ReplyListener>*) NULL) {
     delete requestsTable;
     requestsTable = (Vector<ReplyListener>*) NULL;
@@ -554,7 +529,7 @@ Requestor::Requestor(RequestMultiplexer* mtpx) : Synchronized() {
 
 Requestor::~Requestor() {
   if(DEBUG)
-    printf("~Requestor(): req = 0x%x, reply = 0x%x, mtpx = 0x%x\n", req, reply, mtpx);
+    printf("~Requestor(): req = 0x%x, reply = 0x%x\n", req, reply);
   if (req != (AbstractRequest*) NULL) {
     delete req;
     req = (AbstractRequest*) NULL;
@@ -563,8 +538,10 @@ Requestor::~Requestor() {
     delete reply;
     reply = (AbstractReply*) NULL;
   }
-  // Be careful the RequestMultiplexer is part of the Connection !!
-  mtpx = (RequestMultiplexer*) NULL;
+  if (mtpx != (RequestMultiplexer*) NULL) {
+    delete mtpx;
+    mtpx = (RequestMultiplexer*) NULL;
+  }
 }
 
 AbstractReply* Requestor::request(AbstractRequest* req) {
@@ -923,7 +900,7 @@ Connection* TCPConnectionFactory::createConnection(char *user, char *pass, char 
 // Destination Class
 // ######################################################################
 
-Destination::Destination(char* uid, byte type, char* name) {
+Destination::Destination(char* uid, char type, char* name) {
   if (uid != (char*) NULL) {
     char* newUid = new char[strlen(uid)+1];
     strcpy(newUid, uid);
@@ -951,28 +928,28 @@ char* Destination::getName() {
 }
 
 boolean Destination::isQueue() {
-  return (type == QUEUE_TYPE);
+  return (type == QUEUE);
 }
 
 boolean Destination::isTopic() {
-  return (type == TOPIC_TYPE);
+  return (type == TOPIC);
 }
 
-byte Destination::getType() {
+char Destination::getType() {
   return type;
 }
 
-Destination* Destination::newInstance(char* uid, byte type, char* name) {
-  if (type == QUEUE_TYPE) {
+Destination* Destination::newInstance(char* uid, char type, char* name) {
+  if (type == QUEUE) {
     return new Queue(uid, name);
-  } else if (type == TOPIC_TYPE) {
+  } else if (type == TOPIC) {
     return new Topic(uid, name);
   } else {
     throw XoramException();
   }
 }
 
-TemporaryTopic::TemporaryTopic(char* agentId, Requestor* requestor) : Topic(agentId, Destination::typeToString((byte)TOPIC_TEMP_TYPE)) {
+TemporaryTopic::TemporaryTopic(char* agentId, Requestor* requestor) : Topic(agentId, Destination::typeToString(TMP_TOPIC)) {
   this->requestor = requestor;
 }
 
@@ -990,7 +967,7 @@ Requestor* TemporaryTopic::getRequestor() {
 }
 
 boolean TemporaryTopic::isTemporaryTopic() {
-  return (getType() == TOPIC_TEMP_TYPE);
+  return (getType() == TMP_TOPIC);
 }
 
 // ######################################################################
@@ -1029,8 +1006,6 @@ Session::Session(Connection* cnx,
   consumers = new Vector<MessageConsumer>();
   producers = new Vector<MessageProducer>();
 
-  pendingMessageConsumer = (MessageConsumer*) NULL;
-
   if(DEBUG)
     printf("<= Session(): cnx = 0x%x, ident = 0x%x, consumers = 0x%x, producers = 0x%x, mtpx= 0x%x, requestor = 0x%x, receiveRequestor = 0x%x\n", cnx, ident, consumers, producers, mtpx, requestor, receiveRequestor);
 
@@ -1059,8 +1034,10 @@ Session::~Session() {
     delete producers;
     producers = (Vector<MessageProducer>*) NULL;
   }
-  // pendingMessageConsumer if exist is already closed and freed as part of consumers vector.
-  pendingMessageConsumer = (MessageConsumer*) NULL;
+  if (pendingMessageConsumer != (MessageConsumer*) NULL) {
+    delete pendingMessageConsumer;
+    pendingMessageConsumer = (MessageConsumer*) NULL;
+  }
   if (receiveRequestor != (Requestor*) NULL) {
     delete receiveRequestor;
     receiveRequestor = (Requestor*) NULL;
@@ -1094,25 +1071,11 @@ Topic* Session::createTopic(char* topicName) {
 }
 
 TemporaryTopic* Session::createTemporaryTopic() {
-  SessCreateDestReply* reply =
-    (SessCreateDestReply*) requestor->request(new SessCreateDestRequest((byte)TOPIC_TEMP_TYPE));
-
+  SessCreateTDReply* reply =
+    (SessCreateTDReply*) requestor->request(new SessCreateTTRequest());
   char* tempDest = reply->getAgentId();
   return new TemporaryTopic(tempDest, requestor);
 }
-
-/*
-SessCreateDestReply* Session::createDestination(byte type, String name) {
-  SessCreateDestReply* reply = (SessCreateDestReply) requestor->request(new SessCreateDestRequest(type, name));
-  return reply;
-}
-
-TemporaryQueue* Session::createTemporaryQueue() {
-  SessCreateDestReply* reply = (SessCreateDestReply) requestor->request(new SessCreateDestRequest((byte)QUEUE_TEMP_TYPE));
-  String tempDest = reply->getAgentId();
-  return new TemporaryQueue(tempDest, cnx);
-}
-*/
 
 /**
  * Creates a MessageProducer to send messages to the specified destination.
@@ -1462,7 +1425,7 @@ long long currentTimeMillis() {
 
   clock_gettime(CLOCK_REALTIME, &ts);
   time = ts.tv_sec *1000;
-  time += ts.tv_nsec /1000000;
+  time += ts.tv_nsec /1000;
 
   return time;
 }
@@ -1579,14 +1542,11 @@ Message* Session::receive(long timeOut1, long timeOut2,
             delete reply;
             reply = (ConsumerMessages*) NULL;
 
-            pendingMessageConsumer = (MessageConsumer*) NULL;
             return msg;
           } else {
-            pendingMessageConsumer = (MessageConsumer*) NULL;
             return (Message*) NULL;
           }
         } else {
-          pendingMessageConsumer = (MessageConsumer*) NULL;
           return (Message*) NULL;
         }
 /*       } */
@@ -1594,7 +1554,6 @@ Message* Session::receive(long timeOut1, long timeOut2,
 /*       singleThreadOfControl = -1; */
       pendingMessageConsumer = (MessageConsumer*) NULL;
     }
-    pendingMessageConsumer = (MessageConsumer*) NULL;
 }
 
 void Session::addConsumer(MessageConsumer* cons) {

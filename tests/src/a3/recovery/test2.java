@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C)  2001 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,7 +45,7 @@ public class test2 extends TestCase {
 
   protected void setUp() throws Exception {
     startAgentServer(ServerPong);
-    startAgentServer(router, new String[] { "-DTransaction.UseLockFile=false" });
+    startAgentServer(router);
 
     int bounce = Integer.getInteger("bounce", 600).intValue();
     timeout = 200L * bounce;
@@ -66,8 +66,8 @@ public class test2 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer(ServerPong);
-    killAgentServer(router);
+    crashAgentServer(ServerPong);
+    crashAgentServer(router);
   }
 
 
@@ -123,12 +123,12 @@ public class test2 extends TestCase {
             TestCase.stopAgentServer(test2.router);
 	  } else {
 	    System.out.println("crash");
-	    TestCase.killAgentServer(test2.router);
+	    TestCase.crashAgentServer(test2.router);
 	  }
 	  // Wait in order to prevent WAIT status on TCP connection
 	  Thread.sleep(1000L);
 	  // Start server#2
-      TestCase.startAgentServer(test2.router, new String[] { "-DTransaction.UseLockFile=false" });
+	  TestCase.startAgentServer(test2.router);
 	  nbStopTask++;
 	  if(nbStopTask > 20 ) endTest();
         } else {

@@ -94,7 +94,7 @@ class XoramAdmin {
    * @exception AdminException   If the creation fails.
    */
   CreateUserReply* createUser(char* userName, char* passwd, int serverId);
-  CreateUserReply* createUser(char* userName, char* passwd);
+  CreateUserReply* XoramAdmin::createUser(char* userName, char* passwd);
   void deleteUser(char* userName, char* proxyId);
 
   /**
@@ -176,7 +176,7 @@ class XoramAdmin {
                                    char* name,
                                    char* className,
                                    Properties* prop,
-                                   byte type);
+                                   char type);
 
   void deleteDestination(char* id);
 };

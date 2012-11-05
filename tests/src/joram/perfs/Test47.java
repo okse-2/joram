@@ -40,7 +40,7 @@ import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
-import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.util.Configuration;
 
 /**
  *

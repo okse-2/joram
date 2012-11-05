@@ -75,7 +75,7 @@ public class test4 extends TestCase {
 
   protected void tearDown() {
     for (int i=1; i<nbNode; i++)
-      killAgentServer((short) i);
+      crashAgentServer((short) i);
   }
 
   public static void main(String args[]) {

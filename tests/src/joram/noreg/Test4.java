@@ -26,6 +26,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.QueueBrowser;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
@@ -35,8 +36,6 @@ import javax.jms.TextMessage;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
-
-import framework.BaseTestCase;
 
 /**
  *
@@ -59,9 +58,9 @@ public class Test4 extends BaseTest {
 
     AdminModule.connect(host, port, "root", "root", 60);
 
-    qcf = org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory.create(host, port);
+    qcf = (QueueConnectionFactory) org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory.create(host, port);
     queue = org.objectweb.joram.client.jms.Queue.create(0);
-    User.create("anonymous", "anonymous", 0);
+    User user = User.create("anonymous", "anonymous", 0);
     queue.setFreeReading();
     queue.setFreeWriting();
     org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
@@ -80,7 +79,7 @@ public class Test4 extends BaseTest {
     for (int i=0; i<50; i++) {
       QueueConnection cnx3 = qcf.createQueueConnection();
       QueueSession sess3 = cnx3.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-      QueueBrowser browser = sess3.createBrowser(queue);
+      QueueBrowser browser = sess3.createBrowser((Queue) queue);
       cnx3.start();
       
       if (browser.getEnumeration().hasMoreElements()) {
@@ -92,7 +91,7 @@ public class Test4 extends BaseTest {
       }
       cnx3.close();
 
-      Thread.sleep(200L);
+      Thread.sleep(2000L);
     }
       }catch(Throwable exc){
 	  exc.printStackTrace();
@@ -112,7 +111,7 @@ public class Test4 extends BaseTest {
       try {
 	  if (msg instanceof TextMessage){
 	      // System.out.println(((TextMessage) msg).getText());
-          BaseTestCase.assertTrue(((TextMessage) msg).getText().startsWith("hello world:"));
+	      Test4.assertTrue(((TextMessage) msg).getText().startsWith("hello world:"));
         }else
           System.out.println("unknow message");
      } catch (Exception exc) {

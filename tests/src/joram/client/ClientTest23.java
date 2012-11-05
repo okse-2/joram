@@ -23,6 +23,7 @@
 package joram.client;
 
 
+import java.io.File;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -61,7 +62,8 @@ public class ClientTest23 extends TestCase {
     try {
 
       startAgentServer(
-        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+        (short)0, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
 
       Thread.sleep(1000);
 

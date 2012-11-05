@@ -35,6 +35,16 @@ int main (int argc, char *argv[]) {
     XoramAdmin* admin = new XoramAdmin();
     admin->connect("root", "root", 60);
 
+    // create destination
+    Queue* queue = admin->createQueue("queue");
+    Topic* topic = admin->createTopic("topic");
+    
+    // set right
+    admin->setFreeReading(queue);
+    admin->setFreeWriting(queue);
+    admin->setFreeReading(topic);
+    admin->setFreeWriting(topic);
+
     // create "anonymous" user
     admin->createUser("anonymous", "anonymous");
     admin->disconnect();

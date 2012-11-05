@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<config>
+    <domain name="D1"/>
+
+    <cluster id="0" name="C0">
+
+      <property name="Engine" value="fr.dyade.aaa.agent.HAEngine"/>
+      <property name="JGroups.MCastAddr" value="224.0.0.251"/>
+      <property name="JGroups.MCastPort" value="56789"/>
+
+      <server id="0" hostname="localhost">
+        <network domain="D1" port="16301"/>        
+        <service class="fr.dyade.aaa.agent.AdminProxy" args="7890"/>
+        <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
+        <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="2560"/>
+      </server>
+
+      <server id="1" hostname="localhost">
+        <network domain="D1" port="16302"/>
+        <service class="fr.dyade.aaa.agent.AdminProxy" args="7891"/>
+        <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
+        <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="2561"/>
+      </server>
+
+      <server id="2" hostname="localhost">
+        <network domain="D1" port="16303"/>
+        <service class="fr.dyade.aaa.agent.AdminProxy" args="7892"/>
+        <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
+        <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="2562"/>
+      </server>
+    </cluster>
+
+</config>

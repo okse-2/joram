@@ -35,14 +35,14 @@ class Destination {
   /* unique internal name of the destination. */
   char* uid;
   /* QUEUE, TOPIC, TMP_TOPIC, NOTYPE. */
-  byte type;
+  char type;
   /* administrative name of the destination. */
   char* name;
 
  public:
   enum {QUEUE, TOPIC, TMP_TOPIC, NOTYPE};
 
-  Destination(char* uid, byte type, char* name);
+  Destination(char* uid, char type, char* name);
 
   ~Destination() {
     if(DEBUG)
@@ -80,17 +80,17 @@ class Destination {
   /**
    * Non API method, should be hidden.
    */
-  byte getType();
+  char getType();
 
   /**
    * Non API method, should be hidden.
    */
-  static char* typeToString(byte type) {
-    if (type == QUEUE_TYPE)
+  static char* typeToString(char type) {
+    if (type == QUEUE)
       return "queue";
-    else if (type == TOPIC_TYPE)
+    else if (type == TOPIC)
       return "topic";
-    else if (type == TOPIC_TEMP_TYPE)
+    else if (type == TMP_TOPIC)
       return "topic.tmp";
     return "noType";
   }
@@ -98,21 +98,21 @@ class Destination {
   /**
    * Non API method, should be hidden.
    */
-  static byte stringToType(char *type) {
-    if (type == (char*) NULL) return  NO_TYPE;
+  static char stringToType(char *type) {
+    if (type == (char*) NULL) return  NOTYPE;
     if (strcasecmp(type, "queue"))
-      return QUEUE_TYPE;
+      return QUEUE;
     else if (strcasecmp(type, "topic"))
-      return TOPIC_TYPE;
+      return TOPIC;
     else if (strcasecmp(type, "topic.tmp"))
-      return TOPIC_TEMP_TYPE;
-    return NO_TYPE;
+      return TMP_TOPIC;
+    return NOTYPE;
   }
 
   /**
    * Non API method, should be hidden.
    */
-  Destination* newInstance(char* uid, byte type, char* name);
+  Destination* newInstance(char* uid, char type, char* name);
 };
 
 /**
@@ -123,7 +123,7 @@ class Queue : public Destination {
   /**
    * Creates a Queue object.
    */
-  Queue(char* uid, char* name) : Destination(uid, QUEUE_TYPE, name) { }
+  Queue(char* uid, char* name) : Destination(uid, QUEUE, name) { }
 };
 
 /**
@@ -134,7 +134,7 @@ class Topic : public Destination {
   /**
    * Creates a Topic object.
    */
-  Topic(char* uid, char* name) : Destination(uid, TOPIC_TYPE, name) { }
+  Topic(char* uid, char* name) : Destination(uid, TOPIC, name) { }
 };
 
 #endif /* DESTINATION_H */

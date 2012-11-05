@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config>
-  <property name="Transaction.UseLockFile" value="false" />
+  <property name="NTNoLockFile" value="true" />
   <property name="Engine" value="fr.dyade.aaa.agent.Engine" />
   <property name="Transaction" value="fr.dyade.aaa.util.NullTransaction" />
   <domain name="D0" network="fr.dyade.aaa.agent.SimpleNetwork" />

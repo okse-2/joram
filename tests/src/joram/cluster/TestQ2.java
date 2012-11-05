@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,31 +17,45 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s):Badolle Fabien (ScalAgent D.T.)
  * Contributor(s): 
  */
 package joram.cluster;
 
+import java.util.Hashtable;
 import java.util.Properties;
 
 import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
+import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.AdminHelper;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.ClusterQueue;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
+
+import framework.TestCase;
+
+
 
 /**
- * Configure a producer on the 3 queues of the cluster and a consumer only on the first 2 queues.
- * Verify that each message sent is received (message on the third queues are forwarded to the others).
+ * Test : consumer on queue 0,1 and producer on queue 2.
+ *        check both of two queue receive message
+ *   
  */
-public class TestQ2 extends TestQBase {
+public class TestQ2 extends TestCase {
+
 
   public static void main(String[] args) {
     new TestQ2().run();
@@ -49,88 +63,79 @@ public class TestQ2 extends TestQBase {
 
   public void run() {
     try {
+      System.out.println("server start");
       startAgentServer((short)0);
       startAgentServer((short)1);
       startAgentServer((short)2);
 
-      Properties prop = new Properties();
-      prop.setProperty("period","1000");
-      prop.setProperty("producThreshold","5");
-      prop.setProperty("consumThreshold","2");
-      prop.setProperty("autoEvalThreshold","false");
-      prop.setProperty("waitAfterClusterReq","100");
-      admin(prop);
+      admin();
+      System.out.println("admin config ok");
 
       Context  ictx = new InitialContext();
-
+      
       Queue queue0 = (Queue) ictx.lookup("queue0");
       Queue queue1 = (Queue) ictx.lookup("queue1");
       Queue queue2 = (Queue) ictx.lookup("queue2");
-
-      ConnectionFactory cf0 = (ConnectionFactory) ictx.lookup("cf0");
-      ConnectionFactory cf1 = (ConnectionFactory) ictx.lookup("cf1");
-      ConnectionFactory cf2 = (ConnectionFactory) ictx.lookup("cf2");
+      
+      Destination clusterQueue = (Destination) ictx.lookup("clusterQueue");
+      
+      QueueConnectionFactory qcf0 = (QueueConnectionFactory) ictx.lookup("qcf0");
+      QueueConnectionFactory qcf1 = (QueueConnectionFactory) ictx.lookup("qcf1");
+      QueueConnectionFactory qcf2 = (QueueConnectionFactory) ictx.lookup("qcf2");
 
       ictx.close();
 
-      Connection cnx0a = cf0.createConnection("user", "pass");
-      Session sess0 = cnx0a.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      MsgListenerCluster2 listener0 =new MsgListenerCluster2("recv0 ");
+      MsgListenerCluster2 listener1 =new MsgListenerCluster2("recv1 ");
+
+      Connection cnx0 = qcf0.createConnection("user0","user0");
+      Session sess0 = cnx0.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer recv0 = sess0.createConsumer(queue0);
-      MsgListenerCluster listener0 = new MsgListenerCluster("recv0");
       recv0.setMessageListener(listener0);
-      cnx0a.start();
 
-      Connection cnx1a = cf1.createConnection("user", "pass");
-      Session sess1 = cnx1a.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      Connection cnx1 = qcf1.createConnection("user1","user1");
+      Session sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer recv1 = sess1.createConsumer(queue1);
-      MsgListenerCluster listener1 = new MsgListenerCluster("recv1");
       recv1.setMessageListener(listener1);
-      cnx1a.start();
 
-      Connection cnx0b = cf0.createConnection("user", "pass");
-      Session sess0b = cnx0b.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageProducer producer0 = sess0b.createProducer(queue0);
-      cnx0b.start();
+      Connection cnx2 = qcf2.createConnection("user2","user2");
+      Session sess2 = cnx2.createSession(false,Session.AUTO_ACKNOWLEDGE);
+      MessageProducer producer = sess2.createProducer(null);
 
-      Connection cnx1b = cf1.createConnection("user", "pass");
-      Session sess1b = cnx1b.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageProducer producer1 = sess1b.createProducer(queue1);
-      cnx1b.start();
+      System.setProperty("location", "2");
 
-      Connection cnx2b = cf2.createConnection("user", "pass");
-      Session sess2b = cnx2b.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageProducer producer2 = sess2b.createProducer(queue2);
-      cnx2b.start();
+      cnx0.start();
+      cnx1.start();
+      cnx2.start();
 
-      TextMessage msg = null;
-      int i = 0;
-      for (; i<100; i++) {
-        msg = sess0b.createTextMessage("Test number#0." + i);
-        producer0.send(msg);
+      TextMessage msg = sess2.createTextMessage();
 
-        msg = sess1b.createTextMessage("Test number#1." + i);
-        producer1.send(msg);
-        
-        msg = sess2b.createTextMessage("Test number#2." + i);
-        producer2.send(msg);
+      int j;
+      for (j = 0; j < 100; j++) {
+        msg.setText("Test number " + j);
+        producer.send(clusterQueue, msg);
+
       }
 
-      int nbTry = 50;
-      while (((listener0.nbMsg + listener1.nbMsg) != (3*i)) && (nbTry-- > 0))
-        Thread.sleep(100);
+      int nbTry = 30;
+      while ((listener1.nbMsg + listener0.nbMsg) != j) {
+        Thread.sleep(1000);
+        if (nbTry-- == 0) break;
+      }
+      
+      System.out.println("listener0 / listener1 = " + listener1.nbMsg + " / " + listener0.nbMsg);
+      assertTrue((listener1.nbMsg + listener0.nbMsg) == j);
 
-      System.out.println("listener0/listener1 = " + listener0.nbMsg + " / " + listener1.nbMsg);
-      assertTrue((listener0.nbMsg + listener1.nbMsg) == (3*i));
 
-      cnx0a.close();
-      cnx1a.close();
-      cnx0b.close();
-      cnx1b.close();
-      cnx2b.close();
+      cnx0.close();
+      cnx1.close();
+      cnx2.close();  
+
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
     } finally {
+      System.out.println("Server stop ");
       stopAgentServer((short)0);
       stopAgentServer((short)1);
       stopAgentServer((short)2);
@@ -138,17 +143,96 @@ public class TestQ2 extends TestQBase {
     }
   }
 
-  class MsgListenerCluster implements MessageListener {
+  /**
+   * Admin : Create queue and a user anonymous
+   *   use jndi
+   */
+  public void admin() throws Exception {
+    // conexion 
+    AdminModule admin = new AdminModule();
+    admin.connect("root", "root", 60);
+
+    Properties prop = new Properties();
+    prop.setProperty("period","5");
+    prop.setProperty("producThreshold","25");
+    prop.setProperty("consumThreshold","2");
+    prop.setProperty("autoEvalThreshold","true");
+    prop.setProperty("waitAfterClusterReq","100");
+
+    String ClusterQueueCN = "org.objectweb.joram.mom.dest.ClusterQueue";
+
+    Queue queue0 = Queue.create(0, null, ClusterQueueCN, prop);
+    Queue queue1 = Queue.create(1, null, ClusterQueueCN, prop);
+    Queue queue2 = Queue.create(2, null, ClusterQueueCN, prop);
+
+
+
+    System.out.println("queue0 = " + queue0);
+    System.out.println("queue1 = " + queue1);
+    System.out.println("queue2 = " + queue2);
+
+    User user0 = User.create("user0", "user0", 0);
+    User user1 = User.create("user1", "user1", 1);
+    User user2 = User.create("user2", "user2", 2);
+
+
+    javax.jms.QueueConnectionFactory cf0 =
+      QueueTcpConnectionFactory.create("localhost", 16010);
+    javax.jms.QueueConnectionFactory cf1 =
+      QueueTcpConnectionFactory.create("localhost", 16011);
+    javax.jms.QueueConnectionFactory cf2 =
+      QueueTcpConnectionFactory.create("localhost", 16012);
+
+    AdminHelper.setQueueCluster(queue0,queue1);
+    AdminHelper.setQueueCluster(queue0,queue2);
+
+    queue0.addClusteredQueue(queue1);
+    queue0.addClusteredQueue(queue2);
+
+    Hashtable h = new Hashtable();
+    h.put("0",queue0);
+    h.put("1",queue1);
+    h.put("2",queue2);
+
+    ClusterQueue clusterQueue = new ClusterQueue(h);
+    System.out.println("clusterQueue = " + clusterQueue);
+
+    clusterQueue.setReader(user0);
+    clusterQueue.setWriter(user0);
+    clusterQueue.setReader(user1);
+    clusterQueue.setWriter(user1);
+    clusterQueue.setReader(user2);
+    clusterQueue.setWriter(user2);
+
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    jndiCtx.bind("qcf0", cf0);
+    jndiCtx.bind("qcf1", cf1);
+    jndiCtx.bind("qcf2", cf2);
+    jndiCtx.bind("clusterQueue", clusterQueue);
+    jndiCtx.bind("queue0", queue0);
+    jndiCtx.bind("queue1", queue1);
+    jndiCtx.bind("queue2", queue2);
+    jndiCtx.close();
+
+    admin.disconnect();
+
+  }
+}
+
+
+class MsgListenerCluster2 implements MessageListener
+{
     String ident = null;
     public int nbMsg;
 
-    public MsgListenerCluster(String ident) {
-      nbMsg=0;
-      this.ident = ident;
+    public MsgListenerCluster2() {}
+    
+    public MsgListenerCluster2(String ident) {
+	nbMsg=0;
+	this.ident = ident;
     }
-
+    
     public void onMessage(Message msg) {
-      nbMsg++;
+	nbMsg++;
     }
-  }
 }
