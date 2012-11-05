@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<config>
+
+  <property name="a.HttpDomain.ActivationPeriod" value="10000"/>
+
+  <domain name="a.ApplicationDomain" network="fr.dyade.aaa.agent.SimpleNetwork"/>
+  <domain name="a.HttpDomain" network="fr.dyade.aaa.agent.HttpNetwork"/>
+  <domain name="D0" network="fr.dyade.aaa.agent.SimpleNetwork"/>
+
+  <server hostname="localhost" id="2" name="a.local">
+    <network domain="a.HttpDomain" port="0"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="28303"/>
+  </server>
+
+  <server hostname="localhost" id="1" name="a.central">
+    <network domain="a.HttpDomain" port="4040"/>
+    <network domain="a.ApplicationDomain" port="27301"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="27303"/>
+  </server>
+
+  <server hostname="localhost" id="0" name="s0">
+    <network domain="D0" port="16000"/>
+    <network domain="a.ApplicationDomain" port="26000"/>
+    <service class="fr.dyade.aaa.agent.AgentAdmin" args=""/>
+  </server>
+
+</config>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Specification</title>
+    <filename>technical.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+
+    <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
+
+      <subtitle>As a standalone software, JORAM has been downloaded
+                more than 22,000 times</subtitle>
+
+      <table border="0">
+      <tr>
+        <td><img src="images/joram.jpg" alt="JORAM logo" height="132" width="287" border="0" hspace="2"/></td>
+	      <td valign="middle"></td>
+      </tr>
+      </table>
+      
+      <p><strong>JORAM</strong> incorporates a 100% pure Java implementation of <strong>JMS</strong>
+      (Java Message Service API released by Sun Microsystem, Inc.). It provides access to a MOM
+      (Message Oriented Middleware), built on top of the <a href="http://www.scalagent.com/">ScalAgent D.T.</a>
+      agents based distributed platform.</p>
+      <p> JORAM is an <strong>open source</strong> software released under the <strong>LGPL</strong> license.</p>
+
+      <s2 name="Specification">
+
+        <p>JORAM provides full support to <strong>JMS 1.1</strong>:</p>
+        <ul>
+          <li>Unified interfaces for the Point-to-Point (PTP) and
+            Publish/Subscribe (Pub/Sub) messaging models</li>
+          <li><strong>AND</strong> still the semantically specific PTP and
+            Pub/Sub interfaces</li>
+          <li>Full backward compatibility with JMS 1.0.2b compliant
+            applications</li>
+          <li>Local, TCP and SOAP (HTTP/XML) client-server communication
+              protocols</li>
+          <li>Message persistence and guarantee of delivery</li>
+          <li>Hierarchical topics</li>
+          <li>Message selection</li>
+          <li>Message prioritization</li>
+          <li>A JCA 1.5 Resource Adapter</li>
+        </ul>
+        
+        <p>JORAM also includes the following extra-features:</p>
+        <ul>
+          <li>A persistent, reliable and distributed JNDI server</li>
+          <li>A configurable dead message queue</li>
+          <li>Load balancing through clustered topics and queues</li>
+          <li>Monitoring methods</li>
+          <li>A bridge feature allowing to link JORAM to any JMS compliant messaging platform</li>
+          <li>Client libraries allowing J2ME applications to access the JORAM platform in a JMS 1.1 "way"</li>
+          <li>Client libraries allowing C or C++ applications to access the JORAM platform in a JMS 1.1 "way"</li>
+          <li>High Availability provides the active replication of Joram servers and underlying agent servers,
+          as well as replicated JORAM clients. It transparently handles network handover and server failover.
+          This version currently relies on the use of  JGroups.</li>
+          <li>Dynamic Configuration provides facilities to remotely add and remove Joram servers dynamically
+          through the Administration API of JORAM. This great feature, combined with updated JMX implementation,
+          initiates a new set of  management facilities in JORAM.</li>
+        </ul>
+      </s2>
+
+      <s2 name="Getting Involved">
+	
+      <p>Any input or personal view for improving and/or developing JORAM is welcome. JORAM, as an
+      <strong>open source</strong> project, also welcomes <strong>external contributions</strong>.
+      Interested? Contact <a href="mailto:joram-team@ow2.org">us</a> or check the
+      <a href="dev/corner.html">developer's corner</a>.</p>
+
+      </s2>  
+    </s1>
+  </body>
+</document>

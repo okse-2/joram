@@ -1,0 +1,28 @@
+#!/bin/sh
+
+export LD_LIBRARY_PATH=.
+
+make clean tests
+
+../tests/common/testxstream
+../tests/common/testvector
+../tests/common/testproperties
+../tests/common/testdaemon
+../tests/common/testsynchro
+../tests/common/testxqueue
+
+../tests/base/test1
+../tests/base/test2
+../tests/base/test3
+../tests/base/test4
+../tests/base/test5
+../tests/base/test6
+../tests/base/test7
+../tests/base/test8
+
+../tests/perfs/test1 producer & ../tests/perfs/test1 consumer
+../tests/perfs/test2 producer & ../tests/perfs/test2 consumer
+../tests/perfs/test3 producer & ../tests/perfs/test3 consumer
+../tests/perfs/test4 producer & ../tests/perfs/test4 consumer
+../tests/perfs/test5 producer & ../tests/perfs/test5 consumer
+
