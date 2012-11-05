@@ -1724,6 +1724,19 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
+  <target name="client.ClientTest28" depends="init.a3props,compile"
+          description=" --> Verify the client context cleaning with HeartBeat task.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.client.ClientTest28"/>
+      <param name="jndiconf" value="client/jndi.properties"/>
+      <param name="a3conf" value="client/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="testid" value="client.ClientTest28"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
   <!-- fin test client -->
 
 	<!-- connection tests -->
