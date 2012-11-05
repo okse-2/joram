@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -46,6 +46,7 @@ import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.BagSerializer;
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.agent.WakeUpTask;
@@ -165,6 +166,8 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
       doReact((GetConnectionNot) not);
     } else if (not instanceof CloseConnectionNot) {
       doReact((CloseConnectionNot) not);
+    } else if (not instanceof CloseConnectionNot2) {
+        doReact((CloseConnectionNot2) not);
     } else if (not instanceof ResetCollocatedConnectionsNot) {
       doReact((ResetCollocatedConnectionsNot) not);
     } else if (not instanceof SendReplyNot) {
@@ -225,8 +228,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     }
 
     if (not.getHeartBeat() > 0) {
-      HeartBeatTask heartBeatTask = new HeartBeatTask(2 * not.getHeartBeat(),
-                                                      objKey);
+      HeartBeatTask heartBeatTask = new HeartBeatTask(not.getHeartBeat(), objKey, getId());
       heartBeatTasks.put(objKey, heartBeatTask);
       heartBeatTask.start();
     }
@@ -328,8 +330,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
   private void doReact(CloseConnectionNot not) {
     if (connections != null) {
       Integer key = new Integer(not.getKey());
-      // The connection may have already been 
-      // explicitely closed by a CnxCloseRequest.
+      // The connection may have already been explicitly closed by a CnxCloseRequest.
       if (connections.remove(key) != null) {
         proxyImpl.reactToClientRequest(not.getKey(), new CnxCloseRequest());
         heartBeatTasks.remove(key);
@@ -339,6 +340,21 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     // 1- CloseConnectionNot is transient
     // 2- CloseConnectionNot follows an OpenConnectionNot
     // or a GetConnectionNot
+  }
+  
+  private void doReact(CloseConnectionNot2 not) {
+	if (connections != null) {
+	  Integer key = new Integer(not.getKey());
+	  ConnectionContext ctx = (ConnectionContext) connections.remove(key);
+	  heartBeatTasks.remove(key);
+	  proxyImpl.reactToClientRequest(not.getKey(), new CnxCloseRequest());
+
+	  if (ctx != null) {
+	    MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
+	                                        + ':' + key + " closed");
+	    ctx.pushError(exc);
+	  }
+	}
   }
 
   private void doReact(ResetCollocatedConnectionsNot not) {
@@ -427,8 +443,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
    * Timer task responsible for closing the connection if 
    * it has not sent any requests for the duration 'timeout'.
    */
-  class HeartBeatTask extends fr.dyade.aaa.util.TimerTask implements
-  java.io.Serializable {
+  class HeartBeatTask extends fr.dyade.aaa.util.TimerTask implements java.io.Serializable {
     /**
      * 
      */
@@ -440,22 +455,24 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
 
     private long lastRequestDate;
 
-    HeartBeatTask(int timeout, Integer key) {
+    private transient AgentId userId = null;
+    
+    HeartBeatTask(int timeout, Integer key, AgentId userId) {
       this.timeout = timeout;
       this.key = key;
+      this.userId = userId;
     }
 
     public void run() {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "HeartBeatTask: run");
+
       long date = System.currentTimeMillis();
       if ((date - lastRequestDate) > timeout) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "HeartBeatTask: close connection");
-        ConnectionContext ctx = (ConnectionContext) connections.remove(key);
-        heartBeatTasks.remove(key);
-        proxyImpl.reactToClientRequest(key.intValue(), new CnxCloseRequest());
-        MomException exc = new MomException(MomExceptionReply.HBCloseConnection,
-                                            "Connection " + getId() + ':' + key + " closed");
-        ctx.pushError(exc);
+        if (logger.isLoggable(BasicLevel.INFO))
+          logger.log(BasicLevel.INFO, "HeartBeatTask: close connection");
+            
+          Channel.sendTo(userId, (Notification) new CloseConnectionNot(key.intValue()));
       } else {
         start();
       }
@@ -463,13 +480,15 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
 
     public void start() {
       try {
-        AgentServer.getTimer().schedule(this, timeout);
+        AgentServer.getTimer().schedule(this, timeout/2);
       } catch (Exception exc) {
         throw new Error(exc.toString());
       }
     }
 
     public void touch() {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "HeartBeatTask: touch", new Exception());
       lastRequestDate = System.currentTimeMillis();
     }
   }
