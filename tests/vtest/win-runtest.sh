@@ -25,7 +25,7 @@ echo "installing joram trunk"
 mvn install >> $LOGFILE 2>&1
 
 #following command suppose that svn check out has been made into path $VTEST_HOME/joram
-cd $VTEST_HOME/joram ;
+cd $VTEST_HOME/joram-test ;
 
 #installing joram tests using maven
 echo "installing joram tests"
@@ -57,9 +57,9 @@ if [[ $TEST_RESULT -gt 0 ]]; then
 else
     echo "TEST OK";
     # uncomment when using real joram test
-    # cp $VTEST_HOME/joram/src/jndi2/report.txt results/jndi2-report.txt;
-    # cp $VTEST_HOME/joram/src/joram/report.txt results/joram-report.txt;
-    # cp $VTEST_HOME/joram/src/jms/report.txt results/jms-report.txt;
+    # cp $VTEST_HOME/joram-test/src/jndi2/report.txt results/jndi2-report.txt;
+    # cp $VTEST_HOME/joram-test/src/joram/report.txt results/joram-report.txt;
+    # cp $VTEST_HOME/joram-test/src/jms/report.txt results/jms-report.txt;
     jar cf $ZIPFILE results;
     mv $ZIPFILE ~
     exit 0;
