@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- *
+ * 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -188,14 +188,14 @@ char* get_destination_message_producer(char* producer) {
   return (char*) prod->getDestination();
 }
 
-void send_message_ttl(char* producer,
-                     char* message,
+void send_message_ttl(char* producer, 
+                     char* message, 
                      char* destination,
                      int deliveryMode,
                      int priority,
                      long timeToLive) {
   if (WRAPPER_DEBUG)
-    printf("XoramWrapper: send_message(0x%x,0x%x,0x%x,%d,%d,%d)\n",
+    printf("XoramWrapper: send_message(0x%x,0x%x,0x%x,%d,%d,%d)\n", 
            producer, message, destination, deliveryMode, priority, timeToLive);
   Message* msg = (Message*) message;
   MessageProducer* prod = (MessageProducer*) producer;
@@ -316,20 +316,6 @@ boolean get_boolean_property(char* message, char* name) {
   return msg->getBooleanProperty(name);
 }
 
-void set_body(char* message, int length, byte* body) {
-  if (WRAPPER_DEBUG)
-    printf("XoramWrapper: set_body(0x%x,%d,0x%x)\n", message, length, body);
-  Message* msg = (Message*) message;
-  msg->setBody(length, body);
-}
-
-void get_body(char* message,int* length, byte** body) {
-  if (WRAPPER_DEBUG)
-    printf("XoramWrapper: get_body(0x%x)\n", message);
-  Message* msg = (Message*) message;
-  msg->getBody(length, body);
-}
-
 byte get_byte_property(char* message, char* name) {
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: get_byte_property(0x%x,%s)\n", message, name);
@@ -351,7 +337,7 @@ float get_float_property(char* message, char* name) {
   return msg->getFloatProperty(name);
 }
 
-int get_int_property(char* message, char* name) {
+int get_int_property(char* message, char* name) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: get_int_property(0x%x,%s)\n", message, name);
   Message* msg = (Message*) message;
@@ -372,14 +358,14 @@ short get_short_property(char* message, char* name) {
   return msg->getShortProperty(name);
 }
 
-char* get_string_property(char* message, char* name) {
+char* get_string_property(char* message, char* name) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: get_string_property(0x%x,%s)\n", message, name);
   Message* msg = (Message*) message;
   return msg->getStringProperty(name);
 }
 
-void set_boolean_property(char* message, char* name, boolean value) {
+void set_boolean_property(char* message, char* name, boolean value) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: set_boolean_property(0x%x,%s,%b)\n", message, name, value);
   Message* msg = (Message*) message;
@@ -393,56 +379,56 @@ void set_byte_property(char* message, char* name, byte value) {
   msg->setByteProperty(name, value);
 }
 
-void set_double_property(char* message, char* name, double value) {
+void set_double_property(char* message, char* name, double value) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: set_double_property(0x%x,%s,%d)\n", message, name, value);
   Message* msg = (Message*) message;
   msg->setDoubleProperty(name, value);
 }
 
-void set_float_property(char* message, char* name, float value) {
+void set_float_property(char* message, char* name, float value) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: set_float_property(0x%x,%s,%f)\n", message, name, value);
   Message* msg = (Message*) message;
   msg->setFloatProperty(name, value);
 }
 
-void set_int_property(char* message, char* name, int value) {
+void set_int_property(char* message, char* name, int value) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: set_int_property(0x%x,%s,%i)\n", message, name, value);
   Message* msg = (Message*) message;
   msg->setIntProperty(name, value);
 }
 
-void set_long_property(char* message, char* name, long value) {
+void set_long_property(char* message, char* name, long value) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: set_long_property(0x%x,%s,%d)\n", message, name, value);
   Message* msg = (Message*) message;
   msg->setLongProperty(name, value);
 }
 
-void set_short_property(char* message, char* name, short value) {
+void set_short_property(char* message, char* name, short value) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: set_short_property(0x%x,%s,%d)\n", message, name, value);
   Message* msg = (Message*) message;
   msg->setShortProperty(name, value);
 }
 
-void set_string_property(char* message, char* name, char* value) {
+void set_string_property(char* message, char* name, char* value) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: set_string_property(0x%x,%s,%s)\n", message, name, value);
   Message* msg = (Message*) message;
   msg->setStringProperty(name, value);
 }
 
-char* clone_message(char* message) {
+char* clone_message(char* message) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: clone_message(0x%x)\n", message);
   Message* msg = (Message*) message;
   return (char*) msg->clone();
 }
 
-long long get_timestamp(char* message) {
+long long get_timestamp(char* message) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: get_timestamp(0x%x)\n", message);
   Message* msg = (Message*) message;
@@ -450,35 +436,35 @@ long long get_timestamp(char* message) {
 }
 
 // Destination
-char* get_replyto(char* message) {
+char* get_replyto(char* message) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: get_replyto(0x%x)\n", message);
   Message* msg = (Message*) message;
   return (char*) msg->getReplyTo();
 }
 
-char* get_destination(char* message) {
+char* get_destination(char* message) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: get_destination(0x%x)\n", message);
   Message* msg = (Message*) message;
   return (char*) msg->getDestination();
 }
 
-void set_destination(char* message, char* destination) {
+void set_destination(char* message, char* destination) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: set_destination(0x%x,0x%x)\n", message, destination);
   Message* msg = (Message*) message;
   msg->setDestination((Destination*) destination);
 }
 
-char* get_message_id(char* message) {
+char* get_message_id(char* message) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: get_message_id(0x%x)\n", message);
   Message* msg = (Message*) message;
   return msg->getMessageID();
 }
 
-boolean get_redelivered(char* message) {
+boolean get_redelivered(char* message) { 
   if (WRAPPER_DEBUG)
     printf("XoramWrapper: get_redelivered(0x%x)\n", message);
   Message* msg = (Message*) message;

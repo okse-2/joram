@@ -27,7 +27,7 @@ import java.io.FileReader;
 /**
  * This class checks the report file to find 'FAILED' occurrences and exits in
  * an error status if found. This is useful to show errors when running tests on
- * <a href="http://bamboo.ow2.org/">bamboo</a>.
+ * <a href="http://forge.ow2.org/bamboo/browse/JORAM">bamboo</a>.
  */
 public class CheckReportFile {
 

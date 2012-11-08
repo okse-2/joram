@@ -258,12 +258,15 @@ AdminReply::~AdminReply() {
 void AdminReply::writeTo(OutputStream *os) throw (IOException) {
   if (os->writeBoolean(success) == -1) throw IOException();
   if (os->writeString(info) == -1) throw IOException();
+  if (os->writeByte((byte)-1) == -1) throw IOException();//replyObj not used in Xoram
   if (os->writeInt(errorCode) == -1) throw IOException();
 }
 
 void AdminReply::readFrom(InputStream *is) throw (IOException) {
   if (is->readBoolean(&success) == -1) throw IOException();
   if (is->readString(&info) == -1) throw IOException();
+  byte replyObj;
+  if (is->readByte(&replyObj) == -1) throw IOException();
   if (is->readInt(&errorCode) == -1) throw IOException();
 }
 
@@ -278,7 +281,7 @@ CreateDestinationRequest::CreateDestinationRequest(int serverId,
                                                    char* name,
                                                    char* className,
                                                    Properties* props,
-                                                   byte expectedType) : AdminRequest() {
+                                                   char* expectedType) : AdminRequest() {
   classid = CREATE_DESTINATION_REQUEST;
   this->serverId = serverId;
   this->name = name;
@@ -299,7 +302,7 @@ void CreateDestinationRequest::writeTo(OutputStream *os) throw (IOException) {
   if (os->writeString(name) == -1)  throw IOException();
   if (os->writeString(className) == -1)  throw IOException();
   os->writeProperties(props);
-  if (os->writeByte(expectedType) == -1)  throw IOException();
+  if (os->writeString(expectedType) == -1)  throw IOException();
 }
 
 void CreateDestinationRequest::readFrom(InputStream *is) throw (IOException) {
@@ -307,7 +310,7 @@ void CreateDestinationRequest::readFrom(InputStream *is) throw (IOException) {
   if (is->readString(&name) == -1)  throw IOException();
   if (is->readString(&className) == -1)  throw IOException();
   props = is->readProperties();
-  if (is->readByte(&expectedType) == -1)  throw IOException();
+  if (is->readString(&expectedType) == -1)  throw IOException();
 }
 
 // ######################################################################
@@ -320,7 +323,7 @@ CreateDestinationReply::CreateDestinationReply() : AdminReply() {
 
 CreateDestinationReply::CreateDestinationReply(char* id,
                                                char* name,
-                                               byte type,
+                                               char* type,
                                                char* info) : AdminReply(TRUE, info) {
   classid = CREATE_DESTINATION_REPLY;
   this->id = id;
@@ -342,14 +345,14 @@ void CreateDestinationReply::writeTo(OutputStream *os) throw (IOException) {
   AdminReply::writeTo(os);
   if (os->writeString(id) == -1)  throw IOException();
   if (os->writeString(name) == -1)  throw IOException();
-  //if (os->writeByte(type) == -1)  throw IOException();
+  if (os->writeString(type) == -1)  throw IOException();
 }
 
 void CreateDestinationReply::readFrom(InputStream *is) throw (IOException) {
   AdminReply::readFrom(is);
   if (is->readString(&id) == -1)  throw IOException();
   if (is->readString(&name) == -1)  throw IOException();
-  //if (is->readByte(&type) == -1)  throw IOException();
+  if (is->readString(&type) == -1)  throw IOException();
 }
 
 // ######################################################################

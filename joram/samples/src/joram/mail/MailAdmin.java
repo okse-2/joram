@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,6 @@ package mail;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -37,31 +36,31 @@ public class MailAdmin {
     System.out.println("mail administration...");
 
     AdminModule.connect("root", "root", 60);
-
-    // Create a topic forwarding its messages to the configured email address.
     Properties prop = new Properties();
-    prop.load(new FileInputStream("smtp.properties"));
-    prop.put("distribution.className", "com.scalagent.joram.mom.dest.mail.MailDistribution");
-    Topic topic = Topic.create(0, null, Destination.DISTRIBUTION_TOPIC, prop);
-
-    // Create a queue getting its messages from the configured email address.
-    prop = new Properties();
     prop.load(new FileInputStream("pop.properties"));
-    prop.put("acquisition.className", "com.scalagent.joram.mom.dest.mail.MailAcquisition");
-    Queue queue = Queue.create(0, null, Destination.ACQUISITION_QUEUE, prop);
+ 
+    Queue queue = Queue.create(0, null,
+                               "com.scalagent.joram.mom.dest.mail.JavaMailQueue",prop);
+
+    prop = new Properties();
+    prop.load(new FileInputStream("smtp.properties"));
+    Topic topic = Topic.create(0,null,
+                               "com.scalagent.joram.mom.dest.mail.JavaMailTopic",prop);
 
     javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
 
     User.create("anonymous", "anonymous", 0);
 
-    topic.setFreeWriting();
-
     queue.setFreeReading();
+    queue.setFreeWriting();
+
+    topic.setFreeReading();
+    topic.setFreeWriting();
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);
-    jndiCtx.bind("receiveMailQueue", queue);
-    jndiCtx.bind("sendMailTopic", topic);
+    jndiCtx.bind("mailQueue", queue);
+    jndiCtx.bind("mailTopic", topic);
     jndiCtx.close();
 
     AdminModule.disconnect();

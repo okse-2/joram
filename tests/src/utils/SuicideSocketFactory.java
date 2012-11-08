@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,15 +26,15 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.net.SocketFactory;
+import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.util.SocketFactory;
+import fr.dyade.aaa.util.Timer;
+import fr.dyade.aaa.util.TimerTask;
 
 /**
  * This class implements a SocketFactory. Sockets created by this factory are
@@ -88,7 +88,7 @@ public class SuicideSocketFactory extends SocketFactory {
     }
     
     try {
-      Timer timer = new Timer(true);
+      Timer timer = new Timer();
       timer.schedule(new SuicideSocketTask(socket, timer), MIN_SURVIVAL_TIME + extraTime);
       if (logger.isLoggable(BasicLevel.DEBUG)) {
         logger.log(BasicLevel.DEBUG, "Socket will be destroyed in " + (MIN_SURVIVAL_TIME + extraTime) + " ms.");

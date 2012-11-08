@@ -23,6 +23,7 @@
 package joram.perfs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.jms.BytesMessage;
 import javax.jms.Connection;

@@ -25,13 +25,10 @@
   <!-- Initialize the directory structure properties -->
   <property name="src.dir" location=".."/>
   <property name="obj.dir" location="../../classes"/>
-  <property name="ship.dir" location="../../ship"/>
+  <!-- property name="ship.dir" location="../../joram/ship"/ -->
   <property name="lib.dir" location="${ship.dir}/lib"/>
   <property name="test.dir" location="../../run"/>
   <property name="testlib.dir" location="../../lib"/>
-  <property name="felix.dir" location="${ship.dir}/bin"/>
-  <property name="bundle.dir" location="${ship.dir}/bundle"/>
-  <property name="bin.dir" location="${ship.dir}/bin"/>
   <!-- creates the directory when no file has been extracted -->
   <mkdir dir="${testlib.dir}"/>
 
@@ -47,31 +44,10 @@
     <fileset dir="${testlib.dir}">
       <include name="*.jar"/>
     </fileset>
-    <fileset dir="${bundle.dir}">
-      <include name="*.jar"/>
-    </fileset>
-    <fileset dir="${bin.dir}">
-      <include name="*.jar"/>
-    </fileset>
     <pathelement path="${obj.dir}"/>
-  </path>
-  
-  <!-- Default SCAdmin class : "framework.SCAdminClassic" or "framework.SCAdminOSGi" -->
-  <property name="SCAdminClass" value="framework.SCAdminClassic" />
-  
-  <!-- Creates the felix directory. This is useful if the JORAM OSGi
-    shipment has not been done to avoid a build error when defining
-    felix.class.path property. -->
-  <mkdir dir="${felix.dir}"/>
-  <path id="felix.class.path">
-    <pathelement path="${java.class.path}/"/>
-    <fileset dir="${felix.dir}">
-      <include name="*.jar"/>
-    </fileset>
   </path>
 
   <property name="project.class.path" refid="project.class.path"/>
-  <property name="felix.class.path" refid="felix.class.path"/>
 </target>
 
 <target name="clean" depends="init"
@@ -95,8 +71,7 @@
          optimize="${optimize}"
          deprecation="${deprecation}"
          nowarn="${nowarn}"
-         verbose="${verbose}"
-         includeantruntime="false">
+         verbose="${verbose}">
     <classpath refid="project.class.path"/>
     <include name="framework/*.java"/>
     <include name="utils/*.java"/>

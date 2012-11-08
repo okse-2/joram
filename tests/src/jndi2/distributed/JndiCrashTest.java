@@ -61,34 +61,37 @@ public class JndiCrashTest extends TestCase {
       
       System.out.println("Start s0");
       startAgentServer(
-        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+        (short)0, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
       
       System.out.println("Start s1");
       startAgentServer(
-          (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+          (short)1, (File)null, 
+          new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
       
       System.out.println("Start s2");
       startAgentServer(
-          (short)2, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+          (short)2, (File)null, 
+          new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
         
       Thread.sleep(3000);
       
       Hashtable env0 = new Hashtable();
       env0.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env0.put(NAMING_HOST_PROP, LOCALHOST);
-      env0.put(NAMING_PORT_PROP, "16600");
+      env0.put(NAMING_PORT_PROP, "16400");
       InitialContext ctx0 = new InitialContext(env0);
       
       Hashtable env1 = new Hashtable();
       env1.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env1.put(NAMING_HOST_PROP, LOCALHOST);
-      env1.put(NAMING_PORT_PROP, "16681");
+      env1.put(NAMING_PORT_PROP, "16401");
       InitialContext ctx1 = new InitialContext(env1);
       
       Hashtable env2 = new Hashtable();
       env2.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env2.put(NAMING_HOST_PROP, LOCALHOST);
-      env2.put(NAMING_PORT_PROP, "16682");
+      env2.put(NAMING_PORT_PROP, "16402");
       InitialContext ctx2 = new InitialContext(env2);
       
       ctx0.bind("/A", "A");
@@ -104,7 +107,8 @@ public class JndiCrashTest extends TestCase {
       deleteDirectory(s1);
       
       startAgentServer(
-          (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+          (short)1, (File)null, 
+          new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
         
       Thread.sleep(4000);
       

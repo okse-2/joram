@@ -1,0 +1,353 @@
+<?xml version="1.0"?>
+
+<project default="init" basedir=".">
+
+  <!-- Initializes the environment paths and properties -->
+  <target name="init">
+    <!-- Initializes the directory structure properties -->
+    <property name="lib.dir" location="ship/lib"/>
+    <property name="run.dir" location="samples/run"/>
+    <property name="conf.dir" location="samples/config"/>
+    <property name="tmp.dir" location="tmp"/>
+    <!-- Project classpath needed for execution -->
+    <path id="project.class.path">
+      <pathelement path="${java.class.path}/"/>
+      <fileset dir="${lib.dir}">
+         <include name="*.jar"/>
+      </fileset>
+      <pathelement path="${run.dir}"/>
+    </path>
+    <property name="project.class.path" refid="project.class.path"/>
+  </target>
+
+  <!-- Runs the Admin GUI -->
+  <target name="gui" depends="init"
+    description="--> Starts Joram GUI client">
+    <java classname="org.objectweb.joram.client.tools.admin.AdminTool"
+          failonerror="no" fork="yes"
+          dir=".">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the RA config 
+  <target name="raconfig" depends="init"
+    description=" Starts the RA config">
+    <java classname="org.objectweb.joram.client.connector.utils.RAConfig"
+          failonerror="no" fork="yes"
+          dir=".">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+  -->
+
+<!-- ***************************************************************** -->
+<!-- *                  Update Joram in JOnAS                        * -->
+<!-- ***************************************************************** -->
+  <target name="jonas.env" depends="init">
+    <property environment="env"/>
+    <condition property="jonas.root" value="${env.JONAS_ROOT}">
+      <and>
+        <isset property="env.JONAS_ROOT"/>
+      </and>
+    </condition>
+    <fail message="You have to define the JONAS_ROOT environnement variable or the jonas.root property"
+          unless="jonas.root"/>
+    <condition property="jonas.base" value="${env.JONAS_BASE}">
+      <and>
+        <isset property="env.JONAS_BASE"/>
+      </and>
+    </condition>
+    <echo message="JONAS_ROOT=${jonas.root}"/>
+    <echo message="JONAS_BASE=${jonas.base}"/>
+    <available file="${jonas.root}/lib/commons/jonas/joram" type="dir"
+               property="jonas.root.lib.present"/>
+    <available file="${jonas.base}/lib/commons/jonas/joram" type="dir"
+               property="jonas.base.lib.present"/>
+    <available file="${jonas.root}/rars/joram_for_jonas_ra.rar" 
+               property="jonas.root.rars.present"/>
+    <available file="${jonas.base}/rars/joram_for_jonas_ra.rar" 
+               property="jonas.base.rars.present"/>
+    <available file="${jonas.root}/rars/autoload/joram_for_jonas_ra.rar" 
+               property="jonas.root.rars.auto.present"/>
+    <available file="${jonas.base}/rars/autoload/joram_for_jonas_ra.rar" 
+               property="jonas.base.rars.auto.present"/>
+    <available file="${jonas.root}/lib/client.jar" 
+               property="jonas.root.clt.present"/>
+    <available file="${jonas.base}/lib/client.jar" 
+               property="jonas.base.clt.present"/>
+  </target>
+
+  <target name="putJoramInJonas"
+          depends="jonas.env"
+          description="--> Install Joram into JOnAS (updating librairies)">
+    <antcall target="putJarInJonasRoot" inheritAll="true"/>
+    <antcall target="putJarInJonasBase" inheritAll="true"/>
+    <antcall target="putRarInJonasRoot" inheritAll="true"/>
+    <antcall target="putRarInJonasBase" inheritAll="true"/>
+    <antcall target="putRarInJonasRootAuto" inheritAll="true"/>
+    <antcall target="putRarInJonasBaseAuto" inheritAll="true"/>
+    <antcall target="updateClientInJonasRoot" inheritAll="true"/>
+    <antcall target="updateClientInJonasBase" inheritAll="true"/>
+  </target>
+
+  <target name="putJarInJonasRoot" if="jonas.root.lib.present">
+    <copy toDir="${jonas.root}/lib/commons/jonas/joram" overwrite="true">
+      <fileset dir="${lib.dir}">
+        <include name="joram-client.jar"/>
+        <include name="joram-connector.jar"/>
+        <include name="joram-mom.jar"/>
+        <include name="joram-shared.jar"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="putJarInJonasBase" if="jonas.base.lib.present">
+    <copy toDir="${jonas.base}/lib/commons/jonas/joram" overwrite="true">
+      <fileset dir="${lib.dir}">
+        <include name="joram-client.jar"/>
+        <include name="joram-connector.jar"/>
+        <include name="joram-mom.jar"/>
+        <include name="joram-shared.jar"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="putRarInJonasRoot" if="jonas.root.rars.present">
+    <copy file="${lib.dir}/joram_for_jonas_ra.rar" toDir="${jonas.root}/rars" overwrite="true"/>
+  </target>
+
+  <target name="putRarInJonasBase" if="jonas.base.rars.present">
+    <copy file="${lib.dir}/joram_for_jonas_ra.rar" toDir="${jonas.base}/rars" overwrite="true"/>
+  </target>
+
+  <target name="putRarInJonasRootAuto" if="jonas.root.rars.auto.present">
+    <copy file="${lib.dir}/joram_for_jonas_ra.rar" toDir="${jonas.root}/rars/autoload" overwrite="true"/>
+  </target>
+
+  <target name="putRarInJonasBaseAuto" if="jonas.base.rars.auto.present">
+    <copy file="${lib.dir}/joram_for_jonas_ra.rar" toDir="${jonas.base}/rars/autoload" overwrite="true"/>
+  </target>
+
+  <target name="updateClientInJonasRoot" if="jonas.root.clt.present">
+    <delete dir="${tmp.dir}"/>
+    <mkdir dir="${tmp.dir}"/>
+    <unzip src="${lib.dir}/joram-client.jar" dest="${tmp.dir}"/>
+    <unzip src="${lib.dir}/joram-shared.jar" dest="${tmp.dir}"/>
+    <unzip src="${lib.dir}/joram-connector.jar" dest="${tmp.dir}"/>
+    <jar destfile="${jonas.root}/lib/client.jar" 
+         update="true"
+         basedir="${tmp.dir}">
+    </jar>
+    <delete dir="${tmp.dir}"/>
+  </target>
+  <target name="updateClientInJonasBase" if="jonas.base.clt.present">
+   <delete dir="${tmp.dir}"/>
+    <mkdir dir="${tmp.dir}"/>
+    <unzip src="${lib.dir}/joram-client.jar" dest="${tmp.dir}"/>
+    <unzip src="${lib.dir}/joram-shared.jar" dest="${tmp.dir}"/>
+    <unzip src="${lib.dir}/joram-connector.jar" dest="${tmp.dir}"/>
+    <jar destfile="${jonas.base}/lib/client.jar" 
+         update="true"
+         basedir="${tmp.dir}">
+    </jar>
+    <delete dir="${tmp.dir}"/>
+  </target>
+
+
+<!-- ***************************************************************** -->
+<!-- *                            Server                             * -->
+<!-- ***************************************************************** -->
+  <!-- Initializes the centralized configuration -->
+  <target name="simple_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}" failonerror="false"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/jndi.properties"/>
+    <copy file="${conf.dir}/centralized_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+
+  <!-- Initializes the distributed configuration -->
+  <target name="distributed_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}" failonerror="false"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/jndi.properties"
+          overwrite="true"/>
+    <copy file="${conf.dir}/distributed_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+
+  <!-- Initializes the soap configuration -->
+  <target name="soap_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}" failonerror="false"/>
+    <copy file="${conf.dir}/soap_jndi.properties"
+          tofile="${run.dir}/jndi.properties"
+          overwrite="true"/>
+    <copy file="${conf.dir}/soap_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+
+  <!-- Starts a server -->
+  <target name="server" depends="init">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line="${sid} ./s${sid}"/>
+    </java>
+  </target>
+
+  <!-- Start a server in NullTransaction mode -->
+  <target name="single_server" depends="simple_init"
+          description="--> Starts a single server in non-persistent mode">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+
+  <!-- Setup a distributed architecture -->
+  <target name="server0" depends="distributed_init"
+          description="--> Starts a server for a distributed architecture (w/ id 0)">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+  <target name="server1" depends="distributed_init"
+          description="--> Starts a server for a distributed architecture (w/ id 1)">
+    <antcall target="server">
+      <param name="sid" value="1"/>
+    </antcall>
+  </target>
+  <target name="server2" depends="distributed_init"
+          description="--> Starts a server for a distributed architecture (w/ id 2)">
+    <antcall target="server">
+      <param name="sid" value="2"/>
+    </antcall>
+  </target>
+
+  <target name="servers"
+          description="--> Starts all servers">
+    <parallel>
+      <antcall target="server0"/>
+      <antcall target="server1"/>
+      <antcall target="server2"/>
+    </parallel>
+  </target>
+
+  <!-- Starts the server side soap service -->
+  <target name="soap_start" depends="soap_init"
+   description="--> Starts the server side soap service">
+    <java classname="org.objectweb.joram.client.jms.soap.SoapServiceStarter"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="localhost 8080 1 S1"/>
+    </java>
+  </target>
+
+  <!-- Starts the server 1 of the soap configuration -->
+  <target name="soap_server" depends="soap_init"
+   description="--> Starts server 0 of the SOAP configuration">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="0 ./s0"/>
+    </java>
+  </target>
+
+<!-- ***************************************************************** -->
+<!-- *                            SSL                                * -->
+<!-- ***************************************************************** -->
+  <target name="sslinit" depends="init">
+    <property name="keystore" location="${run.dir}/joram_ks"/>
+    <property name="keystore_pass" value="passpass"/>
+  </target>
+
+  <!-- Initializes the ssl centralized configuration -->
+  <target name="sslsimple_init" depends="sslinit">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}" failonerror="false"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/jndi.properties"/>
+    <copy file="${conf.dir}/sslcentralized_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+    <copy file="${conf.dir}/joram_ks" todir="${run.dir}"/>
+    <property name="keystore" location="${run.dir}/joram_ks"/>
+    <property name="keystore_pass" value="passpass"/>
+  </target>
+
+  <!-- Start a server in NullTransaction mode -->
+  <target name="sslsingle_server" depends="sslsimple_init">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
+      <arg line="0 s0"/>
+    </java>
+  </target>
+
+<!-- ***************************************************************** -->
+<!-- *                            HA                                 * -->
+<!-- ***************************************************************** -->
+  <!-- Initializes the HA configuration -->
+  <target name="ha_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <mkdir dir="${run.dir}/ha${haId}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}/ha${haId}" failonerror="false"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/ha${haId}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/ha${haId}/jndi.properties"
+          overwrite="true"/>
+    <copy file="${conf.dir}/ha_a3servers.xml"
+          tofile="${run.dir}/ha${haId}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+
+  <!-- Starts a HA server -->
+  <target name="ha_server" depends="ha_init">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}/ha${haId}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line="${sid} ./s${sid} ${haId}"/>
+    </java>
+  </target>
+
+  <target name="ha_server0"
+          description="--> Starts a server for a HA architecture (HA #0)">
+    <antcall target="ha_server">
+      <param name="sid" value="0"/>
+      <param name="haId" value="0"/>
+    </antcall>
+  </target>
+  <target name="ha_server1"
+          description="--> Starts a server for a distributed architecture (HA #1)">
+    <antcall target="ha_server">
+      <param name="sid" value="0"/>
+      <param name="haId" value="1"/>
+    </antcall>
+  </target>
+  <target name="ha_server2"
+          description="--> Starts a server for a distributed architecture (HA #2)">
+    <antcall target="ha_server">
+      <param name="sid" value="0"/>
+      <param name="haId" value="2"/>
+    </antcall>
+  </target>
+
+</project>

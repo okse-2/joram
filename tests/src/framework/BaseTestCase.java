@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 20010 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,23 +27,18 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -52,24 +47,22 @@ import java.util.zip.GZIPInputStream;
 import org.objectweb.joram.client.jms.ConnectionMetaData;
 
 /**
- * Utility functions for all test cases.
+ * Utilitary functions for all test cases.
  */
 public class BaseTestCase {
   private static BaseTestCase current = null;
 
   protected String name;
   protected boolean summary = true;
-  protected List failures;
-  protected List errors;
-  protected List exceptions;
+  protected Vector failures;
+  protected Vector errors;
+  protected Vector exceptions;
   protected PrintWriter writer = null;
-  protected boolean saveErrors = true;
   
   public BaseTestCase() {
     String id = System.getProperty("framework.TestCase.TestId");
     summary = new Boolean(System.getProperty("framework.TestCase.Summary", "true")).booleanValue();
     String outfile = System.getProperty("framework.TestCase.OutFile");
-    saveErrors = new Boolean(System.getProperty("framework.TestCase.SaveFailedTests", "true")).booleanValue();
 
     try {
       writer = new PrintWriter(new FileWriter(outfile, true));
@@ -141,13 +134,10 @@ public class BaseTestCase {
     return errors.size();
   }
 
-  static int asserts = 0;
-  
   /**
    * Asserts that a condition is true.
    */
   static public void assertTrue(String message, boolean condition) {
-    asserts++;
     if (!condition) fail(message);
   }
 
@@ -162,7 +152,6 @@ public class BaseTestCase {
    * Asserts that a condition is false.
    */
   static public void assertFalse(String message, boolean condition) {
-    asserts++;
     if (condition) fail(message);
   }
 
@@ -178,7 +167,6 @@ public class BaseTestCase {
    */
   static public void assertEquals(String message,
                                   Object expected, Object actual) {
-    asserts++;
     if (expected == null && actual == null)
       return;
     if (expected != null && expected.equals(actual))
@@ -200,7 +188,6 @@ public class BaseTestCase {
   static public void assertEquals(String message,
                                   double expected, double actual,
                                   double delta) {
-    asserts++;
     if (Double.isInfinite(expected)) {
       if (!(expected == actual))
         failNotEquals(message, new Double(expected), new Double(actual));
@@ -225,7 +212,6 @@ public class BaseTestCase {
   static public void assertEquals(String message,
                                   float expected, float actual,
                                   float delta) {
-    asserts++;
     if (Float.isInfinite(expected)) {
       if (!(expected == actual))
         failNotEquals(message, new Float(expected), new Float(actual));
@@ -336,13 +322,12 @@ public class BaseTestCase {
    * Asserts that two byte[] are equal.
    */
   static public void assertEquals(byte[] tab1, byte[] tab2, int size) {
-    asserts++;
-    boolean ok=true;
-    for(int j=0; j< size && ok==true;j++)
-      if(tab1[j]!=tab2[j]){
-        failNotEquals(null, tab1[j], tab2[j]);
-        ok=false;
-      }
+      boolean ok=true;
+      for(int j=0; j< size && ok==true;j++)
+	  if(tab1[j]!=tab2[j]){
+	      failNotEquals(null,tab1[j],tab2[j]);
+	      ok=false;
+	  }
   } 
 
   /**
@@ -378,14 +363,12 @@ public class BaseTestCase {
    */
   static public void assertSame(String message,
                                 Object expected, Object actual) {
-    asserts++;
     if (expected == actual)
       return;
     failNotSame(message, expected, actual);
   }
 
   static boolean isGzip(File file) {
-    asserts++;
     String name = file.getName();
     int idx = name.lastIndexOf('.');
     if (idx == -1) return false;
@@ -458,7 +441,6 @@ public class BaseTestCase {
    * Asserts that two files are same content.
    */
   static public void assertFileSameContent(String message, String expected, String actual) {
-    asserts++;
     boolean ok = true;
     File file1 =null;
     File file2 =null;
@@ -488,7 +470,6 @@ public class BaseTestCase {
   }
 
   public static boolean isSameContent(File file1, File file2) {
-    asserts++;
     BufferedReader f1 = null;
     RandomAccessFile f2 = null;
     long l2= 0;
@@ -519,9 +500,10 @@ public class BaseTestCase {
           if (line1.equals(line2)) {
             h.put(new Long(l2), pfile);
             break;
+          } else {
+            l2 = pfile.longValue();
+            continue;
           }
-          l2 = pfile.longValue();
-          continue;
         }
       }
       return true;
@@ -549,7 +531,6 @@ public class BaseTestCase {
    */
   static public void assertFileIdentical(String message,
                                          String expected, String actual) {
-    asserts++;
     boolean ok = true;
     File file1 =null;
     File file2 =null;
@@ -589,7 +570,6 @@ public class BaseTestCase {
    * Asserts that a file exists.
    */
   static public void assertFileExist(String message, String expected) {
-    asserts++;
     File file =null;
 
     String formatted = "";
@@ -684,15 +664,15 @@ public class BaseTestCase {
       // Creates a thread to execute the test in order to
       // control the test duration.
       t = new Thread() {
-        public void run() {
-          try {
-            startTest();
-          } catch (Exception exc) {
-            addError(exc);
-            endTest();
+          public void run() {
+            try {
+              startTest();
+            } catch (Exception exc) {
+              addError(exc);
+              endTest();
+            }
           }
-        }
-      };
+        };
       t.setDaemon(true);
       t.start();
       if (timeout != 0L) {
@@ -735,7 +715,15 @@ public class BaseTestCase {
    * Informs the framework that a test was completed.
    */
   public static final void endTest() {
-    endTest(null, true);
+    endTest(null);
+  }
+
+  public static final void endTest(boolean exit) {
+    endTest(null, exit);
+  }
+
+  public static final void endTest(String msg) {
+    endTest(msg, true);
   }
 
   public static final void endTest(String msg, boolean exit) {
@@ -758,22 +746,20 @@ public class BaseTestCase {
     if ((current.failures != null) || (current.errors != null)) {
       if (current.summary)
         System.err.println("TEST \"" + current.name + "\" FAILED" +
-                           ", asserts: " + asserts +
                            ", failures: " + current.failureCount() +
                            ", errors: " + current.errorCount() + ", [" +
                            (current.endDate - current.startDate) + "].");
       if (current.writer != null)
         current.writer.println("TEST \"" + current.name + "\" FAILED" +
-                               ", asserts: " + asserts +
                                ", failures: " + current.failureCount() +
                                ", errors: " + current.errorCount() + ", [" +
                                (current.endDate - current.startDate) + "].");
     } else {
       if (current.summary)
-        System.err.println("TEST \"" + current.name + "\" OK [" + asserts + ", " +
+        System.err.println("TEST \"" + current.name + "\" OK [" +
                            (current.endDate - current.startDate) + "].");
       if (current.writer != null)
-        current.writer.println("TEST \"" + current.name + "\" OK [" + asserts + ", " +
+        current.writer.println("TEST \"" + current.name + "\" OK [" +
                                (current.endDate - current.startDate) + "].");
     }
     if (msg != null) {
@@ -786,7 +772,7 @@ public class BaseTestCase {
       if (current.writer != null) {
         for (int i=0; i<current.failures.size(); i++) {
           current.writer.print("+" + i + ") ");
-          ((Throwable) current.failures.get(i)).printStackTrace(current.writer);
+          ((Throwable) current.failures.elementAt(i)).printStackTrace(current.writer);
         }
       }
     }
@@ -796,7 +782,7 @@ public class BaseTestCase {
       if (current.writer != null) {
         for (int i=0; i<current.errors.size(); i++) {
           current.writer.print("+" + i + ") ");
-          ((Throwable) current.errors.get(i)).printStackTrace(current.writer);
+          ((Throwable) current.errors.elementAt(i)).printStackTrace(current.writer);
         }
       }
     }
@@ -805,21 +791,7 @@ public class BaseTestCase {
       if (current.writer != null) {
         for (int i=0; i<current.exceptions.size(); i++) {
           current.writer.print("+" + i + ") ");
-          ((Throwable) current.exceptions.get(i)).printStackTrace(current.writer);
-        }
-      }
-    }
-
-    if (current.saveErrors
-        && (current.failures != null || current.errors != null || current.exceptions != null)) {
-      DateFormat df = new SimpleDateFormat("yy-MM-dd [HH.mm.ss] ");
-      File currentDir = new File(".");
-      File destDir = new File("../ERROR-" + df.format(new Date()) + current.name);
-      try {
-        copyDirectory(currentDir, destDir);
-      } catch (IOException exc) {
-        if (current.writer != null) {
-          current.writer.print("Error while saving the run directory: " + exc.getMessage());
+          ((Throwable) current.exceptions.elementAt(i)).printStackTrace(current.writer);
         }
       }
     }
@@ -830,39 +802,6 @@ public class BaseTestCase {
     }
 
     if (exit) System.exit(status);
-  }
-
-  public static void copyDirectory(File srcPath, File dstPath) throws IOException {
-    if (srcPath.isDirectory()) {
-      if (!dstPath.exists()) {
-        dstPath.mkdir();
-      }
-      String files[] = srcPath.list();
-      for (int i = 0; i < files.length; i++) {
-        copyDirectory(new File(srcPath, files[i]), new File(dstPath, files[i]));
-      }
-    } else {
-      if (!srcPath.exists())
-        throw new IOException("Source path doesn't exists.");
-
-      if (srcPath.getName().endsWith(".lck")) return;
-
-      try {
-        InputStream in = new FileInputStream(srcPath);
-        OutputStream out = new FileOutputStream(dstPath);
-
-        // Transfer bytes from in to out
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = in.read(buf)) > 0) {
-          out.write(buf, 0, len);
-        }
-        in.close();
-        out.close();
-      } catch (IOException exc) {
-        throw new IOException(srcPath.toString() + ": " + exc.getMessage());
-      }
-    }
   }
 
   public static void writeSysInfo() {
@@ -924,6 +863,7 @@ public class BaseTestCase {
   }
 
   public static void main(String args[]) throws Exception {
+    BaseTestCase test = new BaseTestCase();
     assertFileIdentical(args[0], args[1]);
     endTest();
   }

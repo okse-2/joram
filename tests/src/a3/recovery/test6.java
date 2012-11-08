@@ -20,6 +20,9 @@
  * Initial developer(s):ScalAgent D.T.
  * Contributor(s): 
  */
+
+
+
 package a3.recovery;
 
 import java.util.Random;
@@ -42,9 +45,8 @@ public class test6 extends TestCase {
     ServerPing = Integer.getInteger("Ping", ServerPing).shortValue();
     ServerPong = Integer.getInteger("Pong", ServerPong).shortValue();
 
-    startAgentServer(ServerPing, new String[] { "-DTransaction.UseLockFile=false" });
-    if (ServerPong != ServerPing)
-      startAgentServer(ServerPong, new String[] { "-DTransaction.UseLockFile=false" });
+    startAgentServer(ServerPing);
+    if (ServerPong != ServerPing) startAgentServer(ServerPong);
 
     // int bounce = Integer.getInteger("bounce", 325).intValue();
     int bounce = 5000;
@@ -69,8 +71,8 @@ public class test6 extends TestCase {
   }
 
   protected void tearDown() {
-    killAgentServer(ServerPing);
-    if (ServerPong != ServerPing) killAgentServer(ServerPong);
+    crashAgentServer(ServerPing);
+    if (ServerPong != ServerPing) crashAgentServer(ServerPong);
   }
 
 
@@ -90,7 +92,8 @@ public class test6 extends TestCase {
     public void react(AgentId from, Notification not) {
       try {
         assertTrue(from.equals(ping));
-        assertEquals(not.getClass().getName(), "a3.recovery.test6$Ball");
+        assertEquals(not.getClass().getName(),
+                     "a3.recovery.test6$Ball");
 
         Ball ball = (Ball) not;
         System.out.println("bounce: " + ball.bounce);
@@ -98,18 +101,18 @@ public class test6 extends TestCase {
 
         if (ball.bounce > 0) {
           if (rand.nextBoolean()) {
-            System.out.println("stop");
+	    System.out.println("stop");
             TestCase.stopAgentServer(test6.ServerPing);
           } else {
-            System.out.println("crash");
-            TestCase.killAgentServer(test6.ServerPing);
-          }
-          // Start server#1
-          TestCase.startAgentServer(test6.ServerPing, new String[] { "-DTransaction.UseLockFile=false" });
-          Thread.sleep(2000L);
-          nbStopTask++;
-          if (nbStopTask > 20)
-            endTest();
+	    System.out.println("crash");
+            TestCase.crashAgentServer(test6.ServerPing);
+	  }
+	  // Wait in order to prevent WAIT status on TCP connection
+	  Thread.sleep(2000L);
+	  // Start server#1
+	  TestCase.startAgentServer(test6.ServerPing);
+	  nbStopTask++;
+	  if(nbStopTask > 20 ) endTest();
         } else {
           endTest();
           // never reached

@@ -33,22 +33,28 @@ public class Producer {
   static Context ictx = null; 
 
   public static void main(String[] args) throws Exception {
-    System.out.println("Produces messages on " + args[0]);
+    System.out.println("Produces messages on the queue and on the topic...");
 
     ictx = new InitialContext();
-    Destination dest = (Destination) ictx.lookup(args[0]);
+    Queue queue = (Queue) ictx.lookup("queue");
+    Topic topic = (Topic) ictx.lookup("topic");
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
     ictx.close();
 
     Connection cnx = cf.createConnection();
-    Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageProducer producer = sess.createProducer(dest);
+    Session sess = cnx.createSession(true, 0);
+    MessageProducer producer = sess.createProducer(null);
+
+    TextMessage msg = sess.createTextMessage();
 
     int i;
     for (i = 0; i < 10; i++) {
-      TextMessage msg = sess.createTextMessage("Test number " + i);
-      producer.send(msg);
+      msg.setText("Test number " + i);
+      producer.send(queue, msg);
+      producer.send(topic, msg);
     }
+
+    sess.commit();
 
     System.out.println(i + " messages sent.");
 

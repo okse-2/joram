@@ -80,7 +80,7 @@ void *test(void *id) {
 
   for (i=0; i<10; i++) {
     while(((obj->notif)% 3) != 0);
-    obj->method(*(int*) id);
+    obj->method((int) id);
     sleep(random() %15);
   }
   pthread_exit(NULL);
@@ -129,7 +129,7 @@ int main (int argc, char *argv[]) {
     pthread_exit(NULL);
   
   }catch(Exception exc){
-    printf("exception - %s\n",exc.getMessage());
+    printf("excpetion - %s\n",exc.getMessage());
     BaseTestCase::error(&exc);
   }
   BaseTestCase::endTest();

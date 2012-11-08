@@ -41,7 +41,7 @@ import jms.framework.TestConfig;
 
 /**
  * Test topic sessions <br />
- * See JMS specifications, 4.4 Session
+ * See JMS specifications, §4.4 Session
  */
 public class TopicSessionTest extends PubSubTestCase {
 

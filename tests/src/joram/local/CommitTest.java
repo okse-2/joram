@@ -22,6 +22,7 @@
  */
 package joram.local;
 
+import java.io.File;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -57,13 +58,15 @@ public class CommitTest extends TestCase {
     System.out.println("start server 0");
 
     startAgentServer(
-                     (short)0, new String[]{
+                     (short)0, (File)null, 
+                     new String[]{
                      "-DTransaction=fr.dyade.aaa.util.NTransaction"});
 
     System.out.println("start server 1");
 
     startAgentServer(
-                     (short)1, new String[]{
+                     (short)1, (File)null, 
+                     new String[]{
                      "-DTransaction=fr.dyade.aaa.util.NTransaction"});
 
     Thread.sleep(2000);

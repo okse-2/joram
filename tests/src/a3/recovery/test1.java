@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C)  2001 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,17 +17,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s):ScalAgent D.T.
  * Contributor(s): 
  */
+
 package a3.recovery;
 
-import java.util.Random;
-import java.util.Timer;
+import java.util.*;
 
-import fr.dyade.aaa.agent.Agent;
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Notification;
+
+
+import fr.dyade.aaa.agent.*;
 import framework.TestCase;
 
 public class test1 extends TestCase {
@@ -39,19 +39,13 @@ public class test1 extends TestCase {
   static short ServerPong = (short) 1;
   static int  nbStopTask =0;
 
-  static Object lock = null;
-  static Random rand = null;
-  
   protected void setUp() throws Exception {
-    startAgentServer(ServerPong, new String[] { "-DTransaction.UseLockFile=false" });
+    startAgentServer(ServerPong);
 
     int bounce = Integer.getInteger("bounce", 1500).intValue();
     timeout = 250L * bounce;
     timeout = Long.getLong("timeout", timeout).longValue();
     
-    lock = new Object();
-    rand = new Random(0x1234L);
-
     Timer timer = new Timer(true);
 
     Ping ping = new Ping(ServerPing);
@@ -62,37 +56,12 @@ public class test1 extends TestCase {
 
     ping.deploy();
     pong.deploy();
-  }
-  
-  protected void startTest() throws Exception {
-    super.startTest();
 
-    for (int i=0; i<5; i++) {
-      synchronized(lock) {
-        try {
-          lock.wait();
-        } catch (InterruptedException exc) {}
-      }
-      Thread.sleep(250);
-
-      if (rand.nextBoolean()) {
-        System.out.println("stop");
-        TestCase.stopAgentServer(ServerPong);
-      } else {
-        System.out.println("crash");
-        TestCase.killAgentServer(ServerPong);
-      }
-      // Wait in order to prevent WAIT status on TCP connection
-      Thread.currentThread().sleep(500L);
-      // Start server#1
-      TestCase.startAgentServer(ServerPong, new String[] { "-DTransaction.UseLockFile=false" });
-    }
-
-//    timer.schedule(new StopTask(ping.getId(), new StopNot()), 5000L, 15000L);
+    timer.schedule(new StopTask(ping.getId(), new StopNot()), 5000L, 15000L);
   }
 
   protected void tearDown() {
-    killAgentServer(ServerPong);
+    crashAgentServer(ServerPong);
   }
 
 
@@ -117,30 +86,30 @@ public class test1 extends TestCase {
     }
   }
 
-//  static class StopNot extends Notification {}
-//
-//  static class StopTask extends TimerTask {
-//    AgentId to;
-//    Notification not;
-//
-//    StopTask(AgentId to, Notification not) {
-//      this.to = to;
-//      this.not = not;
-//    }
-//
-//    public void run() {
-//      Channel.sendTo(to, not);
-//    }
-//  }
+  static class StopNot extends Notification {}
+
+  static class StopTask extends TimerTask {
+    AgentId to;
+    Notification not;
+
+    StopTask(AgentId to, Notification not) {
+      this.to = to;
+      this.not = not;
+    }
+
+    public void run() {
+      Channel.sendTo(to, not);
+    }
+  }
 
   static class Ping extends Agent {
     AgentId pong;
     int bounce;
-//    Random rand = null;
+    Random rand = null;
 
     public Ping(short to) {
       super(to);
-//      rand = new Random(0x1234L);
+      rand = new Random(0x1234L);
     }
 
     protected void agentInitialize(boolean firstime) throws Exception {
@@ -151,31 +120,27 @@ public class test1 extends TestCase {
 
     public void react(AgentId from, Notification not) {
       try {
-//        if (not instanceof StopNot) {
-//          if (rand.nextBoolean()) {
-//            System.out.println("stop");
-//            TestCase.stopAgentServer(test1.ServerPong);
-//          } else {
-//            System.out.println("crash");
-//            TestCase.crashAgentServer(test1.ServerPong);
-//          }
-//          // Wait in order to prevent WAIT status on TCP connection
-//          Thread.currentThread().sleep(500L);
-//          // Start server#1
-//          TestCase.startAgentServer(test1.ServerPong);
-//          nbStopTask++;
-//          if(nbStopTask > 20 ) endTest();
-//        } else {
+        if (not instanceof StopNot) {
+          if (rand.nextBoolean()) {
+	    System.out.println("stop");
+            TestCase.stopAgentServer(test1.ServerPong);
+          } else {
+	    System.out.println("crash");
+            TestCase.crashAgentServer(test1.ServerPong);
+	  }
+	  // Wait in order to prevent WAIT status on TCP connection
+	  Thread.currentThread().sleep(500L);
+	  // Start server#1
+	  TestCase.startAgentServer(test1.ServerPong);
+	  nbStopTask++;
+	  if(nbStopTask > 20 ) endTest();
+        } else {
+	  if ((bounce %50) == 0) System.out.println("bounce: " + bounce);
           assertTrue(from.equals(pong));
-          assertEquals(not.getClass().getName(), "a3.recovery.test1$Ball");
+          assertEquals(not.getClass().getName(),
+                       "a3.recovery.test1$Ball");
           if (not instanceof Ball) {
             Ball ball = (Ball) not;
-            if ((ball.bounce %50) == 0) System.out.println("bounce: " + ball.bounce);
-            if ((ball.bounce %250) == 0) {
-              synchronized(lock) {
-                lock.notify();
-              }
-            }
             assertEquals(ball.bounce, bounce);
             if (ball.bounce == 0) {
               endTest();
@@ -185,7 +150,7 @@ public class test1 extends TestCase {
               sendTo(pong, new Ball(bounce));
             }
           }
-//        }
+        }
       } catch (Exception exc) {
         error(exc);
         endTest();

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,47 +25,41 @@ package collector;
 import java.util.Properties;
 
 import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.CollectorQueue;
-import org.objectweb.joram.client.jms.admin.CollectorTopic;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.messages.Message;
 
+
 /**
- * Administers an agent server for the URL acquisition samples.
+ * Administers an agent server for the classic samples.
  */
 public class CollectorAdmin {
   
   public static void main(String[] args) throws Exception {
-    // The collected URL
-    String url = "http://www.gnu.org/licenses/lgpl-2.1.txt";
-
+    String url = "http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history";   
     System.out.println();
     System.out.println("Collector administration...");
 
     AdminModule.connect("root", "root", 60);
 
     Properties prop = new Properties();
-    prop.setProperty("expiration", "0");
-    prop.setProperty("persistent", "true");
-    prop.setProperty("acquisition.period", "0");
+    prop.setProperty("collector.expirationMessage", "0");
+    prop.setProperty("collector.persistentMessage", "true");
+    prop.setProperty("collector.period", "300000");
+    prop.setProperty("collector.url", url);
+    prop.setProperty("collector.type", "" + Message.BYTES);
+    prop.setProperty("collector.ClassName", "com.scalagent.joram.mom.dest.collector.URLCollector");
     
-    Queue queue = CollectorQueue.create(0, "queue", url, prop);
-
-    prop = new Properties();
-    prop.setProperty("expiration", "0");
-    prop.setProperty("persistent", "true");
-    prop.setProperty("acquisition.period", "5000");
-    Topic topic = CollectorTopic.create(0, "topic", url, prop);
+    Queue queue = Queue.create(0, "queue", "com.scalagent.joram.mom.dest.collector.CollectorQueue", prop);
+//    Topic topic = Topic.create(0, "topic", "com.scalagent.joram.mom.dest.collector.CollectorTopic", prop);
     
     User.create("anonymous", "anonymous");
 
     queue.setFreeReading();
     queue.setFreeWriting();
-    topic.setFreeReading();
-    topic.setFreeWriting();
+//    topic.setFreeReading();
+//    topic.setFreeWriting();
 
     javax.jms.ConnectionFactory cf =
       TcpConnectionFactory.create("localhost", 16010);
@@ -73,7 +67,7 @@ public class CollectorAdmin {
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);
     jndiCtx.bind("queue", queue);
-    jndiCtx.bind("topic", topic);
+//    jndiCtx.bind("topic", topic);
     jndiCtx.close();
 
     AdminModule.disconnect();

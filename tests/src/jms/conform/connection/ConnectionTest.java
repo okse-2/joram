@@ -38,7 +38,7 @@ import jms.framework.TestConfig;
 /**
  * Test connections.
  * 
- * See JMS specifications, 4.3.5 Closing a Connection
+ * See JMS specifications, §4.3.5 Closing a Connection
  * 
  */
 public class ConnectionTest extends PTPTestCase {
@@ -62,15 +62,15 @@ public class ConnectionTest extends PTPTestCase {
       Message m = receiver.receive(TestConfig.TIMEOUT);
       receiverConnection.close();
       m.acknowledge();
-      fail("4.3.5 Invoking the acknowledge method of a received message from a closed "
+      fail("§4.3.5 Invoking the acknowledge method of a received message from a closed "
           + "connection's session must throw a [javax.jms.]IllegalStateException.\n");
     } catch (javax.jms.IllegalStateException e) {
     } catch (JMSException e) {
-      fail("4.3.5 Invoking the acknowledge method of a received message from a closed "
+      fail("§4.3.5 Invoking the acknowledge method of a received message from a closed "
           + "connection's session must throw a [javax.jms.]IllegalStateException, not a "
           + e);
     } catch (java.lang.IllegalStateException e) {
-      fail("4.3.5 Invoking the acknowledge method of a received message from a closed "
+      fail("§4.3.5 Invoking the acknowledge method of a received message from a closed "
           + "connection's session must throw an [javax.jms.]IllegalStateException "
           + "[not a java.lang.IllegalStateException]");
     }
@@ -120,7 +120,7 @@ public class ConnectionTest extends PTPTestCase {
       // we close it a second time
       senderConnection.close();
     } catch (Exception e) {
-      fail("4.3.5 Closing a closed connection must not throw an exception.\n");
+      fail("§4.3.5 Closing a closed connection must not throw an exception.\n");
     }
   }
 

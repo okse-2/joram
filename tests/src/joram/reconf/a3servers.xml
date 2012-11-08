@@ -4,6 +4,7 @@
   <property name="Transaction" value="@transaction@"/>
 
   <server id="0" name="s0" hostname="localhost">
+    <service class="fr.dyade.aaa.agent.AgentAdmin" args="0"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="7890"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="2560"/>

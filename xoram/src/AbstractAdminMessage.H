@@ -1,6 +1,6 @@
 /*
  * XORAM: Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -136,14 +136,7 @@ class AbstractAdminMessage : Streamable {
     UNSET_USER_THRESHOLD = 91,
     UNSET_WRITER = 92,
     UPDATE_USER = 93,
-    USER_ADMIN_REQUEST = 94,
-    CMD_ADMIN_REQUEST = 95,
-    CMD_ADMIN_REPLY = 96,
-    ADD_REMOTE_DEST = 97,
-    DEL_REMOTE_DEST = 98,
-    MONITOR_GET_DELIVERED_MESSAGES = 99,
-    SND_DEST_WEIGHTS = 100,
-    SET_SYNC_EXCEPTION_ON_FULL_DEST = 101
+    USER_ADMIN_REQUEST = 94
   };
 
   boolean instanceof(int classid);
@@ -280,7 +273,7 @@ class CreateDestinationRequest : public AdminRequest {
   /** Properties needed to create destination object. */
   Properties* props;
 
-  byte expectedType;
+  char* expectedType;
 
  public:
   CreateDestinationRequest();
@@ -289,7 +282,7 @@ class CreateDestinationRequest : public AdminRequest {
                            char* name,
                            char* className,
                            Properties* props,
-                           byte expectedType);
+                           char* expectedType);
 
   ~CreateDestinationRequest();
 
@@ -313,7 +306,7 @@ class CreateDestinationRequest : public AdminRequest {
     return props;
   }
 
-  byte getExpectedType() {
+  char* getExpectedType() {
     return expectedType;
   }
 
@@ -347,7 +340,7 @@ class CreateDestinationReply : public AdminReply {
   /** Identifier of the created destination. */
   char* id;
   char* name;
-  byte type;
+  char* type;
 
  public:
   CreateDestinationReply();
@@ -359,7 +352,7 @@ class CreateDestinationReply : public AdminReply {
      */
   CreateDestinationReply(char* id,
                          char* name,
-                         byte type,
+                         char* type,
                          char* info);
   ~CreateDestinationReply();
 
@@ -372,7 +365,7 @@ class CreateDestinationReply : public AdminReply {
     return name;
   }
 
-  byte getType() {
+  char* getType() {
     return type;
   }
 

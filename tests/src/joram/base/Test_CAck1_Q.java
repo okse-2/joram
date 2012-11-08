@@ -125,7 +125,6 @@ public class Test_CAck1_Q extends TestCase {
   public void admin() throws Exception {
     // connection 
     javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
-    ((org.objectweb.joram.client.jms.ConnectionFactory) cf).getParameters().connectingTimer = 10;
     AdminModule.connect(cf);
 
     // create a Queue   

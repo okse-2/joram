@@ -26,7 +26,7 @@ import javax.jms.Connection;
 import javax.jms.Session;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.util.Configuration;
 import fr.dyade.aaa.util.NTransaction;
 
 /**

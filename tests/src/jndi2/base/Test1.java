@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2002 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@
 
 package jndi2.base;
 
+import java.io.File;
 import java.util.Hashtable;
 
 import javax.naming.Context;
@@ -60,23 +61,20 @@ public class Test1 extends TestCase {
   public static final String OA1_VAL = new String("OA1_VAL");
   public static final String OA2_VAL = new String("OA2_VAL");
   public static final String OB1_VAL = new String("OB1_VAL");
-  
-  public static void main(String[] args) {
-    new Test1().run();
-  }
 
-  public void run() {
+  public static void main(String[] args) {
     try {
+      Test1 test = null;
+
+      test = new Test1();
 
       Hashtable properties = System.getProperties();
       properties.put("java.naming.factory.initial", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
       properties.put("java.naming.factory.host", "localhost");
       properties.put("java.naming.factory.port", "16600");
     
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false",
-          "-DTransaction=fr.dyade.aaa.util.NTransaction" });
-
-      Thread.sleep(1000);
+      startAgentServer((short)0, (File)null, 
+                       new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
 
       Context ctx = new InitialContext();
 
@@ -190,15 +188,13 @@ public class Test1 extends TestCase {
       assertTrue("Expected list failure (record)", 
                  expectedExc != null);
 
-      killAgentServer((short)0);
+      crashAgentServer((short)0);
         
-      Thread.sleep(1000);
+      Thread.sleep(2000);
       
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false",
-          "-DTransaction=fr.dyade.aaa.util.ATransaction" });
+      startAgentServer((short)0, (File)null, 
+                       new String[]{"-DTransaction=fr.dyade.aaa.util.ATransaction"});      
       
-      Thread.sleep(1000);
-
       ctx = new InitialContext();
 
       // - Check the persistent storage
@@ -258,15 +254,13 @@ public class Test1 extends TestCase {
       assertTrue("Expected list failure (destroyed context)", 
                  expectedExc != null);
 
-      killAgentServer((short)0);
+      crashAgentServer((short)0);
         
-      Thread.sleep(1000);
+      Thread.sleep(2000);
       
-      startAgentServer((short) 0, new String[] { "-DTransaction.UseLockFile=false",
-          "-DTransaction=fr.dyade.aaa.util.NTransaction" });
+      startAgentServer((short)0, (File)null, 
+                       new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});      
       
-      Thread.sleep(1000);
-
       ctx = new InitialContext();
 
       // - Destroy idempotency
@@ -277,11 +271,10 @@ public class Test1 extends TestCase {
         error(exc);
       }
 
-      killAgentServer((short)0);
+      crashAgentServer((short)0);
 
       endTest();
     } catch (Exception exc2) {
-      killAgentServer((short) 0);
       exc2.printStackTrace();
       error(exc2);
       endTest();

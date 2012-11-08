@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,8 @@
  */
 package mail;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.MessageConsumer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.naming.Context;
-import javax.naming.InitialContext;
+import javax.jms.*;
+import javax.naming.*;
 
 /**
  * Consumes messages from the queue and from the topic.
@@ -40,7 +35,7 @@ public class Consumer {
     System.out.println("Trace1");
 
     ictx = new InitialContext();
-    Queue queue = (Queue) ictx.lookup("receiveMailQueue");
+    Queue queue = (Queue) ictx.lookup("mailQueue");
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
     ictx.close();
 

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,10 +17,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):  ScalAgent Distributed Technologies
- * Contributor(s): 
+ * Initial developer(s):  ScalAgent D.T.
+ * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
 package joram.reconf;
+
+import java.io.File;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -43,7 +45,7 @@ public class ReconfTest2 extends ReconfTestBase {
 
   public void run() {
     try {
-      startAgentServer((short) 0, new String[0]);
+      startAgentServer((short) 0, (File) null, new String[0]);
 
       AdminModule.connect("localhost", 2560, "root", "root", 60);
       User.create("anonymous", "anonymous", 0);
@@ -75,14 +77,14 @@ public class ReconfTest2 extends ReconfTestBase {
       }
 
       deployAgentServer((short) 1, "./s1");
-      startAgentServer((short) 1, new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
+      startAgentServer((short) 1, new File("./s1"), new String[0]);
       checkQueue((short) 1);
 
       AdminModule.addDomain("D1", 1, 18770);
 
       AdminModule.addServer(2, "localhost", "D1", 18771, "s2");
       deployAgentServer((short) 2, "s2");
-      startAgentServer((short) 2, new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });
+      startAgentServer((short) 2, new File("./s2"), new String[0]);
       checkQueue((short) 2);
 
       try {
@@ -113,8 +115,6 @@ public class ReconfTest2 extends ReconfTestBase {
       error(exc);
     } finally {
       stopAgentServer((short) 0);
-      killAgentServer((short) 1);
-      killAgentServer((short) 2);
       endTest();
     }
   }

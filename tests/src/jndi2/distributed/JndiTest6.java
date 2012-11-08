@@ -22,6 +22,7 @@
  */
 package jndi2.distributed;
 
+import java.io.File;
 import java.util.Hashtable;
 
 import javax.naming.InitialContext;
@@ -37,7 +38,7 @@ import framework.TestCase;
  *        - stop server 1, delete directory s1
  *        - start server 1, lookup with ctx1
  *        - bind /B with ctx0 and lookup with ctx1,ctx2
- * TODO (AF): this test should be in the nocoupling package.
+ *
  */
 
 
@@ -56,17 +57,20 @@ public class JndiTest6 extends TestCase {
     try {
       System.out.println("Start s0");
       startAgentServer(
-        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
+        (short)0, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
                      "-Dfr.dyade.aaa.jndi2.impl.LooseCoupling=true"});
       
       System.out.println("Start s1");
       startAgentServer(
-          (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
+          (short)1, (File)null, 
+          new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
                      "-Dfr.dyade.aaa.jndi2.impl.LooseCoupling=true"});
       
       System.out.println("Start s2");
       startAgentServer(
-          (short)2, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
+          (short)2, (File)null, 
+          new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
                      "-Dfr.dyade.aaa.jndi2.impl.LooseCoupling=true"});
         
       Thread.sleep(3000);
@@ -74,19 +78,19 @@ public class JndiTest6 extends TestCase {
       Hashtable env0 = new Hashtable();
       env0.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env0.put(NAMING_HOST_PROP, LOCALHOST);
-      env0.put(NAMING_PORT_PROP, "16600");
+      env0.put(NAMING_PORT_PROP, "16400");
       InitialContext ctx0 = new InitialContext(env0);
       
       Hashtable env1 = new Hashtable();
       env1.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env1.put(NAMING_HOST_PROP, LOCALHOST);
-      env1.put(NAMING_PORT_PROP, "16681");
+      env1.put(NAMING_PORT_PROP, "16401");
       InitialContext ctx1 = new InitialContext(env1);
       
       Hashtable env2 = new Hashtable();
       env2.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env2.put(NAMING_HOST_PROP, LOCALHOST);
-      env2.put(NAMING_PORT_PROP, "16682");
+      env2.put(NAMING_PORT_PROP, "16402");
       InitialContext ctx2 = new InitialContext(env2);
       
       System.out.println("Bind on S0");
@@ -99,8 +103,6 @@ public class JndiTest6 extends TestCase {
       ctx2.createSubcontext("/S2");
       ctx2.bind("/S2/C", "C");
 
-      Thread.sleep(1500);
-      
       // Verify data on S0
       System.out.println("Verify on S0");
       assertEquals("A", ctx0.lookup("/S0/A"));
@@ -123,12 +125,14 @@ public class JndiTest6 extends TestCase {
       Thread.sleep(1000);      
       System.out.println("Start S1");
       startAgentServer(
-          (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
+          (short)1, (File)null, 
+          new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
                      "-Dfr.dyade.aaa.jndi2.impl.LooseCoupling=true"});
       Thread.sleep(3000);
       
       // rebinds object on S1
       System.out.println("Rebind on S1");
+//       ctx1 = new InitialContext(env1);
       try {
         ctx1.createSubcontext("/S1");
       } catch (Exception exc) {
@@ -136,9 +140,7 @@ public class JndiTest6 extends TestCase {
       }
       ctx1.rebind("/S1/B", "B1");
       
-      Thread.sleep(1500);
-
-      // Verify data on S1
+      // Verify data on S2
       System.out.println("Verify on S1");
       assertEquals("A", ctx1.lookup("/S0/A"));
       assertEquals("B1", ctx1.lookup("/S1/B"));
@@ -146,7 +148,7 @@ public class JndiTest6 extends TestCase {
       // Verify data on S0
       System.out.println("Verify on S0");
       assertEquals("B1", ctx0.lookup("/S1/B"));
-      // Verify data on S2
+      // Verify data on S1
       System.out.println("Verify on S2");
       assertEquals("B1", ctx2.lookup("/S1/B"));
     } catch (Exception exc) {

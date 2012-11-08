@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,9 +22,11 @@
  */
 package joram.client;
 
+import java.io.File;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
 
 import framework.TestCase;
 
@@ -43,13 +45,14 @@ public class ConnectionClose extends TestCase {
   
   private Connection connection;
 
+  private Destination dest;
+  
   public void run() {
     try {
       startAgentServer(
-        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+        (short)0, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
       
-      Thread.sleep(2000);
-
       ConnectionFactory cf = 
         org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
           "localhost", 2560);
@@ -69,7 +72,6 @@ public class ConnectionClose extends TestCase {
       exc.printStackTrace();
       error(exc);
     } finally {
-      killAgentServer((short) 0);
       endTest();     
     }
   }

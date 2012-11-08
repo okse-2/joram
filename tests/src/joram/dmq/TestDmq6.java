@@ -24,6 +24,7 @@ package joram.dmq;
 
 import java.util.List;
 
+
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -41,7 +42,7 @@ public class TestDmq6 extends TestCase {
 
   public void run() {
     try {
-      boolean defaultCreate = false, dmq = false, dmq1 = false, queue = false, topic = false;
+      boolean defaultCreate = false, dmq = false, dmq1 = false;
       System.out.println("server start");
       startAgentServer((short)0);
 
@@ -53,18 +54,17 @@ public class TestDmq6 extends TestCase {
       Destination[] list1 = AdminModule.getDestinations();
       for(int i = 0;i < list1.length; i++){
         Destination dest = list1[i];
-        if (dest.getAdminName().equals("queue")) {
-          assertTrue(dest.isQueue());
-          assertTrue(dest.isFreelyWriteable());
-          assertTrue(dest.isFreelyReadable());
+
+        if(dest.getType().equals("queue")){
+          assertTrue( dest.isFreelyWriteable() );
+          assertTrue( dest.isFreelyReadable() );
           assertEquals(2,((Queue)dest).getThreshold());
-          queue = true;
-        } else if (dest.getAdminName().equals("topic")) {
-          assertTrue(dest.isTopic());
-          assertTrue(dest.isFreelyWriteable());
-          assertTrue(dest.isFreelyReadable());
-          topic = true;
-        } else if(dest.getAdminName().equals("defaultdmq")){
+        }else if(dest.getType().equals("topic")){
+          assertTrue( dest.isFreelyWriteable() );
+          assertTrue( dest.isFreelyReadable() );
+        }
+
+        if(dest.getAdminName().equals("defaultdmq")){
           List listeI = dest.getReaders();
           assertEquals("dmq",((User)listeI.get(0)).getName());
           assertEquals(dest,AdminModule.getDefaultDMQ());
@@ -79,11 +79,8 @@ public class TestDmq6 extends TestCase {
           assertEquals("dmq",((User)listeI.get(0)).getName());
           dmq1 = true;
         }
-        
       }
 
-      assertTrue(queue);
-      assertTrue(topic);
       assertTrue(defaultCreate);
       assertTrue(dmq);
       assertTrue(dmq1);

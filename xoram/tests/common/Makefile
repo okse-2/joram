@@ -1,8 +1,23 @@
-include ../Makefile.global
+LIBDIR = ../../src
+INCDIR = ../../src
+
+###############################
+# i86-cygwin
+#CCOPT = -g -I$(INCDIR)
+#LDFLAGS = -g
+#LIBXORAM = libxoram.dll
+###############################
+# i86-linux
+CCOPT = -g -fPIC -I$(INCDIR)
+LDFLAGS = -lrt
+LIBXORAM = libxoram.so
+###############################
+
+CC = g++ $(CCOPT)
+LD = g++ $(CCOPT) $(LDFLAGS)
 
 clean:
-	rm -f *.exe *.o *~
-	rm -f testdaemon testsynchro testvector testxqueue testxstream testproperties
+	rm -f *.exe *.o *~ 
 
 tests: testdaemon testsynchro testvector testxqueue testxstream testproperties
 
@@ -23,6 +38,6 @@ testxstream:	TestXStream.o
 
 testproperties:	TestProperties.o 
 	$(LD) -o testproperties TestProperties.o -L$(LIBDIR) -lxoram
-
+	
 .C.o:
 		$(CC) -o $*.o -c $*.C

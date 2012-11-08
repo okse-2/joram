@@ -38,7 +38,7 @@ class TopicListener implements javax.jms.MessageListener {
   /** TopicSession getting messages from a topic. */
   TopicSession session ;
   /** FifoQueue used to hold incoming messages. */
-  fr.dyade.aaa.common.Queue queue ;
+  fr.dyade.aaa.util.Queue queue ;
   
   /**
    * Creates a TopicListener.
@@ -46,7 +46,7 @@ class TopicListener implements javax.jms.MessageListener {
    * @param session		current TopicSession
    * @param queue		FifoQueue used to hold incoming messages
    */
-  TopicListener(TopicSession session, fr.dyade.aaa.common.Queue queue) {
+  TopicListener(TopicSession session, fr.dyade.aaa.util.Queue queue) {
     this.session = session ;
     this.queue = queue ;
   }

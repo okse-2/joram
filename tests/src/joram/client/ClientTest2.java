@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
- * Contributor(s): 
+ * Initial developer(s): Feliot David  (ScalAgent D.T.)
+ * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
 package joram.client;
 
@@ -34,10 +34,7 @@ import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
 
-import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
 
@@ -56,7 +53,7 @@ public class ClientTest2 extends TestCase {
   }
 
   private Connection connection;
-
+  
   private Session session;
 
   private Destination dest;
@@ -66,31 +63,41 @@ public class ClientTest2 extends TestCase {
   public void run() {
     try {
       startAgentServer(
-                       (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+        (short)0, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
 
-      AdminModule.connect("localhost", 2560, "root", "root", 60);
+      AdminModule.connect("localhost", 2560,
+                          "root", "root", 60);
 
-      User user = User.create("anonymous", "anonymous", 0);
+      org.objectweb.joram.client.jms.admin.User user = 
+        org.objectweb.joram.client.jms.admin.User.create(
+          "anonymous", "anonymous", 0);
 
-      Queue queue = Queue.create(0);
+      org.objectweb.joram.client.jms.Queue queue = 
+        org.objectweb.joram.client.jms.Queue.create(0);
       queue.setFreeReading();
       queue.setFreeWriting();
 
       dest = queue;
 
-      ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
+      ConnectionFactory cf = 
+        org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
+          "localhost", 2560);
 
       Message msg = null;
 
       for (int i = 0; i < 300; i++) {
-
-        connection = cf.createConnection("anonymous", "anonymous"); 
-
-        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        
+        connection = cf.createConnection(
+          "anonymous", "anonymous"); 
+        
+        session = connection.createSession(
+          false,
+          Session.AUTO_ACKNOWLEDGE);
         consumer = session.createConsumer(dest);
-
+        
         connection.start();
-
+        
         new Thread() {
           public void run() {
             try {
@@ -100,7 +107,7 @@ public class ClientTest2 extends TestCase {
             }
           }
         }.start();
-
+        
         try {
           msg = consumer.receive();
         } catch (Exception exc) {
@@ -111,7 +118,7 @@ public class ClientTest2 extends TestCase {
         //System.out.println("Close consumer OK (" + i + ')');
 
         consumer = session.createConsumer(dest);
-
+        
         new Thread() {
           public void run() {
             try {
@@ -121,7 +128,7 @@ public class ClientTest2 extends TestCase {
             }
           }
         }.start();
-
+        
         try {
           msg = consumer.receive();
         } catch (Exception exc) {
@@ -130,11 +137,13 @@ public class ClientTest2 extends TestCase {
 
         assertTrue("Null expected", msg == null);
         //System.out.println("Close session OK (" + i + ')');
-
-        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        
+        session = connection.createSession(
+          false,
+          Session.AUTO_ACKNOWLEDGE);
         consumer = session.createConsumer(dest);
-
-        new Thread() {
+	
+	new Thread() {
           public void run() {
             try {
               connection.close();
@@ -143,20 +152,20 @@ public class ClientTest2 extends TestCase {
             }
           }
         }.start();
-
+        
         try {
           msg = consumer.receive();
         } catch (Exception exc) {
           // May happen if the connection is already closed.
-        }
-
+	}
+          
         assertTrue("Null expected", msg == null);
         //System.out.println("Close connection OK (" + i + ')');
+        
+        // Check log file is empty
+        File logFile = new File("server.log.0.1");
+        assertTrue("Log file not empty: " + logFile, logFile.length() == 0);
       }
-      
-      // Check log file is empty
-      File logFile = new File("server.log.0.1");
-      assertTrue("Log file not empty: " + logFile, logFile.length() == 0);
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);

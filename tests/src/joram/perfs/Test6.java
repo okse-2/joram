@@ -30,7 +30,7 @@ import javax.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
-import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.util.Configuration;
 
 /**
  * See build for more detail : Class use with more option

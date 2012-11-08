@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,7 +40,6 @@ import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
-import framework.BaseTestCase;
 
 class ExcList19 implements ExceptionListener {
   String name = null;
@@ -54,6 +53,7 @@ class ExcList19 implements ExceptionListener {
   public void onException(JMSException exc) {
     nbexc += 1;
     System.err.println(name + ": " + exc.getMessage());
+    exc.printStackTrace();
   }
 }
 
@@ -87,102 +87,95 @@ class MsgList19A implements MessageListener {
 
 class MsgList19B implements MessageListener {
   public void onMessage(Message msg) {
-    Exception excp = null;
-    boolean end = false;
+      Exception excp=null;
+      boolean end=false;
     try {
-      end = msg.getBooleanProperty("SynchroEnd");
+       end = msg.getBooleanProperty("SynchroEnd");
       int index = msg.getIntProperty("Index");
       System.out.println("receives " + index + ", " + end);
-      if (end)
-        Test19.tempTopic.delete();
-    } catch (Exception exc) {
-      excp = exc;
+      if (end) Test19.tempTopic.delete();
+    } catch(Exception exc) {
+	exc.printStackTrace();
+	excp=exc;
     }
-    if (end)
-      BaseTestCase.assertTrue(excp instanceof javax.jms.JMSException);
+    if(end)
+	Test19.assertTrue(excp instanceof javax.jms.JMSException);
   }
 }
 
 /**
  * test delete temptopic on onMessage()
  */
-public class Test19 extends BaseTest {
-  static Connection cnx_a;
-  static Connection cnx_b;
+public class Test19 extends BaseTest{
+    static Connection cnx_a;
+    static Connection cnx_b;
 
-  static Session sess_a, sess_b;
+    static Session sess_a, sess_b;
 
-  static ExcList19 exclst_a, exclst_b;
-  static MsgList19A msglst_a;
-  static MsgList19B msglst_b;
+    static ExcList19 exclst_a, exclst_b;
+    static MsgList19A msglst_a;
+    static MsgList19B msglst_b;
 
-  static TemporaryTopic tempTopic;
+    static TemporaryTopic tempTopic;
 
-  public static void main(String args[]) throws Exception {
-    new Test19().run();
-  }
-
-  public void run() {
-    try {
-      AgentServer.init((short) 0, "s0", null);
-      AgentServer.start();
-
-      Thread.sleep(1000L);
-
-      AdminModule.connect("localhost", 16010, "root", "root", 60);
-
-      User.create("anonymous", "anonymous");
-      Topic synchro = Topic.create(0);
-      synchro.setFreeReading();
-      synchro.setFreeWriting();
-
-      ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
-      AdminModule.disconnect();
-
-      cnx_a = cf.createConnection();
-      ExcList19 excListenerA = new ExcList19("ClientA");
-      cnx_a.setExceptionListener(excListenerA);
-      sess_a = cnx_a.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageConsumer cons_a = sess_a.createConsumer(synchro);
-      cons_a.setMessageListener(new MsgList19A());
-      cnx_a.start();
-
-      Connection cnx_b = cf.createConnection();
-      ExcList19 excListenerB = new ExcList19("ClientB");
-      cnx_b.setExceptionListener(excListenerB);
-      sess_b = cnx_b.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-      tempTopic = sess_b.createTemporaryTopic();
-
-      MessageConsumer cons_b = sess_b.createConsumer(tempTopic);
-      cons_b.setMessageListener(new MsgList19B());
-
-      Session sess = cnx_b.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageProducer pub = sess.createProducer(synchro);
-
-      cnx_b.start();
-
-      Message msg = sess.createMessage();
-      msg.setJMSReplyTo(tempTopic);
-
-      pub.send(msg);
-
-      Thread.sleep(10000L);
-      
-      assertEquals(0, excListenerA.nbexc);
-      assertEquals(0, excListenerB.nbexc);
-      cnx_a.close();
-      cnx_b.close();
-
-      Thread.sleep(5000L);
-      assertEquals(1, excListenerA.nbexc);
-      assertEquals(1, excListenerB.nbexc);
-    } catch (Throwable exc) {
-      exc.printStackTrace();
-      error(exc);
-    } finally {
-      AgentServer.stop();
-      endTest();
+    public static void main (String args[]) throws Exception {
+	new Test19().run();
     }
-  }
+    public void run(){
+	try{
+	    AgentServer.init((short) 0, "s0", null);
+	    AgentServer.start();
+
+	    Thread.sleep(1000L);
+	    short sid = Integer.getInteger("sid", 0).shortValue();
+
+	    AdminModule.connect("localhost", 16010, "root", "root", 60);
+
+	    User user = User.create("anonymous", "anonymous");
+	    Topic synchro = Topic.create(0);
+	    synchro.setFreeReading();
+	    synchro.setFreeWriting();
+
+	    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
+	    AdminModule.disconnect();
+
+	    cnx_a = cf.createConnection();
+	    cnx_a.setExceptionListener(new ExcList19("ClientA"));
+	    sess_a = cnx_a.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	    MessageConsumer cons_a = sess_a.createConsumer(synchro);
+	    cons_a.setMessageListener(new MsgList19A());
+	    cnx_a.start();
+
+	    Connection cnx_b = cf.createConnection();
+	    cnx_b.setExceptionListener(new ExcList19("ClientB"));
+	    sess_b = cnx_b.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+	    tempTopic = sess_b.createTemporaryTopic();
+
+	    MessageConsumer cons_b = sess_b.createConsumer(tempTopic);
+	    cons_b.setMessageListener(new MsgList19B());
+
+	    Session sess = cnx_b.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	    MessageProducer pub = sess.createProducer(synchro);
+
+	    cnx_b.start();
+
+	    Message msg = sess.createMessage();
+	    msg.setJMSReplyTo(tempTopic);
+
+	    pub.send(msg);
+
+	    Thread.sleep(10000L);
+	    cnx_a.close();
+	    cnx_b.close();
+
+	    Thread.sleep(5000L);
+	}catch(Throwable exc){
+	    exc.printStackTrace();
+	    error(exc);
+	}finally{
+	    AgentServer.stop();
+	    endTest();
+	}  
+    }
 }

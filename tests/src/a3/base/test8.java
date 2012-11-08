@@ -26,15 +26,6 @@ package a3.base;
 import fr.dyade.aaa.agent.*;
 import framework.TestCase;
 
-/**
- * Test the behavior of sending a notification to an unknown server:
- *  - sending from an external component (directSendTo).
- *  - sending from an agent.
- * An error message must be logged in each case, in the 2nd case an UnknownAgent
- * notification is sent to the sender.
- * 
- * @see     Joram/JORAM-14
- */
 public class test8 extends TestCase {
   public test8() {
     super();
@@ -62,17 +53,14 @@ class Test8Agent extends Agent {
   }
 
   public void react(AgentId from, Notification not) {
+    TestCase.assertEquals(not.getClass().getName(),
+                          "fr.dyade.aaa.agent.Notification");
     if (state == 0) {
-      TestCase.assertEquals(not.getClass().getName(), "fr.dyade.aaa.agent.Notification");
       TestCase.assertTrue(from.isNullId());
-      Channel.sendTo(new AgentId((short) 1, (short) 1, 10),
-                     new Notification());
-      Channel.sendTo(getId(), new Notification());
-    } else if (state == 1) {
-      TestCase.assertEquals(not.getClass().getName(), "fr.dyade.aaa.agent.UnknownAgent");
-      TestCase.assertTrue(from.isNullId());
+       Channel.sendTo(new AgentId((short) 1, (short) 1, 10),
+                      new Notification());
+       Channel.sendTo(getId(), new Notification());
     } else {
-      TestCase.assertEquals(not.getClass().getName(), "fr.dyade.aaa.agent.Notification");
       TestCase.assertEquals(getId(), from);
       TestCase.endTest();
     }

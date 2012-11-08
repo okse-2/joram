@@ -322,13 +322,13 @@ CreateDestinationReply* XoramAdmin::doCreate(int serverId,
                                              char* name,
                                              char* className, 
                                              Properties* prop, 
-                                             byte type) {
+                                             char type) {
   CreateDestinationRequest* cdr =
     new CreateDestinationRequest(serverId,
                                  name,
                                  className,
                                  prop,
-                                 type);
+                                 Destination::typeToString(type));
   AdminReply* reply = XoramAdmin::doRequest(cdr);
   return (CreateDestinationReply*) reply;
 }
@@ -337,7 +337,7 @@ Queue* XoramAdmin::createQueue(int serverId,
                                char* name,
                                char* className,
                                Properties* prop) {
-  CreateDestinationReply* reply = doCreate(serverId, name, className, prop, QUEUE_TYPE);
+  CreateDestinationReply* reply = doCreate(serverId, name, className, prop, Destination::QUEUE);
   Queue* queue = new Queue(reply->getId(), reply->getName());
   return queue;
 }
@@ -375,7 +375,7 @@ Topic* XoramAdmin::createTopic(int serverId,
                                char* name,
                                char* className,
                                Properties* prop) {
-  CreateDestinationReply* reply = doCreate(serverId, name, className, prop, TOPIC_TYPE);
+  CreateDestinationReply* reply = doCreate(serverId, name, className, prop, Destination::TOPIC);
   Topic* topic = new Topic(reply->getId(), reply->getName());
   return topic;
 }

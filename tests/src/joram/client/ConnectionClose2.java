@@ -22,11 +22,11 @@
  */
 package joram.client;
 
+import java.io.File;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
-import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
@@ -61,12 +61,11 @@ public class ConnectionClose2 extends TestCase {
   
   private MessageConsumer consumer;
   
-  static boolean closed = false;
-  
   public void run() {
     try {
       startAgentServer(
-        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+        (short)0, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
       
       AdminModule.connect("localhost", 2560, "root", "root", 60);
 
@@ -112,27 +111,12 @@ public class ConnectionClose2 extends TestCase {
           }
         }.start();
 
-        new Thread() {
-          public void run() {
-            try {
-              Thread.sleep(1000);
-            } catch (InterruptedException e) {}
-            try {
-              connection.close();
-              closed = true;
-            } catch (JMSException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            }
-          }
-        }.start();
+        Thread.sleep(500);
+
+        //System.out.println("Close #" + i);
+        connection.close();
       }
       
-      for (int i=0; i<10; i++) {
-        Thread.sleep(1000);
-        if (closed) break;
-      }
-      assertTrue("Connection is not closed", closed);
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);

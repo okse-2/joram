@@ -12,18 +12,24 @@
 
   <body>
     <s1 name="Support">     
-      <subtitle>JORAM support, provided by ScalAgent Distributed Technologies</subtitle>
+      <subtitle>JORAM support, provided by ScalAgent Distributed
+      Technologies</subtitle>
       <p>In order to fulfill an increasing demand, <a href="http://www.scalagent.com/">ScalAgent Distributed 
 			Technologies</a> supports the development and deployment of operational solutions based on Joram,
-			 and delivers high-level professional services:</p>
+			 and delivers high-level professional services: </p>
 			 <ul>
-			 	<li>Professional support,</li>
-			 	<li>High level training,</li>
-			 	<li>Consulting, advanced studies and prototyping,</li>
-			 	<li>Custom software development and integration.</li>
-			 </ul>
-			 <p>Check the detailed description of our
-			 <a href="http://www.scalagent.com/spip.php?article41">professional services on JORAM</a>.</p>
+			 	<li>Professional Support : <a href="http://www.scalagent.com/pages/en/products/joram-support.htm">
+			 			please consult our terms and conditions online</a>
+			 	</li>
+			 	<li>Consulting, Advanced Studies and Prototyping
+				</li>
+			 	<li>Training : please consult <a href="http://www.scalagent.com/pages/en/services/training02.htm">the
+			 			training pages</a> for more information
+			 	</li>
+			 	<li>Custom Software Development and Integration
+				</li>
+			 </ul> 
+			 <p>Check the <a href="http://www.scalagent.com/pages/en/datasheet/0412-Joram_support-UK.pdf">brochure</a>.</p>
     </s1>
   </body>
 </document>

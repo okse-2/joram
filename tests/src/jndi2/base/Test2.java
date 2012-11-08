@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2002 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
  */
 package jndi2.base;
 
+import java.io.File;
 import java.util.Hashtable;
 
 import javax.naming.Context;
@@ -29,54 +30,61 @@ import javax.naming.InitialContext;
 
 import framework.TestCase;
 
+
 /**
- * Exception when bind an element (/A/elt) without create subcontext (/A)
+ *  Exception when bind an element (/A/elt) without create subcontext (/A)
+ * 
+ *
  */
+
 
 public class Test2 extends TestCase {
 
-  public static final int IT_NB = 2;
-  public static final int CHILDREN_NB = 2;
-  public static final int DEPTH_MAX = 5;
+    public static final int IT_NB = 2;
+    public static final int CHILDREN_NB = 2;
+    public static final int DEPTH_MAX = 5;
 
-  public static void main(String[] args) {
-    new Test2().run();
-  }
-
-  public void run() {
-    try {
-
-      Hashtable properties = System.getProperties();
-
-      startAgentServer((short) 0, new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
-
-      Thread.sleep(1000);
-
-      properties.put("java.naming.factory.initial", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
-      properties.put("java.naming.factory.host", "localhost");
-      properties.put("java.naming.factory.port", "16600");
-
-      Context ctx = new InitialContext();
-
-      Exception excep = null;
-      try {
-        ctx.bind("/toto/toto", "hello");
-      } catch (Exception exc) {
-        excep = exc;
-      }
-      assertTrue(excep != null);
-
-      ctx.createSubcontext("/toto");
-      ctx.bind("/toto/toto1", "hello");
-      ctx.close();
-
-    } catch (Exception exc) {
-      exc.printStackTrace();
-      error(exc);
-    } finally {
-      killAgentServer((short) 0);
-      endTest();
+    public static void main(String[] args) {
+	new Test2().run();
     }
-  }
+    public void run(){
+	try {
+	    Test2 test = null;
+	  
+	    test = new Test2();
+      
+	    Hashtable properties = System.getProperties();
+      
+	    startAgentServer((short)0, (File)null, 
+			     new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+    
+	    properties.put("java.naming.factory.initial", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
+	    properties.put("java.naming.factory.host", "localhost");
+	    properties.put("java.naming.factory.port", "16600");
+     
+	    Context ctx = new InitialContext();
+	   
+	    Exception excep=null;
+	    try{
+		ctx.bind("/toto/toto", "hello");
+	    }catch(Exception exc){
+		excep=exc;
+	    }
+	    assertTrue(excep != null);
+	    
+	    ctx.createSubcontext("/toto");
+	    ctx.bind("/toto/toto1", "hello");
+	    ctx.close();
+	   
+	   
+    
+	} catch (Exception exc) {
+	    exc.printStackTrace();
+	    error(exc);
+	} finally {
+	    crashAgentServer((short)0);
+	    endTest();
+	}
+    }
 
-}
+} 

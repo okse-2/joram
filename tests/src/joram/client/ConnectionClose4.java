@@ -22,6 +22,7 @@
  */
 package joram.client;
 
+import java.io.File;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -51,7 +52,8 @@ public class ConnectionClose4 extends TestCase {
   public void run() {
     try {
       startAgentServer(
-        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+        (short)0, (File)null, 
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
       
       Thread.sleep(4000);
       
@@ -84,7 +86,6 @@ public class ConnectionClose4 extends TestCase {
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
-      stopAgentServer((short) 0);
     } finally {
       endTest();     
     }

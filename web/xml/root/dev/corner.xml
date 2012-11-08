@@ -14,27 +14,30 @@
 
     <s1 name="Welcome at the developers' corner">
   
-    <p>Many people from various origins have contributed to JORAM, and new contributors
-    are always welcome.</p>
-    <p>A contribution can be a bug fix or the development of a new feature, but also new
-    or improved documentation, suggestions, feedbacks, debugging.</p>
-    
-    <p>Simply send your ideas, documents and developments (if any) to the
-    <a href="mailto:joram-team@ow2.org">joram team</a>.</p>
+    <p>Many people from various origins have contributed to JORAM, and
+    new contributors are always welcome.</p>
+    <p>A contribution can be the development of a new feature, but also
+    new or improved documentation, suggestions, feedbacks, debugging.</p>
+    <p>Simply send your ideas, documents and developments (if any) to the 
+    <a href="mailto:joram-team@ow2.org">joram team</a> .</p>
     <p></p>
 
-    <p>The following resources are proposed to the advanced users and developers:</p>
+    <p>The following resources are proposed to the advanced users and
+       developers:</p>
     <ul>
-      <li>The <a href="roadMap.html">road map</a> presents the expected Joram evolutions.
-      It also contains some calls to contributions.</li>
+      <li>The <connect href="roadMap.xml">road map</connect> presents the
+          expected Joram evolutions. It also contains some calls to 
+          contributions.</li>
     </ul>
     <ul>
-      <li>The <a href="versions.html">code updates</a> page provides in-depth descriptions of
-      the evolutions of the SVN code base.</li>
+      <li>The <connect href="versions.xml">code updates</connect>
+          page provides in-depth descriptions of the evolutions of the
+          SVN code base.</li>
     </ul>
     <ul>
-      <li>The <a href="http://websvn.ow2.org/listing.php?repname=joram"> SVN Forge page</a> allows you to get
-      JORAM through SVN, browse the updates, differences, etc.</li>
+      <li>The <a href="http://forge.objectweb.org/cvs/?group_id=4">
+          SVN Forge page</a> allows you to get JORAM through SVN, browse
+          the updates, differences, etc.</li>
     </ul>
     </s1>
 

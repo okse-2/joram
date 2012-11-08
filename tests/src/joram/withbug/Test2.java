@@ -36,7 +36,6 @@ import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
-import framework.BaseTestCase;
 
 class MsgList52 implements MessageListener {
   public void onMessage(Message msg) {
@@ -57,7 +56,7 @@ class MsgList52 implements MessageListener {
   }
 }
 
-public class Test2 extends BaseTestCase {
+public class Test2 extends BaseTest {
   static Object lock = null;
 
   public static void main (String args[]) throws Exception {
@@ -110,5 +109,6 @@ public class Test2 extends BaseTestCase {
       System.exit(-1);
     }
 
+    System.exit(0);
   }
 }
