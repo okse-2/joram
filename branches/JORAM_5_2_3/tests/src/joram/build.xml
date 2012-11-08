@@ -183,6 +183,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="client.cnxtime_2"/>
     <antcall target="client.noloss_1"/>
     <antcall target="client.noloss_2"/>
+  	<antcall target="client.ClientTest28"/>
   </target>
 
   <target name="tests.connection"
