@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+<project name="joram" default="jar" basedir=".">
+
+  <target name="clean">
+    <ant dir="src" antfile="joram.xml" target="clean" />
+  </target>
+
+  <target name="jar" depends="clean">
+    <ant dir="src" antfile="joram.xml" target="ship.jonasadapter" />
+  </target>
+
+  <!-- =================================
+          target: maven:deploy
+         ================================= -->
+  <target name="maven:deploy"
+          depends="jar"
+          description="--> Deploy JORAM on the OW2 Release repository">
+
+    <ant antfile="maven-build.xml" target="deploy" />
+  </target>
+
+  <!-- =================================
+          target: maven:install
+         ================================= -->
+  <target name="maven:install"
+          depends="jar"
+          description="--> Install JORAM in the local artifact repository">
+
+    <ant antfile="maven-build.xml" target="install" />
+  </target>
+
+
+</project>

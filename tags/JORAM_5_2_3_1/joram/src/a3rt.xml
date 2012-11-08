@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE project [
+    <!ENTITY common SYSTEM "./common.xml">
+]>
+
+<project default="ship" basedir=".">
+  <!-- Includes generic stuff -->
+  &common;
+
+  <target name="init.a3rt" depends="init">
+    <!-- Defines specific fileset to compile -->
+    <patternset id="specific.compile.sources">
+      <include name="fr/dyade/aaa/agent/AgentServer.java"/>
+      <include name="fr/dyade/aaa/agent/Engine.java"/>
+      <include name="fr/dyade/aaa/agent/GCEngine.java"/>
+      <include name="fr/dyade/aaa/agent/HAEngine.java"/>
+      <include name="fr/dyade/aaa/agent/SimpleNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/PoolNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/SSLNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/NGNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/UDPNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/HttpNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/HttpsNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/SCServer.java"/>
+      <include name="fr/dyade/aaa/agent/SCAdminBase.java"/>
+      <include name="fr/dyade/aaa/agent/AgentAdmin.java"/>
+      <include name="fr/dyade/aaa/agent/UnknownDomainException.java"/>
+      <include name="fr/dyade/aaa/agent/conf/A3CMLSaxWrapper.java"/>
+      <include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
+
+      <include name="fr/dyade/aaa/util/NullTransaction.java"/>
+      <include name="fr/dyade/aaa/util/JTransaction.java"/>
+      <include name="fr/dyade/aaa/util/NTransaction.java"/>
+      <include name="fr/dyade/aaa/util/FileRepository.java"/>
+      <!-- include name="fr/dyade/aaa/util/DBRepository.java"/ -->
+      <!-- include name="fr/dyade/aaa/util/MySQLDBTransaction.java"/ -->
+      <!-- include name="fr/dyade/aaa/util/DerbyDBTransaction.java"/ -->
+
+      <!-- Begin - Needed for JMX monitoring -->
+      <include name="fr/dyade/aaa/util/management/*.java"/>
+      <include name="com/scalagent/jmx/*.java"/>
+      <!-- End - Needed for JMX monitoring -->
+
+      <include name="fr/dyade/aaa/admin/**/*.java"/>
+
+      <!-- Begin - Needed for JNDI -->
+      <!-- include name="fr/dyade/aaa/jndi2/**/*.java"/ -->
+      <!-- End - Needed for task JNDI -->
+
+      <!-- Begin - Needed for task tests -->
+      <include name="com/scalagent/scheduler/**/*.java"/>
+      <include name="com/scalagent/task/**/*.java"/>
+      <!-- End - Needed for task tests -->
+
+      <include name="fr/dyade/aaa/util/Timer.java"/>
+    </patternset>
+
+    <!-- Specific classpath needed for compilation -->
+    <path id="specific.class.path">
+      <path refid="project.class.path"/>
+    </path>
+  </target>
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     - Specific A3 build target.
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <target name="build.a3rt" depends="init.a3rt,compile">
+    <!-- Build agent server jar file -->
+    <jar jarfile="${build.dir}/a3server.jar">
+      <fileset dir="${obj.dir}">
+        <include name="fr/dyade/aaa/**/*.class"/>
+        <include name="com/scalagent/**/*.class"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="ship" depends="build.a3rt">
+    <mkdir dir="${ship.dir}"/>
+    <!-- lib directory -->
+    <mkdir dir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/a3server.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/ow_monolog.jar"
+          todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jgroups-all.jar"
+          todir="${ship.dir}/lib"/>
+    <!-- run directory -->
+    <mkdir dir="${ship.dir}/run"/>
+    <copy file="${src.dir}/fr/dyade/aaa/agent/conf/a3config.dtd"
+          todir="${ship.dir}/run"/>
+    <chmod dir="${ship.dir}/run" perm="755"/>
+    <!-- licences directory -->
+    <mkdir dir="${ship.dir}/licences"/>
+    <copy todir="${ship.dir}/licences" flatten="yes">
+      <fileset dir="${src.dir}">
+        <include name="licenses/APACHE_LICENSE.TXT"/>
+        <include name="licenses/CUP_LICENCE.TXT"/>
+        <include name="licenses/LGPL_HEADER.TXT"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <!-- JAVADOC building -->
+  <target name="javadoc" depends="prepare"
+          description="--> Generates the javadoc.">
+    <javadoc sourcepath="${src.dir}"
+             destdir="${doc.dir}"
+             classpathref="project.class.path"
+             overview="overview.html"
+             access="private"
+             version="false"
+             author="false"
+             windowtitle="ScalAgent(TM) Agent Framework"
+             doctitle="Scalagent(TM) Agent Framework"
+             bottom="Copyright &#xA9; 2009 Scalagent - All rights reserved">
+      <doctitle><![CDATA[<h1>Joram Documentation</h1>]]></doctitle>
+      <package name="fr.dyade.aaa.*"/>
+    </javadoc>
+  </target>
+</project>

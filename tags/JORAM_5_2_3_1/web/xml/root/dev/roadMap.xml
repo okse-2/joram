@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>JORAM road map</title>
+    <filename>roadMap.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+
+  <s1 name="Road map">
+
+		<s2 name="OSGi support and administration tool">
+    <p>Work in progress around the OSGi support and numerous administration
+    functions. An high level tool is in specification, it will allow to
+    configure, deploy, monitor and control large Joram's configuration.</p>
+    </s2>
+    
+    <s2 name="AMQP">
+    <p>Thank's to third party users, the Joram team should announce soon the
+    support of AMQP in Joram. It will allow the use of Joram from many client
+    interfaces and languages.</p>
+    </s2>
+    
+    <s2 name="Security model">
+    <p>A new security implementation with authentication based on JAAS LoginModule
+    and User/Role access control rights.</p>
+    </s2>
+    
+  </s1>
+
+  <s1 name="Call for contributions">
+
+    <s2 name="Tutorials and documentation">
+    <p>If you wish to contribute a translation, feel free to contact us.</p>
+    </s2>
+
+  </s1>
+
+  </body>
+
+</document>
