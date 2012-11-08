@@ -44,6 +44,7 @@ public class ClientTest28Listener implements MessageListener {
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();  
       Topic topic1 = (Topic) jndiCtx.lookup("topic1");
       Topic topic2 = (Topic) jndiCtx.lookup("topic2");
+      Topic topic3 = (Topic) jndiCtx.lookup("topic3");
       ConnectionFactory cf = (ConnectionFactory) jndiCtx.lookup("cf");
       jndiCtx.close();
 
@@ -63,6 +64,14 @@ public class ClientTest28Listener implements MessageListener {
       cons2.setMessageListener(this);
 
       cnx2.start();
+
+      Connection cnx3 = cf.createConnection("root", "root");
+
+      Session session3 = cnx3.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      MessageConsumer cons3 = session3.createConsumer(topic3);
+      cons3.setMessageListener(this);
+
+      cnx3.start();
     } catch (Throwable exc) {
       exc.printStackTrace();
     }
