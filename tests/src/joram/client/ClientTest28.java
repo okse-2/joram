@@ -52,9 +52,10 @@ public class ClientTest28 extends TestCase {
   public void run() {
     try {
       System.out.println("servers start");
-startAgentServer(
+      startAgentServer(
         (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});            Thread.sleep(1000);
+        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+	  Thread.sleep(1000);
 
       ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
       AdminModule.connect(cf, "root", "root");
@@ -69,10 +70,15 @@ startAgentServer(
       Topic topic2 = Topic.create(0, "topic2");
       topic2.setFreeReading();
       topic2.setFreeWriting();
+
+      Topic topic3 = Topic.create(0, "topic3");
+      topic3.setFreeReading();
+      topic3.setFreeWriting();
       
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();
       jndiCtx.rebind("topic1", topic1);
       jndiCtx.rebind("topic2", topic2);
+      jndiCtx.rebind("topic3", topic3);
       jndiCtx.rebind("cf", cf);
       jndiCtx.close();
       
@@ -90,14 +96,16 @@ startAgentServer(
       
       int subt1 = -1;
       int subt2 = -1;
+      int subt3 = -1;
       do {
         Thread.sleep(pending);
         Subscription[] subs = root.getSubscriptions();
         int subu = (subs==null)?0:subs.length;
         subt1 = topic1.getSubscriptions();
         subt2 = topic2.getSubscriptions();
-        System.out.println(new Date() + " - Sub: " + subt1 + ", " + subt2 + ", " + subu);
-      } while ((subt1 != 0) || (subt2 != 0));
+        subt3 = topic3.getSubscriptions();
+        System.out.println(new Date() + " - Sub: " + subt1 + ", " + subt2 + ", " + subt3 + ", " + subu);
+      } while ((subt1 != 0) || (subt2 != 0) || (subt3 != 0));
 
       AdminModule.disconnect();
     } catch (Throwable exc) {
@@ -120,6 +128,7 @@ startAgentServer(
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();  
       Topic topic1 = (Topic) jndiCtx.lookup("topic1");
       Topic topic2 = (Topic) jndiCtx.lookup("topic2");
+      Topic topic3 = (Topic) jndiCtx.lookup("topic3");
       ConnectionFactory cf = (ConnectionFactory) jndiCtx.lookup("cf");
       jndiCtx.close();
 
@@ -127,6 +136,7 @@ startAgentServer(
       Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageProducer prod1 = session.createProducer(topic1);
       MessageProducer prod2 = session.createProducer(topic2);
+      MessageProducer prod3 = session.createProducer(topic3);
       cnx.start();
 
       Thread t = new Thread() {
@@ -153,6 +163,9 @@ startAgentServer(
         msg = session.createMessage();
         msg.setIntProperty("counter", i);
         prod2.send(msg);
+        msg = session.createMessage();
+        msg.setIntProperty("counter", i);
+        prod3.send(msg);
         Thread.sleep(timeout);
       }
       cnx.close();
