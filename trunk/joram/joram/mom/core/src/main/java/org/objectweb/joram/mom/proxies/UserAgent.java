@@ -414,6 +414,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       doReact((GetConnectionNot) not);
     } else if (not instanceof CloseConnectionNot) {
       doReact((CloseConnectionNot) not);
+    } else if (not instanceof CloseConnectionNot2) {
+      doReact((CloseConnectionNot2) not);
     } else if (not instanceof ResetCollocatedConnectionsNot) {
       doReact((ResetCollocatedConnectionsNot) not);
     } else if (not instanceof SendReplyNot) {
@@ -485,7 +487,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     }
 
     if (not.getHeartBeat() > 0) {
-      HeartBeatTask heartBeatTask = new HeartBeatTask(2 * not.getHeartBeat(), objKey);
+      HeartBeatTask heartBeatTask = new HeartBeatTask(not.getHeartBeat(), objKey, getId());
       heartBeatTasks.put(objKey, heartBeatTask);
       try {
         heartBeatTask.start();
@@ -541,9 +543,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
           //CnxCloseRequest request = (CnxCloseRequest) not.getMessage();
           connections.remove(key);
           HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
-          if (hbt != null) {
-            hbt.cancel();
-          }
+          if (hbt != null) hbt.cancel();
         }
       }
     }
@@ -588,14 +588,41 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     rm.flush();
   }
 
+  
+  private void doReact(CloseConnectionNot2 not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "CloseConnectionNot2: key=" + not.getKey());
+    
+     if (connections != null) {
+      Integer key = new Integer(not.getKey());
+      ConnectionContext ctx = (ConnectionContext) connections.remove(key);
+      connections.remove(key);
+      HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
+      // Normally the task is already cancelled by the task itself.
+      if (hbt != null) hbt.cancel();
+
+      reactToClientRequest(not.getKey(), new CnxCloseRequest());
+
+      if (ctx != null) {
+        MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
+                                            + ':' + key + " closed");
+        ctx.pushError(exc);
+      }
+    }
+  }
+  
   private void doReact(CloseConnectionNot not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "CloseConnectionNot2: key=" + not.getKey());
+
     if (connections != null) {
       Integer key = new Integer(not.getKey());
-      // The connection may have already been 
-      // explicitely closed by a CnxCloseRequest.
+      // The connection may have already been explicitly closed by a CnxCloseRequest.
       if (connections.remove(key) != null) {
         reactToClientRequest(not.getKey(), new CnxCloseRequest());
-        heartBeatTasks.remove(key);
+        connections.remove(key);
+        HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
+        if (hbt != null) hbt.cancel();
       }
     }
     // else should not happen:
@@ -615,6 +642,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         if (obj instanceof StandardConnectionContext) {
           ConnectionContext cc = (ConnectionContext) obj;
           reactToClientRequest(cc.getKey(), new CnxCloseRequest());
+          HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(cc.getKey());
+          if (hbt != null) hbt.cancel();
           iterator.remove();
         }
       }
@@ -735,32 +764,42 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
 
     private transient long lastRequestDate;
 
-    HeartBeatTask(int timeout, Integer key) {
+    private transient AgentId userId = null;
+    
+    HeartBeatTask(int timeout, Integer key, AgentId userId) {
       this.timeout = timeout;
       this.key = key;
+      this.userId = userId;
     }
 
     public void run() {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "HeartBeatTask: run - key=" + key);
+
       long date = System.currentTimeMillis();
       if ((date - lastRequestDate) > timeout) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "HeartBeatTask: close connection");
-        ConnectionContext ctx = (ConnectionContext) connections.remove(key);
-        heartBeatTasks.remove(key);
-        reactToClientRequest(key.intValue(), new CnxCloseRequest());
+        if (logger.isLoggable(BasicLevel.INFO))
+          logger.log(BasicLevel.INFO, "HeartBeatTask: close connection");
+        
+        Channel.sendTo(userId, (Notification) new CloseConnectionNot(key.intValue()));
+        this.cancel();
 
-        if (ctx != null) {
-          MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
-              + ':' + key + " closed");
-          ctx.pushError(exc);
-        }
+//        ConnectionContext ctx = (ConnectionContext) connections.remove(key);
+//        heartBeatTasks.remove(key);
+//        reactToClientRequest(key.intValue(), new CnxCloseRequest());
+//
+//        if (ctx != null) {
+//          MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
+//              + ':' + key + " closed");
+//          ctx.pushError(exc);
+//        }
       }
     }
 
     public void start() throws IOException {
       lastRequestDate = System.currentTimeMillis();
       try {
-        AgentServer.getTimer().schedule(this, timeout, timeout);
+        AgentServer.getTimer().schedule(this, timeout/2, timeout/2);
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN, "HeartBeatTask: cannot schedule task " + key, exc);
@@ -769,6 +808,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     }
 
     public void touch() {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "HeartBeatTask: touch", new Exception());
       lastRequestDate = System.currentTimeMillis();
     }
 
@@ -1297,6 +1338,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         doReact(key, (ActivateConsumerRequest) request);
       else if (request instanceof CommitRequest)
         doReact(key, (CommitRequest)request);
+      else
+        logger.log(BasicLevel.WARN, this + " - unhandling request: " + request);
     } catch (MomException mE) {
       logger.log(BasicLevel.ERROR, this + " - error during request: " + request, mE);
 
@@ -3099,8 +3142,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
   }
 
   protected ClientContext getClientContext(int ctxId) {
-    return (ClientContext)contexts.get(
-      new Integer(ctxId));
+    return (ClientContext)contexts.get(new Integer(ctxId));
   }
 
   protected void cleanPendingMessages(long currentTime) {
