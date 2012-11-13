@@ -23,9 +23,6 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -81,7 +78,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.ExpiredNot;
@@ -93,7 +89,7 @@ import fr.dyade.aaa.common.Debug;
  * The <code>Queue</code> class implements the MOM queue behavior,
  * basically storing messages and delivering them upon clients requests.
  */
-public class Queue extends Destination implements QueueMBean, BagSerializer {
+public class Queue extends Destination implements QueueMBean {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -1607,25 +1603,6 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     }
     // Launching a delivery sequence:
     deliverMessages(0);
-  }
-
-  public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    receiving = in.readBoolean();
-    messages = (List) in.readObject();
-    deliveredMsgs = (Map) in.readObject();
-
-    for (int i = 0; i < messages.size(); i++) {
-      Message message = (Message) messages.get(i);
-      // Persisting the message.
-      setMsgTxName(message);
-      message.save();
-    }
-  }
-
-  public void writeBag(ObjectOutputStream out) throws IOException {
-    out.writeBoolean(receiving);
-    out.writeObject(messages);
-    out.writeObject(deliveredMsgs);
   }
 
   protected void handleExpiredNot(AgentId from, ExpiredNot not) {

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 200 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  *
@@ -24,9 +24,6 @@
  */
 package org.objectweb.joram.mom.proxies; 
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
@@ -287,21 +284,6 @@ class ClientContext implements java.io.Serializable {
     if (transactionsTable == null)
       return new Hashtable().keySet().iterator();
     return transactionsTable.keySet().iterator();
-  }
-
-  public void readBag(ObjectInputStream in) 
-    throws IOException, ClassNotFoundException {
-    started = in.readBoolean();
-    cancelledRequestId = in.readInt();
-    activeSubs = (Vector)in.readObject();
-    repliesBuffer = (Vector)in.readObject();
-  }
-
-  public void writeBag(ObjectOutputStream out) throws IOException {
-    out.writeBoolean(started);
-    out.writeInt(cancelledRequestId);
-    out.writeObject(activeSubs);
-    out.writeObject(repliesBuffer);
   }
 
   public String toString() {

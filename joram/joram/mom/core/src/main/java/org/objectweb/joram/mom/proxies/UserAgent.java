@@ -28,9 +28,7 @@ package org.objectweb.joram.mom.proxies;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -145,7 +143,6 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
@@ -159,7 +156,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * basically forwarding client requests to MOM destinations and MOM
  * destinations replies to clients.
  */ 
-public final class UserAgent extends Agent implements UserAgentMBean, BagSerializer, ProxyAgentItf {
+public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgentItf {
 
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
@@ -3311,151 +3308,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     }
     
     return true;
-  }
-
-
-  public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "UserAgent[" + getId() + "].readbag()");
-
-    connections = (Hashtable) in.readObject();
-    heartBeatTasks = (Hashtable) in.readObject();
-
-    if ((heartBeatTasks != null) && (heartBeatTasks.size() > 0)) {
-      // Start all tasks
-      Enumeration tasks = heartBeatTasks.elements();
-      while (tasks.hasMoreElements())
-        ((HeartBeatTask) tasks.nextElement()).start();
-    }
-
-    activeCtxId = in.readInt();
-    /* // Orders elements is unknown, not use read bag in the same order
-       Enumeration elements = contexts.elements();
-       while (elements.hasMoreElements()) {
-          ClientContext cc = (ClientContext)elements.nextElement();
-          cc.setProxyAgent(proxyAgent);
-          cc.readBag(in);
-       }
-       elements = subsTable.elements();
-       while (elements.hasMoreElements()) {
-          ClientSubscription cs = (ClientSubscription)elements.nextElement();
-          cs.setProxyAgent(proxyAgent);
-          cs.readBag(in);
-       }*/
-    /*** part modified */
-    int size = in.readInt();
-    Object obj = null;
-    for (int j = 0; j < size; j++) {
-      obj = in.readObject();
-      ClientContext cc = (ClientContext) contexts.get(obj);
-      cc.setProxyAgent(this);
-      cc.readBag(in);
-    }
-    size = in.readInt();
-    for (int j = 0; j < size; j++) {
-      obj = in.readObject();
-      ClientSubscription cs = (ClientSubscription) subsTable.get(obj);
-      cs.setProxyAgent(this);
-      cs.readBag(in);
-    }
-    /*** end part modified */  
-    
-    activeCtx = (ClientContext)contexts.get(
-      new Integer(activeCtxId));
-
-    Vector messages = (Vector) in.readObject();
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, " -> messages = " + messages);
-    
-    topicsTable = new Hashtable();
-    messagesTable = new Hashtable();
-
-//    Vector topics = new Vector();
-    TopicSubscription tSub;
-
-    for (Iterator subsIterator = subsTable.entrySet().iterator(); subsIterator.hasNext();) {
-      Map.Entry subEntry = (Map.Entry) subsIterator.next();
-      String subName = (String) subEntry.getKey();
-
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> subName = " + subName);
-      
-      ClientSubscription cSub = (ClientSubscription) subEntry.getValue();
-      AgentId destId = cSub.getTopicId();
-//      if (! topics.contains(destId))
-//        topics.add(destId);
-      cSub.reinitialize(messagesTable, messages, false);
-
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> destId = " + destId + ')');
-      
-      tSub = (TopicSubscription) topicsTable.get(destId);
-      if (tSub == null) {
-        tSub = new TopicSubscription();
-        topicsTable.put(destId, tSub);
-      }
-      tSub.putSubscription(subName, cSub.getSelector());
-    }
-    if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> topicsTable = " + topicsTable);
-
-    // DF: seems not useful here
-    // for (Enumeration topicIds = topics.elements();
-//          topicIds.hasMoreElements();) {
-//       updateSubscriptionToTopic((AgentId) topicIds.nextElement(), -1, -1);
-//     }
-  }
-
-  public void writeBag(ObjectOutputStream out) throws IOException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "UserAgent[" + getId() + "].writeBag()");
-
-    out.writeObject(connections);
-    out.writeObject(heartBeatTasks);
-
-    out.writeInt(activeCtxId);
-    
-    /*  Enumeration elements = contexts.elements();
-	while (elements.hasMoreElements()) {
-	   ((ClientContext)elements.nextElement()).writeBag(out);
-	}
-	elements = subsTable.elements();
-	while (elements.hasMoreElements()) {
-	   ((ClientSubscription)elements.nextElement()).writeBag(out);
-	}*/
-
-    /*** part modified */
-    // the number of keys in contexts map
-    out.writeInt(contexts.size());
-    Iterator ctxs = contexts.entrySet().iterator();
-    while (ctxs.hasNext()) {
-      Map.Entry ctxEntry = (Map.Entry) ctxs.next();
-      out.writeObject(ctxEntry.getKey());
-      ((ClientContext) ctxEntry.getValue()).writeBag(out);
-    }
-
-    // the number of keys in subsTable map
-    out.writeInt(subsTable.size());
-    Iterator subs = subsTable.entrySet().iterator();
-    while (subs.hasNext()) {
-      Map.Entry subEntry = (Map.Entry) subs.next();
-      out.writeObject(subEntry.getKey());
-      ((ClientSubscription) subEntry.getValue()).writeBag(out);
-    }
-    /*** end part modified */
-
-    List messages = new Vector();
-    Iterator msgs = messagesTable.values().iterator();
-    while (msgs.hasNext()) {
-      messages.add(msgs.next());
-    }
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, " -> messages = " + messages + ')');
-
-    out.writeObject(messages);
-  
   }
 
   public long getNbMsgsSentToDMQSinceCreation() {

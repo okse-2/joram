@@ -22,9 +22,6 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -1040,35 +1037,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   
   private void save() {
     if (durable) proxy.setSave();
-  }
-
-  public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ClientSubscription[" + proxyId + "].readbag()");
-
-    contextId = in.readInt();
-    subRequestId = in.readInt();
-    noLocal = in.readBoolean();
-    noFiltering = in.readBoolean();
-    active = in.readInt();
-    requestId = in.readInt();
-    toListener = in.readBoolean();
-    requestExpTime = in.readLong();
-  }
-
-  public void writeBag(ObjectOutputStream out)
-    throws IOException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ClientSubscription[" + proxyId + "].writeBag()");
-
-    out.writeInt(contextId);
-    out.writeInt(subRequestId);
-    out.writeBoolean(noLocal);
-    out.writeBoolean(noFiltering);
-    out.writeInt(active);
-    out.writeInt(requestId);
-    out.writeBoolean(toListener);
-    out.writeLong(requestExpTime);
   }
 
   void cleanMessageIds() {
