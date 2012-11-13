@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,10 +22,6 @@
  * Contributor(s): David Feliot, Nicolas Tachker
  */
 package fr.dyade.aaa.jndi2.impl;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 import javax.naming.Binding;
 import javax.naming.CompositeName;
@@ -618,16 +614,6 @@ public class ServerImpl {
   public void resetNamingContext(NamingContext context)
     throws NamingException {
     contextManager.resetNamingContext(context);
-  }
-
-  public void writeBag(ObjectOutputStream out)
-    throws IOException {
-    contextManager.writeBag(out);
-  }
-
-  public void readBag(ObjectInputStream in) 
-    throws IOException, ClassNotFoundException {
-    contextManager.readBag(in);
   }
 }
 

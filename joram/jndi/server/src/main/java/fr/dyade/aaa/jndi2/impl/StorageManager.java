@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,8 +23,6 @@
 package fr.dyade.aaa.jndi2.impl;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -203,17 +201,5 @@ public class StorageManager {
 
   public NamingContextId getIdFromName(CompositeName name) {
     return (NamingContextId)nameToIdIndex.get(name);
-  }
-
-  public void writeBag(ObjectOutputStream out)
-    throws IOException {
-    out.writeLong(contextCounter);
-    out.writeObject(nameToIdIndex);
-  }
-
-  public void readBag(ObjectInputStream in) 
-    throws IOException, ClassNotFoundException {
-    contextCounter = in.readLong();
-    nameToIdIndex = (Hashtable)in.readObject();
   }
 }

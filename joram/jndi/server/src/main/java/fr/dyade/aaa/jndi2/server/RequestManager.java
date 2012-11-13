@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,9 +22,6 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import javax.naming.Binding;
@@ -334,19 +331,5 @@ public class RequestManager implements LifeCycleListener, Serializable {
       Trace.logger.log(BasicLevel.DEBUG, "RequestManager.onMissingRecord(" +
                        mre + ',' + reqCtx + ')');
     return new JndiError(mre.getNameNotFoundException());
-  }
-
-  public void writeBag(ObjectOutputStream out)
-    throws IOException {
-    impl.writeBag(out);
-  }
-
-  public void readBag(ObjectInputStream in) 
-    throws IOException, ClassNotFoundException {
-    impl = new ServerImpl(
-      AgentServer.getTransaction(),
-      getId(),
-      getRootOwnerId());
-    impl.readBag(in);
   }
 }

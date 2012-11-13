@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,27 +22,21 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Notification;
 
-public class Container extends Agent implements BagSerializer {
+public class Container extends Agent {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   private Vector entryPoints;
 
   private LifeCycleListener lifeCycleListener;
-
-  private BagSerializer bagSerializer;
 
   /**
    * This agent cannot be swapped and has 
@@ -59,10 +53,6 @@ public class Container extends Agent implements BagSerializer {
 
   public void setLifeCycleListener(LifeCycleListener lifeCycleListener) {
     this.lifeCycleListener = lifeCycleListener;
-  }
-
-  public void setBagSerializer(BagSerializer bagSerializer) {
-    this.bagSerializer = bagSerializer;
   }
 
   public void react(AgentId from, Notification not) throws Exception {
@@ -91,15 +81,5 @@ public class Container extends Agent implements BagSerializer {
 
   void sendNotification(AgentId to, Notification not) {
     sendTo(to, not);
-  }
-  
-  public void writeBag(ObjectOutputStream out) throws IOException {
-    if (bagSerializer != null)
-      bagSerializer.writeBag(out);
-  }
-
-  public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    if (bagSerializer != null)
-      bagSerializer.readBag(in);
   }
 }
