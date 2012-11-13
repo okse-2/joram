@@ -8,7 +8,8 @@ if [ -z "$VTEST_HOME" ]
 then
     echo "variable VTEST_HOME doesn't exist"
     echo "please set variable VTEST_HOME to the Vtest \"runtest\" script path"
-    exit 1
+    export VTEST_HOME="/home/vsadt"
+    #exit 1
 else
     echo "VTEST_HOME set to $VTEST_HOME"
 fi
@@ -38,7 +39,7 @@ mvn install >> $LOGFILE 2>&1
 
 #launching tests
 cd src;
-echo "on launching ant custom.tests.vtest"
+echo "on launching ant tests.jms.all"
 ant tests.jms.all -Dship.dir=../../../joram-src/ship >> $LOGFILE 2>&1 
 TEST_RESULT=$?;
 
