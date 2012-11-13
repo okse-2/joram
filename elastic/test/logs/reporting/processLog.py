@@ -44,8 +44,7 @@ for i in range(1,len(sys.argv)):
 resId = 0
 for i in range(1,len(sys.argv)):
     fname = sys.argv[i]
-    #if fname.find("10.0.0.2") > -1 or fname.find("10.0.0.3") > -1:
-    if fname.find("10.0.0.2") > -1: 
+    if fname.find("10.0.0.2") > -1 or fname.find("10.0.0.3") > -1:
         continue # Skip producers
 
     wId = getId()
@@ -104,13 +103,14 @@ set output "../%s.eps"
 set xlabel "Time (s)"
 set ylabel "Messages"
 set xrange [0:4600]
+set yrange [0:%d]
 
 plot """
 
 datal = """'%s.dat' using 1:2 title "%s" with linespoints lw 2 lc %d%s \\
      """
-ratep.write(headr % "rates")
-loadp.write(headr % "loads")
+ratep.write(headr % ("rates",3500))
+loadp.write(headr % ("loads",16000))
 
 for j in range(1,resId):
     ratep.write(datal % ("rates%d" % (j,),"Worker %d" % (j,),j,","))

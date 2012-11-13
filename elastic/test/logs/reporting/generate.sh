@@ -21,6 +21,6 @@ epstopdf loads.eps
 
 pdflatex report.tex
 
-rm -rf report.aux report.log loads* rates*
+rm -rf report.aux report.log loads loads.eps rates rates.eps
 
 evince report.pdf
