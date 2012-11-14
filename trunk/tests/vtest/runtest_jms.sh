@@ -3,6 +3,8 @@
 # Vtest linux script for JORAM  #
 #################################
 
+source .bashrc
+
 #ensure existence of environment variable VTEST_HOME
 if [ -z "$VTEST_HOME" ]
 then
