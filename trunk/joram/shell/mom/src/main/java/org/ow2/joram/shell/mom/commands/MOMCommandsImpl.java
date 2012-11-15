@@ -59,7 +59,6 @@ public class MOMCommandsImpl implements MOMCommands {
   static private MOMCommandsImpl INSTANCE = null;
   
   static public void init(BundleContext context) {
-    System.out.println("Init...");
     bundleContext = context;
     destinationTracker = new ServiceTracker
                 (bundleContext, DestinationMBean.class.getCanonicalName(), null);
@@ -160,7 +159,7 @@ public class MOMCommandsImpl implements MOMCommands {
     } else if(command.equalsIgnoreCase("subscriptionLoad")) {
       buf.append("<userName> <subscriptionName>");
     } else if(command.equalsIgnoreCase("delete")) {
-      buf.append("(topic|queue|user) <name>");
+      buf.append("(topic|queue|dest[ination]|user) <name>");
     } else if(command.equalsIgnoreCase("info")) {
       buf.append("(queue|topic) <name>");
       buf.append("\n       ").append(fullCommand).append(" ");
@@ -558,10 +557,11 @@ public class MOMCommandsImpl implements MOMCommands {
     }
     String category = args[0];
     ServiceTracker tracker;
-    if(category.equalsIgnoreCase("queue")) {
-      tracker = queueTracker;
-    } else if(category.equalsIgnoreCase("topic")) {
-      tracker = topicTracker;
+    if(category.equalsIgnoreCase("queue")
+        || category.equalsIgnoreCase("topic")
+        || category.equalsIgnoreCase("destination")
+        || category.equalsIgnoreCase("dest")) {
+      tracker = destinationTracker;
     } else if(category.equalsIgnoreCase("user")) {
       tracker = userTracker;
     } else {
