@@ -56,7 +56,7 @@ import fr.dyade.aaa.common.Debug;
  * A simple example:
  * <p><blockquote><pre>
  *  &lt;configadmin&gt;
- *   &lt;configuration pid="fr.dyade.aaa.agent.services.A3ManagedService"&gt;
+ *   &lt;configuration pid="joram.server"&gt;
  *     &lt;property name="sid"&gt;0&lt;/property&gt;
  *     &lt;property name="storage"&gt;your_path/s0&lt;/property&gt;
  *     &lt;property name="pathToConf"&gt;your_path/conf&lt;/property&gt;
@@ -68,28 +68,30 @@ import fr.dyade.aaa.common.Debug;
  * </pre></blockquote>
  * 
  */
-public class A3ManagedService extends CommonService implements ManagedService { 
-
-	public static final Logger logmon = Debug.getLogger(A3ManagedService.class.getName());
+public class JoramManagedService extends CommonService implements ManagedService { 
+	public static final Logger logmon = Debug.getLogger(JoramManagedService.class.getName());
 	
-  private ServiceRegistration registration;
-  private boolean initialized = false; 
+	/** the PID name */
+	public static final String PID_NAME= "joram.server";
+
+	private ServiceRegistration registration;
+	private boolean initialized = false; 
   
   /**
    * 
    */
-  public A3ManagedService(final BundleContext bundleContext) throws Exception {
+  public JoramManagedService(final BundleContext bundleContext) throws Exception {
     super(bundleContext);
   	if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "A3ManagedService<" + bundleContext + '>');
-    this.bundleContext = bundleContext;
+      logmon.log(BasicLevel.DEBUG, "JoramManagedService<" + bundleContext + '>');
     Properties props = new Properties();
-    props.setProperty(Constants.SERVICE_PID, A3ManagedService.class.getName());
+    props.setProperty(Constants.SERVICE_PID, PID_NAME);
     registration = bundleContext.registerService(
     		ManagedService.class.getName(),
         this,
         props);
   }
+
 
   protected void doStop() {
   	super.doStop();
@@ -98,7 +100,7 @@ public class A3ManagedService extends CommonService implements ManagedService {
 
   //************ ManagedService ************
   public String getName() {
-	  return "A3ManagedService";
+	  return PID_NAME;
   }
 
   /* (non-Javadoc)
@@ -106,7 +108,7 @@ public class A3ManagedService extends CommonService implements ManagedService {
    */
   public void updated(Dictionary properties) throws ConfigurationException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "A3ManagerService.updated(" + properties + ')');
+      logmon.log(BasicLevel.DEBUG, "JoramManagerService.updated(" + properties + ')');
     if (properties == null) {
       if (initialized)
         doStop();
