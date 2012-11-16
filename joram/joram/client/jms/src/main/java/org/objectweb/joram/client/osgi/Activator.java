@@ -37,6 +37,18 @@ public class Activator implements BundleActivator {
   private UserMSF userMSF = null;
   private ConnectionFactoryMSF cfMSF = null;
   
+  private ServiceConnectionFactory scf = null;
+  private ServiceQueue sq = null;
+  private ServiceTopic st = null;
+  private ServiceUser su = null;
+  private ServiceAcquisitionQueue saq = null;
+  private ServiceAcquisitionTopic sat = null;
+  private ServiceDistributionQueue sdq = null;
+  private ServiceDistributionTopic sdt = null;
+  private ServiceSchedulerQueue ssq = null;
+  private ServiceFtpQueue sfq = null;
+  private ServiceAliasQueue salq = null;
+  
   /* (non-Javadoc)
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
@@ -48,6 +60,19 @@ public class Activator implements BundleActivator {
   	destMSF = new DestinationMSF(context);
   	userMSF = new UserMSF(context);
   	cfMSF = new ConnectionFactoryMSF(context);
+  	
+  	// register Service
+  	scf = new ServiceConnectionFactory(context);
+  	sq = new ServiceQueue(context);
+  	st = new ServiceTopic(context);
+  	su = new ServiceUser(context);
+  	saq = new ServiceAcquisitionQueue(context);
+  	sat = new ServiceAcquisitionTopic(context);
+  	sdq = new ServiceDistributionQueue(context);
+  	sdt = new ServiceDistributionTopic(context);
+  	ssq = new ServiceSchedulerQueue(context);
+  	sfq = new ServiceFtpQueue(context);
+  	salq = new ServiceAliasQueue(context);
   }
 
   /* (non-Javadoc)
@@ -58,6 +83,18 @@ public class Activator implements BundleActivator {
     destMSF.doStop();
     userMSF.doStop();
     cfMSF.doStop();
+    
+    scf.doStop();
+    sq.doStop();
+    st.doStop();
+    su.doStop();
+    saq.doStop();
+    sat.doStop();
+    sdq.doStop();
+    sdt.doStop();
+    ssq.doStop();
+    sfq.doStop();
+    salq.doStop();
   }
 
 }
