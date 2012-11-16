@@ -24,7 +24,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Bundle-Activator>fr.dyade.aaa.agent.services.A3ManagedService</Bundle-Activator>
+            <Bundle-Activator>fr.dyade.aaa.agent.services.A3ServiceActivator</Bundle-Activator>
             <Export-Package>fr.dyade.aaa.agent.services</Export-Package>
           </instructions>
         </configuration>
