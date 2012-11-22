@@ -361,6 +361,7 @@ public class MOMCommandsImpl implements MOMCommands {
   }
 
   private void listSubscription(String userName) {
+    try {
     //Step 1: retrieve the user
     UserAgentMBean user = null;
     Object[] objs = userTracker.getServices();
@@ -413,7 +414,9 @@ public class MOMCommandsImpl implements MOMCommands {
     int i=1;
     for(ClientSubscriptionMBean sub : subs) {
       table[i] = new String[] {
-        sub.getName().subSequence(0, 9).toString(), //Name
+        (sub.getName().length()>9
+          ? sub.getName().subSequence(0, 9).toString()
+          : sub.getName()), //Name
         sub.getTopicIdAsString(), //Topic Id
         String.valueOf(sub.getPendingMessageCount()), //Pending messages
         String.valueOf(sub.getDeliveredMessageCount()), //Waiting for ack.
@@ -423,6 +426,9 @@ public class MOMCommandsImpl implements MOMCommands {
       };
     }
     ShellDisplay.displayTable(table, true);
+    }catch(StringIndexOutOfBoundsException e) {
+      e.printStackTrace();
+    }
   }
   
   /**
