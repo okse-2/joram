@@ -53,7 +53,6 @@ import fr.dyade.aaa.common.Debug;
  *  <li> type
  *  <li> host
  *  <li> port
- *  <li> timeout
  *  <li> identityClassName
  *  <li> inInterceptorClassname
  *  <li> outInterceptorClassname
@@ -83,7 +82,6 @@ public class ServiceConnectionFactory implements ManagedServiceFactory {
 	public static final String TYPE = "type";
 	public static final String HOST = "host";
 	public static final String PORT = "port";
-	public static final String TIMEOUT = "timeout";
 	public static final String IDENTITYCLASS = "identityClassName";
 	public static final String ININTERCEPTORCLASS = "inInterceptorClassname";
 	public static final String OUTINTERCEPTORCLASS = "outInterceptorClassname";
@@ -213,8 +211,6 @@ public class ServiceConnectionFactory implements ManagedServiceFactory {
       else if (key.equals(HOST))
         continue;
       else if (key.equals(PORT))
-        continue;
-      else if (key.equals(TIMEOUT))
         continue;
       else if (key.equals(IDENTITYCLASS))
         continue;
