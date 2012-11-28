@@ -2,8 +2,7 @@
 #################################
 # Vtest linux script for JORAM  #
 #################################
-
-source .bashrc
+EXPECTED_ARGS=1
 
 #ensure existence of environment variable VTEST_HOME
 if [ -z "$VTEST_HOME" ]
@@ -15,6 +14,25 @@ then
 else
     echo "VTEST_HOME set to $VTEST_HOME"
 fi
+
+if [ $# -ne $EXPECTED_ARGS ]
+then
+    echo "runtest is expecting a svn url"
+    echo "Usage: `basename $0` svn_url"
+    exit 1;
+fi
+
+echo "trying to setenv java 7"
+/bin/bash $VTEST_HOME/setenv.sh 7 64;
+if [[ $? -gt 0 ]]; then
+    echo "SETENV FAILED !";
+    exit 1;
+else
+    echo "SETENV OK";
+fi
+java -version
+
+source $VTEST_HOME/.bashrc
 
 #change to "tags/JORAM_X_Y_Z" when producing a release
 
