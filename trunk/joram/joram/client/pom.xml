@@ -16,6 +16,7 @@
   <modules>
     <module>jms</module>
     <module>jca</module>
+    <module>spring</module>
   </modules>
 
 </project>
