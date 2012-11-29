@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ow2.joram</groupId>
+  <artifactId>tests</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <name>JORAM :: tests</name>
+  <description>Builds Joram for tests project.</description>
+
+  <parent>
+    <artifactId>ow2</artifactId>
+    <groupId>org.ow2</groupId>
+    <version>1.3</version>
+  </parent>
+
+  <properties>
+    <joram.version>5.9.0-SNAPSHOT</joram.version>
+  </properties>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>package</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.ow2.joram</groupId>
+                  <artifactId>joram-assembly</artifactId>
+                  <type>zip</type>
+                  <excludes>**/pom.*,**/META-INF/**</excludes>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>.</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>ship</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-assembly</artifactId>
+      <version>${joram.version}</version>
+      <type>zip</type>
+    </dependency>
+  </dependencies>
+</project>

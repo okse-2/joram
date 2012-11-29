@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>jndi-server</artifactId>
+  <packaging>bundle</packaging>
+  <name>JORAM :: jndi :: server</name>
+  <description>Builds the Joram jndi server project.</description>
+
+  <parent>
+    <groupId>org.ow2.joram</groupId>
+    <artifactId>jndi</artifactId>
+    <version>5.9.0-SNAPSHOT</version>
+  </parent>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Export-Package>
+              fr.dyade.aaa.jndi2.distributed,
+              fr.dyade.aaa.jndi2.ha,
+              fr.dyade.aaa.jndi2.impl,
+              fr.dyade.aaa.jndi2.server</Export-Package>
+            <Import-Package>
+              com.scalagent.jmx,
+              fr.dyade.aaa.agent,
+              fr.dyade.aaa.common,
+              fr.dyade.aaa.jndi2.msg,
+              fr.dyade.aaa.util,
+              fr.dyade.aaa.util.management,
+              javax.naming,
+              org.objectweb.util.monolog,
+              org.objectweb.util.monolog.api</Import-Package>
+              <DynamicImport-Package>*</DynamicImport-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>a3-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>jndi-shared</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+</project>
