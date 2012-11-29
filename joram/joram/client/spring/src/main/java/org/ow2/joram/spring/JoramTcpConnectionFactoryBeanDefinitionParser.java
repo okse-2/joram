@@ -36,6 +36,19 @@ import fr.dyade.aaa.common.Debug;
 /**
  * Parser to the joram:tcpConnectionFactory xml entry.
  * 
+ * <P>The joram TCP connection factory attributes:
+ * <UL>
+ * <LI>host (optionnal): the host of the Joram server  (default “localhost”)
+ * <LI>port (optionnal): the port of the Joram server  (default “16010”)
+ * </UL>
+ *<PRE><CODE>
+ * <B>A simple example:</B>
+ * {@code
+ * <!--  Joram tcp connection factory to use  -->
+ * <joram:tcpConnectionFactory id="jmsFactory" 
+ *  host="localhost" 
+ *  port="16010" />
+ * }</CODE></PRE>
  */
 public class JoramTcpConnectionFactoryBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 

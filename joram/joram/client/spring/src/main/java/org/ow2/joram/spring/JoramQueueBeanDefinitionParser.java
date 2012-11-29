@@ -36,6 +36,23 @@ import fr.dyade.aaa.common.Debug;
 
 /**
  * Parser to the joram:queue xml entry.
+ * 
+ * <P>The joram queue attributes:
+ * <UL>
+ * <LI>name (required): the queue name.
+ * <LI>sid (optionnal): the server id where create the queue (default “0”)
+ * <LI>dmq (optionnal): the dead message queue name
+ * <LI>dmqSid (optionnal): the dmq server id (default “sid”)
+ * <LI>deleteOnStop (optionnal): if true the queue can be delete on destroy (default “false”)
+ * </UL>
+ * <PRE><CODE>
+ * <B>A simple example:</B>
+ * {@code
+ * <!--  Joram queue destination to use  -->
+ * <joram:queue id="destination" 
+ *  name="myQueue" 
+ *  dmq="DMQ" />
+ * }</CODE></PRE>
  */
 public class JoramQueueBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 

@@ -35,6 +35,23 @@ import fr.dyade.aaa.common.Debug;
 
 /**
  * Parser to the joram:user xml entry.
+ * 
+ * <P>The joram user attributes:
+ * <UL>
+ * <LI>sid (optionnal): the server id where create the user (default “0”)
+ * <LI>name (optionnal): the user name (default “anonymous”)
+ * <LI>password (optionnal): the user password (default “anonymous”)
+ * <LI>deleteOnStop (optionnal): if true the user can be delete on destroy (default “false”)
+ * </UL>
+ * <PRE><CODE>
+ * <B>A simple example:</B>
+ * {@code
+ * <!--  Joram User to use  -->
+ * <joram:user id="user" 
+ *   name="myUser" 
+ *   password="myUser" 
+ *   deleteOnStop="true"/>
+ * }</CODE></PRE>
  */
 public class JoramUserBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 

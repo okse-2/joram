@@ -34,6 +34,26 @@ import fr.dyade.aaa.common.Debug;
 
 /**
  * Parser for the joram:joramserver xml entry.
+ * 
+ * <P>The joram server attributes:
+ * <UL>
+ *  <LI>sid (optionnal): the server id value (default 0)
+ *  <LI>persistent (optionnal): true if the Joram server if persistent (default false)
+ *  <LI>pathToConf (optionnal): the path to the configuration (a3servers.xml, ...)  (default “.”)
+ *  <LI>storage (optionnal): the path to the persistent directory (default “s+sid”)
+ *  <LI>stopServer (optionnal): if true the server stop on destroy (default false)
+ * </UL>
+ * <PRE><CODE>
+ * <B>A simple example:</B>
+ * {@code
+ * <!--  lets create an embedded Joram server -->
+ * <joram:joramserver id="server" 
+ *    sid="0" 
+ *    persistent="true" 
+ *    pathToConf="/JONAS_BASE/conf" 
+ *    storage="/JONAS_BASE/work/s0" 
+ *    stopServer="false"/>
+ * }</CODE></PRE>
  */
 public class JoramServerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
