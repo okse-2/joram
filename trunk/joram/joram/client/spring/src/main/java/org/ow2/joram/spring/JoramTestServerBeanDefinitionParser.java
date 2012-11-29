@@ -43,6 +43,25 @@ import fr.dyade.aaa.common.Debug;
 
 /**
  * Parser to the joram:testserver xml entry.
+ * 
+ * <P>This if all in one entry, non configuration files, ...
+ * <UL>
+ * <LI>Create and start a collocated Joram server on localhost.
+ * <LI>Create the Joram administration wrapper
+ * <LI>Create the anonymous user
+ * </UL>
+ *
+ * <P>The joram user attributes: 
+ * <UL>
+ * <LI>sid (optionnal): the server id (default “0”)
+ * <LI>port (optionnal): the server port (default “16010”)
+ * </UL>
+ *<PRE><CODE>
+ * <B>A simple example:</B>
+ * {@code
+ * <!-- lets create an embedded Joram server for test, create a user "anonymous" and create a collocated admin wrapper  -->
+ * <joram:testserver id="server" />
+ * }</CODE></PRE>
  */
 public class JoramTestServerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 

@@ -36,6 +36,23 @@ import fr.dyade.aaa.common.Debug;
 
 /**
  * Parser to the joram:topic xml entry.
+ * 
+ * <P>The joram topic attributes:
+ * <UL>
+ * <LI>name (required): the topic name.
+ * <LI>sid (optionnal): the server id where create the topic (default “0”)
+ * <LI>dmq (optionnal): the dead message queue name
+ * <LI>dmqSid (optionnal): the dmq server id (default “sid”)
+ * <LI>deleteOnStop (optionnal): if true the topic can be delete on destroy (default “false”)
+ * </UL>
+ * <PRE><CODE>
+ * <B>A simple example:</B>
+ * {@code
+ * <!--  Joram topic destination to use  -->
+ * <joram:topic id="destination" 
+ *  name="myTopic" 
+ *  dmq="DMQ" />
+ * }</CODE></PRE>
  */
 public class JoramTopicBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 

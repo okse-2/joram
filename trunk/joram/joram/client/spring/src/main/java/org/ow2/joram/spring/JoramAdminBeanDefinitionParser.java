@@ -38,6 +38,24 @@ import fr.dyade.aaa.common.Debug;
 
 /**
  * Parser for the joram:admin xml entry.
+ * 
+ * <P>The joram administration attributes:
+ * <UL>
+ * <LI>user (optionnal): the name of the Joram root (default “root”)
+ * <LI>pass (optionnal): the password of the Joram root (default “root”)
+ * <LI>host (optionnal): the host of the Joram server  (default “localhost”)
+ * <LI>port (optionnal): the port of the Joram server  (default “16010”)
+ * </UL>
+ *<PRE><CODE>
+ * <B>A simple example:</B>
+ * {@code
+ * <!--  Joram administration to use  -->
+ * <joram:admin id="wrapper" 
+ *  user="root" 
+ *  pass="root" 
+ *  host="localhost" 
+ *  port="16010" />
+ * }</CODE></PRE>
  */
 public class JoramAdminBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 

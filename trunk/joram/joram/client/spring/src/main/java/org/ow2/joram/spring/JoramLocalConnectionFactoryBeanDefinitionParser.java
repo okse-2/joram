@@ -34,6 +34,17 @@ import fr.dyade.aaa.common.Debug;
 
 /**
  * Parser to the joram:localConnectionFactory xml entry.
+ * 
+ * <P>The joram local connection factory attributes:
+ * <UL> 
+ * <LI>no attribute for this entry.
+ * </UL>
+ * <PRE><CODE>
+ * <B>A simple example:</B>
+ * {@code
+ * <!--  Joram local connection factory to use -->
+ * <joram:localConnectionFactory id="LCF"/></PRE>
+ * }</CODE></PRE>
  */
 public class JoramLocalConnectionFactoryBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
