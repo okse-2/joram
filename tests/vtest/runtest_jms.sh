@@ -24,6 +24,10 @@ fi
 
 source $VTEST_HOME/.bashrc
 
+echo "printing JDK version"
+java -version
+echo "--"
+
 #change to "tags/JORAM_X_Y_Z" when producing a release
 
 #value should be synchronized whith vtest configuration (test.properties file)
@@ -52,6 +56,7 @@ cd src;
 echo "on launching ant tests.jms.all"
 ant tests.jms.all -Dship.dir=../../../joram-src/ship >> $LOGFILE 2>&1 
 TEST_RESULT=$?;
+
 
 mkdir results ;
 cp $LOGFILE results ;
