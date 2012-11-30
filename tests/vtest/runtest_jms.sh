@@ -22,16 +22,6 @@ then
     exit 1;
 fi
 
-echo "trying to setenv java 7"
-/bin/bash $VTEST_HOME/setenv.sh 7 64;
-if [[ $? -gt 0 ]]; then
-    echo "SETENV FAILED !";
-    exit 1;
-else
-    echo "SETENV OK";
-fi
-java -version
-
 source $VTEST_HOME/.bashrc
 
 #change to "tags/JORAM_X_Y_Z" when producing a release
