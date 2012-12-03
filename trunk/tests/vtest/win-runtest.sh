@@ -36,7 +36,7 @@ cd src;
 echo "on launching ant custom.tests.vtest"
 
 cmd <<EOF
-ant custom.tests.vtest >> antrun.txt 
+ant custom.tests.vtest -Dship.dir=..\..\..\joram-src\ship >> antrun.txt 
 EOF
 
 #ant vtest.check.reports >> $LOGFILE 2>&1 
