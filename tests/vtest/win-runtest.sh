@@ -12,6 +12,15 @@
 #     echo "VTEST_HOME set to $VTEST_HOME"
 # fi
 
+EXPECTED_ARGS=2
+
+if [ $# -ne $EXPECTED_ARGS ]
+then
+    echo "runtest is expecting two args"
+    echo "Usage: `basename $0` svn_url jdk_number"
+    exit 1;
+fi
+
 VTEST_HOME="/cygdrive/c/vtest"
 date=`date +%x`
 date=`echo $date | sed -e s:/:.:g`
@@ -19,7 +28,7 @@ LOGFILE=$VTEST_HOME/"vtest-$date.log"
 ZIPFILE="result.zip"
 
 #extracting joram source so as to test updated trunk artifacts
-svn co svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
+svn co svn://svn.forge.objectweb.org/svnroot/joram/$1/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
 cd $VTEST_HOME/joram-src ;
 echo "installing joram trunk"
 mvn install >> $LOGFILE 2>&1
@@ -36,7 +45,7 @@ cd src;
 echo "on launching ant custom.tests.vtest"
 
 cmd <<EOF
-ant custom.tests.vtest -Dship.dir=..\..\..\joram-src\ship >> antrun.txt 
+runtest.bat $2
 EOF
 
 #ant vtest.check.reports >> $LOGFILE 2>&1 
