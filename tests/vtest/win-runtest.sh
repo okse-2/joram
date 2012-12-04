@@ -44,6 +44,9 @@ mvn install >> $LOGFILE 2>&1
 cd src;
 echo "on launching ant custom.tests.vtest"
 
+#hack
+chmod +x runtest.bat
+
 cmd <<EOF
 runtest.bat $2
 EOF
