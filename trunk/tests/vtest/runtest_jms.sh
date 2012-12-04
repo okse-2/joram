@@ -25,7 +25,7 @@ fi
 source $VTEST_HOME/.bashrc
 
 echo "printing JDK version"
-java -version
+java -version >> $LOGFILE 2>&1 
 echo "--"
 
 #change to "tags/JORAM_X_Y_Z" when producing a release
