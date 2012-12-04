@@ -42,10 +42,7 @@
 <!--   <joram:user id="user" name="anonymous" password="anonymous" deleteOnStop="true"/> -->
   
    <!--  Joram queue destination to use  -->
-   <joram:queue id="destination" name="queue1" dmq="DMQ" />
-   
-   <!--  Joram tcp connection factory to use  -->
-   <joram:tcpConnectionFactory id="jmsFactory" host="localhost" port="16010" />
+   <joram:queue id="destination" name="queue1" />
    
    <!--  Joram local connection factory to use -->
    <joram:localConnectionFactory id="LCF"/>
