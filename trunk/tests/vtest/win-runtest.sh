@@ -59,7 +59,7 @@ cd $VTEST_HOME;
 echo "on launching ant custom.tests.vtest"
 
 cmd <<EOF
-runtest.bat $2 >> antrun.txt
+runtest.bat $1 >> antrun.txt
 EOF
 
 #ant vtest.check.reports >> $LOGFILE 2>&1 
