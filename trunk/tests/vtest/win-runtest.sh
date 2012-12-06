@@ -21,6 +21,20 @@ then
     exit 1;
 fi
 
+if [ $2 -eq "6" ]; then
+	echo "setting jdk 6 for cygwin"
+	export JAVA_HOME="/cygdrive/c/Program Files/Java/jdk1.6.0_35"
+	export JAVA="$JAVA_HOME/bin"
+	export PATH=$JAVA:$PATH
+elif [ $2 -eq "7" ]; then
+	echo "setting jdk 7 for cygwin"
+	export JAVA_HOME="/cygdrive/c/Program Files/Java/jdk1.7.0_09"
+	export JAVA="$JAVA_HOME/bin"
+	export PATH=$JAVA:$PATH
+else
+	echo "jdk $2 not supported"
+fi
+
 VTEST_HOME="/cygdrive/c/vtest"
 date=`date +%x`
 date=`echo $date | sed -e s:/:.:g`
@@ -41,14 +55,11 @@ echo "installing joram tests"
 mvn install >> $LOGFILE 2>&1
 
 #launching tests
-cd src;
+cd $VTEST_HOME;
 echo "on launching ant custom.tests.vtest"
 
-#hack
-chmod +x runtest.bat
-
 cmd <<EOF
-runtest.bat $2
+runtest.bat $2 >> antrun.txt
 EOF
 
 #ant vtest.check.reports >> $LOGFILE 2>&1 
