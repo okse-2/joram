@@ -26,9 +26,10 @@ set PATH=%JAVA_HOME%\bin;%PATH%
 set RUN_DIR=C:\vtest\joram-test\src
 
 echo == java version  ==
-java -version >> batrun.txt
+java -version
 
 echo == Launching ant test  ==
-start /D %RUN_DIR% ant tests.jms.all -Dship.dir=..\..\..\joram-src\ship >> batrun.txt
+cd %RUN_DIR%
+ant tests.jms.all -Dship.dir=..\..\..\joram-src\ship
 
 :end
