@@ -21,12 +21,12 @@ then
     exit 1;
 fi
 
-if [ $2 -eq "6" ]; then
+if [ $1 -eq "6" ]; then
 	echo "setting jdk 6 for cygwin"
 	export JAVA_HOME="/cygdrive/c/Program Files/Java/jdk1.6.0_35"
 	export JAVA="$JAVA_HOME/bin"
 	export PATH=$JAVA:$PATH
-elif [ $2 -eq "7" ]; then
+elif [ $1 -eq "7" ]; then
 	echo "setting jdk 7 for cygwin"
 	export JAVA_HOME="/cygdrive/c/Program Files/Java/jdk1.7.0_09"
 	export JAVA="$JAVA_HOME/bin"
@@ -42,7 +42,7 @@ LOGFILE=$VTEST_HOME/"vtest-$date.log"
 ZIPFILE="result.zip"
 
 #extracting joram source so as to test updated trunk artifacts
-svn co svn://svn.forge.objectweb.org/svnroot/joram/$1/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
+svn co svn://svn.forge.objectweb.org/svnroot/joram/$2/joram $VTEST_HOME/joram-src >> $LOGFILE 2>&1
 cd $VTEST_HOME/joram-src ;
 echo "installing joram trunk"
 mvn install >> $LOGFILE 2>&1
