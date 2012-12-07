@@ -33,6 +33,7 @@ import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Vector;
@@ -1038,6 +1039,14 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
      * to chose unused sessions.
      */
     private long last = 0L;
+    
+    static final int SEND_NONE = 0;
+    static final int SEND_IN_PROGRESS = 1;
+    /**
+     * the sendActivity is defined to avoid a connection close, 
+     * that can arrive by a inactivity of the reader when the SO_TIMEOUT is set.
+     */
+    int sendActivity = 0;
 
     public String toString() {
       return toString(new StringBuffer()).toString();
@@ -1543,6 +1552,9 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           return;
         }
 
+        // sending a message, activity is in progress
+        sendActivity = SEND_IN_PROGRESS;
+        
         if (logmon.isLoggable(BasicLevel.DEBUG)) {
           if (msg.not != null) {
             logmon.log(BasicLevel.DEBUG, getName() + ", send msg#" + msg.getStamp());
@@ -1579,6 +1591,9 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           if (logmon.isLoggable(BasicLevel.WARN))
             logmon.log(BasicLevel.WARN, getName() + ", exception in sending message " + msg, exc);
         }
+        
+        // the message is sent, set the activity to NONE.
+        sendActivity = SEND_NONE;
       }
     }
 
@@ -1633,6 +1648,14 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             logmon.log(BasicLevel.ERROR,
                        getName() + ", error during waiting message", exc);
             break;
+          } catch (SocketTimeoutException exc) {
+            if (sendActivity == 0) {
+              logmon.log(BasicLevel.INFO, getName() + ", The session is active (sending) but Read timed out (SocketTimeoutException), nothing to do continue.");
+              continue;
+            } else {
+              logmon.log(BasicLevel.ERROR, getName() + ", error the session is inactive",  exc);
+              break;
+            }
           } catch (NullPointerException exc) {
             // The stream is closed, exits !
             break;
