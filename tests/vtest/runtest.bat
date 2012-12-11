@@ -18,7 +18,7 @@ goto usage
 
 :usage
 echo runtest.bat takes exatcly one parameter (jdk number : 6 or 7)
-goto end
+exit 1
 
 :test
 set JAVA=%JAVA_HOME%\bin
@@ -30,6 +30,5 @@ java -version
 
 echo == Launching ant test  ==
 cd %RUN_DIR%
-ant tests.jms.all -Dship.dir=..\..\..\joram-src\ship
-
-:end
+call ant tests.jms.all -Dship.dir=..\..\..\joram-src\ship
+exit %ERRORLEVEL%
