@@ -30,63 +30,37 @@ import javax.naming.*;
  * A receiver client.
  * Receives rounds of messages from a given queue.
  */
-public class RegulatedReceiver {
-
-	static class ReceiveRound extends Thread {
-		private Connection cnx;
-		private Queue dest;
-		public ReceiveRound(Connection cnx, Queue dest) {
-			this.cnx = cnx;
-			this.dest = dest;
-		}
-
-		public void run() {
-			try {
-				long start = System.currentTimeMillis();
-				Session session = cnx.createSession(false,Session.AUTO_ACKNOWLEDGE);
-				MessageConsumer receiver = session.createConsumer(dest);
-				count = 0;
-				for(int j = 0; j < Constants.MSG_PER_ROUND; j++) {
-					receiver.receive();
-					count++;
-				}
-			} catch (Exception e) {
-				e.printStackTrace(System.out);
-			}
-		}
-	}
-
-	static int count;
-	static Context ictx = null;
+public class RegulatedReceiverBis {
 
 	public static void main (String argv[]) throws Exception {
 		int number = Integer.parseInt(argv[0]);
 		System.out.println("[RegulatedReceiver " + number + "]\tStarted...");
 
-		ictx = new InitialContext();
+		Context ictx = new InitialContext();
 		ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf" + number);
 		Queue dest = (Queue) ictx.lookup("remote" + number);
 		ictx.close();
 
 		Connection cnx = cnxF.createConnection();
 
-		long wait, rstart;
-
-		//(new Inverse()).start();
+		Session session = cnx.createSession(false,Session.AUTO_ACKNOWLEDGE);
+		MessageConsumer receiver = session.createConsumer(dest);
 
 		cnx.start();
+		
+		long wait;
+		Message msg = null;
+		long start = System.currentTimeMillis();
+		
 		for(int i = 1; true; i++) {
-			rstart = System.currentTimeMillis();
-			ReceiveRound rr = new ReceiveRound(cnx,dest);
-			rr.start();
-			rr.join(Constants.TIME_UNIT);
-
-			System.out.println("[RegulatedReceiver " + number + "]\t" + count);
-
-			wait = rstart + Constants.TIME_UNIT - System.currentTimeMillis();
+			for( int j = 0; j < Constants.MSG_PER_ROUND; j++) {
+				msg = receiver.receive();
+			}
+			
+			System.out.println("[RegulatedReceiver " + number + "] Last message's latency (ms): " + (msg.getJMSTimestamp() - System.currentTimeMillis()));
+			wait = start + Constants.TIME_UNIT*(i+1) - System.currentTimeMillis();
 			if (wait > 0)
 				Thread.sleep(wait);
-
 		}
 
 		/*
