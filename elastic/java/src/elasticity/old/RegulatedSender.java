@@ -44,7 +44,7 @@ public class RegulatedSender {
 		if (round < 300)
 			return 200;
 		if (round < 400)
-			return  200 + (round -300);
+			return  200 + (round - 300);
 		if (round < 500)
 			return 300;
 		if (round < 600)

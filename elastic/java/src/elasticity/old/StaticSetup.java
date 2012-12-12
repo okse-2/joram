@@ -59,7 +59,7 @@ public class StaticSetup {
 		Queue rq3 = Queue.create(3);
 		
 		Properties propAQ = new Properties();
-		propAQ.setProperty("remoteAgentID",rq1.getName()); // + ";" + rq2.getName());
+		propAQ.setProperty("remoteAgentID",rq1.getName()); //+ ";" + rq2.getName() + ";" + rq3.getName());
 		//propAQ.setProperty("period",String.valueOf(Constants.QUEUE_PERIOD));
 		Queue aq0 = Queue.create(0,"org.objectweb.joram.mom.dest.AliasInQueue",propAQ);
 
