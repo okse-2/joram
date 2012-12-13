@@ -33,23 +33,29 @@ import javax.naming.*;
 public class RegulatedReceiver {
 
 	static class ReceiveRound extends Thread {
-		private Connection cnx;
-		private Queue dest;
+		private MessageConsumer receiver;
+		
 		public ReceiveRound(Connection cnx, Queue dest) {
-			this.cnx = cnx;
-			this.dest = dest;
+			try {
+				Session session = cnx.createSession(false,Session.AUTO_ACKNOWLEDGE);
+				receiver = session.createConsumer(dest);
+			} catch (JMSException e) {
+				e.printStackTrace(System.out);
+			}
 		}
 
 		public void run() {
 			try {
-				long start = System.currentTimeMillis();
-				Session session = cnx.createSession(false,Session.AUTO_ACKNOWLEDGE);
-				MessageConsumer receiver = session.createConsumer(dest);
 				count = 0;
+				Message msg = null;
 				for(int j = 0; j < Constants.MSG_PER_ROUND; j++) {
-					receiver.receive();
+					msg = receiver.receive();
 					count++;
 				}
+				
+				if (msg != null)
+					System.out.println(" * Last Message's latency (ms): " + 
+						(System.currentTimeMillis() - msg.getJMSTimestamp()));
 			} catch (Exception e) {
 				e.printStackTrace(System.out);
 			}
@@ -57,44 +63,31 @@ public class RegulatedReceiver {
 	}
 
 	static int count;
-	static Context ictx = null;
 
 	public static void main (String argv[]) throws Exception {
 		int number = Integer.parseInt(argv[0]);
 		System.out.println("[RegulatedReceiver " + number + "]\tStarted...");
 
-		ictx = new InitialContext();
+		Context ictx = new InitialContext();
 		ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf" + number);
 		Queue dest = (Queue) ictx.lookup("remote" + number);
 		ictx.close();
 
 		Connection cnx = cnxF.createConnection();
-
-		long wait, rstart;
-
-		//(new Inverse()).start();
-
 		cnx.start();
-		for(int i = 1; true; i++) {
-			rstart = System.currentTimeMillis();
+		
+		long wait, start;
+		while (true) {
+			start = System.currentTimeMillis();
 			ReceiveRound rr = new ReceiveRound(cnx,dest);
 			rr.start();
 			rr.join(Constants.TIME_UNIT);
 
 			System.out.println("[RegulatedReceiver " + number + "]\t" + count);
 
-			wait = rstart + Constants.TIME_UNIT - System.currentTimeMillis();
+			wait = start + Constants.TIME_UNIT - System.currentTimeMillis();
 			if (wait > 0)
 				Thread.sleep(wait);
-
 		}
-
-		/*
-		long duration = System.currentTimeMillis() - Constants.TIMEOUT - start;
-		System.out.println("[RegulatedReceiver " + number + "]\tT\t" + duration);
-		cnx.close();
-		System.out.println("[RegulatedReceiver " + number + "]\tDone.");
-		 */
 	}
-
 }

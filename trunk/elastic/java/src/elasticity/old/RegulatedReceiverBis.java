@@ -29,6 +29,8 @@ import javax.naming.*;
 /**
  * A receiver client.
  * Receives rounds of messages from a given queue.
+ * 
+ * Does NOT work!!
  */
 public class RegulatedReceiverBis {
 
