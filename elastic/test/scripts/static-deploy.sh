@@ -34,11 +34,11 @@ done
 echo "ADMINISTRATING.."
 ssh 10.0.0.2 "nohup joram/bin/client.sh elasticity.old.StaticSetup &"
 
-echo "LAUNCHING CLIENTS.."
-for i in {1..3}
-do
-        VM=10.0.0.$(($i+2))
-	ssh $VM "nohup joram/bin/client.sh elasticity.old.RegulatedReceiver $i > worker$i.log &"
-done
+#echo "LAUNCHING CLIENTS.."
+#for i in {1..3}
+#do
+#        VM=10.0.0.$(($i+2))
+#	ssh $VM "nohup joram/bin/client.sh elasticity.old.RegulatedReceiver $i > worker$i.log &"
+#done
 
-ssh 10.0.0.2 "nohup joram/bin/client.sh elasticity.old.RegulatedSender 0 > producer.log &"
+#ssh 10.0.0.2 "nohup joram/bin/client.sh elasticity.old.RegulatedSender 0 > producer.log &"

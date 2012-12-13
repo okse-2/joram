@@ -27,8 +27,6 @@ import javax.jms.*;
 import javax.naming.*;
 
 public class RegulatedSender {
-	
-	static Context ictx = null;
 
 	/**
 	 * Computes weights for 
@@ -39,6 +37,10 @@ public class RegulatedSender {
 	 * @return
 	 */
 	public static int computeLoad(int round) {
+		
+		return Constants.MSG_PER_ROUND;
+		
+		/*
 		if (round < 200)
 			return round;
 		if (round < 300)
@@ -63,14 +65,14 @@ public class RegulatedSender {
 			return 200 - (round - 1100);
 
 		return 0;
+		*/
 	}
 
 	public static void main(String argv[]) throws Exception {
-		
 		int number = Integer.parseInt(argv[0]);
 		System.out.println("[RegulatedSender " + number + "]\tStarted...");
 		
-		ictx = new InitialContext();
+		Context ictx = new InitialContext();
 		ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf" + number);
 		Queue dest = (Queue) ictx.lookup("alias" + number);
 		ictx.close();
@@ -105,6 +107,5 @@ public class RegulatedSender {
 		}
 		//cnx.close();
 		//System.out.println("[RegulatedSender]\tDone.");
-		
 	}
 }

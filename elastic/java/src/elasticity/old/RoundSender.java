@@ -59,7 +59,7 @@ public class RoundSender
 		
 		Queue dest = null;
 		if (alias)
-			dest = (Queue) ictx.lookup("alias");
+			dest = (Queue) ictx.lookup("alias0");
 		else
 			dest = (Queue) ictx.lookup("remote1");
 		

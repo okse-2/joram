@@ -29,9 +29,9 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.Properties;
+
+import javax.naming.*;
 
 /**
  * Manages a distributed architecture.
@@ -54,16 +54,19 @@ public class StaticSetup {
 		User.create("anonymous", "anonymous", 3);
 	    
 		// Creating the destinations on servers
+		Queue ack = Queue.create(0);
 		Queue rq1 = Queue.create(1);
 		Queue rq2 = Queue.create(2);
 		Queue rq3 = Queue.create(3);
-		
+				
 		Properties propAQ = new Properties();
 		propAQ.setProperty("remoteAgentID",rq1.getName()); //+ ";" + rq2.getName() + ";" + rq3.getName());
 		//propAQ.setProperty("period",String.valueOf(Constants.QUEUE_PERIOD));
 		Queue aq0 = Queue.create(0,"org.objectweb.joram.mom.dest.AliasInQueue",propAQ);
 
 		// Setting free access to the destinations:
+		ack.setFreeReading();
+		ack.setFreeWriting();
 		aq0.setFreeWriting();
 		rq1.setFreeReading();
 		rq1.setFreeWriting();
@@ -83,7 +86,8 @@ public class StaticSetup {
 				TcpConnectionFactory.create("10.0.0.5", 16013);
 		
 		// Binding the objects in JNDI:
-		javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+		Context jndiCtx = new InitialContext();
+		jndiCtx.bind("ack", ack);
 		jndiCtx.bind("alias0", aq0);
 		jndiCtx.bind("remote1", rq1);
 		jndiCtx.bind("remote2", rq2);
