@@ -46,16 +46,8 @@ public class RegulatedReceiver {
 
 		public void run() {
 			try {
-				count = 0;
-				Message msg = null;
-				for(int j = 0; j < Constants.MSG_PER_ROUND; j++) {
-					msg = receiver.receive();
-					count++;
-				}
-				
-				if (msg != null)
-					System.out.println(" * Last Message's latency (ms): " + 
-						(System.currentTimeMillis() - msg.getJMSTimestamp()));
+				for(count  = 0; count < Constants.MSG_PER_ROUND; count++)
+					receiver.receive();
 			} catch (Exception e) {
 				e.printStackTrace(System.out);
 			}
@@ -82,6 +74,7 @@ public class RegulatedReceiver {
 			ReceiveRound rr = new ReceiveRound(cnx,dest);
 			rr.start();
 			rr.join(Constants.TIME_UNIT);
+			rr.stop();
 
 			System.out.println("[RegulatedReceiver " + number + "]\t" + count);
 

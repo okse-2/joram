@@ -38,6 +38,6 @@ java.write("""
 java.close()
 
 os.system("cat Load.java")
-#os.system("javac Load.java")
-#os.system("java Load")
+os.system("javac Load.java")
+os.system("java Load")
 os.system("rm -f Load.java Load.class")

@@ -38,34 +38,7 @@ public class RegulatedSender {
 	 */
 	public static int computeLoad(int round) {
 		
-		return Constants.MSG_PER_ROUND;
-		
-		/*
-		if (round < 200)
-			return round;
-		if (round < 300)
-			return 200;
-		if (round < 400)
-			return  200 + (round - 300);
-		if (round < 500)
-			return 300;
-		if (round < 600)
-			return  300 - (round - 500);
-		if (round < 700)
-			return 200;
-		if (round < 800)
-			return 200 - (round - 700);
-		if (round < 900)
-			return 100;
-		if (round < 1000)
-			return 100 + (round - 900);
-		if (round < 1100)
-			return 200;
-		if (round < 1300)
-			return 200 - (round - 1100);
-
-		return 0;
-		*/
+		return Constants.MSG_PER_ROUND + 5;
 	}
 
 	public static void main(String argv[]) throws Exception {
