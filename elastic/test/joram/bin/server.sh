@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Definition of environment variables
-JORAM_HOME=/root/joram
-JAVA_HOME=/root/jdk1.7.0_02
+JORAM_HOME=/home/ubuntu/joram
+JAVA_HOME=/home/ubuntu/jdk1.7.0_02
 
 # Test the argument number
 if [ -z $1 ]

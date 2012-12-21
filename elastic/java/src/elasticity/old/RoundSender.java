@@ -47,6 +47,7 @@ public class RoundSender
 		if (argv.length == 1) {
 			int arg = Integer.parseInt(argv[0]);
 			alias = (arg == 0);
+			
 		}
 		
 	    byte[] content = new byte[Constants.MSG_SIZE];
