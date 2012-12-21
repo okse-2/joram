@@ -135,6 +135,7 @@
         dmq       CDATA ""
         threshold CDATA "-1"
         nbMaxMsg  CDATA "-1"
+        syncExceptionOnFull CDATA "false"
         className CDATA "org.objectweb.joram.mom.dest.Queue">
 
 <!ELEMENT Topic (property | reader | writer | freeReader | freeWriter | jndi)*>

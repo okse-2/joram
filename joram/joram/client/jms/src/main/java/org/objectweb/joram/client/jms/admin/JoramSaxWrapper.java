@@ -224,6 +224,8 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ATT_IDENTITYCLASS = "identityClass";
   /** Syntaxic name for urls attribute */
   static final String ATT_URLS = "urls";
+  /** Syntaxic name for syncExceptionOnFull attribute */
+  static final String ATT_SYNCEXCONFULLDEST = "syncExceptionOnFull";
 
   static final String ATT_FOREIGN = "foreign";
   
@@ -316,6 +318,7 @@ public class JoramSaxWrapper extends DefaultHandler {
   int threshold = -1;
   int nbMaxMsg = -1;
   String parent = null;
+  boolean syncExceptionOnFull = false;
 
   /**
    * Name of joram admin to get from the file.
@@ -764,6 +767,10 @@ public class JoramSaxWrapper extends DefaultHandler {
     } catch (NumberFormatException exc) {
       throw new SAXException("bad value for nbMaxMsg: " + atts.getValue(ATT_NBMAXMSG));
     }
+
+    String value = atts.getValue(ATT_SYNCEXCONFULLDEST);
+    if (value != null)
+      syncExceptionOnFull = Boolean.parseBoolean(value);
   }
   
   void getTopicAtts(Attributes atts) throws SAXException {
@@ -1010,6 +1017,11 @@ public class JoramSaxWrapper extends DefaultHandler {
           configureDestination(queue);
           if (threshold > 0) queue.setThreshold(threshold);
           if (nbMaxMsg > 0) queue.setNbMaxMsg(nbMaxMsg);
+          if (syncExceptionOnFull) {
+            queue.setSyncExceptionOnFull(true);
+            syncExceptionOnFull = false;
+          }
+
           registerDestination(queue);
           setDestinationDMQ(name, queue, dmq);
         } else if (rawName.equals(ELT_TOPIC)) {
