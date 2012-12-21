@@ -144,11 +144,11 @@ public class ManagedConnectionImpl
     this.userName = userName;
 
     if (cnx instanceof XAQueueConnection)
-      mode = "PTP";
+      mode = ManagedConnectionFactoryConfig.MODE_PTP;
     else if (cnx instanceof XATopicConnection)
-      mode = "PubSub";
+      mode = ManagedConnectionFactoryConfig.MODE_PUBSUB;
     else
-      mode = "Unified";
+      mode = ManagedConnectionFactoryConfig.MODE_UNIFIED;
 
     try {
       cnx.setExceptionListener(this);
