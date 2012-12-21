@@ -410,7 +410,7 @@ public class OutboundSession implements javax.jms.Session {
   }
 
   /** 
-   * Actually does nothing, closing of the session occurs while closing
+   * In Java EE, closing of the session occurs while closing
    * the component's connection.
    */
   public void close() throws JMSException {
@@ -420,6 +420,9 @@ public class OutboundSession implements javax.jms.Session {
     valid = false;
     cnx.sessions.remove(this);
     started = false;
+    
+    // close the joram session, need by spring
+    ((org.objectweb.joram.client.jms.Session)sess).close();
   }
 
   /**
