@@ -312,6 +312,9 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
     org.objectweb.joram.client.jms.Connection cnx = 
       (org.objectweb.joram.client.jms.Connection) xac;
     cnx.cleanup();
+    
+    // unregister the OutboundConnection mbean created by ManagedConnectionImpl.getConnection(null,null).
+    unregisterMBean();
   }
 
   public String toString() {
