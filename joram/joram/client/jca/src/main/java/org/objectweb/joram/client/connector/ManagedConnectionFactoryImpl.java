@@ -261,7 +261,7 @@ public class ManagedConnectionFactoryImpl extends ManagedConnectionFactoryConfig
     String userName;
 
     // No user identification provided, using the default one.
-    String mode = "Unified";
+    String mode = ManagedConnectionFactoryConfig.MODE_UNIFIED;
 
     if (cxRequest == null)
       userName = getUserName();
@@ -273,9 +273,9 @@ public class ManagedConnectionFactoryImpl extends ManagedConnectionFactoryConfig
       }
 
       if (cxRequest instanceof QueueConnectionRequest)
-        mode = "PTP";
+        mode = ManagedConnectionFactoryConfig.MODE_PTP;
       else if (cxRequest instanceof TopicConnectionRequest)
-        mode = "PubSub";
+        mode = ManagedConnectionFactoryConfig.MODE_PUBSUB;
 
       userName = ((ConnectionRequest) cxRequest).getUserName();
     }

@@ -176,7 +176,11 @@ public class ManagedConnectionFactoryConfig implements java.io.Serializable {
    */
   private String outInterceptors = null;
 
-  private String mode = "Unified"; // Unified | PTP | PubSub
+  public static final String MODE_UNIFIED = "Unified";
+  public static final String MODE_PTP = "PTP";
+  public static final String MODE_PUBSUB = "PubSub";
+  
+  private String mode = MODE_UNIFIED; // Unified | PTP | PubSub
   
   private String name = null;
 
@@ -366,7 +370,7 @@ public class ManagedConnectionFactoryConfig implements java.io.Serializable {
   	multiThreadSync = new Boolean(props.getProperty("multiThreadSync", "false")).booleanValue();
   	multiThreadSyncDelay = new Integer(props.getProperty("multiThreadSyncDelay", "1")).intValue();
 
-  	mode = props.getProperty("mode", "Unified"); //"Unified | PTP | PubSub"
+  	mode = props.getProperty("mode", MODE_UNIFIED); //"Unified | PTP | PubSub"
   	// TODO: unused by JOnAS
 // <!--Unified-->
 // <!--ConnectionFactoryInterface = javax.jms.ConnectionFactory-->
