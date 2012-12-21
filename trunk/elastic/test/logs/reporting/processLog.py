@@ -25,6 +25,9 @@ def getRound():
 
 # Init production
 prod = [0] * MAX_RND
+nbrw = [0] * MAX_RND
+suml = [0] * MAX_RND
+maxl = [0] * MAX_RND
 
 # Init time origin
 datei = 0
@@ -79,6 +82,10 @@ for i in range(1,len(sys.argv)):
         load = int(cells[loadi])
 
         prod[rnd] += rate
+	nbrw[rnd] += 1
+	suml[rnd] += load
+	if load > maxl[rnd]:
+		maxl[rnd] = load
         
         ratef.write("%d\t%d\n" % (rnd*10,rate))
         loadf.write("%d\t%d\n" % (rnd*10,load))
@@ -87,13 +94,22 @@ for i in range(1,len(sys.argv)):
     ratef.close()
     loadf.close()
 
-# Create prod datafile.
+# Create prod, nbrw and suml datafiles.
 prodf = open("rates/prod.dat","w")
+nbrwf = open("plus/nbrw.dat","w")
+sumlf = open("plus/suml.dat","w")
+maxlf = open("plus/maxl.dat","w")
+
 for i in range(len(prod)):
-    prodf.write("%d\t%d\n" % (i*10,prod[i]))
+	prodf.write("%d\t%d\n" % (i*10,prod[i]))
+	nbrwf.write("%d\t%d\n" % (i*10,nbrw[i]))
+	sumlf.write("%d\t%d\n" % (i*10,suml[i]))
+	maxlf.write("%d\t%d\n" % (i*10,maxl[i]))
 
 prodf.close()
-    
+nbrwf.close()
+sumlf.close()
+
 # Generate Gnuplot scripts
 ratep = open("rates/rates.gnuplot","w");
 loadp = open("loads/loads.gnuplot","w");

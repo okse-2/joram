@@ -7,7 +7,7 @@ public class Constants {
 	static final int MSG_SIZE = 1000;
 	
 	static final int NB_OF_ROUNDS = 100;
-	static final int MSG_PER_ROUND = 10;
+	static final int MSG_PER_ROUND = 1000;
 	
 	static final int TIME_UNIT = 1000;
 }
