@@ -38,6 +38,7 @@
     <antcall target="tests"/>
     <!-- HttpNetwork + NGTransaction -->
     <antcall target="tests.http"/>
+  	<antcall target="pool.test"/>
   </target>
 
   <!--
@@ -1017,6 +1018,49 @@
     </java>
   </target>
 
+	
+	  <!--
+	     - PoolNetwork :
+	     - test SO_TIMEOUT
+	     - a3servers.xml -> PoolNetwork
+	  -->
+	  <target name="pool.init">
+	    <antcall target="init.test" inheritAll="true">
+	      <param name="a3conf" value="pool/a3servers.xml"/>
+	    </antcall>
+	  	<copy file="pool/a3debug.cfg" overwrite="true" tofile="${test.dir}/a3debug.cfg"/>
+	  </target>
+
+	  <target name="pool.receiver" depends="init,compile,pool.init">
+	    <java classname="a3.pool.Receiver"
+	          failonerror="no" fork="yes"
+	          dir="${test.dir}">
+	      <classpath path="${project.class.path}"/>
+	      <jvmarg line="-Dcom.sun.management.jmxremote -Dframework.TestCase.OutFile=${report.file} -Dframework.TestCase.TestId=pool.receiver"/>
+	      <arg line="0 ./s0"/>
+	    </java>
+	  </target>
+
+	  <target name="pool.sender" depends="compile">
+	    <java classname="a3.pool.Sender"
+	          failonerror="no" fork="yes"
+	          dir="${test.dir}">
+	      <classpath path="${project.class.path}"/>
+	      <jvmarg line="-Dcom.sun.management.jmxremote -Dframework.TestCase.OutFile=${report.file} -Dframework.TestCase.TestId=pool.sender"/>
+	      <arg line="1 ./s1"/>
+	    </java>
+	  </target>
+	
+	<target name="pool.test" depends="init,compile,pool.init">
+		<parallel>
+      <antcall target="pool.receiver" inheritAll="true"/>
+			<sequential>
+			  <sleep seconds="1"/>
+			  <antcall target="pool.sender" inheritAll="true"/>
+			</sequential>
+    </parallel>
+  </target>
+	      	
   <!--
      - test for CSSI.
      -->
