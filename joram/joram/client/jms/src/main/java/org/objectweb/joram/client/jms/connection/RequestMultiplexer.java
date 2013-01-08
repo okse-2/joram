@@ -95,8 +95,36 @@ public class RequestMultiplexer {
 
   private DemultiplexerDaemon demtpx;
 
-  private Timer timer;
-  
+  private static Timer timer;
+  private static int timerInUse;
+
+  private synchronized static void createTimer() {
+    if (timer == null) {
+      timer = new Timer();
+      timerInUse = 0;
+    }
+    timerInUse++;
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "createTimer: timerInUse = " + timerInUse);
+  }
+
+  private synchronized static void cancelTimer() {
+    if (timer != null) {
+      timerInUse--;
+      if (timerInUse < 1) {
+        timer.cancel();
+        timer = null;
+        timerInUse = 0;
+      }
+    }
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "cancelTimer: timerInUse = " + timerInUse);
+  }
+
+  private synchronized static Timer getTimer() {
+    return timer;
+  }
+
   /**
    * The task responsible for keeping
    * the connection alive.
@@ -117,8 +145,8 @@ public class RequestMultiplexer {
     this.cnx = cnx; 
     requestsTable = new Hashtable();
     requestCounter = 0;
-    timer = new Timer();
-    channel.setTimer(timer);
+    createTimer();
+    channel.setTimer(getTimer());
     try {
       channel.connect();
     } catch (JMSException exc) {
@@ -127,7 +155,7 @@ public class RequestMultiplexer {
       // Wraps the incoming exception
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "", exc);
-      if (timer != null) timer.cancel();
+      cancelTimer();
       throw new JMSException(exc.toString());
     }
     
@@ -231,7 +259,7 @@ public class RequestMultiplexer {
     }
 
     if (heartBeatTask != null) heartBeatTask.cancel();
-    if (timer != null) timer.cancel();
+    cancelTimer();
     channel.close();
     demtpx.stop();
 
@@ -414,6 +442,7 @@ public class RequestMultiplexer {
   }
 
   public void schedule(TimerTask task, long period) {
+    Timer timer = getTimer();
     if (timer != null) {
       try {
         timer.schedule(task, period);
@@ -552,6 +581,7 @@ public class RequestMultiplexer {
     }
 
     public void start() throws Exception {
+      Timer timer = getTimer();
       if (timer != null)
         timer.schedule(this, heartBeat, heartBeat);
     }
