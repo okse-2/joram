@@ -104,8 +104,7 @@ public class RoundSender
 			System.out.println("[RoundSender]\t" + i + "\t" + round);
 			sum += round;
 			acker.receive();
-			//acker.receive();
-
+			acker.receive();
 		}
 		
 

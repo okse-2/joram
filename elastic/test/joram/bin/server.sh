@@ -2,7 +2,7 @@
 
 # Definition of environment variables
 JORAM_HOME=/home/ubuntu/joram
-JAVA_HOME=/home/ubuntu/jdk1.7.0_02
+JAVA_HOME=/home/ubuntu/jdk1.7.0_10
 
 # Test the argument number
 if [ -z $1 ]

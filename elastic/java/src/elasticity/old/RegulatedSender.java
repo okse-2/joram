@@ -37,8 +37,9 @@ public class RegulatedSender {
 	 * @return
 	 */
 	public static int computeLoad(int round) {
-		
-		return Constants.MSG_PER_ROUND + 5;
+		if (round < 10)
+			return round * Constants.MSG_LOAD / 10;
+		return Constants.MSG_LOAD * 9 / 10;
 	}
 
 	public static void main(String argv[]) throws Exception {
@@ -49,7 +50,7 @@ public class RegulatedSender {
 		ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf" + number);
 		Queue dest = (Queue) ictx.lookup("alias" + number);
 		ictx.close();
-
+		
 		Connection cnx = cnxF.createConnection();
 		Session session = cnx.createSession(true,Session.SESSION_TRANSACTED);
 		MessageProducer sender = session.createProducer(dest);
@@ -66,11 +67,11 @@ public class RegulatedSender {
 		cnx.start();
 		start = System.currentTimeMillis();
 		
-		for(int i = 0; true; i++) {
+		for (int i = 0; i < 100; i++) {
 			load = computeLoad(i);
-			for(int j = 0; j < load; j++) {
+			for (int j = 0; j < load; j++) {
 				sender.send(message);
-				//if ((j % 10) == 9)
+				if ((j % 10) == 9)
 					session.commit();
 			}
 			System.out.println("[RegulatedSender " + number + "]\t" + i + "\t" + load);

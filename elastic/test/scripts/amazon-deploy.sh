@@ -1,6 +1,6 @@
-VMS=(54.247.42.157 79.125.66.239 79.125.61.38)
-KEY="-i /home/ahmed/AWS/amazon.pem"
-JRE="/home/ahmed/Oracle/jdk1.7.0_02"
+VMS=(46.51.145.182 46.137.69.24 176.34.205.183)
+KEY="-i /home/elrhedda/Amazon/joram.pem"
+JRE=$JAVA_HOME
 
 echo "BUILDING.."
 echo "JORAM"
@@ -42,13 +42,13 @@ do
 done
 
 echo "ADMINISTRATING.."
-ssh $KEY ubuntu@${VMS[1]} "nohup joram/bin/client.sh elasticity.old.StaticSetup &"
+ssh $KEY ubuntu@${VMS[0]} "nohup joram/bin/client.sh elasticity.old.StaticSetup &"
 
-#echo "LAUNCHING CLIENTS.."
-#for i in {1..3}
-#do
-#        VM=10.0.0.$(($i+2))
-#	ssh $VM "nohup joram/bin/client.sh elasticity.old.RegulatedReceiver $i > worker$i.log &"
-#done
+echo "LAUNCHING CLIENTS.."
+for i in $(seq 1 $LIM)
+do
+        VM=ubuntu@${VMS[$i]}
+	ssh $KEY $VM "nohup joram/bin/client.sh elasticity.old.RegulatedReceiver $i > rreceiver$i.log &"
+done
 
-#ssh 10.0.0.2 "nohup joram/bin/client.sh elasticity.old.RegulatedSender 0 > producer.log &"
+ssh $KEY ubuntu@${VMS[0]} "nohup joram/bin/client.sh elasticity.old.RegulatedSender 0 > rsender.log &"
