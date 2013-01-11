@@ -44,7 +44,7 @@ public class StaticSetup {
 		System.out.println("[StaticSetup]\tStarted...");
 		
 		// Connecting the administrator:
-		AdminModule.connect("10.39.47.166",16010,"root","root", 60);
+		AdminModule.connect("10.48.7.102",16010,"root","root", 60);
 		
 		System.out.println("[StaticSetup]\tConnected to Admin Module.");
 		// Creating access for user anonymous on servers
@@ -60,8 +60,8 @@ public class StaticSetup {
 		/*Queue rq3 = Queue.create(3);*/
 				
 		Properties propAQ = new Properties();
-		propAQ.setProperty("remoteAgentID",rq1.getName()); // + ";" + rq2.getName()); // + ";" + rq3.getName());
-		//propAQ.setProperty("period",String.valueOf(Constants.QUEUE_PERIOD));
+		propAQ.setProperty("remoteAgentID",rq1.getName() + ";" + rq2.getName()); // + ";" + rq3.getName());
+		propAQ.setProperty("period",String.valueOf(Constants.QUEUE_PERIOD));
 		Queue aq0 = Queue.create(0,"org.objectweb.joram.mom.dest.AliasInQueue",propAQ);
 
 		// Setting free access to the destinations:
@@ -77,11 +77,11 @@ public class StaticSetup {
 		
 		// Creating the connection factories for connecting to the servers:
 		javax.jms.ConnectionFactory cf0 =
-				TcpConnectionFactory.create("10.39.47.166", 16010);
+				TcpConnectionFactory.create("10.48.7.102", 16010);
 		javax.jms.ConnectionFactory cf1 =
-				TcpConnectionFactory.create("10.39.48.69", 16011);
+				TcpConnectionFactory.create("10.227.205.231", 16011);
 		javax.jms.ConnectionFactory cf2 =
-				TcpConnectionFactory.create("10.39.56.27", 16012);
+				TcpConnectionFactory.create("10.227.135.211", 16012);
 		/*javax.jms.ConnectionFactory cf3 =
 				TcpConnectionFactory.create("10.0.0.5", 16013);*/
 		

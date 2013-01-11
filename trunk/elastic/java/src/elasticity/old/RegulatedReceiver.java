@@ -46,7 +46,7 @@ public class RegulatedReceiver {
 
 		public void run() {
 			try {
-				for(count  = 0; count < Constants.MSG_PER_ROUND; count++)
+				for(count  = 0; count < load; count++)
 					receiver.receive();
 			} catch (Exception e) {
 				e.printStackTrace(System.out);
@@ -55,11 +55,13 @@ public class RegulatedReceiver {
 	}
 
 	static int count;
+	static int number;
+	static int load;
 
-	public static void main (String argv[]) throws Exception {
-		int number = Integer.parseInt(argv[0]);
+	public static void main(String argv[]) throws Exception {
+		number = Integer.parseInt(argv[0]);
 		System.out.println("[RegulatedReceiver " + number + "]\tStarted...");
-
+		
 		Context ictx = new InitialContext();
 		ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf" + number);
 		Queue dest = (Queue) ictx.lookup("remote" + number);
@@ -68,8 +70,13 @@ public class RegulatedReceiver {
 		Connection cnx = cnxF.createConnection();
 		cnx.start();
 		
+		if (number == 1)
+			load = Constants.MSG_LOAD * 70 / 100;
+		else
+			load = Constants.MSG_LOAD * 30 / 100;
+		
 		long wait, start;
-		while (true) {
+		for (int i = 0; i < 200; i++) {
 			start = System.currentTimeMillis();
 			ReceiveRound rr = new ReceiveRound(cnx,dest);
 			rr.start();

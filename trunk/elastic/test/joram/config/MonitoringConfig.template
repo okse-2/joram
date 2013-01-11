@@ -4,7 +4,7 @@
 	<Task>
 
 		<type type = "fr.dyade.aaa.common.monitoring.FileMonitoringTimerTask" />
-		<period period = "10000" />
+		<period period = "1000" />
 		<taskProps objectName = "resultPath" 
 							 attribute  = "RANDmonitoringNUM.csv" />
 		<taskProps objectName = "name" 
