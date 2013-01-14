@@ -24,12 +24,13 @@
 <!-- ====================================== -->
 <!-- ====================================== -->
 <?xml version="1.0"?>
-  
+<!DOCTYPE JORAM SYSTEM "C:\cygwin\home\freyssin\OW2Joram\joram\joram\client\jms\src\main\resources\org\objectweb\joram\client\jms\admin\joramAdmin.dtd">
+
 <JoramAdmin>
   <LocalAdminModule login="root" password="root"
   								  identityClass="org.objectweb.joram.shared.security.SimpleIdentity">
     <property name="asyncSend" value="true"/>
-  </AdminModule>
+  </LocalAdminModule>
 
   <TcpAdminModule host="localhost" port="16010" login="root" password="root"
   								identityClass="org.objectweb.joram.shared.security.SimpleIdentity">
