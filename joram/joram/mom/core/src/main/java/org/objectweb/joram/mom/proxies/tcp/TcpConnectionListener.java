@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -45,14 +45,10 @@ import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.stream.StreamUtil;
 
-
-
 /**
  * Listens to the TCP connections from the JMS clients.
- * Creates a <code>TcpConnection</code> for each
- * accepted TCP connection.
- * Opens the <code>UserConnection</code> with the
- * right user's proxy.
+ * Creates a <code>TcpConnection</code> for each accepted TCP connection.
+ * Opens the <code>UserConnection</code> with the right user's proxy.
  */
 public class TcpConnectionListener extends Daemon {
   /** logger */
@@ -273,6 +269,7 @@ public class TcpConnectionListener extends Daemon {
         nos.send();
         ioctrl = new IOControl(sock, ctx.getInputCounter());
 
+        // Close the remaining connection if it exists
         TcpConnection tcpConnection = proxyService.getConnection(proxyId, key);
         if (tcpConnection != null) {
           tcpConnection.close();
