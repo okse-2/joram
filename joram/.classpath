@@ -1,23 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="a3/common/target/classes" path="a3/common/src/main/java"/>
-	<classpathentry kind="src" output="a3/rt/target/classes" path="a3/rt/src/main/java"/>
-	<classpathentry kind="src" path="a3/osgi/src/main/java"/>
-	<classpathentry kind="src" output="jndi/shared/target/classes" path="jndi/shared/src/main/java"/>
-	<classpathentry kind="src" output="jndi/server/target/classes" path="jndi/server/src/main/java"/>
-	<classpathentry kind="src" output="jndi/client/target/classes" path="jndi/client/src/main/java"/>
-	<classpathentry kind="src" output="joram/shared/target/classes" path="joram/shared/src/main/java"/>
-	<classpathentry kind="src" output="joram/mom/core/target/classes" path="joram/mom/core/src/main/java"/>
-	<classpathentry kind="src" output="joram/client/jms/target/classes" path="joram/client/jms/src/main/java"/>
-	<classpathentry kind="src" output="joram/client/jca/target/classes" path="joram/client/jca/src/main/java"/>
-	<classpathentry kind="src" output="joram/mom/extensions/collector/target/classes" path="joram/mom/extensions/collector/src/main/java"/>
-	<classpathentry kind="src" output="joram/mom/extensions/ftp/target/classes" path="joram/mom/extensions/ftp/src/main/java"/>
-	<classpathentry kind="src" output="joram/mom/extensions/jmsbridge/target/classes" path="joram/mom/extensions/jmsbridge/src/main/java"/>
-	<classpathentry kind="src" output="joram/mom/extensions/mail/target/classes" path="joram/mom/extensions/mail/src/main/java"/>
-	<classpathentry kind="src" output="joram/mom/extensions/scheduler/target/classes" path="joram/mom/extensions/scheduler/src/main/java"/>
-	<classpathentry kind="src" path="joram/mom/extensions/amqp/src/main/java"/>
-	<classpathentry kind="src" output="joram/tools/jasp/target/classes" path="joram/tools/jasp/src/main/java"/>
-	<classpathentry kind="src" output="samples/classes" path="samples/src/joram"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
 	<classpathentry kind="output" path="target/classes"/>
