@@ -688,17 +688,6 @@ public interface AdminItf {
                          String identityClassName,
                          Properties prop) throws ConnectException, AdminException;
   
-//
-//   * Create a user Identity.
-//   * 
-//   * @param user              Name of the user.
-//   * @param passwd            Password of the user.
-//   * @param identityClassName identity class name (simple, jaas).
-//   * @return identity user Identity.
-//   * @throws AdminException
-//
-//  private Identity createIdentity(String user, String passwd, String identityClassName);
-
   /**
    * Returns the information about the current server: unique identifier, symbolic name and hostname.
    *
@@ -730,7 +719,7 @@ public interface AdminItf {
   public String getLocalHost() throws ConnectException, AdminException;
 
   /**
-   * Returns the port number of the server the module is connected to.
+   * Returns the name of the server the module is connected to.
    *
    * @exception ConnectException  If the admin connection is not established.
    * @exception AdminException    If the request fails.
