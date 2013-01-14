@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -1061,7 +1061,7 @@ public class AdminWrapper implements AdminItf {
   }
 
   /**
-   * Returns the port number of the server the module is connected to.
+   * Returns the name of the server the module is connected to.
    *
    * @exception ConnectException  If the admin connection is not established.
    * @exception AdminException    If the request fails.
