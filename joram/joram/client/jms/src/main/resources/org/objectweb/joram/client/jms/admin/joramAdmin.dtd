@@ -17,7 +17,9 @@
   - USA.
 -->
 
-<!ELEMENT JoramAdmin (LocalAdminModule | TcpAdminModule | SSLAdminModule | AdminModule | LocalConnectionFactory | TcpConnectionFactory | SSLConnectionFactory | ConnectionFactory | User | Destination | Queue | Topic | DMQueue | Cluster | Server | InitialContext | AMQPBridgeConnection)*>
+<!DOCTYPE JORAM [
+
+<!ELEMENT JoramAdmin (LocalAdminModule | TcpAdminModule | SSLAdminModule | AdminModule | LocalConnectionFactory | TcpConnectionFactory | SSLConnectionFactory | ConnectionFactory | User | Destination | Queue | Topic | JMSAcquisitionQueue | JMSDistributionQueue | JMSAcquisitionTopic | JMSDistributionTopic | AMQPAcquisitionQueue| AMQPDistributionQueue | AMQPAcquisitionTopic | AMQPDistributionTopic | DMQueue | Cluster | Server | InitialContext | JMSBridgeConnection | AMQPBridgeConnection)*>
 <!ATTLIST JoramAdmin name CDATA "default">
 
 <!ELEMENT LocalAdminModule (property)*>
@@ -132,19 +134,87 @@
 <!ATTLIST Queue
 	name      CDATA ""
 	serverId  CDATA "0"
-        dmq       CDATA ""
-        threshold CDATA "-1"
-        nbMaxMsg  CDATA "-1"
-        syncExceptionOnFull CDATA "false"
-        className CDATA "org.objectweb.joram.mom.dest.Queue">
+    dmq       CDATA ""
+    threshold CDATA "-1"
+    nbMaxMsg  CDATA "-1"
+    syncExceptionOnFull CDATA "false"
+    className CDATA "org.objectweb.joram.mom.dest.Queue">
+
+<!ELEMENT JMSAcquisitionQueue (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST JMSAcquisitionQueue
+	name      CDATA ""
+	serverId  CDATA "0"
+  dmq       CDATA ""
+  threshold CDATA "-1"
+  nbMaxMsg  CDATA "-1"
+  foreign   CDATA #REQUIRED>
+
+<!ELEMENT JMSDistributionQueue (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST JMSDistributionQueue
+	name      CDATA ""
+	serverId  CDATA "0"
+  dmq       CDATA ""
+  threshold CDATA "-1"
+  nbMaxMsg  CDATA "-1"
+  foreign   CDATA #REQUIRED>
+
+<!ELEMENT AMQPAcquisitionQueue (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST AMQPAcquisitionQueue
+	name      CDATA ""
+	serverId  CDATA "0"
+  dmq       CDATA ""
+  threshold CDATA "-1"
+  nbMaxMsg  CDATA "-1"
+  foreign   CDATA #REQUIRED>
+
+<!ELEMENT AMQPDistributionQueue (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST AMQPDistributionQueue
+	name      CDATA ""
+	serverId  CDATA "0"
+  dmq       CDATA ""
+  threshold CDATA "-1"
+  nbMaxMsg  CDATA "-1"
+  foreign   CDATA #REQUIRED>
 
 <!ELEMENT Topic (property | reader | writer | freeReader | freeWriter | jndi)*>
 <!ATTLIST Topic
 	name      CDATA ""
 	serverId  CDATA "0"
-        dmq       CDATA ""
-        parent    CDATA ""
-        className CDATA "org.objectweb.joram.mom.dest.Topic">
+  dmq       CDATA ""
+  parent    CDATA ""
+  className CDATA "org.objectweb.joram.mom.dest.Topic">
+
+<!ELEMENT JMSAcquisitionTopic (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST JMSAcquisitionTopic
+	name      CDATA ""
+	serverId  CDATA "0"
+  dmq       CDATA ""
+  parent    CDATA ""
+  foreign   CDATA #REQUIRED>
+
+<!ELEMENT JMSDistributionTopic (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST JMSDistributionTopic
+	name      CDATA ""
+	serverId  CDATA "0"
+  dmq       CDATA ""
+  parent    CDATA ""
+  foreign   CDATA #REQUIRED>
+
+<!ELEMENT AMQPAcquisitionTopic (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST AMQPAcquisitionTopic
+	name      CDATA ""
+	serverId  CDATA "0"
+  dmq       CDATA ""
+  parent    CDATA ""
+  foreign   CDATA #REQUIRED>
+
+<!ELEMENT AMQPDistributionTopic (property | reader | writer | freeReader | freeWriter | jndi)*>
+<!ATTLIST AMQPDistributionTopic
+	name      CDATA ""
+	serverId  CDATA "0"
+  dmq       CDATA ""
+  parent    CDATA ""
+  foreign   CDATA #REQUIRED>
 
 <!ELEMENT DMQueue (property | reader | writer | freeReader | freeWriter | jndi)*>
 <!ATTLIST DMQueue
@@ -176,7 +246,14 @@
 <!ELEMENT Cluster (Queue | Topic | reader | writer | freeReader | freeWriter | jndi)*>
 <!ATTLIST Cluster>
 
+<!ELEMENT JMSBridgeConnection EMPTY>
+<!ATTLIST JMSBridgeConnection
+        serverId  CDATA #IMPLIED
+        urls CDATA #REQUIRED>
+
 <!ELEMENT AMQPBridgeConnection EMPTY>
 <!ATTLIST AMQPBridgeConnection
         serverId  CDATA #IMPLIED
         urls CDATA #REQUIRED>
+
+]>
