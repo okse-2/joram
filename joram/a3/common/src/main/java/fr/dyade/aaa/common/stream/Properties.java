@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,6 +33,11 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
+
 
 /**
  *  This class implements a set of properties, which maps keys to values.
@@ -40,6 +45,8 @@ import java.util.NoSuchElementException;
  * as a value. <p>
  */
 public class Properties implements Serializable, Cloneable {
+  private static Logger logger = Debug.getLogger("fr.dyade.aaa.common.Properties");
+  
   /** The total number of entries in the hash table. */
   private transient int count;
   /** The hash table data. */
@@ -53,7 +60,7 @@ public class Properties implements Serializable, Cloneable {
 							 
   /** The load factor for the hashtable. */
   private transient float loadFactor;
-
+  
   /**
    * The number of times this Properties has been structurally modified
    * Structural modifications are those that change the number of entries in
@@ -74,12 +81,15 @@ public class Properties implements Serializable, Cloneable {
    */
   public Properties(int initialCapacity, float loadFactor) {
     if (initialCapacity < 0)
-      throw new IllegalArgumentException("Illegal Capacity: "+
-                                         initialCapacity);
+      throw new IllegalArgumentException("Illegal Capacity: " + initialCapacity);
     if (loadFactor <= 0 || Float.isNaN(loadFactor))
-      throw new IllegalArgumentException("Illegal Load: "+loadFactor);
+      throw new IllegalArgumentException("Illegal Load: " + loadFactor);
 
-    if (initialCapacity==0)
+    initialize(initialCapacity, loadFactor);
+  }
+  
+  private void initialize(int initialCapacity, float loadFactor) {
+    if (initialCapacity == 0)
       initialCapacity = 1;
     this.loadFactor = loadFactor;
     table = new Entry[initialCapacity];
@@ -690,12 +700,15 @@ public class Properties implements Serializable, Cloneable {
    */
   public void writeTo(OutputStream os) throws IOException {
     StreamUtil.writeTo(count, os);
+//    logger.log(BasicLevel.DEBUG, "write count=" + count);
+    if (count == 0) return;
     for (int index = table.length-1; index >= 0; index--) {
       Entry entry = table[index];
       
       while (entry != null) {
         StreamUtil.writeTo(entry.key, os);
         StreamUtil.writeObjectTo(entry.value, os);
+//        logger.log(BasicLevel.DEBUG, "write entry=" + entry.key + ", " + entry.value);
         entry = entry.next;
       }
     }
@@ -709,19 +722,24 @@ public class Properties implements Serializable, Cloneable {
    */
   public static Properties readFrom(InputStream is) throws IOException {
     int count = StreamUtil.readIntFrom(is);
+//    logger.log(BasicLevel.DEBUG, "read count=" + count);
     if (count == -1) return null;
 
     Properties p = new Properties(((4*count)/3) +1);
+    p.readFrom(is, count);
+    return p;
+  }
 
+  public void readFrom(InputStream is, int count) throws IOException {
     String key;
     Object value;
     for (int i=0; i<count; i++) {
       key = StreamUtil.readStringFrom(is);
       value = StreamUtil.readObjectFrom(is);
-      p.put(key, value);
+//      logger.log(BasicLevel.DEBUG, "read entry=" + key + ", " + value);
+      put(key, value);
     }
-
-    return p;
+//    logger.log(BasicLevel.DEBUG, "read this.count=" + this.count);
   }
   
   /** ***** ***** ***** ***** ***** ***** ***** *****
@@ -736,6 +754,14 @@ public class Properties implements Serializable, Cloneable {
    * @throws ClassNotFoundException  
    */
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    readFrom(in);
+    int count = StreamUtil.readIntFrom(in);
+//    logger.log(BasicLevel.DEBUG, "read count=" + count);
+    if (count <= 0) return;
+//    try {
+      initialize(((4*count)/3) +1, 0.75f);
+      readFrom(in, count);
+//    } catch (Exception exc) {
+//      logger.log(BasicLevel.DEBUG, "read", exc);
+//    }
   }
 }
