@@ -31,6 +31,7 @@
   <target name="tests.noperf.all"
           description=" --> launch all no perf joram tests">
     <antcall target="tests.base"/>
+  	<antcall target="tests.alias"/>
     <antcall target="tests.recovery"/>
     <antcall target="tests.dist"/>
     <antcall target="tests.admin"/>
@@ -64,6 +65,7 @@
     <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
     <property name="isOSGi" value="true"/>
     <antcall target="tests.base"/>
+  	<antcall target="tests.alias"/>
     <antcall target="tests.recovery"/>
     <antcall target="tests.admin"/>
     <antcall target="tests.client"/>
@@ -94,6 +96,7 @@
     <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
     <property name="isOSGi" value="true"/>
     <antcall target="tests.base"/>
+  	<antcall target="tests.alias"/>
     <antcall target="tests.recovery"/>
     <antcall target="tests.admin"/>
     <antcall target="tests.client"/>
@@ -103,7 +106,7 @@
     <antcall target="tests.tcp"/>
     <antcall target="tests.noreg"/>
     <antcall target="tests.xa"/>
-    <antcall target="tests.bridge.new"/>
+    <antcall target="tests.bridge.jms.new"/>
     <antcall target="tests.schedqueue"/>
     <antcall target="tests.clusterTopic"/>
     <antcall target="tests.clusterQueue"/>
@@ -132,14 +135,6 @@
     <antcall target="base.test_Multi_Q"/>
     <antcall target="tests.transacted"/>
     <antcall target="tests.exceptionlistener"/>
-  </target>
-
-  <target name="tests.alias"
-          description=" --> launch all alias tests">
-    <antcall target="alias.AliasTestQ"/>
-    <antcall target="alias.AliasTestT"/>
-    <antcall target="alias.AliasTestQ2.simple"/>
-    <antcall target="alias.AliasTestQ2.pool"/>
   </target>
 
   <target name="tests.messages"
@@ -267,6 +262,9 @@
     <antcall target="client.ClientTest26"/>
     <antcall target="client.IndividualAcknowledge"/>
     <antcall target="client.SyncExceptionOnFullQueue"/>
+    <antcall target="client.ClientTest27"/>
+    <antcall target="client.ClientTest28"/>
+    <antcall target="client.ClientTest29"/>
   </target>
 
   <target name="tests.connection"
@@ -692,10 +690,20 @@
 
   <!--  ************ init and start end *************** -->
 
-  <target name="alias.AliasTestQ" depends="init.a3props,compile"
-          description=" --> test if the message received is the same that the message sent, with two alias queues">
+  <target name="tests.alias"
+          description=" --> launch all alias tests">
+    <antcall target="alias.AliasQTest"/>
+    <antcall target="alias.AliasTTest"/>
+    <antcall target="alias.AliasQTest2.simple"/>
+    <antcall target="alias.AliasQTest2.pool"/>
+    <antcall target="alias.AliasInQTest1"/>
+    <antcall target="alias.AliasInQTest2"/>
+  </target>
+
+  <target name="alias.AliasQTest" depends="init.a3props,compile"
+          description=" --> test an alias queue built with acquisition and distibution queue">
     <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="alias.AliasTestQ"/>
+      <param name="testid" value="alias.AliasQTest"/>
       <param name="className" value="joram.alias.AliasTestQ"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -704,10 +712,10 @@
     </antcall>
   </target>
 
-  <target name="alias.AliasTestT" depends="init.a3props,compile"
-          description=" --> test if the message received is the same that the message sent, with two alias topics">
+  <target name="alias.AliasTTest" depends="init.a3props,compile"
+          description=" --> test an alias topic built with acquisition and distibution topic">
     <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="alias.AliasTestT"/>
+      <param name="testid" value="alias.AliasTTest"/>
       <param name="className" value="joram.alias.AliasTestT"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -716,10 +724,10 @@
     </antcall>
   </target>
 
-  <target name="alias.AliasTestQ2.simple" depends="init.a3props,compile"
+  <target name="alias.AliasQTest2.simple" depends="init.a3props,compile"
           description=" --> test the AliasQueue behavior, holding messages when destination is unreachable">
     <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="alias.AliasTestQ2.simple"/>
+      <param name="testid" value="alias.AliasQTest2.simple"/>
       <param name="className" value="joram.alias.AliasTestQ2"/>
       <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
       <param name="jndiconf" value="base/jndi.properties"/>
@@ -729,11 +737,37 @@
     </antcall>
   </target>
 
-  <target name="alias.AliasTestQ2.pool" depends="init.a3props,compile"
+  <target name="alias.AliasQTest2.pool" depends="init.a3props,compile"
           description=" --> test the AliasQueue behavior, holding messages when destination is unreachable">
     <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="alias.AliasTestQ2.pool"/>
+      <param name="testid" value="alias.AliasQTest2.pool"/>
       <param name="className" value="joram.alias.AliasTestQ2"/>
+      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="jndiconf" value="base/jndi.properties"/>
+      <param name="a3conf" value="alias/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="alias.AliasInQTest1" depends="init.a3props,compile"
+          description=" --> test the AliasInQueue behavior with static repartition">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="alias.AliasInQTest1"/>
+      <param name="className" value="joram.alias.AliasInQueueTest1"/>
+      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="jndiconf" value="base/jndi.properties"/>
+      <param name="a3conf" value="alias/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="alias.AliasInQTest2" depends="init.a3props,compile"
+          description=" --> test the AliasInQueue behavior with dynamic repartition">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="alias.AliasInQTest2"/>
+      <param name="className" value="joram.alias.AliasInQueueTest2"/>
       <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="alias/a3servers2.xml"/>
@@ -1976,6 +2010,45 @@
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="testid" value="client.ClientTest26"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="client.ClientTest27" depends="init.a3props,compile"
+          description=" --> Test memory leak with subscription and connection closes.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.client.ClientTest27"/>
+      <param name="jndiconf" value="client/jndi.properties"/>
+      <param name="a3conf" value="client/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="testid" value="client.ClientTest27"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="client.ClientTest28" depends="init.a3props,compile"
+          description=" --> Test memory leak with subscription and connection closes.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.client.ClientTest28"/>
+      <param name="jndiconf" value="client/jndi.properties"/>
+      <param name="a3conf" value="client/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="testid" value="client.ClientTest28"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="client.ClientTest29" depends="init.a3props,compile"
+          description=" --> Test memory leak with subscription and connection closes.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.client.ClientTest29"/>
+      <param name="jndiconf" value="client/jndi.properties"/>
+      <param name="a3conf" value="client/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="testid" value="client.ClientTest29"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -4512,7 +4585,7 @@
   <target name="bridge.jms.admintest2xA" depends="init.a3props,compile"
            description=" --> Creates bridge queues through the XML administration scripts.">
     <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="bridge.jms.admintest2x"/>
+      <param name="testid" value="bridge.jms.admintest2xA"/>
       <param name="className" value="joram.bridgejms.BridgeAdminTest2"/>
       <param name="jndiconf" value="bridgejms/jndi.properties"/>
       <param name="a3conf" value="bridgejms/a3servers.xml"/>
@@ -4523,7 +4596,7 @@
   <target name="bridge.jms.admintest2xB" depends="init.a3props,compile"
            description=" --> Creates bridge topics through the XML administration scripts.">
     <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="bridge.jms.admintest2x"/>
+      <param name="testid" value="bridge.jms.admintest2xB"/>
       <param name="className" value="joram.bridgejms.BridgeAdminTest2"/>
       <param name="jndiconf" value="bridgejms/jndi.properties"/>
       <param name="a3conf" value="bridgejms/a3servers.xml"/>
