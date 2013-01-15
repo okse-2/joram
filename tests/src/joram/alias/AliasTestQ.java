@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2011 ScalAgent Distributed Technologies
+ * Copyright (C)  2011 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package joram.alias;
@@ -42,8 +42,8 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import framework.TestCase;
 
 /**
- * Test : The message received by the consumer is the same that the message sent
- * by the producer Use two alias queues
+ * Test: The message received by the consumer is the same that the message sent
+ * by the producer using distribution and acquisition queue to build an alias queue.
  */
 public class AliasTestQ extends TestCase {
 
@@ -123,7 +123,6 @@ public class AliasTestQ extends TestCase {
     User.create("anonymous", "anonymous");
 
     qack.setFreeReading();
-    qdist.setFreeReading();
 
     qack.setFreeWriting();
     qdist.setFreeWriting();
