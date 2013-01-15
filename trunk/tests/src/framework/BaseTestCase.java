@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 20010 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): (ScalAgent D.T.)
- * Contributor(s): Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 
 package framework;
@@ -41,6 +41,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
@@ -50,11 +51,17 @@ import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 
 import org.objectweb.joram.client.jms.ConnectionMetaData;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * Utility functions for all test cases.
  */
 public class BaseTestCase {
+  protected static final Logger logmon = Debug.getLogger(BaseTestCase.class.getName());
+
   private static BaseTestCase current = null;
 
   protected String name;
@@ -742,6 +749,8 @@ public class BaseTestCase {
     current.endDate = System.currentTimeMillis();
     int status = 0;
 
+    killAllProcess();
+    
     current.endEnv();
     current.tearDown();
 
@@ -926,5 +935,76 @@ public class BaseTestCase {
   public static void main(String args[]) throws Exception {
     assertFileIdentical(args[0], args[1]);
     endTest();
+  }
+
+  static Vector<Process> launchedProcess = new Vector<Process>();
+  
+  public static void killAllProcess() {
+    logmon.log(BasicLevel.DEBUG, "SCAdmin: killAllProcess");
+    
+    int exit = -1;
+    for (int i=launchedProcess.size(); i>0; i--) {
+      Process p = launchedProcess.remove(i-1);
+      if (p != null) {
+        try {
+          exit = p.exitValue();
+          logmon.log(BasicLevel.DEBUG, "SCAdmin: killAllProcess exited " + exit);
+        } catch (IllegalThreadStateException exc) {
+          logmon.log(BasicLevel.DEBUG, "SCAdmin: killAllProcess killed");
+          p.destroy();
+        }
+      }
+    }
+  }
+  
+  public static Process startProcess(String classname, String[] jvmargs, String[] args) throws IOException {
+    return startProcess(classname, null, jvmargs, args);
+  }
+  
+  public static Process startProcess(String classname, String cp, String[] jvmargs, String[] args) throws IOException {
+    logmon.log(BasicLevel.DEBUG, "SCAdmin: launch " + classname);
+    
+    List<String> argv = new ArrayList<String>();
+    
+    String javapath = new File(new File(System.getProperty("java.home"), "bin"), "java").getPath();
+    argv.add(javapath);
+
+    argv.add("-classpath");
+    if (cp != null)
+      argv.add(cp);
+    else
+      argv.add(System.getProperty("java.class.path"));
+    
+    if (jvmargs != null) {
+      for (int i = 0; i < jvmargs.length; i++)
+        argv.add(jvmargs[i]);
+    }
+    // Add JMX monitoring options
+    argv.add("-Dcom.sun.management.jmxremote");
+
+    // Main class
+    argv.add(classname);
+
+    if (args != null) {
+      for (int i = 0; i < args.length; i++)
+        argv.add(args[i]);
+    }
+
+    Process p = null;
+    try {
+      p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]));
+    } catch (Exception exc) {
+      exception(exc);
+      // The process is still alive, kill it!
+      p.destroy();
+      return null;
+    }
+
+    p.getInputStream().close();
+    p.getOutputStream().close();
+    p.getErrorStream().close();
+
+    launchedProcess.add(p);
+    return p;
   }
 }

@@ -82,21 +82,21 @@ public class SCAdminClassic extends SCBaseAdmin {
       throw new Exception("Problem during configuration parsing");
     }
 
-    String javapath = new File(new File(System.getProperty("java.home"), "bin"), "java").getPath();
-    String classpath = System.getProperty("java.class.path");
+//    String javapath = new File(new File(System.getProperty("java.home"), "bin"), "java").getPath();
+//    String classpath = System.getProperty("java.class.path");
 
-    List argv = new ArrayList();
-    argv.add(javapath);
-
-    argv.add("-classpath");
-    argv.add(classpath);
-    if (jvmargs != null) {
-      for (int i = 0; i < jvmargs.length; i++)
-        argv.add(jvmargs[i]);
-    }
-
-    // Add JMX monitoring options
-    argv.add("-Dcom.sun.management.jmxremote");
+//    List argv = new ArrayList();
+//    argv.add(javapath);
+//
+//    argv.add("-classpath");
+//    argv.add(classpath);
+//    if (jvmargs != null) {
+//      for (int i = 0; i < jvmargs.length; i++)
+//        argv.add(jvmargs[i]);
+//    }
+//
+//    // Add JMX monitoring options
+//    argv.add("-Dcom.sun.management.jmxremote");
 
     // Retrieve port from a3 configuration file (a3servers.xml)
     int port = -1;
@@ -112,21 +112,25 @@ public class SCAdminClassic extends SCBaseAdmin {
       logmon.log(BasicLevel.DEBUG, "SCAdmin: AgentServer#" + sid + " telnet port: " + port);
     }
 
-    // Main class
-    argv.add("fr.dyade.aaa.agent.AgentServer");
-    argv.add(Short.toString(sid));
-    argv.add("s" + sid);
+//    // Main class
+//    argv.add();
+//    argv.add(Short.toString(sid));
+//    argv.add("s" + sid);
 
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
-      logmon.log(BasicLevel.DEBUG, "SCAdmin" + ": launches AgentServer#" + sid + " with: " + argv);
+      logmon.log(BasicLevel.DEBUG, "SCAdmin" + ": launches AgentServer#" + sid);
     }
 
-    Process p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]));
+//    Process p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]));
+//
+//    p.getInputStream().close();
+//    p.getOutputStream().close();
+//    p.getErrorStream().close();
 
-    p.getInputStream().close();
-    p.getOutputStream().close();
-    p.getErrorStream().close();
-
+    Process p = BaseTestCase.startProcess("fr.dyade.aaa.agent.AgentServer",
+                                          jvmargs,
+                                          new String[] {Short.toString(sid), "s" + sid});
+    
     launchedServers.put(new Short(sid), new Server(port, p));
   }
 }
