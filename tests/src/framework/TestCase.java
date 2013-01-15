@@ -25,12 +25,16 @@ package framework;
 
 import java.io.File;
 
+import org.objectweb.util.monolog.api.Logger;
+
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.common.Debug;
 
 /**
  * Framework for tests using A3 agent servers.
  */
 public class TestCase extends BaseTestCase {
+  protected static final Logger logmon = Debug.getLogger(TestCase.class.getName());
 
   static SCAdminItf admin = null;
 

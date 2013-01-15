@@ -58,26 +58,17 @@ public class SCAdminOSGi extends SCBaseAdmin {
       }
     }
 
-    String javapath = new File(new File(System.getProperty("java.home"), "bin"), "java").getPath();
-
     // Find felix jar and put it on the classpath
     File felixbin = new File(System.getProperty("felix.dir") + "/felix.jar");
     if (!felixbin.exists()) {
       throw new Exception("Felix framework not found.");
     }
-    List argv = new ArrayList();
-    argv.add(javapath);
-
-    argv.add("-classpath");
-    argv.add("." + File.pathSeparatorChar + felixbin.getAbsolutePath());
     
+    List<String> argv = new ArrayList<String>();    
     if (jvmargs != null) {
       for (int i = 0; i < jvmargs.length; i++)
         argv.add(jvmargs[i]);
     }
-
-    // Add JMX monitoring options
-    argv.add("-Dcom.sun.management.jmxremote");
 
     // Choose a random telnet port if unspecified
     int port = Integer.getInteger("osgi.shell.telnet.port", getFreePort());
@@ -96,21 +87,17 @@ public class SCAdminOSGi extends SCBaseAdmin {
     argv.add("-D" + Activator.AGENT_SERVER_STORAGE_PROPERTY + "=s" + sid);
     argv.add("-XX:+UnlockDiagnosticVMOptions");
     argv.add("-XX:+UnsyncloadClass");
-    argv.add("-Dgosh.args=--nointeractive");// need with gogo
-
-    // Main class
-    argv.add("org.apache.felix.main.Main");
+    argv.add("-Dgosh.args=--nointeractive"); // need with gogo
 
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       logmon.log(BasicLevel.DEBUG, "SCAdmin" + ": launches AgentServer#" + sid + " with: " + argv);
     }
 
-    Process p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]));
-
-    p.getInputStream().close();
-    p.getOutputStream().close();
-    p.getErrorStream().close();
-
+    Process p = BaseTestCase.startProcess("org.apache.felix.main.Main",
+                                          "." + File.pathSeparatorChar + felixbin.getAbsolutePath(),
+                                          (String[]) argv.toArray(new String[argv.size()]),
+                                          null);
+    
     launchedServers.put(new Short(sid), new Server(port, p));
   }
 }
