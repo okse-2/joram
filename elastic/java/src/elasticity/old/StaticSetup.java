@@ -44,14 +44,14 @@ public class StaticSetup {
 		System.out.println("[StaticSetup]\tStarted...");
 		
 		// Connecting the administrator:
-		AdminModule.connect("10.48.7.102",16010,"root","root", 60);
+		AdminModule.connect("10.39.43.95",16010,"root","root", 60);
 		
 		System.out.println("[StaticSetup]\tConnected to Admin Module.");
 		// Creating access for user anonymous on servers
 		User.create("anonymous", "anonymous", 0);
 		User.create("anonymous", "anonymous", 1);
 		User.create("anonymous", "anonymous", 2);
-		/*User.create("anonymous", "anonymous", 3);*/
+		User.create("anonymous", "anonymous", 3);
 	    
 		// Creating the destinations on servers
 		Queue ack = Queue.create(0);
@@ -63,39 +63,40 @@ public class StaticSetup {
 		propAQ.setProperty("remoteAgentID",rq1.getName() + ";" + rq2.getName()); // + ";" + rq3.getName());
 		propAQ.setProperty("period",String.valueOf(Constants.QUEUE_PERIOD));
 		Queue aq0 = Queue.create(0,"org.objectweb.joram.mom.dest.AliasInQueue",propAQ);
+		Queue aq3 = Queue.create(3,"org.objectweb.joram.mom.dest.AliasInQueue",propAQ);
 
 		// Setting free access to the destinations:
 		ack.setFreeReading();
 		ack.setFreeWriting();
 		aq0.setFreeWriting();
+		aq3.setFreeWriting();
 		rq1.setFreeReading();
 		rq1.setFreeWriting();
 		rq2.setFreeReading();
 		rq2.setFreeWriting();
-		/*rq3.setFreeReading();
-		rq3.setFreeWriting();*/
 		
 		// Creating the connection factories for connecting to the servers:
 		javax.jms.ConnectionFactory cf0 =
-				TcpConnectionFactory.create("10.48.7.102", 16010);
+				TcpConnectionFactory.create("10.39.43.95", 16010);
 		javax.jms.ConnectionFactory cf1 =
-				TcpConnectionFactory.create("10.227.205.231", 16011);
+				TcpConnectionFactory.create("10.39.58.146", 16011);
 		javax.jms.ConnectionFactory cf2 =
-				TcpConnectionFactory.create("10.227.135.211", 16012);
-		/*javax.jms.ConnectionFactory cf3 =
-				TcpConnectionFactory.create("10.0.0.5", 16013);*/
+				TcpConnectionFactory.create("10.39.51.245", 16012);
+		javax.jms.ConnectionFactory cf3 =
+				TcpConnectionFactory.create("10.39.4.163", 16013);
 		
 		// Binding the objects in JNDI:
 		Context jndiCtx = new InitialContext();
 		jndiCtx.bind("ack", ack);
 		jndiCtx.bind("alias0", aq0);
+		jndiCtx.bind("alias3", aq3);
 		jndiCtx.bind("remote1", rq1);
 		jndiCtx.bind("remote2", rq2);
-		/*jndiCtx.bind("remote3", rq3);*/
+		
 		jndiCtx.bind("cf0", cf0);
 		jndiCtx.bind("cf1", cf1);
 		jndiCtx.bind("cf2", cf2);
-		/*jndiCtx.bind("cf3", cf3);*/
+		jndiCtx.bind("cf3", cf3);
 		jndiCtx.close();
 		
 		AdminModule.disconnect();

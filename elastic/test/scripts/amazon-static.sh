@@ -1,6 +1,25 @@
-VMS=(46.51.145.182 46.137.69.24 176.34.205.183)
+#!/bin/bash
+
 KEY="-i /home/elrhedda/Amazon/joram.pem"
 JRE=$JAVA_HOME
+VMS=()
+
+for ip in `ec2-describe-instances | grep INSTANCE | cut -f17`
+do
+	VMS+=($ip)
+done 
+
+if [ "$1" = "stop" ]
+then
+	echo "KILLALL.."
+	for ip in ${VMS[*]}
+	do
+        	VM=ubuntu@$ip
+        	ssh $KEY $VM killall -9 java
+		echo "Done for $ip.."
+	done
+	exit 0;
+fi
 
 echo "BUILDING.."
 echo "JORAM"
@@ -45,10 +64,8 @@ echo "ADMINISTRATING.."
 ssh $KEY ubuntu@${VMS[0]} "nohup joram/bin/client.sh elasticity.old.StaticSetup &"
 
 echo "LAUNCHING CLIENTS.."
-for i in $(seq 1 $LIM)
-do
-        VM=ubuntu@${VMS[$i]}
-	ssh $KEY $VM "nohup joram/bin/client.sh elasticity.old.RegulatedReceiver $i > rreceiver$i.log &"
-done
+ssh $KEY ubuntu@${VMS[0]} "nohup joram/bin/client.sh elasticity.old.RegulatedSender 0 > rsender0.log &"
+ssh $KEY ubuntu@${VMS[3]} "nohup joram/bin/client.sh elasticity.old.RegulatedSender 3 > rsender3.log &"
+ssh $KEY ubuntu@${VMS[1]} "nohup joram/bin/client.sh elasticity.old.RegulatedReceiver 1 > rreceiver1.log &"
+ssh $KEY ubuntu@${VMS[2]} "nohup joram/bin/client.sh elasticity.old.RegulatedReceiver 2 > rreceiver2.log &"
 
-ssh $KEY ubuntu@${VMS[0]} "nohup joram/bin/client.sh elasticity.old.RegulatedSender 0 > rsender.log &"

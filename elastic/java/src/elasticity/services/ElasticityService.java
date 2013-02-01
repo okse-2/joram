@@ -36,7 +36,7 @@ public class ElasticityService extends Service {
 	 * It is used (1) when regulating overloaded queues' rates;
 	 * and (2), when scaling down, which takes 100/downRate rounds. 
 	 */
-	private int downRate;
+	private int stepRate;
 
 	//Involved JMS objects.
 	/** The list of producers */
@@ -61,6 +61,9 @@ public class ElasticityService extends Service {
 	/** Number of monitored overloaded workers. */
 	private int overloaded;
 
+	/** Average load of the monitored workers. */
+	private int averageLoad;
+	
 	/**
 	 * Stores for how many rounds a scaling down plan has been on-going.
 	 * If < 0, no scaling down plan is being carried on.
@@ -75,6 +78,9 @@ public class ElasticityService extends Service {
 
 	@Override
 	public void initService(Properties props) throws Exception {
+		//Setting the admin connection once and for all.
+		AdminModule.connect("localhost",16101,"root","root", 60);
+
 		//Initializes the service beneath.
 		js = new JoramService();
 		try {
@@ -88,7 +94,7 @@ public class ElasticityService extends Service {
 		//Get the properties..
 		maxLoadLimit = Integer.valueOf(props.getProperty("max_load_limit"));
 		minLoadLimit = Integer.valueOf(props.getProperty("min_load_limit"));
-		downRate = Integer.valueOf(props.getProperty("down_rate"));
+		stepRate = Integer.valueOf(props.getProperty("step_rate"));
 
 		//Initializing the fields..
 		producers = new ArrayList<Queue>();
@@ -111,9 +117,6 @@ public class ElasticityService extends Service {
 
 		scalingDownAge = -1;
 
-		//Setting the admin connection once and for all.
-		AdminModule.connect("10.0.0.2",16101,"root","root", 60);
-		
 		logger.log(Level.INFO,"Initialization completed.");
 	}
 
@@ -123,7 +126,7 @@ public class ElasticityService extends Service {
 	public void monitorWorkers() throws Exception {
 		underloaded = 0;
 		overloaded = 0;
-
+		averageLoad = 0;
 		try {
 			for(int i = 0; i < workers.size(); i++) {
 				Queue worker = workers.get(i);
@@ -137,7 +140,10 @@ public class ElasticityService extends Service {
 					underloaded++;
 				else if (loads.get(i) > maxLoadLimit)
 					overloaded++;
+				
+				averageLoad += loads.get(i);
 			}
+			averageLoad /= workers.size();
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.log(Level.SEVERE, "Couldn't monitor the workers!");
@@ -153,6 +159,7 @@ public class ElasticityService extends Service {
 
 		logger.log(Level.FINE,"Monitored loads:" + loadStr);
 		logger.log(Level.FINE,"Monitored rates:" + rateStr);
+		logger.log(Level.FINE,"Average load: " + averageLoad);
 	}
 
 	/**
@@ -185,7 +192,7 @@ public class ElasticityService extends Service {
 
 		//Plan can continue.
 		if (scalingDownAge >= 0) {
-			if (++scalingDownAge > (100/downRate)) {
+			if (++scalingDownAge > (100/stepRate)) {
 				//Worker should effectively be removed.
 				Queue worker = workers.remove(last);
 				rates.remove(last);
@@ -218,7 +225,7 @@ public class ElasticityService extends Service {
 
 			} else {
 				//Gradually decrease the rate of the worker to remove (will affect weights computation).
-				rates.set(last, scalingDownRate*(100-downRate*scalingDownAge)/100);
+				rates.set(last, scalingDownRate*(100-stepRate*scalingDownAge)/100);
 				logger.log(Level.INFO,"Trying to remove extra worker, " + scalingDownAge + "..");
 				return true;
 			}
@@ -230,7 +237,7 @@ public class ElasticityService extends Service {
 
 	/**
 	 * Adds a new worker to the active workers list,
-	 * if all workers are overloaded
+	 * if all workers are overloaded.
 	 * 
 	 * @return true if scaling up is achieved.
 	 */
@@ -278,9 +285,9 @@ public class ElasticityService extends Service {
 		return true;
 	}
 
-	/**
+	/*
 	 * Decreases the monitored rates of overloaded workers.
-	 */
+	 *
 	private void regulateRates() {
 		//Return, if no need for regulation.
 		if (overloaded == 0 || overloaded == workers.size())
@@ -289,8 +296,24 @@ public class ElasticityService extends Service {
 		String rateStr = "";
 		for(int i = 0; i < workers.size(); i++) {
 			if (loads.get(i) > maxLoadLimit)
-				rates.set(i,rates.get(i)*(100-downRate)/100);
+				rates.set(i,rates.get(i)*(100-stepRate)/100);
 
+			rateStr = rateStr + " " + rates.get(i);
+		}
+		logger.log(Level.FINE,"Regulated rates:" + rateStr);
+	}*/
+	
+	/**
+	 * Tries to distribute the load over the workers.
+	 */
+	private void regulateRates() {
+		String rateStr = "";
+		for(int i = 0; i < workers.size(); i++) {
+			int max = rates.get(i) * stepRate / 100;
+			int dif = Math.abs(loads.get(i) - averageLoad);
+			int reg = Math.min(dif,max);
+			
+			rates.set(i,rates.get(i) + (int) Math.signum(dif) * reg);
 			rateStr = rateStr + " " + rates.get(i);
 		}
 		logger.log(Level.FINE,"Regulated rates:" + rateStr);

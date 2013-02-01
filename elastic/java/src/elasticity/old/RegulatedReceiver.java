@@ -61,6 +61,7 @@ public class RegulatedReceiver {
 	public static void main(String argv[]) throws Exception {
 		number = Integer.parseInt(argv[0]);
 		System.out.println("[RegulatedReceiver " + number + "]\tStarted...");
+		System.out.println("[RegulatedReceiver " + number + "]\tIter\tCount\tRTime\tTTime");
 		
 		Context ictx = new InitialContext();
 		ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf" + number);
@@ -71,21 +72,33 @@ public class RegulatedReceiver {
 		cnx.start();
 		
 		if (number == 1)
-			load = Constants.MSG_LOAD * 70 / 100;
+			load = Constants.MSG_LOAD * 7 / 10;
 		else
-			load = Constants.MSG_LOAD * 30 / 100;
+			load = Constants.MSG_LOAD * 3 / 10;
 		
-		long wait, start;
-		for (int i = 0; i < 200; i++) {
-			start = System.currentTimeMillis();
-			ReceiveRound rr = new ReceiveRound(cnx,dest);
+		ReceiveRound rr = new ReceiveRound(cnx,dest);
+		
+		long wait, start, time, rstart, rtime;
+		start = System.currentTimeMillis();
+		for (int i = 0; true; i++) {
+			rstart = System.currentTimeMillis();
 			rr.start();
 			rr.join(Constants.TIME_UNIT);
 			rr.stop();
+			rr = new ReceiveRound(cnx,dest);
+			
+			if (i == 500) {
+				if (number == 2)
+					load = Constants.MSG_LOAD * 7 / 10;
+				else
+					load = Constants.MSG_LOAD * 3 / 10;
+			}
+			
+			rtime = System.currentTimeMillis() - rstart;
+			time = System.currentTimeMillis() - start;
+			System.out.println("[RegulatedReceiver " + number + "]\t"+ i + "\t" + count + "\t" + rtime + "\t" + time);
 
-			System.out.println("[RegulatedReceiver " + number + "]\t" + count);
-
-			wait = start + Constants.TIME_UNIT - System.currentTimeMillis();
+			wait = rstart + Constants.TIME_UNIT - System.currentTimeMillis();
 			if (wait > 0)
 				Thread.sleep(wait);
 		}

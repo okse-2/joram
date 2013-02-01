@@ -16,13 +16,13 @@ import javax.naming.InitialContext;
  */
 public class Producer {
 
-	/**
+	/*
 	 * Comuptes the load/s for each round.
 	 * considering WORKER_MAX = 100.
 	 * 
 	 * @param round Current round.
 	 * @return Computed load.
-	 */
+	 *
 	public static int computeLoad(int round) {
 		if (round < 1100)
 			return round / 2;
@@ -47,6 +47,17 @@ public class Producer {
 		if (round < 4500)
 			return 550 - (round - 3400) / 2;
 
+		return 0;
+	}*/
+	
+	public static int computeLoad(int round) {
+		if (round < 1500)
+			return (round / 100);
+		if (round < 2500)
+			return 15;
+		if (round < 4000)
+			return 15 - (round - 2500) / 100;
+		
 		return 0;
 	}
 
@@ -77,18 +88,14 @@ public class Producer {
 
 		start = System.currentTimeMillis();
 		for(int i = 0;true; i++) {
-			load = (computeLoad(i * Constants.TIME_UNIT/1000) * 
-					Constants.WORKER_MAX / 100) /
-					Constants.NB_OF_PRODUCERS;
-
-			for(int j = 0; j < load; j++) {
+			load = computeLoad(i) / 2;
+			load += (number == 1) ? computeLoad(i) % 2 : 0;
+			for(int j = 0; j < load; j++)
 				sender.send(message);
-				if ((j % 10) == 9)
-					session.commit();
-			}
-
-			System.out.println("[Producer " + number + "]\t" + i + "\t" + load * Constants.NB_OF_PRODUCERS);
-			wait = start + Constants.TIME_UNIT*(i+1) - System.currentTimeMillis();
+			session.commit();
+			
+			System.out.println("[Producer " + number + "]\t" + i + "\t" + computeLoad(i));
+			wait = start + Constants.PRODUCER_PERIOD * (i+1) - System.currentTimeMillis();
 			if (wait > 0)
 				Thread.sleep(wait);
 		}

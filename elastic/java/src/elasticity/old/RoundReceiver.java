@@ -64,7 +64,7 @@ public class RoundReceiver {
 		long rstart,round;
 		for(int i = 0; i < Constants.NB_OF_ROUNDS; i++) {
 			rstart = System.currentTimeMillis();
-			for(int j = 0; j < Constants.MSG_PER_ROUND/2; j++) {
+			for(int j = 0; j < Constants.MSG_PER_ROUND; j++) {
 				receiver.receive();
 			}
 			round = System.currentTimeMillis() - rstart;

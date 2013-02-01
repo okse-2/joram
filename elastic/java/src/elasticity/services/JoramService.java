@@ -11,6 +11,7 @@ import javax.naming.InitialContext;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.Server;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
@@ -27,8 +28,8 @@ public class JoramService extends Service {
 	private static final String tcpProxyService = "org.objectweb.joram.mom.proxies.tcp.TcpProxyService";
 	
 	//Scripts used by this service.
-	private static final String launchServer = "/root/joram/bin/launch-vm-server.sh";
-	private static final String launchClient = "/root/joram/bin/launch-vm-client.sh";
+	private static final String launchServer = "/home/ubuntu/joram/bin/launch-vm-server.sh";
+	private static final String launchClient = "/home/ubuntu/joram/bin/launch-vm-client.sh";
 	
 	//Values so that the ports of worker i are base+i.
 	private static final int domainPortBase = 16050;
@@ -74,10 +75,15 @@ public class JoramService extends Service {
 			pp.start();
 		}
 		
-		//Hard-coded setup of initial configuration. 
-		vms = new LinkedList<String>();
-		vms.push("10.0.0.4");
+		//Set initial machine, on which Joram#1 is already running.
 		size = 1;
+		vms = new LinkedList<String>();
+		for (Server s : AdminModule.getServers()) {
+			if (s.getId() == 1) {
+				vms.push(s.getHostName());
+				break;
+			}
+		}
 		
 		logger.log(Level.INFO,"Initialization completed.");
 	}
@@ -167,7 +173,7 @@ public class JoramService extends Service {
 		logger.log(Level.INFO,"Started new server remotely..");
 
 		User.create("anonymous", "anonymous", servNum);
-		Queue newRq = Queue.create(servNum);
+		Queue newRq = Queue.create(servNum,"queue"+servNum);
 		newRq.setFreeReading();
 		newRq.setFreeWriting();
 		javax.jms.ConnectionFactory newCf =
