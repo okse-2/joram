@@ -7,17 +7,22 @@ class Constants {
 	public static final int MSG_SIZE = 1000;
 	
 	/**
-	 * Maximum number a worker can consume per TIME_UNIT. 
+	 * Maximum number a worker can consume per WORKER_PERIOD. 
 	 */
-	public static final int WORKER_MAX = 500;
+	public static final int WORKER_MAX = 100;
 	
 	/**
-	 * period of time between two rounds (in ms).
+	 * Period of time between two worker rounds (in ms).
 	 */
-	public static final int TIME_UNIT = 1000;
+	public static final int WORKER_PERIOD = 1000;
 	
 	/**
 	 * Number of producers.
 	 */
 	public static final int NB_OF_PRODUCERS = 2;
+	
+	/**
+	 * Period of time between two producer rounds (in ms).
+	 */
+	public static final int PRODUCER_PERIOD = 100;
 }

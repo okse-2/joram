@@ -38,8 +38,8 @@ public class RegulatedSender {
 	 */
 	public static int computeLoad(int round) {
 		if (round < 10)
-			return round * Constants.MSG_LOAD / 10;
-		return Constants.MSG_LOAD * 9 / 10;
+			return round * Constants.MSG_LOAD / 20;
+		return Constants.MSG_LOAD / 2;
 	}
 
 	public static void main(String argv[]) throws Exception {
@@ -50,6 +50,8 @@ public class RegulatedSender {
 		ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf" + number);
 		Queue dest = (Queue) ictx.lookup("alias" + number);
 		ictx.close();
+		
+		System.out.println("[RegulatedSender " + number + "]\tRetrieved context..");
 		
 		Connection cnx = cnxF.createConnection();
 		Session session = cnx.createSession(true,Session.SESSION_TRANSACTED);
@@ -65,19 +67,23 @@ public class RegulatedSender {
 		long start, wait;
 		int load;
 		cnx.start();
+		
+		System.out.println("[RegulatedSender " + number + "]\tReady to send..");
+		
 		start = System.currentTimeMillis();
 		
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < Constants.REG_ROUNDS; i++) {
 			load = computeLoad(i);
 			for (int j = 0; j < load; j++) {
 				sender.send(message);
 				if ((j % 10) == 9)
 					session.commit();
 			}
-			System.out.println("[RegulatedSender " + number + "]\t" + i + "\t" + load);
+			
 			wait = start + Constants.TIME_UNIT*(i+1) - System.currentTimeMillis();
 			if (wait > 0)
 				Thread.sleep(wait);
+			System.out.println("[RegulatedSender " + number + "]\t" + i + "\t" + load);
 		}
 		//cnx.close();
 		//System.out.println("[RegulatedSender]\tDone.");

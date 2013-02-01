@@ -2,8 +2,13 @@ package elasticity.eval;
 
 import java.util.Properties;
 
+import javax.jms.ConnectionFactory;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.Server;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
@@ -14,26 +19,38 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
  */
 public class Setup {
 	
+	
+	private static Server[] servers;
+	
+	private static String getServerAddress(int id) {
+		for (Server s : servers) {
+			if (s.getId() == id)
+				return s.getHostName(); 
+		}
+		return null;
+	}
+	
 	public static void main(String args[]) throws Exception {
 		System.out.println("[Setup]\tStarted...");
 		
 		// Connecting the administrator (using TcpProxyService port)
-		AdminModule.connect("10.0.0.2",16101,"root","root", 60);
-				
+		AdminModule.connect("localhost",16101,"root","root", 60);
+		servers = AdminModule.getServers();
+		
 		// Creating access for user anonymous on servers
 		User.create("anonymous", "anonymous", 101);
 		User.create("anonymous", "anonymous", 102);
 		User.create("anonymous", "anonymous", 1);
 	    
 		//Worker
-		Queue rq1 = Queue.create(1);
+		Queue rq1 = Queue.create(1,"queue1");
 		
 		//Producers
 		Properties propAQ = new Properties();
 		propAQ.setProperty("remoteAgentID",rq1.getName());
-		Queue aq1 = Queue.create(101,"org.objectweb.joram.mom.dest.AliasInQueue",propAQ);
-		Queue aq2 = Queue.create(102,"org.objectweb.joram.mom.dest.AliasInQueue",propAQ);
-
+		Queue aq1 = Queue.create(101,"queue101","org.objectweb.joram.mom.dest.AliasInQueue",propAQ);
+		Queue aq2 = Queue.create(102,"queue102","org.objectweb.joram.mom.dest.AliasInQueue",propAQ);
+		
 		//Setting free access to the destinations
 		aq1.setFreeWriting();
 		aq2.setFreeWriting();
@@ -41,15 +58,15 @@ public class Setup {
 		rq1.setFreeWriting();
 		
 		// Creating the connection factories for connecting to the servers:
-		javax.jms.ConnectionFactory cfp1 =
-				TcpConnectionFactory.create("10.0.0.2", 16101);
-		javax.jms.ConnectionFactory cfp2 =
-				TcpConnectionFactory.create("10.0.0.3", 16102);
-		javax.jms.ConnectionFactory cfw1 =
-				TcpConnectionFactory.create("10.0.0.4", 16001);
+		ConnectionFactory cfp1 =
+				TcpConnectionFactory.create(getServerAddress(101), 16101);
+		ConnectionFactory cfp2 =
+				TcpConnectionFactory.create(getServerAddress(102), 16102);
+		ConnectionFactory cfw1 =
+				TcpConnectionFactory.create(getServerAddress(1), 16001);
 
 		// Binding the objects in JNDI:
-		javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+		Context jndiCtx = new InitialContext();
 		jndiCtx.bind("producer1", aq1);
 		jndiCtx.bind("producer2", aq2);
 		jndiCtx.bind("worker1", rq1);

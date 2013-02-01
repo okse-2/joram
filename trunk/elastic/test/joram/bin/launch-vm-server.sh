@@ -8,14 +8,14 @@ while [ $OK -ne 0 ]
 do
 	scp -o UserKnownHostsFile=/dev/null \
 	    -o StrictHostKeyChecking=no \
-	    -i /root/config/molkey.pem \
-            /root/joram/run/new_a3servers.xml \
-	    $IPADDR:/root/joram/config/a3servers.xml
+	    -i /home/ubuntu/joram/aws/joram.pem \
+            /home/ubuntu/joram/run/new_a3servers.xml \
+	    ubuntu@$IPADDR:/home/ubuntu/joram/config/a3servers.xml
 	OK=$?
 	sleep 1
 done
-	
+
 ssh -o UserKnownHostsFile=/dev/null \
     -o StrictHostKeyChecking=no \
-    -i /root/config/molkey.pem \
-    -f $IPADDR "nohup joram/bin/server.sh $NUM > /dev/null &"
+    -i /home/ubuntu/joram/aws/joram.pem \
+    -f ubuntu@$IPADDR "nohup /home/ubuntu/joram/bin/server.sh $NUM > /dev/null &"

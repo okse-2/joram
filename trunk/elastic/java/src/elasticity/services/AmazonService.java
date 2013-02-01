@@ -1,6 +1,7 @@
 package elasticity.services;
 
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Properties;
@@ -27,11 +28,12 @@ import elasticity.interfaces.Service;
  */
 public class AmazonService extends Service {
 	
-	private static final String awsServiceUrl = "http://194.199.25.115:80/services/Cloud/";
-	private static final String awsAccessKey = "admin";
-	private static final String awsSecretKey = "password";
-	private static final String awsKeypair = "molkey";
+	private static final String awsServiceUrl = "ec2.eu-west-1.amazonaws.com";				//"http://194.199.25.115:80/services/Cloud/";
+	private static final String awsAccessKey = "AKIAJEB3ONM4SNB3UIEA";						//"admin";
+	private static final String awsSecretKey = "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"; 	//"password";
+	private static final String awsKeypair = "joram";
 	private static final String awsInstanceType = "m1.small";
+	private static final String awsSecurityGroup = "default";
 	
 	private String awsImageId;
 	
@@ -64,8 +66,10 @@ public class AmazonService extends Service {
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 		runInstancesRequest.setImageId(awsImageId);
 		runInstancesRequest.setKeyName(awsKeypair);
+		runInstancesRequest.setSecurityGroups(Collections.singleton(awsSecurityGroup));
 		runInstancesRequest.setInstanceType(awsInstanceType);
 		runInstancesRequest.setMaxCount(1);
+		runInstancesRequest.setMinCount(1);
 
 		//Executes the run request.
 		String instanceId = ""; //Will be changed eventually.
@@ -75,6 +79,7 @@ public class AmazonService extends Service {
 			logger.log(Level.INFO,"Sent RunInstanceRequest successfully..");
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,"Error while sending RunInstanceRequest!" );
+			e.printStackTrace(System.out);
 			throw e; //Forwards the exception
 		}
 				
@@ -92,7 +97,7 @@ public class AmazonService extends Service {
 				Instance instance = describeInstancesResult.getReservations().get(0).getInstances().get(0);
 				logger.log(Level.INFO,"Current instance state: " + instance.getState().getName() + "..");
 				if (instance.getState().getName().equals("running")) {
-					instanceIp = instance.getPublicIpAddress();
+					instanceIp = instance.getPrivateIpAddress();
 					ip2id.put(instanceIp,instanceId);
 					done = true;
 				}

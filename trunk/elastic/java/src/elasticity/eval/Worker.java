@@ -16,6 +16,30 @@ import javax.naming.InitialContext;
  */
 public class Worker {
 	
+	static int count, load;
+	
+	static class ReceiveRound extends Thread {
+		private MessageConsumer receiver;
+		
+		public ReceiveRound(Connection cnx, Queue dest) {
+			try {
+				Session session = cnx.createSession(false,Session.AUTO_ACKNOWLEDGE);
+				receiver = session.createConsumer(dest);
+			} catch (JMSException e) {
+				e.printStackTrace(System.out);
+			}
+		}
+
+		public void run() {
+			try {
+				for(count  = 0; count < load; count++)
+					receiver.receive();
+			} catch (Exception e) {
+				e.printStackTrace(System.out);
+			}
+		}
+	}
+	
 	public static void main (String argv[]) throws Exception {
 		int number = Integer.parseInt(argv[0]);
 		System.out.println("[Worker " + number + "]\tStarted...");
@@ -26,45 +50,22 @@ public class Worker {
 		ictx.close();
 
 		Connection cnx = cnxF.createConnection();
-		Session session = cnx.createSession(false,Session.AUTO_ACKNOWLEDGE);
-		MessageConsumer receiver = session.createConsumer(dest);
-
+		ReceiveRound rr = new ReceiveRound(cnx,dest);
+		load = Constants.WORKER_MAX;
+		
+		
 		long wait, rstart;
 		cnx.start();
 		while(true) {
 			rstart = System.currentTimeMillis();
-			ReceiveRound rr = new ReceiveRound(receiver,number);
 			rr.start();
-			rr.join(Constants.TIME_UNIT);
-
-			wait = rstart + Constants.TIME_UNIT - System.currentTimeMillis();
+			rr.join(Constants.WORKER_PERIOD);
+			rr.stop();
+			rr = new ReceiveRound(cnx,dest);
+			System.out.println("[Worker " + number + "]\t" + count);		
+			wait = rstart + Constants.WORKER_PERIOD - System.currentTimeMillis();
 			if (wait > 0)
 				Thread.sleep(wait);
 		}
-	}
-}
-
-/**
- * A class used to receive a round of messages.
- */
-class ReceiveRound extends Thread {
-
-	private MessageConsumer receiver;
-	private int number;
-
-	public ReceiveRound(MessageConsumer receiver, int number) {
-		this.receiver = receiver;
-		this.number = number;
-	}
-
-	public void run() {
-		int count = 0;
-		for(int j = 0; j < Constants.WORKER_MAX; j++) {
-			try {
-				receiver.receive();
-				count++;
-			} catch (JMSException e) {}
-		}
-		System.out.println("[Worker " + number + "]\t" + count);
 	}
 }
