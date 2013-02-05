@@ -338,4 +338,18 @@ public class ConnectionManager implements ConnectionManagerMBean {
       return false;
     }
   }
+  
+  /**
+   * Activates/deactivates the connection manager.
+   * 
+   * @param activate true, activates the connection manager.
+   */
+  public static void setActivate(boolean activate) {
+    if (currentInstance == null) return;
+    if (activate) {
+      currentInstance.activate();
+    } else {
+      currentInstance.deactivate();
+    }
+  }
 }
