@@ -1,0 +1,324 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.ow2.joram</groupId>
+  <artifactId>parent</artifactId>
+  <packaging>pom</packaging>
+  <!-- version : major.minor.build -->
+  <version>5.8.1</version>
+  <name>JORAM</name>
+  <url>http://maven.apache.org</url>
+  <description>Builds the Joram project.</description>
+ 
+  <parent>
+    <groupId>org.ow2</groupId>
+    <artifactId>ow2</artifactId>
+    <version>1.3</version>
+  </parent>
+
+  <modules>
+    <module>a3</module>
+    <module>jndi</module>
+    <module>joram</module>
+    <module>licenses</module>
+    <module>conf</module>
+    <module>assembly</module>
+    <module>samples</module>
+    <module>shell</module>
+  </modules>
+
+  <profiles>
+    <!-- Profile release -->
+    <profile>
+      <id>release</id>
+      <modules>
+        <module>release</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <!-- <version>2.1.2</version> -->
+            <executions>
+              <execution>
+                <id>bind-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                  <!-- <goal>jar-no-fork</goal> -->
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-release-plugin</artifactId>
+            <configuration>
+              <tagBase>svn+ssh://svn.forge.objectweb.org/svnroot/joram/tags</tagBase>
+              <autoVersionSubmodules>true</autoVersionSubmodules>
+              <addSchema>false</addSchema>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    
+    <!-- Profile sign -->
+     <profile>
+      <id>sign</id>
+      <modules>
+        <module>release</module>
+      </modules>
+      <build>
+        <plugins>
+          <!-- - - - - - - - - - - - - - - - - - - - - -->
+          <!--  Sign all the artifacts                 -->
+          <!-- - - - - - - - - - - - - - - - - - - - - -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    
+    <!-- Profile javadoc -->
+    <profile>
+      <id>doc</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.8</version>
+            <configuration>
+              <show>private</show>
+              <nohelp>true</nohelp>
+              <links>
+                <link>http://download.oracle.com/javaee/6/api/</link>
+              </links>
+              <jarOutputDirectory>release/target</jarOutputDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <id>javadoc</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>aggregate-jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+      <!-- reporting -->
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <!-- <stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile> -->
+              <show>private</show>
+            </configuration>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+  </profiles>
+  
+  <!-- Source code management -->
+  <scm>
+    <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/joram/trunk</connection>
+    <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/joram/trunk</developerConnection>
+  </scm>
+  
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh</artifactId>
+        <version>1.0</version>
+      </extension>
+    </extensions> 
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
+  <properties>
+    <!-- joram protocol -->
+    <joram.protocol>58</joram.protocol>
+    <!--  dependencies versions -->
+    <ow2.version>1.3</ow2.version>
+    <mail.version>1.4.1</mail.version>
+    <monolog.version>5.2.0</monolog.version>
+    <jcup.version>5.3.1</jcup.version>
+    <jftp.version>1.52</jftp.version>
+    <geronimo-jms_spec.version>1.1.1</geronimo-jms_spec.version>
+    <osgi.compendium.version>4.2.0</osgi.compendium.version>
+    <org.osgi.version>3.0.0</org.osgi.version>
+    <activation.version>1.1.1</activation.version>
+    <commons-dbcp.version>1.2.2</commons-dbcp.version>
+    <mysql-connector-java.version>5.1.6</mysql-connector-java.version>
+    <connector.version>1.0.3</connector.version>
+    <felix.main.version>4.0.2</felix.main.version>
+    <felix.shell.version>1.4.2</felix.shell.version>
+    <felix.remote.version>1.1.2</felix.remote.version>
+    <felix.tui.version>1.4.1</felix.tui.version>
+    <felix.gogo.runtime.version>0.10.0</felix.gogo.runtime.version>
+    <felix.gogo.command.version>0.12.0</felix.gogo.command.version>
+    <felix.gogo.shell.version>0.10.0</felix.gogo.shell.version>
+    <maven.bundle.plugin.version>2.3.5</maven.bundle.plugin.version>
+    <!-- to prevent [WARNING] Using platform encoding -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <stomp.version>1.0</stomp.version>
+    <commons-io.version>1.4</commons-io.version>
+    <ow2-util-substitution.version>1.0.32</ow2-util-substitution.version>
+  </properties>
+
+  <organization>
+    <name>ScalAgent D.T.</name>
+    <url>http://joram.ow2.org/</url>
+  </organization>
+
+ <!-- Who worked on this project ? -->
+  <developers>
+    <developer>
+      <id>afreyssin</id>
+      <name>Andre Freyssinet</name>
+      <email>Andre.Freyssinet@scalagent.com</email>
+    </developer>
+    <developer>
+      <id>tachker</id>
+      <name>Nicolas Tachker</name>
+      <email>nicolas.tachker@scalagent.com</email>
+    </developer>
+  </developers>
+  
+  <!-- Preferred dependencies version -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.compendium</artifactId>
+        <version>${osgi.compendium.version}</version>
+        <type>jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi</artifactId>
+        <version>${org.osgi.version}</version>
+        <type>jar</type>
+      </dependency>
+      <dependency>
+        <groupId>javax.mail</groupId>
+        <artifactId>mail</artifactId>
+        <version>${mail.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.jonas.osgi</groupId>
+        <artifactId>monolog</artifactId>
+        <version>${monolog.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.objectweb.joram</groupId>
+        <artifactId>jcup</artifactId>
+        <version>${jcup.version}</version>
+        <type>jar</type>
+      </dependency>
+      <dependency>
+        <groupId>javax.activation</groupId>
+        <artifactId>activation</artifactId>
+        <version>${activation.version}</version>
+        <type>jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-jms_1.1_spec</artifactId>
+        <version>${geronimo-jms_spec.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-connector-1.5-spec</artifactId>
+        <version>${connector.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-dbcp</groupId>
+        <artifactId>commons-dbcp</artifactId>
+        <version>${commons-dbcp.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>${mysql-connector-java.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2</groupId>
+        <artifactId>ow2</artifactId>
+        <version>${ow2.version}</version>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.objectweb.joram</groupId>
+        <artifactId>jftp</artifactId>
+        <version>${jftp.version}</version>
+        <type>jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.stomp</groupId>
+        <artifactId>stompconnect</artifactId>
+        <version>${stomp.version}</version>
+        <type>jar</type>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${commons-io.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-substitution</artifactId>
+        <version>${ow2-util-substitution.version}</version>
+    </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.jonas.osgi</groupId>
+      <artifactId>monolog</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+</project>

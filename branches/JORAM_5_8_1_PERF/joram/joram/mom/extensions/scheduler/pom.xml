@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+  <artifactId>joram-mom-extensions-scheduler</artifactId>
+  <packaging>bundle</packaging>
+  <name>JORAM :: joram :: mom :: extensions :: scheduler</name>
+  <description>Builds the Joram scheduler extension project.</description>
+
+	<parent>
+		<groupId>org.ow2.joram</groupId>
+    <artifactId>joram-mom-extensions</artifactId>
+		<version>5.8.1</version>
+  </parent>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Export-Package>com.scalagent.joram.mom.dest.scheduler</Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-mom-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+</project>
