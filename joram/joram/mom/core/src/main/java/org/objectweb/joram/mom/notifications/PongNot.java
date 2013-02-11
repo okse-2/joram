@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,8 +26,8 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.common.stream.Properties;
 
 /**
- * A notification sent in response of a {@link PingNot}.
- * Should contain the metrics about current behavior of the remote destination.
+ * An empty notification, sent in response of a {@link PingNot}.
+ * Should contain the metrics about current behavior of the destination.
  */
 public class PongNot extends Notification {
   private static final long serialVersionUID = 1L;

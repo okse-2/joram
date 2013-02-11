@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - 2013 ScalAgent Distributed Technologies
- * Copyright (C) 2012 - 2013 Universite Joseph Fourier
+ * Copyright (C) 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 Universite Joseph Fourier
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -89,7 +89,7 @@ public class AliasInQueue extends Queue {
 		if (properties != null && properties.containsKey(REMOTE_AGENT_OPTION)) {
 			try {
 				String[] agents = properties.getProperty(REMOTE_AGENT_OPTION).split(";");
-				
+
 				destinations = new ArrayList<AgentId>();
 				oldmetrics = new ArrayList<Long>();
 				newmetrics = new ArrayList<Long>();
@@ -105,9 +105,7 @@ public class AliasInQueue extends Queue {
 				}
 
 			} catch (IllegalArgumentException exc) {
-				logger.log(BasicLevel.ERROR,
-				           "AliasInQueue: can't parse '" + REMOTE_AGENT_OPTION + " property -> " +
-				               properties.getProperty(REMOTE_AGENT_OPTION), exc);
+				logger.log(BasicLevel.ERROR, "AliasInQueue: can't parse '" + REMOTE_AGENT_OPTION + " option.", exc);
 			}
 		}
 
@@ -139,6 +137,7 @@ public class AliasInQueue extends Queue {
 		return null;
 	}
 
+	/*
 	public void react(AgentId from, Notification not) throws Exception {
 		if (logger.isLoggable(BasicLevel.DEBUG))
 			logger.log(BasicLevel.DEBUG, "AliasInQueue.react(" + from + ',' + not + ')');
@@ -149,6 +148,7 @@ public class AliasInQueue extends Queue {
 			super.react(from, not);
 		}
 	}
+	*/
 
 	protected void handleExpiredNot(AgentId from, ExpiredNot not) {
 		if (logger.isLoggable(BasicLevel.DEBUG)) {
@@ -191,8 +191,8 @@ public class AliasInQueue extends Queue {
         addClientMessages(((ClientMessages) uA.not), false);
       } catch (AccessException e) {/* never happens */}
 		} else if (uA.not instanceof PingNot) {
-			logger.log(BasicLevel.ERROR,
-			           "Unknown agent. '" + REMOTE_AGENT_OPTION+ "' property refers to an unknown agent.");
+			logger.log(BasicLevel.ERROR, "Unknown agent. '" + REMOTE_AGENT_OPTION
+					+ "' property refers to an unknown agent.");
 		} else {
 			super.doUnknownAgent(uA);
 		}
@@ -329,18 +329,18 @@ public class AliasInQueue extends Queue {
 		if (x1 != null)
 			newmetrics.set(dest, x1.longValue());
 		metrics.set(dest, newmetrics.get(dest) - oldmetrics.get(dest));
-		Integer x2 = (Integer) not.get("PendingMessageCount");
-		int pending = 0;
+		Long x2 = (Long) not.get("PendingMessageCount");
+		long pending = 0L;
 		if (x2 != null)
-			pending = x2.intValue();
-		logger.log(BasicLevel.ERROR, "Pending: " + pending + " from: " + dest);
+			pending = x2.longValue();
+		logger.log(BasicLevel.ERROR,"Pending: " + pending + " from: " + dest);
 		// Correction (consider only 80% of the actual reception rate) 
 		if (pending > pendingMessagesThreshold) {
 			metrics.set(dest, metrics.get(dest)*80/100);
-			logger.log(BasicLevel.ERROR, "Metric got altered for: " + dest);
+			logger.log(BasicLevel.ERROR,"Metric got altered for: " + dest);
 		}
 
-		logger.log(BasicLevel.ERROR, "Received: " + metrics.get(dest) + " from: " + dest);
+		logger.log(BasicLevel.ERROR,"Received: " + metrics.get(dest) + " from: " + dest);
 
 		if (metrics.get(dest) < minMetrics) 
 			minMetrics = metrics.get(dest);

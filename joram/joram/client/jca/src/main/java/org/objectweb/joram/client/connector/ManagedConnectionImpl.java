@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -545,13 +545,11 @@ public class ManagedConnectionImpl
     return res;
   }
 
-  private Object lockForExc = new Object();
-  
   /** Notifies that the wrapped physical connection has been lost. */
-  public void onException(JMSException exc) {
+  public synchronized void onException(JMSException exc) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + " onException(" + exc + ')');
-    
+
     // Physical connection already invalid: doing nothing.
     if (! isValid())
       return;
@@ -564,28 +562,26 @@ public class ManagedConnectionImpl
     ConnectionEvent event =
       new ConnectionEvent(this, ConnectionEvent.CONNECTION_ERROR_OCCURRED);
 
-    synchronized(lockForExc) {
-      ConnectionEventListener listener;
-      for (int i = 0; i < listeners.size(); i++) {
-        listener = (ConnectionEventListener) listeners.get(i);
-        listener.connectionErrorOccurred(event);
-      }
+    ConnectionEventListener listener;
+    for (int i = 0; i < listeners.size(); i++) {
+      listener = (ConnectionEventListener) listeners.get(i);
+      listener.connectionErrorOccurred(event);
+    }
 
-
-      try {
-        cleanup();
-      } catch (ResourceException e) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, this + " onException.cleanup exception " + e);
-      }
-
-      try {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, this + " onException: call ra.reconnect()");
-        ra.reconnect();
-        reconnect();
-      } catch (Exception e) {
-      }
+    try {
+    	cleanup();
+    } catch (ResourceException e) {
+    	if (logger.isLoggable(BasicLevel.DEBUG))
+    		logger.log(BasicLevel.DEBUG, this + " onException.cleanup exception " + e);
+    }
+    
+    
+    try {
+    	if (logger.isLoggable(BasicLevel.DEBUG))
+    		logger.log(BasicLevel.DEBUG, this + " onException: call ra.reconnect()");
+    	ra.reconnect();
+    	reconnect();
+    } catch (Exception e) {
     }
   }
 

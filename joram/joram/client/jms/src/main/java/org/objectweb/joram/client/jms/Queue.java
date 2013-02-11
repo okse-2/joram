@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2012 Universite Joseph Fourier
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
@@ -576,54 +576,25 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	/**
 	 * Adds a destination to an alias queue's destinations' list.
 	 * 
-	 * @param destId The internal name of remote destination
+	 * @param destId
 	 * @throws ConnectException
 	 * @throws AdminException
 	 */
 	public void addRemoteDestination(String destId) throws ConnectException, AdminException {
 		doRequest(new AddRemoteDestination(agentId, destId));
 	}
-
-  /**
-   * Adds a destination to an alias queue's destinations' list.
-   * 
-   * @param remote  The remote queue to add
-   * @throws ConnectException
-   * @throws AdminException
-   */
-  public void addRemoteDestination(Queue remote) throws ConnectException, AdminException {
-    doRequest(new AddRemoteDestination(agentId, remote.getName()));
-  }
 	
 	/**
 	 * Removes a destination from an alias queue's destinations' list.
 	 * 
-	 * @param destId The internal name of remote destination
+	 * @param destId
 	 * @throws ConnectException
 	 * @throws AdminException
 	 */
 	public void delRemoteDestination(String destId) throws ConnectException, AdminException {
 		doRequest(new DelRemoteDestination(agentId, destId));
 	}
-  
-  /**
-   * Removes a destination from an alias queue's destinations' list.
-   * 
-   * @param destId The remote queue to remove
-   * @throws ConnectException
-   * @throws AdminException
-   */
-  public void delRemoteDestination(Queue remote) throws ConnectException, AdminException {
-    doRequest(new DelRemoteDestination(agentId, remote.getName()));
-  }
 
-  /**
-   * Set weights for each remote destination of this alias queue.
-   * 
-   * @param weights
-   * @throws ConnectException
-   * @throws AdminException
-   */
 	public void sendDestinationsWeights(int[] weights) throws ConnectException, AdminException {
 		doRequest(new SendDestinationsWeights(agentId, weights));
 	}
