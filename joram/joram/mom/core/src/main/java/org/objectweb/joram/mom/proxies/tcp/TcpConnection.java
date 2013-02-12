@@ -162,6 +162,7 @@ public class TcpConnection implements TcpConnectionMBean {
     return creationDate;
   }
 
+  /* JORAM_PERF_BRANCH:
   public long getReceivedCount() {
     return ioctrl.getReceivedCount();
   }
@@ -169,5 +170,5 @@ public class TcpConnection implements TcpConnectionMBean {
   public long getSentCount() {
     return ioctrl.getSentCount();
   }
-
+   */
 }

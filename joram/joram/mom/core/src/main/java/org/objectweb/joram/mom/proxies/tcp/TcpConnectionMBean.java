@@ -59,14 +59,16 @@ public interface TcpConnectionMBean {
    * 
    * @return the number of requests sent on the connection.
    */
-  public long getSentCount();
+  /* JORAM_PERF_BRANCH:
+  public long getSentCount();*/
 
   /**
    * Gets the number of replies received on the connection.
    * 
    * @return the number of replies received on the connection.
    */
-  public long getReceivedCount();
+  /* JORAM_PERF_BRANCH:
+  public long getReceivedCount();*/
   
 
 }
