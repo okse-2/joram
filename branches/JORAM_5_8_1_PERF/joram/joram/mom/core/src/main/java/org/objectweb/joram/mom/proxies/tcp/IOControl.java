@@ -49,22 +49,26 @@ public class IOControl {
 
   private BufferedInputStream bis;
 
-  private int windowSize;
+  // JORAM_PERF_BRANCH:
+  //private int windowSize;
 
-  private int unackCounter;
+  //private int unackCounter;
   
-  private long receivedCount;
+  //private long receivedCount;
 
-  private long sentCount;
+  //private long sentCount;
+  //JORAM_PERF_BRANCH.
 
   public IOControl(Socket sock) throws IOException {
     this(sock, -1);
   }
     
   public IOControl(Socket sock,
-		   long inputCounter)  throws IOException {    
-    windowSize = AgentServer.getInteger("fr.dyade.aaa.util.ReliableTcpConnection.windowSize", 100).intValue();
-    unackCounter = 0;
+		   long inputCounter)  throws IOException {   
+    // JORAM_PERF_BRANCH:
+    //windowSize = AgentServer.getInteger("fr.dyade.aaa.util.ReliableTcpConnection.windowSize", 100).intValue();
+    //unackCounter = 0;
+    //JORAM_PERF_BRANCH.
     this.inputCounter = inputCounter;
     this.sock = sock;
 
@@ -78,8 +82,10 @@ public class IOControl {
 
     try {
       nos.send(msg.getId(), msg.getAckId(), msg.getObject());
+      /* JORAM_PERF_BRANCH
       sentCount++;
       unackCounter = 0;
+      */
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "IOControl.send", exc);
@@ -130,6 +136,9 @@ public class IOControl {
         long messageId = StreamUtil.readLongFrom(bis);
         long ackId = StreamUtil.readLongFrom(bis);
         AbstractJmsRequest obj = (AbstractJmsRequest) AbstractJmsMessage.read(bis);
+        return new ProxyMessage(messageId, ackId, obj);
+        
+        /* JORAM_PERF_BRANCH
         receivedCount++;
 
         if (messageId > inputCounter) {
@@ -144,6 +153,7 @@ public class IOControl {
           return new ProxyMessage(messageId, ackId, obj);
         }
         logger.log(BasicLevel.DEBUG, "IOControl.receive: already received message: " + messageId + " -> " + obj);
+        JORAM_PERF_BRANCH */
       }
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -174,6 +184,7 @@ public class IOControl {
     return sock;
   }
   
+  /* JORAM_PERF_BRANCH
   public long getSentCount() {
     return sentCount;
   }
@@ -181,5 +192,5 @@ public class IOControl {
   public long getReceivedCount() {
     return receivedCount;
   }
-  
+  */
 }
