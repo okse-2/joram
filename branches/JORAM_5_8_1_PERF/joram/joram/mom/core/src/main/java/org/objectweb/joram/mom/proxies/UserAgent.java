@@ -1203,7 +1203,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
                                               0,
                                               false,
                                               req.getMessageIdsToAck(),
-                                              req.getMessageCount());    
+                                              req.getMessageCount());
+      // JORAM_PERF_BRANCH:
+      not.setImplicitReceive(true);
+      // JORAM_PERF_BRANCH.
       AgentId destId = AgentId.fromString(req.getTarget());
       if (destId == null)
         throw new RequestException("Request to an undefined destination (null).");
