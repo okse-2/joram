@@ -641,6 +641,7 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
 
     // If sender is not a writer, sending the messages to the DMQ, and
     // throwing an exception:
+    /* JORAM_PERF_BRANCH: enables to bypass the proxy (just for testing)
     if (!isWriter(from)) {
       DMQManager dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
       Message msg;
@@ -653,7 +654,7 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       dmqManager.sendToDMQ();
       throw new AccessException("WRITE right not granted");
     }
-
+    JORAM_PERF_BRANCH */
     doClientMessages(from, not, true);
 
     // For topic performance we must send reply after process ClientMessage. It results
