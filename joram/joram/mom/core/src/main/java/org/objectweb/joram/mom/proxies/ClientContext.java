@@ -187,8 +187,11 @@ class ClientContext implements java.io.Serializable {
 
   /** Adds the identifier of a delivering queue. */ 
   void addDeliveringQueue(AgentId queueId) {
-    deliveringQueues.put(queueId, queueId);
-    proxy.setSave();
+    // JORAM_PERF_BRANCH
+    if (deliveringQueues.get(queueId) == null) {
+      deliveringQueues.put(queueId, queueId);
+      proxy.setSave();
+    }
   }
 
   /** Returns the identifiers of the delivering queues. */

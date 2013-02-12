@@ -84,7 +84,9 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
     ProxyMessage msg = (ProxyMessage)obj;
     inputCounter = msg.getId();
     AbstractJmsRequest request = (AbstractJmsRequest) msg.getObject();
-    queue.ack(msg.getAckId());
+    // JORAM_PERF_BRANCH:
+    // queue.ack(msg.getAckId());
+    // JORAM_PERF_BRANCH.
     if (request instanceof CnxCloseRequest) {
       closed = true;
     }

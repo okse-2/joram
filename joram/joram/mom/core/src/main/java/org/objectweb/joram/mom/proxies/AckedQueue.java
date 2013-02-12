@@ -63,16 +63,19 @@ public class AckedQueue implements java.io.Serializable {
       while ((list.size() - current) == 0) {
         list.wait();
       }      
-      ProxyMessage msg = list.elementAt(current);
-      current++;
+      // JORAM_PERF_BRANCH:
+      //ProxyMessage msg = list.elementAt(current);
+      ProxyMessage msg = list.remove(current);
+      //current++;
+      // JORAM_PERF_BRANCH.
       return msg;
     }
   }
 
+  /* JORAM_PERF_BRANCH:
   public void ack(long ackId) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AckedQueue.ack(" + ackId + ')');
-    
     synchronized (list) {
       while (list.size() > 0) {
         ProxyMessage m = list.elementAt(0);
@@ -87,6 +90,7 @@ public class AckedQueue implements java.io.Serializable {
       }
     }
   }
+  */
 
   public void reset() {
     if (logger.isLoggable(BasicLevel.DEBUG))
