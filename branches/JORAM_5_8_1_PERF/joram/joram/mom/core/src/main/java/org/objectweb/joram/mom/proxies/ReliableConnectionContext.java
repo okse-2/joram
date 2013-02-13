@@ -105,5 +105,12 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
   
   public boolean isClosed() {
     return closed;
+  }
+
+  // JORAM_PERF_BRANCH
+  @Override
+  public String toString() {
+    return "ReliableConnectionContext [key=" + key + ", queue="
+        + queue.size() + ", heartBeat=" + heartBeat + ", closed=" + closed + "]";
   }  
 }
