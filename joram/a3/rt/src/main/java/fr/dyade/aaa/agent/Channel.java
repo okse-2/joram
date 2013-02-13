@@ -199,6 +199,10 @@ public class Channel {
     }
 
     try {
+      // JORAM_PERF_BRANCH:
+      if (msg.not != null && msg.not.persistent == false) {
+        consumer.postAndValidate(msg);
+      } else {
       AgentServer.getTransaction().begin();      
       consumer.post(msg);
       
@@ -226,6 +230,7 @@ public class Channel {
       // then commit and validate the message.
       consumer.validate();
       AgentServer.getTransaction().release();
+      }
     } catch (Exception exc) {
       // Should never happened (IOException or ClassNotFoundException).
       logmon.log(BasicLevel.FATAL,
