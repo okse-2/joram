@@ -25,6 +25,10 @@ package org.objectweb.joram.mom.proxies;
 import fr.dyade.aaa.agent.AgentMBean;
 
 public interface UserAgentMBean extends AgentMBean {
+  
+  // JORAM_PERF_BRANCH
+  public String[] getConnectionInfos();
+  
   /**
    * Returns the name of this queue, or its id if not set.
    *
