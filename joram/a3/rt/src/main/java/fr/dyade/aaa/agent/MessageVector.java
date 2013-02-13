@@ -107,6 +107,15 @@ final class MessageVector implements MessageQueue {
       logmon.log(BasicLevel.DEBUG, logmsg + "push(" + item + ")");
     insertMessageAt(item, count);
   }
+  
+  // JORAM_PERF_BRANCH
+  public synchronized void pushAndValidate(Message item) {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "pushAndValidate(" + item + ")");
+    insertMessageAt(item, validated);
+    validated++;
+    notify();
+  }
 
   /**
    * Removes the message at the top of this queue.
