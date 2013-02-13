@@ -499,6 +499,18 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     sendTo(getId(), new ReturnConnectionNot(not, ctx));
     keyCounter++;
   }
+  
+  // JORAM_PERF_BRANCH:
+  public String[] getConnectionInfos() {
+    String[] infos = new String[connections.size()];
+    Enumeration enumer = connections.elements();
+    int i = 0;
+    while (enumer.hasMoreElements()) {
+      infos[i] = enumer.nextElement().toString();
+      i++;
+    }
+    return infos;
+  }
 
   /**
    * Differs the reply because the connection key counter
