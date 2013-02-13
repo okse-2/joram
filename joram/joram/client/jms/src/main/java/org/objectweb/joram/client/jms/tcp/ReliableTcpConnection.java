@@ -52,11 +52,12 @@ public class ReliableTcpConnection {
 
   private int windowSize;
 
-  private volatile long inputCounter;
+  // JORAM_PERF_BRANCH
+  //private volatile long inputCounter;
 
-  private long outputCounter;
+  //private long outputCounter;
 
-  private volatile int unackCounter;
+  //private volatile int unackCounter;
 
   private Vector pendingMessages;
 
@@ -82,9 +83,10 @@ public class ReliableTcpConnection {
       logger.log(BasicLevel.INFO, 
                  "ReliableTcpConnection.windowSize=" + windowSize);
     timer = timer2;
-    inputCounter = -1;
-    outputCounter = 0;
-    unackCounter = 0;
+    // JORAM_PERF_BRANCH:
+    //inputCounter = -1;
+    //outputCounter = 0;
+    //unackCounter = 0;
     pendingMessages = new Vector();
     inputLock = new Object();
     outputLock = new Object();
@@ -121,7 +123,8 @@ public class ReliableTcpConnection {
         synchronized (pendingMessages) {
           for (int i = 0; i < pendingMessages.size(); i++) {
             TcpMessage pendingMsg = (TcpMessage) pendingMessages.elementAt(i);
-            doSend(pendingMsg.id, inputCounter, pendingMsg.object);
+            // JORAM_PERF_BRANCH:
+            doSend(pendingMsg.object);
           }
         }
       }
@@ -147,8 +150,9 @@ public class ReliableTcpConnection {
     if (getStatus() != CONNECT) 
       throw new IOException("Connection closed");
     try {      
-      synchronized (outputLock) {        
-        doSend(outputCounter, inputCounter, request);
+      synchronized (outputLock) { 
+        // JORAM_PERF_BRANCH:
+        doSend(request);
         /* JORAM_PERF_BRANCH:
         addPendingMessage(new TcpMessage(
           outputCounter, request));
@@ -163,13 +167,14 @@ public class ReliableTcpConnection {
     }
   }
   
-  private void doSend(long id, long ackId, AbstractJmsMessage msg) throws IOException {
+  private void doSend(AbstractJmsMessage msg) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                 "ReliableTcpConnection.doSend(" + id + ',' + ackId + ',' + msg + ')');
+                 "ReliableTcpConnection.doSend(" + msg + ')');
     synchronized (outputLock) {
-      nos.send(id, ackId, msg);
-      unackCounter = 0;
+      // JORAM_PERF_BRANCH:
+      nos.send(msg);
+      //unackCounter = 0;
     }
   }
 
@@ -183,20 +188,21 @@ public class ReliableTcpConnection {
     }
 
     public void reset() {
-      count = 4;
+      count = 0;
     }
 
-    void send(long id, long ackId, AbstractJmsMessage msg) throws IOException {
+    void send(AbstractJmsMessage msg) throws IOException {
       try {
-        StreamUtil.writeTo(id, this);
-        StreamUtil.writeTo(ackId, this);
+        // JORAM_PERF_BRANCH:
+        //StreamUtil.writeTo(id, this);
+        //StreamUtil.writeTo(ackId, this);
         AbstractJmsMessage.write(msg, this);
-
+/* JORAM_PERF_BRANCH:
         buf[0] = (byte) ((count -4) >>>  24);
         buf[1] = (byte) ((count -4) >>>  16);
         buf[2] = (byte) ((count -4) >>>  8);
         buf[3] = (byte) ((count -4) >>>  0);
-
+*/
         writeTo(os);
         os.flush();
       } finally {
@@ -215,7 +221,7 @@ public class ReliableTcpConnection {
     }
   }
   JORAM_PERF_BRANCH.*/
-  
+  /* JORAM_PERF_BRANCH:
   private void ackPendingMessages(long ackId) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
@@ -233,7 +239,7 @@ public class ReliableTcpConnection {
       }
     }
   }
-
+*/
   public AbstractJmsReply receive() throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
@@ -248,9 +254,10 @@ public class ReliableTcpConnection {
         AbstractJmsReply obj;
 
         synchronized (inputLock) {
-          int len = StreamUtil.readIntFrom(bis);
-          messageId = StreamUtil.readLongFrom(bis);
-          ackId = StreamUtil.readLongFrom(bis);
+          // JORAM_PERF_BRANCH:
+          //int len = StreamUtil.readIntFrom(bis);
+          //messageId = StreamUtil.readLongFrom(bis);
+          //ackId = StreamUtil.readLongFrom(bis);
           obj =  (AbstractJmsReply) AbstractJmsMessage.read(bis);
           // JORAM_PERF_BRANCH:
           return obj;
