@@ -267,7 +267,8 @@ public class TcpConnectionListener extends Daemon {
         ctx = (ReliableConnectionContext) gcn.getConnectionContext();
         StreamUtil.writeTo(0, nos);
         nos.send();
-        ioctrl = new IOControl(sock, ctx.getInputCounter());
+        // JORAM_PERF_BRANCH
+        ioctrl = new IOControl(sock);
 
         // Close the remaining connection if it exists
         TcpConnection tcpConnection = proxyService.getConnection(proxyId, key);

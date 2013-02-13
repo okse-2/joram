@@ -30,21 +30,21 @@ public class ProxyMessage implements java.io.Serializable {
    * 
    */
   private static final long serialVersionUID = 1L;
+  // JORAM_PERF_BRANCH
+  //private long id;
 
-  private long id;
-
-  private long ackId;
+  //private long ackId;
 
   private AbstractJmsMessage obj;
 
-  public ProxyMessage(long id, 
-                      long ackId,
-                      AbstractJmsMessage obj) {
-    this.id = id;
-    this.ackId = ackId;
+  public ProxyMessage(AbstractJmsMessage obj) {
+    // JORAM_PERF_BRANCH
+    //this.id = id;
+    //this.ackId = ackId;
     this.obj = obj;
   }
 
+  /* JORAM_PERF_BRANCH
   public final long getId() {
     return id;
   }
@@ -52,15 +52,16 @@ public class ProxyMessage implements java.io.Serializable {
   public final long getAckId() {
     return ackId;
   }
-
+*/
   public final AbstractJmsMessage getObject() {
     return obj;
   }
 
   public String toString() {
     return '(' + super.toString() + 
+   /* JORAM_PERF_BRANCH
       ",id=" + id + 
-      ",ackId=" + ackId + 
+      ",ackId=" + ackId + */
       ",obj=" + obj + ')';
   }
 }

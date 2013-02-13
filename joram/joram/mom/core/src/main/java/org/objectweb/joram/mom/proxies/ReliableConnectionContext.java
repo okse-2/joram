@@ -44,10 +44,10 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
   private static final long serialVersionUID = 1L;
 
   private int key;
+  //JORAM_PERF_BRANCH
+  //private long inputCounter;
 
-  private long inputCounter;
-
-  private long outputCounter;
+  //private long outputCounter;
 
   private AckedQueue queue;
 
@@ -58,8 +58,9 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
   ReliableConnectionContext(int key, int heartBeat) {
     this.key = key;
     this.heartBeat = heartBeat;
-    inputCounter = -1;
-    outputCounter = 0;
+    // JORAM_PERF_BRANCH
+    //inputCounter = -1;
+    //outputCounter = 0;
     queue = new AckedQueue();
     closed = false;
   }
@@ -75,14 +76,15 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
   public int getHeartBeat() {
     return heartBeat;
   }
-  
+  /* JORAM_PERF_BRANCH
   public long getInputCounter() {
     return inputCounter;
   }
-  
+  */
   public AbstractJmsRequest getRequest(Object obj) {
     ProxyMessage msg = (ProxyMessage)obj;
-    inputCounter = msg.getId();
+    // JORAM_PERF_BRANCH
+    //inputCounter = msg.getId();
     AbstractJmsRequest request = (AbstractJmsRequest) msg.getObject();
     // JORAM_PERF_BRANCH:
     // queue.ack(msg.getAckId());
@@ -94,13 +96,15 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
   }
   
   public void pushReply(AbstractJmsReply reply) {
-    ProxyMessage msg = new ProxyMessage(outputCounter, inputCounter, reply);
+    ProxyMessage msg = new ProxyMessage(reply);
     queue.push(msg);
-    outputCounter++;
+    // JORAM_PERF_BRANCH
+    //outputCounter++;
   }
   
   public void pushError(MomException exc) {
-    queue.push(new ProxyMessage(-1, -1, new MomExceptionReply(exc)));
+    // JORAM_PERF_BRANCH
+    queue.push(new ProxyMessage(new MomExceptionReply(exc)));
   }
   
   public boolean isClosed() {

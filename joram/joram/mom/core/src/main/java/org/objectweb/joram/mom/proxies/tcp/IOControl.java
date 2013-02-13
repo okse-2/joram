@@ -40,8 +40,8 @@ import fr.dyade.aaa.common.stream.StreamUtil;
 
 public class IOControl {
   public static Logger logger = Debug.getLogger(IOControl.class.getName());
-
-  private long inputCounter;
+  //JORAM_PERF_BRANCH
+  //private long inputCounter;
 
   private Socket sock;
 
@@ -59,17 +59,12 @@ public class IOControl {
   //private long sentCount;
   //JORAM_PERF_BRANCH.
 
-  public IOControl(Socket sock) throws IOException {
-    this(sock, -1);
-  }
-    
-  public IOControl(Socket sock,
-		   long inputCounter)  throws IOException {   
+  public IOControl(Socket sock) throws IOException {   
     // JORAM_PERF_BRANCH:
     //windowSize = AgentServer.getInteger("fr.dyade.aaa.util.ReliableTcpConnection.windowSize", 100).intValue();
     //unackCounter = 0;
     //JORAM_PERF_BRANCH.
-    this.inputCounter = inputCounter;
+    //this.inputCounter = inputCounter;
     this.sock = sock;
 
     nos = new NetOutputStream(sock);
@@ -81,7 +76,8 @@ public class IOControl {
       logger.log(BasicLevel.DEBUG, "IOControl.send:" + msg);
 
     try {
-      nos.send(msg.getId(), msg.getAckId(), msg.getObject());
+      // JORAM_PERF_BRANCH
+      nos.send(msg.getObject());
       /* JORAM_PERF_BRANCH
       sentCount++;
       unackCounter = 0;
@@ -104,20 +100,22 @@ public class IOControl {
     }
 
     public void reset() {
-      count = 4;
+      // JORAM_PERF_BRANCH
+      count = 0;
     }
 
-    void send(long id, long ackId, AbstractJmsMessage msg) throws IOException {
+    void send(AbstractJmsMessage msg) throws IOException {
       try {
-        StreamUtil.writeTo(id, this);
-        StreamUtil.writeTo(ackId, this);
+        // JORAM_PERF_BRANCH
+        //StreamUtil.writeTo(id, this);
+        //StreamUtil.writeTo(ackId, this);
         AbstractJmsMessage.write(msg, this);
-
+/* JORAM_PERF_BRANCH
         buf[0] = (byte) ((count -4) >>>  24);
         buf[1] = (byte) ((count -4) >>>  16);
         buf[2] = (byte) ((count -4) >>>  8);
         buf[3] = (byte) ((count -4) >>>  0);
-
+*/
         writeTo(os);
         os.flush();
       } finally {
@@ -132,11 +130,12 @@ public class IOControl {
 
     try {
       while (true) {
-        int len = StreamUtil.readIntFrom(bis);
-        long messageId = StreamUtil.readLongFrom(bis);
-        long ackId = StreamUtil.readLongFrom(bis);
+        // JORAM_PERF_BRANCH
+        //int len = StreamUtil.readIntFrom(bis);
+        //long messageId = StreamUtil.readLongFrom(bis);
+        //long ackId = StreamUtil.readLongFrom(bis);
         AbstractJmsRequest obj = (AbstractJmsRequest) AbstractJmsMessage.read(bis);
-        return new ProxyMessage(messageId, ackId, obj);
+        return new ProxyMessage(obj);
         
         /* JORAM_PERF_BRANCH
         receivedCount++;
