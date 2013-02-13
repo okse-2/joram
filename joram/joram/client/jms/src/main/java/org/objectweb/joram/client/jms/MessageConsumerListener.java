@@ -211,6 +211,7 @@ abstract class MessageConsumerListener implements ReplyListener {
     }
     
     if (queueMode) {
+      /* JORAM_PERF_BRANCH:
       boolean subscribe = false;
       String[] toAck = null;
       synchronized (this) {
@@ -231,13 +232,16 @@ abstract class MessageConsumerListener implements ReplyListener {
           }
         }
       }
+      */
       // out of the synchronized block
+      /* JORAM_PERF_BRANCH:
       if (subscribe) {
         if (queueMessageReadMax == 0)
           subscribe(toAck, 1);
         else 
           subscribe(toAck, queueMessageReadMax);
       }
+      JORAM_PERF_BRANCH. */
     } else {
       synchronized (this) {
         if (topicMsgInputPassivated) {
@@ -403,9 +407,11 @@ abstract class MessageConsumerListener implements ReplyListener {
       throw new AbortedRequestException();
     }
     
+    /* JORAM_PERF_BRANCH:
     if (queueMode) {
       return true;
     }
+    JORAM_PERF_BRANCH. */
     return false;
   }
   
