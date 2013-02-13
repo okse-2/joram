@@ -149,9 +149,11 @@ public class ReliableTcpConnection {
     try {      
       synchronized (outputLock) {        
         doSend(outputCounter, inputCounter, request);
+        /* JORAM_PERF_BRANCH:
         addPendingMessage(new TcpMessage(
           outputCounter, request));
         outputCounter++;
+          JORAM_PERF_BRANCH.*/
       }
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -202,7 +204,8 @@ public class ReliableTcpConnection {
       }
     }
   }
-
+  
+  /* JORAM_PERF_BRANCH:
   private void addPendingMessage(TcpMessage msg) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
@@ -211,7 +214,8 @@ public class ReliableTcpConnection {
       pendingMessages.addElement(msg);
     }
   }
-
+  JORAM_PERF_BRANCH.*/
+  
   private void ackPendingMessages(long ackId) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
@@ -248,7 +252,11 @@ public class ReliableTcpConnection {
           messageId = StreamUtil.readLongFrom(bis);
           ackId = StreamUtil.readLongFrom(bis);
           obj =  (AbstractJmsReply) AbstractJmsMessage.read(bis);
+          // JORAM_PERF_BRANCH:
+          return obj;
+          //JORAM_PERF_BRANCH.
         }
+        /* JORAM_PERF_BRANCH:
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> id = " + messageId);
         ackPendingMessages(ackId);
@@ -269,7 +277,8 @@ public class ReliableTcpConnection {
           } else if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        " -> already received message: " + messageId + " " + obj);
-        }        
+        }
+        JORAM_PERF_BRANCH.*/       
       } catch (IOException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "", exc);
@@ -312,7 +321,8 @@ public class ReliableTcpConnection {
         ",object=" + object + ')';
     }
   }
-
+  
+  /* JORAM_PERF_BRANCH:
   class AckTimerTask extends java.util.TimerTask {
     public void run() {
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -326,4 +336,6 @@ public class ReliableTcpConnection {
       }
     }
   }
+  JORAM_PERF_BRANCH.*/
+  
 }
