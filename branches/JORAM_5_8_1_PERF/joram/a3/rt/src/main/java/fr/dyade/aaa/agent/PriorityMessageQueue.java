@@ -102,6 +102,12 @@ final class PriorityMessageQueue implements MessageQueue {
       insertMessageAt(item, highPriorityCount, true);
     }
   }
+  
+  public synchronized void pushAndValidate(Message item) {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "pushAndValidate(" + item + ")");
+    throw new RuntimeException("not provided");
+  }
 
   /**
    * Removes the message at the top of this queue.
