@@ -1510,7 +1510,11 @@ public class Queue extends Destination implements QueueMBean {
 
       // Next request:
       if (notMsg.getSize() > 0) {
-        requests.remove(index);
+        // JORAM_PERF_BRANCH:
+        if (! notRec.isImplicitReceive()) {
+          requests.remove(index);
+        }
+        // JORAM_PERF_BRANCH.
         forward(notRec.requester, notMsg);
       } else {
         index++;
