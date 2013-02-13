@@ -29,9 +29,11 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
+import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.ConsumerAckRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.security.Identity;
@@ -88,9 +90,6 @@ public class ConnectionManager implements ConnectionManagerMBean {
         rn.setPriority(0);
       }
       Channel.sendTo(proxyId, rn);
-    }
-    if (req instanceof ProducerMessages) {
-      FlowControl.flowControl();
     }*/
     // JORAM_PERF_BRANCH:
     RequestNot rn = new RequestNot(cnxKey, msg);
@@ -121,7 +120,23 @@ public class ConnectionManager implements ConnectionManagerMBean {
         }
         not.setPriority(0);
         Channel.sendTo(destId, not);
-      } else {
+      } else if (req instanceof ConsumerAckRequest) {
+        ConsumerAckRequest car = (ConsumerAckRequest) req;
+        if (car.getQueueMode()) {
+          AgentId qId = AgentId.fromString(req.getTarget());
+          AcknowledgeRequest not = new AcknowledgeRequest(cnxKey, car.getRequestId(), car.getIds());
+          if (qId.getTo() == proxyId.getTo()) {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, " -> local acking");
+            not.setPersistent(false);
+            Channel.sendTo(qId, not);
+          } else {
+            Channel.sendTo(qId, not);
+          }
+        } else {
+          Channel.sendTo(proxyId, rn);
+        }
+      } else { 
         Channel.sendTo(proxyId, rn);
       }
     }
