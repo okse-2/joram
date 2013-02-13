@@ -57,6 +57,9 @@ public class ReceiveRequest extends AbstractRequestNot {
   private String[] msgIds;
 
   private int msgCount;
+  
+  // JORAM_PERF_BRANCH:
+  private boolean implicitReceive;
 
   /**
    * Constructs a <code>ReceiveRequest</code> instance.
@@ -85,6 +88,15 @@ public class ReceiveRequest extends AbstractRequestNot {
     this.msgCount = msgCount;
   }
 
+  //JORAM_PERF_BRANCH:
+  public boolean isImplicitReceive() {
+    return implicitReceive;
+  }
+
+  //JORAM_PERF_BRANCH:
+  public void setImplicitReceive(boolean implicitReceive) {
+    this.implicitReceive = implicitReceive;
+  }
 
   /** Returns the selector of the request. */
   public String getSelector() {
