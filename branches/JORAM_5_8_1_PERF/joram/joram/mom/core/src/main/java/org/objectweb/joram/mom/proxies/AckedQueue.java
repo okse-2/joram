@@ -44,6 +44,11 @@ public class AckedQueue implements java.io.Serializable {
     list = new Vector<ProxyMessage>();
     current = 0;
   }
+  
+  // JORAM_PERF_BRANCH
+  public int size() {
+    return list.size();
+  }
 
   public void push(ProxyMessage msg) {
     if (logger.isLoggable(BasicLevel.DEBUG))
