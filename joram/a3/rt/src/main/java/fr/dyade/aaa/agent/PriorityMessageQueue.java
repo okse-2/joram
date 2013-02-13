@@ -29,6 +29,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.EmptyQueueException;
 
+//JORAM_PERF_BRANCH
 final class PriorityMessageQueue implements MessageQueue {
   private Logger logmon = null;
   private String logmsg = null;
