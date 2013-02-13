@@ -887,6 +887,13 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     msg.save();
     qin.push(msg);
   }
+  
+  // JORAM_PERF_BRANCH
+  public void postAndValidate(Message msg) throws Exception {
+    stamp(msg);
+    msg.save();
+    qin.pushAndValidate(msg);
+  }
 
   protected boolean needToBeCommited = false;
   protected long timeout = Long.MAX_VALUE;
@@ -1150,6 +1157,26 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       logmon.log(BasicLevel.DEBUG, getName() + ": commit()");
     
     if (agent != null) agent.save();
+    
+    // JORAM_PERF_BRANCH:
+    if (msg.not != null && msg.not.persistent == false) {
+      qin.pop();
+      msg.delete();
+      msg.free();
+      // dispatch
+      Message msg = null;
+      while (! mq.isEmpty()) {
+        try {
+          msg = (Message) mq.get();
+        } catch (InterruptedException exc) {
+          continue;
+        }
+        if (msg.from == null) msg.from = AgentId.localId;
+        MessageConsumer cons = AgentServer.getConsumer(msg.to.getTo());
+        cons.postAndValidate(msg);
+        mq.pop();
+      }
+    } else { // JORAM_PERF_BRANCH.
     AgentServer.getTransaction().begin();
     // Suppress the processed notification from message queue ..
     qin.pop();
@@ -1165,7 +1192,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     // The transaction has committed, then validate all messages.
     Channel.validate();
     AgentServer.getTransaction().release();
-    
+    }
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ": commited");
 
