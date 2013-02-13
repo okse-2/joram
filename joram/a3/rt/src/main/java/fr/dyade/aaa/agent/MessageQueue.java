@@ -47,6 +47,9 @@ interface MessageQueue {
    * @param   item   the message to be pushed onto this queue.
    */
   public void push(Message item);
+  
+  // JORAM_PERF_BRANCH
+  public void pushAndValidate(Message item);
 
   /**
    * Removes the message at the top of this queue.
