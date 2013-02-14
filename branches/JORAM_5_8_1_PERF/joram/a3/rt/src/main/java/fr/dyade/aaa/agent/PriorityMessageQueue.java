@@ -368,7 +368,7 @@ final class PriorityMessageQueue implements MessageQueue {
    * @param index	the index of the message.
    * @return     	The message at the top of this queue.
    */
-  private Message getMessageAt(int index) {
+  public synchronized Message getMessageAt(int index) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "getMessageAt(" + index + ")");
     logmon.log(BasicLevel.DEBUG, logmsg + "data=" + data);
@@ -384,7 +384,7 @@ final class PriorityMessageQueue implements MessageQueue {
    *
    * @param index	the index of the message to remove.
    */
-  private void removeMessageAt(int index) {
+  public synchronized void removeMessageAt(int index) {
     Object o = data.remove(index);
     logmon.log(BasicLevel.DEBUG, "removed=" + o);
     if (index < highPriorityCount) {
