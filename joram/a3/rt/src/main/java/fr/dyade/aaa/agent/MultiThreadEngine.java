@@ -208,6 +208,15 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     logmon.log(BasicLevel.DEBUG, getName() + ", initialized");
   }
   
+  public String[] getWorkerInfos() {
+    String[] res = new String[workers.size()];
+    int i = 0;
+    for (EngineWorker w : workers) {
+      res[i++] = w.toString();
+    }
+    return res;
+  }
+  
   /**
    * Creates and initializes an agent.
    *
@@ -864,6 +873,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         }
         ag[i] = null;
       }
+    }
+
+    @Override
+    public String toString() {
+      return "EngineWorker [currentAgentId=" + currentAgentId + "]";
     }
     
   }
