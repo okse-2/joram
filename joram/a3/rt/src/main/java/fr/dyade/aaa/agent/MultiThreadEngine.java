@@ -482,7 +482,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   public final void push(AgentId to, Notification not) {
     EngineWorker w = getCurrentWorker();
-    if (w == null) {
+    if (w != null) {
       w.push(to, not);
     } else {
       Channel.channel.directSendTo(AgentId.localId, to, not);
@@ -491,7 +491,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   public final void push(AgentId from, AgentId to, Notification not) {
     EngineWorker w = getCurrentWorker();
-    if (w == null) {
+    if (w != null) {
       w.push(from, to, not);
     } else {
       Channel.channel.directSendTo(from, to, not);
