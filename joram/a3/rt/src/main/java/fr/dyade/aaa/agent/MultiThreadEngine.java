@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 BULL
+ * Copyright (C) 1996 - 2000 INRIA
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ */
 package fr.dyade.aaa.agent;
 
 import java.io.IOException;
@@ -6,6 +26,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -14,7 +35,7 @@ import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Queue;
 
 // JORAM_PERF_BRANCH: new engine
-public class MultiThreadEngine {
+public class MultiThreadEngine implements MessageConsumer, MultiThreadEngineMBean {
   
   public static final int DEFAULT_ENGINE_WORKER_NUMBER = 2;
   
@@ -35,7 +56,7 @@ public class MultiThreadEngine {
   private Hashtable<AgentId, Agent> agents;
   
   /** Virtual time counter use in FIFO swap-in/swap-out mechanisms. */
-  private long now = 0;
+  private AtomicLong now;
   
   /** Maximum number of memory loaded agents. */
   private int NbMaxAgents = 100;
@@ -50,7 +71,16 @@ public class MultiThreadEngine {
   /** Vector containing id's of all fixed agents. */
   private Vector<AgentId> fixedAgentIdList;
   
-  public MultiThreadEngine() {
+  /** Logical timestamp information for messages in "local" domain. */
+  private int stamp;
+
+  /** Buffer used to optimize */
+  private byte[] stampBuf;
+
+  /** True if the timestamp is modified since last save. */
+  private boolean modified;
+  
+  public MultiThreadEngine() throws Exception {
     name = "Engine#" + AgentServer.getServerId();
 
     // Get the logging monitor from current server MonologLoggerFactory
@@ -69,6 +99,12 @@ public class MultiThreadEngine {
     for (int i = 0; i < workerNumber; i++) {
       workers.add(new EngineWorker(i));
     }
+    
+    now = new AtomicLong(0);
+    
+    modified = false;
+    restore();
+    if (modified) save();
   }
   
   public String getName() {
@@ -205,7 +241,7 @@ public class MultiThreadEngine {
     agent.save();
 
     // Memorize the agent creation and ...
-    now += 1;
+    now.incrementAndGet();
     garbage(worker);
 
     agents.put(agent.getId(), agent);
@@ -255,14 +291,14 @@ public class MultiThreadEngine {
    *  when executing class specific initialization
    */
   final Agent load(AgentId id, EngineWorker worker) throws IOException, ClassNotFoundException, Exception {
-    now += 1;
+    long last = now.incrementAndGet();
 
     Agent ag = (Agent) agents.get(id);
     if (ag == null)  {
       ag = reload(id, worker);
       garbage(worker);
     }
-    ag.last = now;
+    ag.last = last;
 
     return ag;
   }
@@ -338,9 +374,9 @@ public class MultiThreadEngine {
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
-                 getName() + ", garbage: " + agents.size() + '/' + NbMaxAgents + '+' + fixedAgentIdList.size() + ' ' + now);
+                 getName() + ", garbage: " + agents.size() + '/' + NbMaxAgents + '+' + fixedAgentIdList.size() + ' ' + now.get());
     
-    long deadline = now - NbMaxAgents;
+    long deadline = now.get() - NbMaxAgents;
     Agent[] ag = new Agent[agents.size()];
     int i = 0;
     for (Enumeration<Agent> e = agents.elements() ; e.hasMoreElements() ;) {
@@ -405,6 +441,25 @@ public class MultiThreadEngine {
       Channel.channel.directSendTo(from, to, not);
     }
   }
+  
+  /**
+   *  Returns a string representation of the specified agent. If the agent
+   * is not present it is loaded in memory, be careful it is not initialized
+   * (agentInitialize) nor cached in agents vector.
+   *
+   * @param id  The agent's unique identification.
+   * @return  A string representation of specified agent.
+   */
+  public String dumpAgent(AgentId id) throws IOException, ClassNotFoundException {
+    Agent ag = (Agent) agents.get(id);
+    if (ag == null) {
+      ag = Agent.load(id);
+      if (ag == null) {
+        return id.toString() + " unknown";
+      }
+    }
+    return ag.toString();
+  } 
   
   class EngineWorker extends Daemon {
     
@@ -687,6 +742,231 @@ public class MultiThreadEngine {
       }
     }
     
+  }
+  
+  // MBean methods
+
+  /**
+   * Returns the maximum number of agents loaded in memory.
+   *
+   * @return  the maximum number of agents loaded in memory
+   */
+  public int getNbMaxAgents() {
+    return NbMaxAgents;
+  }
+
+  /**
+   * Returns the number of agents actually loaded in memory.
+   *
+   * @return  the maximum number of agents actually loaded in memory
+   */
+  public int getNbAgents() {
+    return agents.size();
+  }
+
+  public boolean isRunning() {
+    return isStarted();
+  }
+
+  /**
+   * Returns the number of agent's reaction since last boot.
+   *
+   * @return  the number of agent's reaction since last boot
+   */
+  public long getNbReactions() {
+    return now.get();
+  }
+
+  public int getNbMessages() {
+    return stamp;
+  }
+
+  public int getNbWaitingMessages() {
+    return qin.size();
+  }
+
+  /**
+   * Returns the number of fixed agents.
+   *
+   * @return  the number of fixed agents
+   */
+  public int getNbFixedAgents() {
+    return fixedAgentIdList.size();
+  }
+
+  /**
+   * Sets the maximum number of agents that can be loaded simultaneously
+   * in memory.
+   *
+   * @param NbMaxAgents  the maximum number of agents
+   */
+  public void setNbMaxAgents(int NbMaxAgents) {
+    this.NbMaxAgents = NbMaxAgents;
+  }
+
+  /**
+   *  Returns a string representation of the specified agent.
+   *
+   * @param id  The string representation of the agent's unique identification.
+   * @return  A string representation of the specified agent.
+   * @see   Engine#dumpAgent(AgentId)
+   */
+  public String dumpAgent(String id) throws Exception {
+    return dumpAgent(AgentId.fromString(id));
+  }
+
+  /**
+   * Returns true if the agent profiling is on.
+   * 
+   * @see fr.dyade.aaa.agent.EngineMBean#isAgentProfiling()
+   */
+  public boolean isAgentProfiling() {
+    return false;
+  }
+
+  public void setAgentProfiling(boolean agentProfiling) {
+    
+  }
+
+  public long getReactTime() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  public void resetReactTime() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public long getCommitTime() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  public void resetCommitTime() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public void resetTimer() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public float getAverageLoad1() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  public float getAverageLoad5() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  public float getAverageLoad15() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+  
+  // !!!
+  // Consumer methods
+  //!!!
+
+  public String getDomainName() {
+    return "engine";
+  }
+
+  /**
+   * Insert a message in the <code>MessageQueue</code>.
+   * This method is used during initialization to restore the component
+   * state from persistent storage.
+   *
+   * @param msg   the message
+   */
+  public void insert(Message msg) {
+    qin.insert(msg);
+  }
+
+  /**
+   * Saves logical clock information to persistent storage.
+   */
+  public void save() throws IOException {
+    if (modified) {
+      stampBuf[0] = (byte)((stamp >>> 24) & 0xFF);
+      stampBuf[1] = (byte)((stamp >>> 16) & 0xFF);
+      stampBuf[2] = (byte)((stamp >>>  8) & 0xFF);
+      stampBuf[3] = (byte)(stamp & 0xFF);
+      AgentServer.getTransaction().saveByteArray(stampBuf, getName());
+      modified = false;
+    }
+  }
+
+  /**
+   * Restores logical clock information from persistent storage.
+   */
+  public void restore() throws Exception {
+    stampBuf = AgentServer.getTransaction().loadByteArray(getName());
+    if (stampBuf == null) {
+      stamp = 0;
+      stampBuf = new byte[4];
+      modified = true;
+    } else {
+      stamp = ((stampBuf[0] & 0xFF) << 24) +
+      ((stampBuf[1] & 0xFF) << 16) +
+      ((stampBuf[2] & 0xFF) <<  8) +
+      (stampBuf[3] & 0xFF);
+      modified = false;
+    }
+  }
+
+  /**
+   *  Adds a message in "ready to deliver" list. This method allocates a
+   * new time stamp to the message ; be Careful, changing the stamp imply
+   * the filename change too.
+   */
+  public void post(Message msg) throws Exception {
+    stamp(msg);
+    msg.save();
+    qin.push(msg);
+  }
+
+  // JORAM_PERF_BRANCH
+  public void postAndValidate(Message msg) throws Exception {
+    stamp(msg);
+    msg.save();
+    qin.pushAndValidate(msg);
+  }
+  
+  private void stamp(Message msg) {
+    if (msg.isPersistent())
+      // If the message is transient there is no need to save the stamp counter.
+      modified = true;
+    msg.source = AgentServer.getServerId();
+    msg.dest = AgentServer.getServerId();
+    msg.stamp = ++stamp;
+  }
+
+  /**
+   * Validates all messages pushed in queue during transaction session.
+   */
+  public void validate() {
+    qin.validate();
+  }
+
+  /**
+   * This operation always throws an IllegalStateException.
+   */
+  public void delete() throws IllegalStateException {
+    throw new IllegalStateException();
+  }
+
+  /**
+   * Get this engine's <code>MessageQueue</code> qin.
+   *
+   * @return this <code>Engine</code>'s queue.
+   */
+  public MessageQueue getQueue() {
+    return qin;
   }
 
 }

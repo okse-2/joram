@@ -32,6 +32,8 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.common.AverageLoadTask;
 import fr.dyade.aaa.common.Queue;
 
+// JORAM_PERF_BRANCH
+
 class EngineThread extends Thread {
   SingleThreadEngine engine = null;
 
@@ -92,7 +94,7 @@ class EngineThread extends Thread {
  * stops the agent server.
  * </ul>
  */
-class SingleThreadEngine implements Engine, Runnable, MessageConsumer, EngineMBean {
+class SingleThreadEngine implements Engine, Runnable, MessageConsumer, SingleThreadEngineMBean {
   /**
    * Queue of messages to be delivered to local agents.
    */ 
