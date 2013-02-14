@@ -439,6 +439,10 @@ final class MessageVector implements MessageQueue {
   public int size() {
     return count;
   }
+  
+  public int getValidated() {
+    return validated;
+  }
 
   /**
    * Returns a string representation of this <code>MessageVector</code>

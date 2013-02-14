@@ -358,13 +358,26 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   private Agent load(AgentId id, EngineWorker worker) throws IOException, ClassNotFoundException, Exception {
     long last = now.incrementAndGet();
 
-    Agent ag = (Agent) agents.get(id);
-    if (ag == null)  {
-      ag = reload(id, worker);
+    Agent ag;
+    boolean reloaded;
+    synchronized (agents) {
+      ag = (Agent) agents.get(id);
+      if (ag == null)  {
+        ag = Agent.load(id);
+        if (ag == null) {
+          throw new UnknownAgentException();
+        } else {
+          reloaded = true;
+        }
+      } else {
+        reloaded = false;
+      }
+    }
+    if (reloaded) {
+      reload(ag, worker);
       garbage(worker);
     }
     ag.last = last;
-
     return ag;
   }
   
@@ -382,10 +395,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
    * @exception Exception
    *  unspecialized exception
    */
-  private Agent reload(AgentId id, EngineWorker worker)
+  private void reload(Agent ag, EngineWorker worker)
   throws IOException, ClassNotFoundException, Exception {
-    Agent ag = null;
-    if ((ag = Agent.load(id)) != null) {
       Agent old;
       if (worker != null) {
         old = worker.agent;
@@ -419,11 +430,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
                    getName() + "Agent" + ag.id + " [" + ag.name + "] loaded");
-    } else {
-      throw new UnknownAgentException();
-    }
-
-    return ag;
   }
   
   /**
@@ -442,10 +448,14 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                  getName() + ", garbage: " + agents.size() + '/' + NbMaxAgents + '+' + fixedAgentIdList.size() + ' ' + now.get());
     
     long deadline = now.get() - NbMaxAgents;
-    Agent[] ag = new Agent[agents.size()];
+    
     int i = 0;
-    for (Enumeration<Agent> e = agents.elements() ; e.hasMoreElements() ;) {
-      ag[i++] = e.nextElement();
+    Agent[] ag;
+    synchronized (agents) {
+      ag = new Agent[agents.size()];
+      for (Enumeration<Agent> e = agents.elements() ; e.hasMoreElements() ;) {
+        ag[i++] = e.nextElement();
+      }
     }
     
     Agent old;
@@ -557,10 +567,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
 
     public void run() {
       try {
-        long start = 0L;
-        long end = 0L;
-        boolean profiling = false;
-        
         main_loop:
           while (running) {
             agent = null;
@@ -574,9 +580,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                   if (isAllowedToReact(msg.to)) {
                     qin.pop();
                   } else {
-                    if (qin.size() > 1) {
+                    if (qin.getValidated() > 1) {
                       loop:
-                      for (int i = 1; i < qin.size(); i++) {
+                      for (int i = 1; i < qin.getValidated(); i++) {
                         msg = qin.getMessageAt(i);
                         if (isAllowedToReact(msg.to)) {
                           qin.removeMessageAt(i);

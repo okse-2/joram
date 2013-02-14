@@ -421,4 +421,8 @@ final class PriorityMessageQueue implements MessageQueue {
     return strbuf.toString();
   }
 
+  public int getValidated() {
+    return validated;
+  }
+
 }

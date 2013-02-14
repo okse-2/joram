@@ -106,4 +106,7 @@ interface MessageQueue {
   
   //JORAM_PERF_BRANCH
   public void removeMessageAt(int index);
+  
+  //JORAM_PERF_BRANCH
+  public int getValidated();
 }
