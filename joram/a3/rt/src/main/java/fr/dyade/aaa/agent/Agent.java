@@ -652,11 +652,15 @@ public abstract class Agent implements AgentMBean, Serializable {
 //     }
 
 //  if (Class.EngineThread.isAssignable(Thread.currentThread())) {
-    if (Thread.currentThread() == AgentServer.engine.thread) {
+    // JORAM_PERF_BRANCH
+    AgentServer.engine.push(getId(), to, not);
+    /*
+    if (AgentServer.engine.isEngineThread()) {
       AgentServer.engine.push(getId(), to, not);
     } else {
       Channel.channel.directSendTo(getId(), to, not);
     }
+    */
   }
 
   /**

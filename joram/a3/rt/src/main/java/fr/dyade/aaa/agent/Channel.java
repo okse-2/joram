@@ -101,11 +101,16 @@ public class Channel {
 //     }
 
 //  if (Class.EngineThread.isAssignable(Thread.currentThread())) {
-    if (Thread.currentThread() == AgentServer.engine.thread) {
+    
+    // JORAM_PERF_BRANCH
+    AgentServer.engine.push(to, not);
+    /* JORAM_PERF_BRANCH
+    if (AgentServer.engine.isEngineThread()) {
       AgentServer.engine.push(AgentServer.engine.agent.getId(), to, not);
     } else {
       channel.directSendTo(AgentId.localId, to, not);
     }
+    */
   }
 
   /**

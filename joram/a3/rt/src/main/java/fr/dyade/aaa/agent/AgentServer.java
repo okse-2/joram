@@ -239,9 +239,17 @@ public final class AgentServer {
   /**
    * Returns the agent server engine thread.
    */
+  // JORAM_PERF_BRANCH
+  public static boolean isEngineThread() {
+    return engine.isEngineThread();
+  }
+  
+  /**
+   * Returns the agent server engine thread.
+   * JORAM_PERF_BRANCH
   public static Thread getEngineThread() {
     return engine.thread;
-  }
+  }*/
 
   public static void resetEngineAverageLoad() {
     getEngine().resetAverageLoad();
@@ -692,12 +700,27 @@ public final class AgentServer {
     
     return;
   }
+  
+  /**
+   * Creates a new instance of Engine (real class depends of server type).
+   *
+   * @return    the corresponding <code>engine</code>'s instance.
+   */
+  // JORAM_PERF_BRANCH
+  static Engine newEngineInstance() throws Exception {
+    String cname = "fr.dyade.aaa.agent.SingleThreadEngine";
+    cname = AgentServer.getProperty("Engine", cname);
+
+    Class<?> eclass = Class.forName(cname);
+    return (SingleThreadEngine) eclass.newInstance();
+  }
 
   private static void createConsumers(A3CMLServer root) throws Exception {
     consumers = new Hashtable<String, MessageConsumer>();
 
     // Creates the local MessageConsumer: the Engine.
-    engine = Engine.newInstance();
+    // JORAM_PERF_BRANCH
+    engine = newEngineInstance();
     addConsumer("local", engine);
 
     // Search all directly accessible domains.
