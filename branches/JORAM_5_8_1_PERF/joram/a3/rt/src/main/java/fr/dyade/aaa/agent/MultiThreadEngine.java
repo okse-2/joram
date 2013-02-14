@@ -556,7 +556,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
             try {
               synchronized (qin) {
                 msg = qin.get(timeout);
-                qin.pop();
+                if (msg != null) {
+                  qin.pop();
+                }
               }
               if (msg == null) {
                 onTimeOut();
@@ -718,9 +720,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         }
       } else { // JORAM_PERF_BRANCH.
         AgentServer.getTransaction().begin();
-        // Suppress the processed notification from message queue ..
-        qin.pop();
-        // .. then deletes it ..
+        // Deletes the message
         msg.delete();
         // .. and frees it.
         msg.free();
