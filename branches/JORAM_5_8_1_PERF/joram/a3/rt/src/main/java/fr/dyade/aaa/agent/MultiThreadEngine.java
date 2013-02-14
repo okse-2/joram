@@ -35,7 +35,7 @@ import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Queue;
 
 // JORAM_PERF_BRANCH: new engine
-public class MultiThreadEngine implements MessageConsumer, MultiThreadEngineMBean {
+public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   public static final int DEFAULT_ENGINE_WORKER_NUMBER = 2;
   
@@ -219,6 +219,62 @@ public class MultiThreadEngine implements MessageConsumer, MultiThreadEngineMBea
     agent.agentInitialize(true);
     createAgent(agent, worker);
   }
+  
+  public boolean isEngineThread() {
+    for (EngineWorker w : workers) {
+      if (w.isCurrentThread()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public void resetAverageLoad() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /**
+   * Deletes an agent.
+   *
+   * @param agent agent to delete
+   */
+  public void deleteAgent(AgentId from) throws Exception {
+    EngineWorker worker = getCurrentWorker();
+    Agent ag;
+    Agent old = worker.agent;
+    try {
+      ag = load(from, worker);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + ", delete Agent" + ag.id + " [" + ag.name + "]");
+      AgentServer.getTransaction().delete(ag.id.toString());
+    } catch (UnknownAgentException exc) {
+      logmon.log(BasicLevel.ERROR,
+                 getName() +
+                 ", can't delete unknown Agent" + from);
+      throw new Exception("Can't delete unknown Agent" + from);
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR,
+                 getName() + ", can't delete Agent" + from, exc);
+      throw new Exception("Can't delete Agent" + from);
+    }
+    if (ag.isFixed())
+      removeFixedAgentId(ag.id);
+    agents.remove(ag.getId());
+    try {
+      // Set current agent running in order to allow from field fixed
+      // for sendTo during agentFinalize (We assume that only Engine
+      // use this method).
+      worker.agent = ag;
+      ag.agentFinalize(true);
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR,
+                 "Agent" + ag.id + " [" + ag.name + "] error during agentFinalize", exc);
+    } finally {
+      worker.agent = old;
+    }
+  }
 
   /**
    * Creates and initializes an agent.
@@ -290,7 +346,7 @@ public class MultiThreadEngine implements MessageConsumer, MultiThreadEngineMBea
    * @exception Exception
    *  when executing class specific initialization
    */
-  final Agent load(AgentId id, EngineWorker worker) throws IOException, ClassNotFoundException, Exception {
+  private Agent load(AgentId id, EngineWorker worker) throws IOException, ClassNotFoundException, Exception {
     long last = now.incrementAndGet();
 
     Agent ag = (Agent) agents.get(id);
@@ -317,7 +373,7 @@ public class MultiThreadEngine implements MessageConsumer, MultiThreadEngineMBea
    * @exception Exception
    *  unspecialized exception
    */
-  final Agent reload(AgentId id, EngineWorker worker)
+  private Agent reload(AgentId id, EngineWorker worker)
   throws IOException, ClassNotFoundException, Exception {
     Agent ag = null;
     if ((ag = Agent.load(id)) != null) {
@@ -365,7 +421,7 @@ public class MultiThreadEngine implements MessageConsumer, MultiThreadEngineMBea
    *  The <code>garbage</code> method should be called regularly , to swap out
    * from memory all the agents which have not been accessed for a time.
    */
-  void garbage(EngineWorker worker) {
+  private void garbage(EngineWorker worker) {
     if (! AgentServer.getTransaction().isPersistent())
       return;
     
