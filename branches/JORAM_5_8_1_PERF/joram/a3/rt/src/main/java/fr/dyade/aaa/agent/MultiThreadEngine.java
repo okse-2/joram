@@ -388,6 +388,24 @@ public class MultiThreadEngine {
       logmon.log(BasicLevel.DEBUG, getName() + ", garbage: " + agents.size());
   }
   
+  public final void push(AgentId to, Notification not) {
+    EngineWorker w = getCurrentWorker();
+    if (w == null) {
+      w.push(to, not);
+    } else {
+      Channel.channel.directSendTo(AgentId.localId, to, not);
+    }
+  }
+  
+  public final void push(AgentId from, AgentId to, Notification not) {
+    EngineWorker w = getCurrentWorker();
+    if (w == null) {
+      w.push(from, to, not);
+    } else {
+      Channel.channel.directSendTo(from, to, not);
+    }
+  }
+  
   class EngineWorker extends Daemon {
     
     private Queue mq;
@@ -533,6 +551,11 @@ public class MultiThreadEngine {
     }
     
     protected void onTimeOut() throws Exception {}
+    
+    final void push(AgentId to, Notification not) {
+      AgentId from = agent.getId();
+      push(from, to, not);
+    }
     
     /**
      * Push a new message in temporary queue until the end of current reaction.
