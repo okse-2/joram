@@ -712,7 +712,7 @@ public final class AgentServer {
     cname = AgentServer.getProperty("Engine", cname);
 
     Class<?> eclass = Class.forName(cname);
-    return (SingleThreadEngine) eclass.newInstance();
+    return (Engine) eclass.newInstance();
   }
 
   private static void createConsumers(A3CMLServer root) throws Exception {
