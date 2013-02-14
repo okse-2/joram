@@ -228,6 +228,15 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
     return false;
   }
+  
+  public boolean isAllowedToReact(AgentId id) {
+    for (EngineWorker w : workers) {
+      if (id.equals(w.currentAgentId)) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   public void resetAverageLoad() {
     // TODO Auto-generated method stub
@@ -515,7 +524,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       }
     }
     return ag.toString();
-  } 
+  }
   
   class EngineWorker extends Daemon {
     
@@ -524,12 +533,17 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     /**
      * The current agent running.
      */ 
-    Agent agent = null;
+    private Agent agent;
+    
+    /**
+     * Synchronized with Qin
+     */
+    private AgentId currentAgentId;
 
     /**
      * The message in progress.
      */ 
-    Message msg = null;
+    private Message msg;
     
     EngineWorker(int i) {
       super("MultiThreadEngineWorker#" + i, 
@@ -557,7 +571,30 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
               synchronized (qin) {
                 msg = qin.get(timeout);
                 if (msg != null) {
-                  qin.pop();
+                  if (isAllowedToReact(msg.to)) {
+                    qin.pop();
+                  } else {
+                    if (qin.size() > 1) {
+                      loop:
+                      for (int i = 1; i < qin.size(); i++) {
+                        msg = qin.getMessageAt(i);
+                        if (isAllowedToReact(msg.to)) {
+                          qin.removeMessageAt(i);
+                          break loop;
+                        } else {
+                          msg = null;
+                        }
+                      }
+                    } else {
+                      msg = null;
+                    }
+                  }
+                  if (msg != null) {
+                    // Now the agent is not allowed to react with another engine worker
+                    currentAgentId = msg.to;
+                  } else {
+                    qin.wait();
+                  }
                 }
               }
               if (msg == null) {
@@ -645,6 +682,12 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                 break main_loop;
               }
             }
+            
+            synchronized (qin) {
+              // Now the agent can react with another engine worker
+              currentAgentId = null;
+              qin.notify();
+            }
 
             // Commit all changes then continue.
             commit();
@@ -695,7 +738,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
      * <li>then commit the transaction to validate all changes.
      * </ul>
      */
-    void commit() throws Exception {
+    private void commit() throws Exception {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ": commit()");
       

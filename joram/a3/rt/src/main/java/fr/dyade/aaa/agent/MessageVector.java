@@ -377,7 +377,8 @@ final class MessageVector implements MessageQueue {
    * @param index	the index of the message.
    * @return     	The message at the top of this queue.
    */
-  private Message getMessageAt(int index) {
+  //JORAM_PERF_BRANCH
+  public synchronized Message getMessageAt(int index) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "getMessageAt(" + index + ")");
 
@@ -394,7 +395,8 @@ final class MessageVector implements MessageQueue {
    *
    * @param index	the index of the message to remove.
    */
-  private void removeMessageAt(int index) {
+  //JORAM_PERF_BRANCH
+  public synchronized void removeMessageAt(int index) {
     if (index == 0) {
       // It is the first element, just move the start of the list.
       data[first] = null; /* let gc do its work */
