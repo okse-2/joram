@@ -80,6 +80,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   /** True if the timestamp is modified since last save. */
   private boolean modified;
   
+  private List<AgentId> stillNotAliveAgents;
+  
   public MultiThreadEngine() throws Exception {
     name = "Engine#" + AgentServer.getServerId();
 
@@ -101,6 +103,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
     
     now = new AtomicLong(0);
+    
+    stillNotAliveAgents = new ArrayList<AgentId>();
     
     modified = false;
     restore();
@@ -232,6 +236,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   public boolean isAllowedToReact(AgentId id) {
     for (EngineWorker w : workers) {
       if (id.equals(w.currentAgentId)) {
+        return false;
+      }
+    }
+    for (AgentId notAlive : stillNotAliveAgents) {
+      if (id.equals(notAlive)) {
         return false;
       }
     }
@@ -598,6 +607,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                   if (msg != null) {
                     // Now the agent is not allowed to react with another engine worker
                     currentAgentId = msg.to;
+                    // Check if the notification is an agent create request
+                    if (msg.not instanceof AgentCreateRequest) {
+                      AgentCreateRequest acr = (AgentCreateRequest) msg.not;
+                      stillNotAliveAgents.add(acr.deploy);
+                    }
                   } else {
                     qin.wait();
                   }
@@ -692,6 +706,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
             synchronized (qin) {
               // Now the agent can react with another engine worker
               currentAgentId = null;
+              // Now the created agent is alive
+              if (msg.not instanceof AgentCreateRequest) {
+                AgentCreateRequest acr = (AgentCreateRequest) msg.not;
+                stillNotAliveAgents.remove(acr.deploy);
+              }
               qin.notify();
             }
 
