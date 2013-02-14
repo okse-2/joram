@@ -96,7 +96,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     
     started = false;
     
-    int workerNumber = DEFAULT_ENGINE_WORKER_NUMBER;
+    int workerNumber = AgentServer.getInteger("EngineWorkerNumber", DEFAULT_ENGINE_WORKER_NUMBER).intValue();;
     workers = new ArrayList<MultiThreadEngine.EngineWorker>(workerNumber);
     for (int i = 0; i < workerNumber; i++) {
       workers.add(new EngineWorker(i));
