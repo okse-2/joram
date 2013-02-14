@@ -133,7 +133,8 @@ final class MessageVector implements MessageQueue {
     
     Message item = getMessageAt(0);
     removeMessageAt(0);
-    validated -= 1;
+    // JORAM_PERF_BRANCH (moved in 'removeMessageAt')
+    //validated -= 1;
 
     return item;
   }
@@ -264,7 +265,8 @@ final class MessageVector implements MessageQueue {
                      logmsg + "removeMessage #" + msg.getStamp() + " -> " + i);
 
         removeMessageAt(i);
-        validated -= 1;
+        // JORAM_PERF_BRANCH (moved in 'removeMessageAt')
+        //validated -= 1;
         return;
       }
     }
@@ -295,7 +297,8 @@ final class MessageVector implements MessageQueue {
     for (int j=0; j<i; j++) {
       removeMessageAt(0);
     }
-    validated -= i;
+    // JORAM_PERF_BRANCH (moved in 'removeMessageAt')
+    // validated -= i;
     
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "remove #" + stamp + " ->" +i);
@@ -321,7 +324,8 @@ final class MessageVector implements MessageQueue {
           (msg.not.expiration > 0) &&
           (currentTimeMillis >= msg.not.expiration)) {
         removeMessageAt(i);
-        validated -= 1;
+        // JORAM_PERF_BRANCH (moved in 'removeMessageAt')
+        //validated -= 1;
     
         if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, logmsg + "remove #" + msg.getStamp());
@@ -422,6 +426,10 @@ final class MessageVector implements MessageQueue {
 
     // Decrease the counter
     count -= 1;
+    // JORAM_PERF_BRANCH
+    if (index < validated) {
+      validated -=1;
+    }
     // If there is no more element, moves the empty list to the beginning of
     // the vector.
     if (count == 0) first = 0;
