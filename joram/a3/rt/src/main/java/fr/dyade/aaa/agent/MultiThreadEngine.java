@@ -598,11 +598,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
     
     public void execute() {
-      synchronized (qin) {
-        if (! running) {
-          running = true;
-          executorService.execute(this);
-        }
+      if (!running) {
+        running = true;
+        executorService.execute(this);
       }
     }
 
@@ -1054,8 +1052,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     msg.save();
     //qin.pushAndValidate(msg);
     AgentContext ctx = getAgentContext(msg.to);
-    ctx.getWorker().getQin().pushAndValidate(msg);
-    execute(ctx);
+    MessageQueue qin = ctx.getWorker().getQin();
+    synchronized (qin) {
+      qin.pushAndValidate(msg);
+      execute(ctx);
+    }
   }
   
   private void execute(AgentContext ctx) {
@@ -1089,8 +1090,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       logmon.log(BasicLevel.DEBUG, getName() + " validate");
     for (Enumeration<AgentContext> e = agents.elements() ; e.hasMoreElements() ;) {
       AgentContext ctx = e.nextElement();
-      ctx.getWorker().getQin().validate();
-      execute(ctx);
+      MessageQueue qin = ctx.getWorker().getQin();
+      synchronized (qin) {
+        ctx.getWorker().getQin().validate();
+        execute(ctx);
+      }
     }
   }
 
