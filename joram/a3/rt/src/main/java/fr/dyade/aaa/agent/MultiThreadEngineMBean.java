@@ -22,6 +22,6 @@ package fr.dyade.aaa.agent;
 
 public interface MultiThreadEngineMBean extends EngineMBean {
 
-  String[] getWorkerInfos();
+  //String[] getWorkerInfos();
   
 }

@@ -26,12 +26,14 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Queue;
 
 // JORAM_PERF_BRANCH: new engine
@@ -48,12 +50,12 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   /**
    * The threads of this engine.
    */ 
-  private List<EngineWorker> workers;
+  //private List<EngineWorker> workers;
   
   /** This table is used to maintain a list of agents already in memory
    * using the AgentId as primary key.
    */
-  private Hashtable<AgentId, Agent> agents;
+  private Hashtable<AgentId, AgentContext> agents;
   
   /** Virtual time counter use in FIFO swap-in/swap-out mechanisms. */
   private AtomicLong now;
@@ -61,12 +63,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   /** Maximum number of memory loaded agents. */
   private int NbMaxAgents = 100;
   
-  protected long timeout = Long.MAX_VALUE;
+  //private long timeout = Long.MAX_VALUE;
   
-  /**
-   * Queue of messages to be delivered to local agents.
-   */ 
-  protected MessageQueue qin;
+  private ExecutorService executorService;
   
   /** Vector containing id's of all fixed agents. */
   private Vector<AgentId> fixedAgentIdList;
@@ -92,15 +91,18 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       logmon.log(BasicLevel.DEBUG, getName() + " created [" + getClass().getName() + "].");
 
     NbMaxAgents = AgentServer.getInteger("NbMaxAgents", NbMaxAgents).intValue();
-    qin = new MessageVector(name, AgentServer.getTransaction().isPersistent());
     
     started = false;
     
-    int workerNumber = AgentServer.getInteger("EngineWorkerNumber", DEFAULT_ENGINE_WORKER_NUMBER).intValue();;
+    int workerNumber = AgentServer.getInteger("EngineWorkerNumber", DEFAULT_ENGINE_WORKER_NUMBER).intValue();
+    executorService = Executors.newFixedThreadPool(workerNumber, new EngineThreadFactory());
+    
+    /*
     workers = new ArrayList<MultiThreadEngine.EngineWorker>(workerNumber);
     for (int i = 0; i < workerNumber; i++) {
       workers.add(new EngineWorker(i));
     }
+    */
     
     now = new AtomicLong(0);
     
@@ -129,7 +131,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
    * Causes this engine to begin execution.
    *
    * @see stop
-   */
+   *
   public synchronized void start() {
     if (started) return;
     if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -140,13 +142,13 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     started = true;
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + " started.");
-  }
+  }*/
   
   /**
    * Forces the engine to stop executing.
    *
    * @see start
-   */
+   *
   public synchronized void stop() {
     if (started) {
       started = false;
@@ -154,21 +156,29 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         w.stop();
       }
     }
-  }
+  }*/
   
   public EngineWorker getCurrentWorker() {
-    for (EngineWorker w : workers) {
-      if (w.isCurrentThread()) {
-        return w;
-      }
+    Thread currentThread = Thread.currentThread();
+    if (currentThread instanceof EngineThread) {
+      EngineThread engineThread = (EngineThread) currentThread;
+      return engineThread.getEngineWorker();
     }
     return null;
+  }
+  
+  public boolean isEngineThread() {
+    Thread currentThread = Thread.currentThread();
+    if (currentThread instanceof EngineThread) {
+      return true;
+    }
+    return false;
   }
   
   public void init() throws Exception {
     // Before any agent may be used, the environment, including the hash table,
     // must be initialized.
-    agents = new Hashtable<AgentId, Agent>();
+    agents = new Hashtable<AgentId, AgentContext>();
     try {
       // Creates or initializes AgentFactory, then loads and initializes
       // all fixed agents.
@@ -207,7 +217,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
 
     logmon.log(BasicLevel.DEBUG, getName() + ", initialized");
   }
-  
+  /*
   public String[] getWorkerInfos() {
     String[] res = new String[workers.size()];
     int i = 0;
@@ -216,7 +226,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
     return res;
   }
-  
+  */
   /**
    * Creates and initializes an agent.
    *
@@ -232,16 +242,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     agent.agentInitialize(true);
     createAgent(agent, worker);
   }
-  
-  public boolean isEngineThread() {
-    for (EngineWorker w : workers) {
-      if (w.isCurrentThread()) {
-        return true;
-      }
-    }
-    return false;
-  }
-  
+  /*
   public boolean isAllowedToReact(AgentId id) {
     for (EngineWorker w : workers) {
       if (id.equals(w.currentAgentId)) {
@@ -255,7 +256,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
     return true;
   }
-
+*/
   public void resetAverageLoad() {
     // TODO Auto-generated method stub
     
@@ -325,9 +326,14 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
 
     // Memorize the agent creation and ...
     now.incrementAndGet();
-    garbage(worker);
+    //garbage(worker);
 
-    agents.put(agent.getId(), agent);
+    AgentContext agentContext;
+    synchronized (agents) {
+      agentContext = getAgentContext(agent.getId());
+      agentContext.setAgent(agent);
+    }
+    execute(agentContext);
   }
   
   /**
@@ -379,12 +385,14 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     Agent ag;
     boolean reloaded;
     synchronized (agents) {
-      ag = (Agent) agents.get(id);
+      AgentContext ctx = getAgentContext(id);
+      ag = ctx.getAgent();
       if (ag == null)  {
         ag = Agent.load(id);
         if (ag == null) {
           throw new UnknownAgentException();
         } else {
+          ctx.setAgent(ag);
           reloaded = true;
         }
       } else {
@@ -393,7 +401,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
     if (reloaded) {
       reload(ag, worker);
-      garbage(worker);
+      //garbage(worker);
     }
     ag.last = last;
     return ag;
@@ -444,7 +452,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       if (ag.logmon == null)
         ag.logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
                                     ".#" + AgentServer.getServerId());
-      agents.put(ag.id, ag);
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
                    getName() + "Agent" + ag.id + " [" + ag.name + "] loaded");
@@ -468,11 +475,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     long deadline = now.get() - NbMaxAgents;
     
     int i = 0;
-    Agent[] ag;
+    AgentContext[] agentContexts;
     synchronized (agents) {
-      ag = new Agent[agents.size()];
-      for (Enumeration<Agent> e = agents.elements() ; e.hasMoreElements() ;) {
-        ag[i++] = e.nextElement();
+      agentContexts = new AgentContext[agents.size()];
+      for (Enumeration<AgentContext> e = agents.elements() ; e.hasMoreElements() ;) {
+        agentContexts[i++] = e.nextElement();
       }
     }
     
@@ -484,27 +491,32 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
     try {
       for (i--; i>=0; i--) {
-        if ((ag[i].last <= deadline) && (!ag[i].fixed)) {
+        AgentContext agentContext = agentContexts[i];
+        if (agentContext.getAgent() != null && 
+            (agentContext.getAgent().last <= deadline) && 
+            (! agentContext.getAgent().fixed)) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
-                       "Agent" + ag[i].id + " [" + ag[i].name + "] garbaged");
-          agents.remove(ag[i].id);
+                       "Agent" + agentContext.getAgent().id + 
+                       " [" + agentContext.getAgent().name + "] garbaged");
+          //agents.remove(ag[i].id);
           try {
             // Set current agent running in order to allow from field fixed
             // for sendTo during agentFinalize (We assume that only Engine
             // use this method).
             if (worker != null) {
-              worker.agent = ag[i];
+              worker.agent = agentContext.getAgent();
             }
-            ag[i].agentFinalize(false);
+            agentContext.getAgent().agentFinalize(false);
             if (worker != null) {
               worker.agent = old;
             }
           } catch (Exception exc) {
             logmon.log(BasicLevel.ERROR,
-                       "Agent" + ag[i].id + " [" + ag[i].name + "] error during agentFinalize", exc);
+                       "Agent" + agentContext.getAgent().id + 
+                       " [" + agentContext.getAgent().name + "] error during agentFinalize", exc);
           }
-          ag[i] = null;
+          agentContext.setAgent(null);
         }
       }
     } finally {
@@ -544,7 +556,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
    * @return  A string representation of specified agent.
    */
   public String dumpAgent(AgentId id) throws IOException, ClassNotFoundException {
-    Agent ag = (Agent) agents.get(id);
+    Agent ag = getAgentContext(id).getAgent();
     if (ag == null) {
       ag = Agent.load(id);
       if (ag == null) {
@@ -554,7 +566,12 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     return ag.toString();
   }
   
-  class EngineWorker extends Daemon {
+  class EngineWorker implements Runnable {
+    
+    /**
+     * Queue of messages to be delivered to local agents.
+     */ 
+    private MessageQueue qin;
     
     private Queue mq;
     
@@ -565,35 +582,61 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     
     /**
      * Synchronized with Qin
-     */
-    private AgentId currentAgentId;
+     *
+    private AgentId currentAgentId;*/
 
     /**
      * The message in progress.
      */ 
     private Message msg;
     
-    EngineWorker(int i) {
-      super("MultiThreadEngineWorker#" + i, 
-          MultiThreadEngine.this.logmon);
+    private boolean running;
+    
+    EngineWorker(AgentId agentId) {
+      //qin = new MessageVector(agentId.toString(), AgentServer.getTransaction().isPersistent());
+      qin = new MessageVector(agentId.toString(), false);
       mq = new Queue();
     }
+     
+    public MessageQueue getQin() {
+      return qin;
+    }
+    
+    public void execute() {
+      synchronized (qin) {
+        if (! running) {
+          running = true;
+          executorService.execute(this);
+        }
+      }
+    }
 
+    /*
     protected void close() {}
 
     protected void shutdown() {}
-
+*/
     public void run() {
+      Thread currentThread = Thread.currentThread();
+      EngineThread engineThread = (EngineThread) currentThread;
+      engineThread.setEngineWorker(this);
       try {
         main_loop:
-          while (running) {
+          while (true) {
             agent = null;
-            canStop = true;
+            //canStop = true;
 
             // Get a notification, then execute the right reaction.
-            try {
+            // try {
               synchronized (qin) {
-                msg = qin.get(timeout);
+                if (qin.getValidated() > 0) {
+                  msg = qin.getMessageAt(0);
+                  qin.removeMessageAt(0);
+                } else {
+                  msg = null;
+                }
+                
+                /*
                 if (msg != null) {
                   if (isAllowedToReact(msg.to)) {
                     qin.pop();
@@ -625,17 +668,19 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                     qin.wait();
                   }
                 }
+                */
               }
               if (msg == null) {
-                onTimeOut();
-                continue;
+                running = false;
+                return;
               }
+            /*
             } catch (InterruptedException exc) {
               continue;
-            }
+            }*/
 
-            canStop = false;
-            if (! running) break;
+            //canStop = false;
+            //if (! running) break;
 
             if ((msg.from == null) || (msg.to == null) || (msg.not == null)) {
               // The notification is malformed.
@@ -711,7 +756,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                 break main_loop;
               }
             }
-            
+            /*
             synchronized (qin) {
               // Now the agent can react with another engine worker
               currentAgentId = null;
@@ -722,7 +767,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
               }
               qin.notify();
             }
-
+*/
             // Commit all changes then continue.
             commit();
           }
@@ -730,10 +775,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         //  There is an unrecoverable exception during the transaction
         // we must exit from server.
         logmon.log(BasicLevel.FATAL, getName() + ": Transaction problem", exc);
-        canStop = false;
+        //canStop = false;
         // Stop the AgentServer
         AgentServer.stop(false);
-      } finally {
         terminate();
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, getName() + " stopped.");
@@ -782,17 +826,18 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       if (msg.not != null && msg.not.persistent == false) {
         msg.delete();
         msg.free();
+        msg = null;
         // dispatch
-        Message msg = null;
+        Message sentMsg = null;
         while (! mq.isEmpty()) {
           try {
-            msg = (Message) mq.get();
+            sentMsg = (Message) mq.get();
           } catch (InterruptedException exc) {
             continue;
           }
-          if (msg.from == null) msg.from = AgentId.localId;
-          MessageConsumer cons = AgentServer.getConsumer(msg.to.getTo());
-          cons.postAndValidate(msg);
+          if (sentMsg.from == null) sentMsg.from = AgentId.localId;
+          MessageConsumer cons = AgentServer.getConsumer(sentMsg.to.getTo());
+          cons.postAndValidate(sentMsg);
           mq.pop();
         }
       } else { // JORAM_PERF_BRANCH.
@@ -801,6 +846,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         msg.delete();
         // .. and frees it.
         msg.free();
+        msg = null;
         // Post all notifications temporary kept in mq to the right consumers,
         // then saves changes.
         dispatch();
@@ -851,8 +897,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         logmon.log(BasicLevel.DEBUG, getName() + ", ends");
       Agent[] ag = new Agent[agents.size()];
       int i = 0;
-      for (Enumeration<Agent> e = agents.elements() ; e.hasMoreElements() ;) {
-        ag[i++] = e.nextElement();
+      for (Enumeration<AgentContext> e = agents.elements() ; e.hasMoreElements() ;) {
+        ag[i++] = e.nextElement().getAgent();
       }
       for (i--; i>=0; i--) {
         if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -873,11 +919,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         }
         ag[i] = null;
       }
-    }
-
-    @Override
-    public String toString() {
-      return "EngineWorker [currentAgentId=" + currentAgentId + "]";
     }
     
   }
@@ -920,7 +961,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   }
 
   public int getNbWaitingMessages() {
-    return qin.size();
+    int res = 0;
+    for (Enumeration<AgentContext> e = agents.elements() ; e.hasMoreElements() ;) {
+      res += e.nextElement().getWorker().getQin().size();
+    }
+    return res;
   }
 
   /**
@@ -1022,7 +1067,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
    * @param msg   the message
    */
   public void insert(Message msg) {
-    qin.insert(msg);
+    AgentContext ctx = getAgentContext(msg.to);
+    ctx.getWorker().getQin().insert(msg);
   }
 
   /**
@@ -1056,6 +1102,15 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       modified = false;
     }
   }
+  
+  private AgentContext getAgentContext(AgentId id) {
+    AgentContext ctx = agents.get(id);
+    if (ctx == null) {
+      ctx = new AgentContext(id, null, new EngineWorker(id));
+      agents.put(id, ctx);
+    }
+    return ctx;
+  }
 
   /**
    *  Adds a message in "ready to deliver" list. This method allocates a
@@ -1065,14 +1120,34 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   public void post(Message msg) throws Exception {
     stamp(msg);
     msg.save();
-    qin.push(msg);
+    AgentContext ctx = getAgentContext(msg.to);
+    ctx.getWorker().getQin().push(msg);
   }
 
   // JORAM_PERF_BRANCH
   public void postAndValidate(Message msg) throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + "postAndValidate: " + msg);
     stamp(msg);
     msg.save();
-    qin.pushAndValidate(msg);
+    //qin.pushAndValidate(msg);
+    AgentContext ctx = getAgentContext(msg.to);
+    ctx.getWorker().getQin().pushAndValidate(msg);
+    execute(ctx);
+  }
+  
+  private void execute(AgentContext ctx) {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + " execute: " + ctx.getAgentId());
+    if (ctx.agent != null) {
+      ctx.getWorker().execute();
+    } else {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + " agent not created: " + ctx.getAgentId());
+    }
+    // Else: As the garbage is not active with multi-thread
+    // means that the agent has not been created yet
+    // do nothing
   }
   
   private void stamp(Message msg) {
@@ -1088,7 +1163,13 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
    * Validates all messages pushed in queue during transaction session.
    */
   public void validate() {
-    qin.validate();
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + " validate");
+    for (Enumeration<AgentContext> e = agents.elements() ; e.hasMoreElements() ;) {
+      AgentContext ctx = e.nextElement();
+      ctx.getWorker().getQin().validate();
+      execute(ctx);
+    }
   }
 
   /**
@@ -1102,9 +1183,84 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
    * Get this engine's <code>MessageQueue</code> qin.
    *
    * @return this <code>Engine</code>'s queue.
-   */
+   *
   public MessageQueue getQueue() {
     return qin;
+  }*/
+  
+  static class AgentContext {
+    private AgentId agentId;
+    private Agent agent;
+    private EngineWorker worker;
+    private boolean swapped;
+    
+    public AgentContext(AgentId agentId, Agent agent, EngineWorker worker) {
+      super();
+      this.agentId = agentId;
+      this.agent = agent;
+      this.worker = worker;
+    }
+
+    public AgentId getAgentId() {
+      return agentId;
+    }
+
+    public Agent getAgent() {
+      return agent;
+    }
+
+    public void setAgent(Agent agent) {
+      this.agent = agent;
+    }
+
+    public EngineWorker getWorker() {
+      return worker;
+    }
+
+    public boolean isSwapped() {
+      return swapped;
+    }
+
+    public void setSwapped(boolean swapped) {
+      this.swapped = swapped;
+    }
+
+  }
+  
+  class EngineThreadFactory implements ThreadFactory {
+    
+    private int counter;
+
+    public Thread newThread(Runnable runnable) {
+      return new EngineThread(runnable, counter++);
+    }
+    
+  }
+  
+  class EngineThread extends Thread {
+    
+    private EngineWorker engineWorker;
+
+    EngineThread(Runnable runnable, int id) {
+      super(AgentServer.getThreadGroup(), runnable, "MultiThreadEngine#" + id);
+    }
+
+    public void setEngineWorker(EngineWorker engineWorker) {
+      this.engineWorker = engineWorker;
+    }
+
+    public EngineWorker getEngineWorker() {
+      return engineWorker;
+    }
+    
+  }
+
+  public void start() throws Exception {
+
+  }
+
+  public void stop() {
+    
   }
 
 }
