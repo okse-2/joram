@@ -594,7 +594,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     
     EngineWorker(AgentId agentId) {
       //qin = new MessageVector(agentId.toString(), AgentServer.getTransaction().isPersistent());
-      qin = new MessageVector(agentId.toString(), false);
+      qin = new ConcurrentLinkedMessageQueue(agentId.toString());
       mq = new Queue();
     }
      
@@ -627,60 +627,16 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
             //canStop = true;
 
             // Get a notification, then execute the right reaction.
-            // try {
+            msg = qin.pop();
+            if (msg == null) {
               synchronized (qin) {
-                if (qin.getValidated() > 0) {
-                  msg = qin.getMessageAt(0);
-                  qin.removeMessageAt(0);
-                } else {
-                  msg = null;
+                msg = qin.pop();
+                if (msg == null) {
+                  running = false;
+                  return;
                 }
-                
-                /*
-                if (msg != null) {
-                  if (isAllowedToReact(msg.to)) {
-                    qin.pop();
-                  } else {
-                    if (qin.getValidated() > 1) {
-                      loop:
-                      for (int i = 1; i < qin.getValidated(); i++) {
-                        msg = qin.getMessageAt(i);
-                        if (isAllowedToReact(msg.to)) {
-                          qin.removeMessageAt(i);
-                          break loop;
-                        } else {
-                          msg = null;
-                        }
-                      }
-                    } else {
-                      msg = null;
-                    }
-                  }
-                  if (msg != null) {
-                    // Now the agent is not allowed to react with another engine worker
-                    currentAgentId = msg.to;
-                    // Check if the notification is an agent create request
-                    if (msg.not instanceof AgentCreateRequest) {
-                      AgentCreateRequest acr = (AgentCreateRequest) msg.not;
-                      stillNotAliveAgents.add(acr.deploy);
-                    }
-                  } else {
-                    qin.wait();
-                  }
-                }
-                */
               }
-              if (msg == null) {
-                running = false;
-                return;
-              }
-            /*
-            } catch (InterruptedException exc) {
-              continue;
-            }*/
-
-            //canStop = false;
-            //if (! running) break;
+            }
 
             if ((msg.from == null) || (msg.to == null) || (msg.not == null)) {
               // The notification is malformed.
@@ -756,18 +712,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                 break main_loop;
               }
             }
-            /*
-            synchronized (qin) {
-              // Now the agent can react with another engine worker
-              currentAgentId = null;
-              // Now the created agent is alive
-              if (msg.not instanceof AgentCreateRequest) {
-                AgentCreateRequest acr = (AgentCreateRequest) msg.not;
-                stillNotAliveAgents.remove(acr.deploy);
-              }
-              qin.notify();
-            }
-*/
+            
             // Commit all changes then continue.
             commit();
           }

@@ -100,13 +100,5 @@ interface MessageQueue {
    * @return the size of the MessageQueue
    */
   public int size();
-  
-  // JORAM_PERF_BRANCH
-  public Message getMessageAt(int index);
-  
-  //JORAM_PERF_BRANCH
-  public void removeMessageAt(int index);
-  
-  //JORAM_PERF_BRANCH
-  public int getValidated();
+
 }
