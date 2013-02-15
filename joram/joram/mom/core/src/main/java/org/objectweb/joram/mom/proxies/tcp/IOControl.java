@@ -69,6 +69,10 @@ public class IOControl {
 
     nos = new NetOutputStream(sock);
     bis = new BufferedInputStream(sock.getInputStream());
+    
+    // JORAM_PERF_BRANCH
+    FlushTask flushTask = new FlushTask();
+    AgentServer.getTimer().schedule(flushTask, 50, 50);
   }
 
   public synchronized void send(ProxyMessage msg) throws IOException {
@@ -91,6 +95,8 @@ public class IOControl {
   }
 
   static class NetOutputStream extends ByteArrayOutputStream {
+    // JORAM_PERF_BRANCH
+    private static final int MAX_BUFFER_SIZE = 8192;
     private OutputStream os = null;
 
     NetOutputStream(Socket sock) throws IOException {
@@ -105,21 +111,42 @@ public class IOControl {
     }
 
     void send(AbstractJmsMessage msg) throws IOException {
-      try {
         // JORAM_PERF_BRANCH
         //StreamUtil.writeTo(id, this);
         //StreamUtil.writeTo(ackId, this);
-        AbstractJmsMessage.write(msg, this);
+      AbstractJmsMessage.write(msg, this);
+      if (size() > MAX_BUFFER_SIZE) {
+        flushSocket();
+      }
 /* JORAM_PERF_BRANCH
         buf[0] = (byte) ((count -4) >>>  24);
         buf[1] = (byte) ((count -4) >>>  16);
         buf[2] = (byte) ((count -4) >>>  8);
         buf[3] = (byte) ((count -4) >>>  0);
 */
-        writeTo(os);
+    }
+    
+    void flushSocket() throws IOException {
+      if (size() > 0) {
+        synchronized (this) {
+          writeTo(os);
+          reset();
+        }
         os.flush();
-      } finally {
-        reset();
+      }
+    }
+  }
+  
+  //JORAM_PERF_BRANCH
+  class FlushTask extends java.util.TimerTask {
+    public void run() {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "FlushTask.run()");
+      try {
+        nos.flushSocket();
+      } catch (IOException exc) {
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "", exc);
       }
     }
   }
