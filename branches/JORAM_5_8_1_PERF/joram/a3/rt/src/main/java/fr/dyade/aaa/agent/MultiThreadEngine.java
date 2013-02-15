@@ -573,17 +573,12 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
      */ 
     private MessageQueue qin;
     
-    private Queue mq;
+    private List<Message> mq;
     
     /**
      * The current agent running.
      */ 
     private Agent agent;
-    
-    /**
-     * Synchronized with Qin
-     *
-    private AgentId currentAgentId;*/
 
     /**
      * The message in progress.
@@ -595,7 +590,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     EngineWorker(AgentId agentId) {
       //qin = new MessageVector(agentId.toString(), AgentServer.getTransaction().isPersistent());
       qin = new ConcurrentLinkedMessageQueue(agentId.toString());
-      mq = new Queue();
+      mq = new ArrayList<Message>();
     }
      
     public MessageQueue getQin() {
@@ -611,11 +606,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       }
     }
 
-    /*
-    protected void close() {}
-
-    protected void shutdown() {}
-*/
     public void run() {
       Thread currentThread = Thread.currentThread();
       EngineThread engineThread = (EngineThread) currentThread;
@@ -749,7 +739,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                    getName() + ", push(" + from + ", " + to + ", " + not + ")");
       if ((to == null) || to.isNullId())
         return;
-      mq.push(Message.alloc(from, to, not));
+      mq.add(Message.alloc(from, to, not));
     }
     
     /**
@@ -775,15 +765,10 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         // dispatch
         Message sentMsg = null;
         while (! mq.isEmpty()) {
-          try {
-            sentMsg = (Message) mq.get();
-          } catch (InterruptedException exc) {
-            continue;
-          }
+          sentMsg = (Message) mq.remove(0);
           if (sentMsg.from == null) sentMsg.from = AgentId.localId;
           MessageConsumer cons = AgentServer.getConsumer(sentMsg.to.getTo());
           cons.postAndValidate(sentMsg);
-          mq.pop();
         }
       } else { // JORAM_PERF_BRANCH.
         AgentServer.getTransaction().begin();
@@ -822,17 +807,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       Message msg = null;
 
       while (! mq.isEmpty()) {
-        try {
-          msg = (Message) mq.get();
-        } catch (InterruptedException exc) {
-          continue;
-        }
-
+        msg = mq.remove(0);
         if (msg.from == null) msg.from = AgentId.localId;
-
         Channel.post(msg);
-        
-        mq.pop();
       }
       Channel.save();
     }
