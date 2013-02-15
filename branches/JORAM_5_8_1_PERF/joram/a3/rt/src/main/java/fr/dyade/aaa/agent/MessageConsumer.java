@@ -104,8 +104,9 @@ public interface MessageConsumer {
    * debug tasks, should be replaced by a common attribute.
    *
    * @return this <code>MessageConsumer</code>'s queue.
-   */
-  MessageQueue getQueue();
+   *
+   *JORAM_PERF_BRANCH
+  MessageQueue getQueue();*/
 
   /**
    *  Tests if the component is alive. A <code>MessageConsumer</code> is alive
