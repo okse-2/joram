@@ -59,7 +59,7 @@ public class ReliableTcpConnection {
 
   //private volatile int unackCounter;
 
-  private Vector pendingMessages;
+  //private Vector pendingMessages;
 
   private Socket sock;
 
@@ -67,30 +67,29 @@ public class ReliableTcpConnection {
 
   private BufferedInputStream bis;
 
-  private Object inputLock;
+  //private Object inputLock;
 
-  private Object outputLock;
+  //private Object outputLock;
 
   private int status;
   
   private java.util.Timer timer;
 
-  public ReliableTcpConnection(java.util.Timer timer2) {    
+  public ReliableTcpConnection(java.util.Timer timer) {    
     windowSize = Integer.getInteger(
       WINDOW_SIZE_PROP_NAME,
       DEFAULT_WINDOW_SIZE).intValue();
     if (logger.isLoggable(BasicLevel.INFO))
       logger.log(BasicLevel.INFO, 
                  "ReliableTcpConnection.windowSize=" + windowSize);
-    timer = timer2;
+    this.timer = timer;
     // JORAM_PERF_BRANCH:
     //inputCounter = -1;
     //outputCounter = 0;
     //unackCounter = 0;
-    pendingMessages = new Vector();
-    inputLock = new Object();
-    outputLock = new Object();
-    
+    //pendingMessages = new Vector();
+    //inputLock = new Object();
+    //outputLock = new Object();
     setStatus(INIT);
   }
 
@@ -116,10 +115,10 @@ public class ReliableTcpConnection {
 
     try {
       this.sock = sock;
-
-      synchronized (outputLock) {
-        nos = new NetOutputStream(sock);
-        
+      nos = new NetOutputStream(sock);
+      
+      // JORAM_PERF_BRANCH
+      /*
         synchronized (pendingMessages) {
           for (int i = 0; i < pendingMessages.size(); i++) {
             TcpMessage pendingMsg = (TcpMessage) pendingMessages.elementAt(i);
@@ -127,13 +126,16 @@ public class ReliableTcpConnection {
             doSend(pendingMsg.object);
           }
         }
-      }
+      */
 
-      synchronized (inputLock) {
-        bis = new BufferedInputStream(sock.getInputStream());
-      }
+      //synchronized (inputLock) {
+      bis = new BufferedInputStream(sock.getInputStream());
+      //}
 
       setStatus(CONNECT);
+
+      FlushTask flushTask = new FlushTask();
+      timer.schedule(flushTask, 50, 50);
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "", exc);
@@ -150,7 +152,6 @@ public class ReliableTcpConnection {
     if (getStatus() != CONNECT) 
       throw new IOException("Connection closed");
     try {      
-      synchronized (outputLock) { 
         // JORAM_PERF_BRANCH:
         doSend(request);
         /* JORAM_PERF_BRANCH:
@@ -158,7 +159,6 @@ public class ReliableTcpConnection {
           outputCounter, request));
         outputCounter++;
           JORAM_PERF_BRANCH.*/
-      }
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "ReliableTcpConnection.send()", exc);
@@ -171,14 +171,14 @@ public class ReliableTcpConnection {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "ReliableTcpConnection.doSend(" + msg + ')');
-    synchronized (outputLock) {
-      // JORAM_PERF_BRANCH:
-      nos.send(msg);
-      //unackCounter = 0;
-    }
+    // JORAM_PERF_BRANCH:
+    nos.send(msg);
+    //unackCounter = 0;
   }
 
   static class NetOutputStream extends ByteArrayOutputStream {
+    private static final int MAX_BUFFER_SIZE = 8192;
+    
     private OutputStream os = null;
 
     NetOutputStream(Socket sock) throws IOException {
@@ -191,22 +191,30 @@ public class ReliableTcpConnection {
       count = 0;
     }
 
-    void send(AbstractJmsMessage msg) throws IOException {
-      try {
+    synchronized void send(AbstractJmsMessage msg) throws IOException {
         // JORAM_PERF_BRANCH:
         //StreamUtil.writeTo(id, this);
         //StreamUtil.writeTo(ackId, this);
-        AbstractJmsMessage.write(msg, this);
+      AbstractJmsMessage.write(msg, this);
+      if (size() > MAX_BUFFER_SIZE) {
+        flushSocket();
+      }
 /* JORAM_PERF_BRANCH:
         buf[0] = (byte) ((count -4) >>>  24);
         buf[1] = (byte) ((count -4) >>>  16);
         buf[2] = (byte) ((count -4) >>>  8);
         buf[3] = (byte) ((count -4) >>>  0);
 */
-        writeTo(os);
+    }
+    
+    // JORAM_PERF_BRANCH:
+    void flushSocket() throws IOException {
+      if (size() > 0) {
+        synchronized (this) {
+          writeTo(os);
+          reset();
+        }
         os.flush();
-      } finally {
-        reset();
       }
     }
   }
@@ -249,20 +257,21 @@ public class ReliableTcpConnection {
 
     while (true) {
       try {
-        long messageId;
-        long ackId;
+        //long messageId;
+        //long ackId;
         AbstractJmsReply obj;
 
-        synchronized (inputLock) {
-          // JORAM_PERF_BRANCH:
+        // JORAM_PERF_BRANCH:
+        //synchronized (inputLock) {
+          
           //int len = StreamUtil.readIntFrom(bis);
           //messageId = StreamUtil.readLongFrom(bis);
           //ackId = StreamUtil.readLongFrom(bis);
-          obj =  (AbstractJmsReply) AbstractJmsMessage.read(bis);
+        obj =  (AbstractJmsReply) AbstractJmsMessage.read(bis);
           // JORAM_PERF_BRANCH:
-          return obj;
+        return obj;
           //JORAM_PERF_BRANCH.
-        }
+
         /* JORAM_PERF_BRANCH:
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> id = " + messageId);
@@ -344,5 +353,19 @@ public class ReliableTcpConnection {
     }
   }
   JORAM_PERF_BRANCH.*/
+  
+  //JORAM_PERF_BRANCH:
+  class FlushTask extends java.util.TimerTask {
+    public void run() {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "FlushTask.run()");
+      try {
+        nos.flushSocket();
+      } catch (IOException exc) {
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "", exc);
+      }
+    }
+  }
   
 }
