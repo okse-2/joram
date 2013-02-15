@@ -28,9 +28,11 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Timer;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -1143,8 +1145,24 @@ public final class AgentServer {
       try {
         // then restores all messages.
         String[] list = transaction.getList("@");
+        
+        List<Message> orderedMessages = new ArrayList<Message>();
+        // JORAM_PERF_BRANCH:
         for (int i=0; i<list.length; i++) {
           Message msg = Message.load(list[i]);
+          int j = 0;
+          for (; j < orderedMessages.size(); j++) {
+            Message orderedMsg = orderedMessages.get(j);
+            if (msg.getStamp() < orderedMsg.getStamp()) break;
+          }
+          orderedMessages.add(j, msg);
+        }
+        // JORAM_PERF_BRANCH.
+        
+        // JORAM_PERF_BRANCH
+        for (int i=0; i<orderedMessages.size(); i++) {
+          // JORAM_PERF_BRANCH
+          Message msg = orderedMessages.get(i);
 
           if (msg.getSource() == serverId) {
             // The update has been locally generated, the message is ready to
