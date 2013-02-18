@@ -447,10 +447,13 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     
     private boolean running;
     
+    private boolean persistentPush;
+    
     EngineWorker(AgentId agentId) {
       this.agentId = agentId;
       qin = new ConcurrentLinkedMessageQueue(agentId.toString());
       mq = new ArrayList<Message>();
+      persistentPush = false;
     }
      
     public MessageQueue getQin() {
@@ -481,6 +484,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
           while (true) {
             //agent = null;
             //canStop = true;
+            persistentPush = false;
 
             // Get a notification, then execute the right reaction.
             msg = qin.pop();
@@ -521,7 +525,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                 logmon.log(BasicLevel.ERROR,
                            getName() + ": Unknown agent, " + msg.to + ".react(" +
                            msg.from + ", " + msg.not + ")");
-                agent = null;
+                //agent = null;
                 push(AgentId.localId, msg.from, new UnknownAgent(msg.to, msg.not));
               } catch (Exception exc) {
                 //  Can't load agent then send an error notification
@@ -530,7 +534,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                            getName() + ": Can't load agent, " + msg.to + ".react(" +
                            msg.from + ", " + msg.not + ")",
                            exc);
-                agent = null;
+                //agent = null;
                 // Stop the AgentServer
                 AgentServer.stop(false);
                 break main_loop;
@@ -608,6 +612,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                    getName() + ", push(" + from + ", " + to + ", " + not + ")");
       if ((to == null) || to.isNullId())
         return;
+      if (not.persistent) {
+        persistentPush = true;
+      }
       mq.add(Message.alloc(from, to, not));
     }
     
@@ -627,7 +634,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       if (agent != null) agent.save();
       
       // JORAM_PERF_BRANCH:
-      if (msg.not != null && msg.not.persistent == false) {
+      if (msg.not != null && msg.not.persistent == false &&
+           ! agent.isUpdated() && ! persistentPush) {
         msg.delete();
         msg.free();
         msg = null;
@@ -705,9 +713,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         } catch (Exception exc) {
           logmon.log(BasicLevel.ERROR,
                      "Agent" + ag[i].id + " [" + ag[i].name + "] error during agentFinalize", exc);
-        } finally {
-          agent = null;
         }
+        
+        //finally {
+        //  agent = null;
+        //}
         ag[i] = null;
       }
     }

@@ -166,6 +166,11 @@ public abstract class Agent implements AgentMBean, Serializable {
     updated = true;
   }
 
+  // JORAM_PERF_BRANCH
+  boolean isUpdated() {
+    return updated;
+  }
+
   /**
    * Indicates to the Engine component that a commit is needed.
    */
