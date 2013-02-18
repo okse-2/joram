@@ -630,12 +630,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     private void commit() throws Exception {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ": commit()");
-      
+      boolean updatedAgent = agent.isUpdated();
       if (agent != null) agent.save();
-      
       // JORAM_PERF_BRANCH:
       if (msg.not != null && msg.not.persistent == false &&
-           ! agent.isUpdated() && ! persistentPush) {
+           ! updatedAgent && ! persistentPush) {
         msg.delete();
         msg.free();
         msg = null;
