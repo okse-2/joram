@@ -328,7 +328,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * - value = <code></code>
    */
   private transient Hashtable connections;
-
+  
   private transient Hashtable heartBeatTasks;
 
   /**
@@ -475,14 +475,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     Integer objKey = new Integer(keyCounter);
     ConnectionContext ctx;
-    if (not.getReliable()) {
-      ctx = new ReliableConnectionContext(keyCounter, not.getHeartBeat());
+      if (not.getReliable()) {
+        ctx = new ReliableConnectionContext(keyCounter, not.getHeartBeat());
       connections.put(objKey, ctx);
-    } else {
-      ctx = new StandardConnectionContext(keyCounter);
-      connections.put(objKey, ctx);
+      } else {
+        ctx = new StandardConnectionContext(keyCounter);
+    connections.put(objKey, ctx);
     }
-
+    
     if (not.getHeartBeat() > 0) {
       HeartBeatTask heartBeatTask = new HeartBeatTask(not.getHeartBeat(), objKey, getId());
       heartBeatTasks.put(objKey, heartBeatTask);
@@ -564,8 +564,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       if (ctx != null) {
         AbstractJmsRequest request = ctx.getRequest(req.getMessage());
         if (request instanceof ProducerMessages) {
-          ProducerMessages pm = (ProducerMessages) request;
-          rm.put(req.getConnectionKey(), pm);
+          // process interceptors 
+          ProducerMessages pm = processInterceptors((ProducerMessages) request);
+          if (pm != null)
+            rm.put(req.getConnectionKey(), pm);
         } else if (request instanceof JmsRequestGroup) {
           JmsRequestGroup jrg = (JmsRequestGroup) request;
           AbstractJmsRequest[] groupedRequests = jrg.getRequests();
@@ -806,7 +808,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     public void touch() {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "HeartBeatTask: touch", new Exception());
+        logger.log(BasicLevel.DEBUG, "HeartBeatTask: touch");
       lastRequestDate = System.currentTimeMillis();
     }
 
@@ -1081,43 +1083,18 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (destId == null)
       throw new RequestException("Request to an undefined destination (null).");
 
-    ProducerMessages pm = req; 
-    if (interceptorsIN != null && !interceptorsIN.isEmpty()) {
-    	org.objectweb.joram.shared.messages.Message m = null;
-    	Vector msgs = ((ProducerMessages) req).getMessages();
-    	Vector newMsgs = new Vector();
-    	for (int i = 0; i < msgs.size(); i++) {
-    		m = (org.objectweb.joram.shared.messages.Message) msgs.elementAt(i);
-    		Iterator it = interceptorsIN.iterator();
-    		while (it.hasNext()) {
-    			MessageInterceptor interceptor = (MessageInterceptor) it.next();
-    			if (!interceptor.handle(m)) {
-    				m = null;
-    				break;
-    			}
-    		}
-    		if (m != null) {
-    			newMsgs.add(m);
-    		} else {
-    			// send the originals messages to the user DMQ.
-    			sendToDMQ((org.objectweb.joram.shared.messages.Message) msgs.elementAt(i), MessageErrorConstants.INTERCEPTORS);
-    		}
-    	}
-    	// no message to send. Send reply to the producer.
-    	if (newMsgs.size() == 0 && !msgs.isEmpty()) { 
-    		if (logger.isLoggable(BasicLevel.DEBUG))
-    			logger.log(BasicLevel.DEBUG, "UserAgent.reactToClientRequest : no message to send.");
-    		if (destId.getTo() == getId().getTo() && !pm.getAsyncSend()) {
-    			// send producer reply
-    			sendNot(getId(), new SendReplyNot(key, pm.getRequestId()));
-    		}
-    		return;
-    	}
-    	//update producer message.
-    	((ProducerMessages) pm).setMessages(newMsgs);
-    	pm = req;
+    // process interceptors 
+    ProducerMessages pm = processInterceptors(req); 
+    if (pm == null) { 
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "UserAgent.reactToClientRequest : no message to send.");
+      if (destId.getTo() == getId().getTo() && !req.getAsyncSend()) {
+        // send producer reply
+        sendNot(getId(), new SendReplyNot(key, req.getRequestId()));
+      }
+      return;
     }
-
+    
     ClientMessages not = new ClientMessages(key, pm.getRequestId(), pm.getMessages());
     setDmq(not);
 
@@ -1241,8 +1218,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     RequestBuffer rm = new RequestBuffer(this);
     for (int i = 0; i < requests.length; i++) {
       if (requests[i] instanceof ProducerMessages) {
-        ProducerMessages pm =(ProducerMessages) requests[i];
-        rm.put(key, pm);
+        // process interceptors 
+        ProducerMessages pm = processInterceptors((ProducerMessages) requests[i]);
+        if (pm != null)
+          rm.put(key, pm);
       } else {
         reactToClientRequest(key, requests[i]);
       }
@@ -2287,7 +2266,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     Enumeration pms = req.getProducerMessages();
     if (pms != null) {
       while (pms.hasMoreElements()) {
-        ProducerMessages pm = (ProducerMessages) pms.nextElement();
+        // process interceptors
+        ProducerMessages pm = processInterceptors((ProducerMessages) pms.nextElement());
+        if (pm == null)
+          continue;
         AgentId destId = AgentId.fromString(pm.getTarget());
         ClientMessages not = new ClientMessages(key, 
             req.getRequestId(), pm.getMessages());
@@ -3312,6 +3294,40 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
   public long getNbMsgsSentToDMQSinceCreation() {
     return nbMsgsSentToDMQSinceCreation;
+  }
+  
+  private ProducerMessages processInterceptors(ProducerMessages pm) {
+    if (interceptorsIN != null && !interceptorsIN.isEmpty()) {
+      org.objectweb.joram.shared.messages.Message m = null;
+      Vector msgs = ((ProducerMessages) pm).getMessages();
+      Vector newMsgs = new Vector();
+      for (int i = 0; i < msgs.size(); i++) {
+        m = (org.objectweb.joram.shared.messages.Message) msgs.elementAt(i);
+        Iterator it = interceptorsIN.iterator();
+        while (it.hasNext()) {
+          MessageInterceptor interceptor = (MessageInterceptor) it.next();
+          if (!interceptor.handle(m)) {
+            m = null;
+            break;
+          }
+        }
+        if (m != null) {
+          newMsgs.add(m);
+        } else {
+          // send the originals messages to the user DMQ.
+          sendToDMQ((org.objectweb.joram.shared.messages.Message) msgs.elementAt(i), MessageErrorConstants.INTERCEPTORS);
+        }
+      }
+      // no message to send. Send reply to the producer.
+      if (newMsgs.size() == 0 && !msgs.isEmpty()) { 
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "UserAgent.processInterceptors : no message to send.");
+        return null;
+      }
+      //update producer message.
+      ((ProducerMessages) pm).setMessages(newMsgs);
+    }
+    return pm;
   }
 }
 
