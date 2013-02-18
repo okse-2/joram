@@ -6122,7 +6122,22 @@
       <param name="include.classes" value="joram/interceptors/Exit*.class" />
     </antcall>
   </target>
-
+	
+  <target name="interceptors.test8" depends="init.a3props,compile"
+    description=" --> test interceptors 8">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction" />
+      <param name="className" value="joram.interceptors.Test8" />
+      <param name="jndiconf" value="interceptors/jndi.properties" />
+      <param name="a3conf" value="interceptors/a3servers.xml" />
+      <param name="jvmargs" value="" />
+      <param name="testid" value="interceptors.test8" />
+      <param name="args" value="" />
+      <param name="manifest.mf" value="joram/interceptors/manifest.mf" />
+      <param name="include.classes" value="joram/interceptors/Exit*.class" />
+    </antcall>
+  </target>
+	
   <target name="interceptors.test_Q" depends="init.a3props,compile"
     description=" --> test interceptors on a Queue">
     <antcall target="test.run" inheritAll="true">
