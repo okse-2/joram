@@ -25,8 +25,11 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 
+import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
@@ -96,7 +99,14 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
   }
   
   public void pushReply(AbstractJmsReply reply) {
-    ProxyMessage msg = new ProxyMessage(reply);
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      AbstractJmsMessage.write(reply, baos);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    ProxyMessage msg = new ProxyMessage(baos.toByteArray());
+    //ProxyMessage msg = new ProxyMessage(reply);
     queue.push(msg);
     // JORAM_PERF_BRANCH
     //outputCounter++;
