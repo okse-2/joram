@@ -68,21 +68,22 @@ public class TcpWriter extends Daemon {
       logger.log(BasicLevel.DEBUG,  "TcpWriter.run()");
     try {
       while (running) {
-        ProxyMessage msg = replyQueue.get();
-        if ((msg.getObject() instanceof MomExceptionReply) &&
-            (((MomExceptionReply) msg.getObject()).getType() == MomExceptionReply.HBCloseConnection)) {
-          // Exception indicating that the connection
-          // has been closed by the heart beat task.
-          // (see UserAgent)
-          new Thread(new Runnable() {
-            public void run() {            
-              tcpConnection.close();
-            }
-          }).start();
-        } else {
-          ioctrl.send(msg);
-          // No queue.pop() !
-          // Done by the proxy (UserAgent)
+        ProxyMessage[] messages = replyQueue.get();
+        for (ProxyMessage msg : messages) {
+          if ((msg.getObject() instanceof MomExceptionReply)
+              && (((MomExceptionReply) msg.getObject()).getType() == MomExceptionReply.HBCloseConnection)) {
+            // Exception indicating that the connection
+            // has been closed by the heart beat task.
+            // (see UserAgent)
+            new Thread(new Runnable() {
+              public void run() {
+                tcpConnection.close();
+              }
+            }).start();
+            break;
+          } else {
+            ioctrl.send(msg);
+          }
         }
       }
     } catch (Exception exc) {
