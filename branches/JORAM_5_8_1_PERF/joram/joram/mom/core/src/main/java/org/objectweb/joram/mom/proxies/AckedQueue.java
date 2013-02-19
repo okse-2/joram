@@ -60,7 +60,7 @@ public class AckedQueue implements java.io.Serializable {
     }
   }
 
-  public ProxyMessage get() throws InterruptedException {
+  public ProxyMessage[] get() throws InterruptedException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AckedQueue.get()");
     
@@ -70,10 +70,12 @@ public class AckedQueue implements java.io.Serializable {
       }      
       // JORAM_PERF_BRANCH:
       //ProxyMessage msg = list.elementAt(current);
-      ProxyMessage msg = list.remove(current);
+      ProxyMessage[] res = new ProxyMessage[list.size()];
+      list.copyInto(res);
+      list.clear();
       //current++;
       // JORAM_PERF_BRANCH.
-      return msg;
+      return res;
     }
   }
 
