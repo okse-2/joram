@@ -35,9 +35,9 @@ public class ProxyMessage implements java.io.Serializable {
 
   //private long ackId;
 
-  private AbstractJmsMessage obj;
+  private Object obj;
 
-  public ProxyMessage(AbstractJmsMessage obj) {
+  public ProxyMessage(Object obj) {
     // JORAM_PERF_BRANCH
     //this.id = id;
     //this.ackId = ackId;
@@ -53,7 +53,7 @@ public class ProxyMessage implements java.io.Serializable {
     return ackId;
   }
 */
-  public final AbstractJmsMessage getObject() {
+  public final Object getObject() {
     return obj;
   }
 
