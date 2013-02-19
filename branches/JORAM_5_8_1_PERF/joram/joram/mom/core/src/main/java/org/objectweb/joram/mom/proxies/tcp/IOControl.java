@@ -23,10 +23,11 @@
 package org.objectweb.joram.mom.proxies.tcp;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.objectweb.joram.mom.proxies.ProxyMessage;
 import org.objectweb.joram.shared.client.AbstractJmsMessage;
@@ -39,25 +40,24 @@ import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.stream.StreamUtil;
 
 public class IOControl {
+  
   public static Logger logger = Debug.getLogger(IOControl.class.getName());
-  //JORAM_PERF_BRANCH
-  //private long inputCounter;
+  
+  public static int DEFAULT_BUFFER_SIZE = 8192;
+  
+  public static final int DEFAULT_TCP_SENDBUFFER_SIZE = 32768;
+
+  public static final int DEFAULT_TCP_RECEIVEBUFFER_SIZE = 32768;
 
   private Socket sock;
 
-  private NetOutputStream nos;
+  private BufferedOutputStream bos;
 
   private BufferedInputStream bis;
-
-  // JORAM_PERF_BRANCH:
-  //private int windowSize;
-
-  //private int unackCounter;
   
-  //private long receivedCount;
-
-  //private long sentCount;
-  //JORAM_PERF_BRANCH.
+  private LinkedBlockingQueue<byte[]> receiveQueue;
+  
+  private Reader reader;
 
   public IOControl(Socket sock) throws IOException {   
     // JORAM_PERF_BRANCH:
@@ -66,22 +66,43 @@ public class IOControl {
     //JORAM_PERF_BRANCH.
     //this.inputCounter = inputCounter;
     this.sock = sock;
-
-    nos = new NetOutputStream(sock);
-    bis = new BufferedInputStream(sock.getInputStream());
+    sock.setSendBufferSize(DEFAULT_TCP_SENDBUFFER_SIZE);
+    sock.setReceiveBufferSize(DEFAULT_TCP_RECEIVEBUFFER_SIZE);
+    sock.setTcpNoDelay(true);
     
+    bos = new BufferedOutputStream(sock.getOutputStream(), DEFAULT_BUFFER_SIZE);
+    bis = new BufferedInputStream(sock.getInputStream(), DEFAULT_BUFFER_SIZE);
+    this.receiveQueue = new LinkedBlockingQueue<byte[]>();
     // JORAM_PERF_BRANCH
     FlushTask flushTask = new FlushTask();
     AgentServer.getTimer().schedule(flushTask, 50, 50);
+    
+    reader = new Reader();
+    reader.start();
   }
 
-  public synchronized void send(ProxyMessage msg) throws IOException {
+  public void send(ProxyMessage msg) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "IOControl.send:" + msg);
 
+    //AbstractJmsMessage ajm = (AbstractJmsMessage) msg.getObject();
+    
     try {
+      /*
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      try {
+        AbstractJmsMessage.write(ajm, baos);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      */
+      byte[] bytes = (byte[]) msg.getObject();
       // JORAM_PERF_BRANCH
-      nos.send(msg.getObject());
+      synchronized (bos) {
+        StreamUtil.writeTo(bytes.length, bos);
+        bos.write(bytes);
+        //bos.write(baos.toByteArray());
+      }
       /* JORAM_PERF_BRANCH
       sentCount++;
       unackCounter = 0;
@@ -93,49 +114,6 @@ public class IOControl {
       throw exc;
     }
   }
-
-  static class NetOutputStream extends ByteArrayOutputStream {
-    // JORAM_PERF_BRANCH
-    private static final int MAX_BUFFER_SIZE = 8192;
-    private OutputStream os = null;
-
-    NetOutputStream(Socket sock) throws IOException {
-      super(1024);
-      reset();
-      os = sock.getOutputStream();
-    }
-
-    public void reset() {
-      // JORAM_PERF_BRANCH
-      count = 0;
-    }
-
-    void send(AbstractJmsMessage msg) throws IOException {
-        // JORAM_PERF_BRANCH
-        //StreamUtil.writeTo(id, this);
-        //StreamUtil.writeTo(ackId, this);
-      AbstractJmsMessage.write(msg, this);
-      if (size() > MAX_BUFFER_SIZE) {
-        flushSocket();
-      }
-/* JORAM_PERF_BRANCH
-        buf[0] = (byte) ((count -4) >>>  24);
-        buf[1] = (byte) ((count -4) >>>  16);
-        buf[2] = (byte) ((count -4) >>>  8);
-        buf[3] = (byte) ((count -4) >>>  0);
-*/
-    }
-    
-    void flushSocket() throws IOException {
-      if (size() > 0) {
-        synchronized (this) {
-          writeTo(os);
-          reset();
-        }
-        os.flush();
-      }
-    }
-  }
   
   //JORAM_PERF_BRANCH
   class FlushTask extends java.util.TimerTask {
@@ -143,7 +121,9 @@ public class IOControl {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "FlushTask.run()");
       try {
-        nos.flushSocket();
+        synchronized (bos) {
+          bos.flush();
+        }
       } catch (IOException exc) {
         if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN, "", exc);
@@ -154,33 +134,12 @@ public class IOControl {
   public ProxyMessage receive() throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "IOControl.receive()");
-
+    
+    byte[] bytes = receiveQueue.take();
     try {
-      while (true) {
-        // JORAM_PERF_BRANCH
-        //int len = StreamUtil.readIntFrom(bis);
-        //long messageId = StreamUtil.readLongFrom(bis);
-        //long ackId = StreamUtil.readLongFrom(bis);
-        AbstractJmsRequest obj = (AbstractJmsRequest) AbstractJmsMessage.read(bis);
-        return new ProxyMessage(obj);
-        
-        /* JORAM_PERF_BRANCH
-        receivedCount++;
-
-        if (messageId > inputCounter) {
-          inputCounter = messageId;
-          synchronized (this) {
-            if (unackCounter < windowSize) {
-              unackCounter++;
-            } else {
-              send(new ProxyMessage(-1, messageId, null));
-            }
-          }
-          return new ProxyMessage(messageId, ackId, obj);
-        }
-        logger.log(BasicLevel.DEBUG, "IOControl.receive: already received message: " + messageId + " -> " + obj);
-        JORAM_PERF_BRANCH */
-      }
+      ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+      AbstractJmsRequest obj = (AbstractJmsRequest) AbstractJmsMessage.read(bais);
+      return new ProxyMessage(obj);
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "IOControl.receive", exc);
@@ -204,19 +163,49 @@ public class IOControl {
       if (sock != null) sock.close();
       sock = null;
     } catch (IOException exc) {}
+    reader.stop();
   }
   
   Socket getSocket() {
     return sock;
   }
   
-  /* JORAM_PERF_BRANCH
-  public long getSentCount() {
-    return sentCount;
-  }
+  class Reader extends fr.dyade.aaa.common.Daemon {
+    Reader() {
+      super("ReliableTcpConnectionReader", logger);
+    }
 
-  public long getReceivedCount() {
-    return receivedCount;
+    public void run() {
+      try {
+        while (running) {
+          canStop = true;
+          int len = StreamUtil.readIntFrom(bis);
+          byte[] bytes = StreamUtil.readFully(len, bis);
+          receiveQueue.offer(bytes);
+        }
+      } catch (Exception exc) { 
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "", exc);
+        close();
+      } finally {
+        finish();
+      }
+    }
+    
+    /**
+     * Enables the daemon to stop itself.
+     */
+    public void stop() {
+      if (isCurrentThread()) {
+        finish();
+      } else {
+        super.stop();
+      }
+    }
+
+    protected void shutdown() {}
+
+    protected void close() {}
+    
   }
-  */
 }
