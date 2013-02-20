@@ -1197,6 +1197,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       doReact(key, req);   
     }
   }
+  
+  public static final boolean DIRECT_QUEUE_DELIVER = true;
 
   /**
    * Either forwards the <code>ConsumerSetListRequest</code> request as a
@@ -1217,7 +1219,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
                                               req.getMessageIdsToAck(),
                                               req.getMessageCount());
       // JORAM_PERF_BRANCH:
-      not.setImplicitReceive(true);
+      if (DIRECT_QUEUE_DELIVER) {
+        not.setImplicitReceive(true);
+      }
       // JORAM_PERF_BRANCH.
       AgentId destId = AgentId.fromString(req.getTarget());
       if (destId == null)
