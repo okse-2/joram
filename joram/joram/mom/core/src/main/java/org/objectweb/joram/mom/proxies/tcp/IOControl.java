@@ -25,6 +25,7 @@ package org.objectweb.joram.mom.proxies.tcp;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -80,33 +81,30 @@ public class IOControl {
     reader = new Reader();
     reader.start();
   }
-
+  public static final boolean ENGINE_ENCODE = false;
+  
   public void send(ProxyMessage msg) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "IOControl.send:" + msg);
-
-    //AbstractJmsMessage ajm = (AbstractJmsMessage) msg.getObject();
-    
     try {
-      /*
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      try {
-        AbstractJmsMessage.write(ajm, baos);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
+      byte[] bytes;
+      if (! ENGINE_ENCODE) {
+        try {
+          AbstractJmsMessage ajm = (AbstractJmsMessage) msg.getObject();
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          AbstractJmsMessage.write(ajm, baos);
+          bytes = baos.toByteArray();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        bytes = (byte[]) msg.getObject();
       }
-      */
-      byte[] bytes = (byte[]) msg.getObject();
       // JORAM_PERF_BRANCH
       synchronized (bos) {
         StreamUtil.writeTo(bytes.length, bos);
         bos.write(bytes);
-        //bos.write(baos.toByteArray());
       }
-      /* JORAM_PERF_BRANCH
-      sentCount++;
-      unackCounter = 0;
-      */
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "IOControl.send", exc);
