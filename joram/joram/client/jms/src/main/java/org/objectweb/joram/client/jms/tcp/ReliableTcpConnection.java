@@ -84,6 +84,11 @@ public class ReliableTcpConnection {
     this.receiveQueue = new LinkedBlockingQueue<byte[]>();
     setStatus(INIT);
   }
+  
+  //JORAM_PERF_BRANCH
+  public int size() {
+    return receiveQueue.size();
+  }
 
   private synchronized void setStatus(int status) {
     if (logger.isLoggable(BasicLevel.DEBUG))

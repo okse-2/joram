@@ -106,6 +106,11 @@ public class ReliableTcpClient {
   public ReliableTcpClient() {
     this.clockSynchroThreshold = Configuration.getLong(CLOCK_SYNCHRO_THRESHOLD, clockSynchroThreshold).longValue();
   }
+  
+  //JORAM_PERF_BRANCH
+  public int size() {
+    return connection.size();
+  }
 
   public void setTimer(Timer timer2) {
     timer = timer2;
