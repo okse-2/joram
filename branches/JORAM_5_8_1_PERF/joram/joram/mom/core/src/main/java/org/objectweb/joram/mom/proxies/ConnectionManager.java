@@ -76,6 +76,8 @@ public class ConnectionManager implements ConnectionManagerMBean {
   /** Unique ConnectionManager instance. */
   private static ConnectionManager currentInstance;
   
+  public static final boolean DIRECT_NOTIFICATION = true;
+  
   public static final void sendToProxy(AgentId proxyId, int cnxKey,
       AbstractJmsRequest req, Object msg) {
     /* JORAM_PERF_BRANCH:
@@ -92,51 +94,61 @@ public class ConnectionManager implements ConnectionManagerMBean {
       Channel.sendTo(proxyId, rn);
     }*/
     // JORAM_PERF_BRANCH:
-    RequestNot rn = new RequestNot(cnxKey, msg);
     if (multiCnxSync
         && (req instanceof ProducerMessages || 
             req instanceof JmsRequestGroup)) {
+      RequestNot rn = new RequestNot(cnxKey, msg);
       MultiCnxSync mcs = ConnectionManager.getMultiCnxSync(proxyId);
       mcs.send(rn);
     } else {
-      if (req instanceof ProducerMessages) {
-        ProducerMessages pm = (ProducerMessages) req;
-        AgentId destId = AgentId.fromString(req.getTarget());
-        ClientMessages not = new ClientMessages(cnxKey, pm.getRequestId(), pm.getMessages());
-        if (destId.getTo() == proxyId.getTo()) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, " -> local sending");
-          not.setPersistent(false);
-          not.setExpiration(0L);
-          if (pm.getAsyncSend()) {
-            not.setAsyncSend(true);
-          }
-        } else {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, " -> remote sending");
-          if (!pm.getAsyncSend()) {
-            Channel.sendTo(proxyId, new SendReplyNot(cnxKey, pm.getRequestId()));
-          }
-        }
-        not.setPriority(0);
-        Channel.sendTo(destId, not);
-      } else if (req instanceof ConsumerAckRequest) {
-        ConsumerAckRequest car = (ConsumerAckRequest) req;
-        if (car.getQueueMode()) {
-          AgentId qId = AgentId.fromString(req.getTarget());
-          AcknowledgeRequest not = new AcknowledgeRequest(cnxKey, car.getRequestId(), car.getIds());
-          if (qId.getTo() == proxyId.getTo()) {
+      if (DIRECT_NOTIFICATION) {
+        if (req instanceof ProducerMessages) {
+          ProducerMessages pm = (ProducerMessages) req;
+          AgentId destId = AgentId.fromString(req.getTarget());
+          ClientMessages not = new ClientMessages(cnxKey, pm.getRequestId(),
+              pm.getMessages());
+          if (destId.getTo() == proxyId.getTo()) {
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, " -> local acking");
+              logger.log(BasicLevel.DEBUG, " -> local sending");
             not.setPersistent(false);
-            Channel.sendTo(qId, not);
+            not.setExpiration(0L);
+            if (pm.getAsyncSend()) {
+              not.setAsyncSend(true);
+            }
           } else {
-            Channel.sendTo(qId, not);
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, " -> remote sending");
+            if (!pm.getAsyncSend()) {
+              Channel.sendTo(proxyId,
+                  new SendReplyNot(cnxKey, pm.getRequestId()));
+            }
+          }
+          not.setPriority(0);
+          Channel.sendTo(destId, not);
+        } else if (req instanceof ConsumerAckRequest) {
+          ConsumerAckRequest car = (ConsumerAckRequest) req;
+          if (car.getQueueMode()) {
+            AgentId qId = AgentId.fromString(req.getTarget());
+            AcknowledgeRequest not = new AcknowledgeRequest(cnxKey,
+                car.getRequestId(), car.getIds());
+            if (qId.getTo() == proxyId.getTo()) {
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, " -> local acking");
+              not.setPersistent(false);
+              Channel.sendTo(qId, not);
+            } else {
+              Channel.sendTo(qId, not);
+            }
+          } else {
+            RequestNot rn = new RequestNot(cnxKey, msg);
+            Channel.sendTo(proxyId, rn);
           }
         } else {
+          RequestNot rn = new RequestNot(cnxKey, msg);
           Channel.sendTo(proxyId, rn);
         }
       } else { 
+        RequestNot rn = new RequestNot(cnxKey, msg);
         Channel.sendTo(proxyId, rn);
       }
     }
