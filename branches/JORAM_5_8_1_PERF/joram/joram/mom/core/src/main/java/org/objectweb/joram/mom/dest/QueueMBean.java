@@ -28,6 +28,9 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
 public interface QueueMBean extends DestinationMBean {
+  
+  int getAckRequestNumber();
+  
   /**
    * Returns  the threshold value of this queue, -1 if not set.
    *

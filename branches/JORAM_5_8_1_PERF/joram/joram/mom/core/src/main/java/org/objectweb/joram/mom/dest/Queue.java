@@ -152,6 +152,12 @@ public class Queue extends Destination implements QueueMBean {
 
   /** List holding the requests before reply or expiry. */
   protected List requests = new Vector();
+  
+  private int ackRequestNumber;
+
+  public int getAckRequestNumber() {
+    return ackRequestNumber;
+  }
 
   /**
    * Distributes the received notifications to the appropriate reactions.
@@ -580,6 +586,7 @@ public class Queue extends Destination implements QueueMBean {
    * instance, requesting messages to be acknowledged.
    */
   protected void acknowledgeRequest(AcknowledgeRequest not) {
+    ackRequestNumber++;
     for (Enumeration ids = not.getIds(); ids.hasMoreElements();) {
       String msgId = (String) ids.nextElement();
       acknowledge(msgId);
