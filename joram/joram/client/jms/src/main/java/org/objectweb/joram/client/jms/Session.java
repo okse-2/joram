@@ -220,6 +220,11 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   /** FIFO queue holding the asynchronous server deliveries. */
   private fr.dyade.aaa.common.Queue repliesIn;
+  
+  // JORAM_PERF_BRANCH
+  public int getRepliesInSize() {
+    return repliesIn.size();
+  }
 
   /** Daemon distributing asynchronous server deliveries. */
   private SessionDaemon daemon;
