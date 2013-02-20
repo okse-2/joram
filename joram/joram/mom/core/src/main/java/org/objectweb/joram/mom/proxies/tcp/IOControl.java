@@ -31,6 +31,7 @@ import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.objectweb.joram.mom.proxies.ProxyMessage;
+import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
 import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -81,14 +82,13 @@ public class IOControl {
     reader = new Reader();
     reader.start();
   }
-  public static final boolean ENGINE_ENCODE = false;
   
   public void send(ProxyMessage msg) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "IOControl.send:" + msg);
     try {
       byte[] bytes;
-      if (! ENGINE_ENCODE) {
+      if (! ReliableConnectionContext.ENGINE_ENCODE) {
         try {
           AbstractJmsMessage ajm = (AbstractJmsMessage) msg.getObject();
           ByteArrayOutputStream baos = new ByteArrayOutputStream();
