@@ -180,4 +180,10 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
   public Identity getIdentity() {
     return identity;
   }
+
+  //JORAM_PERF_BRANCH
+  public int size() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
 }
