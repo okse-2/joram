@@ -28,6 +28,8 @@ import javax.jms.JMSException;
 
 
 public interface SessionMBean {
+  
+  int getRepliesInSize();
 
   /**
    * Status of the session
