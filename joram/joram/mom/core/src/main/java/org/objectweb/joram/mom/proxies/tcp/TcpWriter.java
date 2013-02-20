@@ -62,28 +62,37 @@ public class TcpWriter extends Daemon {
     this.tcpConnection = tcpConnection;
     replyQueue.reset();
   }
+  
+  private void handleMessage(ProxyMessage msg) throws Exception {
+    if ((msg.getObject() instanceof MomExceptionReply)
+        && (((MomExceptionReply) msg.getObject()).getType() == MomExceptionReply.HBCloseConnection)) {
+      // Exception indicating that the connection
+      // has been closed by the heart beat task.
+      // (see UserAgent)
+      new Thread(new Runnable() {
+        public void run() {
+          tcpConnection.close();
+        }
+      }).start();
+      running = false;
+    } else {
+      ioctrl.send(msg);
+    }
+  }
 
   public void run() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,  "TcpWriter.run()");
     try {
       while (running) {
-        ProxyMessage[] messages = replyQueue.get();
-        for (ProxyMessage msg : messages) {
-          if ((msg.getObject() instanceof MomExceptionReply)
-              && (((MomExceptionReply) msg.getObject()).getType() == MomExceptionReply.HBCloseConnection)) {
-            // Exception indicating that the connection
-            // has been closed by the heart beat task.
-            // (see UserAgent)
-            new Thread(new Runnable() {
-              public void run() {
-                tcpConnection.close();
-              }
-            }).start();
-            break;
-          } else {
-            ioctrl.send(msg);
+        if (AckedQueue.GET_ARRAY) {
+          ProxyMessage[] messages = (ProxyMessage[]) replyQueue.get();
+          for (ProxyMessage msg : messages) {
+            handleMessage(msg);
           }
+        } else {
+          ProxyMessage msg = (ProxyMessage) replyQueue.get();
+          handleMessage(msg);
         }
       }
     } catch (Exception exc) {
