@@ -107,6 +107,11 @@ public class TcpRequestChannel implements RequestChannel {
     tcpClient.addServerAddress(params.getHost(), params.getPort());
     this.identity = identity;
   }
+  
+  //JORAM_PERF_BRANCH
+  public int size() {
+    return tcpClient.size();
+  }
 
   public void setTimer(Timer timer) {
     tcpClient.setTimer(timer);
@@ -145,4 +150,5 @@ public class TcpRequestChannel implements RequestChannel {
   public Identity getIdentity() {
     return identity;
   }
+
 }
