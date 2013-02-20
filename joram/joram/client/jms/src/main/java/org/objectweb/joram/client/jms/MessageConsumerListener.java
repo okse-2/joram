@@ -51,6 +51,8 @@ import org.objectweb.util.monolog.api.Logger;
 abstract class MessageConsumerListener implements ReplyListener {
   
   public static Logger logger = Debug.getLogger(MessageConsumerListener.class.getName());
+  
+  public static final boolean DIRECT_QUEUE_DELIVER = true;
 
   /**
    * Status of the message consumer listener.
@@ -211,37 +213,41 @@ abstract class MessageConsumerListener implements ReplyListener {
     }
     
     if (queueMode) {
-      /* JORAM_PERF_BRANCH:
+      /* JORAM_PERF_BRANCH:*/
       boolean subscribe = false;
       String[] toAck = null;
-      synchronized (this) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> messageCount = " + messageCount);
-        // Consume in advance (default is one message in advance)
-        if ((messageCount < queueMessageReadMax || (queueMessageReadMax == 0))
-            && receiveStatus == ReceiveStatus.CONSUMING_REPLY) {
-          subscribe = true;
-          if (ackMode == javax.jms.Session.DUPS_OK_ACKNOWLEDGE) {
-            synchronized (messagesToAck) {
-              if (messagesToAck.size() > 0) {
-                toAck = new String[messagesToAck.size()];
-                messagesToAck.copyInto(toAck);
-                messagesToAck.clear();
+      if (! DIRECT_QUEUE_DELIVER) {
+        synchronized (this) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, " -> messageCount = " + messageCount);
+          // Consume in advance (default is one message in advance)
+          if ((messageCount < queueMessageReadMax || (queueMessageReadMax == 0))
+              && receiveStatus == ReceiveStatus.CONSUMING_REPLY) {
+            subscribe = true;
+            if (ackMode == javax.jms.Session.DUPS_OK_ACKNOWLEDGE) {
+              synchronized (messagesToAck) {
+                if (messagesToAck.size() > 0) {
+                  toAck = new String[messagesToAck.size()];
+                  messagesToAck.copyInto(toAck);
+                  messagesToAck.clear();
+                }
               }
             }
           }
         }
       }
-      */
+      /**/
       // out of the synchronized block
-      /* JORAM_PERF_BRANCH:
-      if (subscribe) {
-        if (queueMessageReadMax == 0)
-          subscribe(toAck, 1);
-        else 
-          subscribe(toAck, queueMessageReadMax);
+      /* JORAM_PERF_BRANCH:*/
+      if (! DIRECT_QUEUE_DELIVER) {
+        if (subscribe) {
+          if (queueMessageReadMax == 0)
+            subscribe(toAck, 1);
+          else 
+            subscribe(toAck, queueMessageReadMax);
+        }
       }
-      JORAM_PERF_BRANCH. */
+      /*JORAM_PERF_BRANCH. */
     } else {
       synchronized (this) {
         if (topicMsgInputPassivated) {
@@ -407,11 +413,13 @@ abstract class MessageConsumerListener implements ReplyListener {
       throw new AbortedRequestException();
     }
     
-    /* JORAM_PERF_BRANCH:
-    if (queueMode) {
-      return true;
+    /* JORAM_PERF_BRANCH:*/
+    if (! DIRECT_QUEUE_DELIVER) {
+      if (queueMode) {
+        return true;
+      }
     }
-    JORAM_PERF_BRANCH. */
+    /*JORAM_PERF_BRANCH. */
     return false;
   }
   
