@@ -38,11 +38,8 @@ public class AckedQueue implements java.io.Serializable {
 
   private Vector<ProxyMessage> list;
 
-  private int current;
-
   public AckedQueue() {
     list = new Vector<ProxyMessage>();
-    current = 0;
   }
   
   // JORAM_PERF_BRANCH
@@ -59,23 +56,28 @@ public class AckedQueue implements java.io.Serializable {
       list.notify();
     }
   }
+  
+  public static final boolean GET_ARRAY = true;
 
-  public ProxyMessage[] get() throws InterruptedException {
+  public Object get() throws InterruptedException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AckedQueue.get()");
     
     synchronized (list) { 
-      while ((list.size() - current) == 0) {
+      while (list.size() == 0) {
         list.wait();
       }      
       // JORAM_PERF_BRANCH:
-      //ProxyMessage msg = list.elementAt(current);
-      ProxyMessage[] res = new ProxyMessage[list.size()];
-      list.copyInto(res);
-      list.clear();
-      //current++;
+      if (GET_ARRAY) {
+        ProxyMessage[] res = new ProxyMessage[list.size()];
+        list.copyInto(res);
+        list.clear();
+        return res;
+      } else {
+        ProxyMessage msg = list.remove(0);
+        return msg;
+      }
       // JORAM_PERF_BRANCH.
-      return res;
     }
   }
 
@@ -102,7 +104,5 @@ public class AckedQueue implements java.io.Serializable {
   public void reset() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AckedQueue.reset()");
-    
-    current = 0;
   }
 }
