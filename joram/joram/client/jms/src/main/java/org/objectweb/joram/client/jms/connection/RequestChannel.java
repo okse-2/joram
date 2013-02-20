@@ -43,4 +43,7 @@ public interface RequestChannel {
   public void closing();
   
   public Identity getIdentity();
+  
+  //JORAM_PERF_BRANCH
+  public int size();
 }

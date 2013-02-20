@@ -130,4 +130,10 @@ public class MultiThreadSyncChannel implements RequestChannel {
   public Identity getIdentity() {
     return null;
   }
+
+  // JORAM_PERF_BRANCH
+  public int size() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
 }
