@@ -98,18 +98,22 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
     return request;
   }
   
+  public static final boolean ENGINE_ENCODE = false;
+  
   public void pushReply(AbstractJmsReply reply) {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      AbstractJmsMessage.write(reply, baos);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    ProxyMessage msg;
+    if (ENGINE_ENCODE) {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      try {
+        AbstractJmsMessage.write(reply, baos);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      msg = new ProxyMessage(baos.toByteArray());
+    } else {
+      msg = new ProxyMessage(reply);
     }
-    ProxyMessage msg = new ProxyMessage(baos.toByteArray());
-    //ProxyMessage msg = new ProxyMessage(reply);
     queue.push(msg);
-    // JORAM_PERF_BRANCH
-    //outputCounter++;
   }
   
   public void pushError(MomException exc) {
