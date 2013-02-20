@@ -41,6 +41,8 @@ public interface ConnectionMBean {
   boolean getImplicitAck();
   boolean getAsyncSend();
   
+  int getRequestChannelSize();
+  
   void start() throws JMSException;
   void stop() throws JMSException;
   void close() throws JMSException;

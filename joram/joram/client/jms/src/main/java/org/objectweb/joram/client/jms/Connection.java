@@ -175,6 +175,8 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
   private int hashCode;
   
   private Identity identity = null;
+  
+  private RequestChannel requestChannel;
 
   /**
    * Creates a <code>Connection</code> instance.
@@ -184,6 +186,10 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
     // in admin package (merge in future in ConnectionFactory class).
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Connection.<init>");
+  }
+  
+  public int getRequestChannelSize() {
+    return requestChannel.size();
   }
   
   /**
@@ -235,6 +241,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
     mtpx.setDemultiplexerDaemonName(toString());
     
     identity = requestChannel.getIdentity();
+    this.requestChannel = requestChannel;
     registerMBean(JMXBeanBaseName);
   }
 
