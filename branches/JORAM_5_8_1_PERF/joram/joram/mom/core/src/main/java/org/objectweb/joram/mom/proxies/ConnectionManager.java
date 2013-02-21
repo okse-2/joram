@@ -36,6 +36,7 @@ import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerAckRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
+import org.objectweb.joram.shared.client.ServerReply;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -78,8 +79,9 @@ public class ConnectionManager implements ConnectionManagerMBean {
   
   public static final boolean DIRECT_NOTIFICATION = true;
   
+  // JORAM_PERF_BRANCH
   public static final void sendToProxy(AgentId proxyId, int cnxKey,
-      AbstractJmsRequest req, Object msg) {
+      AbstractJmsRequest req, Object msg, AckedQueue replyQueue) {
     /* JORAM_PERF_BRANCH:
     RequestNot rn = new RequestNot(cnxKey, msg);
     if (multiCnxSync
@@ -107,24 +109,16 @@ public class ConnectionManager implements ConnectionManagerMBean {
           AgentId destId = AgentId.fromString(req.getTarget());
           ClientMessages not = new ClientMessages(cnxKey, pm.getRequestId(),
               pm.getMessages());
-          if (destId.getTo() == proxyId.getTo()) {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, " -> local sending");
-            not.setPersistent(false);
-            not.setExpiration(0L);
-            if (pm.getAsyncSend()) {
-              not.setAsyncSend(true);
-            }
+          not.setPersistent(false);
+          not.setExpiration(0L);
+          if (pm.getAsyncSend()) {
+            not.setAsyncSend(true);
+            Channel.sendTo(destId, not);
           } else {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, " -> remote sending");
-            if (!pm.getAsyncSend()) {
-              Channel.sendTo(proxyId,
-                  new SendReplyNot(cnxKey, pm.getRequestId()));
-            }
+            Channel.sendTo(destId, not);
+            ServerReply reply = new ServerReply(not.getRequestId());
+            replyQueue.push(new ProxyMessage(reply, false));
           }
-          not.setPriority(0);
-          Channel.sendTo(destId, not);
         } else if (req instanceof ConsumerAckRequest) {
           ConsumerAckRequest car = (ConsumerAckRequest) req;
           if (car.getQueueMode()) {

@@ -679,7 +679,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     ClientContext cc = getClientContext(not.getKey());
     if (cc != null) {
       if (cc.setReply(not.getRequestId()) == 0) {
-        sendToClient(not.getKey(), new ServerReply(not.getRequestId()));
+        sendToClient(not.getKey(), new ServerReply(not.getRequestId()), false);
       }
     } else if (logger.isLoggable(BasicLevel.DEBUG)) {
       // Can happen if the connection is closed before the SendReplyNot
@@ -708,7 +708,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    *          is connected through.
    * @param reply the reply to send to the client.
    */
-  public void sendToClient(int key, AbstractJmsReply reply) {
+  public void sendToClient(int key, AbstractJmsReply reply, boolean asyncSend) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "UserAgent.sendToClient(" + key + ',' + reply + ')');
     Integer objKey = new Integer(key);
@@ -752,7 +752,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       		}
       	}
       	// push the reply
-      	ctx.pushReply(reply);
+      	ctx.pushReply(reply, asyncSend);
       }
     }
     // else may happen. Drop the reply.
@@ -1071,9 +1071,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       // Catching an exception due to an invalid agent identifier to
       // forward the request to:
       DestinationException dE = new DestinationException("Incorrect destination identifier: " + iE);
-      sendToClient(key, new MomExceptionReply(request.getRequestId(), dE));
+      sendToClient(key, new MomExceptionReply(request.getRequestId(), dE), true);
     } catch (RequestException exc) {
-      sendToClient(key, new MomExceptionReply(request.getRequestId(), exc));
+      sendToClient(key, new MomExceptionReply(request.getRequestId(), exc), true);
     }
   }
 
@@ -1381,7 +1381,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private void doReact(int key, GetAdminTopicRequest req) throws AccessException {
 //     if (! admin)
 //       throw new AccessException("Request forbidden to a non administrator.");
-    sendToClient(key, new GetAdminTopicReply(req, AdminTopic.getDefault().toString()));
+    sendToClient(key, new GetAdminTopicReply(req, AdminTopic.getDefault().toString()), false);
   }
 
   /**
@@ -2157,7 +2157,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * to be sent to a client.
    */
   private void doReact(SyncReply not) {
-    sendToClient(not.key, not.reply);
+    sendToClient(not.key, not.reply, false);
   }
 
   /**
@@ -2273,7 +2273,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     CnxCloseReply reply = new CnxCloseReply();
     reply.setCorrelationId(req.getRequestId());
-    sendToClient(key, reply);
+    sendToClient(key, reply, false);
   }
 
   private void doReact(int key, ActivateConsumerRequest req) {
@@ -2451,7 +2451,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
         // If the context is started, delivering the message, or buffering it:
         if (activeCtx.getActivated()) {
-          doReply(jRep);
+          doReply(jRep, true);
         } else {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, " -> buffer the reply");
@@ -2580,7 +2580,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           try {
             setCtx(sub.getContextId());
             if (activeCtx.getActivated())
-              doReply(consM);
+              doReply(consM, true);
             else
               activeCtx.addPendingDelivery(consM);
           } catch (StateException pE) {
@@ -3154,7 +3154,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * @param rep  The reply to send.
    */
   private void doReply(AbstractJmsReply reply) {
-    sendToClient(activeCtxId, reply);
+    doReply(reply, false);
+  }
+  
+  private void doReply(AbstractJmsReply reply, boolean asyncSend) {
+    sendToClient(activeCtxId, reply, asyncSend);
   }
 
   protected ClientContext getClientContext(int ctxId) {

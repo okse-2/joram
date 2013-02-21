@@ -100,7 +100,7 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
   
   public static final boolean ENGINE_ENCODE = false;
   
-  public void pushReply(AbstractJmsReply reply) {
+  public void pushReply(AbstractJmsReply reply, boolean asyncSend) {
     ProxyMessage msg;
     if (ENGINE_ENCODE) {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -109,16 +109,16 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
-      msg = new ProxyMessage(baos.toByteArray());
+      msg = new ProxyMessage(baos.toByteArray(), asyncSend);
     } else {
-      msg = new ProxyMessage(reply);
+      msg = new ProxyMessage(reply, asyncSend);
     }
     queue.push(msg);
   }
   
   public void pushError(MomException exc) {
     // JORAM_PERF_BRANCH
-    queue.push(new ProxyMessage(new MomExceptionReply(exc)));
+    queue.push(new ProxyMessage(new MomExceptionReply(exc), true));
   }
   
   public boolean isClosed() {
