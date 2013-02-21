@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -48,7 +48,7 @@ public class Consumer implements MessageListener {
   static boolean transacted = true;
   static boolean dupsOk = true;
   
-  static int queueMessageReadMax = 100;
+  static int queueMessageReadMax = 1000;
   static int topicAckBufferMax = 100;
   static boolean implicitAck = true;
 
