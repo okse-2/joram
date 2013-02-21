@@ -119,7 +119,8 @@ public class TcpConnection implements TcpConnectionMBean {
       logger.log(BasicLevel.DEBUG, "TcpConnection.start()");
     try {
       tcpWriter = new TcpWriter(ioctrl, ctx.getQueue(), this);
-      tcpReader = new TcpReader(ioctrl, proxyId, this, closeConnection);
+      // JORAM_PERF_BRANCH
+      tcpReader = new TcpReader(ioctrl, proxyId, this, closeConnection, ctx.getQueue());
       proxyService.registerConnection(this);
       tcpWriter.start();
       tcpReader.start();
