@@ -39,7 +39,8 @@ public interface ConnectionContext {
 
   public int getKey();
   
-  public void pushReply(AbstractJmsReply reply);
+  // JORAM_PERF_BRANCH
+  public void pushReply(AbstractJmsReply reply, boolean asyncSend);
   
   public void pushError(MomException exc);
   

@@ -67,7 +67,7 @@ public class StandardConnectionContext
     return queue;
   }
   
-  public void pushReply(AbstractJmsReply reply) {
+  public void pushReply(AbstractJmsReply reply, boolean asyncSend) {
     queue.push(reply);
   }
   

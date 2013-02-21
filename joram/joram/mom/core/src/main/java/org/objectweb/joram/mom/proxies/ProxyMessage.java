@@ -36,12 +36,19 @@ public class ProxyMessage implements java.io.Serializable {
   //private long ackId;
 
   private Object obj;
+  
+  private boolean asyncSend;
 
-  public ProxyMessage(Object obj) {
+  public ProxyMessage(Object obj, boolean asyncSend) {
     // JORAM_PERF_BRANCH
     //this.id = id;
     //this.ackId = ackId;
     this.obj = obj;
+    this.asyncSend = asyncSend;
+  }
+
+  public boolean isAsyncSend() {
+    return asyncSend;
   }
 
   /* JORAM_PERF_BRANCH
