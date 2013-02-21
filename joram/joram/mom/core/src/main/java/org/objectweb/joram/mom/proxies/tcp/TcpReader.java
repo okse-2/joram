@@ -23,6 +23,7 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
+import org.objectweb.joram.mom.proxies.AckedQueue;
 import org.objectweb.joram.mom.proxies.CloseConnectionNot;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.ProxyMessage;
@@ -54,6 +55,9 @@ public class TcpReader extends Daemon {
   private AgentId proxyId;
 
   private boolean closeConnection;
+  
+  // JORAM_PERF_BRANCH
+  private AckedQueue replyQueue;
 
   /**
    * Creates a new reader.
@@ -61,12 +65,14 @@ public class TcpReader extends Daemon {
   public TcpReader(IOControl ioctrl,
                    AgentId proxyId,
                    TcpConnection tcpConnection,
-                   boolean closeConnection) {
+                   boolean closeConnection,
+                   AckedQueue replyQueue) {
     super("tcpReader." + tcpConnection.getKey(), logger);
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;
     this.tcpConnection = tcpConnection;
     this.closeConnection = closeConnection;
+    this.replyQueue = replyQueue;
   }
 
   public void run() {
@@ -78,10 +84,11 @@ public class TcpReader extends Daemon {
         canStop = false;
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "TcpReader reads msg: " + msg);
+        // JORAM_PERF_BRANCH
         ConnectionManager.sendToProxy(proxyId,
                                       tcpConnection.getKey(),
                                       (AbstractJmsRequest)msg.getObject(), 
-                                      msg);
+                                      msg, replyQueue);
         canStop = true;
       }
     } catch (Throwable error) {
