@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -129,7 +129,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   /** Virtual time counter use in FIFO swap-in/swap-out mechanisms. */
   long now = 0;
   /** Maximum number of memory loaded agents. */
-  int NbMaxAgents = 100;
+  int NbMaxAgents = 1000;
 
   /**
    * Returns the number of agent's reaction since last boot.
@@ -1258,6 +1258,13 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     }
   }
 
+  /**
+   * Returns a report about the distribution of messages type in queue.
+   */
+  public String report() {
+    return qin.report();
+  }
+  
   /**
    * Returns a string representation of this engine. 
    *
