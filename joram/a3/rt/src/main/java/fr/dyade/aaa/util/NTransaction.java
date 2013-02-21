@@ -143,7 +143,13 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     return (logFile.getLogFileSize() /Kb);
   }
   
-  /** If true every write in the log file is synced to disk. */
+  /**
+   *  If true every write in the log file is synced to disk, by default
+   * false. This value can be adjusted for a particular server by setting
+   * <code>Transaction.SyncOnWrite</code> specific property.
+   * <p>
+   *  This property can be set only at first launching.
+   */
   boolean syncOnWrite = false;
 
   /**
@@ -371,6 +377,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     LogThresholdOperation = getInteger("NTLogThresholdOperation", LogThresholdOperation).intValue();
     Operation.initPool(LogThresholdOperation);
 
+    syncOnWrite = getBoolean("Transaction.SyncOnWrite");
+    
     try {
       repositoryImpl = System.getProperty("NTRepositoryImpl", repositoryImpl);
       repository = (Repository) Class.forName(repositoryImpl).newInstance();
@@ -389,7 +397,6 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       throw new IOException(exc.getMessage());
     }
     
-    syncOnWrite = getBoolean("NTSyncOnWrite");
     if (getBoolean("NTNoLockFile"))
       logmon.log(BasicLevel.ERROR,
                  "NTransaction, no longer use NTNoLockFile property, use Transaction.UseLockFile.");
