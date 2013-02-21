@@ -96,6 +96,9 @@ public final class FileRepository implements Repository {
    */
   private boolean useFileOutputStream;
 
+  private boolean syncOnWrite = false;
+  private String mode = "rw";
+
   // Be careful the constructor must be public to allow newInstance from another package.
   public FileRepository() {}
 
@@ -106,6 +109,8 @@ public final class FileRepository implements Repository {
   public void init(Transaction transaction, File dir)  throws IOException {
     this.dir = dir;
     useFileOutputStream = transaction.getBoolean("FileRepository.useRandomAccessFile");
+    syncOnWrite = transaction.getBoolean("Transaction.SyncOnWrite");
+    if (syncOnWrite) mode = "rwd";
   }
 
   /**
@@ -135,10 +140,10 @@ public final class FileRepository implements Repository {
     if (useFileOutputStream ) {
       FileOutputStream fos = new FileOutputStream(file);
       fos.write(content);
-      fos.getFD().sync();
+      if (syncOnWrite) fos.getFD().sync();
       fos.close();
     } else {
-      RandomAccessFile raf = new RandomAccessFile(file, "rwd");
+      RandomAccessFile raf = new RandomAccessFile(file, mode);
       raf.write(content);
       raf.close();                    
     }

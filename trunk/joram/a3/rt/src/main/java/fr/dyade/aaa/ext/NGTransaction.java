@@ -315,6 +315,8 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     LogThresholdOperation = getInteger("Transaction.LogThresholdOperation", LogThresholdOperation).intValue();
     Operation.initPool(LogThresholdOperation);
 
+    syncOnWrite = getBoolean("Transaction.SyncOnWrite");
+    
     try {
       repositoryImpl = getProperty("Transaction.RepositoryImpl", repositoryImpl);
       repository = (Repository) Class.forName(repositoryImpl).newInstance();
@@ -333,7 +335,6 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       throw new IOException(exc.getMessage());
     }
     
-    syncOnWrite = getBoolean("Transaction.SyncOnWrite");
     useLockFile = getBoolean("Transaction.UseLockFile");
 
     logManager = new LogManager(dir, repository, useLockFile, syncOnWrite);
