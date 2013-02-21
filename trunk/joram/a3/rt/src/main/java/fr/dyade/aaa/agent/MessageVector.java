@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,9 @@
  * Contributor(s): 
  */
 package fr.dyade.aaa.agent;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -68,7 +71,10 @@ final class MessageVector implements MessageQueue {
   MessageVector(String name, boolean persistent) {
     logmon = Debug.getLogger(getClass().getName() + '.' + name);
     logmsg = name + ".MessageVector: ";
-
+    
+    if (msgTypesTracking)
+      counters = new Hashtable<Class, Counter>();
+    
     this.persistent = persistent;
     data = new Object[50];
     first = 0;
@@ -94,7 +100,7 @@ final class MessageVector implements MessageQueue {
     insertMessageAt(item, i);
     validated += 1;
   }
-
+  
   /**
    * Pushes a message onto the bottom of this queue. It should only
    * be used during a transaction. The item will be really available
@@ -105,9 +111,11 @@ final class MessageVector implements MessageQueue {
   public synchronized void push(Message item) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "push(" + item + ")");
+    
+    if (msgTypesTracking) inc(item.not);
     insertMessageAt(item, count);
   }
-
+  
   /**
    * Removes the message at the top of this queue.
    * It must only be used during a transaction.
@@ -123,6 +131,7 @@ final class MessageVector implements MessageQueue {
       throw new EmptyQueueException();
     
     Message item = getMessageAt(0);
+    if (msgTypesTracking) dec(item.not);
     removeMessageAt(0);
     validated -= 1;
 
@@ -451,4 +460,57 @@ final class MessageVector implements MessageQueue {
     return strbuf.toString();
   }
 
+  /**
+   *  Name of property allowing to track the distribution of the types of messages.
+   * <p>
+   *  This property can be fixed either from <code>java</code> launching command or
+   * a3servers.xml configuration file.
+   */
+  public static final String MSG_TYPES_TRACKING =
+    "fr.dyade.aaa.agent.MsgTypesTracking";
+  
+  /**
+   * True if the tracking of the distribution of messages type is allowed.
+   */
+  private static boolean msgTypesTracking = AgentServer.getBoolean(MSG_TYPES_TRACKING);
+
+  static class Counter {
+    int total = 1;
+    int live = 1;
+  }
+  
+  Hashtable<Class, Counter> counters = null;
+
+  private void inc(Notification not) {
+    if (not == null) return;
+    
+    Counter counter = counters.get(not.getClass());
+    if (counter == null) {
+      counters.put(not.getClass(), new Counter());
+    } else {
+      counter.total += 1;
+      counter.live += 1;
+    }
+  }
+
+  private void dec(Notification not) {
+    if (not == null) return;
+    
+    Counter counter = counters.get(not.getClass());
+    counter.live -= 1;
+  }
+
+  /**
+   * Returns a report about the distribution of messages type in queue.
+   */
+  public String report() {
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append("waiting=").append(size()).append('\n');
+    for (Enumeration<Class> e = counters.keys(); e.hasMoreElements();){ 
+      Class clazz = e.nextElement();
+      Counter counter = counters.get(clazz);
+      strbuf.append(clazz.getName()).append('=').append(counter.live).append('/').append(counter.total).append('\n');
+    }
+    return strbuf.toString();
+  }
 }

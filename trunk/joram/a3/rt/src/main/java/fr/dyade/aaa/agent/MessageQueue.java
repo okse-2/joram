@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -97,4 +97,9 @@ interface MessageQueue {
    * @return the size of the MessageQueue
    */
   public int size();
+  
+  /**
+   * Returns a report about the distribution of messages type in queue.
+   */
+  public String report();
 }
