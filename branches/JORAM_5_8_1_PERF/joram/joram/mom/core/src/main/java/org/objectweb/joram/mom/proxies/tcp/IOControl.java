@@ -104,6 +104,9 @@ public class IOControl {
       synchronized (bos) {
         StreamUtil.writeTo(bytes.length, bos);
         bos.write(bytes);
+        if (! msg.isAsyncSend()) {
+          bos.flush();
+        }
       }
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -137,7 +140,7 @@ public class IOControl {
     try {
       ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
       AbstractJmsRequest obj = (AbstractJmsRequest) AbstractJmsMessage.read(bais);
-      return new ProxyMessage(obj);
+      return new ProxyMessage(obj, false);
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "IOControl.receive", exc);
