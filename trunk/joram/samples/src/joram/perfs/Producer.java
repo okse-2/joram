@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,6 +47,7 @@ public class Producer implements Runnable {
   static boolean MsgTransient = true;
   static boolean SwapAllowed = false;
   static boolean transacted = true;
+  static boolean asyncSend = false;
 
   public static boolean getBoolean(String key, boolean def) {
     String value = System.getProperty(key, Boolean.toString(def));
@@ -63,6 +64,7 @@ public class Producer implements Runnable {
     MsgTransient = getBoolean("MsgTransient", MsgTransient);
     SwapAllowed = getBoolean("SwapAllowed", SwapAllowed);
     transacted = getBoolean("Transacted", transacted);
+    asyncSend = getBoolean("asyncSend", asyncSend);
 
     InitialContext ictx = new InitialContext();
     dest = (Destination) ictx.lookup(args[0]);
@@ -73,7 +75,10 @@ public class Producer implements Runnable {
     System.out.println("Message: MsgTransient=" + MsgTransient);
     System.out.println("Message: SwapAllowed=" + SwapAllowed);
     System.out.println("Transacted=" + transacted);
+    System.out.println("asyncSend=" + asyncSend);
     System.out.println("NbMsg=" + (Round*NbMsgPerRound) + ", MsgSize=" + MsgSize);
+    
+    ((org.objectweb.joram.client.jms.ConnectionFactory) cf).getParameters().asyncSend = asyncSend;
     
     for (int i=0; i<NbClient; i++) {
       new Thread(new Producer()).start();
@@ -114,6 +119,7 @@ public class Producer implements Runnable {
             dtx += (dtx1 - dtx2);
             Thread.sleep(dtx1 - dtx2);
           }
+          System.out.println("sent=" + i + ", mps=" + ((((long) i) * 1000L)/dtx2));
         }
       }
       long end = System.currentTimeMillis();
