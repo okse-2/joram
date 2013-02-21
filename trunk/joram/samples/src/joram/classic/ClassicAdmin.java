@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -24,10 +24,10 @@
  */
 package classic;
 
+import javax.jms.ConnectionFactory;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.TopicConnectionFactory;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -43,7 +43,8 @@ public class ClassicAdmin {
     System.out.println();
     System.out.println("Classic administration...");
 
-    AdminModule.connect("root", "root", 60);
+    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
+    AdminModule.connect(cf, "root", "root");
 
     Queue queue = Queue.create("queue");
     queue.setFreeReading();
@@ -54,14 +55,9 @@ public class ClassicAdmin {
     
     User.create("anonymous", "anonymous");
 
-
-    ConnectionFactory cf =
-      TcpConnectionFactory.create("localhost", 16010);
-    cf.getParameters().addOutInterceptor("classic.Interceptor");
-    QueueConnectionFactory qcf =
-      TcpConnectionFactory.create("localhost", 16010);
-    TopicConnectionFactory tcf =
-      TcpConnectionFactory.create("localhost", 16010);
+//    ((org.objectweb.joram.client.jms.ConnectionFactory) cf).getParameters().addOutInterceptor("classic.Interceptor");
+    QueueConnectionFactory qcf = TcpConnectionFactory.create("localhost", 16010);
+    TopicConnectionFactory tcf = TcpConnectionFactory.create("localhost", 16010);
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);
