@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -159,8 +159,7 @@ public final class AgentServer {
    * initial starting of the server, the configuration is then atomically maintained
    * in the persistence directory.
    * <p>
-   *  This property can only be fixed either from <code>java</code> launching
-   * command.
+   *  This property can only be fixed from <code>java</code> launching command.
    */
   public final static String CFG_DIR_PROPERTY = "fr.dyade.aaa.agent.A3CONF_DIR";
   /**
@@ -177,8 +176,7 @@ public final class AgentServer {
    * initial starting of the server, the configuration is then atomically maintained
    * in the persistence directory.
    * <p>
-   *  This property can only be fixed either from <code>java</code> launching
-   * command.
+   *  This property can only be fixed from <code>java</code> launching command.
    */
   public final static String CFG_FILE_PROPERTY = "fr.dyade.aaa.agent.A3CONF_FILE";
   /**
@@ -204,8 +202,7 @@ public final class AgentServer {
    *  Name of property allowing to configure the XML wrapper used to read the server
    * configuration.
    * <p>
-   *  This property can only be fixed either from <code>java</code> launching
-   * command.
+   *  This property can only be fixed from <code>java</code> launching command.
    */
   public final static String A3CMLWRP_PROPERTY = "fr.dyade.aaa.agent.A3CMLWrapper";
   /**
@@ -269,6 +266,14 @@ public final class AgentServer {
    */
   public static float getEngineAverageLoad15() {
     return getEngine().getAverageLoad15();
+  }
+  
+  /**
+   * Returns the immediate engine load.
+   * @return the immediate engine load.
+   */
+  public static int getEngineLoad() {
+    return getEngine().getNbWaitingMessages();
   }
   
   /**
