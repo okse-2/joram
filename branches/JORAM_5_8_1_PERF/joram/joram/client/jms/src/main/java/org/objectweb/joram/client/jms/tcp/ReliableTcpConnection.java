@@ -31,6 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -162,6 +163,10 @@ public class ReliableTcpConnection {
     synchronized (bos) {
       StreamUtil.writeTo(bytes.length, bos);
       bos.write(bytes);
+      if (msg instanceof ProducerMessages) {
+        ProducerMessages pm = (ProducerMessages) msg;
+        if (! pm.getAsyncSend()) bos.flush();
+      }
     }
   }
   
