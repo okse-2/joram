@@ -136,8 +136,11 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
   public void send(AbstractJmsRequest request) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "LocalConnection.send(" + request + ')');
-    ConnectionManager.sendToProxy(proxyId, ctx.getKey(), request, request);
-    sentCount++;
+    throw new Exception("JORAM PERF BRANCH: need to be fixed");
+    // JORAM_PERF_BRANCH
+    // Cannot pass the context queue: ctx.getQueue()
+    // ConnectionManager.sendToProxy(proxyId, ctx.getKey(), request, request, null);
+    // sentCount++;
   }
 
   public AbstractJmsReply receive() throws Exception {
