@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,12 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import java.util.Hashtable;
-
 
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.stream.StreamUtil;
