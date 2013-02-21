@@ -30,7 +30,6 @@
               fr.dyade.aaa.common.monitoring,
               fr.dyade.aaa.common.net,
               fr.dyade.aaa.util.management,
-              javax.xml.parsers,
               org.objectweb.util.monolog,
               org.objectweb.util.monolog.api</Import-Package>
               <DynamicImport-Package>*</DynamicImport-Package>
