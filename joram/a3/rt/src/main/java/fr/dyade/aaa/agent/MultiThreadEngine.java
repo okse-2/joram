@@ -41,7 +41,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   public static final int DEFAULT_REACT_NUMBER_BEFORE_COMMIT = 1000;
   
-  public static final int DEFAULT_QIN_THRESHOLD = 1000;
+  public static final int DEFAULT_QIN_THRESHOLD = 10000;
   
   private Logger logmon;
   
@@ -71,6 +71,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   /** True if the timestamp is modified since last save. */
   private boolean modified;
   
+  private List<AgentContext> toValidate;
+  
   public MultiThreadEngine() throws Exception {
     name = "Engine#" + AgentServer.getServerId();
 
@@ -84,6 +86,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     
     int workerNumber = AgentServer.getInteger("EngineWorkerNumber", DEFAULT_ENGINE_WORKER_NUMBER).intValue();
     executorService = Executors.newFixedThreadPool(workerNumber, new EngineThreadFactory());
+    
+    toValidate = new ArrayList<AgentContext>();
     
     now = new AtomicLong(0);
     
@@ -482,6 +486,10 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       this.agent = agent;
     }
 
+    public AgentId getAgentId() {
+      return agentId;
+    }
+
     public void run() {
       Thread currentThread = Thread.currentThread();
       EngineThread engineThread = (EngineThread) currentThread;
@@ -494,8 +502,10 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
             // Get a notification, then execute the right reaction.
             msg = qin.pop();
             if (msg == null) {
-              // Commit all changes then test again
-              commit();
+              if (reactMessageList.size() > 0) {
+                // Commit all changes then test again
+                commit();
+              }
               synchronized (qin) {
                 msg = qin.pop();
                 if (msg == null) {
@@ -589,10 +599,20 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
             }
             reactMessageList.add(currentMessage);
             if (reactMessageList.size() > DEFAULT_REACT_NUMBER_BEFORE_COMMIT) {
-              // Commit all changes then continue.
               commit();
             }
+            
+            //else if (currentMessage.not.priority == 9) {
+            //  commit();
+            //}
             currentMessage = null;
+            /*
+            if (reactMessageList.size() > DEFAULT_QIN_THRESHOLD / 2) {
+              synchronized (qin) {
+                qin.notifyAll();
+              }
+            }
+            */
           }
       } catch (Throwable exc) {
         //  There is an unrecoverable exception during the transaction
@@ -645,7 +665,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     private void commit() throws Exception {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ": commit()");
-      
       if (agent != null) agent.save();
       // JORAM_PERF_BRANCH:
       if (beginTransaction) {
@@ -670,20 +689,18 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
           msg.free();
         }
         // dispatch
-        Message sentMsg = null;
-        while (!mq.isEmpty()) {
-          sentMsg = (Message) mq.remove(0);
-          if (sentMsg.from == null)
-            sentMsg.from = AgentId.localId;
+        for (Message sentMsg : mq) {
+          if (sentMsg.from == null) sentMsg.from = AgentId.localId;
           MessageConsumer cons = AgentServer.getConsumer(sentMsg.to.getTo());
           cons.postAndValidate(sentMsg);
         }
+        mq.clear();
       }
       reactMessageList.clear();
       persistentPush = false;
       beginTransaction = false;
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, getName() + ": commited");
+        logmon.log(BasicLevel.DEBUG, getName() + ": committed");
     }
     
     /**
@@ -700,11 +717,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
      *        storage.
      */
     private void dispatch() throws Exception {
-      while (! mq.isEmpty()) {
-        Message msg = mq.remove(0);
-        if (msg.from == null) msg.from = AgentId.localId;
-        Channel.post(msg);
+      for (Message sentMsg : mq) {
+        if (sentMsg.from == null) sentMsg.from = AgentId.localId;
+        Channel.post(sentMsg);
       }
+      mq.clear();
       Channel.save();
     }
     
@@ -937,15 +954,17 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
     return ctx;
   }
-  
+  /*
   private void checkFullQin(ConcurrentLinkedMessageQueue qin) {
-    while (qin.size() > DEFAULT_QIN_THRESHOLD) {
-      try {
-        Thread.sleep(2);
-      } catch (InterruptedException e) {}
+    synchronized (qin) {
+      while (qin.size() > DEFAULT_QIN_THRESHOLD) {
+        try {
+          qin.wait();
+        } catch (InterruptedException e) {}
+      }
     }
   }
-
+*/
   /**
    *  Adds a message in "ready to deliver" list. This method allocates a
    * new time stamp to the message ; be Careful, changing the stamp imply
@@ -960,8 +979,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     msg.save();
     AgentContext ctx = getAgentContext(msg.to);
     ConcurrentLinkedMessageQueue qin = ctx.getWorker().getQin();
-    checkFullQin(qin);
+    //checkFullQin(qin);
     qin.push(msg);
+    toValidate.add(ctx);
   }
   
   private void checkAgentCreate(Message msg) {
@@ -994,16 +1014,16 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     msg.save();
     AgentContext ctx = getAgentContext(msg.to);
     ConcurrentLinkedMessageQueue qin = ctx.getWorker().getQin();
-    checkFullQin(qin);
     synchronized (qin) {
+      //checkFullQin(qin);
       qin.pushAndValidate(msg);
       execute(ctx);
     }
   }
   
   private void execute(AgentContext ctx) {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + " execute: " + ctx);
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO, getName() + " execute: " + ctx.getWorker().getAgentId());
     if (ctx.getStatus() == AgentContext.CREATED) {
       ctx.getWorker().execute();
     } else {
@@ -1029,11 +1049,10 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   public void validate() {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + " validate");
-    for (Enumeration<AgentContext> e = agents.elements() ; e.hasMoreElements() ;) {
-      AgentContext ctx = e.nextElement();
+    for (AgentContext ctx : toValidate) {
       ConcurrentLinkedMessageQueue qin = ctx.getWorker().getQin();
       synchronized (qin) {
-        ctx.getWorker().getQin().validate();
+        qin.validate();
         execute(ctx);
       }
     }
