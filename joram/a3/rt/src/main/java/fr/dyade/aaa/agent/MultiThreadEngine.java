@@ -39,9 +39,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   public static final int DEFAULT_ENGINE_WORKER_NUMBER = 2;
   
-  public static final int DEFAULT_REACT_NUMBER_BEFORE_COMMIT = 1000;
+  public static final int DEFAULT_REACT_NUMBER_BEFORE_COMMIT = 0;
   
-  public static final int DEFAULT_QIN_THRESHOLD = 10000;
+  //public static final int DEFAULT_QIN_THRESHOLD = 10000;
   
   private Logger logmon;
   
@@ -942,6 +942,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   private AgentContext getAgentContext(AgentId id) {
     AgentContext ctx = agents.get(id);
+    if (ctx == null) throw new RuntimeException("Unknown agent context: " + id);
     return ctx;
   }
   
@@ -1114,7 +1115,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     private int counter;
 
     public Thread newThread(Runnable runnable) {
-      return new EngineThread(runnable, counter++);
+      Thread t = new EngineThread(runnable, counter++);
+      t.setPriority(Thread.MAX_PRIORITY);
+      return t;
     }
     
   }
