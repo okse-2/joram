@@ -1056,6 +1056,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         execute(ctx);
       }
     }
+    toValidate.clear();
   }
 
   /**
