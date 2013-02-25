@@ -162,6 +162,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(UserAgent.class.getName());
+  
+  // JORAM_PERF_BRANCH
+  public static final boolean DIRECT_QUEUE_DELIVER = false;
 
   /** the in and out interceptors list. */
   private String interceptors_in = null;
@@ -1132,7 +1135,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     ClientMessages not = new ClientMessages(key, pm.getRequestId(), pm.getMessages());
     setDmq(not);
-
+    
+    // JORAM_PERF_BRANCH
+    not.setProxyId(getId());
+    
     if (destId.getTo() == getId().getTo()) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> local sending");
@@ -1197,8 +1203,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       doReact(key, req);   
     }
   }
-  
-  public static final boolean DIRECT_QUEUE_DELIVER = true;
 
   /**
    * Either forwards the <code>ConsumerSetListRequest</code> request as a
