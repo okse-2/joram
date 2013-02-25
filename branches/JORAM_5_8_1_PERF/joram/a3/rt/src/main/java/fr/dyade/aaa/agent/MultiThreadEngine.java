@@ -39,7 +39,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   public static final int DEFAULT_ENGINE_WORKER_NUMBER = 2;
   
-  public static final int DEFAULT_REACT_NUMBER_BEFORE_COMMIT = 1000;
+  public static final int DEFAULT_REACT_NUMBER_BEFORE_COMMIT = 10;
   
   //public static final int DEFAULT_QIN_THRESHOLD = 10000;
   
