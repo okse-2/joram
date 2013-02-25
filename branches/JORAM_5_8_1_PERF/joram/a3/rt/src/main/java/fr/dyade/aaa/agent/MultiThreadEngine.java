@@ -39,7 +39,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   public static final int DEFAULT_ENGINE_WORKER_NUMBER = 2;
   
-  public static final int DEFAULT_REACT_NUMBER_BEFORE_COMMIT = 0;
+  public static final int DEFAULT_REACT_NUMBER_BEFORE_COMMIT = 1000;
   
   //public static final int DEFAULT_QIN_THRESHOLD = 10000;
   
@@ -592,7 +592,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                 break main_loop;
               }
             }
-                 
+              
             boolean updatedAgent = agent.isUpdated();
             if (msg.not.persistent == true || updatedAgent || persistentPush) {
               beginTransaction = true;
@@ -602,17 +602,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
               commit();
             }
             
-            //else if (currentMessage.not.priority == 9) {
-            //  commit();
-            //}
+            
+            //commit();
             currentMessage = null;
-            /*
-            if (reactMessageList.size() > DEFAULT_QIN_THRESHOLD / 2) {
-              synchronized (qin) {
-                qin.notifyAll();
-              }
-            }
-            */
           }
       } catch (Throwable exc) {
         //  There is an unrecoverable exception during the transaction
@@ -759,7 +751,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     @Override
     public String toString() {
       return "EngineWorker [agentId=" + agentId + ", qin=" + qin + ", agent="
-          + agent + ", reactContextList=" + reactMessageList + ", running="
+          + agent + ", running="
           + running + ", currentReact=" + currentMessage + ", mq=" + mq
           + ", persistentPush=" + persistentPush + ", beginTransaction="
           + beginTransaction + "]";
