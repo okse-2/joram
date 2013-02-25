@@ -530,7 +530,9 @@ abstract class MessageConsumerListener implements ReplyListener {
     }
   }
 
-  void ack(String msgId, int ackMode)
+  
+  // JORAM_PERF_BRANCH
+  void ack(String msgId, int ackMode, boolean persistentMessage)
       throws JMSException {
     if (ackMode == javax.jms.Session.DUPS_OK_ACKNOWLEDGE) {
       // All the operations on messagesToAck are synchronized
@@ -542,6 +544,12 @@ abstract class MessageConsumerListener implements ReplyListener {
     } else {
       ConsumerAckRequest ack = new ConsumerAckRequest(targetName, queueMode);
       ack.addId(msgId);
+      
+      // JORAM_PERF_BRANCH
+      if (! persistentMessage) {
+        ack.setAsyncSend(true);
+      }
+      
       rm.sendRequest(ack);
     }
   }
