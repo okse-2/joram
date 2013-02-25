@@ -267,6 +267,10 @@ public interface Transaction {
    * @param release if true releases the transaction at the end of the commit.
    */
   void commit(boolean release) throws IOException;
+  
+  // JORAM_PERF_BRANCH
+  void commit(Runnable beforeRelease) throws IOException;
+  
   /**
    * Release the mutual exclusion.
    */
