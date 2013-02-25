@@ -31,6 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.ConsumerAckRequest;
 import org.objectweb.joram.shared.client.ConsumerReceiveRequest;
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -167,6 +168,9 @@ public class ReliableTcpConnection {
       if (msg instanceof ProducerMessages) {
         ProducerMessages pm = (ProducerMessages) msg;
         if (! pm.getAsyncSend()) bos.flush();
+      } else if (msg instanceof ConsumerAckRequest) {
+        ConsumerAckRequest car = (ConsumerAckRequest) msg;
+        if (! car.isAsyncSend()) bos.flush();
       } else {
         bos.flush();
       }
