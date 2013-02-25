@@ -419,6 +419,9 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
       }
     }
   }
+  
+  // JORAM_PERF_BRANCH
+  private Runnable channelValidateCallback;
 
   /**
    * Initializes a new network component. This method is used in order to
@@ -470,6 +473,14 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     restore();
     
     averageLoadTask = new NetworkAverageLoadTask(AgentServer.getTimer());
+    
+    // JORAM_PERF_BRANCH
+    channelValidateCallback = new Runnable() {
+      
+      public void run() {
+        Channel.validate();
+      }
+    };
   }
 
   /**
@@ -863,10 +874,12 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
         logmon.log(BasicLevel.DEBUG, getName() + ", deliver msg#" + msg.getStamp());
 
       Channel.save();
-      AgentServer.getTransaction().commit(false);
+      AgentServer.getTransaction().commit(channelValidateCallback);
+      
+      // JORAM_PERF_BRANCH: done by the callback
       // then commit and validate the message.
-      Channel.validate();
-      AgentServer.getTransaction().release();
+      //Channel.validate();
+      //AgentServer.getTransaction().release();
     } else {
 //    it's an already delivered message, we have just to re-send an
 //    acknowledge (see below).
