@@ -41,6 +41,11 @@ public abstract class BaseTransaction implements Transaction {
   public BaseTransaction() {
     props = new Properties();
   }
+  
+  // JORAM_PERF_BRANCH
+  public void commit(Runnable beforeRelease) throws IOException {
+    throw new IOException("Not implemented");
+  }
 
   public void loadProperties(File dir) throws InvalidPropertiesFormatException, FileNotFoundException, IOException {
     // Gets default Transaction properties from disk
