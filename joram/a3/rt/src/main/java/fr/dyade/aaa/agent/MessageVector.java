@@ -21,6 +21,9 @@
  */
 package fr.dyade.aaa.agent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -61,7 +64,7 @@ final class MessageVector implements MessageQueue {
    */
   private int count;
   /** The number of validated message in this <tt>MessageQueue</tt>. */
-  private int validated;
+  private List<Message> notValidated;
 
   private boolean persistent;
 
@@ -73,7 +76,7 @@ final class MessageVector implements MessageQueue {
     data = new Object[50];
     first = 0;
     count = 0;
-    validated = 0;
+    notValidated = new ArrayList<Message>();
   }
 
   /**
@@ -85,14 +88,7 @@ final class MessageVector implements MessageQueue {
   public synchronized void insert(Message item) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "insert(" + item + ")");
-
-    int i = 0;
-    for (; i<validated; i++) {
-      Message msg = getMessageAt(i);
-      if (item.getStamp() < msg.getStamp()) break;
-    }
-    insertMessageAt(item, i);
-    validated += 1;
+    insertMessageAt(item, count);
   }
 
   /**
@@ -112,8 +108,7 @@ final class MessageVector implements MessageQueue {
   public synchronized void pushAndValidate(Message item) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "pushAndValidate(" + item + ")");
-    insertMessageAt(item, validated);
-    validated++;
+    insertMessageAt(item, count);
     notify();
   }
 
@@ -128,7 +123,7 @@ final class MessageVector implements MessageQueue {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "pop()");
 
-    if (validated == 0)
+    if (count == 0)
       throw new EmptyQueueException();
     
     Message item = getMessageAt(0);
@@ -146,7 +141,9 @@ final class MessageVector implements MessageQueue {
   public synchronized void validate() {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "validate()");
-    validated = size();
+    for (Message msg : notValidated) {
+      insertMessageAt(msg, count);
+    }
     notify();
   }
 
@@ -163,14 +160,9 @@ final class MessageVector implements MessageQueue {
   public synchronized Message get() throws InterruptedException {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG)) {
       logmon.log(BasicLevel.DEBUG, logmsg + "get()");
-
-      cpt1 += 1; cpt2 += validated;
-      if ((cpt1 & 0xFFFFL) == 0L) {
-          logmon.log(BasicLevel.DEBUG, logmsg + (cpt2/cpt1) + '/' + validated);
-      }
     }
     
-    while (validated == 0) {
+    while (count == 0) {
       wait();
     }
     Message item = getMessageAt(0);
@@ -196,16 +188,12 @@ final class MessageVector implements MessageQueue {
   public synchronized Message get(long timeout) throws InterruptedException {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG)) {
       logmon.log(BasicLevel.DEBUG, logmsg + "get(" + timeout + ")");
-
-      cpt1 += 1; cpt2 += validated;
-      if ((cpt1 & 0xFFFFL) == 0L) {
-        logmon.log(BasicLevel.DEBUG, logmsg + (cpt2/cpt1) + '/' + validated);
-      }
     }
-    
-    Message item = null;
-    if ((validated == 0) && (timeout > 0)) wait(timeout);
-    if (validated > 0) item = getMessageAt(0);
+
+    while (count == 0) {
+      wait(timeout);
+    }
+    Message item = getMessageAt(0);
 
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "get() -> " + item);
@@ -225,15 +213,10 @@ final class MessageVector implements MessageQueue {
   public synchronized Message getMessageTo(short to) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG)) {
       logmon.log(BasicLevel.DEBUG, logmsg + "getFrom(" + to + ")");
-
-      cpt1 += 1; cpt2 += validated;
-      if ((cpt1 & 0xFFFFL) == 0L) {
-        logmon.log(BasicLevel.DEBUG, logmsg + (cpt2/cpt1) + '/' + validated);
-      }
     }
     
     Message item = null;
-    for (int i=0; i<validated; i++) {
+    for (int i=0; i<count; i++) {
       Message msg = getMessageAt(i);
       if (msg.getDest() == to) {
         item = msg;
@@ -257,7 +240,7 @@ final class MessageVector implements MessageQueue {
       logmon.log(BasicLevel.DEBUG,
                  logmsg + "removeMessage #" + msg.getStamp());
 
-    for (int i = 0; i<validated; i++) {
+    for (int i = 0; i<count; i++) {
       if (getMessageAt(i) ==  msg) {
 
         if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
@@ -283,13 +266,13 @@ final class MessageVector implements MessageQueue {
    * take in account the multiples incoming nodes.
    */
   synchronized int remove(int stamp) {
-    if (validated == 0) return 0;
+    if (count == 0) return 0;
     
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "remove #" + stamp);
 
     int i = 0;
-    for (; i<validated; i++) {
+    for (; i<count; i++) {
       Message msg = getMessageAt(i);
       if (stamp < msg.getStamp()) break;
     }
@@ -312,13 +295,13 @@ final class MessageVector implements MessageQueue {
    * account the multiples incoming nodes.
    */
   synchronized Message removeExpired(long currentTimeMillis) {
-    if (validated == 0) return null;
+    if (count == 0) return null;
     
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  logmsg + "removeExpired - " + currentTimeMillis);
 
-    for (int i = 0; i<validated; i++) {
+    for (int i = 0; i<count; i++) {
       Message msg = getMessageAt(i);
       if ((msg.not != null) && 
           (msg.not.expiration > 0) &&
@@ -426,10 +409,7 @@ final class MessageVector implements MessageQueue {
 
     // Decrease the counter
     count -= 1;
-    // JORAM_PERF_BRANCH
-    if (index < validated) {
-      validated -=1;
-    }
+
     // If there is no more element, moves the empty list to the beginning of
     // the vector.
     if (count == 0) first = 0;
@@ -449,7 +429,7 @@ final class MessageVector implements MessageQueue {
   }
   
   public int getValidated() {
-    return validated;
+    return count;
   }
 
   /**
@@ -465,7 +445,6 @@ final class MessageVector implements MessageQueue {
     strbuf.append('(').append(super.toString());
     strbuf.append(",first=").append(first);
     strbuf.append(",count=").append(count);
-    strbuf.append(",validated=").append(validated).append(",(");
     for (int i=0; i<data.length; i++) {
       strbuf.append(data[i]).append(',');
     }
