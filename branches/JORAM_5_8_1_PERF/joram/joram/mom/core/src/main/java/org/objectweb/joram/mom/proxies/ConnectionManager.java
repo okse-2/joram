@@ -36,7 +36,6 @@ import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerAckRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
-import org.objectweb.joram.shared.client.ServerReply;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -107,17 +106,29 @@ public class ConnectionManager implements ConnectionManagerMBean {
         if (req instanceof ProducerMessages) {
           ProducerMessages pm = (ProducerMessages) req;
           AgentId destId = AgentId.fromString(req.getTarget());
-          ClientMessages not = new ClientMessages(cnxKey, pm.getRequestId(),
-              pm.getMessages());
-          not.setPersistent(false);
-          not.setExpiration(0L);
+          
           if (pm.getAsyncSend()) {
+            ClientMessages not = new ClientMessages(cnxKey, pm.getRequestId(),
+                pm.getMessages());
+            not.setPersistent(false);
+            not.setExpiration(0L);
+            not.setProxyId(proxyId);
             not.setAsyncSend(true);
             Channel.sendTo(destId, not);
           } else {
-            Channel.sendTo(destId, not);
-            ServerReply reply = new ServerReply(not.getRequestId());
-            replyQueue.push(new ProxyMessage(reply, false));
+            if (destId.getTo() == proxyId.getTo()) {
+              ClientMessages not = new ClientMessages(cnxKey,
+                  pm.getRequestId(), pm.getMessages());
+              not.setPersistent(false);
+              not.setExpiration(0L);
+              not.setProxyId(proxyId);
+              not.setAsyncSend(false);
+              Channel.sendTo(destId, not);
+            } else {
+              // Still use the old way when the destination is remote
+              RequestNot rn = new RequestNot(cnxKey, msg);
+              Channel.sendTo(proxyId, rn);
+            }
           }
         } else if (req instanceof ConsumerAckRequest) {
           ConsumerAckRequest car = (ConsumerAckRequest) req;
