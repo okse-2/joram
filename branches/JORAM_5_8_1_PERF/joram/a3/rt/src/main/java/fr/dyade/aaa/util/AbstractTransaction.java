@@ -141,6 +141,19 @@ public abstract class AbstractTransaction extends BaseTransaction {
     setPhase(FREE);
   }
   
+  // JORAM_PERF_BRANCH
+  private int waitingToBegin;
+  
+  //JORAM_PERF_BRANCH
+  public int getWaitingToBegin() {
+    return waitingToBegin;
+  }
+
+  //JORAM_PERF_BRANCH
+  public void setWaitingToBegin(int waitingToBegin) {
+    this.waitingToBegin = waitingToBegin;
+  }
+
   /**
    *  Start a transaction validation, the validation phase needs 3 phases: begin, commit
    * and release. The begin ensure the mutual exclusion of the current transaction.
@@ -148,12 +161,19 @@ public abstract class AbstractTransaction extends BaseTransaction {
    * @see fr.dyade.aaa.util.Transaction#begin()
    */
   public final synchronized void begin() throws IOException {
+    // JORAM_PERF_BRANCH
+    waitingToBegin++;
+    
     while (phase != FREE) {
       try {
         wait();
       } catch (InterruptedException exc) {
       }
     }
+    
+    // JORAM_PERF_BRANCH
+    waitingToBegin--;
+    
     // Change the transaction state.
     setPhase(RUN);
   }
