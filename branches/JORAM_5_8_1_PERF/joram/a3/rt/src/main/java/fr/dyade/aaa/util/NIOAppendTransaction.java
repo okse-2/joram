@@ -53,7 +53,7 @@ import fr.dyade.aaa.common.Debug;
  * @see DBRepository
  * @see MySqlDBRepository
  */
-public final class NIOAppendTransaction extends AbstractTransaction implements NTransactionMBean {
+public final class NIOAppendTransaction extends AbstractTransaction implements NIOAppendTransactionMBean {
   /**
    *  Global in memory log initial capacity, by default 4096.
    *  This value can be adjusted for a particular server by setting
