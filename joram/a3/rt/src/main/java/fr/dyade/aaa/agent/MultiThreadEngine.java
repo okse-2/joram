@@ -73,6 +73,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   private List<AgentContext> toValidate;
   
+  private Runnable channelValidateCallback;
+  
   public MultiThreadEngine() throws Exception {
     name = "Engine#" + AgentServer.getServerId();
 
@@ -94,6 +96,12 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     modified = false;
     restore();
     if (modified) save();
+    
+    channelValidateCallback = new Runnable() {
+      public void run() {
+        Channel.validate();
+      }
+    };
   }
   
   public String getName() {
@@ -671,10 +679,12 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         // then saves changes.
         dispatch();
         // Saves the agent state then commit the transaction.
-        AgentServer.getTransaction().commit(false);
+        AgentServer.getTransaction().commit(channelValidateCallback);
+        
+        // Now the following is done in the callback
         // The transaction has committed, then validate all messages.
-        Channel.validate();
-        AgentServer.getTransaction().release();
+        //Channel.validate();
+        //AgentServer.getTransaction().release();
       } else {
         for (Message msg : reactMessageList) {
           msg.delete();
