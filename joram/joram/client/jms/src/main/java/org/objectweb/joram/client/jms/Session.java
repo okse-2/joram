@@ -2315,7 +2315,8 @@ public class Session implements javax.jms.Session, SessionMBean {
       }
     } else {
       if (autoAck) {
-        mcl.ack(msgId, acknowledgeMode);
+        // JORAM_PERF_BRANCH
+        mcl.ack(msgId, acknowledgeMode, momMsg.persistent);
       }
     }
     
