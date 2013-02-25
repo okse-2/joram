@@ -231,10 +231,12 @@ public class Channel {
         logmon.log(BasicLevel.DEBUG, toString() + ".directSendTo() -> " + msg.getStamp());
 
       consumer.save();
-      AgentServer.getTransaction().commit(false);
+      AgentServer.getTransaction().commit(new ConsumerValidator(consumer));
+      
+      // JORAM_PERF_BRANCH: done by the consumer validate callback
       // then commit and validate the message.
-      consumer.validate();
-      AgentServer.getTransaction().release();
+      //consumer.validate();
+      //AgentServer.getTransaction().release();
       }
     } catch (Exception exc) {
       // Should never happened (IOException or ClassNotFoundException).
@@ -242,6 +244,22 @@ public class Channel {
                  toString() + ", Transaction problem.", exc);
       throw new TransactionError(toString() + ", " + exc.getMessage());
     }
+  }
+  
+  // JORAM_PERF_BRANCH:
+  static class ConsumerValidator implements Runnable {
+    
+    private MessageConsumer consumer;
+
+    public ConsumerValidator(MessageConsumer consumer) {
+      super();
+      this.consumer = consumer;
+    }
+
+    public void run() {
+      consumer.validate();
+    }
+    
   }
 
   /**
