@@ -39,6 +39,9 @@ public final class ConsumerAckRequest extends AbstractJmsRequest {
 
   /** Message identifier. */
   private Vector ids;
+  
+  // JORAM_PERF_BRANCH
+  private boolean asyncSend = false;
 
   /** Sets the acknowledged message identifier. */
   public void addId(String id) {
@@ -98,6 +101,7 @@ public final class ConsumerAckRequest extends AbstractJmsRequest {
     super.writeTo(os);
     StreamUtil.writeListOfStringTo(ids, os);
     StreamUtil.writeTo(queueMode, os);
+    StreamUtil.writeTo(asyncSend, os);
   }
 
   /**
@@ -110,5 +114,14 @@ public final class ConsumerAckRequest extends AbstractJmsRequest {
     super.readFrom(is);
     ids = StreamUtil.readVectorOfStringFrom(is);
     queueMode = StreamUtil.readBooleanFrom(is);
+    asyncSend = StreamUtil.readBooleanFrom(is);
+  }
+
+  public boolean isAsyncSend() {
+    return asyncSend;
+  }
+
+  public void setAsyncSend(boolean asyncSend) {
+    this.asyncSend = asyncSend;
   }
 }
