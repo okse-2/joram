@@ -28,8 +28,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -54,6 +56,9 @@ import fr.dyade.aaa.common.Debug;
  * @see MySqlDBRepository
  */
 public final class NIOAppendTransaction extends AbstractTransaction implements NIOAppendTransactionMBean {
+  
+  public static final boolean MULTI_THREAD_DISK_SYNC = true;
+  
   /**
    *  Global in memory log initial capacity, by default 4096.
    *  This value can be adjusted for a particular server by setting
@@ -575,29 +580,79 @@ public final class NIOAppendTransaction extends AbstractTransaction implements N
       old.free();
     }
   }
+  
+  private Object syncLock = new Object();
+  
+  private List<Runnable> callbacks = new ArrayList<Runnable>();
+  
+  private boolean synchronizedDisk;
 
-  public final synchronized void commit(boolean release) throws IOException {
-    if (phase != RUN)
-      throw new IllegalStateException("Can not commit.");
-
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "NTransaction, commit(" + release + ')');
-    
-    Hashtable<Object, Operation> log = perThreadContext.get().getLog();
-    if (! log.isEmpty()) {
-      logFile.commit(log);
-      log.clear();
+  public final void commit(boolean release) throws IOException {
+    commit(null);
+  }
+  
+  private void validateAndRelease() throws IOException {
+    for (Runnable callback : callbacks) {
+      callback.run();
     }
+    callbacks.clear();
+    release();
+  }
+  
+  private void syncValidateAndRelease() throws IOException {
+    synchronized (syncLock) {
+      logFile.sync();
+      synchronizedDisk = true;
+      validateAndRelease();
+      syncLock.notifyAll();
+    }
+  }
+  
+  public void commit(Runnable beforeRelease) throws IOException {
+    synchronized (this) {
+      if (phase != RUN)
+        throw new IllegalStateException("Cannot commit.");
+      
+      synchronizedDisk = false;
 
-    setPhase(COMMIT);
+      Hashtable<Object, Operation> log = perThreadContext.get().getLog();
+      if (!log.isEmpty()) {
+        logFile.commit(log);
+        log.clear();
+      }
 
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "NTransaction, committed");
+      setPhase(COMMIT);
 
-    if (release) {
-      setPhase(FREE);
-      // wake-up an eventually user's thread in begin
-      notify();
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, "NTransaction, committed");
+      
+      if (beforeRelease != null) {
+        callbacks.add(beforeRelease);
+      }
+      
+      if (! syncOnWrite) {
+        validateAndRelease();
+        return;
+      } else if (MULTI_THREAD_DISK_SYNC) {
+        if (getWaitingToBegin() == 0) {
+          syncValidateAndRelease();
+          return;
+        } else {
+          release();
+        }
+      } else {
+        logFile.sync();
+        validateAndRelease();
+        return;
+      }
+    }
+    
+    synchronized (syncLock) {
+      if (! synchronizedDisk) {
+        try {
+          syncLock.wait();
+        } catch (InterruptedException e) {}
+      }
     }
   }
 
@@ -751,6 +806,8 @@ public final class NIOAppendTransaction extends AbstractTransaction implements N
     
     // JORAM_PERF_BRANCH
     private long logId;
+    
+    private boolean syncOnWrite;
 
     LogFile(File dir, Repository repository,
             boolean useLockFile, boolean syncOnWrite) throws IOException {
@@ -768,10 +825,15 @@ public final class NIOAppendTransaction extends AbstractTransaction implements N
         lockFile.deleteOnExit();
       }
 
+      /*
       if (syncOnWrite)
         mode = "rwd";
       else
-        mode = "rw";
+      */
+      
+      // JORAM_PERF_BRANCH: sync should be explicit
+      this.syncOnWrite = syncOnWrite;
+      mode = "rw";
       
       log = new Hashtable<Object, Operation>(LogMemoryCapacity);
 
@@ -1002,6 +1064,8 @@ public final class NIOAppendTransaction extends AbstractTransaction implements N
       FileChannel channel = logFile.getChannel();
       channel.write(buffer);
       
+      // Do not sync here
+      
       // JORAM_PERF_BRANCH
       //logFile.seek(current -1);
       //logFile.write(Operation.COMMIT);
@@ -1014,6 +1078,12 @@ public final class NIOAppendTransaction extends AbstractTransaction implements N
       if ((current > MaxLogFileSize) || (logMemorySize > MaxLogMemorySize) ||
           ((garbageTimeOut > 0) && (System.currentTimeMillis() > (lastGarbageTime + garbageTimeOut))))
         garbage();
+    }
+    
+    // JORAM_PERF_BRANCH
+    void sync() throws IOException {
+      FileChannel channel = logFile.getChannel();
+      channel.force(false);
     }
 
     /**
