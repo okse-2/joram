@@ -164,7 +164,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   public static Logger logger = Debug.getLogger(UserAgent.class.getName());
   
   // JORAM_PERF_BRANCH
-  public static final boolean DIRECT_QUEUE_DELIVER = false;
+  public static final boolean DIRECT_QUEUE_DELIVER = true;
 
   /** the in and out interceptors list. */
   private String interceptors_in = null;
