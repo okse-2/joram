@@ -261,6 +261,8 @@ class SingleThreadEngine implements Engine, Runnable, MessageConsumer, SingleThr
   }
 
   protected Queue mq;
+  
+  private boolean persistentPush;
 
   /**
    * Push a new message in temporary queue until the end of current reaction.
@@ -275,6 +277,9 @@ class SingleThreadEngine implements Engine, Runnable, MessageConsumer, SingleThr
     if (Thread.currentThread() == thread) {
       if ((to == null) || to.isNullId())
         return;
+      if (not.persistent) {
+        persistentPush = true;
+      }
       AgentId from = agent.getId();
       mq.push(Message.alloc(from, to, not));
     } else {
@@ -287,6 +292,9 @@ class SingleThreadEngine implements Engine, Runnable, MessageConsumer, SingleThr
     if (Thread.currentThread() == thread) {
       if ((to == null) || to.isNullId())
         return;
+      if (not.persistent) {
+        persistentPush = true;
+      }
       mq.push(Message.alloc(from, to, not));
     } else {
       Channel.channel.directSendTo(from, to, not);
@@ -1158,11 +1166,11 @@ class SingleThreadEngine implements Engine, Runnable, MessageConsumer, SingleThr
   void commit() throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ": commit()");
-    
+    boolean updatedAgent = agent.isUpdated();
     if (agent != null) agent.save();
     
     // JORAM_PERF_BRANCH:
-    if (msg.not != null && msg.not.persistent == false) {
+    if (msg.not.persistent == false && ! updatedAgent && ! persistentPush) {
       qin.pop();
       msg.delete();
       msg.free();
@@ -1196,6 +1204,7 @@ class SingleThreadEngine implements Engine, Runnable, MessageConsumer, SingleThr
     Channel.validate();
     AgentServer.getTransaction().release();
     }
+    persistentPush = false;
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ": commited");
 
