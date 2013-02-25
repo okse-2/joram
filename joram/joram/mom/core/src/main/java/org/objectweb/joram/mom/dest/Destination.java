@@ -638,10 +638,14 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
   protected void clientMessages(AgentId from, ClientMessages not) throws AccessException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Destination.clientMessages(" + from + ',' + not + ')');
-
+    
+    // JORAM_PERF_BRANCH
+    if (AgentId.nullId.equals(from)) {
+      from = not.getProxyId();
+    }
+    
     // If sender is not a writer, sending the messages to the DMQ, and
     // throwing an exception:
-    /* JORAM_PERF_BRANCH: enables to bypass the proxy (just for testing)
     if (!isWriter(from)) {
       DMQManager dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
       Message msg;
@@ -654,15 +658,17 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       dmqManager.sendToDMQ();
       throw new AccessException("WRITE right not granted");
     }
-    JORAM_PERF_BRANCH */
     doClientMessages(from, not, true);
 
     // For topic performance we must send reply after process ClientMessage. It results
     // in a best flow-control of sender allowing the handling of forwarded messages before
     // sender freeing.
     
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "SendReplyNot: " + not.isPersistent() + " " + not.getAsyncSend());
     if (!not.isPersistent() && !not.getAsyncSend()) {
-      forward(from, new SendReplyNot(not.getClientContext(), not.getRequestId()));
+      SendReplyNot replyNot = new SendReplyNot(not.getClientContext(), not.getRequestId());
+      forward(from, replyNot);
     }
   }
 
@@ -998,6 +1004,8 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
   }
   
   protected final void forward(AgentId to, Notification not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Destination.forward(" + to + ',' + not + ')');
     Channel.sendTo(to, not);
   }
   
