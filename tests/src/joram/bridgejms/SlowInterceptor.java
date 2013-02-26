@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,8 @@
  */
 package joram.bridgejms;
 
+import java.util.Properties;
+
 import org.objectweb.joram.mom.util.MessageInterceptor;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -33,7 +35,7 @@ public class SlowInterceptor implements MessageInterceptor {
 
 	 public static Logger logger = Debug.getLogger(SlowInterceptor.class.getName());
 	 
-	public boolean handle(Message m) {
+	public boolean handle(Message m, Properties prop) {
 		logger.log(BasicLevel.DEBUG, getClass().getName() + " SlowInterceptor= " + m);
 		try {
 	    Thread.sleep(1000);
@@ -42,4 +44,10 @@ public class SlowInterceptor implements MessageInterceptor {
 		return true;
 	}
 
+  public void init(Properties prop) {
+    // TODO Auto-generated method stub
+    
+  }
+
+	
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,8 @@
  */
 package joram.interceptors;
 
+import java.util.Properties;
+
 import org.objectweb.joram.mom.util.MessageInterceptor;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -33,11 +35,14 @@ public class Exit4 implements MessageInterceptor {
 
 	 public static Logger logger = Debug.getLogger(Exit4.class.getName());
 	 
-	public boolean handle(Message m) {
-		logger.log(BasicLevel.DEBUG, getClass().getName() + " interceptor.Exit4 = " + m);
+	public boolean handle(Message m, Properties prop) {
+		logger.log(BasicLevel.DEBUG, getClass().getName() + " m = " + m);
 		if (m != null)
 			m.setProperty("interceptor.4", "Exit4");
 		return true;
 	}
 
+	public void init(Properties prop) {
+    logger.log(BasicLevel.DEBUG, getClass().getName() + " prop = " + prop);
+  }
 }
