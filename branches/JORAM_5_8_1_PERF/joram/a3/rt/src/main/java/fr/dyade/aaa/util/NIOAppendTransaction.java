@@ -1130,14 +1130,31 @@ public final class NIOAppendTransaction extends AbstractTransaction implements N
 
       current = 7;
       // Cleans log file
-      logFile.seek(0);
+      // logFile.seek(0);
       // JORAM_PERF_BRANCH
       //logFile.write(Operation.END);
       
+      int fileSize = (int) logFile.length();
+      ByteBuffer bb = ByteBuffer.allocate(fileSize);
+      
+      for (int i = 0; i < fileSize; i++)
+      {
+         bb.put((byte) 0);
+      }
+
+      bb.flip();
+      FileChannel channel = logFile.getChannel();
+      channel.position(0);
+      channel.write(bb);
+      logmon.log(BasicLevel.WARN, "*** Log clean: " + fileSize);
+      channel.position(0);
+
       // JORAM_PERF_BRANCH
       logId = System.currentTimeMillis();
       logFile.writeLong(logId);
-
+      
+      channel.force(false);
+      
       long end = System.currentTimeMillis();
       lastGarbageTime = end;
       garbageTime += end - start;
