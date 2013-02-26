@@ -807,6 +807,7 @@ public final class NIOAppendTransaction extends AbstractTransaction implements N
     // JORAM_PERF_BRANCH
     private long logId;
     
+    // JORAM_PERF_BRANCH
     private boolean syncOnWrite;
 
     LogFile(File dir, Repository repository,
@@ -928,16 +929,17 @@ public final class NIOAppendTransaction extends AbstractTransaction implements N
         logFile = new RandomAccessFile(logFilePN, mode);
         logFile.setLength(MaxLogFileSize);
 
-        current = 1;
+        // JORAM_PERF_BRANCH
+        // current = 1;
+        
         // Cleans log file
-        logFile.seek(0);
+        // JORAM_PERF_BRANCH
+        // logFile.seek(0);
         
         // JORAM_PERF_BRANCH
         //logFile.write(Operation.END);
         
-        // JORAM_PERF_BRANCH
-        logId = System.currentTimeMillis();
-        logFile.writeLong(logId);
+        fillAndReset();
       }
     }
 
@@ -1128,12 +1130,26 @@ public final class NIOAppendTransaction extends AbstractTransaction implements N
 
       repository.commit();
 
-      current = 7;
+      //current = 7;
       // Cleans log file
       // logFile.seek(0);
       // JORAM_PERF_BRANCH
       //logFile.write(Operation.END);
       
+      // JORAM_PERF_BRANCH
+      fillAndReset();
+      
+      long end = System.currentTimeMillis();
+      lastGarbageTime = end;
+      garbageTime += end - start;
+
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   "NTransaction.LogFile.garbage() - end: " + (end - start));
+    }
+    
+    // JORAM_PERF_BRANCH
+    void fillAndReset() throws IOException {
       int fileSize = (int) logFile.length();
       ByteBuffer bb = ByteBuffer.allocate(fileSize);
       
@@ -1146,22 +1162,17 @@ public final class NIOAppendTransaction extends AbstractTransaction implements N
       FileChannel channel = logFile.getChannel();
       channel.position(0);
       channel.write(bb);
-      logmon.log(BasicLevel.WARN, "*** Log clean: " + fileSize);
       channel.position(0);
 
       // JORAM_PERF_BRANCH
       logId = System.currentTimeMillis();
       logFile.writeLong(logId);
       
-      channel.force(false);
+      if (syncOnWrite) {
+        channel.force(false);
+      }
       
-      long end = System.currentTimeMillis();
-      lastGarbageTime = end;
-      garbageTime += end - start;
-
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   "NTransaction.LogFile.garbage() - end: " + (end - start));
+      current = 8;
     }
 
     void stop() {
