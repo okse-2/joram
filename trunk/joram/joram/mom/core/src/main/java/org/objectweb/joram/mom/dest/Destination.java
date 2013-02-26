@@ -116,7 +116,8 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
 
   /** the interceptors list. */
   private String interceptorsStr = null;
-  private transient List interceptors = null;
+  private transient List<MessageInterceptor> interceptors = null;
+  private transient Properties interceptorsProp = null;
   
   /**
    * Empty constructor for newInstance().
@@ -155,13 +156,18 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       logger.log(BasicLevel.DEBUG, "agentInitialize(" + firstTime + ')');
 
     super.agentInitialize(firstTime);
+
+    // set the destination name and id in interceptorsProp
+    interceptorsProp = new Properties();
+    interceptorsProp.put(MessageInterceptor.AGENT_ID, getDestinationId());
+    interceptorsProp.put(MessageInterceptor.AGENT_NAME, getName());
     
     // interceptors
     if (interceptorsStr != null) {
-      interceptors = new ArrayList();
-      InterceptorsHelper.addInterceptors(interceptorsStr, interceptors);
+      interceptors = new ArrayList<MessageInterceptor>();
+      InterceptorsHelper.addInterceptors(interceptorsStr, interceptors, interceptorsProp);
     }
-    
+
     initialize(firstTime);
 
     if (getPeriod() > -1)
@@ -375,8 +381,8 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     // Interceptors are set the first time in agent initialization
     if (!firstTime) {
       if (interceptorsStr != null) {
-        interceptors = new ArrayList();
-        InterceptorsHelper.addInterceptors(interceptorsStr, interceptors);
+        interceptors = new ArrayList<MessageInterceptor>();
+        InterceptorsHelper.addInterceptors(interceptorsStr, interceptors, interceptorsProp);
       } else {
         interceptors = null;
       }
@@ -1054,8 +1060,8 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
 			case AdminCommandConstant.CMD_ADD_INTERCEPTORS:
 				prop = request.getProp();
 				if (interceptors == null)
-					interceptors = new ArrayList();
-				InterceptorsHelper.addInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS), interceptors);
+					interceptors = new ArrayList<MessageInterceptor>();
+				InterceptorsHelper.addInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS), interceptors, interceptorsProp);
 				interceptorsStr = InterceptorsHelper.getListInterceptors(interceptors);
 				// state change
 				setSave();
@@ -1084,7 +1090,8 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
 				InterceptorsHelper.replaceInterceptor(
 						((String) prop.get(AdminCommandConstant.INTERCEPTORS_NEW)), 
 						((String) prop.get(AdminCommandConstant.INTERCEPTORS_OLD)), 
-						interceptors);
+						interceptors,
+						interceptorsProp);
 						interceptorsStr = InterceptorsHelper.getListInterceptors(interceptors);
 				// state change
 				setSave();
@@ -1157,10 +1164,10 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       logger.log(BasicLevel.DEBUG, "processInterceptors(" + msg + ')');
   	
   	if (interceptors != null && !interceptors.isEmpty()) {
-  		Iterator it = interceptors.iterator();
+  		Iterator<MessageInterceptor> it = interceptors.iterator();
   		while (it.hasNext()) {
   			MessageInterceptor interceptor = (MessageInterceptor) it.next();
-  			if (!interceptor.handle(msg))
+  			if (!interceptor.handle(msg, interceptorsProp))
   				return null;
   		}
   	}

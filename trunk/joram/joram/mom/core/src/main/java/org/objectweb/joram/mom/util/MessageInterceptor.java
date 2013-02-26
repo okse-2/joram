@@ -21,17 +21,30 @@
  */
 package org.objectweb.joram.mom.util;
 
+import java.util.Properties;
+
 import org.objectweb.joram.shared.messages.Message;
 
 public interface MessageInterceptor {
-
+  // the properties can contains this values
+  public static final String AGENT_ID = "agentId";
+  public static final String AGENT_NAME = "agentName";
+  public static final String KEY = "key";
+  
+	/**
+	 * initialize this interceptor
+	 * @param properties the properties
+	 */
+	void init(Properties properties);
+	
 	/**
 	 * Implement this method to intercept message on server side.
 	 *  
-	 * @param msg  message 
+	 * @param msg  the message 
+	 * @param properties the properties
 	 * @return true if continue with the next interceptor, 
 	 *         false send the message in DMQ.
 	 */
-	boolean handle(Message msg);
+	boolean handle(Message msg, Properties properties);
 
 }

@@ -25,6 +25,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -46,9 +47,10 @@ public class InterceptorsHelper {
 	 * 
 	 * @param listInterceptorClassName list of string className interceptors (separate with INTERCEPTOR_CLASS_NAME_SEPARATOR)
 	 * @param interceptors	the interceptors List.
+	 * @param interceptorProp the init properties parameter.
 	 * @throws Exception
 	 */
-	public static synchronized void addInterceptors(String listInterceptorClassName, List interceptors) throws Exception {
+	public static synchronized void addInterceptors(String listInterceptorClassName, List<MessageInterceptor> interceptors, Properties interceptorProp) throws Exception {
 		if (listInterceptorClassName != null && interceptors != null) {
 			if (logger.isLoggable(BasicLevel.DEBUG))
 				logger.log(BasicLevel.DEBUG, "addInterceptors(" + listInterceptorClassName + ", " + interceptors + ')');
@@ -57,7 +59,9 @@ public class InterceptorsHelper {
 			while (token.hasMoreTokens()) {
 				String interceptorClassName = token.nextToken();
 				try {
-					interceptors.add((MessageInterceptor)Class.forName(interceptorClassName).newInstance());
+					MessageInterceptor interceptor = (MessageInterceptor)Class.forName(interceptorClassName).newInstance();
+					interceptor.init(interceptorProp);
+					interceptors.add(interceptor);
 				} catch(Throwable t) {
 					if (logger.isLoggable(BasicLevel.WARN))
 						logger.log(BasicLevel.WARN, "addInterceptors", t);
@@ -81,10 +85,10 @@ public class InterceptorsHelper {
 	 * @param interceptors	the interceptors List.
    * @return true if removed.
    */
-  private static boolean removeInterceptor(String interceptorClassName, List interceptors) {
+  private static boolean removeInterceptor(String interceptorClassName, List<MessageInterceptor> interceptors) {
   	boolean removed = false;
   	if (interceptorClassName != null) {
-  		Iterator it = interceptors.iterator();
+  		Iterator<MessageInterceptor> it = interceptors.iterator();
   		while (it.hasNext()) {
   			if (interceptorClassName.equals(it.next().getClass().getName())) {
   				removed=true;
@@ -103,7 +107,7 @@ public class InterceptorsHelper {
 	 * @param interceptors	the interceptors List.
 	 * @throws Exception
    */
-  public static synchronized void removeInterceptors(String listInterceptorClassName, List interceptors) throws Exception {
+  public static synchronized void removeInterceptors(String listInterceptorClassName, List<MessageInterceptor> interceptors) throws Exception {
   	if (listInterceptorClassName != null && interceptors != null) {
   		if (logger.isLoggable(BasicLevel.DEBUG))
   			logger.log(BasicLevel.DEBUG, "removeInterceptors(" + listInterceptorClassName + ", " + interceptors + ')');
@@ -138,19 +142,21 @@ public class InterceptorsHelper {
 	 * @return true if replaced.
 	 * @throws Exception
    */
-  public static synchronized boolean replaceInterceptor(String newInterceptorClassName, String oldInterceptorClassName, List interceptors) throws Exception {
+  public static synchronized boolean replaceInterceptor(String newInterceptorClassName, String oldInterceptorClassName, List<MessageInterceptor> interceptors, Properties interceptorProp) throws Exception {
   	if (newInterceptorClassName != null && oldInterceptorClassName != null && interceptors != null) {
   		if (logger.isLoggable(BasicLevel.DEBUG))
   			logger.log(BasicLevel.DEBUG, "replaceInterceptor(" + newInterceptorClassName + ", " + oldInterceptorClassName + ", " + interceptors + ')');
   		try {
   			boolean replaced = false;
-  			Iterator it = interceptors.iterator();
+  			Iterator<MessageInterceptor> it = interceptors.iterator();
   			while (it.hasNext()) {
   				MessageInterceptor oldMI = (MessageInterceptor) it.next();
   				if (oldInterceptorClassName.equals(oldMI.getClass().getName())) {
   					int index = interceptors.indexOf(oldMI);
   					interceptors.remove(index);
-  					interceptors.add(index, (MessageInterceptor)Class.forName(newInterceptorClassName).newInstance());
+  					MessageInterceptor interceptor = (MessageInterceptor)Class.forName(newInterceptorClassName).newInstance();
+  					interceptor.init(interceptorProp);
+  					interceptors.add(index, interceptor);
   					if (logger.isLoggable(BasicLevel.DEBUG))
   						logger.log(BasicLevel.DEBUG, "replaceInterceptor index = " + index);
   					replaced=true;
@@ -175,12 +181,12 @@ public class InterceptorsHelper {
 	 * @param interceptors  the interceptors List.
 	 * @return string representation of interceptors List separate by INTERCEPTOR_CLASS_NAME_SEPARATOR
 	 */
-	public static String getListInterceptors(List interceptors) {
+	public static String getListInterceptors(List<MessageInterceptor> interceptors) {
 		if (interceptors != null) {
 			if (logger.isLoggable(BasicLevel.DEBUG))
 				logger.log(BasicLevel.DEBUG, "getListInterceptors(" + interceptors + ')');
 			StringBuffer buff = new StringBuffer();
-			Iterator it = interceptors.iterator();
+			Iterator<MessageInterceptor> it = interceptors.iterator();
 			while (it.hasNext()) {
 				MessageInterceptor messageInterceptor = (MessageInterceptor) it.next();
 				buff.append(messageInterceptor.getClass().getName());
