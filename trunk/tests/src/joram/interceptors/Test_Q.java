@@ -63,7 +63,7 @@ public class Test_Q extends TestCase {
         org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous", 0);
 
       org.objectweb.joram.client.jms.Queue queue = 
-        org.objectweb.joram.client.jms.Queue.create(0);
+        org.objectweb.joram.client.jms.Queue.create("queue");
       queue.setFreeReading();
       queue.setFreeWriting();
 
