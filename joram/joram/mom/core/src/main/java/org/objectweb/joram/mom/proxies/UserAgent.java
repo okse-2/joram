@@ -166,8 +166,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   /** the in and out interceptors list. */
   private String interceptors_in = null;
   private String interceptors_out = null;
-  private transient List interceptorsOUT = null;
-  private transient List interceptorsIN = null;
+  private transient List<MessageInterceptor> interceptorsOUT = null;
+  private transient List<MessageInterceptor> interceptorsIN = null;
+  private transient Properties interceptorsProp = null;
     
   /** period to run the cleaning task, by default 60s. */
   private long period = 60000L;
@@ -565,7 +566,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         AbstractJmsRequest request = ctx.getRequest(req.getMessage());
         if (request instanceof ProducerMessages) {
           // process interceptors 
-          ProducerMessages pm = processInterceptors((ProducerMessages) request);
+          ProducerMessages pm = processInterceptors(key, (ProducerMessages) request);
           if (pm != null)
             rm.put(req.getConnectionKey(), pm);
         } else if (request instanceof JmsRequestGroup) {
@@ -709,21 +710,23 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       	if (interceptorsOUT != null && !interceptorsOUT.isEmpty()) {
       		if (reply instanceof ConsumerMessages) {
       			org.objectweb.joram.shared.messages.Message m = null;
+      			interceptorsProp.put(MessageInterceptor.KEY, key); // used by flowchart
       			Vector msgs = ((ConsumerMessages) reply).getMessages();
       			Vector newMsgs = new Vector();
       			Vector acks = new Vector();
       			for (int i = 0; i < msgs.size(); i++) {
       				m = (org.objectweb.joram.shared.messages.Message) msgs.elementAt(i);
       				// interceptors iterator
-      				Iterator it = interceptorsOUT.iterator();
+      				Iterator<MessageInterceptor> it = interceptorsOUT.iterator();
       				while (it.hasNext()) {
       					MessageInterceptor interceptor = (MessageInterceptor) it.next();
       					// interceptor handle
-      					if (!interceptor.handle(m)) {
+      					if (!interceptor.handle(m, interceptorsProp)) {
       						m = null;
       						break;
       					}
       				}
+      				interceptorsProp.remove(MessageInterceptor.KEY);
       				if (m != null) {
     						newMsgs.add(m);
       				} else {
@@ -912,13 +915,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Re-initializing after a crash or a server stop.
 
     // interceptors
+    initInterceptorsProp();
     if (interceptors_out != null) {
-    	interceptorsOUT = new ArrayList();
-    	InterceptorsHelper.addInterceptors(interceptors_out, interceptorsOUT);
+    	interceptorsOUT = new ArrayList<MessageInterceptor>();
+    	InterceptorsHelper.addInterceptors(interceptors_out, interceptorsOUT, interceptorsProp);
     }
     if (interceptors_in != null) {
-    	interceptorsIN = new ArrayList();
-    	InterceptorsHelper.addInterceptors(interceptors_in, interceptorsIN);
+    	interceptorsIN = new ArrayList<MessageInterceptor>();
+    	InterceptorsHelper.addInterceptors(interceptors_in, interceptorsIN, interceptorsProp);
     }
     
     // Browsing the pre-crash contexts:
@@ -1084,7 +1088,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       throw new RequestException("Request to an undefined destination (null).");
 
     // process interceptors 
-    ProducerMessages pm = processInterceptors(req); 
+    ProducerMessages pm = processInterceptors(key, req); 
     if (pm == null) { 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "UserAgent.reactToClientRequest : no message to send.");
@@ -1219,7 +1223,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     for (int i = 0; i < requests.length; i++) {
       if (requests[i] instanceof ProducerMessages) {
         // process interceptors 
-        ProducerMessages pm = processInterceptors((ProducerMessages) requests[i]);
+        ProducerMessages pm = processInterceptors(key, (ProducerMessages) requests[i]);
         if (pm != null)
           rm.put(key, pm);
       } else {
@@ -2267,7 +2271,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (pms != null) {
       while (pms.hasMoreElements()) {
         // process interceptors
-        ProducerMessages pm = processInterceptors((ProducerMessages) pms.nextElement());
+        ProducerMessages pm = processInterceptors(key, (ProducerMessages) pms.nextElement());
         if (pm == null)
           continue;
         AgentId destId = AgentId.fromString(pm.getTarget());
@@ -2851,12 +2855,12 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 			case AdminCommandConstant.CMD_ADD_INTERCEPTORS:
 				prop = request.getProp();
 				if (interceptorsOUT == null)
-					interceptorsOUT = new ArrayList();
-				InterceptorsHelper.addInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT), interceptorsOUT);
+					interceptorsOUT = new ArrayList<MessageInterceptor>();
+				InterceptorsHelper.addInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT), interceptorsOUT, interceptorsProp);
 				interceptors_out = InterceptorsHelper.getListInterceptors(interceptorsOUT);
 				if (interceptorsIN == null)
-					interceptorsIN = new ArrayList();
-				InterceptorsHelper.addInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN), interceptorsIN);
+					interceptorsIN = new ArrayList<MessageInterceptor>();
+				InterceptorsHelper.addInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN), interceptorsIN, interceptorsProp);
 				interceptors_in = InterceptorsHelper.getListInterceptors(interceptorsIN);
 				// state change
 				setSave();
@@ -2897,13 +2901,15 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 				InterceptorsHelper.replaceInterceptor(
 						((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN_NEW)), 
 						((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN_OLD)), 
-						interceptorsIN);
+						interceptorsIN,
+						interceptorsProp);
 				interceptors_in = InterceptorsHelper.getListInterceptors(interceptorsIN);
 				// replace OUT interceptor
 				InterceptorsHelper.replaceInterceptor(
 						((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT_NEW)), 
 						((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT_OLD)), 
-						interceptorsOUT);
+						interceptorsOUT,
+						interceptorsProp);
 				interceptors_out = InterceptorsHelper.getListInterceptors(interceptorsOUT);
 				// state change
 				setSave();
@@ -3296,21 +3302,32 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     return nbMsgsSentToDMQSinceCreation;
   }
   
-  private ProducerMessages processInterceptors(ProducerMessages pm) {
+  private void initInterceptorsProp() {
+    if (interceptorsProp == null) {
+      // set the destination name and id in interceptorsProp
+      interceptorsProp = new Properties();
+      interceptorsProp.put(MessageInterceptor.AGENT_ID, getId());
+      interceptorsProp.put(MessageInterceptor.AGENT_NAME, getName());
+    }
+  }
+  
+  private ProducerMessages processInterceptors(int key, ProducerMessages pm) {
     if (interceptorsIN != null && !interceptorsIN.isEmpty()) {
+      interceptorsProp.put(MessageInterceptor.KEY, key); // used by flowchart
       org.objectweb.joram.shared.messages.Message m = null;
       Vector msgs = ((ProducerMessages) pm).getMessages();
       Vector newMsgs = new Vector();
       for (int i = 0; i < msgs.size(); i++) {
         m = (org.objectweb.joram.shared.messages.Message) msgs.elementAt(i);
-        Iterator it = interceptorsIN.iterator();
+        Iterator<MessageInterceptor> it = interceptorsIN.iterator();
         while (it.hasNext()) {
-          MessageInterceptor interceptor = (MessageInterceptor) it.next();
-          if (!interceptor.handle(m)) {
+          MessageInterceptor interceptor = it.next();
+          if (!interceptor.handle(m, interceptorsProp)) {
             m = null;
             break;
           }
         }
+        interceptorsProp.remove(MessageInterceptor.KEY);
         if (m != null) {
           newMsgs.add(m);
         } else {
