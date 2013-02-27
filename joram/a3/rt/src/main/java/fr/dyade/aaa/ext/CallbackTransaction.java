@@ -492,9 +492,9 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
   private LogFileWriter commitWorker = new LogFileWriter();
   
   public void commit(Runnable callback) throws IOException {
-    if (logmon.isLoggable(BasicLevel.WARN))
-      logmon.log(BasicLevel.WARN, "CallbackTransaction.commit()");
-    synchronized (this) {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "CallbackTransaction.commit()");
+    try {
       if (phase != RUN)
         throw new IllegalStateException("Cannot commit.");
 
@@ -508,10 +508,10 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
 
       setPhase(COMMIT);
       
-      release();
-
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "NTransaction, to be committed");
+        logmon.log(BasicLevel.DEBUG, "CallbackTransaction, to be committed");
+    } finally {
+      release();
     }
   }
   
@@ -552,6 +552,9 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
 
     private boolean running;
     
+    private List<LogFileWriteContext> toValidate = 
+        new ArrayList<LogFileWriteContext>();
+    
     public void run() {
       LogFile currentLogFile = null;
       while (true) {
@@ -559,12 +562,21 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
         if (ctx == null) {
           if (currentLogFile != null) {
             try {
-              logmon.log(BasicLevel.WARN, "*** sync log: " + currentLogFile.logidx);
+              //logmon.log(BasicLevel.WARN, "*** sync log: " + currentLogFile.logidx);
               FileChannel channel = currentLogFile.getChannel();
-              channel.force(false);
+              if (syncOnWrite) {
+                channel.force(false);
+              }
+              for (LogFileWriteContext ctxToValidate : toValidate) {
+                if (ctxToValidate.callback != null) {
+                  //logmon.log(BasicLevel.WARN, "*** callback");
+                  ctxToValidate.callback.run();
+                }
+              }
+              toValidate.clear();
               currentLogFile = null;
             } catch (IOException e) {
-              logmon.log(BasicLevel.WARN, "", e);
+              logmon.log(BasicLevel.ERROR, "", e);
             }
           }
           synchronized (contexts) {
@@ -576,22 +588,21 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
           }
         }
         currentLogFile = ctx.logBuffer.logFile;
-        logmon.log(BasicLevel.WARN, "*** write log buffer: " + currentLogFile.logidx);
+        //logmon.log(BasicLevel.WARN, "*** write log buffer: " + currentLogFile.logidx);
         try {
-          logManager.writeLogBuffer(ctx.logBuffer);
+          ByteBuffer buffer = ctx.logBuffer.buffer;
+          FileChannel channel = ctx.logBuffer.logFile.getChannel();
+          channel.write(buffer);
+          toValidate.add(ctx);
         } catch (IOException e) {
-          logmon.log(BasicLevel.WARN, "", e);
-        }
-        if (ctx.callback != null) {
-          logmon.log(BasicLevel.WARN, "*** callback");
-          ctx.callback.run();
+          logmon.log(BasicLevel.ERROR, "", e);
         }
       }
     }
     
     public void offer(LogFileWriteContext ctx) {
       synchronized (contexts) {
-        logmon.log(BasicLevel.WARN, "*** offer");
+        //logmon.log(BasicLevel.WARN, "*** offer");
         contexts.offer(ctx);
         if (! running) {
           running = true;
@@ -995,8 +1006,8 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
           op.logidx = logidx;
           op.logptr = current + count;
           
-          if (logmon.isLoggable(BasicLevel.WARN))
-            logmon.log(BasicLevel.WARN,
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
                        "commit#" + op.logidx + ' ' + op.dirName + '/' + op.name + ": " + op.logptr);
 
           // Save the operation to the log on disk
@@ -1068,6 +1079,8 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
       // TODO: should ensure that the LogFileWriter has finished to write in the old logs
       // because a garbage may happen below
       
+      // TODO: check why the following fails as it should work
+      /*
       for (int i=0; i<nbLogFile; i++) {
         if (logFile[i] == null) continue;
 
@@ -1081,6 +1094,7 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
           garbage(logFile[i]);
         }
       }
+      */
       
       if (current > MaxLogFileSize) {
         if (logmon.isLoggable(BasicLevel.DEBUG)) {
@@ -1091,13 +1105,12 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
           logmon.log(BasicLevel.DEBUG, "log -> " + mainLog.size());
         }
 
-        int newLogIdx = logidx + 1;
-        if (logFile[newLogIdx % nbLogFile] != null) {
+        logidx += 1;
+        if (logFile[logidx % nbLogFile] != null) {
           // The log file is an older one, garbage it before using it anew.
           garbage(logFile[logidx % nbLogFile]);
         }
 
-        logidx += newLogIdx;
         // Creates and initializes a new log file
         logFile[logidx % nbLogFile] = new LogFile(dir, logidx, mode);
         logFile[logidx % nbLogFile].setLength(MaxLogFileSize);
@@ -1109,22 +1122,15 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
         // logFile[logidx%nbLogFile].seek(0);
         // logFile[logidx%nbLogFile].write(Operation.END);
         // current = 1;
+        
+        // TODO: already done in Garbage?
         fillAndReset(logFile[logidx % nbLogFile]);
         current = 8;
       }
 
       return new LogBuffer(buffer, logFile[logidx % nbLogFile]);
     }
-     
-    void writeLogBuffer(LogBuffer logBuffer) throws IOException {
-      ByteBuffer buffer = logBuffer.buffer;
-      
-      FileChannel channel = logBuffer.logFile.getChannel();
-      channel.write(buffer);
-      
-      // Do not sync here
-    }
-
+    
     public byte[] getFromLog(String dirName, String name) throws IOException {
       // First searches in the logs a new value for the object.
       Operation op = mainLog.get(OperationKey.newKey(dirName, name));
@@ -1144,8 +1150,8 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
     public byte[] getFromLog(Operation op) throws IOException {
       loadFromLog += 1;
       
-      if (logmon.isLoggable(BasicLevel.WARN))
-        logmon.log(BasicLevel.WARN,
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
                    "getFromLog#" + op.logidx + ' ' + op.dirName + '/' + op.name + ": " + op.logptr);
       
       logFile[op.logidx%nbLogFile].seek(op.logptr);
@@ -1406,7 +1412,8 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
       logFile.writeLong(logFile.logId);
       
       if (syncOnWrite) {
-        channel.force(false);
+        // Also sync the metadata
+        channel.force(true);
       }
     }
 
