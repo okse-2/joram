@@ -207,7 +207,8 @@ public class Test6 extends BaseTest {
       error(exc);
     } finally {
       System.out.println("Server stop ");
-      fr.dyade.aaa.agent.AgentServer.stop();
+      if (! Boolean.getBoolean("ServerOutside"))
+        fr.dyade.aaa.agent.AgentServer.stop();
       endTest(); 
     }
   }
