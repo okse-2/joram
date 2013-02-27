@@ -30,12 +30,13 @@ import java.util.List;
 import org.objectweb.joram.shared.messages.Message;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.CallbackNotification;
 
 /**
  * A <code>ClientMessages</code> instance is used by a client agent for
  * sending one or many messages to a destination.
  */
-public class ClientMessages extends AbstractRequestNot {
+public class ClientMessages extends AbstractRequestNot implements CallbackNotification {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
@@ -48,6 +49,9 @@ public class ClientMessages extends AbstractRequestNot {
   
   // JORAM_PERF_BRANCH
   private AgentId proxyId;
+  
+  //JORAM_PERF_BRANCH
+  private Runnable callback;
 
   /**
    * Constructs a <code>ClientMessages</code> instance.
@@ -115,6 +119,14 @@ public class ClientMessages extends AbstractRequestNot {
 
   public void setProxyId(AgentId proxyId) {
     this.proxyId = proxyId;
+  }
+
+  public Runnable getCallback() {
+    return callback;
+  }
+
+  public void setCallback(Runnable callback) {
+    this.callback = callback;
   }
 
   /** Adds a message to deliver. */
