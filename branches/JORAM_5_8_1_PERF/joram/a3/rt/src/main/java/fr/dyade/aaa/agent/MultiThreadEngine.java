@@ -69,7 +69,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   /** True if the timestamp is modified since last save. */
   private boolean modified;
   
-  private List<AgentContext> toValidate;
+  //private List<AgentContext> toValidate;
   
   public MultiThreadEngine() throws Exception {
     name = "Engine#" + AgentServer.getServerId();
@@ -85,7 +85,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     int workerNumber = AgentServer.getInteger("EngineWorkerNumber", DEFAULT_ENGINE_WORKER_NUMBER).intValue();
     executorService = Executors.newFixedThreadPool(workerNumber, new EngineThreadFactory());
     
-    toValidate = new ArrayList<AgentContext>();
+    //toValidate = new Vector<AgentContext>();
     
     now = new AtomicLong(0);
     
@@ -451,13 +451,13 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     
     private Message currentMessage;
     
-    private List<Message> mq;
+    private ArrayList<Message> mq;
     
     private boolean persistentPush;
     
     private boolean beginTransaction;
     
-    private List<Runnable> callbacks;
+    private ArrayList<Runnable> callbacks;
     
     EngineWorker(AgentId agentId) {
       this.agentId = agentId;
@@ -680,9 +680,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         }
         // Post all notifications temporary kept in mq to the right consumers,
         // then saves changes.
-        dispatch();
+        List<Message> toValidate = dispatch();
         // Saves the agent state then commit the transaction.
-        AgentServer.getTransaction().commit(new CommitCallback(callbacks));
+        AgentServer.getTransaction().commit(new CommitCallback(toValidate, (List<Runnable>) callbacks.clone()));
         
         // Now the following is done in the callback
         // The transaction has committed, then validate all messages.
@@ -722,13 +722,16 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
      * @exception IOException error when accessing the local persistent
      *        storage.
      */
-    private void dispatch() throws Exception {
+    private List<Message> dispatch() throws Exception {
+      List<Message> toValidate;
       for (Message sentMsg : mq) {
         if (sentMsg.from == null) sentMsg.from = AgentId.localId;
         Channel.post(sentMsg);
       }
+      toValidate = (List<Message>) mq.clone();
       mq.clear();
       Channel.save();
+      return toValidate;
     }
     
     private void terminate() {
@@ -974,10 +977,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     checkAgentCreate(msg);
     stamp(msg);
     msg.save();
-    AgentContext ctx = getAgentContext(msg.to);
-    ConcurrentLinkedMessageQueue qin = ctx.getWorker().getQin();
-    qin.push(msg);
-    toValidate.add(ctx);
   }
   
   private void checkAgentCreate(Message msg) {
@@ -1016,6 +1015,16 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
   }
   
+  //JORAM_PERF_BRANCH
+  public void validate(Message msg) throws Exception {
+    AgentContext ctx = getAgentContext(msg.to);
+    ConcurrentLinkedMessageQueue qin = ctx.getWorker().getQin();
+    synchronized (qin) {
+      qin.pushAndValidate(msg);
+      execute(ctx);
+    }
+  }
+  
   private void execute(AgentContext ctx) {
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, getName() + " execute: " + ctx.getWorker().getAgentId());
@@ -1044,6 +1053,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   public void validate() {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + " validate");
+    /*
     for (AgentContext ctx : toValidate) {
       ConcurrentLinkedMessageQueue qin = ctx.getWorker().getQin();
       synchronized (qin) {
@@ -1052,6 +1062,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       }
     }
     toValidate.clear();
+    */
   }
 
   /**
@@ -1077,7 +1088,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     public static final int DELETED = 3;
     
     private EngineWorker worker;
-    private int status;
+    private volatile int status;
     
     public AgentContext(AgentId agentId, EngineWorker worker) {
       super();
@@ -1134,17 +1145,27 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     
   }
   
-  static class CommitCallback implements Runnable {
+  class CommitCallback implements Runnable {
+    
+    private List<Message> toValidate;
     
     private List<Runnable> callbacks;
 
-    public CommitCallback(List<Runnable> callbacks) {
+    public CommitCallback(List<Message> toValidate,
+        List<Runnable> callbacks) {
       super();
+      this.toValidate = toValidate;
       this.callbacks = callbacks;
     }
 
     public void run() {
-      Channel.validate();
+      for (Message msgToValidate : toValidate) {
+        try {
+          Channel.validate(msgToValidate);
+        } catch (Exception e) {
+          logmon.log(BasicLevel.ERROR, getName() + " validate", e);
+        }
+      }
       for (Runnable callback : callbacks) {
         callback.run();
       }
