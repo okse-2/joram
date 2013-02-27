@@ -954,6 +954,8 @@ public class Queue extends Destination implements QueueMBean {
     receiving = true;
     ClientMessages cm = null;
     
+    nbMsgsReceiveSinceCreationBis += not.getMessages().size();
+    
     // interceptors
     if (interceptorsAvailable()) {
     	// new client message
@@ -1647,4 +1649,11 @@ public class Queue extends Destination implements QueueMBean {
 		
 		return stats;
 	}
+	
+	protected long nbMsgsReceiveSinceCreationBis = 0;
+	
+	public final long getNbMsgsReceiveSinceCreationBis() {
+		
+	    return nbMsgsReceiveSinceCreationBis;
+	  }
 }
