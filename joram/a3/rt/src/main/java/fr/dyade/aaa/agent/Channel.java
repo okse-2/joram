@@ -142,6 +142,16 @@ public class Channel {
     for (int i=0; i<consumers.size(); i++) {
       ((MessageConsumer) consumers.elementAt(i)).save();
     }
+    // JORAM_PERF_BRANCH
+    // Clear the list now: the validate is done concurrently with a callback
+    consumers.clear();
+  }
+  
+  // JORAM_PERF_BRANCH
+  // Called by the commit callback
+  static final void validate(Message msg) throws Exception {
+    MessageConsumer cons = AgentServer.getConsumer(msg.to.getTo());
+    cons.validate(msg);
   }
 
   /**
@@ -156,10 +166,14 @@ public class Channel {
    * @see Engine#commit()
    */
   static final void validate() {
+    // JORAM_PERF_BRANCH
+    // the validate is done concurrently
+    /*
     for (int i=0; i<consumers.size(); i++) {
       ((MessageConsumer) consumers.elementAt(i)).validate();
     }
     consumers.clear();
+    */
   }
 
   /**
@@ -231,7 +245,10 @@ public class Channel {
         logmon.log(BasicLevel.DEBUG, toString() + ".directSendTo() -> " + msg.getStamp());
 
       consumer.save();
-      AgentServer.getTransaction().commit(new ConsumerValidator(consumer));
+      
+      // JORAM_PERF_BRANCH
+      // Pass a commit callback
+      AgentServer.getTransaction().commit(new ConsumerValidator(msg, consumer));
       
       // JORAM_PERF_BRANCH: done by the consumer validate callback
       // then commit and validate the message.
@@ -247,17 +264,24 @@ public class Channel {
   }
   
   // JORAM_PERF_BRANCH:
-  static class ConsumerValidator implements Runnable {
+  class ConsumerValidator implements Runnable {
     
     private MessageConsumer consumer;
+    
+    private Message msg;
 
-    public ConsumerValidator(MessageConsumer consumer) {
+    public ConsumerValidator(Message msg, MessageConsumer consumer) {
       super();
+      this.msg = msg;
       this.consumer = consumer;
     }
 
     public void run() {
-      consumer.validate();
+      try {
+        consumer.validate(msg);
+      } catch (Exception e) {
+        logmon.log(BasicLevel.DEBUG, "", e);
+      }
     }
     
   }
