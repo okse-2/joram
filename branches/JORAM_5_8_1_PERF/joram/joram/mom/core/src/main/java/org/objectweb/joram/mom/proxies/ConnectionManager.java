@@ -36,6 +36,7 @@ import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerAckRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
+import org.objectweb.joram.shared.client.ServerReply;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -77,6 +78,24 @@ public class ConnectionManager implements ConnectionManagerMBean {
   private static ConnectionManager currentInstance;
   
   public static final boolean DIRECT_NOTIFICATION = true;
+  
+  static class ReplyCallback implements Runnable {
+    
+    private AckedQueue replyQueue;
+    
+    private int correlationId;
+
+    public ReplyCallback(AckedQueue replyQueue, int correlationId) {
+      super();
+      this.replyQueue = replyQueue;
+      this.correlationId = correlationId;
+    }
+
+    public void run() {
+      replyQueue.push(new ProxyMessage(new ServerReply(correlationId), false));
+    }
+    
+  }
   
   // JORAM_PERF_BRANCH
   public static final void sendToProxy(AgentId proxyId, int cnxKey,
@@ -122,7 +141,9 @@ public class ConnectionManager implements ConnectionManagerMBean {
               not.setPersistent(false);
               not.setExpiration(0L);
               not.setProxyId(proxyId);
-              not.setAsyncSend(false);
+              // not.setAsyncSend(false);
+              not.setAsyncSend(true); // callback is used, see below
+              not.setCallback(new ReplyCallback(replyQueue, pm.getRequestId()));
               Channel.sendTo(destId, not);
             } else {
               // Still use the old way when the destination is remote
