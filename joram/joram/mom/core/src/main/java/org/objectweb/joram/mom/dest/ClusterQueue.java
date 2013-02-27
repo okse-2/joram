@@ -453,6 +453,7 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     ClientMessages cm = not.getClientMessages();
     try {
       if (cm != null)
+    	nbMsgsReceiveSinceCreationBis -= cm.getMessages().size();
         doClientMessages(from, cm, false);
     } catch (AccessException e) {/* never happens */}
   }
@@ -493,6 +494,7 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     ClientMessages cm = not.getClientMessages();
     if (cm != null) {
       try {
+    	nbMsgsReceiveSinceCreationBis -= cm.getMessages().size();
         doClientMessages(from, cm, false);
       } catch (AccessException e) { /* never happens */}
     }

@@ -136,4 +136,10 @@ public interface QueueMBean extends DestinationMBean {
   public List getMessagesView();
 
 //  public CompositeData[] getMessages() throws Exception;
+  
+  /** 
+   * @return the number of messages sent to this queue
+   * since its creation.
+   */
+  long getNbMsgsReceiveSinceCreationBis();
 }
