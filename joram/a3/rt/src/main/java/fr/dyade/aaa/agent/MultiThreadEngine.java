@@ -41,8 +41,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   public static final int DEFAULT_REACT_NUMBER_BEFORE_COMMIT = 10;
   
-  //public static final int DEFAULT_QIN_THRESHOLD = 10000;
-  
   private Logger logmon;
   
   private String name;
@@ -73,8 +71,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   private List<AgentContext> toValidate;
   
-  private Runnable channelValidateCallback;
-  
   public MultiThreadEngine() throws Exception {
     name = "Engine#" + AgentServer.getServerId();
 
@@ -96,12 +92,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     modified = false;
     restore();
     if (modified) save();
-    
-    channelValidateCallback = new Runnable() {
-      public void run() {
-        Channel.validate();
-      }
-    };
+
   }
   
   public String getName() {
@@ -466,6 +457,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     
     private boolean beginTransaction;
     
+    private List<Runnable> callbacks;
+    
     EngineWorker(AgentId agentId) {
       this.agentId = agentId;
       qin = new ConcurrentLinkedMessageQueue(agentId.toString());
@@ -473,6 +466,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       persistentPush = false;
       beginTransaction = false;
       reactMessageList = new ArrayList<Message>();
+      callbacks = new ArrayList<Runnable>();
     }
      
     public ConcurrentLinkedMessageQueue getQin() {
@@ -582,6 +576,13 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                 }
               }
             }
+            
+            if (msg.not instanceof CallbackNotification) {
+              Runnable callback = ((CallbackNotification) msg.not).getCallback();
+              if (callback != null) {
+                callbacks.add(callback);
+              }
+            }
 
             if (agent != null) {
               if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -653,6 +654,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       mq.add(Message.alloc(from, to, not));
     }
     
+    
+    
     /**
      * Commit the agent reaction in case of right termination:<ul>
      * <li>suppress the processed notification from message queue,
@@ -664,7 +667,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
      */
     private void commit() throws Exception {
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, getName() + ": commit()");
+        logmon.log(BasicLevel.DEBUG, getName() + ": commit()" + reactMessageList.size());
       if (agent != null) agent.save();
       // JORAM_PERF_BRANCH:
       if (beginTransaction) {
@@ -679,7 +682,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         // then saves changes.
         dispatch();
         // Saves the agent state then commit the transaction.
-        AgentServer.getTransaction().commit(channelValidateCallback);
+        AgentServer.getTransaction().commit(new CommitCallback(callbacks));
         
         // Now the following is done in the callback
         // The transaction has committed, then validate all messages.
@@ -699,6 +702,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         mq.clear();
       }
       reactMessageList.clear();
+      callbacks.clear();
       persistentPush = false;
       beginTransaction = false;
       if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -957,17 +961,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
     return ctx;
   }
-  /*
-  private void checkFullQin(ConcurrentLinkedMessageQueue qin) {
-    synchronized (qin) {
-      while (qin.size() > DEFAULT_QIN_THRESHOLD) {
-        try {
-          qin.wait();
-        } catch (InterruptedException e) {}
-      }
-    }
-  }
-*/
+
   /**
    *  Adds a message in "ready to deliver" list. This method allocates a
    * new time stamp to the message ; be Careful, changing the stamp imply
@@ -982,7 +976,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     msg.save();
     AgentContext ctx = getAgentContext(msg.to);
     ConcurrentLinkedMessageQueue qin = ctx.getWorker().getQin();
-    //checkFullQin(qin);
     qin.push(msg);
     toValidate.add(ctx);
   }
@@ -1018,7 +1011,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     AgentContext ctx = getAgentContext(msg.to);
     ConcurrentLinkedMessageQueue qin = ctx.getWorker().getQin();
     synchronized (qin) {
-      //checkFullQin(qin);
       qin.pushAndValidate(msg);
       execute(ctx);
     }
@@ -1138,6 +1130,24 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
 
     public EngineWorker getEngineWorker() {
       return engineWorker;
+    }
+    
+  }
+  
+  static class CommitCallback implements Runnable {
+    
+    private List<Runnable> callbacks;
+
+    public CommitCallback(List<Runnable> callbacks) {
+      super();
+      this.callbacks = callbacks;
+    }
+
+    public void run() {
+      Channel.validate();
+      for (Runnable callback : callbacks) {
+        callback.run();
+      }
     }
     
   }
