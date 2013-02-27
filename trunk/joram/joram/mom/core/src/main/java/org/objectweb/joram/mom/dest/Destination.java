@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -159,8 +159,8 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
 
     // set the destination name and id in interceptorsProp
     interceptorsProp = new Properties();
-    interceptorsProp.put(MessageInterceptor.AGENT_ID, getDestinationId());
-    interceptorsProp.put(MessageInterceptor.AGENT_NAME, getName());
+    interceptorsProp.setProperty(MessageInterceptor.AGENT_ID, getDestinationId());
+    interceptorsProp.setProperty(MessageInterceptor.AGENT_NAME, getName());
     
     // interceptors
     if (interceptorsStr != null) {

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
@@ -710,7 +710,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       	if (interceptorsOUT != null && !interceptorsOUT.isEmpty()) {
       		if (reply instanceof ConsumerMessages) {
       			org.objectweb.joram.shared.messages.Message m = null;
-      			interceptorsProp.put(MessageInterceptor.KEY, key); // used by flowchart
+      			interceptorsProp.setProperty(MessageInterceptor.KEY, ""+key); // used by flowchart
       			Vector msgs = ((ConsumerMessages) reply).getMessages();
       			Vector newMsgs = new Vector();
       			Vector acks = new Vector();
@@ -3306,14 +3306,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (interceptorsProp == null) {
       // set the destination name and id in interceptorsProp
       interceptorsProp = new Properties();
-      interceptorsProp.put(MessageInterceptor.AGENT_ID, getId());
-      interceptorsProp.put(MessageInterceptor.AGENT_NAME, getName());
+      interceptorsProp.setProperty(MessageInterceptor.AGENT_ID, getAgentId());
+      interceptorsProp.setProperty(MessageInterceptor.AGENT_NAME, getName());
     }
   }
   
   private ProducerMessages processInterceptors(int key, ProducerMessages pm) {
     if (interceptorsIN != null && !interceptorsIN.isEmpty()) {
-      interceptorsProp.put(MessageInterceptor.KEY, key); // used by flowchart
+      interceptorsProp.setProperty(MessageInterceptor.KEY, ""+key); // used by flowchart
       org.objectweb.joram.shared.messages.Message m = null;
       Vector msgs = ((ProducerMessages) pm).getMessages();
       Vector newMsgs = new Vector();
