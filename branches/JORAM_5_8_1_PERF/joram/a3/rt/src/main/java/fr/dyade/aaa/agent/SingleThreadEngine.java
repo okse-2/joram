@@ -1316,4 +1316,9 @@ class SingleThreadEngine implements Engine, Runnable, MessageConsumer, SingleThr
   public boolean isEngineThread() {
     return Thread.currentThread() == thread;
   }
+
+  // JORAM_PERF_BRANCH
+  public void validate(Message msg) throws Exception {
+    throw new Exception("Not implemented");
+  }
 }
