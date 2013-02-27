@@ -69,6 +69,9 @@ public interface MessageConsumer {
   
   // JORAM_PERF_BRANCH
   void postAndValidate(Message msg) throws Exception;
+  
+  //JORAM_PERF_BRANCH
+  void validate(Message msg) throws Exception;
 
   /**
    * Validates all messages pushed in queue during transaction session.
