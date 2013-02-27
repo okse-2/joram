@@ -675,7 +675,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     // Saves the message.
     msg.save();
     // Push it in "ready to deliver" queue.
-    qout.push(msg);
+    // JORAM_PERF_BRANCH: don't push, done later during the commit (enables concurrent transactions)
+    // qout.push(msg);
     nbMessageOut += 1;
   }
   
@@ -694,6 +695,11 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     // Push it in "ready to deliver" queue.
     qout.pushAndValidate(msg);
     nbMessageOut += 1;
+  }
+  
+  //JORAM_PERF_BRANCH
+  public void validate(Message msg) throws Exception {
+    qout.pushAndValidate(msg);
   }
 
   /**
