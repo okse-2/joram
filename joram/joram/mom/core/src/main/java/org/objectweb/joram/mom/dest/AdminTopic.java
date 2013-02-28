@@ -2066,4 +2066,31 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   public static boolean isDestinationTableContain(String destName) {
     return ref.destinationsTable.containsKey(destName);
   }
+  
+	/**
+	 * Retrieves an existing destination.
+	 * 
+	 * @param agentId
+	 *            The identifier of the destination.
+	 * @param type
+	 *            The type of the destination.
+	 * @return the descriptor of the destination, null if it does not exist.
+	 */
+	public static DestinationDesc reverseLookupDest(String agentId, byte type) {
+		DestinationDesc desc = null;
+		DestinationDesc tmp;
+		AgentId agent = AgentId.fromString(agentId);
+
+		for (Object mapKey : ref.destinationsTable.keySet()) {
+			tmp = (DestinationDesc) ref.destinationsTable.get((String) mapKey);
+			if (tmp.id.equals(agent)) {
+				if (tmp.getType() == type) {
+					desc = tmp; // founded
+					return desc;
+				}
+			}
+		}
+		return desc;
+	}
+
 }
