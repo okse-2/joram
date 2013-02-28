@@ -70,8 +70,6 @@ import fr.dyade.aaa.util.Transaction;
  */
 public final class NGAsyncTransaction extends AbstractTransaction implements NGAsyncTransactionMBean {
   
-  public static final boolean MULTI_THREAD_DISK_SYNC = true;
-  
   /**
    *  Global in memory log initial capacity, by default 4096.
    *  This value can be adjusted for a particular server by setting
@@ -513,11 +511,11 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
   }
   
   static class LogFileContext {
-    LogFile file;
+    LogFile logFile;
 
-    public LogFileContext(LogFile file) {
+    public LogFileContext(LogFile logFile) {
       super();
-      this.file = file;
+      this.logFile = logFile;
     }
     
   }
@@ -526,9 +524,9 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     ByteBuffer byteBuffer;
     Runnable callback;
     
-    public LogFileWriteContext(LogFile file, ByteBuffer byteBuffer,
+    public LogFileWriteContext(LogFile logFile, ByteBuffer byteBuffer,
         Runnable callback) {
-      super(file);
+      super(logFile);
       this.byteBuffer = byteBuffer;
       this.callback = callback;
     }
@@ -538,8 +536,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
   static class LogGarbageContext extends LogFileContext {
     List<Operation> operations;
 
-    public LogGarbageContext(LogFile file, List<Operation> operations) {
-      super(file);
+    public LogGarbageContext(LogFile logFile, List<Operation> operations) {
+      super(logFile);
       this.operations = operations;
     }
     
@@ -556,14 +554,23 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
   }
  
- class LogFileWriterThread extends Thread {
+  class LogFileWriterThread extends Thread {
    
-   LogFileWriterThread(Runnable runnable, int id) {
-     super(AgentServer.getThreadGroup(), runnable, "CommitWorker#" + id);
-   }
+    LogFileWriterThread(Runnable runnable, int id) {
+      super(AgentServer.getThreadGroup(), runnable, "CommitWorker#" + id);
+    }
    
- }
+  }
   
+  /**
+   * Number of 'write' between two synchronizations with the disk
+   */
+  private int writeSyncRatio;
+
+  public int getWriteSyncRatio() {
+    return writeSyncRatio;
+  }
+
   class LogFileWriter implements Runnable {
     
     private ConcurrentLinkedQueue<LogFileContext> contexts = 
@@ -573,23 +580,30 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
     private LogFile currentLogFile;
     
+    private int syncCount;
+    
+    private int writeCount;
+    
     private List<LogFileWriteContext> toValidate = 
         new ArrayList<LogFileWriteContext>();
     
     private void syncCurrentLog() throws IOException {
-      //logmon.log(BasicLevel.WARN, "*** sync log: " + currentLogFile.logidx);
       FileChannel channel = currentLogFile.getChannel();
       if (syncOnWrite) {
         channel.force(false);
-        //logmon.log(BasicLevel.WARN, "Synced: log#" + currentLogFile.logidx);
       }
+      validate();
+      currentLogFile = null;
+      syncCount++;
+      writeSyncRatio = writeCount/syncCount;
+    }
+    
+    private void validate() {
       for (LogFileWriteContext ctxToValidate : toValidate) {
         if (ctxToValidate.callback != null) {
-          //logmon.log(BasicLevel.WARN, "*** callback");
           ctxToValidate.callback.run();
         }
       }
-      currentLogFile = null;
       toValidate.clear();
     }
     
@@ -614,26 +628,26 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           }
         }
         
-        if (currentLogFile != null &&
-            currentLogFile != ctx.file) {
-          // This is either a log change or a garbage
-          // Need to sync the current log
-          try {
-            syncCurrentLog();
-          } catch (IOException e) {
-            logmon.log(BasicLevel.ERROR, "", e);
-          }
-        }
-        
-        currentLogFile = ctx.file;
-        //logmon.log(BasicLevel.WARN, "*** write log buffer: " + currentLogFile.logidx);
-        
         if (ctx instanceof LogFileWriteContext) {
+          if (currentLogFile != null &&
+              currentLogFile != ctx.logFile) {
+            // The log file has been changed
+            // Need to sync the current log
+            try {
+              syncCurrentLog();
+            } catch (IOException e) {
+              logmon.log(BasicLevel.ERROR, "", e);
+            }
+          }
+          
+          currentLogFile = ctx.logFile;
+          
           LogFileWriteContext writeCtx = (LogFileWriteContext) ctx;
           try {
             ByteBuffer buffer = writeCtx.byteBuffer;
             FileChannel channel = currentLogFile.getChannel();
             channel.write(buffer);
+            writeCount++;
             toValidate.add(writeCtx);
           } catch (IOException e) {
             logmon.log(BasicLevel.ERROR, "", e);
@@ -641,13 +655,16 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         } else {
           try {
             LogGarbageContext garbageCtx = (LogGarbageContext) ctx;
+            LogFile garbagedLog = ctx.logFile;
+            //logmon.log(BasicLevel.WARN, "*** garbage log: " + garbagedLog.logidx);
+                
             for (Operation op : garbageCtx.operations) {
               if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
                 if (logmon.isLoggable(BasicLevel.DEBUG))
                   logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Save ("
                       + op.dirName + '/' + op.name + ')');
 
-                byte buf[] = logManager.getFromLog(currentLogFile, op);
+                byte buf[] = logManager.getFromLog(garbagedLog, op);
 
                 repository.save(op.dirName, op.name, buf);
               } else if (op.type == Operation.DELETE) {
@@ -659,9 +676,16 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
               }
               op.free();
             }
-            logManager.fillAndReset(currentLogFile);
-            logManager.recycleLog(currentLogFile);
-            currentLogFile = null;
+            logManager.fillAndReset(garbagedLog);
+            
+            if (currentLogFile == garbagedLog) {
+              // Already synchronized by 'fillAndReset'
+              // Only need to validate the callback
+              validate();
+              currentLogFile = null;
+            }
+            
+            logManager.recycleLog(garbagedLog);
           } catch (IOException e) {
             logmon.log(BasicLevel.ERROR, "", e);
           }
@@ -1058,7 +1082,6 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       
       // Don't need to wait that the LogFileWriter has finished to write in the old logs
       // because the garbage is also done by the LogFileWriter
-      /*
       for (int i=0; i<nbLogFile; i++) {
         if (logFile[i] == null) continue;
         if (i == (logidx%nbLogFile)) {
@@ -1076,7 +1099,6 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           garbage(logFile[i], logFileWriter);
         }
       }
-      */
 
       commitCount += 1;
       
@@ -1131,8 +1153,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         }
 
         // Creates and initializes a new log file
+        // TODO: this new log should have already been created and filled by the LogWriter
+        // TODO: may be we should check that the file exists before and wait if not (this should not happen in normal cases)
         logFile[logidx % nbLogFile] = new LogFile(dir, logidx, mode);
-        logFile[logidx % nbLogFile].setLength(MaxLogFileSize);
+        
+        // Not useful as the logs are filled
+        //logFile[logidx % nbLogFile].setLength(MaxLogFileSize);
 
         // Cleans log file (needed only for new log file, already done in
         // garbage).
@@ -1658,7 +1684,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
      *  The file is open in "rwd" mode and require that every update to the file's content be
      * written synchronously to the underlying storage device. 
      *  
-     * @param file the specified file.
+     * @param logFile the specified file.
      */
     public LogFile(File dir, int logidx, String mode) throws FileNotFoundException {
       super(new File(dir, "log#" + logidx), mode);
