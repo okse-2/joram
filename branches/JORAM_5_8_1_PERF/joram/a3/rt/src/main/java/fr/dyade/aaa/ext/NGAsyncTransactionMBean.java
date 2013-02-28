@@ -168,5 +168,7 @@ public interface NGAsyncTransactionMBean extends TransactionMBean {
   
   public String logContent(int idx) throws IOException;
   
+  /* Not permitted
   public void garbage(int idx) throws IOException;
+  */
 }
