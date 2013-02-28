@@ -40,7 +40,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -316,18 +318,22 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
   public NGAsyncTransaction() {}
 
-  private ExecutorService executorService;
+  private ScheduledExecutorService executorService;
+  
+  private long syncTimeout;
   
   public final void initRepository() throws IOException {
     LogMemoryCapacity = getInteger("Transaction.LogMemoryCapacity", LogMemoryCapacity).intValue();
     MaxLogFileSize = getInteger("Transaction.MaxLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
     nbLogFile = getInteger("Transaction.NbLogFile", nbLogFile).intValue();
     minObjInLog = getInteger("Transaction.minObjInLog", minObjInLog).intValue();
+    syncTimeout = getInteger("Transaction.syncTimeout", 3000000).intValue();
     
     LogThresholdOperation = getInteger("Transaction.LogThresholdOperation", LogThresholdOperation).intValue();
     Operation.initPool(LogThresholdOperation);
 
-    executorService = Executors.newFixedThreadPool(1, new LogFileWriterThreadFactory());
+    executorService = Executors.newSingleThreadScheduledExecutor(new LogFileWriterThreadFactory());
+    executorService.scheduleWithFixedDelay(logFileWriter, 5, 5, TimeUnit.MILLISECONDS);
     
     try {
       repositoryImpl = getProperty("Transaction.RepositoryImpl", repositoryImpl);
@@ -587,15 +593,21 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     private List<LogFileWriteContext> toValidate = 
         new ArrayList<LogFileWriteContext>();
     
+    private long lastSyncDate;
+    
+    private boolean pendingSync;
+    
     private void syncCurrentLog() throws IOException {
+      //logmon.log(BasicLevel.WARN, "*** sync");
       FileChannel channel = currentLogFile.getChannel();
       if (syncOnWrite) {
         channel.force(false);
       }
       validate();
-      currentLogFile = null;
+      pendingSync = false;
       syncCount++;
       writeSyncRatio = writeCount/syncCount;
+      lastSyncDate = System.nanoTime();
     }
     
     private void validate() {
@@ -608,28 +620,33 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     }
     
     public void run() {
-      currentLogFile = null;
       while (true) {
         LogFileContext ctx = contexts.poll();
         if (ctx == null) {
-          if (currentLogFile != null) {
-            try {
-              syncCurrentLog();
-            } catch (IOException e) {
-              logmon.log(BasicLevel.ERROR, "", e);
+          if (pendingSync) {
+            long now = System.nanoTime();
+            if (now - lastSyncDate > syncTimeout) {
+              try {
+                syncCurrentLog();
+              } catch (IOException e) {
+                logmon.log(BasicLevel.ERROR, "", e);
+              }
+            } else {
+              //logmon.log(BasicLevel.WARN, "*** no sync");
             }
           }
           synchronized (contexts) {
             ctx = contexts.poll();
             if (ctx == null) {
               running = false;
+              //logmon.log(BasicLevel.WARN, "*** exit");
               return;
             }
           }
         }
         
         if (ctx instanceof LogFileWriteContext) {
-          if (currentLogFile != null &&
+          if (pendingSync &&
               currentLogFile != ctx.logFile) {
             // The log file has been changed
             // Need to sync the current log
@@ -646,8 +663,10 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           try {
             ByteBuffer buffer = writeCtx.byteBuffer;
             FileChannel channel = currentLogFile.getChannel();
+            //logmon.log(BasicLevel.WARN, "*** write");
             channel.write(buffer);
             writeCount++;
+            pendingSync = true;
             toValidate.add(writeCtx);
           } catch (IOException e) {
             logmon.log(BasicLevel.ERROR, "", e);
@@ -682,7 +701,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
               // Already synchronized by 'fillAndReset'
               // Only need to validate the callback
               validate();
-              currentLogFile = null;
+              pendingSync = false;
             }
             
             logManager.recycleLog(garbagedLog);
@@ -1082,6 +1101,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       
       // Don't need to wait that the LogFileWriter has finished to write in the old logs
       // because the garbage is also done by the LogFileWriter
+      /*
       for (int i=0; i<nbLogFile; i++) {
         if (logFile[i] == null) continue;
         if (i == (logidx%nbLogFile)) {
@@ -1099,6 +1119,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           garbage(logFile[i], logFileWriter);
         }
       }
+      */
 
       commitCount += 1;
       
@@ -1169,7 +1190,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         // current = 1;
         
         // TODO: already done in Garbage?
-        fillAndReset(logFile[logidx % nbLogFile]);
+        // fillAndReset(logFile[logidx % nbLogFile]);
         current = 8;
       }
 
@@ -1476,13 +1497,14 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
             continue;
           
           garbagedOperations.add(op);
+          
           /* Moved in LogWriter
           if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Save ("
                   + op.dirName + '/' + op.name + ')');
 
-            byte buf[] = getFromLog(op);
+            byte buf[] = getFromLog(logf, op);
 
             repository.save(op.dirName, op.name, buf);
           } else if (op.type == Operation.DELETE) {
@@ -1492,8 +1514,10 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
             repository.delete(op.dirName, op.name);
           }
-*/
+          */
+          
           iterator.remove();
+          
           // Moved in LogWriter
           //op.free();
         }
@@ -1507,7 +1531,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       
       // JORAM_PERF_BRANCH
       // Moved in LogWriter
-      // fillAndReset(logf);
+      //fillAndReset(logf);
       
       if (logf.logidx == logidx) {
         // If the log file is the current one don't close it ! just reset
@@ -1523,7 +1547,9 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
         // Rename the log for a future use
         logf.renameTo();
+        
         */
+        
         // Cleans the log file array
         logFile[logf.logidx%nbLogFile] = null;
       }
@@ -1550,6 +1576,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       }
 
       bb.flip();
+
       FileChannel channel = logFile.getChannel();
       channel.position(0);
       channel.write(bb);
