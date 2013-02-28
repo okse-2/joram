@@ -493,7 +493,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
   
   public void commit(Runnable callback) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "CallbackTransaction.commit()");
+      logmon.log(BasicLevel.DEBUG, "NGAsyncTransaction.commit()");
     try {
       if (phase != RUN)
         throw new IllegalStateException("Cannot commit.");
@@ -509,7 +509,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       setPhase(COMMIT);
       
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "CallbackTransaction, to be committed");
+        logmon.log(BasicLevel.DEBUG, "NGAsyncTransaction, to be committed");
     } finally {
       release();
     }
@@ -566,6 +566,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
               FileChannel channel = currentLogFile.getChannel();
               if (syncOnWrite) {
                 channel.force(false);
+                //logmon.log(BasicLevel.WARN, "Synced: log#" + currentLogFile.logidx);
               }
               for (LogFileWriteContext ctxToValidate : toValidate) {
                 if (ctxToValidate.callback != null) {
@@ -672,12 +673,34 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       logmon.log(BasicLevel.INFO, "NTransaction, closed: " + toString());
     }
   }
+  
+
+  static class OpenByteArrayOutputStream extends ByteArrayOutputStream {
+    
+    OpenByteArrayOutputStream(int capacity) {
+      super(capacity);
+    }
+    
+    byte[] getBuf() {
+      return buf;
+    }
+    
+    void setBuf(byte[] buf) {
+      this.buf = buf;
+    }
+    
+    void setCount(int count) {
+      this.count = count;
+    }
+  }
+  
 
   /**
    *  This class manages the memory log of operations and the multiples
    * log files.
    */
-  static final class LogManager extends ByteArrayOutputStream {
+  // JORAM_PERF_BRANCH: can't reuse the ByteArrayOutputStream because of asynchronous writes
+  static final class LogManager {
     /**
      * Log of all operations already committed but not reported on disk.
      */
@@ -744,7 +767,6 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
     LogManager(File dir, Repository repository,
                boolean useLockFile, boolean syncOnWrite) throws IOException {
-      super(4 * Kb);
       this.repository = repository;
       
       if (useLockFile) {
@@ -968,6 +990,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       }
      
     }
+    
+    private List<Operation> operationsToWrite = new ArrayList<Operation>();
 
     /**
      * Reports all buffered operations in logs.
@@ -977,103 +1001,144 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         logmon.log(BasicLevel.DEBUG, "NTransaction.LogFile.commit()");
 
       commitCount += 1;
-
+      
       Set<Entry<Object, Operation>> entries = ctxlog.entrySet();
+      
+      // Compute the size
+      int sizeToAllocate = 0;
       Iterator<Entry<Object, Operation>> iterator = entries.iterator();
-      try {
-        while (true) {
-          Entry<Object, Operation> entry = iterator.next();
-          Object key = entry.getKey();
-          Operation op = entry.getValue();
+      while (iterator.hasNext()) {
+        Entry<Object, Operation> entry = iterator.next();
+        Object key = entry.getKey();
+        Operation op = entry.getValue();
 
-          if (op.type == Operation.NOOP) continue;
+        if (op.type == Operation.NOOP)
+          continue;
 
-//        if (logmon.isLoggable(BasicLevel.DEBUG)) {
-//           if (op.type == Operation.SAVE) {
-//             logmon.log(BasicLevel.DEBUG, "NTransaction save " + op.name);
-//           } else if (op.type == Operation.CREATE) {
-//             logmon.log(BasicLevel.DEBUG, "NTransaction create " + op.name);
-//           } else if (op.type == Operation.DELETE) {
-//             logmon.log(BasicLevel.DEBUG, "NTransaction delete " + op.name);
-//           } else {
-//             logmon.log(BasicLevel.DEBUG, "NTransaction unknown(" + op.type + ") " + op.name);
-//           }
-//        }
-          
-          // JORAM_PERF_BRANCH
-          write(Operation.COMMIT);
+        // JORAM_PERF_BRANCH
+        // Operation.COMMIT
+        sizeToAllocate += 1;
 
-          op.logidx = logidx;
-          op.logptr = current + count;
-          
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       "commit#" + op.logidx + ' ' + op.dirName + '/' + op.name + ": " + op.logptr);
+        // op.type
+        sizeToAllocate += 1;
 
-          // Save the operation to the log on disk
-          write(op.type);
-          if (op.dirName != null) {
-            writeUTF(op.dirName);
-          } else {
-            write(emptyUTFString);
-          }
-          writeUTF(op.name);
-          if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
-            writeInt(op.value.length);
-            write(op.value);
-          }
-          // TODO: Use SoftReference ?
-          op.value = null;
-
-          // Reports all committed operation in current log
-          Operation old = mainLog.put(key, op);
-          logFile[logidx%nbLogFile].logCounter += 1;
-
-          if (old != null) {
-            logFile[old.logidx%nbLogFile].logCounter -= 1;
-
-            // There is 6 different cases:
-            //
-            //   new |
-            // old   |  C  |  S  |  D
-            // ------+-----+-----+-----+
-            //   C   |  C  |  C  | NOP
-            // ------+-----+-----+-----+
-            //   S   |  S  |  S  |  D
-            // ------+-----+-----+-----+
-            //   D   |  S  |  S  |  D
-            //
-
-            if (old.type == Operation.CREATE) {
-              if (op.type == Operation.SAVE) {
-                // The object has never been created on disk, the resulting operation
-                // is still a creation.
-                op.type = Operation.CREATE;
-              } else if (op.type == Operation.DELETE) {
-                // There is no more need to memorize the deletion the object will be
-                // never created on disk.
-                op.type = Operation.NOOP;
-                mainLog.remove(key);
-                op.free();
-                logFile[logidx%nbLogFile].logCounter -= 1;
-              }
-            }
-            old.free();
-          }
+        if (op.dirName != null) {
+          sizeToAllocate += op.dirName.length();
         }
-      } catch (NoSuchElementException exc) {}
+
+        sizeToAllocate += op.name.length();
+
+        if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
+          sizeToAllocate += 4;
+          sizeToAllocate += op.value.length;
+        }
+      }
+      
+      // Final tag (date)
+      sizeToAllocate += 8;
+
+      // JORAM_PERF_BRANCH: can't reuse the same ByteArrayOutputStream because
+      // of asynchronous writer
+      OpenByteArrayOutputStream baos = new OpenByteArrayOutputStream(
+          sizeToAllocate);
+
+      iterator = entries.iterator();
+      while (iterator.hasNext()) {
+        Entry<Object, Operation> entry = iterator.next();
+        Object key = entry.getKey();
+        Operation op = entry.getValue();
+
+        if (op.type == Operation.NOOP)
+          continue;
+
+        // if (logmon.isLoggable(BasicLevel.DEBUG)) {
+        // if (op.type == Operation.SAVE) {
+        // logmon.log(BasicLevel.DEBUG, "NTransaction save " + op.name);
+        // } else if (op.type == Operation.CREATE) {
+        // logmon.log(BasicLevel.DEBUG, "NTransaction create " + op.name);
+        // } else if (op.type == Operation.DELETE) {
+        // logmon.log(BasicLevel.DEBUG, "NTransaction delete " + op.name);
+        // } else {
+        // logmon.log(BasicLevel.DEBUG, "NTransaction unknown(" + op.type + ") "
+        // + op.name);
+        // }
+        // }
+
+        operationsToWrite.add(op);
+
+        // JORAM_PERF_BRANCH
+        baos.write(Operation.COMMIT);
+
+        op.logidx = logidx;
+        op.logptr = current + baos.size();
+
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, "commit#" + op.logidx + ' ' + op.dirName
+              + '/' + op.name + ": " + op.logptr);
+
+        // Save the operation to the log on disk
+        baos.write(op.type);
+        if (op.dirName != null) {
+          writeUTF(op.dirName, baos);
+        } else {
+          baos.write(emptyUTFString);
+        }
+        writeUTF(op.name, baos);
+        if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
+          writeInt(op.value.length, baos);
+          baos.write(op.value);
+        }
+        // TODO: Use SoftReference ?
+        op.value = null;
+
+        // Reports all committed operation in current log
+        Operation old = mainLog.put(key, op);
+        logFile[logidx % nbLogFile].logCounter += 1;
+
+        if (old != null) {
+          logFile[old.logidx % nbLogFile].logCounter -= 1;
+
+          // There is 6 different cases:
+          //
+          // new |
+          // old | C | S | D
+          // ------+-----+-----+-----+
+          // C | C | C | NOP
+          // ------+-----+-----+-----+
+          // S | S | S | D
+          // ------+-----+-----+-----+
+          // D | S | S | D
+          //
+
+          if (old.type == Operation.CREATE) {
+            if (op.type == Operation.SAVE) {
+              // The object has never been created on disk, the resulting operation
+              // is still a creation.
+              op.type = Operation.CREATE;
+            } else if (op.type == Operation.DELETE) {
+              // There is no more need to memorize the deletion the object will be
+              // never created on disk.
+              op.type = Operation.NOOP;
+              mainLog.remove(key);
+              op.free();
+              logFile[logidx % nbLogFile].logCounter -= 1;
+            }
+          }
+          old.free();
+        }
+      }
+
       //JORAM_PERF_BRANCH
       //write(Operation.END);
-      writeLong(logFile[logidx%nbLogFile].logId);
+      writeLong(logFile[logidx%nbLogFile].logId, baos);
 
       // JORAM_PERF_BRANCH
       //logFile[logidx%nbLogFile].seek(current);
       //logFile[logidx%nbLogFile].write(buf, 0, count);
 
-      ByteBuffer buffer = ByteBuffer.wrap(buf, 0, count);
+      ByteBuffer buffer = ByteBuffer.wrap(baos.getBuf(), 0, baos.size());
       
-      current += (count);
-      reset();
+      current += baos.size();
       ctxlog.clear();
       
       // TODO: should ensure that the LogFileWriter has finished to write in the old logs
@@ -1318,6 +1383,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
      * @throws IOException
      */
     private final void garbage(LogFile logf) throws IOException {
+      //logmon.log(BasicLevel.WARN, "Garbage: log#" + logf.logidx);
+      
       if (logf == null) return;
 
       garbageCount += 1;
@@ -1444,44 +1511,54 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
     static private final byte[] emptyUTFString = {0, 0};
 
-    void writeUTF(String str)  {
+    void writeUTF(String str, OpenByteArrayOutputStream baos)  {
       int strlen = str.length() ;
 
-      int newcount = count + strlen +2;
+      int newcount = baos.size() + strlen +2;
+      byte[] buf = baos.getBuf();
+      int count = baos.size();
       if (newcount > buf.length) {
         byte newbuf[] = new byte[Math.max(buf.length << 1, newcount)];
         System.arraycopy(buf, 0, newbuf, 0, count);
         buf = newbuf;
+        baos.setBuf(newbuf);
       }
 
       buf[count++] = (byte) ((strlen >>> 8) & 0xFF);
       buf[count++] = (byte) ((strlen >>> 0) & 0xFF);
 
       str.getBytes(0, strlen, buf, count);
-      count = newcount;
+      baos.setCount(newcount);
     }
 
-    void writeInt(int v) {
+    void writeInt(int v, OpenByteArrayOutputStream baos) {
+      byte[] buf = baos.getBuf();
+      int count = baos.size();
       int newcount = count +4;
       if (newcount > buf.length) {
         byte newbuf[] = new byte[buf.length << 1];
         System.arraycopy(buf, 0, newbuf, 0, count);
         buf = newbuf;
+        baos.setBuf(newbuf);
       }
 
       buf[count++] = (byte) ((v >>> 24) & 0xFF);
       buf[count++] = (byte) ((v >>> 16) & 0xFF);
       buf[count++] = (byte) ((v >>>  8) & 0xFF);
       buf[count++] = (byte) ((v >>>  0) & 0xFF);
+      baos.setCount(newcount);
     }
     
  // JORAM_PERF_BRANCH
-    void writeLong(long l) {
+    void writeLong(long l, OpenByteArrayOutputStream baos) {
+      byte[] buf = baos.getBuf();
+      int count = baos.size();
       int newcount = count +8;
       if (newcount > buf.length) {
         byte newbuf[] = new byte[buf.length << 1];
         System.arraycopy(buf, 0, newbuf, 0, count);
         buf = newbuf;
+        baos.setBuf(newbuf);
       }
 
       buf[count++] = (byte) ((l >>> 56) & 0xFF);
@@ -1492,6 +1569,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       buf[count++] = (byte) ((l >>> 16) & 0xFF);
       buf[count++] = (byte) ((l >>>  8) & 0xFF);
       buf[count++] = (byte) ((l >>>  0) & 0xFF);
+      baos.setCount(newcount);
     }
   }
 
