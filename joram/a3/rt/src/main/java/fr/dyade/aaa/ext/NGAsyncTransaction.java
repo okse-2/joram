@@ -46,7 +46,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.ext.NGAsyncTransaction.LogManager.LogBuffer;
 import fr.dyade.aaa.util.AbstractTransaction;
 import fr.dyade.aaa.util.Operation;
 import fr.dyade.aaa.util.OperationKey;
@@ -489,7 +488,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     commit(null);
   }
   
-  private LogFileWriter commitWorker = new LogFileWriter();
+  private LogFileWriter logFileWriter = new LogFileWriter();
   
   public void commit(Runnable callback) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -500,9 +499,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
       Hashtable<Object, Operation> log = perThreadContext.get().getLog();
       if (! log.isEmpty()) {
-        LogBuffer logBuffer = logManager.commit(log);
-        LogFileWriteContext ctx = new LogFileWriteContext(logBuffer, callback);
-        commitWorker.offer(ctx);
+        logManager.commit(log, callback, logFileWriter);
         log.clear();
       }
 
@@ -515,18 +512,40 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     }
   }
   
-  static class LogFileWriteContext {
-    LogBuffer logBuffer;
-    Runnable callback;
-    
-    public LogFileWriteContext(LogBuffer logBuffer, Runnable callback) {
+  static class LogFileContext {
+    LogFile file;
+
+    public LogFileContext(LogFile file) {
       super();
-      this.logBuffer = logBuffer;
-      this.callback = callback;
+      this.file = file;
     }
+    
   }
   
- class LogFileWriterThreadFactory implements ThreadFactory {
+  static class LogFileWriteContext extends LogFileContext {
+    ByteBuffer byteBuffer;
+    Runnable callback;
+    
+    public LogFileWriteContext(LogFile file, ByteBuffer byteBuffer,
+        Runnable callback) {
+      super(file);
+      this.byteBuffer = byteBuffer;
+      this.callback = callback;
+    }
+
+  }
+  
+  static class LogGarbageContext extends LogFileContext {
+    List<Operation> operations;
+
+    public LogGarbageContext(LogFile file, List<Operation> operations) {
+      super(file);
+      this.operations = operations;
+    }
+    
+  }
+  
+  class LogFileWriterThreadFactory implements ThreadFactory {
     
     private int counter;
 
@@ -547,35 +566,41 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
   
   class LogFileWriter implements Runnable {
     
-    private ConcurrentLinkedQueue<LogFileWriteContext> contexts = 
-        new ConcurrentLinkedQueue<LogFileWriteContext>();
+    private ConcurrentLinkedQueue<LogFileContext> contexts = 
+        new ConcurrentLinkedQueue<LogFileContext>();
 
     private boolean running;
+    
+    private LogFile currentLogFile;
     
     private List<LogFileWriteContext> toValidate = 
         new ArrayList<LogFileWriteContext>();
     
+    private void syncCurrentLog() throws IOException {
+      //logmon.log(BasicLevel.WARN, "*** sync log: " + currentLogFile.logidx);
+      FileChannel channel = currentLogFile.getChannel();
+      if (syncOnWrite) {
+        channel.force(false);
+        //logmon.log(BasicLevel.WARN, "Synced: log#" + currentLogFile.logidx);
+      }
+      for (LogFileWriteContext ctxToValidate : toValidate) {
+        if (ctxToValidate.callback != null) {
+          //logmon.log(BasicLevel.WARN, "*** callback");
+          ctxToValidate.callback.run();
+        }
+      }
+      currentLogFile = null;
+      toValidate.clear();
+    }
+    
     public void run() {
-      LogFile currentLogFile = null;
+      currentLogFile = null;
       while (true) {
-        LogFileWriteContext ctx = contexts.poll();
+        LogFileContext ctx = contexts.poll();
         if (ctx == null) {
           if (currentLogFile != null) {
             try {
-              //logmon.log(BasicLevel.WARN, "*** sync log: " + currentLogFile.logidx);
-              FileChannel channel = currentLogFile.getChannel();
-              if (syncOnWrite) {
-                channel.force(false);
-                //logmon.log(BasicLevel.WARN, "Synced: log#" + currentLogFile.logidx);
-              }
-              for (LogFileWriteContext ctxToValidate : toValidate) {
-                if (ctxToValidate.callback != null) {
-                  //logmon.log(BasicLevel.WARN, "*** callback");
-                  ctxToValidate.callback.run();
-                }
-              }
-              toValidate.clear();
-              currentLogFile = null;
+              syncCurrentLog();
             } catch (IOException e) {
               logmon.log(BasicLevel.ERROR, "", e);
             }
@@ -588,20 +613,63 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
             }
           }
         }
-        currentLogFile = ctx.logBuffer.logFile;
+        
+        if (currentLogFile != null &&
+            currentLogFile != ctx.file) {
+          // This is either a log change or a garbage
+          // Need to sync the current log
+          try {
+            syncCurrentLog();
+          } catch (IOException e) {
+            logmon.log(BasicLevel.ERROR, "", e);
+          }
+        }
+        
+        currentLogFile = ctx.file;
         //logmon.log(BasicLevel.WARN, "*** write log buffer: " + currentLogFile.logidx);
-        try {
-          ByteBuffer buffer = ctx.logBuffer.buffer;
-          FileChannel channel = ctx.logBuffer.logFile.getChannel();
-          channel.write(buffer);
-          toValidate.add(ctx);
-        } catch (IOException e) {
-          logmon.log(BasicLevel.ERROR, "", e);
+        
+        if (ctx instanceof LogFileWriteContext) {
+          LogFileWriteContext writeCtx = (LogFileWriteContext) ctx;
+          try {
+            ByteBuffer buffer = writeCtx.byteBuffer;
+            FileChannel channel = currentLogFile.getChannel();
+            channel.write(buffer);
+            toValidate.add(writeCtx);
+          } catch (IOException e) {
+            logmon.log(BasicLevel.ERROR, "", e);
+          }
+        } else {
+          try {
+            LogGarbageContext garbageCtx = (LogGarbageContext) ctx;
+            for (Operation op : garbageCtx.operations) {
+              if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
+                if (logmon.isLoggable(BasicLevel.DEBUG))
+                  logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Save ("
+                      + op.dirName + '/' + op.name + ')');
+
+                byte buf[] = logManager.getFromLog(currentLogFile, op);
+
+                repository.save(op.dirName, op.name, buf);
+              } else if (op.type == Operation.DELETE) {
+                if (logmon.isLoggable(BasicLevel.DEBUG))
+                  logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Delete ("
+                      + op.dirName + '/' + op.name + ')');
+
+                repository.delete(op.dirName, op.name);
+              }
+              op.free();
+            }
+            logManager.fillAndReset(currentLogFile);
+            logManager.recycleLog(currentLogFile);
+            currentLogFile = null;
+          } catch (IOException e) {
+            logmon.log(BasicLevel.ERROR, "", e);
+          }
         }
       }
     }
     
-    public void offer(LogFileWriteContext ctx) {
+    public void offer(LogFileContext ctx) {
       synchronized (contexts) {
         //logmon.log(BasicLevel.WARN, "*** offer");
         contexts.offer(ctx);
@@ -979,33 +1047,22 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                  "NGTransaction.LogManager, ends: " + (System.currentTimeMillis() - start));
     }
     
-    static class LogBuffer {
-      ByteBuffer buffer;
-      LogFile logFile;
-
-      public LogBuffer(ByteBuffer buffer, LogFile logFile) {
-        super();
-        this.buffer = buffer;
-        this.logFile = logFile;
-      }
-     
-    }
-    
     private List<Operation> operationsToWrite = new ArrayList<Operation>();
 
     /**
      * Reports all buffered operations in logs.
      */
-    LogBuffer commit(Hashtable<Object, Operation> ctxlog) throws IOException {
+    void commit(Hashtable<Object, Operation> ctxlog, Runnable callback, LogFileWriter logFileWriter) throws IOException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, "NTransaction.LogFile.commit()");
       
+      // Don't need to wait that the LogFileWriter has finished to write in the old logs
+      // because the garbage is also done by the LogFileWriter
+      /*
       for (int i=0; i<nbLogFile; i++) {
         if (logFile[i] == null) continue;
-        if (i == (logidx%nbLogFile) ||
-            i == ((logidx - 1)%nbLogFile)) {
-          // Don't garbage the current log or the previous one
-          // in order to let the log writer work
+        if (i == (logidx%nbLogFile)) {
+          // Don't garbage the current log
           continue;
         }
         
@@ -1016,9 +1073,10 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
                        "NTransaction log#" + logFile[i].logidx + " is no longer needed, cleans it.");
-          garbage(logFile[i]);
+          garbage(logFile[i], logFileWriter);
         }
       }
+      */
 
       commitCount += 1;
       
@@ -1069,7 +1127,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         logidx += 1;
         if (logFile[logidx % nbLogFile] != null) {
           // The log file is an older one, garbage it before using it anew.
-          garbage(logFile[logidx % nbLogFile]);
+          garbage(logFile[logidx % nbLogFile], logFileWriter);
         }
 
         // Creates and initializes a new log file
@@ -1192,11 +1250,10 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       
       current += baos.size();
       ctxlog.clear();
-      
-      // TODO: should ensure that the LogFileWriter has finished to write in the old logs
-      // because a garbage may happen below
 
-      return new LogBuffer(buffer, logFile[logidx % nbLogFile]);
+      LogFileWriteContext writeContex = new LogFileWriteContext(
+          logFile[logidx % nbLogFile], buffer, callback);
+      logFileWriter.offer(writeContex);
     }
     
     public byte[] getFromLog(String dirName, String name) throws IOException {
@@ -1205,7 +1262,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       if (op != null) {
         if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
           // reads the value from the log file
-          return getFromLog(op);
+          return getFromLog(logFile[op.logidx%nbLogFile], op);
         } else if (op.type == Operation.DELETE) {
           // The object was deleted.
           throw new FileNotFoundException();
@@ -1215,36 +1272,24 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       return null;
     }
 
-    public byte[] getFromLog(Operation op) throws IOException {
+    // Can be called by the LogWriter for operations that have been removed
+    // from the main log.
+    public byte[] getFromLog(LogFile logf, Operation op) throws IOException {
       loadFromLog += 1;
       
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
                    "getFromLog#" + op.logidx + ' ' + op.dirName + '/' + op.name + ": " + op.logptr);
       
-      logFile[op.logidx%nbLogFile].seek(op.logptr);
-      int optype = logFile[op.logidx%nbLogFile].read();    
-//      if ((optype != Operation.CREATE) && (optype != Operation.SAVE) &&
-//          (logmon.isLoggable(BasicLevel.DEBUG))) {
-//        logmon.log(BasicLevel.DEBUG, "getFromLog#" + op.logidx + ": " + optype + ", " + op.type);
-//      }
+      logf.seek(op.logptr);
+      int optype = logf.read();    
 
-      String dirName = logFile[op.logidx%nbLogFile].readUTF();
+      String dirName = logf.readUTF();
       if (dirName.length() == 0) dirName = null;
-      String name = logFile[op.logidx%nbLogFile].readUTF();
+      String name = logf.readUTF();
 
-//      if (((dirName != null) && (! dirName.equals(op.dirName))) || (! name.equals(op.name)) &&
-//          (logmon.isLoggable(BasicLevel.DEBUG))) {
-//        logmon.log(BasicLevel.DEBUG,
-//                   "getFromLog#" + op.logidx + ": " + dirName + '/' + name + ", " + op.dirName + '/' + op.name);
-//      }
-
-      byte buf[] = new byte[logFile[op.logidx%nbLogFile].readInt()];
-      logFile[op.logidx%nbLogFile].readFully(buf);
-
-//      if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
-//        logmon.log(BasicLevel.DEBUG,
-//                   "getFromLog#" + op.logidx + ", buf=" + Arrays.toString(buf));
+      byte buf[] = new byte[logf.readInt()];
+      logf.readFully(buf);
 
       return buf;
     }
@@ -1374,9 +1419,11 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       return strbuf.toString();
     }
     
+    /* JORAM_PERF_BRANCH: not permitted
     private final void garbage(int idx) throws IOException {
       garbage(logFile[idx%nbLogFile]);
     }
+    */
     
     /**
      * Reports all 'live' operations of a particular log file in the repository, the
@@ -1385,7 +1432,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
      * @param logf The log file to garbage.
      * @throws IOException
      */
-    private final void garbage(LogFile logf) throws IOException {
+    private final void garbage(LogFile logf, LogFileWriter logFileWriter) throws IOException {
       //logmon.log(BasicLevel.WARN, "Garbage: log#" + logf.logidx);
       
       if (logf == null) return;
@@ -1393,37 +1440,36 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       garbageCount += 1;
       long start = System.currentTimeMillis();
       
+      List<Operation> garbagedOperations = new ArrayList<Operation>();
       if (logf.logCounter > 0) {
-        synchronized (mainLog) {
-          Iterator<Operation> iterator = mainLog.values().iterator();
-          try {
-            while (true) {
-              Operation op = iterator.next();
+        Iterator<Operation> iterator = mainLog.values().iterator();
+        while (iterator.hasNext()) {
+          Operation op = iterator.next();
 
-              if (op.logidx != logf.logidx)
-                continue;
+          if (op.logidx != logf.logidx)
+            continue;
+          
+          garbagedOperations.add(op);
+          /* Moved in LogWriter
+          if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Save ("
+                  + op.dirName + '/' + op.name + ')');
 
-              if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
-                if (logmon.isLoggable(BasicLevel.DEBUG))
-                  logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Save ("
-                      + op.dirName + '/' + op.name + ')');
+            byte buf[] = getFromLog(op);
 
-                byte buf[] = getFromLog(op);
+            repository.save(op.dirName, op.name, buf);
+          } else if (op.type == Operation.DELETE) {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Delete ("
+                  + op.dirName + '/' + op.name + ')');
 
-                repository.save(op.dirName, op.name, buf);
-              } else if (op.type == Operation.DELETE) {
-                if (logmon.isLoggable(BasicLevel.DEBUG))
-                  logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Delete ("
-                      + op.dirName + '/' + op.name + ')');
-
-                repository.delete(op.dirName, op.name);
-              }
-
-              iterator.remove();
-              op.free();
-            }
-          } catch (NoSuchElementException exc) {
+            repository.delete(op.dirName, op.name);
           }
+*/
+          iterator.remove();
+          // Moved in LogWriter
+          //op.free();
         }
         repository.commit();
       }
@@ -1434,7 +1480,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       //logf.write(Operation.END);
       
       // JORAM_PERF_BRANCH
-      fillAndReset(logf);
+      // Moved in LogWriter
+      // fillAndReset(logf);
       
       if (logf.logidx == logidx) {
         // If the log file is the current one don't close it ! just reset
@@ -1444,14 +1491,19 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         //current = 1;
         current = 8;
       } else {
+        /* Moved in LogWriter (see recycleLog)
         // Closes the log file and renames it for future use.
         logf.close();
 
         // Rename the log for a future use
         logf.renameTo();
+        */
         // Cleans the log file array
         logFile[logf.logidx%nbLogFile] = null;
       }
+      
+      LogGarbageContext garbageContext = new LogGarbageContext(logf, garbagedOperations);
+      logFileWriter.offer(garbageContext);
       
       lastGarbageDate = System.currentTimeMillis();
       garbageTime += lastGarbageDate - start;
@@ -1484,6 +1536,16 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       if (syncOnWrite) {
         // Also sync the metadata
         channel.force(true);
+      }
+    }
+    
+    void recycleLog(LogFile logf) throws IOException {
+      if (logf.logidx != logidx) {
+        // Closes the log file and renames it for future use.
+        logf.close();
+
+        // Rename the log for a future use
+        logf.renameTo();
       }
     }
 
@@ -1646,10 +1708,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     return res;
   }
 
+  /* JORAM_PERF_BRANCH: Not permitted
   public void garbage(int idx) throws IOException {
     begin();
     logManager.garbage(idx);
     commit(true);
   }
+  */
 }
 
