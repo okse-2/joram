@@ -168,6 +168,8 @@ public interface NGAsyncTransactionMBean extends TransactionMBean {
   
   public String logContent(int idx) throws IOException;
   
+  int getWriteSyncRatio();
+  
   /* Not permitted
   public void garbage(int idx) throws IOException;
   */
