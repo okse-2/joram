@@ -999,6 +999,26 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     LogBuffer commit(Hashtable<Object, Operation> ctxlog) throws IOException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, "NTransaction.LogFile.commit()");
+      
+      for (int i=0; i<nbLogFile; i++) {
+        if (logFile[i] == null) continue;
+        if (i == (logidx%nbLogFile) ||
+            i == ((logidx - 1)%nbLogFile)) {
+          // Don't garbage the current log or the previous one
+          // in order to let the log writer work
+          continue;
+        }
+        
+        if ((logFile[i].logCounter == 0) ||
+            (logFile[i].logCounter < minObjInLog)) {
+          // The related log file is no longer useful, cleans it in order to speed up the
+          // restart after a crash.
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       "NTransaction log#" + logFile[i].logidx + " is no longer needed, cleans it.");
+          garbage(logFile[i]);
+        }
+      }
 
       commitCount += 1;
       
@@ -1036,6 +1056,38 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       
       // Final tag (date)
       sizeToAllocate += 8;
+      
+      if (current + sizeToAllocate > MaxLogFileSize) {
+        if (logmon.isLoggable(BasicLevel.DEBUG)) {
+          for (int i = 0; i < nbLogFile; i++)
+            if (logFile[i] != null)
+              logmon.log(BasicLevel.DEBUG, "logCounter[" + logFile[i].logidx
+                  + "]=" + logFile[i].logCounter);
+          logmon.log(BasicLevel.DEBUG, "log -> " + mainLog.size());
+        }
+
+        logidx += 1;
+        if (logFile[logidx % nbLogFile] != null) {
+          // The log file is an older one, garbage it before using it anew.
+          garbage(logFile[logidx % nbLogFile]);
+        }
+
+        // Creates and initializes a new log file
+        logFile[logidx % nbLogFile] = new LogFile(dir, logidx, mode);
+        logFile[logidx % nbLogFile].setLength(MaxLogFileSize);
+
+        // Cleans log file (needed only for new log file, already done in
+        // garbage).
+
+        // JORAM_PERF_BRANCH
+        // logFile[logidx%nbLogFile].seek(0);
+        // logFile[logidx%nbLogFile].write(Operation.END);
+        // current = 1;
+        
+        // TODO: already done in Garbage?
+        fillAndReset(logFile[logidx % nbLogFile]);
+        current = 8;
+      }
 
       // JORAM_PERF_BRANCH: can't reuse the same ByteArrayOutputStream because
       // of asynchronous writer
@@ -1143,55 +1195,6 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       
       // TODO: should ensure that the LogFileWriter has finished to write in the old logs
       // because a garbage may happen below
-      
-      // TODO: check why the following fails as it should work
-      /*
-      for (int i=0; i<nbLogFile; i++) {
-        if (logFile[i] == null) continue;
-
-        if ((logFile[i].logCounter == 0) ||
-            ((i != (logidx%nbLogFile)) && (logFile[i].logCounter < minObjInLog))) {
-          // The related log file is no longer useful, cleans it in order to speed up the
-          // restart after a crash.
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       "NTransaction log#" + logFile[i].logidx + " is no longer needed, cleans it.");
-          garbage(logFile[i]);
-        }
-      }
-      */
-      
-      if (current > MaxLogFileSize) {
-        if (logmon.isLoggable(BasicLevel.DEBUG)) {
-          for (int i = 0; i < nbLogFile; i++)
-            if (logFile[i] != null)
-              logmon.log(BasicLevel.DEBUG, "logCounter[" + logFile[i].logidx
-                  + "]=" + logFile[i].logCounter);
-          logmon.log(BasicLevel.DEBUG, "log -> " + mainLog.size());
-        }
-
-        logidx += 1;
-        if (logFile[logidx % nbLogFile] != null) {
-          // The log file is an older one, garbage it before using it anew.
-          garbage(logFile[logidx % nbLogFile]);
-        }
-
-        // Creates and initializes a new log file
-        logFile[logidx % nbLogFile] = new LogFile(dir, logidx, mode);
-        logFile[logidx % nbLogFile].setLength(MaxLogFileSize);
-
-        // Cleans log file (needed only for new log file, already done in
-        // garbage).
-
-        // JORAM_PERF_BRANCH
-        // logFile[logidx%nbLogFile].seek(0);
-        // logFile[logidx%nbLogFile].write(Operation.END);
-        // current = 1;
-        
-        // TODO: already done in Garbage?
-        fillAndReset(logFile[logidx % nbLogFile]);
-        current = 8;
-      }
 
       return new LogBuffer(buffer, logFile[logidx % nbLogFile]);
     }
