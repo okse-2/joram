@@ -29,7 +29,7 @@ import fr.dyade.aaa.util.TransactionMBean;
 /**
  *
  */
-public interface CallbackTransactionMBean extends TransactionMBean {
+public interface NGAsyncTransactionMBean extends TransactionMBean {
 
   /**
    * Returns the initial capacity of global in memory log (by default 4096).

@@ -46,7 +46,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.ext.CallbackTransaction.LogManager.LogBuffer;
+import fr.dyade.aaa.ext.NGAsyncTransaction.LogManager.LogBuffer;
 import fr.dyade.aaa.util.AbstractTransaction;
 import fr.dyade.aaa.util.Operation;
 import fr.dyade.aaa.util.OperationKey;
@@ -69,7 +69,7 @@ import fr.dyade.aaa.util.Transaction;
  * @see DBRepository
  * @see MySqlDBRepository
  */
-public final class CallbackTransaction extends AbstractTransaction implements CallbackTransactionMBean {
+public final class NGAsyncTransaction extends AbstractTransaction implements NGAsyncTransactionMBean {
   
   public static final boolean MULTI_THREAD_DISK_SYNC = true;
   
@@ -317,7 +317,7 @@ public final class CallbackTransaction extends AbstractTransaction implements Ca
 
   Repository repository = null;
 
-  public CallbackTransaction() {}
+  public NGAsyncTransaction() {}
 
   private ExecutorService executorService;
   
