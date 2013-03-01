@@ -677,6 +677,15 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
             LogFile garbagedLog = ctx.logFile;
             //logmon.log(BasicLevel.WARN, "*** garbage log: " + garbagedLog.logidx);
                 
+            if (currentLogFile == garbagedLog) {
+              // Need to sync the current log
+              try {
+                syncCurrentLog();
+              } catch (IOException e) {
+                logmon.log(BasicLevel.ERROR, "", e);
+              }
+            }
+            
             for (Operation op : garbageCtx.operations) {
               if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
                 if (logmon.isLoggable(BasicLevel.WARN))
@@ -697,14 +706,6 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
               repository.commit();
             }
             logManager.fillAndReset(garbagedLog);
-            
-            if (currentLogFile == garbagedLog) {
-              // Already synchronized by 'fillAndReset'
-              // Only need to validate the callback
-              validate();
-              pendingSync = false;
-            }
-            
             logManager.recycleLog(garbagedLog);
           } catch (IOException e) {
             logmon.log(BasicLevel.ERROR, "", e);
@@ -989,14 +990,6 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
                   logFile[logidx%nbLogFile].skipBytes(logFile[logidx%nbLogFile].readInt());
                 }
-                
-                // JORAM_PERF_BRANCH
-                long commitLogId = logFile[logidx%nbLogFile].readLong();
-                logmon.log(BasicLevel.WARN, "commitLogId=" + commitLogId);
-                if (commitLogId != logf.logId) {
-                  logmon.log(BasicLevel.WARN, "*** STOP ***");
-                  break commitLoop;
-                }
 
                 if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
                   logmon.log(BasicLevel.DEBUG,
@@ -1062,6 +1055,14 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
               }
               if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG, "NGTransaction.LogManager, COMMIT#" + idx);
+              
+              // JORAM_PERF_BRANCH
+              long commitLogId = logFile[logidx%nbLogFile].readLong();
+              logmon.log(BasicLevel.WARN, "commitLogId=" + commitLogId);
+              if (commitLogId != logf.logId) {
+                logmon.log(BasicLevel.WARN, "*** STOP ***");
+                break commitLoop;
+              }
             }
 
             current = (int) logFile[logidx%nbLogFile].getFilePointer();
@@ -1093,7 +1094,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         
         // JORAM_PERF_BRANCH
         fillAndReset(logFile[logidx%nbLogFile]);
-        current = 8;
+        current = 0;
       }
       
       logmon.log(BasicLevel.INFO,
@@ -1137,6 +1138,11 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       
       // Compute the size
       int sizeToAllocate = 0;
+      
+      // JORAM_PERF_BRANCH
+      // Operation.COMMIT
+      sizeToAllocate += 1;
+      
       Iterator<Entry<Object, Operation>> iterator = entries.iterator();
       while (iterator.hasNext()) {
         Entry<Object, Operation> entry = iterator.next();
@@ -1145,10 +1151,6 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
         if (op.type == Operation.NOOP)
           continue;
-
-        // JORAM_PERF_BRANCH
-        // Operation.COMMIT
-        sizeToAllocate += 1;
 
         // op.type
         sizeToAllocate += 1;
@@ -1165,10 +1167,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         }
       }
       
-      // Final tag (date)
-      sizeToAllocate += 8;
+      // Final tag (END + log id = 1 + 8)
+      sizeToAllocate += 9;
       
-      if (current + sizeToAllocate > MaxLogFileSize) {
+      boolean garbageRequired = current + sizeToAllocate > MaxLogFileSize;
+      
+      if (garbageRequired) {
         if (logmon.isLoggable(BasicLevel.DEBUG)) {
           for (int i = 0; i < nbLogFile; i++)
             if (logFile[i] != null)
@@ -1209,16 +1213,26 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         if (logidx < nbLogFile) {
           // These files are not recycled
           fillAndReset(logFile[logidx % nbLogFile]);
-        } else {
-          logFile[logidx % nbLogFile].seek(8);
         }
-        current = 8;
+        current = 0;
+        
+        // Need to add the log id
+        sizeToAllocate += 8;
       }
-
+      
       // JORAM_PERF_BRANCH: can't reuse the same ByteArrayOutputStream because
       // of asynchronous writer
       OpenByteArrayOutputStream baos = new OpenByteArrayOutputStream(
           sizeToAllocate);
+      
+      if (garbageRequired) {
+        long newLogId = System.currentTimeMillis();
+        logFile[logidx % nbLogFile].logId = newLogId;
+        writeLong(newLogId, baos);
+      }
+      
+      // JORAM_PERF_BRANCH
+      baos.write(Operation.COMMIT);
 
       iterator = entries.iterator();
       while (iterator.hasNext()) {
@@ -1243,9 +1257,6 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         // }
 
         operationsToWrite.add(op);
-
-        // JORAM_PERF_BRANCH
-        baos.write(Operation.COMMIT);
 
         op.logidx = logidx;
         op.logptr = current + baos.size();
@@ -1307,7 +1318,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       }
 
       //JORAM_PERF_BRANCH
-      //write(Operation.END);
+      baos.write(Operation.END);
       writeLong(logFile[logidx%nbLogFile].logId, baos);
 
       // JORAM_PERF_BRANCH
@@ -1606,11 +1617,6 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       FileChannel channel = logFile.getChannel();
       channel.position(0);
       channel.write(bb);
-      channel.position(0);
-
-      // JORAM_PERF_BRANCH
-      logFile.logId = System.currentTimeMillis();
-      logFile.writeLong(logFile.logId);
       
       if (syncOnWrite) {
         // Also sync the metadata
