@@ -679,21 +679,22 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                 
             for (Operation op : garbageCtx.operations) {
               if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
-                if (logmon.isLoggable(BasicLevel.DEBUG))
-                  logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Save ("
+                if (logmon.isLoggable(BasicLevel.WARN))
+                  logmon.log(BasicLevel.WARN, "NTransaction, LogFile.Save ("
                       + op.dirName + '/' + op.name + ')');
 
                 byte buf[] = logManager.getFromLog(garbagedLog, op);
 
                 repository.save(op.dirName, op.name, buf);
               } else if (op.type == Operation.DELETE) {
-                if (logmon.isLoggable(BasicLevel.DEBUG))
-                  logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Delete ("
+                if (logmon.isLoggable(BasicLevel.WARN))
+                  logmon.log(BasicLevel.WARN, "NTransaction, LogFile.Delete ("
                       + op.dirName + '/' + op.name + ')');
 
                 repository.delete(op.dirName, op.name);
               }
               op.free();
+              repository.commit();
             }
             logManager.fillAndReset(garbagedLog);
             
@@ -936,6 +937,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
             
             // JORAM_PERF_BRANCH
             logf.logId = logf.readLong();
+            logmon.log(BasicLevel.WARN, "logId=" + logf.logId);
             
             /*
             int optype = logf.read();
@@ -952,11 +954,13 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
             // current is fixed after the log reading
 
             int optype = logf.read();
+            logmon.log(BasicLevel.WARN, "commit/end=" + optype);
             commitLoop:
             while (optype == Operation.COMMIT) {
               String dirName;
               String name;
               optype = logFile[logidx%nbLogFile].read();
+              logmon.log(BasicLevel.WARN, "optype=" + optype);
    
               while ((optype == Operation.CREATE) ||
                      (optype == Operation.SAVE) ||
@@ -966,8 +970,10 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                 //  Gets all operations of one committed transaction then
                 // adds them to specified log.
                 dirName = logFile[logidx%nbLogFile].readUTF();
+                logmon.log(BasicLevel.WARN, "dirName=" + dirName);
                 if (dirName.length() == 0) dirName = null;
                 name = logFile[logidx%nbLogFile].readUTF();
+                logmon.log(BasicLevel.WARN, "name=" + name);
 
                 Object key = OperationKey.newKey(dirName, name);
 
@@ -986,7 +992,9 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                 
                 // JORAM_PERF_BRANCH
                 long commitLogId = logFile[logidx%nbLogFile].readLong();
+                logmon.log(BasicLevel.WARN, "commitLogId=" + commitLogId);
                 if (commitLogId != logf.logId) {
+                  logmon.log(BasicLevel.WARN, "*** STOP ***");
                   break commitLoop;
                 }
 
@@ -1047,6 +1055,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                   op.logptr = ptr;
                   mainLog.put(key, op);
                 }
+                
+                logmon.log(BasicLevel.WARN, "mainLog=" + mainLog);
                 
                 optype = logFile[logidx%nbLogFile].read();
               }
@@ -1168,15 +1178,20 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         }
 
         logidx += 1;
+        long logFileId;
         if (logFile[logidx % nbLogFile] != null) {
-          // The log file is an older one, garbage it before using it anew.
+          logFileId = logFile[logidx % nbLogFile].logId;
+          // The log file is an older one, garbage it before using it again.
           garbage(logFile[logidx % nbLogFile], logFileWriter);
+        } else {
+          logFileId = 0;
         }
 
         // Creates and initializes a new log file
         // TODO: this new log should have already been created and filled by the LogWriter
         // TODO: may be we should check that the file exists before and wait if not (this should not happen in normal cases)
         logFile[logidx % nbLogFile] = new LogFile(dir, logidx, mode);
+        logFile[logidx % nbLogFile].logId = logFileId;
         
         // Not useful as the logs are filled
         //logFile[logidx % nbLogFile].setLength(MaxLogFileSize);
@@ -1189,8 +1204,14 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         // logFile[logidx%nbLogFile].write(Operation.END);
         // current = 1;
         
-        // TODO: already done in Garbage?
-        // fillAndReset(logFile[logidx % nbLogFile]);
+        // JORAM_PERF_BRANCH: already done either at creation of the LogManager
+        // or during the garbage (concurrent)
+        if (logidx < nbLogFile) {
+          // These files are not recycled
+          fillAndReset(logFile[logidx % nbLogFile]);
+        } else {
+          logFile[logidx % nbLogFile].seek(8);
+        }
         current = 8;
       }
 
@@ -1254,17 +1275,17 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
         if (old != null) {
           logFile[old.logidx % nbLogFile].logCounter -= 1;
-
-          // There is 6 different cases:
+          
+          // There are 6 different cases:
           //
-          // new |
-          // old | C | S | D
+          //   new |
+          // old   |  C  |  S  |  D
           // ------+-----+-----+-----+
-          // C | C | C | NOP
+          //   C   |  C  |  C  | NOP
           // ------+-----+-----+-----+
-          // S | S | S | D
+          //   S   |  S  |  S  |  D
           // ------+-----+-----+-----+
-          // D | S | S | D
+          //   D   |  S  |  S  |  D
           //
 
           if (old.type == Operation.CREATE) {
@@ -1480,7 +1501,10 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
      * @throws IOException
      */
     private final void garbage(LogFile logf, LogFileWriter logFileWriter) throws IOException {
-      //logmon.log(BasicLevel.WARN, "Garbage: log#" + logf.logidx);
+      logmon.log(BasicLevel.WARN, "Garbage: log#" + logf);
+      logmon.log(BasicLevel.WARN, "logidx=" + logidx);
+      logmon.log(BasicLevel.WARN, "mainLog=" + mainLog);
+      logmon.log(BasicLevel.WARN, "Log content" + logContent(logf.logidx));
       
       if (logf == null) return;
 
@@ -1521,7 +1545,9 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           // Moved in LogWriter
           //op.free();
         }
-        repository.commit();
+        
+        // Moved in LogWriter
+        // repository.commit();
       }
 
       // Cleans log file
@@ -1723,6 +1749,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     public void renameTo() {
       maxUsedIdx += 1;
       new File(dir, "log#" + logidx).renameTo(new File(dir, "log#" + maxUsedIdx));
+    }
+
+    @Override
+    public String toString() {
+      return "LogFile [logidx=" + logidx + ", logCounter=" + logCounter
+          + ", dir=" + dir + ", logId=" + logId + "]";
     }
   }
   
