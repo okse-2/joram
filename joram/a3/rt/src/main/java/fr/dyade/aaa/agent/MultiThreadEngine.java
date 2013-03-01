@@ -1017,7 +1017,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   //JORAM_PERF_BRANCH
   public void validate(Message msg) throws Exception {
-    AgentContext ctx = getAgentContext(msg.to);
+    AgentContext ctx = getAgentContextAndCreate(msg.to);
     ConcurrentLinkedMessageQueue qin = ctx.getWorker().getQin();
     synchronized (qin) {
       qin.pushAndValidate(msg);
