@@ -961,11 +961,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
               String dirName;
               String name;
               optype = logFile[logidx%nbLogFile].read();
-              logmon.log(BasicLevel.WARN, "optype=" + optype);
    
               while ((optype == Operation.CREATE) ||
                      (optype == Operation.SAVE) ||
                      (optype == Operation.DELETE)) {
+                logmon.log(BasicLevel.WARN, "optype=" + optype);
+                
                 int ptr = (int) logFile[logidx%nbLogFile].getFilePointer() -1;
                 logFile[logidx%nbLogFile].logCounter += 1;
                 //  Gets all operations of one committed transaction then
@@ -995,6 +996,14 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                   logmon.log(BasicLevel.DEBUG,
                              "NGTransaction.LogManager, OPERATION=" + optype + ", " + name);
 //                           "NGTransaction.LogManager, OPERATION=" + optype + ", " + name + " buf=" + Arrays.toString(buf));
+                
+                // JORAM_PERF_BRANCH
+                long commitLogId = logFile[logidx%nbLogFile].readLong();
+                logmon.log(BasicLevel.WARN, "commitLogId=" + commitLogId);
+                if (commitLogId != logf.logId) {
+                  logmon.log(BasicLevel.WARN, "*** STOP ***");
+                  break commitLoop;
+                }
                 
                 Operation old = mainLog.get(key);
                 if (old != null) {
@@ -1049,21 +1058,16 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                   mainLog.put(key, op);
                 }
                 
-                logmon.log(BasicLevel.WARN, "mainLog=" + mainLog);
-                
                 optype = logFile[logidx%nbLogFile].read();
               }
               if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG, "NGTransaction.LogManager, COMMIT#" + idx);
-              
-              // JORAM_PERF_BRANCH
-              long commitLogId = logFile[logidx%nbLogFile].readLong();
-              logmon.log(BasicLevel.WARN, "commitLogId=" + commitLogId);
-              if (commitLogId != logf.logId) {
-                logmon.log(BasicLevel.WARN, "*** STOP ***");
-                break commitLoop;
-              }
+
+              // JORAM_PERF_BRANCH: read the next COMMIT or null
+              optype = logf.read();
             }
+            
+            logmon.log(BasicLevel.WARN, "mainLog=" + mainLog);
 
             current = (int) logFile[logidx%nbLogFile].getFilePointer();
             if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
@@ -1165,10 +1169,13 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           sizeToAllocate += 4;
           sizeToAllocate += op.value.length;
         }
+        
+        // Log id
+        sizeToAllocate += 8;
       }
       
-      // Final tag (END + log id = 1 + 8)
-      sizeToAllocate += 9;
+      // Final tag (END)
+      sizeToAllocate += 1;
       
       boolean garbageRequired = current + sizeToAllocate > MaxLogFileSize;
       
@@ -1279,6 +1286,9 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         }
         // TODO: Use SoftReference ?
         op.value = null;
+        
+        // JORAM_PERF_BRANCH
+        writeLong(logFile[logidx%nbLogFile].logId, baos);
 
         // Reports all committed operation in current log
         Operation old = mainLog.put(key, op);
@@ -1319,7 +1329,6 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
       //JORAM_PERF_BRANCH
       baos.write(Operation.END);
-      writeLong(logFile[logidx%nbLogFile].logId, baos);
 
       // JORAM_PERF_BRANCH
       //logFile[logidx%nbLogFile].seek(current);
@@ -1622,6 +1631,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         // Also sync the metadata
         channel.force(true);
       }
+      
+      channel.position(0);
     }
     
     void recycleLog(LogFile logf) throws IOException {
