@@ -744,13 +744,23 @@ public class Queue extends Destination implements QueueMBean {
       ReceiveRequest request = (ReceiveRequest) requests.get(i);
       if (request.requester.equals(from) &&
           request.getClientContext() == not.getClientContext() &&
-          request.getRequestId() == not.getAbortedRequestId()) {
+          (not.getAbortedRequestId() == -1 ||  // JORAM_PERF_BRANCH
+           request.getRequestId() == not.getAbortedRequestId())) {
         if (not.isPersistent()) {
           // state change, so save.
           setSave();
         }
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "Remove receive request: " + request.requester);
         requests.remove(i);
-        break;
+        
+        // JORAM_PERF_BRANCH
+        // there may be several ReceiveRequests to remove (after proxy restart)
+        if (not.getAbortedRequestId() != -1) {
+          break;
+        }
+      } else {
+        i++;
       }
     }
   }
