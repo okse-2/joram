@@ -410,7 +410,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                                  boolean first) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
-                 "NGTransaction, saveInLog(" + dirName + '/' + name + ", " + copy + ", " + first + ")");
+                 "NGAsyncTransaction, saveInLog(" + dirName + '/' + name + ", " + copy + ", " + first + ")");
 
     Object key = OperationKey.newKey(dirName, name);
     Operation op = null;
@@ -1045,6 +1045,9 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                       //logmon.log(BasicLevel.WARN, "keep: " + old.type);
                       old.logidx = logidx;
                       old.logptr = ptr;
+                      
+                      // JORAM_PERF_BRANCH
+                      old.value = opValue;
                     } else {
                       // The operation is a delete
                       if (old.type == Operation.CREATE) {
