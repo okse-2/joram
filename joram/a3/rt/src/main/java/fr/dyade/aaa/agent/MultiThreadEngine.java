@@ -455,6 +455,13 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     
     private boolean persistentPush;
     
+    /**
+     * Remember that the agent has been updated
+     * during a reaction (as there may be several
+     * reactions executed in sequence)
+     */
+    private boolean updatedAgent;
+    
     private boolean beginTransaction;
     
     private ArrayList<Runnable> callbacks;
@@ -602,7 +609,12 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
               }
             }
               
-            boolean updatedAgent = agent.isUpdated();
+            if (agent.isUpdated()) {
+              updatedAgent = true;
+            }
+            // Else nothing as we have to remember the agent has been
+            // updated by a reaction (a 'setNoSave' may override a 'setSave')
+            
             if (msg.not.persistent == true || updatedAgent || persistentPush) {
               beginTransaction = true;
             }
@@ -668,7 +680,13 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     private void commit() throws Exception {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ": commit()" + reactMessageList.size());
-      if (agent != null) agent.save();
+      if (agent != null) {
+        if (updatedAgent) {
+          // A reaction may have called setNoSave()
+          agent.setSave();
+        }
+        agent.save();
+      }
       // JORAM_PERF_BRANCH:
       if (beginTransaction) {
         AgentServer.getTransaction().begin();
@@ -705,6 +723,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       callbacks.clear();
       persistentPush = false;
       beginTransaction = false;
+      updatedAgent = false;
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ": committed");
     }
@@ -1017,6 +1036,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   //JORAM_PERF_BRANCH
   public void validate(Message msg) throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + " validate: " + msg);
     AgentContext ctx = getAgentContextAndCreate(msg.to);
     ConcurrentLinkedMessageQueue qin = ctx.getWorker().getQin();
     synchronized (qin) {
@@ -1159,6 +1180,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
 
     public void run() {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ": CommitCallback.run()"); 
       for (Message msgToValidate : toValidate) {
         try {
           Channel.validate(msgToValidate);
