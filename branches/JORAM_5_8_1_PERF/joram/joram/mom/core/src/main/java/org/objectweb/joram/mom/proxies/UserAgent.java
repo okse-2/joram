@@ -934,6 +934,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     	InterceptorsHelper.addInterceptors(interceptors_in, interceptorsIN);
     }
     
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "contexts=" + contexts);
+    
     // Browsing the pre-crash contexts:
     ClientContext activeCtx;
     AgentId destId;
@@ -941,6 +944,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       activeCtx = (ClientContext) ctxs.next();
       activeCtx.setProxyAgent(this);
       ctxs.remove();
+      
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "activeCtx.getDeliveringQueues()=" + activeCtx);
 
       // Denying the non acknowledged messages:
       for (Iterator queueIds = activeCtx.getDeliveringQueues(); queueIds.hasNext();) {
@@ -949,6 +955,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Denies messages on queue " + destId.toString());
+        
+        
+        // JORAM_PERF_BRANCH
+        sendNot(destId, new AbortReceiveRequest(activeCtx.getId(), -1, -1));
       }
 
       // Saving the prepared transactions.
@@ -1222,15 +1232,20 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
                                               false,
                                               req.getMessageIdsToAck(),
                                               req.getMessageCount());
-      // JORAM_PERF_BRANCH:
-      if (DIRECT_QUEUE_DELIVER) {
-        not.setImplicitReceive(true);
-      }
-      // JORAM_PERF_BRANCH.
+
       AgentId destId = AgentId.fromString(req.getTarget());
       if (destId == null)
         throw new RequestException("Request to an undefined destination (null).");
 
+      // JORAM_PERF_BRANCH:
+      if (DIRECT_QUEUE_DELIVER) {
+        not.setImplicitReceive(true);
+        activeCtx.addDeliveringQueue(destId);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "activeCtx.getDeliveringQueues() = " + activeCtx);
+      }
+      // JORAM_PERF_BRANCH.
+      
       if (destId.getTo() == getId().getTo()) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> local sending");
@@ -2174,12 +2189,22 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     setSave();
 
     //setCtx(cKey);
+    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "contexts=" + contexts);
 
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+          "activeCtx.getDeliveringQueues() = " + activeCtx);
+    
     // Denying the non acknowledged messages:
     AgentId id;
     boolean prepared = false;
     for (Iterator ids = activeCtx.getDeliveringQueues(); ids.hasNext();) {
       id = (AgentId) ids.next();
+      
+      // JORAM_PERF_BRANCH
+      sendNot(id, new AbortReceiveRequest(activeCtx.getId(), -1, -1));
 
       for (Iterator xids = activeCtx.getTxIds(); xids.hasNext();) {
         Xid xid = (Xid) xids.next();
@@ -2278,6 +2303,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     CnxCloseReply reply = new CnxCloseReply();
     reply.setCorrelationId(req.getRequestId());
     sendToClient(key, reply, false);
+    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "contexts=" + contexts);
   }
 
   private void doReact(int key, ActivateConsumerRequest req) {
