@@ -718,6 +718,9 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
           cons.postAndValidate(sentMsg);
         }
         mq.clear();
+        for (Runnable callback : callbacks) {
+          callback.run();
+        }
       }
       reactMessageList.clear();
       callbacks.clear();
