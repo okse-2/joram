@@ -514,6 +514,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           logManager.commit(log, callback, null);
         }
         log.clear();
+      } else {
+        if (logmon.isLoggable(BasicLevel.WARN))
+          logmon.log(BasicLevel.WARN, "Should not commit an empty log", new Exception());
+        if (callback != null) {
+          callback.run();
+        }
       }
 
       setPhase(COMMIT);
@@ -572,7 +578,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
   class LogFileWriterThread extends Thread {
    
     LogFileWriterThread(Runnable runnable, int id) {
-      super(AgentServer.getThreadGroup(), runnable, "CommitWorker#" + id);
+      super(AgentServer.getThreadGroup(), runnable, "LogFileWriter#" + id);
     }
    
   }
@@ -607,7 +613,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     private boolean pendingSync;
     
     private void syncCurrentLog() throws IOException {
-      //logmon.log(BasicLevel.WARN, "*** sync");
+      //logmon.log(BasicLevel.DEBUG, "*** sync");
       FileChannel channel = currentLogFile.getChannel();
       if (syncOnWrite) {
         channel.force(false);
@@ -672,7 +678,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           try {
             ByteBuffer buffer = writeCtx.byteBuffer;
             FileChannel channel = currentLogFile.getChannel();
-            //logmon.log(BasicLevel.WARN, "*** write");
+            //logmon.log(BasicLevel.DEBUG, "*** write");
             channel.write(buffer);
             writeCount++;
             pendingSync = true;
@@ -1642,8 +1648,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     void garbageOperations(LogFile logf, List<Operation> garbagedOperations) throws IOException {
       for (Operation op : garbagedOperations) {
         if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
-          if (logmon.isLoggable(BasicLevel.WARN))
-            logmon.log(BasicLevel.WARN, "NTransaction, LogFile.Save ("
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Save ("
                 + op.dirName + '/' + op.name + ')');
 
           byte buf[] = getFromLog(logf, op);
