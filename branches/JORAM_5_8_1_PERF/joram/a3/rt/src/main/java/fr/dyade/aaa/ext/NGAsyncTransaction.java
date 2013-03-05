@@ -1113,8 +1113,9 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         //logFile[logidx%nbLogFile].write(Operation.END);
         
         // JORAM_PERF_BRANCH
-        fillAndReset(logFile[logidx%nbLogFile]);
-        current = 0;
+        logFile[logidx%nbLogFile].logId = System.currentTimeMillis();
+        fillAndReset(logFile[logidx%nbLogFile], logFile[logidx%nbLogFile].logId);
+        current = 8;
       }
       
       logmon.log(BasicLevel.INFO,
@@ -1656,8 +1657,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
           repository.save(op.dirName, op.name, buf);
         } else if (op.type == Operation.DELETE) {
-          if (logmon.isLoggable(BasicLevel.WARN))
-            logmon.log(BasicLevel.WARN, "NTransaction, LogFile.Delete ("
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Delete ("
                 + op.dirName + '/' + op.name + ')');
 
           repository.delete(op.dirName, op.name);
@@ -1669,10 +1670,26 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       recycleLog(logf);
     }
     
-    // JORAM_PERF_BRANCH
     void fillAndReset(LogFile logFile) throws IOException {
+      fillAndReset(logFile, 0);
+    }
+    
+    // JORAM_PERF_BRANCH
+    void fillAndReset(LogFile logFile, long logId) throws IOException {
       int fileSize = (int) logFile.length();
       ByteBuffer bb = ByteBuffer.allocate(fileSize);
+      
+      if (logId > 0) {
+        bb.put((byte) ((logId >>> 56) & 0xFF));
+        bb.put((byte) ((logId >>> 48) & 0xFF));
+        bb.put((byte) ((logId >>> 40) & 0xFF));
+        bb.put((byte) ((logId >>> 32) & 0xFF));
+        bb.put((byte) ((logId >>> 24) & 0xFF));
+        bb.put((byte) ((logId >>> 16) & 0xFF));
+        bb.put((byte) ((logId >>>  8) & 0xFF));
+        bb.put((byte) ((logId >>>  0) & 0xFF));
+        fileSize -= 8;
+      }
       
       for (int i = 0; i < fileSize; i++)
       {
@@ -1690,7 +1707,11 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         channel.force(true);
       }
       
-      channel.position(0);
+      if (logId > 0) {
+        channel.position(8);
+      } else {
+        channel.position(0);
+      }
     }
     
     void recycleLog(LogFile logf) throws IOException {
