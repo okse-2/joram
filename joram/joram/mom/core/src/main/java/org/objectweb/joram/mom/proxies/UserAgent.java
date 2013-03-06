@@ -1039,11 +1039,19 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           topicsTable.put(destId, tSub);
         }
         tSub.putSubscription((String) subEntry.getKey(), cSub.getSelector());
+        
+        // JORAM_PERF_BRANCH
+        tSub.putDurable((String) subEntry.getKey(), Boolean.TRUE);
       }
     }
     // Browsing the topics and updating their subscriptions.
-    for (Iterator topicIds = topics.iterator(); topicIds.hasNext();)
-      updateSubscriptionToTopic((AgentId) topicIds.next(), -1, -1);
+    for (Iterator topicIds = topics.iterator(); topicIds.hasNext();) {
+      
+      // JORAM_PERF_BRANCH
+      TopicSubscription topicSubscription = (TopicSubscription) topicsTable.get((AgentId) topicIds.next());
+      
+      updateSubscriptionToTopic((AgentId) topicIds.next(), -1, -1, topicSubscription.isDurable());
+    }
   }
 
   private void setActiveCtxId(int activeCtxId) {
@@ -1552,6 +1560,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     } else { // Known topic...
       tSub = (TopicSubscription) topicsTable.get(topicId);
     }
+    
+    // JORAM_PERF_BRANCH
+    if (req.getDurable()) {
+      tSub.putDurable(subName, Boolean.TRUE);
+    }
 
     if (newSub) { // New subscription...
       // state change, so save.
@@ -1581,7 +1594,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           logger.log(BasicLevel.WARN, "  - Could not register ClientSubscriptionMbean", e);
       }
       tSub.putSubscription(subName, req.getSelector());
-      sent = updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription());
+      sent = updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription(), req.getDurable());
     } else { // Existing durable subscription...
       cSub = (ClientSubscription) subsTable.get(subName);
 
@@ -1594,7 +1607,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         TopicSubscription oldTSub =
           (TopicSubscription) topicsTable.get(cSub.getTopicId());
         oldTSub.removeSubscription(subName);
-        updateSubscriptionToTopic(cSub.getTopicId(), -1, -1, req.isAsyncSubscription());
+        updateSubscriptionToTopic(cSub.getTopicId(), -1, -1, req.isAsyncSubscription(), req.getDurable());
       }
 
       // Updated selector?
@@ -1617,7 +1630,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       // Updated subscription: updating subscription to topic.  
       if (updatedTopic || updatedSelector) {
         tSub.putSubscription(subName, req.getSelector());
-        sent = updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription());
+        sent = updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription(), req.getDurable());
       }
     }
     // Activating the subscription.
@@ -1725,7 +1738,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     AgentId topicId = sub.getTopicId();
     TopicSubscription tSub = (TopicSubscription) topicsTable.get(topicId);
     tSub.removeSubscription(subName);
-    updateSubscriptionToTopic(topicId, -1, -1);
+    
+    // JORAM_PERF_BRANCH
+    tSub.removeDurable(subName);
+    
+    updateSubscriptionToTopic(topicId, -1, -1, tSub.isDurable());
 
     // Deleting the subscription.
     sub.delete();
@@ -2259,8 +2276,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       }
     }
     // Browsing the topics which at least have one subscription removed.
-    for (Iterator topicIds = topics.iterator(); topicIds.hasNext();)
-      updateSubscriptionToTopic((AgentId) topicIds.next(), -1, -1);
+    for (Iterator topicIds = topics.iterator(); topicIds.hasNext();) {
+      AgentId topicId = (AgentId) topicIds.next();
+
+      // JORAM_PERF_BRANCH
+      TopicSubscription tSub = (TopicSubscription) topicsTable.get(topicId);
+      
+      updateSubscriptionToTopic(topicId, -1, -1, tSub.isDurable());
+    }
 
     // Deleting the temporary destinations:
     AgentId destId;
@@ -2591,7 +2614,12 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> save message " + message);
         // TODO (AF): The message saving does it need the proxy saving ?
-        setSave();
+        
+        // JORAM_PERF_BRANCH
+        if (message.isPersistent()) {
+          setSave();
+        }
+        
         // Persisting the message.
         setMsgTxName(message);
         message.save();
@@ -3280,7 +3308,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> topicsTable.remove(" + destId + ')');
       topics.remove();
-      updateSubscriptionToTopic(destId, -1, -1);
+      updateSubscriptionToTopic(destId, -1, -1, false);
     }
     
     // Delete all subscriptions
@@ -3315,8 +3343,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    */
   private boolean updateSubscriptionToTopic(AgentId topicId,
       int contextId,
-      int requestId) {
-    return updateSubscriptionToTopic(topicId, contextId, requestId, false);
+      int requestId,
+      boolean durable) {
+    return updateSubscriptionToTopic(topicId, contextId, requestId, false, durable);
   }
   
   /**
@@ -3330,7 +3359,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * @return  <code>true</code> if a <code>SubscribeRequest</code> has been
    *          sent to the topic.
    */
-  private boolean updateSubscriptionToTopic(AgentId topicId, int contextId, int requestId, boolean asyncSub) {
+  // JORAM_PERF_BRANCH: + durable
+  private boolean updateSubscriptionToTopic(AgentId topicId, int contextId, int requestId, boolean asyncSub, boolean durable) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "UserAgent.updateSubscriptionToTopic(" + topicId + ',' + contextId + ','
           + requestId + ',' + asyncSub + ')');
@@ -3354,7 +3384,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       return false;
 
     tSub.setLastSelector(builtSelector);
-    SubscribeRequest req = new SubscribeRequest(contextId, requestId, builtSelector, asyncSub);
+    SubscribeRequest req = new SubscribeRequest(contextId, requestId, builtSelector, asyncSub, durable);
     sendNot(topicId, req);
     
     // send reply if asynchronous subscription request.
