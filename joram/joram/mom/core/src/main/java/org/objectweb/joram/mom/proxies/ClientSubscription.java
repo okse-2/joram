@@ -541,7 +541,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
           message.durableAcksCounter++;
 
         messageIds.add(msgId);
-        save();
+        
+        // JORAM_PERF_BRANCH
+        if (message.isPersistent()) {
+          save();
+        }
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, this + ": added msg " + msgId + " for delivery.");
@@ -600,8 +604,13 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         }
         
         id = (String) messageIds.remove(0);
-        save();
+
         message = (Message) messagesTable.get(id);
+        
+        // JORAM_PERF_BRANCH
+        if (message.isPersistent()) {
+          save();
+        }
 
         if (message != null) {
           // Message still exists.
@@ -693,7 +702,12 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, " -> invalid message");
             messageIds.remove(id);
-            save();
+            
+            // JORAM_PERF_BRANCH
+            if (message.isPersistent()) {
+              save();
+            }
+            
             messagesTable.remove(id);
             // Deleting the message, if needed.
             if (durable)
@@ -719,7 +733,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
           messageIds.remove(id);
           deniedMsgs.remove(id);
-          save();
+          
+          // JORAM_PERF_BRANCH
+          if (message.isPersistent()) {
+            save();
+          }
         }
       }
 
@@ -727,7 +745,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       if (keptMsg != null) {
         messageIds.remove(keptMsg.getId());
         deliveredIds.put(keptMsg.getId(), keptMsg.getId());
-        save();
+        
+        // JORAM_PERF_BRANCH
+        if (keptMsg.isPersistent()) {
+          save();
+        }
 
         // Setting the message's deliveryCount and denied fields.
         deliveryAttempts = (Integer) deniedMsgs.get(keptMsg.getId());
@@ -785,9 +807,14 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     
     deliveredIds.remove(id);
     deniedMsgs.remove(id);
-    save();
+    
     Message msg = (Message) messagesTable.get(id);
     
+    // JORAM_PERF_BRANCH
+    if (msg.isPersistent()) {
+      save();
+    }
+
     // Message may be null if it is not valid anymore
     if (msg != null) {
       decrAckCounters(id, msg);
@@ -835,12 +862,16 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
           continue denyLoop;
         }
       }
-      save();
       
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, this + ": deny message: " + id);
       
       message = (Message) messagesTable.get(id);
+      
+      // JORAM_PERF_BRANCH
+      if (message.isPersistent()) {
+        save();
+      }
       
       // Message may be null if it is not valid anymore
       if (message == null) continue denyLoop;
@@ -983,7 +1014,12 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   public void deleteMessage(String msgId) {
     messageIds.remove(msgId);
     Message message = removeMessage(msgId);
-    save();
+    
+    // JORAM_PERF_BRANCH
+    if (message.isPersistent()) {
+      save();
+    }
+    
     if (message != null) {
       DMQManager dmqManager = new DMQManager(dmqId, null);
       nbMsgsSentToDMQSinceCreation++;
