@@ -25,6 +25,7 @@
 package org.objectweb.joram.mom.dest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -106,6 +107,9 @@ public class Topic extends Destination implements TopicMBean {
 
   /** Vector of subscribers' identifiers. */
   protected List subscribers = new Vector();
+  
+  // JORAM_PERF_BRANCH
+  private Map durableSubscriptions = new HashMap<AgentId, Boolean>();
 
   /** Table of subscribers' selectors. */
   protected Map selectors = new Hashtable();
@@ -329,6 +333,13 @@ public class Topic extends Destination implements TopicMBean {
     // Adding new subscriber.
     if (! subscribers.contains(from)) {
       subscribers.add(from);
+    }
+    
+    // JORAM_PERF_BRANCH
+    if (not.isDurable()) {
+      durableSubscriptions.put(from, Boolean.TRUE);
+    } else {
+      durableSubscriptions.remove(from);
     }
 
     // The requester might either be a new subscriber, or an existing one;
@@ -678,6 +689,21 @@ public class Topic extends Destination implements TopicMBean {
       }
       // There are messages to send.
       if (! deliverables.isEmpty()) {
+        
+        // JORAM_PERF_BRANCH
+        boolean persistentMessage = false;
+        for (Iterator msgs = messages.iterator(); msgs.hasNext();) {
+          Message msg = (Message) msgs.next();
+          if (msg.persistent) {
+            persistentMessage = true;
+          }
+        }
+        
+        // JORAM_PERF_BRANCH
+        if (persistentMessage && durableSubscriptions.get(subscriber) != null) {
+          persistent = true;
+        }
+        
         TopicMsgsReply topicMsgsReply = new TopicMsgsReply(deliverables);
         topicMsgsReply.setPersistent(persistent);
         setDmq(topicMsgsReply); 
