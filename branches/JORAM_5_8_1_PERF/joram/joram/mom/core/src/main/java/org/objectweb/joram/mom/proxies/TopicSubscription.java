@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,14 +36,38 @@ class TopicSubscription {
   private Map subs;
   /** Last built selector. */
   private String lastSelector = null;
+  
+  // JORAM_PERF_BRANCH
+  private Map<String, Boolean> durableSubscriptions;
 
   /** 
    * Creates a <code>TopicSubscription</code> instance.
    */
   TopicSubscription() {
     this.subs = new Hashtable();
+    this.durableSubscriptions = new HashMap<String, Boolean>();
   }
  
+  //JORAM_PERF_BRANCH
+  public boolean isDurable(String name) {
+    return durableSubscriptions.get(name);
+  }
+  
+  //JORAM_PERF_BRANCH
+  public boolean isDurable() {
+    return ! durableSubscriptions.isEmpty();
+  }
+
+  // JORAM_PERF_BRANCH
+  public void putDurable(String name, Boolean durable) {
+    durableSubscriptions.put(name, durable);
+  }
+  
+  //JORAM_PERF_BRANCH
+  public void removeDurable(String name) {
+    durableSubscriptions.remove(name);
+  }
+
   /**
    * Adds a new subscription or updates an existing one.
    *
