@@ -38,6 +38,9 @@ public class SubscribeRequest extends AbstractRequestNot {
   
   /** asynchronous subscription request. */
   private boolean asyncSub = false;
+  
+  // JORAM_PERF_BRANCH
+  private boolean durable;
 
   /**
    * Constructs a <code>SubscribeRequest</code> instance. 
@@ -48,10 +51,11 @@ public class SubscribeRequest extends AbstractRequestNot {
    *          empty string for no selection.
    * @param asyncSub true if asynchronous subscription.
    */
-  public SubscribeRequest(int clientContext, int requestId, String selector, boolean asyncSub) {
+  public SubscribeRequest(int clientContext, int requestId, String selector, boolean asyncSub, boolean durable) {
     super(clientContext, requestId);
     this.selector = selector;
     this.asyncSub = asyncSub;
+    this.durable = durable;
   }
 
   /**
@@ -66,4 +70,9 @@ public class SubscribeRequest extends AbstractRequestNot {
   public String getSelector() {
     return selector;
   }
+
+  public boolean isDurable() {
+    return durable;
+  }
+  
 } 
