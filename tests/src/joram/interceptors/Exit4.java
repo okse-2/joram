@@ -33,16 +33,17 @@ import fr.dyade.aaa.common.Debug;
 
 public class Exit4 implements MessageInterceptor {
 
-	 public static Logger logger = Debug.getLogger(Exit4.class.getName());
-	 
-	public boolean handle(Message m, Properties prop) {
-		logger.log(BasicLevel.DEBUG, getClass().getName() + " m = " + m);
-		if (m != null)
-			m.setProperty("interceptor.4", "Exit4");
-		return true;
-	}
+  public static Logger logger = Debug.getLogger(Exit4.class.getName());
 
-	public void init(Properties prop) {
-    logger.log(BasicLevel.DEBUG, getClass().getName() + " prop = " + prop);
+  public boolean handle(Message m, int key) {
+    logger.log(BasicLevel.DEBUG, getClass().getName() + " m = " + m);
+    if (m != null)
+      m.setProperty("interceptor.4", "Exit4");
+    return true;
+  }
+
+  public void init(String agentId, String agentName, Properties prop) {
+    logger.log(BasicLevel.DEBUG, getClass().getName() + " agentName = "
+        + agentName + ", prop = " + prop);
   }
 }

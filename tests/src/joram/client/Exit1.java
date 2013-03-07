@@ -34,22 +34,20 @@ import framework.TestCase;
 
 public class Exit1 implements MessageInterceptor {
 
-	public static Logger logger = Debug.getLogger(Exit1.class.getName());
+  public static Logger logger = Debug.getLogger(Exit1.class.getName());
 
-	public boolean handle(Message m, Properties prop) {
-		logger.log(BasicLevel.DEBUG, "TestCase.killAgentServer: interceptor.Exit1 = " + m);
+  public boolean handle(Message m, int key) {
+    logger.log(BasicLevel.DEBUG,
+        "TestCase.killAgentServer: interceptor.Exit1 = " + m);
 
-		
-//		TestCase.killAgentServer(AgentServer.getServerId());
-		TestCase.stopAgentServerExt(7890);
-//		System.exit(0);
+    // TestCase.killAgentServer(AgentServer.getServerId());
+    TestCase.stopAgentServerExt(7890);
+    // System.exit(0);
 
-		return true;
-	}
-
-  public void init(Properties prop) {
-    // TODO Auto-generated method stub
-    
+    return true;
   }
 
+  public void init(String arg0, String arg1, Properties arg2) {
+    // TODO Auto-generated method stub
+  }
 }
