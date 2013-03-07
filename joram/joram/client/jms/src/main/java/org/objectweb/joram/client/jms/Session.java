@@ -2396,6 +2396,9 @@ public class Session implements javax.jms.Session, SessionMBean {
       ProducerMessages pM = new ProducerMessages(dest.getName(),
           (org.objectweb.joram.shared.messages.Message) joramMsg.momMsg.clone());
 
+      // JORAM_PERF_BRANCH
+      pM.setQueue(dest.isQueue());
+      
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Sending " + joramMsg);
 
