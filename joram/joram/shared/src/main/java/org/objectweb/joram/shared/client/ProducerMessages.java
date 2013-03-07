@@ -138,6 +138,7 @@ public final class ProducerMessages extends AbstractJmsRequest {
     super.toString(strbuf);
     strbuf.append(",messages=").append(messages);
     strbuf.append(",asyncSend=").append(asyncSend);
+    strbuf.append(",isQueue=").append(isQueue);
     strbuf.append(')');
   }
 
