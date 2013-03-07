@@ -583,13 +583,6 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                 }
               }
             }
-            
-            if (msg.not instanceof CallbackNotification) {
-              Runnable callback = ((CallbackNotification) msg.not).getCallback();
-              if (callback != null) {
-                callbacks.add(callback);
-              }
-            }
 
             if (agent != null) {
               if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -606,6 +599,13 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
                 // Stop the AgentServer
                 AgentServer.stop(false);
                 break main_loop;
+              }
+            }
+            
+            if (msg.not instanceof CallbackNotification) {
+              Runnable callback = ((CallbackNotification) msg.not).getCallback();
+              if (callback != null) {
+                callbacks.add(callback);
               }
             }
               
