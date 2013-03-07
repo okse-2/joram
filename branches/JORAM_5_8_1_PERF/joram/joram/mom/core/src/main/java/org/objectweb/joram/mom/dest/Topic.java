@@ -639,6 +639,10 @@ public class Topic extends Destination implements TopicMBean {
     
     setNoSave();
     boolean persistent = false;
+    
+    // JORAM_PERF_BRANCH
+    ClientMessages.TopicReplyCallback callback = not.getTopicReplyCallback();
+    int localDurableSubscriberCount = 0;
 
     for (Iterator subs = subscribers.iterator(); subs.hasNext();) {
       // Browsing the subscribers.
@@ -701,15 +705,23 @@ public class Topic extends Destination implements TopicMBean {
         
         // JORAM_PERF_BRANCH
         if (persistentMessage && durableSubscriptions.get(subscriber) != null) {
-          persistent = true;
+          localDurableSubscriberCount++;
         }
         
         TopicMsgsReply topicMsgsReply = new TopicMsgsReply(deliverables);
         topicMsgsReply.setPersistent(persistent);
+        
+        // JORAM_PERF_BRANCH
+        topicMsgsReply.setCallback(callback);
+        
         setDmq(topicMsgsReply); 
         forward(subscriber, topicMsgsReply);
         nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation + deliverables.size();
       }
+    }
+    
+    if (callback != null) {
+      callback.setSubscriberCount(localDurableSubscriberCount);
     }
   }
 
