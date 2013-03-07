@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,25 +26,24 @@ import java.util.Properties;
 import org.objectweb.joram.shared.messages.Message;
 
 public interface MessageInterceptor {
-  // the properties can contains this values
-  public static final String AGENT_ID = "agentId";
-  public static final String AGENT_NAME = "agentName";
-  public static final String KEY = "key";
-  
-	/**
+
+  /**
 	 * initialize this interceptor
-	 * @param properties the properties
+	 * 
+	 * @param agentId the string representation of agentId
+   * @param agentName the agent name
+	 * @param properties the properties come from the client
 	 */
-	void init(Properties properties);
+	void init(String agentId, String agentName, Properties properties);
 	
 	/**
 	 * Implement this method to intercept message on server side.
 	 *  
 	 * @param msg  the message 
-	 * @param properties the properties
+	 * @param key the connection key, on destination key=-1
 	 * @return true if continue with the next interceptor, 
 	 *         false send the message in DMQ.
 	 */
-	boolean handle(Message msg, Properties properties);
+	boolean handle(Message msg, int key);
 
 }

@@ -1043,6 +1043,40 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
   
   /**
+   * Administration method add interceptor.
+   * 
+   * @param interceptor the className interceptor
+   * @param properties the properties of this interceptor
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void addInterceptor(String interceptor, Properties properties) throws ConnectException, AdminException {
+    if (properties == null)
+      properties = new Properties();
+    properties.put(AdminCommandConstant.INTERCEPTORS, interceptor);
+    getWrapper().processAdmin(getName(), AdminCommandConstant.CMD_ADD_INTERCEPTORS, properties);
+  }
+  
+  /**
+   * Administration method to replace interceptor.
+   * 
+   * @param newInterceptor the new className interceptor.
+   * @param oldInterceptor the old className interceptor.
+   * @param properties the properties of the new interceptor
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void replaceInterceptor(String newInterceptor, String oldInterceptor, Properties properties) throws ConnectException, AdminException {
+    if (properties == null)
+      properties = new Properties();
+    properties.put(AdminCommandConstant.INTERCEPTORS_NEW, newInterceptor);
+    properties.put(AdminCommandConstant.INTERCEPTORS_OLD, oldInterceptor);
+    getWrapper().processAdmin(getName(), AdminCommandConstant.CMD_REPLACE_INTERCEPTORS, properties);
+  }
+  
+  /**
    * Administration method to set properties.
    * 
    * @param prop the properties to update.
