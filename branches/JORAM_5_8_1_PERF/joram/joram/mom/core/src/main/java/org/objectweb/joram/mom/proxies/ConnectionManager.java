@@ -79,7 +79,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
   
   public static final boolean DIRECT_NOTIFICATION = true;
   
-  static class ReplyCallback implements Runnable {
+  static class QueueReplyCallback implements Runnable {
     
     private AckedQueue replyQueue;
     
@@ -87,7 +87,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
     
     private long createDate;
 
-    public ReplyCallback(AckedQueue replyQueue, int correlationId) {
+    public QueueReplyCallback(AckedQueue replyQueue, int correlationId) {
       super();
       this.replyQueue = replyQueue;
       this.correlationId = correlationId;
@@ -148,7 +148,12 @@ public class ConnectionManager implements ConnectionManagerMBean {
               not.setProxyId(proxyId);
               // not.setAsyncSend(false);
               not.setAsyncSend(true); // callback is used, see below
-              not.setCallback(new ReplyCallback(replyQueue, pm.getRequestId()));
+              if (pm.isQueue()) {
+                not.setCallback(new QueueReplyCallback(replyQueue, pm.getRequestId()));
+              } else {
+                not.setTopicReplyCallback(
+                    new ClientMessages.TopicReplyCallback(replyQueue, pm.getRequestId()));
+              }
               Channel.sendTo(destId, not);
             } else {
               // Still use the old way when the destination is remote
