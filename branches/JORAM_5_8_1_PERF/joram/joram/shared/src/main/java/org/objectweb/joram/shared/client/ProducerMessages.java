@@ -58,6 +58,19 @@ public final class ProducerMessages extends AbstractJmsRequest {
   public final boolean getAsyncSend() {
     return asyncSend;
   }
+  
+  // JORAM_PERF_BRANCH
+  private boolean isQueue;
+
+  //JORAM_PERF_BRANCH
+  public boolean isQueue() {
+    return isQueue;
+  }
+
+  //JORAM_PERF_BRANCH
+  public void setQueue(boolean isQueue) {
+    this.isQueue = isQueue;
+  }
 
   /** Returns the produced messages. */
   public Vector getMessages() {
@@ -142,6 +155,8 @@ public final class ProducerMessages extends AbstractJmsRequest {
     super.writeTo(os);
     Message.writeVectorTo(messages, os);
     StreamUtil.writeTo(asyncSend, os);
+    // JORAM_PERF_BRANCH
+    StreamUtil.writeTo(isQueue, os);
   }
 
   /**
@@ -154,5 +169,7 @@ public final class ProducerMessages extends AbstractJmsRequest {
     super.readFrom(is);
     messages = Message.readVectorFrom(is);
     asyncSend = StreamUtil.readBooleanFrom(is);
+    // JORAM_PERF_BRANCH
+    isQueue = StreamUtil.readBooleanFrom(is);
   }
 }
