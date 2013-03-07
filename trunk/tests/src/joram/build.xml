@@ -568,6 +568,8 @@
     <antcall target="interceptors.test5" />
     <antcall target="interceptors.test6" />
     <antcall target="interceptors.test7" />
+  	<antcall target="interceptors.test8" />
+  	<antcall target="interceptors.test9" />
     <antcall target="interceptors.test_Q" />
     <antcall target="interceptors.test_T" />
     <antcall target="interceptors.test_Q2" />
@@ -580,6 +582,8 @@
     <antcall target="interceptors.test_T5" />
     <antcall target="interceptors.test_Q6" />
     <antcall target="interceptors.test_T6" />
+  	<antcall target="interceptors.test_Q7" />
+    <antcall target="interceptors.test_T7" />
   </target>
 
   <target name="tests.distribution"
@@ -6138,6 +6142,21 @@
     </antcall>
   </target>
 	
+	<target name="interceptors.test9" depends="init.a3props,compile"
+	    description=" --> test interceptors 9">
+	    <antcall target="test.run" inheritAll="true">
+	      <param name="transaction" value="fr.dyade.aaa.util.NTransaction" />
+	      <param name="className" value="joram.interceptors.Test9" />
+	      <param name="jndiconf" value="interceptors/jndi.properties" />
+	      <param name="a3conf" value="interceptors/a3servers.xml" />
+	      <param name="jvmargs" value="" />
+	      <param name="testid" value="interceptors.test9" />
+	      <param name="args" value="" />
+	      <param name="manifest.mf" value="joram/interceptors/manifest.mf" />
+	      <param name="include.classes" value="joram/interceptors/Exit*.class" />
+	    </antcall>
+	  </target>
+	
   <target name="interceptors.test_Q" depends="init.a3props,compile"
     description=" --> test interceptors on a Queue">
     <antcall target="test.run" inheritAll="true">
@@ -6289,7 +6308,7 @@
   </target>
 
   <target name="interceptors.test_Q6" depends="init.a3props,compile"
-    description=" --> test5 interceptors on a Queue creation.">
+    description=" --> test6 interceptors on a Queue creation.">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction" />
       <param name="className" value="joram.interceptors.Test_Q6" />
@@ -6304,7 +6323,7 @@
   </target>
 
   <target name="interceptors.test_T6" depends="init.a3props,compile"
-    description=" --> test5 interceptors on a Topic creation.">
+    description=" --> test6 interceptors on a Topic creation.">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction" />
       <param name="className" value="joram.interceptors.Test_T6" />
@@ -6312,6 +6331,36 @@
       <param name="a3conf" value="interceptors/a3servers.xml" />
       <param name="jvmargs" value="" />
       <param name="testid" value="interceptors.test_T6" />
+      <param name="args" value="" />
+      <param name="manifest.mf" value="joram/interceptors/manifest.mf" />
+      <param name="include.classes" value="joram/interceptors/Exit*.class" />
+    </antcall>
+  </target>
+	
+	<target name="interceptors.test_Q7" depends="init.a3props,compile"
+    description=" --> test7 interceptors with properties on a Queue">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction" />
+      <param name="className" value="joram.interceptors.Test_Q7" />
+      <param name="jndiconf" value="interceptors/jndi.properties" />
+      <param name="a3conf" value="interceptors/a3servers.xml" />
+      <param name="jvmargs" value="" />
+      <param name="testid" value="interceptors.test_Q7" />
+      <param name="args" value="" />
+      <param name="manifest.mf" value="joram/interceptors/manifest.mf" />
+      <param name="include.classes" value="joram/interceptors/Exit*.class" />
+    </antcall>
+  </target>
+	
+	<target name="interceptors.test_T7" depends="init.a3props,compile"
+    description=" --> test7 interceptors with properties on a Topic">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction" />
+      <param name="className" value="joram.interceptors.Test_T7" />
+      <param name="jndiconf" value="interceptors/jndi.properties" />
+      <param name="a3conf" value="interceptors/a3servers.xml" />
+      <param name="jvmargs" value="" />
+      <param name="testid" value="interceptors.test_T7" />
       <param name="args" value="" />
       <param name="manifest.mf" value="joram/interceptors/manifest.mf" />
       <param name="include.classes" value="joram/interceptors/Exit*.class" />
