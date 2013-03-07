@@ -20,14 +20,18 @@
  */
 package fr.dyade.aaa.agent;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+
+import fr.dyade.aaa.util.TransactionObject;
 
 /**
  * Class Notification is the root of the notifications hierarchy. Every
  * notification's class has Notification as a superclass.
  */
-public class Notification implements Serializable, Cloneable {
+public class Notification implements Serializable, Cloneable, TransactionObject {
   /** define serialVersionUID for interoperability */
   static final long serialVersionUID = 1L;
 
@@ -283,5 +287,35 @@ public class Notification implements Serializable, Cloneable {
   public final String toString() {
     StringBuffer output = new StringBuffer();
     return toString(output).toString();
+  }
+
+  public int getClassId() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  //JORAM_PERF_BRANCH
+  public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    os.writeByte((priority & 0x0F)
+        | // 4 bits
+        ((expiration > 0) ? ExpirationSet : 0x00)
+        | ((context != null) ? ContextSet : 0x00)
+        | ((deadNotificationAgentId != null) ? DeadNotificationAgentIdSet
+            : 0x00));
+    if (expiration > 0)
+      os.writeLong(expiration);
+    if (context != null) {
+      if (context instanceof TransactionObject) {
+        ((TransactionObject) context).encodeTransactionObject(os);
+      }
+    }
+    if (deadNotificationAgentId != null)
+      deadNotificationAgentId.encodeTransactionObject(os);
+  }
+
+  //JORAM_PERF_BRANCH
+  public void decodeTransactionObject(DataInputStream os) throws IOException {
+    // TODO Auto-generated method stub
+    
   }
 }

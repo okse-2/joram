@@ -23,8 +23,12 @@
  */
 package fr.dyade.aaa.agent;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+
+import fr.dyade.aaa.util.TransactionObject;
 
 /**
  * <code>AgentIdStamp</code> class defines static members, variable and
@@ -154,7 +158,7 @@ final class AgentIdStamp implements Serializable {
  *
  * @see AgentIdStamp
  */
-public final class AgentId implements Serializable {
+public final class AgentId implements Serializable, TransactionObject {
   /** Define serialVersionUID for interoperability. */
   static final long serialVersionUID = 1L;
 
@@ -463,5 +467,22 @@ public final class AgentId implements Serializable {
       return true;
     }
     return false;
+  }
+
+  public int getClassId() {
+    return 0;
+  }
+
+  //JORAM_PERF_BRANCH
+  public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    os.writeInt(from);
+    os.writeInt(to);
+    os.writeInt(stamp);
+  }
+
+  //JORAM_PERF_BRANCH
+  public void decodeTransactionObject(DataInputStream os) throws IOException {
+    // TODO Auto-generated method stub
+    
   }
 }
