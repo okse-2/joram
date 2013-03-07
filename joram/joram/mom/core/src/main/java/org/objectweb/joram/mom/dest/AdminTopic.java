@@ -867,10 +867,10 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
         proxy.setName(name);
         proxId = proxy.getId();
         
-      	// set interceptors.
-      	proxy.setInterceptors(request.getProperties());
-        
         try {
+          // set interceptors.
+          proxy.setInterceptors(request.getProperties());
+
         	// deploy UserAgent
           proxy.deploy();
           if (logger.isLoggable(BasicLevel.DEBUG))
@@ -884,8 +884,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
           .append(proxId.toString()).append("] for user [").append(name)
           .append("] has been created and deployed").toString();
           strbuf.setLength(0);
-        }
-        catch (Exception exc) {
+        } catch (Exception exc) {
         	if (logger.isLoggable(BasicLevel.ERROR))
             logger.log(BasicLevel.ERROR, "EXCEPTION:: createUser [" + name + "]", exc);
           throw new RequestException("User proxy not deployed: " + exc);

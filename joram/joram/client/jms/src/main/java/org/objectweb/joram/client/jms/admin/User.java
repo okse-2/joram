@@ -24,6 +24,7 @@
 package org.objectweb.joram.client.jms.admin;
 
 import java.net.ConnectException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
@@ -725,6 +726,21 @@ public class User extends AdministeredObject implements UserMBean {
   }
   
   /**
+   * Add interceptor
+   * 
+   * @param interceptor the className interceptor
+   * @param properties the interceptor properties
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void addInterceptorIN(String interceptor, Properties properties) throws ConnectException, AdminException {
+    if (properties == null)
+      properties = new Properties();
+    properties.put(AdminCommandConstant.INTERCEPTORS_IN, interceptor);
+    getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_ADD_INTERCEPTORS, properties);
+  }
+  
+  /**
    * Get interceptors.
    * 
    * @return list of string className interceptor (separate with ",")
@@ -761,6 +777,21 @@ public class User extends AdministeredObject implements UserMBean {
   	Properties prop = new Properties();
     prop.put(AdminCommandConstant.INTERCEPTORS_OUT, interceptors);
     getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_ADD_INTERCEPTORS, prop);
+  }
+  
+  /**
+   * Add interceptor
+   * 
+   * @param interceptor the className interceptor
+   * @param properties the interceptor properties
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void addInterceptorOUT(String interceptor, Properties properties) throws ConnectException, AdminException {
+    if (properties == null)
+      properties = new Properties();
+    properties.put(AdminCommandConstant.INTERCEPTORS_OUT, interceptor);
+    getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_ADD_INTERCEPTORS, properties);
   }
   
   /**
@@ -805,6 +836,23 @@ public class User extends AdministeredObject implements UserMBean {
   }
   
   /**
+   * Replace interceptor IN
+   * 
+   * @param newInterceptor the new className interceptor.
+   * @param oldInterceptor the old className interceptor.
+   * @param properties the new interceptor properties
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void replaceInterceptorIN(String newInterceptor, String oldInterceptor, Properties properties) throws ConnectException, AdminException {
+    if (properties == null)
+      properties = new Properties();
+    properties.put(AdminCommandConstant.INTERCEPTORS_IN_NEW, newInterceptor);
+    properties.put(AdminCommandConstant.INTERCEPTORS_IN_OLD, oldInterceptor);
+    getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_REPLACE_INTERCEPTORS, properties);
+  }
+  
+  /**
    * Replace interceptor OUT
    * 
    * @param newInterceptor the new className interceptor.
@@ -817,6 +865,23 @@ public class User extends AdministeredObject implements UserMBean {
     prop.put(AdminCommandConstant.INTERCEPTORS_OUT_NEW, newInterceptor);
     prop.put(AdminCommandConstant.INTERCEPTORS_OUT_OLD, oldInterceptor);
     getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_REPLACE_INTERCEPTORS, prop);
+  }
+  
+  /**
+   * Replace interceptor OUT
+   * 
+   * @param newInterceptor the new className interceptor.
+   * @param oldInterceptor the old className interceptor.
+   * @param properties the new interceptor properties
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void replaceInterceptorOUT(String newInterceptor, String oldInterceptor, Properties properties) throws ConnectException, AdminException {
+    if (properties == null)
+      properties = new Properties();
+    properties.put(AdminCommandConstant.INTERCEPTORS_OUT_NEW, newInterceptor);
+    properties.put(AdminCommandConstant.INTERCEPTORS_OUT_OLD, oldInterceptor);
+    getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_REPLACE_INTERCEPTORS, properties);
   }
   
   /**

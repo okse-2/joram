@@ -29,7 +29,9 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -39,6 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TimerTask;
 import java.util.Vector;
 
@@ -164,11 +168,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   public static Logger logger = Debug.getLogger(UserAgent.class.getName());
 
   /** the in and out interceptors list. */
-  private String interceptors_in = null;
-  private String interceptors_out = null;
   private transient List<MessageInterceptor> interceptorsOUT = null;
   private transient List<MessageInterceptor> interceptorsIN = null;
-  private transient Properties interceptorsProp = null;
+  private List<Properties> interceptorsPropIN = null;
+  private List<Properties> interceptorsPropOUT = null;
     
   /** period to run the cleaning task, by default 60s. */
   private long period = 60000L;
@@ -710,7 +713,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       	if (interceptorsOUT != null && !interceptorsOUT.isEmpty()) {
       		if (reply instanceof ConsumerMessages) {
       			org.objectweb.joram.shared.messages.Message m = null;
-      			interceptorsProp.setProperty(MessageInterceptor.KEY, ""+key); // used by flowchart
       			Vector msgs = ((ConsumerMessages) reply).getMessages();
       			Vector newMsgs = new Vector();
       			Vector acks = new Vector();
@@ -721,12 +723,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       				while (it.hasNext()) {
       					MessageInterceptor interceptor = (MessageInterceptor) it.next();
       					// interceptor handle
-      					if (!interceptor.handle(m, interceptorsProp)) {
+      					if (!interceptor.handle(m, key)) {
       						m = null;
       						break;
       					}
       				}
-      				interceptorsProp.remove(MessageInterceptor.KEY);
       				if (m != null) {
     						newMsgs.add(m);
       				} else {
@@ -884,15 +885,31 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * Only call in UserAgent creation.
    * 
    * @param prop properties
+   * @throws Exception 
    */
-  public void setInterceptors(Properties prop) {
+  public void setInterceptors(Properties prop) throws Exception {
   	if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this + " initInterceptors(" + prop + ')');
+      logger.log(BasicLevel.DEBUG, "--- " + this + " setInterceptors(" + prop + ')');
   	
   	if (prop == null) return;
 
-  	interceptors_out = (String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT);
-  	interceptors_in = (String) prop.get(AdminCommandConstant.INTERCEPTORS_IN);
+  	if (prop.containsKey(AdminCommandConstant.INTERCEPTORS_IN)) {
+      if (interceptorsPropIN == null)
+        interceptorsPropIN = new ArrayList<Properties>();
+      if (interceptorsIN == null)
+        interceptorsIN = new ArrayList<MessageInterceptor>();
+      //TODO: clean prop
+  	  addInterceptor(getAgentId(), getName(), AdminCommandConstant.INTERCEPTORS_IN, interceptorsIN, prop, interceptorsPropIN);
+  	}
+  	
+  	if (prop.containsKey(AdminCommandConstant.INTERCEPTORS_OUT)) {
+      if (interceptorsPropOUT == null)
+        interceptorsPropOUT = new ArrayList<Properties>();
+      if (interceptorsOUT == null)
+        interceptorsOUT = new ArrayList<MessageInterceptor>();
+      //TODO: clean prop
+      addInterceptor(getAgentId(), getName(), AdminCommandConstant.INTERCEPTORS_OUT, interceptorsOUT, prop, interceptorsPropOUT);
+  	}
   }
   
   /**
@@ -915,14 +932,13 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Re-initializing after a crash or a server stop.
 
     // interceptors
-    initInterceptorsProp();
-    if (interceptors_out != null) {
+    if (interceptorsPropOUT != null) {
     	interceptorsOUT = new ArrayList<MessageInterceptor>();
-    	InterceptorsHelper.addInterceptors(interceptors_out, interceptorsOUT, interceptorsProp);
+    	InterceptorsHelper.addInterceptors(getAgentId(), getName(), AdminCommandConstant.INTERCEPTORS_OUT, interceptorsPropOUT, interceptorsOUT);
     }
-    if (interceptors_in != null) {
+    if (interceptorsPropIN != null) {
     	interceptorsIN = new ArrayList<MessageInterceptor>();
-    	InterceptorsHelper.addInterceptors(interceptors_in, interceptorsIN, interceptorsProp);
+    	InterceptorsHelper.addInterceptors(getAgentId(), getName(), AdminCommandConstant.INTERCEPTORS_IN, interceptorsPropIN, interceptorsIN);
     }
     
     // Browsing the pre-crash contexts:
@@ -2854,65 +2870,67 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 			switch (request.getCommand()) {
 			case AdminCommandConstant.CMD_ADD_INTERCEPTORS:
 				prop = request.getProp();
-				if (interceptorsOUT == null)
-					interceptorsOUT = new ArrayList<MessageInterceptor>();
-				InterceptorsHelper.addInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT), interceptorsOUT, interceptorsProp);
-				interceptors_out = InterceptorsHelper.getListInterceptors(interceptorsOUT);
-				if (interceptorsIN == null)
-					interceptorsIN = new ArrayList<MessageInterceptor>();
-				InterceptorsHelper.addInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN), interceptorsIN, interceptorsProp);
-				interceptors_in = InterceptorsHelper.getListInterceptors(interceptorsIN);
-				// state change
-				setSave();
+        
+				// add interceptors out
+        if (prop.containsKey(AdminCommandConstant.INTERCEPTORS_OUT)) {
+          if (interceptorsPropOUT == null)
+            interceptorsPropOUT = new ArrayList<Properties>();
+          if (interceptorsOUT == null)
+            interceptorsOUT = new ArrayList<MessageInterceptor>();
+          addInterceptor(getAgentId(), getName(), AdminCommandConstant.INTERCEPTORS_OUT, interceptorsOUT, prop, interceptorsPropOUT);
+        }
+        // add interceptors in
+        if (prop.containsKey(AdminCommandConstant.INTERCEPTORS_IN)) {
+          if (interceptorsPropIN == null)
+            interceptorsPropIN = new ArrayList<Properties>();
+          if (interceptorsIN == null)
+            interceptorsIN = new ArrayList<MessageInterceptor>();
+          addInterceptor(getAgentId(), getName(), AdminCommandConstant.INTERCEPTORS_IN, interceptorsIN, prop, interceptorsPropIN);
+        }
 				break;
+				
 			case AdminCommandConstant.CMD_REMOVE_INTERCEPTORS:
 				prop = request.getProp();
-				InterceptorsHelper.removeInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT), interceptorsOUT);
-				interceptors_out = InterceptorsHelper.getListInterceptors(interceptorsOUT);
-				InterceptorsHelper.removeInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN), interceptorsIN);
-				interceptors_in = InterceptorsHelper.getListInterceptors(interceptorsIN);
-				if (interceptorsIN != null && interceptorsIN.isEmpty())
-					interceptorsIN = null;
-				if (interceptorsOUT != null && interceptorsOUT.isEmpty())
-					interceptorsOUT = null;
-				// state change
-				setSave();
+				removeInterceptor(AdminCommandConstant.INTERCEPTORS_OUT, interceptorsOUT, prop.getProperty(AdminCommandConstant.INTERCEPTORS_OUT), interceptorsPropOUT);
+				removeInterceptor(AdminCommandConstant.INTERCEPTORS_IN, interceptorsIN, prop.getProperty(AdminCommandConstant.INTERCEPTORS_IN), interceptorsPropIN);
 				break;
+				
 			case AdminCommandConstant.CMD_GET_INTERCEPTORS:
 				replyProp = new Properties();
-				if (interceptors_in == null) {
-	                replyProp.put(AdminCommandConstant.INTERCEPTORS_IN, "");
+				if (interceptorsIN == null) {
+				  replyProp.put(AdminCommandConstant.INTERCEPTORS_IN, "");
 				} else {
-	                replyProp.put(AdminCommandConstant.INTERCEPTORS_IN, InterceptorsHelper.getListInterceptors(interceptorsIN));
+				  replyProp.put(AdminCommandConstant.INTERCEPTORS_IN, InterceptorsHelper.getListInterceptors(interceptorsIN));
 				}
-				if (interceptors_out == null) {
-	                replyProp.put(AdminCommandConstant.INTERCEPTORS_OUT, "");
+				if (interceptorsOUT == null) {
+				  replyProp.put(AdminCommandConstant.INTERCEPTORS_OUT, "");
 				} else {
-	                replyProp.put(AdminCommandConstant.INTERCEPTORS_OUT, InterceptorsHelper.getListInterceptors(interceptorsOUT));
+				  replyProp.put(AdminCommandConstant.INTERCEPTORS_OUT, InterceptorsHelper.getListInterceptors(interceptorsOUT));
 				}
 				break;
+				
 			case AdminCommandConstant.CMD_REPLACE_INTERCEPTORS:
 				prop = request.getProp();
 				if (interceptorsIN == null && prop.containsKey(AdminCommandConstant.INTERCEPTORS_IN_NEW))
 					throw new Exception("interceptorsIN == null.");
 				if (interceptorsOUT == null && prop.containsKey(AdminCommandConstant.INTERCEPTORS_OUT_NEW))
 					throw new Exception("interceptorsOUT == null.");
-				// replace IN interceptor
-				InterceptorsHelper.replaceInterceptor(
-						((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN_NEW)), 
-						((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN_OLD)), 
-						interceptorsIN,
-						interceptorsProp);
-				interceptors_in = InterceptorsHelper.getListInterceptors(interceptorsIN);
-				// replace OUT interceptor
-				InterceptorsHelper.replaceInterceptor(
-						((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT_NEW)), 
-						((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT_OLD)), 
-						interceptorsOUT,
-						interceptorsProp);
-				interceptors_out = InterceptorsHelper.getListInterceptors(interceptorsOUT);
-				// state change
-				setSave();
+				
+				if (prop.containsKey(AdminCommandConstant.INTERCEPTORS_IN_OLD)) {
+				  // replace IN interceptor
+				  replaceInterceptorIN(
+				      getAgentId(),
+				      getName(),
+				      prop);
+				}
+
+				if (prop.containsKey(AdminCommandConstant.INTERCEPTORS_OUT_OLD)) {
+				  // replace OUT interceptor
+				  replaceInterceptorOUT(
+				      getAgentId(),
+				      getName(),
+				      prop);
+				}
 				break;
 
 			default:
@@ -3302,18 +3320,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     return nbMsgsSentToDMQSinceCreation;
   }
   
-  private void initInterceptorsProp() {
-    if (interceptorsProp == null) {
-      // set the destination name and id in interceptorsProp
-      interceptorsProp = new Properties();
-      interceptorsProp.setProperty(MessageInterceptor.AGENT_ID, getAgentId());
-      interceptorsProp.setProperty(MessageInterceptor.AGENT_NAME, getName());
-    }
-  }
-  
   private ProducerMessages processInterceptors(int key, ProducerMessages pm) {
     if (interceptorsIN != null && !interceptorsIN.isEmpty()) {
-      interceptorsProp.setProperty(MessageInterceptor.KEY, ""+key); // used by flowchart
       org.objectweb.joram.shared.messages.Message m = null;
       Vector msgs = ((ProducerMessages) pm).getMessages();
       Vector newMsgs = new Vector();
@@ -3322,12 +3330,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         Iterator<MessageInterceptor> it = interceptorsIN.iterator();
         while (it.hasNext()) {
           MessageInterceptor interceptor = it.next();
-          if (!interceptor.handle(m, interceptorsProp)) {
+          if (!interceptor.handle(m, key)) {
             m = null;
             break;
           }
         }
-        interceptorsProp.remove(MessageInterceptor.KEY);
         if (m != null) {
           newMsgs.add(m);
         } else {
@@ -3345,6 +3352,176 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       ((ProducerMessages) pm).setMessages(newMsgs);
     }
     return pm;
+  }
+  
+  private void addInterceptor(
+      String agentId, 
+      String agentName,
+      String interceptorsKey,
+      List<MessageInterceptor> interceptors, 
+      final Properties prop, 
+      List<Properties> interceptorsProp) throws Exception {
+    
+    String error = null;
+    String interceptorsClassName = prop.getProperty(interceptorsKey);
+    if (interceptorsClassName == null) return;
+    
+    if (interceptorsClassName.contains(InterceptorsHelper.INTERCEPTOR_CLASS_NAME_SEPARATOR)) {
+      StringTokenizer token = new StringTokenizer(interceptorsClassName, InterceptorsHelper.INTERCEPTOR_CLASS_NAME_SEPARATOR);
+      while (token.hasMoreTokens()) {
+        String interceptorClassName = token.nextToken();
+        Properties iProp = new Properties();
+        iProp.setProperty(interceptorsKey, interceptorClassName);
+        interceptorsProp.add(iProp);
+        try {
+          InterceptorsHelper.addInterceptors(agentId, agentName, interceptorsKey, iProp, interceptors);
+        } catch(Exception exc) {
+          if (logger.isLoggable(BasicLevel.WARN))
+            logger.log(BasicLevel.WARN, "addInterceptors", exc);
+          StringWriter sw = new StringWriter();
+          exc.printStackTrace(new PrintWriter(sw));
+          if (error == null)
+          error = "(" + interceptorClassName + " exc=" + sw.toString() + ')';
+          else 
+            error += "(" + interceptorClassName + " exc=" + sw.toString() + ')';
+        }
+      }
+    } else {
+      interceptorsProp.add(prop);
+      InterceptorsHelper.addInterceptors(agentId, agentName, interceptorsKey, prop, interceptors);
+    }
+    
+    // state change
+    setSave();
+    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "UserAgent.addInterceptor interceptors = " + interceptors + ", interceptorsProp = " + interceptorsProp);
+    
+    if (error != null) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, "UserAgent.addInterceptor error = " + error);
+      throw new Exception(error);
+    }
+  }
+  
+  private void removeInterceptor(
+      String interceptorsKey,
+      List<MessageInterceptor> interceptors, 
+      String classNames, 
+      List<Properties> interceptorsProp) throws Exception {
+    
+    if (classNames == null || interceptors == null || interceptorsProp == null) return;
+    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "UserAgent.removeInterceptor classNames = " + classNames + ", interceptors = " + interceptors + ", interceptorsProp = " + interceptorsProp);
+
+    StringTokenizer token = new StringTokenizer(classNames, InterceptorsHelper.INTERCEPTOR_CLASS_NAME_SEPARATOR);
+    while (token.hasMoreTokens()) {
+      String className = token.nextToken();
+      // find and remove the interceptor
+      Properties toRemove = null;
+      Iterator<Properties> it = interceptorsProp.iterator();
+      while (it.hasNext()) {
+        Properties properties = (Properties) it.next();
+        if (properties.getProperty(interceptorsKey).equals(className)) {
+          toRemove = properties;
+          break;
+        }
+      }
+      if (toRemove != null) {
+        interceptorsProp.remove(toRemove);
+        
+        InterceptorsHelper.removeInterceptors(classNames, interceptors);
+        if (interceptors.isEmpty())
+          interceptors = null;
+        // state change
+        setSave();
+      }
+    }
+  }
+  
+  private void replaceInterceptorIN(
+      String agentId, 
+      String agentName,
+      final Properties prop) throws Exception {
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "UserAgent.replaceInterceptorIN(" + agentId + ", " + agentName + ", " + prop + ')');
+
+    Boolean ret = InterceptorsHelper.replaceInterceptor(
+        agentId, 
+        agentName, 
+        AdminCommandConstant.INTERCEPTORS_IN_NEW, 
+        AdminCommandConstant.INTERCEPTORS_IN_OLD, 
+        interceptorsIN, 
+        prop);
+
+    if (ret) {
+      Iterator<Properties> it = interceptorsPropIN.iterator();
+      while (it.hasNext()) {
+        Properties properties = (Properties) it.next();
+        if (properties.getProperty(AdminCommandConstant.INTERCEPTORS_IN).equals(prop.getProperty(AdminCommandConstant.INTERCEPTORS_IN_OLD))) {
+          int index = interceptorsPropIN.indexOf(properties);
+          Properties newProp = new Properties();
+          Set<Entry<Object, Object>> entrys = prop.entrySet();
+          Iterator<Entry<Object, Object>> iterator = entrys.iterator();
+          while (iterator.hasNext()) {
+            Entry<Object, Object> entry = (Entry<Object, Object>) iterator.next();
+            if (entry.getKey().equals(AdminCommandConstant.INTERCEPTORS_IN_NEW))
+              newProp.put(AdminCommandConstant.INTERCEPTORS_IN, entry.getValue());
+            else
+              newProp.put(entry.getKey(), entry.getValue());
+          }
+          interceptorsPropIN.remove(index);
+          interceptorsPropIN.add(index, newProp);
+          // state change
+          setSave();
+          break;
+        }
+      }
+    }
+  }
+  
+  private void replaceInterceptorOUT(
+      String agentId, 
+      String agentName,
+      final Properties prop) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "UserAgent.replaceInterceptorOUT(" + agentId + ", " + agentName + ", " + prop + ')');
+
+    Boolean ret = InterceptorsHelper.replaceInterceptor(
+        agentId, 
+        agentName, 
+        AdminCommandConstant.INTERCEPTORS_OUT_NEW, 
+        AdminCommandConstant.INTERCEPTORS_OUT_OLD, 
+        interceptorsOUT, 
+        prop);
+
+    if (ret) {
+      // update the interceptorsPropOUT list
+      Iterator<Properties> it = interceptorsPropOUT.iterator();
+      while (it.hasNext()) {
+        Properties properties = (Properties) it.next();
+        if (properties.getProperty(AdminCommandConstant.INTERCEPTORS_OUT).equals(prop.getProperty(AdminCommandConstant.INTERCEPTORS_OUT_OLD))) {
+          int index = interceptorsPropOUT.indexOf(properties);
+          Properties newProp = new Properties();
+          Set<Entry<Object, Object>> entrys = prop.entrySet();
+          Iterator<Entry<Object, Object>> iterator = entrys.iterator();
+          while (iterator.hasNext()) {
+            Entry<Object, Object> entry = (Entry<Object, Object>) iterator.next();
+            if (entry.getKey().equals(AdminCommandConstant.INTERCEPTORS_OUT_NEW))
+              newProp.put(AdminCommandConstant.INTERCEPTORS_OUT, entry.getValue());
+            else
+              newProp.put(entry.getKey(), entry.getValue());
+          }
+          interceptorsPropOUT.remove(index);
+          interceptorsPropOUT.add(index, newProp);
+          // state change
+          setSave();
+          break;
+        }
+      }
+    }
   }
 }
 
