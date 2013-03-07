@@ -643,6 +643,15 @@ public class Topic extends Destination implements TopicMBean {
     // JORAM_PERF_BRANCH
     ClientMessages.TopicReplyCallback callback = not.getTopicReplyCallback();
     int localDurableSubscriberCount = 0;
+    
+    // JORAM_PERF_BRANCH
+    boolean persistentMessage = false;
+    for (Iterator msgs = messages.iterator(); msgs.hasNext();) {
+      Message msg = (Message) msgs.next();
+      if (msg.persistent) {
+        persistentMessage = true;
+      }
+    }
 
     for (Iterator subs = subscribers.iterator(); subs.hasNext();) {
       // Browsing the subscribers.
@@ -691,28 +700,18 @@ public class Topic extends Destination implements TopicMBean {
           }
         }  
       }
+      
       // There are messages to send.
       if (! deliverables.isEmpty()) {
-        
-        // JORAM_PERF_BRANCH
-        boolean persistentMessage = false;
-        for (Iterator msgs = messages.iterator(); msgs.hasNext();) {
-          Message msg = (Message) msgs.next();
-          if (msg.persistent) {
-            persistentMessage = true;
-          }
-        }
-        
-        // JORAM_PERF_BRANCH
-        if (persistentMessage && durableSubscriptions.get(subscriber) != null) {
-          localDurableSubscriberCount++;
-        }
         
         TopicMsgsReply topicMsgsReply = new TopicMsgsReply(deliverables);
         topicMsgsReply.setPersistent(persistent);
         
         // JORAM_PERF_BRANCH
-        topicMsgsReply.setCallback(callback);
+        if (persistentMessage && durableSubscriptions.get(subscriber) != null) {
+          localDurableSubscriberCount++;
+          topicMsgsReply.setCallback(callback);
+        }
         
         setDmq(topicMsgsReply); 
         forward(subscriber, topicMsgsReply);
@@ -720,8 +719,15 @@ public class Topic extends Destination implements TopicMBean {
       }
     }
     
+    // JORAM_PERF_BRANCH
     if (callback != null) {
-      callback.setSubscriberCount(localDurableSubscriberCount);
+      if (localDurableSubscriberCount > 0) {
+        callback.setSubscriberCount(localDurableSubscriberCount);
+      } else {
+        // The callback needs to be called at the end of this reaction
+        callback.setSubscriberCount(1);
+        not.setCallback(callback);
+      }
     }
   }
 
