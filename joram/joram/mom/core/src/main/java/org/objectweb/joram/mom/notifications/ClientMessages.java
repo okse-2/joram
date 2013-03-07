@@ -27,6 +27,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectweb.joram.mom.proxies.AckedQueue;
+import org.objectweb.joram.mom.proxies.ProxyMessage;
+import org.objectweb.joram.shared.client.ServerReply;
 import org.objectweb.joram.shared.messages.Message;
 
 import fr.dyade.aaa.agent.AgentId;
@@ -52,6 +55,9 @@ public class ClientMessages extends AbstractRequestNot implements CallbackNotifi
   
   //JORAM_PERF_BRANCH
   private Runnable callback;
+  
+  //JORAM_PERF_BRANCH
+  private TopicReplyCallback topicReplyCallback;
 
   /**
    * Constructs a <code>ClientMessages</code> instance.
@@ -127,6 +133,16 @@ public class ClientMessages extends AbstractRequestNot implements CallbackNotifi
 
   public void setCallback(Runnable callback) {
     this.callback = callback;
+  }
+
+  //JORAM_PERF_BRANCH
+  public TopicReplyCallback getTopicReplyCallback() {
+    return topicReplyCallback;
+  }
+
+  //JORAM_PERF_BRANCH
+  public void setTopicReplyCallback(TopicReplyCallback topicReplyCallback) {
+    this.topicReplyCallback = topicReplyCallback;
   }
 
   /** Adds a message to deliver. */
@@ -212,5 +228,38 @@ public class ClientMessages extends AbstractRequestNot implements CallbackNotifi
     output.append(')');
 
     return output;
+  }
+  
+  //JORAM_PERF_BRANCH
+  public static class TopicReplyCallback implements Runnable {
+    
+    private AckedQueue replyQueue;
+    
+    private int correlationId;
+    
+    private long createDate;
+    
+    private int subscriberCount;
+
+    public TopicReplyCallback(AckedQueue replyQueue, int correlationId) {
+      super();
+      this.replyQueue = replyQueue;
+      this.correlationId = correlationId;
+      createDate = System.nanoTime();
+    }
+    
+    public void setSubscriberCount(int subscriberCount) {
+      this.subscriberCount = subscriberCount;
+    }
+
+    public synchronized void run() {
+      subscriberCount--;
+      if (subscriberCount == 0) {
+        replyQueue.push(new ProxyMessage(new ServerReply(correlationId), false));
+        long time = System.nanoTime() - createDate;
+        //logger.log(BasicLevel.WARN, "producer blocked: " + time);
+      }
+    }
+    
   }
 } 
