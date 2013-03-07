@@ -29,12 +29,14 @@ import java.util.List;
 import org.objectweb.joram.shared.messages.Message;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.CallbackNotification;
 
 /**
  * A <code>TopicMsgsReply</code> instance is used by a topic for sending
  * messages to an agent client which subscribed to it.
  */
-public class TopicMsgsReply extends AbstractReplyNot {
+// JORAM_PERF_BRANCH
+public class TopicMsgsReply extends AbstractReplyNot implements CallbackNotification {
   /**
    * 
    */
@@ -78,4 +80,16 @@ public class TopicMsgsReply extends AbstractReplyNot {
   public void setDMQId(AgentId dmqId) {
     setDeadNotificationAgentId(dmqId);
   }
+  
+  //JORAM_PERF_BRANCH
+  private Runnable callback;
+
+  public Runnable getCallback() {
+    return callback;
+  }
+
+  public void setCallback(Runnable callback) {
+    this.callback = callback;
+  }
+  
 } 
