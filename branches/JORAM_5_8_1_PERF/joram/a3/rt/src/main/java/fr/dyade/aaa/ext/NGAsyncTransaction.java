@@ -555,10 +555,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
   }
   
   static class LogGarbageContext extends LogFileContext {
+    String newFileName;
     List<Operation> operations;
 
-    public LogGarbageContext(LogFile logFile, List<Operation> operations) {
+    public LogGarbageContext(LogFile logFile, String newFileName, List<Operation> operations) {
       super(logFile);
+      this.newFileName = newFileName;
       this.operations = operations;
     }
     
@@ -676,6 +678,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           
           LogFileWriteContext writeCtx = (LogFileWriteContext) ctx;
           try {
+            currentLogFile.open();
             ByteBuffer buffer = writeCtx.byteBuffer;
             FileChannel channel = currentLogFile.getChannel();
             //logmon.log(BasicLevel.DEBUG, "*** write");
@@ -690,6 +693,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           try {
             LogGarbageContext garbageCtx = (LogGarbageContext) ctx;
             LogFile garbagedLog = ctx.logFile;
+            garbagedLog.open();
             //logmon.log(BasicLevel.WARN, "*** garbage log: " + garbagedLog);
                 
             if (currentLogFile == garbagedLog) {
@@ -701,7 +705,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
               }
             }
             
-            logManager.garbageOperations(garbagedLog, garbageCtx.operations);
+            logManager.garbageOperations(garbagedLog, garbageCtx.newFileName, garbageCtx.operations);
           } catch (IOException e) {
             logmon.log(BasicLevel.ERROR, "", e);
           }
@@ -930,6 +934,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           if (logidx == -1) logidx = idx[i];
           try {
             LogFile logf = new LogFile(dir, idx[i], mode);
+            logf.open();
             
             // JORAM_PERF_BRANCH
             logf.logId = logf.readLong();
@@ -1107,6 +1112,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       if (logFile[logidx%nbLogFile] == null) {
         // Creates a log file
         logFile[logidx%nbLogFile] = new LogFile(dir, logidx, mode);
+        logFile[logidx%nbLogFile].open();
         logFile[logidx%nbLogFile].setLength(MaxLogFileSize);
 
         // Initializes the log file
@@ -1207,20 +1213,33 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         }
 
         logidx += 1;
-        long logFileId;
-        if (logFile[logidx % nbLogFile] != null) {
-          logFileId = logFile[logidx % nbLogFile].logId;
-          // The log file is an older one, garbage it before using it again.
-          garbage(logFile[logidx % nbLogFile], logFileWriter);
-        } else {
-          logFileId = 0;
-        }
-
+        
+        LogFile oldLogFile = logFile[logidx % nbLogFile];
+        
         // Creates and initializes a new log file
         // TODO: this new log should have already been created and filled by the LogWriter
         // TODO: may be we should check that the file exists before and wait if not (this should not happen in normal cases)
         logFile[logidx % nbLogFile] = new LogFile(dir, logidx, mode);
-        logFile[logidx % nbLogFile].logId = logFileId;
+        
+        // Don't open the LogFile as it may be be opened concurrently by the LogFileWriter
+        
+        // long logFileId;
+        if (oldLogFile != null) {
+          
+          // !!! seems useless:
+          //logFileId = logFile[logidx % nbLogFile].logId;
+          
+          // The log file is an older one, garbage it before using it again.
+          garbage(oldLogFile, logFile[logidx % nbLogFile].getFile().getName(), logFileWriter);
+        } else {
+          
+          // only for the first n-1 logs?
+          // also seems useless
+          //logFileId = 0;
+        }
+
+        // !!! seems useless:
+        //logFile[logidx % nbLogFile].logId = logFileId;
         
         // Not useful as the logs are filled
         //logFile[logidx % nbLogFile].setLength(MaxLogFileSize);
@@ -1360,6 +1379,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           logFile[logidx % nbLogFile], buffer, callback);
         logFileWriter.offer(writeContex);
       } else {
+        logFile[logidx % nbLogFile].open();
         FileChannel channel = logFile[logidx % nbLogFile].getChannel();
         channel.write(buffer);
         if (syncOnWrite) {
@@ -1554,7 +1574,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
      * @param logf The log file to garbage.
      * @throws IOException
      */
-    private final void garbage(LogFile logf, LogFileWriter logFileWriter) throws IOException {
+    private final void garbage(LogFile logf, String newFileName, LogFileWriter logFileWriter) throws IOException {
       //logmon.log(BasicLevel.WARN, "Garbage: log#" + logf);
       //logmon.log(BasicLevel.WARN, "logidx=" + logidx);
       //logmon.log(BasicLevel.WARN, "mainLog=" + mainLog);
@@ -1631,14 +1651,14 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         */
         
         // Cleans the log file array
-        logFile[logf.logidx%nbLogFile] = null;
+        //logFile[logf.logidx%nbLogFile] = null;
       }
       
       if (logFileWriter != null) {
-        LogGarbageContext garbageContext = new LogGarbageContext(logf, garbagedOperations);
+        LogGarbageContext garbageContext = new LogGarbageContext(logf, newFileName, garbagedOperations);
         logFileWriter.offer(garbageContext);
       } else {
-        garbageOperations(logf, garbagedOperations);
+        garbageOperations(logf, newFileName, garbagedOperations);
       }
       
       lastGarbageDate = System.currentTimeMillis();
@@ -1649,7 +1669,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                    "NTransaction.LogFile.garbage() - end: " + (lastGarbageDate - start));
     }
     
-    void garbageOperations(LogFile logf, List<Operation> garbagedOperations) throws IOException {
+    void garbageOperations(LogFile logf, String newFileName, List<Operation> garbagedOperations) throws IOException {
+      logf.open();
       for (Operation op : garbagedOperations) {
         if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -1670,7 +1691,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         repository.commit();
       }
       fillAndReset(logf);
-      recycleLog(logf);
+      recycleLog(logf, newFileName);
     }
     
     void fillAndReset(LogFile logFile) throws IOException {
@@ -1679,6 +1700,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
     // JORAM_PERF_BRANCH
     void fillAndReset(LogFile logFile, long logId) throws IOException {
+      logFile.open();
       int fileSize = (int) logFile.length();
       ByteBuffer bb = ByteBuffer.allocate(fileSize);
       
@@ -1717,13 +1739,14 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       }
     }
     
-    void recycleLog(LogFile logf) throws IOException {
+    void recycleLog(LogFile logf, String newFileName) throws IOException {
+      logf.open();
       if (logf.logidx != logidx) {
         // Closes the log file and renames it for future use.
         logf.close();
 
         // Rename the log for a future use
-        logf.renameTo();
+        logf.getFile().renameTo(new File(dir, newFileName));
       }
     }
 
@@ -1816,7 +1839,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     }
   }
 
-  public static class LogFile extends RandomAccessFile {
+  public static class LogFile {
     /** Unique index of this log file */
     int logidx;
     /** Number of valid operation in this log file */
@@ -1824,11 +1847,17 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
     File dir;
     
+    File file;
+    
     /** Maximum index of existing log files */
     static int maxUsedIdx = -1;
     
     // JORAM_PERF_BRANCH
     long logId;
+    
+    RandomAccessFile raf;
+    
+    String mode;
     
     /**
      *  Creates a random access file stream to read from and to write to the file specified
@@ -1839,22 +1868,81 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
      * @param logFile the specified file.
      */
     public LogFile(File dir, int logidx, String mode) throws FileNotFoundException {
-      super(new File(dir, "log#" + logidx), mode);
-      if (logidx > maxUsedIdx) maxUsedIdx = logidx;
       this.logidx = logidx;
       this.dir = dir;
+      this.mode = mode;
+      file = new File(dir, "log#" + logidx);
+      if (logidx > maxUsedIdx) maxUsedIdx = logidx;
+    }
+    
+    public File getFile() {
+      return file;
+    }
+    
+    public void open() throws IOException {
+      if (raf == null) {
+        raf = new RandomAccessFile(file, mode);
+      }
+    }
+    
+    public FileChannel getChannel() {
+      return raf.getChannel();
+    }
+    
+    public int readInt() throws IOException {
+      return raf.readInt();
+    }
+    
+    public long readLong() throws IOException {
+      return raf.readLong();
     }
 
-    public void renameTo() {
-      maxUsedIdx += 1;
-      new File(dir, "log#" + logidx).renameTo(new File(dir, "log#" + maxUsedIdx));
+    /*
+    public void renameTo(String newName) {
+      file.renameTo(new File(dir, newName));
+    }
+    */
+    
+    public int read() throws IOException {
+      return raf.read();
+    }
+    
+    public void readFully(byte[] bytes) throws IOException {
+      raf.readFully(bytes);
+    }
+    
+    public long getFilePointer() throws IOException {
+      return raf.getFilePointer();
+    }
+    
+    public String readUTF() throws IOException {
+      return raf.readUTF();
+    }
+    
+    public void setLength(int length) throws IOException {
+      raf.setLength(length);
+    }
+    
+    public void seek(long cursor) throws IOException {
+      raf.seek(cursor);
+    }
+    
+    public long length() throws IOException {
+      return raf.length();
+    }
+    
+    public void close() throws IOException {
+      raf.close();
+      raf = null;
     }
 
     @Override
     public String toString() {
       return "LogFile [logidx=" + logidx + ", logCounter=" + logCounter
-          + ", dir=" + dir + ", logId=" + logId + "]";
+          + ", dir=" + dir + ", file=" + file.getName() + ", logId=" + logId + ", raf="
+          + raf + ", mode=" + mode + "]";
     }
+   
   }
   
   /**
