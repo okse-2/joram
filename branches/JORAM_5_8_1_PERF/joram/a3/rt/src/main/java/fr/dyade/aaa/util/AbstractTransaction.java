@@ -271,16 +271,28 @@ public abstract class AbstractTransaction extends BaseTransaction {
                          String dirName, String name,
                          boolean first) throws IOException {
     Context ctx = perThreadContext.get();
-    if (ctx.oos == null) {
+    if (obj instanceof TransactionObject) {
+      TransactionObject to = (TransactionObject) obj;
       ctx.bos.reset();
-      ctx.oos = new ObjectOutputStream(ctx.bos);
+      DataOutputStream dos = new DataOutputStream(ctx.bos);
+      dos.writeBoolean(true);
+      dos.writeInt(to.getClassId());
+      to.encodeTransactionObject(dos);
+      dos.flush();
     } else {
-      ctx.oos.reset();
-      ctx.bos.reset();
-      ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
+      DataOutputStream dos = new DataOutputStream(ctx.bos);
+      dos.writeBoolean(false);
+      if (ctx.oos == null) {
+        ctx.bos.reset();
+        ctx.oos = new ObjectOutputStream(ctx.bos);
+      } else {
+        ctx.oos.reset();
+        ctx.bos.reset();
+        ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
+      }
+      ctx.oos.writeObject(obj);
+      ctx.oos.flush();
     }
-    ctx.oos.writeObject(obj);
-    ctx.oos.flush();
     
     saveInLog(ctx.bos.toByteArray(), dirName, name, ctx.log, false, first);
   }
