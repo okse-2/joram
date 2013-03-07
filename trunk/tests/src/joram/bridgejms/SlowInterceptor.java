@@ -33,21 +33,18 @@ import fr.dyade.aaa.common.Debug;
 
 public class SlowInterceptor implements MessageInterceptor {
 
-	 public static Logger logger = Debug.getLogger(SlowInterceptor.class.getName());
-	 
-	public boolean handle(Message m, Properties prop) {
-		logger.log(BasicLevel.DEBUG, getClass().getName() + " SlowInterceptor= " + m);
-		try {
-	    Thread.sleep(1000);
-    } catch (InterruptedException e) {
-    }
-		return true;
-	}
+  public static Logger logger = Debug.getLogger(SlowInterceptor.class.getName());
 
-  public void init(Properties prop) {
-    // TODO Auto-generated method stub
-    
+  public boolean handle(Message m, int key) {
+    logger.log(BasicLevel.DEBUG, getClass().getName() + " SlowInterceptor= " + m);
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) { }
+    return true;
   }
 
-	
+  public void init(String arg0, String arg1, Properties arg2) {
+    // TODO Auto-generated method stub
+
+  }
 }

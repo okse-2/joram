@@ -35,16 +35,16 @@ public class Exit1 implements MessageInterceptor {
 
 	 public static Logger logger = Debug.getLogger(Exit1.class.getName());
 	 
-	public boolean handle(Message m, Properties prop) {
-	  logger.log(BasicLevel.DEBUG, getClass().getName() + " prop = " + prop);
+	public boolean handle(Message m, int key) {
+	  logger.log(BasicLevel.DEBUG, getClass().getName() + " key = " + key);
 		logger.log(BasicLevel.DEBUG, getClass().getName() + " m = " + m);
 		if (m != null)
 			m.setProperty("interceptor.1", "Exit1");
 		return true;
 	}
 
-  public void init(Properties prop) {
-    logger.log(BasicLevel.DEBUG, getClass().getName() + " prop = " + prop);
+  public void init(String agentId, String agentName, Properties prop) {
+    logger.log(BasicLevel.DEBUG, getClass().getName() + " agentName = " + agentName + ", prop = " + prop);
   }
 
 }
