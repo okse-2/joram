@@ -1803,6 +1803,9 @@ public class Session implements javax.jms.Session, SessionMBean {
     if (pM == null) {
       pM = new ProducerMessages(dest.getName());
       sendings.put(dest.getName(), pM);
+      
+      // JORAM_PERF_BRANCH
+      pM.setQueue(dest.isQueue());
     }
     pM.addMessage(msg);
 
