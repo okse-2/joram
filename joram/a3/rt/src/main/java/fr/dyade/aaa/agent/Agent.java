@@ -303,6 +303,11 @@ public abstract class Agent implements AgentMBean, Serializable, TransactionObje
     fixed = in.readBoolean();
     updated = true;
   }
+  
+  // JORAM_PERF_BRANCH: need an empty constructor for the serializer
+  public Agent(Agent nullAgent) {
+    // Do nothing
+  }
 
   /**
    * Allocates a new Agent object. The resulting object <b>is not an agent</b>;
