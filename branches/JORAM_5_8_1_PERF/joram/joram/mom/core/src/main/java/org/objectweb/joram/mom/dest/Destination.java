@@ -1228,7 +1228,7 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     freeReading = is.readBoolean();
     freeWriting = is.readBoolean();
     int clientsSize = is.readInt();
-    clients = new Hashtable<AgentId, Integer>();
+    clients = new Hashtable<AgentId, Integer>(clientsSize);
     for (int i = 0; i < clientsSize; i++) {
       AgentId key = new AgentId((short) 0, (short) 0, 0);
       key.decodeTransactionObject(is);
