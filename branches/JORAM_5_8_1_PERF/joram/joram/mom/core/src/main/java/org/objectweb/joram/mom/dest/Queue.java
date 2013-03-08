@@ -91,6 +91,7 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.TransactionObject;
+import fr.dyade.aaa.util.TransactionObjectFactory;
 
 /**
  * The <code>Queue</code> class implements the MOM queue behavior,
@@ -1737,6 +1738,15 @@ public class Queue extends Destination implements QueueMBean {
       request.decodeTransactionObject(is);
       requests.add(request);
     }
+  }
+  
+  // JORAM_PERF_BRANCH
+  public static class QueueFactory implements TransactionObjectFactory {
+
+    public TransactionObject newInstance() {
+      return new Queue();
+    }
+    
   }
   
 }
