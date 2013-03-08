@@ -31,7 +31,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -3481,40 +3480,4 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     threshold = is.readInt(); 
   }
   
-}
-
-/**
- * The <code>Xid</code> internal class is a utility class representing
- * a global transaction identifier.
- */
-class Xid implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-  byte[] bq;
-  int fi;
-  byte[] gti;
-
-  Xid(byte[] bq, int fi, byte[] gti) {
-    this.bq = bq;
-    this.fi = fi;
-    this.gti = gti;
-  }
-
-  public boolean equals(Object o) {
-    if (!(o instanceof Xid))
-      return false;
-
-    Xid other = (Xid) o;
-
-    return java.util.Arrays.equals(bq, other.bq)
-           && fi == other.fi
-           && java.util.Arrays.equals(gti, other.gti);
-  }
-
-  public int hashCode() {
-    return (new String(bq) + "-" + new String(gti)).hashCode();
-  }
-
 }
