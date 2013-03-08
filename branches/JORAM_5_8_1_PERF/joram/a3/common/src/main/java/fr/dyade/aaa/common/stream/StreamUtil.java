@@ -42,7 +42,8 @@ public final class StreamUtil {
   };
 
   // Be careful, the buffer will be reused..
-  private static byte[] readFully(int length, InputStream is) throws IOException {
+  // JORAM_PERF_BRANCH: public method
+  public static byte[] readFully(int length, InputStream is) throws IOException {
     int count = 0;
     byte[] buf = (byte[]) (perThreadBuffer.get());
     if (length > buf.length) buf = new byte[length];
