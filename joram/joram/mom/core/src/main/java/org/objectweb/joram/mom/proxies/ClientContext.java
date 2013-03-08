@@ -24,10 +24,15 @@
  */
 package org.objectweb.joram.mom.proxies; 
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.Map.Entry;
 
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.XACnxPrepare;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -35,12 +40,13 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.TransactionObject;
 
 /**
  * The <code>ClientContext</code> class holds the data related to a client
  * context.
  */
-class ClientContext implements java.io.Serializable {
+class ClientContext implements java.io.Serializable, TransactionObject {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
@@ -53,11 +59,11 @@ class ClientContext implements java.io.Serializable {
   /** Context identifier. */
   private int id;
   /** Vector of temporary destinations. */
-  private Vector tempDestinations;
+  private Vector<AgentId> tempDestinations;
   /** Identifiers of queues delivering messages. */
-  private Hashtable deliveringQueues;
+  private Hashtable<AgentId, AgentId> deliveringQueues;
   /** Prepared transactions objects waiting for commit. */
-  private Hashtable transactionsTable;
+  private Hashtable<Xid, XACnxPrepare> transactionsTable;
 
   /** <code>true</code> if the context is activated. */
   private transient boolean started;
@@ -67,13 +73,16 @@ class ClientContext implements java.io.Serializable {
    */
   private transient int cancelledRequestId;
   /** Vector of active subscriptions' names. */
-  private transient Vector activeSubs;
+  private transient Vector<String> activeSubs;
   /** Pending replies waiting for the context to be activated. */
   private transient Vector repliesBuffer;
   /** Contexts waiting for the replies from some local agents*/
   private transient Hashtable commitTable;
   
   private transient ProxyAgentItf proxy;
+  
+  // JORAM_PERF_BRANCH
+  public ClientContext() {}
 
   /**
    * Constructs a <code>ClientContext</code> instance.
@@ -251,7 +260,7 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Registers a given transaction "prepare". */
-  void registerTxPrepare(Object key, XACnxPrepare prepare) throws Exception {
+  void registerTxPrepare(Xid key, XACnxPrepare prepare) throws Exception {
     if (transactionsTable == null)
       transactionsTable = new Hashtable();
 
@@ -312,4 +321,66 @@ class ClientContext implements java.io.Serializable {
     buff.append(')');
     return buff.toString();
   }
+
+  // JORAM_PERF_BRANCH
+  public int getClassId() {
+    return JoramHelper.CLIENTCONTEXT_CLASS_ID;
+  }
+
+  //JORAM_PERF_BRANCH
+  public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    os.writeInt(activeSubs.size());
+    for (String activeSub : activeSubs) {
+      os.writeUTF(activeSub);
+    }
+    os.writeInt(deliveringQueues.size());
+    Iterator<Entry<AgentId, AgentId>> deliveringQueueIterator = deliveringQueues.entrySet().iterator();
+    while (deliveringQueueIterator.hasNext()) {
+      Entry<AgentId, AgentId> deliveringQueue = deliveringQueueIterator.next();
+      deliveringQueue.getKey().encodeTransactionObject(os);
+      // not useful to encode the value
+    }
+    os.writeInt(id);
+    proxyId.encodeTransactionObject(os);
+    os.writeInt(tempDestinations.size());
+    for (AgentId tempDestination : tempDestinations) {
+      tempDestination.encodeTransactionObject(os);
+    }
+    // TODO: transactionsTable
+    /*
+    os.writeInt(transactionsTable.size());
+    Iterator<Entry<Xid, XACnxPrepare>> transactionsTableIterator = transactionsTable.entrySet().iterator();
+    while (transactionsTableIterator.hasNext()) {
+      Entry<Xid, XACnxPrepare> transaction = transactionsTableIterator.next();
+      transaction.getKey().encodeTransactionObject(os);
+      transaction.getValue().encodeTransactionObject(os);
+    }
+    */
+  }
+
+  //JORAM_PERF_BRANCH
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    int activeSubsSize = is.readInt();
+    activeSubs = new Vector<String>(activeSubsSize);
+    for (int i = 0; i < activeSubsSize; i++) {
+      String activeSub = is.readUTF();
+      activeSubs.add(activeSub);
+    }
+    int deliveringQueuesSize = is.readInt();
+    deliveringQueues = new Hashtable<AgentId, AgentId>(deliveringQueuesSize);
+    for (int i = 0; i < activeSubsSize; i++) {
+      AgentId key = new AgentId((short) 0, (short) 0, 0); 
+      deliveringQueues.put(key, key);
+    }
+    id = is.readInt();
+    AgentId proxyId = new AgentId((short) 0, (short) 0, 0); 
+    proxyId.decodeTransactionObject(is);
+    int tempDestinationsSize = is.readInt();
+    tempDestinations = new Vector<AgentId>(tempDestinationsSize);
+    for (AgentId tempDestination : tempDestinations) {
+      tempDestination.decodeTransactionObject(is);
+    }
+    // TODO: transactionsTable
+  }
+  
 }
