@@ -41,6 +41,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.TransactionObject;
+import fr.dyade.aaa.util.TransactionObjectFactory;
 
 /**
  * The <code>ClientContext</code> class holds the data related to a client
@@ -381,6 +382,15 @@ class ClientContext implements java.io.Serializable, TransactionObject {
       tempDestination.decodeTransactionObject(is);
     }
     // TODO: transactionsTable
+  }
+  
+  //JORAM_PERF_BRANCH
+  public static class ClientContextFactory implements TransactionObjectFactory {
+
+    public TransactionObject newInstance() {
+      return new ClientContext();
+    }
+    
   }
   
 }

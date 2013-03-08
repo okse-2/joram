@@ -151,6 +151,8 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.WakeUpTask;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.TransactionObject;
+import fr.dyade.aaa.util.TransactionObjectFactory;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -3478,6 +3480,15 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       subsTable.put(key, value);
     }
     threshold = is.readInt(); 
+  }
+  
+  //JORAM_PERF_BRANCH
+  public static class UserAgentFactory implements TransactionObjectFactory {
+
+    public TransactionObject newInstance() {
+      return new UserAgent();
+    }
+
   }
   
 }
