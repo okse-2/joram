@@ -52,6 +52,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.TransactionObject;
+import fr.dyade.aaa.util.TransactionObjectFactory;
 
 /**
  * The <code>ClientSubscription</code> class holds the data of a client
@@ -1178,6 +1179,15 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     threshold = is.readInt();
     topicId = new AgentId((short) 0, (short) 0, 0);
     topicId.decodeTransactionObject(is);
+  }
+  
+  //JORAM_PERF_BRANCH
+  public static class ClientSubscriptionFactory implements TransactionObjectFactory {
+
+    public TransactionObject newInstance() {
+      return new ClientSubscription();
+    }
+    
   }
 
 }

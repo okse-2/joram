@@ -29,9 +29,12 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
+import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
+import org.objectweb.joram.mom.notifications.ReceiveRequest;
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerAckRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
@@ -45,6 +48,7 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.TransactionObjectFactoryRepository;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -235,6 +239,14 @@ public class ConnectionManager implements ConnectionManagerMBean {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "ConnectionManager.init(" + args + ',' + firstTime + ')');
+    
+    // JORAM_PERF_BRANCH
+    TransactionObjectFactoryRepository.putFactory(JoramHelper.CLIENTCONTEXT_CLASS_ID, new ClientContext.ClientContextFactory());
+    TransactionObjectFactoryRepository.putFactory(JoramHelper.CLIENTSUBSCRIPTION_CLASS_ID, new ClientSubscription.ClientSubscriptionFactory());
+    TransactionObjectFactoryRepository.putFactory(JoramHelper.QUEUE_CLASS_ID, new Queue.QueueFactory());
+    TransactionObjectFactoryRepository.putFactory(JoramHelper.RECEIVEREQUEST_CLASS_ID, new ReceiveRequest.ReceiveRequestFactory());
+    TransactionObjectFactoryRepository.putFactory(JoramHelper.USERAGENT_CLASS_ID, new UserAgent.UserAgentFactory());
+    
     if (! firstTime) return;
 
     AdminTopic adminTopic = new AdminTopic();
