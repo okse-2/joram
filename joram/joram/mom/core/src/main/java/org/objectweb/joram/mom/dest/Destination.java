@@ -23,6 +23,8 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +32,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -298,7 +301,7 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
   /** <code>true</code> if the WRITE access is granted to everybody. */
   protected boolean freeWriting = false;
   /** Table of the destination readers and writers. */
-  protected Hashtable clients = new Hashtable();
+  protected Hashtable<AgentId, Integer> clients = new Hashtable<AgentId, Integer>();
 
   /** READ access value. */
   public static int READ = 1;
@@ -1182,4 +1185,74 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
   protected boolean interceptorsAvailable() {
   	return interceptors != null && !interceptors.isEmpty();
   }
+  
+  // JORAM_PERF_BRANCH
+  public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    super.encodeTransactionObject(os);
+    os.writeBoolean(deletable);
+    adminId.encodeTransactionObject(os);
+    os.writeBoolean(freeReading);
+    os.writeBoolean(freeWriting);
+    os.writeInt(clients.size());
+    Iterator<Entry<AgentId, Integer>> clientIterator = clients.entrySet().iterator();
+    while (clientIterator.hasNext()) {
+      Entry<AgentId, Integer> client = clientIterator.next();
+      client.getKey().encodeTransactionObject(os);
+      os.writeInt(client.getValue());
+    }
+    if (dmqId == null) {
+      os.writeBoolean(true);
+    } else {
+      os.writeBoolean(false);
+      dmqId.encodeTransactionObject(os);
+    }
+    os.writeLong(creationDate);
+    os.writeLong(nbMsgsReceiveSinceCreation);
+    os.writeLong(nbMsgsDeliverSinceCreation);
+    os.writeLong(nbMsgsSentToDMQSinceCreation);
+    os.writeLong(period);
+    if (interceptorsStr == null) {
+      os.writeBoolean(true);
+    } else {
+      os.writeBoolean(false);
+      os.writeUTF(interceptorsStr);
+    }
+  }
+  
+  //JORAM_PERF_BRANCH
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    super.decodeTransactionObject(is);
+    deletable = is.readBoolean();
+    adminId = new AgentId((short) 0, (short) 0, 0);
+    adminId.decodeTransactionObject(is);
+    freeReading = is.readBoolean();
+    freeWriting = is.readBoolean();
+    int clientsSize = is.readInt();
+    clients = new Hashtable<AgentId, Integer>();
+    for (int i = 0; i < clientsSize; i++) {
+      AgentId key = new AgentId((short) 0, (short) 0, 0);
+      key.decodeTransactionObject(is);
+      int value = is.readInt();
+      clients.put(key, value);
+    }
+    boolean isNull = is.readBoolean();
+    if (isNull) {
+      dmqId = null;
+    } else {
+      dmqId = new AgentId((short) 0, (short) 0, 0);
+      dmqId.decodeTransactionObject(is);
+    }
+    creationDate = is.readLong();
+    nbMsgsReceiveSinceCreation = is.readLong();
+    nbMsgsDeliverSinceCreation = is.readLong();
+    nbMsgsSentToDMQSinceCreation = is.readLong();
+    period = is.readLong();
+    isNull = is.readBoolean();
+    if (isNull) {
+      interceptorsStr = null;
+    } else {
+      interceptorsStr = is.readUTF();
+    }
+  }
+  
 }
