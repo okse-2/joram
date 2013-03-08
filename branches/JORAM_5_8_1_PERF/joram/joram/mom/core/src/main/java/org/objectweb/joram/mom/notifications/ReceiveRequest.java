@@ -23,6 +23,14 @@
  */
 package org.objectweb.joram.mom.notifications;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
+import org.objectweb.joram.mom.util.JoramHelper;
+
+import fr.dyade.aaa.agent.AgentId;
+
 /**
  * A <code>ReceiveRequest</code> instance is used by a client agent for 
  * requesting a message on a queue.
@@ -60,6 +68,8 @@ public class ReceiveRequest extends AbstractRequestNot {
   
   // JORAM_PERF_BRANCH:
   private boolean implicitReceive;
+  
+  public ReceiveRequest() {}
 
   /**
    * Constructs a <code>ReceiveRequest</code> instance.
@@ -145,5 +155,74 @@ public class ReceiveRequest extends AbstractRequestNot {
 
   public final int getMessageCount() {
     return msgCount;
+  }
+
+  // JORAM_PERF_BRANCH
+  public int getClassId() {
+    return JoramHelper.RECEIVEREQUEST_CLASS_ID;
+  }
+
+  //JORAM_PERF_BRANCH
+  public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    super.encodeTransactionObject(os);
+    os.writeBoolean(autoAck);
+    os.writeLong(expirationTime);
+    os.writeBoolean(implicitReceive);
+    os.writeInt(msgCount);
+    if (msgIds == null) {
+      os.writeBoolean(true);
+    } else {
+      os.writeBoolean(false);
+      os.writeInt(msgIds.length);
+      for (String msgId : msgIds) {
+        os.writeUTF(msgId);
+      }
+    }
+    if (requester == null) {
+      os.writeBoolean(true);
+    } else {
+      os.writeBoolean(false);
+      requester.encodeTransactionObject(os);
+    }
+    if (selector == null) {
+      os.writeBoolean(true);
+    } else {
+      os.writeBoolean(false);
+      os.writeUTF(selector);
+    }
+    os.writeLong(timeOut);
+  }
+
+  //JORAM_PERF_BRANCH
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    super.decodeTransactionObject(is);
+    autoAck = is.readBoolean();
+    expirationTime = is.readLong();
+    implicitReceive = is.readBoolean();
+    msgCount = is.readInt();
+    boolean isNull = is.readBoolean();
+    if (isNull) {
+      msgIds = null;
+    } else {
+      int msgIdsLength = is.readInt();
+      msgIds = new String[msgIdsLength];
+      for (int i = 0; i < msgIdsLength; i++) {
+        msgIds[i] = is.readUTF();
+      }
+    }
+    isNull = is.readBoolean();
+    if (isNull) {
+      requester = null;
+    } else {
+      requester = new AgentId((short) 0, (short) 0, 0); 
+      requester.decodeTransactionObject(is);
+    }
+    isNull = is.readBoolean();
+    if (isNull) {
+      selector = null;
+    } else {
+      selector = is.readUTF();
+    }
+    timeOut = is.readLong();
   }
 } 
