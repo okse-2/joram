@@ -20,6 +20,7 @@ package fr.dyade.aaa.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -274,20 +275,20 @@ public abstract class AbstractTransaction extends BaseTransaction {
     if (obj instanceof TransactionObject) {
       TransactionObject to = (TransactionObject) obj;
       ctx.bos.reset();
+      ctx.bos.write(1);
       DataOutputStream dos = new DataOutputStream(ctx.bos);
-      dos.writeBoolean(true);
       dos.writeInt(to.getClassId());
       to.encodeTransactionObject(dos);
       dos.flush();
     } else {
-      DataOutputStream dos = new DataOutputStream(ctx.bos);
-      dos.writeBoolean(false);
       if (ctx.oos == null) {
         ctx.bos.reset();
+        ctx.bos.write(0);
         ctx.oos = new ObjectOutputStream(ctx.bos);
       } else {
         ctx.oos.reset();
         ctx.bos.reset();
+        ctx.bos.write(0);
         ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
       }
       ctx.oos.writeObject(obj);
@@ -409,12 +410,25 @@ public abstract class AbstractTransaction extends BaseTransaction {
     byte[] buf = loadByteArray(dirName, name);
     if (buf != null) {
       ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-      ObjectInputStream ois = new ObjectInputStream(bis);
-      try {
-      	return ois.readObject();
-      } finally {
-        ois.close();
-        bis.close();
+      
+      // JORAM_PERF_BRANCH
+      int flag = bis.read();
+      if (flag == 1) {
+        DataInputStream dis = new DataInputStream(bis);
+        int classId = dis.readInt();
+        TransactionObjectFactory factory = TransactionObjectFactoryRepository.getFactory(classId);
+        if (factory == null) throw new IOException("Transaction object factory not found: " + classId);
+        TransactionObject to = factory.newInstance();
+        to.decodeTransactionObject(dis);
+        return to;
+      } else {
+        ObjectInputStream ois = new ObjectInputStream(bis);
+        try {
+          return ois.readObject();
+        } finally {
+          ois.close();
+          bis.close();
+        }
       }
     }
     
