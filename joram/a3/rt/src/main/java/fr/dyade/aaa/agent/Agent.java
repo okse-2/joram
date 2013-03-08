@@ -791,6 +791,12 @@ public abstract class Agent implements AgentMBean, Serializable, TransactionObje
                  "Agent" + id + " [" + name + "],  finalize: " + lastTime);
   }
   
+  //JORAM_PERF_BRANCH
+  // Enables the subclasses not to implement the method
+  public int getClassId() {
+    return -1;
+  }
+  
   // JORAM_PERF_BRANCH
   public void encodeTransactionObject(DataOutputStream os) throws IOException {
     if (name == null)
@@ -801,9 +807,12 @@ public abstract class Agent implements AgentMBean, Serializable, TransactionObje
   }
   
   //JORAM_PERF_BRANCH
-  public void decodeTransactionObject(DataInputStream os) throws IOException {
-    // TODO Auto-generated method stub
-    
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    name = is.readUTF();
+    if (name.length() == 0)
+      name = null;
+    fixed = is.readBoolean();
+    updated = true;
   }
   
 }
