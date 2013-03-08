@@ -470,19 +470,20 @@ public final class AgentId implements Serializable, TransactionObject {
   }
 
   public int getClassId() {
-    return 0;
+    return TransactionObject.AGENTID_CLASS_ID;
   }
 
   //JORAM_PERF_BRANCH
   public void encodeTransactionObject(DataOutputStream os) throws IOException {
-    os.writeInt(from);
-    os.writeInt(to);
+    os.writeShort(from);
+    os.writeShort(to);
     os.writeInt(stamp);
   }
 
   //JORAM_PERF_BRANCH
-  public void decodeTransactionObject(DataInputStream os) throws IOException {
-    // TODO Auto-generated method stub
-    
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    from = is.readShort();
+    to = is.readShort();
+    stamp = is.readInt();
   }
 }
