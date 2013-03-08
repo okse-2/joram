@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import fr.dyade.aaa.util.TransactionObject;
+import fr.dyade.aaa.util.TransactionObjectFactory;
+import fr.dyade.aaa.util.TransactionObjectFactoryRepository;
 
 /**
  * Class Notification is the root of the notifications hierarchy. Every
@@ -290,8 +292,7 @@ public class Notification implements Serializable, Cloneable, TransactionObject 
   }
 
   public int getClassId() {
-    // TODO Auto-generated method stub
-    return 0;
+    return TransactionObject.NOTIFICATION_CLASS_ID;
   }
 
   //JORAM_PERF_BRANCH
@@ -306,7 +307,12 @@ public class Notification implements Serializable, Cloneable, TransactionObject 
       os.writeLong(expiration);
     if (context != null) {
       if (context instanceof TransactionObject) {
-        ((TransactionObject) context).encodeTransactionObject(os);
+        os.writeBoolean(true);
+        TransactionObject to = (TransactionObject) context;
+        os.writeInt(to.getClassId());
+        to.encodeTransactionObject(os);
+      } else {
+        os.writeBoolean(false);
       }
     }
     if (deadNotificationAgentId != null)
@@ -314,8 +320,27 @@ public class Notification implements Serializable, Cloneable, TransactionObject 
   }
 
   //JORAM_PERF_BRANCH
-  public void decodeTransactionObject(DataInputStream os) throws IOException {
-    // TODO Auto-generated method stub
-    
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    byte tmp = is.readByte();
+    priority = tmp & 0x0F; // 4 bits
+    if ((tmp & ExpirationSet) != 0)
+      expiration = is.readLong();
+    if ((tmp & ContextSet) != 0) {
+      boolean isTransactionObject = is.readBoolean();
+      if (isTransactionObject) {
+        int classId = is.readInt();
+        TransactionObjectFactory factory = TransactionObjectFactoryRepository.getFactory(classId);
+        TransactionObject to = factory.newInstance();
+        to.decodeTransactionObject(is);
+        context = to;
+      } else {
+        context = null;
+      }
+    }
+    if ((tmp & DeadNotificationAgentIdSet) != 0) {
+      deadNotificationAgentId = new AgentId();
+      deadNotificationAgentId.decodeTransactionObject(is);
+    }
   }
+  
 }
