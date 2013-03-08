@@ -25,6 +25,8 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -68,6 +70,7 @@ import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.mom.util.InterceptorsHelper;
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.mom.util.MessageInterceptor;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
@@ -277,7 +280,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * <b>Key:</b> context identifier<br>
    * <b>Value:</b> context
    */
-  private Map contexts;
+  private Map<Integer, ClientContext> contexts;
 
   /**
    * Table holding the <code>ClientSubscription</code> instances.
@@ -286,7 +289,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * <b>Value:</b> client subscription
    */
 
-  private Map subsTable;
+  private Map<String, ClientSubscription> subsTable;
 
   /**
    * Table holding the recovered transactions branches.
@@ -294,7 +297,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * <b>Key:</b> transaction identifier<br>
    * <b>Value:</b> <code>XACnxPrepare</code> instance
    */
-  private Map recoveredTransactions;
+  private Map<Xid, XACnxPrepare> recoveredTransactions;
 
   /** Counter of message arrivals from topics. */ 
   private long arrivalsCounter = 0; 
@@ -3398,6 +3401,86 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   public long getNbMsgsSentToDMQSinceCreation() {
     return nbMsgsSentToDMQSinceCreation;
   }
+  
+  // JORAM_PERF_BRANCH
+  public int getClassId() {
+    return JoramHelper.USERAGENT_CLASS_ID;
+  }
+
+  // JORAM_PERF_BRANCH
+  public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    super.encodeTransactionObject(os);
+    os.writeLong(arrivalsCounter);
+    os.writeInt(contexts.size());
+    Iterator<Entry<Integer, ClientContext>> contextIterator = contexts.entrySet().iterator();
+    while (contextIterator.hasNext()) {
+      Entry<Integer, ClientContext> context = contextIterator.next();
+      os.writeInt(context.getKey());
+      context.getValue().encodeTransactionObject(os);
+    }
+    if (dmqId == null) {
+      os.writeBoolean(true);
+    } else {
+      os.writeBoolean(false);
+      dmqId.encodeTransactionObject(os);
+    }
+    // TODO: interceptors_in
+    // TODO: interceptors_out
+    os.writeInt(keyCounter);
+    os.writeInt(nbMaxMsg);
+    os.writeLong(nbMsgsSentToDMQSinceCreation);
+    os.writeLong(period);
+    // TODO: recoveredTransactions
+    os.writeInt(subsTable.size());
+    Iterator<Entry<String, ClientSubscription>> subsTableIterator = subsTable.entrySet().iterator();
+    while (subsTableIterator.hasNext()) {
+      Entry<String, ClientSubscription> context = subsTableIterator.next();
+      os.writeUTF(context.getKey());
+      context.getValue().encodeTransactionObject(os);
+    }
+    os.writeInt(threshold); 
+  }
+  
+  // JORAM_PERF_BRANCH
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    super.decodeTransactionObject(is);
+    arrivalsCounter = is.readLong();
+    int contextsSize = is.readInt();
+    contexts = new Hashtable<Integer, ClientContext>(contextsSize);
+    for (int i = 0; i < contextsSize; i++) {
+      Integer key = is.readInt();
+      ClientContext value = new ClientContext();
+      value.decodeTransactionObject(is);
+      contexts.put(key,  value);
+    }
+    boolean isNull = is.readBoolean();
+    if (isNull) {
+      dmqId = null;
+    } else {
+      dmqId = new AgentId((short) 0, (short) 0, 0);
+      dmqId.decodeTransactionObject(is);
+    }
+    // TODO: interceptors_in
+    interceptors_in = null;
+    // TODO: interceptors_out
+    interceptors_out = null;
+    keyCounter = is.readInt();
+    nbMaxMsg = is.readInt();
+    nbMsgsSentToDMQSinceCreation = is.readLong();
+    period = is.readLong();
+    // TODO: recoveredTransactions
+    recoveredTransactions = null;
+    int subsTableSize = is.readInt();
+    subsTable = new Hashtable<String, ClientSubscription>(subsTableSize);
+    for (int i = 0; i < subsTableSize; i++) {
+      String key = is.readUTF();
+      ClientSubscription value = new ClientSubscription();
+      value.decodeTransactionObject(is);
+      subsTable.put(key, value);
+    }
+    threshold = is.readInt(); 
+  }
+  
 }
 
 /**
@@ -3433,4 +3516,5 @@ class Xid implements Serializable {
   public int hashCode() {
     return (new String(bq) + "-" + new String(gti)).hashCode();
   }
+
 }
