@@ -126,6 +126,11 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
    */
   public Destination() {
   }
+  
+  //JORAM_PERF_BRANCH
+  public Destination(Destination nullDestination) {
+    super(nullDestination);
+  }
 
   /**
    * Constructor with parameters for fixing the destination and specifying its
