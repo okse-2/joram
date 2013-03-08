@@ -30,6 +30,8 @@ import java.io.IOException;
 import org.objectweb.joram.mom.util.JoramHelper;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.util.TransactionObject;
+import fr.dyade.aaa.util.TransactionObjectFactory;
 
 /**
  * A <code>ReceiveRequest</code> instance is used by a client agent for 
@@ -224,5 +226,14 @@ public class ReceiveRequest extends AbstractRequestNot {
       selector = is.readUTF();
     }
     timeOut = is.readLong();
+  }
+  
+  //JORAM_PERF_BRANCH
+  public static class ReceiveRequestFactory implements TransactionObjectFactory {
+
+    public TransactionObject newInstance() {
+      return new ReceiveRequest();
+    }
+
   }
 } 
