@@ -344,6 +344,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private int keyCounter = 0;
 
   private transient WakeUpTask cleaningTask;
+  
+  // JORAM_PERF_BRANCH
+  public UserAgent(UserAgent nullAgent) {
+    super(nullAgent);
+  }
 
   /** (Re)initializes the agent when (re)loading. */
   public void agentInitialize(boolean firstTime) throws Exception {
@@ -3486,7 +3491,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   public static class UserAgentFactory implements TransactionObjectFactory {
 
     public TransactionObject newInstance() {
-      return new UserAgent();
+      return new UserAgent(null);
     }
 
   }
