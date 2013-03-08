@@ -272,30 +272,41 @@ public abstract class AbstractTransaction extends BaseTransaction {
                          String dirName, String name,
                          boolean first) throws IOException {
     Context ctx = perThreadContext.get();
+    
+    // JORAM_PERF_BRANCH
     if (obj instanceof TransactionObject) {
       TransactionObject to = (TransactionObject) obj;
-      ctx.bos.reset();
-      ctx.bos.write(1);
-      DataOutputStream dos = new DataOutputStream(ctx.bos);
-      dos.writeInt(to.getClassId());
-      to.encodeTransactionObject(dos);
-      dos.flush();
-    } else {
-      if (ctx.oos == null) {
+      if (to.getClassId() != -1) {
         ctx.bos.reset();
-        ctx.bos.write(0);
-        ctx.oos = new ObjectOutputStream(ctx.bos);
+        ctx.bos.write(1);
+        DataOutputStream dos = new DataOutputStream(ctx.bos);
+        dos.writeInt(to.getClassId());
+        to.encodeTransactionObject(dos);
+        dos.flush();
       } else {
-        ctx.oos.reset();
-        ctx.bos.reset();
-        ctx.bos.write(0);
-        ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
+        serialize(obj, ctx);
       }
-      ctx.oos.writeObject(obj);
-      ctx.oos.flush();
+    } else {
+      serialize(obj, ctx);
     }
     
     saveInLog(ctx.bos.toByteArray(), dirName, name, ctx.log, false, first);
+  }
+
+  //JORAM_PERF_BRANCH
+  private void serialize(Serializable obj, Context ctx) throws IOException {
+    if (ctx.oos == null) {
+      ctx.bos.reset();
+      ctx.bos.write(0);
+      ctx.oos = new ObjectOutputStream(ctx.bos);
+    } else {
+      ctx.oos.reset();
+      ctx.bos.reset();
+      ctx.bos.write(0);
+      ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
+    }
+    ctx.oos.writeObject(obj);
+    ctx.oos.flush();
   }
 
   /**
