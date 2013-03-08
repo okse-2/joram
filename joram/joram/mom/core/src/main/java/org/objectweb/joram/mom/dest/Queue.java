@@ -23,12 +23,17 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.management.openmbean.CompositeData;
@@ -50,6 +55,7 @@ import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.admin.AdminReply;
@@ -84,6 +90,7 @@ import fr.dyade.aaa.agent.ExpiredNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.TransactionObject;
 
 /**
  * The <code>Queue</code> class implements the MOM queue behavior,
@@ -142,16 +149,16 @@ public class Queue extends Destination implements QueueMBean {
   private int priority; 
 
   /** Table keeping the messages' consumers identifiers. */
-  protected Map consumers = new Hashtable();
+  protected Map<String, AgentId> consumers = new Hashtable<String, AgentId>();
 
   /** Table keeping the messages' consumers contexts. */
-  protected Map contexts = new Hashtable();
+  protected Map<String, Integer> contexts = new Hashtable<String, Integer>();
 
   /** Counter of messages arrivals. */
   protected long arrivalsCounter = 0;
 
   /** List holding the requests before reply or expiry. */
-  protected List requests = new Vector();
+  protected List<ReceiveRequest> requests = new Vector<ReceiveRequest>();
   
   private int ackRequestNumber;
 
@@ -1668,4 +1675,68 @@ public class Queue extends Destination implements QueueMBean {
 		
 		return stats;
 	}
+
+  // JORAM_PERF_BRANCH
+  public int getClassId() {
+    return JoramHelper.QUEUE_CLASS_ID;
+  }
+
+  // JORAM_PERF_BRANCH
+  public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    super.encodeTransactionObject(os);
+    os.writeInt(ackRequestNumber);
+    os.writeLong(arrivalsCounter);
+    os.writeInt(consumers.size());
+    Iterator<Entry<String, AgentId>> consumerIterator = consumers.entrySet().iterator();
+    while (consumerIterator.hasNext()) {
+      Entry<String, AgentId> consumer = consumerIterator.next();
+      os.writeUTF(consumer.getKey());
+      consumer.getValue().encodeTransactionObject(os);
+    }
+    os.writeInt(contexts.size());
+    Iterator<Entry<String, Integer>> contextIterator = contexts.entrySet().iterator();
+    while (contextIterator.hasNext()) {
+      Entry<String, Integer> consumer = contextIterator.next();
+      os.writeUTF(consumer.getKey());
+      os.writeInt(consumer.getValue());
+    }
+    os.writeInt(nbMaxMsg);
+    os.writeInt(priority);
+    os.writeInt(requests.size());
+    for (ReceiveRequest request : requests) {
+      request.encodeTransactionObject(os);
+    }
+  }
+
+  // JORAM_PERF_BRANCH
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    super.decodeTransactionObject(is);
+    ackRequestNumber = is.readInt();
+    arrivalsCounter = is.readLong();
+    int consumersSize = is.readInt();
+    consumers = new Hashtable<String, AgentId>(consumersSize);
+    for (int i = 0; i < consumersSize; i++) {
+      String key = is.readUTF();
+      AgentId value = new AgentId((short) 0, (short) 0, 0);
+      value.decodeTransactionObject(is);
+      consumers.put(key, value);
+    }
+    int contextsSize = is.readInt();
+    contexts = new Hashtable<String, Integer>(contextsSize);
+    for (int i = 0; i < contextsSize; i++) {
+      String key = is.readUTF();
+      Integer value = is.readInt();
+      contexts.put(key, value);
+    }
+    nbMaxMsg = is.readInt();
+    priority = is.readInt();
+    int requestsSize = is.readInt();
+    requests = new Vector<ReceiveRequest>();
+    for (int i = 0; i < requestsSize; i++) {
+      ReceiveRequest request = new ReceiveRequest();
+      request.decodeTransactionObject(is);
+      requests.add(request);
+    }
+  }
+  
 }
