@@ -21,6 +21,8 @@
 package fr.dyade.aaa.agent;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -132,6 +134,29 @@ public class Channel {
                          channel.toString() + ", can't post message: " + msg, exc);
       if ((msg.from != null) && (msg.from.stamp != AgentId.NullIdStamp))
         post(Message.alloc(AgentId.localId, msg.from, new UnknownAgent(msg.to, msg.not)));
+    }
+  }
+  
+  // JORAM_PERF_BRANCH
+  static final synchronized void postAndSave(List<Message> msgList) throws Exception {
+    List<MessageConsumer> consumersToSave = new ArrayList<MessageConsumer>();
+    for (Message msg : msgList) {
+      try {
+        MessageConsumer cons = AgentServer.getConsumer(msg.to.getTo());
+        cons.post(msg);
+        if (! consumersToSave.contains(cons)) {
+          consumersToSave.add(cons);
+        }
+      } catch (UnknownServerException exc) {
+        channel.logmon.log(BasicLevel.ERROR, channel.toString()
+            + ", can't post message: " + msg, exc);
+        if ((msg.from != null) && (msg.from.stamp != AgentId.NullIdStamp))
+          post(Message.alloc(AgentId.localId, msg.from, new UnknownAgent(
+              msg.to, msg.not)));
+      }
+    }
+    for (int i=0; i<consumersToSave.size(); i++) {
+      ((MessageConsumer) consumersToSave.get(i)).save();
     }
   }
 
