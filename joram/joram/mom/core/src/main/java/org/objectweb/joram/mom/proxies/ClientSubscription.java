@@ -22,6 +22,9 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.Map.Entry;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
@@ -38,6 +42,7 @@ import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.messages.MessageJMXWrapper;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.selectors.Selector;
@@ -46,13 +51,14 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.TransactionObject;
 
 /**
  * The <code>ClientSubscription</code> class holds the data of a client
  * subscription, and the methods managing the delivery and acknowledgement
  * of the messages.
  */
-class ClientSubscription implements ClientSubscriptionMBean, Serializable {
+class ClientSubscription implements ClientSubscriptionMBean, Serializable, TransactionObject {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
@@ -121,11 +127,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   }
 
   /** Vector of identifiers of the messages to deliver. */
-  private List messageIds;
+  private List<String> messageIds;
   /** Table of delivered messages identifiers. */
-  private Map deliveredIds;
+  private Map<String, String> deliveredIds;
   /** Table keeping the denied messages identifiers. */
-  private Map deniedMsgs;
+  private Map<String, Integer> deniedMsgs;
 
   /** Identifier of the subscription context. */
   private transient int contextId;
@@ -170,6 +176,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   protected long nbMsgsDeliveredSinceCreation = 0;
 
   private int DEFAULT_MAX_NUMBER_OF_MSG_PER_REQUEST = 100;
+  
+  public ClientSubscription() {}
   
   /**
    * Constructs a <code>ClientSubscription</code> instance.
@@ -1077,6 +1085,99 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
   void cleanMessageIds() {
     messageIds.retainAll(messagesTable.keySet());
+  }
+
+  // JORAM_PERF_BRANCH
+  public int getClassId() {
+    return JoramHelper.CLIENTSUBSCRIPTION_CLASS_ID;
+  }
+
+  //JORAM_PERF_BRANCH
+  public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    os.writeInt(deliveredIds.size());
+    Iterator<Entry<String, String>> deliveredIdIterator = deliveredIds.entrySet().iterator();
+    while (deliveredIdIterator.hasNext()) {
+      Entry<String, String> deliveredId = deliveredIdIterator.next();
+      os.writeUTF(deliveredId.getKey());
+      // no need to encode the value
+    }
+    os.writeInt(deniedMsgs.size());
+    Iterator<Entry<String, Integer>> deniedMsgIterator = deniedMsgs.entrySet().iterator();
+    while (deniedMsgIterator.hasNext()) {
+      Entry<String, Integer> deniedMsg = deniedMsgIterator.next();
+      os.writeUTF(deniedMsg.getKey());
+      os.writeInt(deniedMsg.getValue());
+    }
+    if (dmqId == null) {
+      os.writeBoolean(true);
+    } else {
+      os.writeBoolean(false);
+      dmqId.encodeTransactionObject(os);
+    }
+    os.writeBoolean(durable);
+    os.writeInt(messageIds.size());
+    for (String messageId : messageIds) {
+      os.writeUTF(messageId);
+    }
+    os.writeUTF(name);
+    os.writeInt(nbMaxMsg);
+    os.writeLong(nbMsgsDeliveredSinceCreation);
+    os.writeLong(nbMsgsSentToDMQSinceCreation);
+    proxyId.encodeTransactionObject(os);
+    if (selector == null) {
+      os.writeBoolean(true);
+    } else {
+      os.writeBoolean(false);
+      os.writeUTF(selector);
+    }
+    os.writeInt(threshold);
+    topicId.encodeTransactionObject(os);
+  }
+
+  //JORAM_PERF_BRANCH
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    int deliveredIdsSize = is.readInt();
+    deliveredIds = new Hashtable<String, String>(deliveredIdsSize);
+    for (int i = 0; i < deliveredIdsSize; i++) {
+      String key = is.readUTF();
+      deliveredIds.put(key, key);
+    }
+    int deniedMsgSize = is.readInt();
+    deniedMsgs = new Hashtable<String, Integer>(deniedMsgSize);
+    for (int i = 0; i < deniedMsgSize; i++) {
+      String key = is.readUTF();
+      Integer value = is.readInt();
+      deniedMsgs.put(key, value);
+    }
+    boolean isNull = is.readBoolean();
+    if (isNull) {
+      dmqId = null;
+    } else {
+      dmqId = new AgentId((short) 0, (short) 0, 0);
+      dmqId.decodeTransactionObject(is);
+    }
+    durable = is.readBoolean();
+    int messageIdsSize = is.readInt();
+    messageIds = new Vector<String>(messageIdsSize);
+    for (int i = 0; i < messageIdsSize; i++) {
+      String messageId = is.readUTF();
+      messageIds.add(messageId);
+    }
+    name = is.readUTF();
+    nbMaxMsg = is.readInt();
+    nbMsgsDeliveredSinceCreation = is.readLong();
+    nbMsgsSentToDMQSinceCreation = is.readLong();
+    proxyId = new AgentId((short) 0, (short) 0, 0);
+    proxyId.decodeTransactionObject(is);
+    isNull = is.readBoolean();
+    if (isNull) {
+      selector = null;
+    } else {
+      selector = is.readUTF();
+    }
+    threshold = is.readInt();
+    topicId = new AgentId((short) 0, (short) 0, 0);
+    topicId.decodeTransactionObject(is);
   }
 
 }
