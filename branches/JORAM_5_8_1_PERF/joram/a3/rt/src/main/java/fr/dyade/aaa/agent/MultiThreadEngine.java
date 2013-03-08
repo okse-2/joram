@@ -689,7 +689,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       }
       // JORAM_PERF_BRANCH:
       if (beginTransaction) {
-        AgentServer.getTransaction().begin();
+        
         for (Message msg : reactMessageList) {
           // Deletes the message
           msg.delete();
@@ -699,7 +699,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         // Post all notifications temporary kept in mq to the right consumers,
         // then saves changes.
         List<Message> toValidate = dispatch();
-        // Saves the agent state then commit the transaction.
+        
+        AgentServer.getTransaction().begin();
         AgentServer.getTransaction().commit(new CommitCallback(toValidate, (List<Runnable>) callbacks.clone()));
         
         // Now the following is done in the callback
@@ -748,11 +749,12 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       List<Message> toValidate;
       for (Message sentMsg : mq) {
         if (sentMsg.from == null) sentMsg.from = AgentId.localId;
-        Channel.post(sentMsg);
+        //Channel.post(sentMsg);
       }
       toValidate = (List<Message>) mq.clone();
       mq.clear();
-      Channel.save();
+      //Channel.save();
+      Channel.postAndSave(toValidate);
       return toValidate;
     }
     
