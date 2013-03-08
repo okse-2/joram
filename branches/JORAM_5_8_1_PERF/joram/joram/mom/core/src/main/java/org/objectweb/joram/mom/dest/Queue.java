@@ -115,6 +115,16 @@ public class Queue extends Destination implements QueueMBean {
   /** Static value holding the default threshold for a server. */
   static int defaultThreshold = -1;
 
+  // JORAM_PERF_BRANCH
+  public Queue() {
+    
+  }
+  
+  //JORAM_PERF_BRANCH
+  public Queue(Queue nullQueue) {
+    super(nullQueue);
+  }
+  
   /**
    * Returns  the threshold value of this queue, -1 if not set.
    *
@@ -1713,8 +1723,13 @@ public class Queue extends Destination implements QueueMBean {
   public void decodeTransactionObject(DataInputStream is) throws IOException {
     super.decodeTransactionObject(is);
     ackRequestNumber = is.readInt();
+    logger.log(BasicLevel.WARN, "name=" + getName());
+    logger.log(BasicLevel.WARN, "id=" + getId());
+    logger.log(BasicLevel.WARN, "ackRequestNumber=" + arrivalsCounter);
     arrivalsCounter = is.readLong();
+    logger.log(BasicLevel.WARN, "arrivalsCounter=" + arrivalsCounter);
     int consumersSize = is.readInt();
+    logger.log(BasicLevel.WARN, "consumersSize=" + consumersSize);
     consumers = new Hashtable<String, AgentId>(consumersSize);
     for (int i = 0; i < consumersSize; i++) {
       String key = is.readUTF();
@@ -1744,7 +1759,7 @@ public class Queue extends Destination implements QueueMBean {
   public static class QueueFactory implements TransactionObjectFactory {
 
     public TransactionObject newInstance() {
-      return new Queue();
+      return new Queue(null);
     }
     
   }
