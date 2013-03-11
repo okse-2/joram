@@ -415,17 +415,18 @@ public final class Message implements Cloneable, Serializable, Streamable {
     }
   }
 
-  private static final short typeFlag = 0x0001;
-  private static final short replyToIdFlag = 0x0002;
-  private static final short replyToTypeFlag = 0x0004;
-  private static final short propertiesFlag = 0x0008;
-  private static final short priorityFlag = 0x0010;
-  private static final short expirationFlag = 0x0020;
-  private static final short corrrelationIdFlag = 0x0040;
-  private static final short deliveryCountFlag = 0x0080;
-  private static final short jmsTypeFlag = 0x0100;
-  private static final short redeliveredFlag = 0x0200;
-  private static final short persistentFlag = 0x0400;
+  // JORAM_PERF_BRANCH
+  public static final short typeFlag = 0x0001;
+  public static final short replyToIdFlag = 0x0002;
+  public static final short replyToTypeFlag = 0x0004;
+  public static final short propertiesFlag = 0x0008;
+  public static final short priorityFlag = 0x0010;
+  public static final short expirationFlag = 0x0020;
+  public static final short corrrelationIdFlag = 0x0040;
+  public static final short deliveryCountFlag = 0x0080;
+  public static final short jmsTypeFlag = 0x0100;
+  public static final short redeliveredFlag = 0x0200;
+  public static final short persistentFlag = 0x0400;
 
   /* ***** ***** ***** ***** *****
    * Streamable interface
