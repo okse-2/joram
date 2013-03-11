@@ -1257,6 +1257,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       // JORAM_PERF_BRANCH:
       if (DIRECT_QUEUE_DELIVER) {
         not.setImplicitReceive(true);
+        try {
+          setCtx(key);
+        } catch (StateException pE) {
+          throw new RequestException(pE.toString());
+        }
         activeCtx.addDeliveringQueue(destId);
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "activeCtx.getDeliveringQueues() = " + activeCtx);
@@ -3457,8 +3462,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       Integer key = is.readInt();
       ClientContext value = new ClientContext();
       value.decodeTransactionObject(is);
-      contexts.put(key,  value);
+      contexts.put(key, value);
     }
+    logger.log(BasicLevel.ERROR, " contexts = " + contexts);
     boolean isNull = is.readBoolean();
     if (isNull) {
       dmqId = null;
