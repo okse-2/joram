@@ -71,6 +71,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   
   //private List<AgentContext> toValidate;
   
+  private int reactNumberBeforeCommit;
+  
   public MultiThreadEngine() throws Exception {
     name = "Engine#" + AgentServer.getServerId();
 
@@ -84,6 +86,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     
     int workerNumber = AgentServer.getInteger("EngineWorkerNumber", DEFAULT_ENGINE_WORKER_NUMBER).intValue();
     executorService = Executors.newFixedThreadPool(workerNumber, new EngineThreadFactory());
+    
+    reactNumberBeforeCommit = AgentServer.getInteger("ReactNumberBeforeCommit", DEFAULT_REACT_NUMBER_BEFORE_COMMIT).intValue();
     
     //toValidate = new Vector<AgentContext>();
     
@@ -619,7 +623,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
               beginTransaction = true;
             }
             reactMessageList.add(currentMessage);
-            if (reactMessageList.size() > DEFAULT_REACT_NUMBER_BEFORE_COMMIT) {
+            if (reactMessageList.size() > reactNumberBeforeCommit) {
               commit();
             }
             
