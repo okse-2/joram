@@ -23,6 +23,10 @@
  */
 package org.objectweb.joram.mom.notifications;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 import fr.dyade.aaa.agent.Notification;
 
 /**
@@ -60,6 +64,16 @@ public abstract class AbstractNotification extends Notification {
 
   public void setPersistent(boolean persistent) {
     this.persistent = persistent;
+  }
+  
+  public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    super.encodeTransactionObject(os);
+    os.writeInt(clientContext);
+  }
+  
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    super.decodeTransactionObject(is);
+    clientContext = is.readInt();
   }
 
   /**

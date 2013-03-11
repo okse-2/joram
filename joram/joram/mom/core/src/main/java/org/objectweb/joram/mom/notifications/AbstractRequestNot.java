@@ -23,6 +23,10 @@
  */
 package org.objectweb.joram.mom.notifications;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 /**
  * An <code>AbstractRequest</code> is a request sent by a client agent to
  * a destination agent.
@@ -56,6 +60,16 @@ public abstract class AbstractRequestNot extends AbstractNotification {
   /** Returns the request identifier. */
   public int getRequestId() {
     return requestId;
+  }
+  
+  public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    super.encodeTransactionObject(os);
+    os.writeInt(requestId);
+  }
+  
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    super.decodeTransactionObject(is);
+    requestId = is.readInt();
   }
 
   /**

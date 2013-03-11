@@ -158,6 +158,22 @@ public class ReceiveRequest extends AbstractRequestNot {
   public final int getMessageCount() {
     return msgCount;
   }
+  
+  //JORAM_PERF_BRANCH
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",autoAck=").append(autoAck);
+    output.append(",expirationTime=").append(expirationTime);
+    output.append(",implicitReceive=").append(implicitReceive);
+    output.append(",msgCount=").append(msgCount);
+    output.append(",msgIds=").append(msgIds);
+    output.append(",requester=").append(requester);
+    output.append(",selector=").append(selector);
+    output.append(",timeOut=").append(timeOut);
+    output.append(')');
+    return output;
+  }
 
   // JORAM_PERF_BRANCH
   public int getClassId() {
