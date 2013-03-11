@@ -1747,7 +1747,7 @@ public class Queue extends Destination implements QueueMBean {
     nbMaxMsg = is.readInt();
     priority = is.readInt();
     int requestsSize = is.readInt();
-    requests = new Vector<ReceiveRequest>();
+    requests = new Vector<ReceiveRequest>(requestsSize);
     for (int i = 0; i < requestsSize; i++) {
       ReceiveRequest request = new ReceiveRequest();
       request.decodeTransactionObject(is);
