@@ -66,6 +66,7 @@ public class JoramHelper {
   public static final int CLIENTCONTEXT_CLASS_ID = CLASS_ID_AREA + 2;
   public static final int RECEIVEREQUEST_CLASS_ID = CLASS_ID_AREA + 3;
   public static final int CLIENTSUBSCRIPTION_CLASS_ID = CLASS_ID_AREA + 4;
+  public static final int MESSAGE_CLASS_ID = CLASS_ID_AREA + 5;
   
   public static final String JNDI_INITIAL = "java.naming.factory.initial";
   public static final String JNDI_HOST = "scn.naming.factory.host";

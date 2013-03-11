@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.dest.Queue;
+import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
@@ -246,6 +247,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
     TransactionObjectFactoryRepository.putFactory(JoramHelper.QUEUE_CLASS_ID, new Queue.QueueFactory());
     TransactionObjectFactoryRepository.putFactory(JoramHelper.RECEIVEREQUEST_CLASS_ID, new ReceiveRequest.ReceiveRequestFactory());
     TransactionObjectFactoryRepository.putFactory(JoramHelper.USERAGENT_CLASS_ID, new UserAgent.UserAgentFactory());
+    TransactionObjectFactoryRepository.putFactory(JoramHelper.MESSAGE_CLASS_ID, new Message.MessageFactory());
     
     if (! firstTime) return;
 
