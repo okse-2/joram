@@ -22,6 +22,8 @@
  */
 package org.objectweb.joram.mom.messages;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -32,6 +34,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.objectweb.joram.mom.dest.Queue;
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -39,6 +43,8 @@ import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.stream.StreamUtil;
 import fr.dyade.aaa.util.Transaction;
+import fr.dyade.aaa.util.TransactionObject;
+import fr.dyade.aaa.util.TransactionObjectFactory;
 
 /** 
  * The <code>Message</code> class actually provides the transport facility
@@ -47,7 +53,7 @@ import fr.dyade.aaa.util.Transaction;
  * A message content is always wrapped as a bytes array, it is characterized
  * by properties and "header" fields.
  */
-public final class Message implements Serializable, MessageView {
+public final class Message implements Serializable, MessageView, TransactionObject {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 2L;
 
@@ -101,6 +107,9 @@ public final class Message implements Serializable, MessageView {
   private static final boolean globalUseSoftRef =
     AgentServer.getBoolean("org.objectweb.joram.mom.messages.SWAPALLOWED");
 
+  // JORAM_PERF_BRANCH
+  public Message() {}
+  
   /**
    * Constructs a <code>Message</code> instance.
    */
@@ -524,4 +533,102 @@ public final class Message implements Serializable, MessageView {
     }
     return props;
   }
+
+  public int getClassId() {
+    return JoramHelper.MESSAGE_CLASS_ID;
+  }
+
+  public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    os.writeLong(order);
+    os.writeBoolean(soft);
+
+    // Header
+    os.writeUTF(msg.id);
+    os.writeUTF(msg.toId);
+    os.write(msg.toType);
+    os.writeLong(msg.timestamp);
+
+    // One short is used to know which fields are set
+    short s = 0;
+    if (msg.type != org.objectweb.joram.shared.messages.Message.SIMPLE) { s |= msg.typeFlag; }
+    if (msg.replyToId != null) { s |= msg.replyToIdFlag; }
+    if (msg.replyToType != 0) { s |= msg.replyToTypeFlag; }
+    if (msg.properties != null) { s |= msg.propertiesFlag; }
+    if (msg.priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { s |= msg.priorityFlag; }
+    if (msg.expiration != 0) { s |= msg.expirationFlag; }
+    if (msg.correlationId != null) { s |= msg.corrrelationIdFlag; }
+    if (msg.deliveryCount != 0) { s |= msg.deliveryCountFlag; }
+    if (msg.jmsType != null) { s |= msg.jmsTypeFlag; }
+    if (msg.redelivered) { s |= msg.redeliveredFlag; }
+    if (msg.persistent) { s |= msg.persistentFlag; }
+    
+    os.writeShort(s);
+    
+    if (msg.type != org.objectweb.joram.shared.messages.Message.SIMPLE) { StreamUtil.writeTo(msg.type, os); }
+    if (msg.replyToId != null) { StreamUtil.writeTo(msg.replyToId, os); }
+    if (msg.replyToType != 0) { StreamUtil.writeTo(msg.replyToType, os); }
+    if (msg.properties != null) { StreamUtil.writeTo(msg.properties, os); }
+    if (msg.priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { StreamUtil.writeTo(msg.priority, os); }
+    if (msg.expiration != 0) { StreamUtil.writeTo(msg.expiration, os); }
+    if (msg.correlationId != null) { StreamUtil.writeTo(msg.correlationId, os); }
+    if (msg.deliveryCount != 0) { StreamUtil.writeTo(msg.deliveryCount, os); }
+    if (msg.jmsType != null) { StreamUtil.writeTo(msg.jmsType, os); }
+    
+    if (msg.body == null) {
+      os.writeBoolean(true);
+    } else {
+      os.writeBoolean(false);
+      os.writeInt(msg.body.length);
+      os.write(msg.body);
+    }
+  }
+
+  public void decodeTransactionObject(DataInputStream is) throws IOException {
+    order = is.readLong();
+    soft = is.readBoolean();
+
+    acksCounter = 0;
+    durableAcksCounter = 0;
+
+    msg = new org.objectweb.joram.shared.messages.Message();
+    
+    msg.id = is.readUTF();
+    msg.toId = is.readUTF();
+    msg.toType = (byte) is.read();
+    msg.timestamp = is.readLong();
+    
+    short s = StreamUtil.readShortFrom(is);
+
+    if ((s & msg.typeFlag) != 0) { msg.type = StreamUtil.readIntFrom(is); }
+    if ((s & msg.replyToIdFlag) != 0) { msg.replyToId = StreamUtil.readStringFrom(is); }
+    if ((s & msg.replyToTypeFlag) != 0) { msg.replyToType = StreamUtil.readByteFrom(is); }
+    if ((s & msg.propertiesFlag) != 0) { msg.properties = StreamUtil.readPropertiesFrom(is); }
+    msg.priority = org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY;
+    if ((s & msg.priorityFlag) != 0) { msg.priority = StreamUtil.readIntFrom(is); }
+    if ((s & msg.expirationFlag) != 0) { msg.expiration = StreamUtil.readLongFrom(is); }
+    if ((s & msg.corrrelationIdFlag) != 0) { msg.correlationId = StreamUtil.readStringFrom(is); }
+    if ((s & msg.deliveryCountFlag) != 0) { msg.deliveryCount = StreamUtil.readIntFrom(is); }
+    if ((s & msg.jmsTypeFlag) != 0) { msg.jmsType = StreamUtil.readStringFrom(is); }
+    msg.redelivered = (s & msg.redeliveredFlag) != 0;
+    msg.persistent = (s & msg.persistentFlag) != 0;
+    
+    boolean isNull = is.readBoolean();
+    if (isNull) {
+      msg.body = null;
+    } else {
+      int length = is.readInt();
+      msg.body = new byte[length];
+      is.readFully(msg.body);
+    }
+  }
+  
+  //JORAM_PERF_BRANCH
+  public static class MessageFactory implements TransactionObjectFactory {
+
+    public TransactionObject newInstance() {
+      return new Message();
+    }
+   
+  } 
+  
 }
