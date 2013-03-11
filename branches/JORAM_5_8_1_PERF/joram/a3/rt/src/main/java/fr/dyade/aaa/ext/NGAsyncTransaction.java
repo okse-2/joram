@@ -1795,6 +1795,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
     private boolean recycled;
     
+    private FileChannel channel;
+    
     /**
      *  Creates a random access file stream to read from and to write to the file specified
      * by the File argument.
@@ -1862,7 +1864,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
     private FileChannel getChannel() throws IOException {
       if (raf == null) throw new IOException("Closed log file");
-      return raf.getChannel();
+      if (channel == null) channel = raf.getChannel();
+      return channel;
     }
     
     public int readInt() throws IOException {
