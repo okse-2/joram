@@ -369,8 +369,9 @@ class ClientContext implements java.io.Serializable, TransactionObject {
     }
     int deliveringQueuesSize = is.readInt();
     deliveringQueues = new Hashtable<AgentId, AgentId>(deliveringQueuesSize);
-    for (int i = 0; i < activeSubsSize; i++) {
-      AgentId key = new AgentId((short) 0, (short) 0, 0); 
+    for (int i = 0; i < deliveringQueuesSize; i++) {
+      AgentId key = new AgentId((short) 0, (short) 0, 0);
+      key.decodeTransactionObject(is);
       deliveringQueues.put(key, key);
     }
     id = is.readInt();
@@ -378,8 +379,10 @@ class ClientContext implements java.io.Serializable, TransactionObject {
     proxyId.decodeTransactionObject(is);
     int tempDestinationsSize = is.readInt();
     tempDestinations = new Vector<AgentId>(tempDestinationsSize);
-    for (AgentId tempDestination : tempDestinations) {
+    for (int i = 0; i < tempDestinationsSize; i++) {
+      AgentId tempDestination = new AgentId((short) 0, (short) 0, 0);
       tempDestination.decodeTransactionObject(is);
+      tempDestinations.add(tempDestination);
     }
     // TODO: transactionsTable
   }
