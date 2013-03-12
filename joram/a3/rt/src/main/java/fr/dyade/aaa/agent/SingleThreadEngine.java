@@ -1187,27 +1187,41 @@ class SingleThreadEngine implements Engine, Runnable, MessageConsumer, SingleThr
         cons.postAndValidate(msg);
         mq.pop();
       }
-    } else { // JORAM_PERF_BRANCH.
-    AgentServer.getTransaction().begin();
-    // Suppress the processed notification from message queue ..
-    qin.pop();
-    // .. then deletes it ..
-    msg.delete();
-    // .. and frees it.
-    msg.free();
-    // Post all notifications temporary kept in mq to the right consumers,
-    // then saves changes.
-    dispatch();
-    // Saves the agent state then commit the transaction.
-    AgentServer.getTransaction().commit(false);
-    // The transaction has committed, then validate all messages.
-    Channel.validate();
-    AgentServer.getTransaction().release();
+    } else {
+      // JORAM_PERF_BRANCH.
+      //AgentServer.getTransaction().begin();
+      
+      // Suppress the processed notification from message queue ..
+      qin.pop();
+      // .. then deletes it ..
+      msg.delete();
+      // .. and frees it.
+      msg.free();
+      // Post all notifications temporary kept in mq to the right consumers,
+      // then saves changes.
+      dispatch();
+      // Saves the agent state then commit the transaction.
+      AgentServer.getTransaction().commit(new CommitCallback());
+      // The transaction has committed, then validate all messages.
+      
+      // JORAM_PERF_BRANCH
+      //Channel.validate();
+      
+      // JORAM_PERF_BRANCH
+      //AgentServer.getTransaction().release();
     }
     persistentPush = false;
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ": commited");
 
+  }
+  
+  class CommitCallback implements Runnable {
+
+    public void run() {
+      Channel.validate();
+    }
+    
   }
 
   /**
@@ -1221,7 +1235,10 @@ class SingleThreadEngine implements Engine, Runnable, MessageConsumer, SingleThr
    * </ul>
    */
   void abort(Exception exc) throws Exception {
-    AgentServer.getTransaction().begin();
+    
+    // JORAM_PERF_BRANCH
+    //AgentServer.getTransaction().begin();
+    
     // Reload the state of agent.
     try {
       agent = reload(msg.to);
@@ -1319,6 +1336,10 @@ class SingleThreadEngine implements Engine, Runnable, MessageConsumer, SingleThr
 
   // JORAM_PERF_BRANCH
   public void validate(Message msg) throws Exception {
+    throw new Exception("Not implemented");
+  }
+
+  public void postAndSave(Message msg) throws Exception {
     throw new Exception("Not implemented");
   }
 }
