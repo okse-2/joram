@@ -1242,7 +1242,10 @@ public final class AgentServer {
                  getName() + ", initialized at " + new Date());
 
       // Commit all changes.
-      transaction.begin();
+      
+      // JORAM_PERF_BRANCH
+      //transaction.begin();
+      
       transaction.commit(true);
 
       try {
@@ -1327,7 +1330,10 @@ public final class AgentServer {
       logmon.log(BasicLevel.WARN, getName() + ", started at " + new Date());
 
       // Commit all changes.
-      transaction.begin();
+      
+      // JORAM_PERF_BRANCH
+      //transaction.begin();
+      
       transaction.commit(true);
     } catch (Exception exc) {
       logmon.log(BasicLevel.ERROR, getName() + "Cannot start", exc);
