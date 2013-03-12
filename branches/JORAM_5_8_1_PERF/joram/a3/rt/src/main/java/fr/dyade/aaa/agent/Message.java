@@ -282,11 +282,14 @@ final class Message implements Serializable {
    */
   private Message() {}
 
-  private static Pool pool = null;
+  // JORAM_PERF_BRANCH
+  //private static Pool pool = null;
 
   static {
     int size = AgentServer.getInteger("fr.dyade.aaa.agent.Message$Pool.size", 150).intValue();
-    pool = new Pool("Message", size);
+    
+    // JORAM_PERF_BRANCH
+    //pool = new Pool("Message", size);
   }
 
   /**
@@ -295,11 +298,16 @@ final class Message implements Serializable {
   static Message alloc() {
     Message msg = null;
     
+    // JORAM_PERF_BRANCH
+    /*
     try {
       msg = (Message) pool.allocElement();
     } catch (Exception exc) {
       return new Message();
     }
+    */
+    msg = new Message();
+    
     return msg;
   }
 
@@ -322,7 +330,9 @@ final class Message implements Serializable {
   void free() {
     not = null;	/* to let gc do its work */
     stringId = null;
-    pool.freeElement(this);
+    
+    // JORAM_PERF_BRANCH
+    //pool.freeElement(this);
   }
   
   private void set(AgentId from, AgentId to, Notification not) {
