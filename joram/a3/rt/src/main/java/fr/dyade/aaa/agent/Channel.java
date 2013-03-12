@@ -200,6 +200,19 @@ public class Channel {
     consumers.clear();
     */
   }
+  
+  // JORAM_PERF_BRANCH
+  static final void postAndValidate(Message msg) throws Exception {
+    try {
+      MessageConsumer cons = AgentServer.getConsumer(msg.to.getTo());
+      cons.postAndValidate(msg);
+    } catch (UnknownServerException exc) {
+      channel.logmon.log(BasicLevel.ERROR,
+                         channel.toString() + ", can't post message: " + msg, exc);
+      if ((msg.from != null) && (msg.from.stamp != AgentId.NullIdStamp))
+        post(Message.alloc(AgentId.localId, msg.from, new UnknownAgent(msg.to, msg.not)));
+    }
+  }
 
   /**
    * Sends an immediately validated notification to an agent. Post and
@@ -247,8 +260,12 @@ public class Channel {
       if (msg.not != null && msg.not.persistent == false) {
         consumer.postAndValidate(msg);
       } else {
-      AgentServer.getTransaction().begin();      
-      consumer.post(msg);
+      
+      // JORAM_PERF_BRANCH  
+      //AgentServer.getTransaction().begin();      
+      
+      // JORAM_PERF_BRANCH    
+      consumer.postAndSave(msg);
       
 //      if (AgentServer.sdf != null) {
 //        // SDF generation
@@ -269,7 +286,8 @@ public class Channel {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, toString() + ".directSendTo() -> " + msg.getStamp());
 
-      consumer.save();
+      // JORAM_PERF_BRANCH: done before (atomically)   
+      //consumer.save();
       
       // JORAM_PERF_BRANCH
       // Pass a commit callback
