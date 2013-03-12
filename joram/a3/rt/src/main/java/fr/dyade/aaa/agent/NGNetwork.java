@@ -576,7 +576,9 @@ public class NGNetwork extends StreamNetwork {
           buf.flip();
           int boot = buf.getInt();
 
-          AgentServer.getTransaction().begin();
+          // JORAM_PERF_BRANCH
+          //AgentServer.getTransaction().begin();
+          
           testBootTS(sid, boot);
           AgentServer.getTransaction().commit(true);
         } else {
@@ -643,7 +645,9 @@ public class NGNetwork extends StreamNetwork {
         buf.flip();
         channel.write(buf);
 
-        AgentServer.getTransaction().begin();
+        // JORAM_PERF_BRANCH
+        //AgentServer.getTransaction().begin();
+        
         testBootTS(sid, boot);
         AgentServer.getTransaction().commit(true);
 
@@ -1058,7 +1062,10 @@ public class NGNetwork extends StreamNetwork {
         //  Suppress the acknowledged notification from waiting list,
         // and deletes it.
         msg = sendlist.removeMessage(ack);
-        AgentServer.getTransaction().begin();
+        
+        // JORAM_PERF_BRANCH
+        // AgentServer.getTransaction().begin();
+        
         msg.delete();
         msg.free();
         AgentServer.getTransaction().commit(true);
