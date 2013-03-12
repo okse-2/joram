@@ -99,7 +99,10 @@ public class ServiceManager implements Serializable {
     AgentServer.getTransaction().save(manager, "serviceManager");
     // with OSGi the service start asynchronously, 
     // and perhaps without running transaction.
-    AgentServer.getTransaction().begin();
+    
+    //AgentServer.getTransaction().begin();
+    
+    
     AgentServer.getTransaction().commit(true);
     if (xlogmon.isLoggable(BasicLevel.DEBUG))
       xlogmon.log(BasicLevel.DEBUG, getName() + " service manager saved.");
