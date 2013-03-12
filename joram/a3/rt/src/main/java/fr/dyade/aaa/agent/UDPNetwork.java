@@ -352,7 +352,10 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
             }
 
             // Suppress the acked notifications from waiting list and delete the messages.
-            AgentServer.getTransaction().begin();
+            
+            // JORAM_PERF_BRANCH
+            // AgentServer.getTransaction().begin();
+            
             synchronized (srvInfo.lock) {
               while (!srvInfo.messagesToAck.isEmpty()
                   && ((MessageAndIndex) srvInfo.messagesToAck.getFirst()).index
@@ -471,10 +474,13 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
                     + msgi.msg.from + ", " + msgi.msg.not + " to "
                     + msgi.msg.not.deadNotificationAgentId);
               }
-              AgentServer.getTransaction().begin();
-              Channel.post(Message.alloc(AgentId.localId, msgi.msg.not.deadNotificationAgentId,
+              
+              // JORAM_PERF_BRANCH
+              // AgentServer.getTransaction().begin();
+              Channel.postAndValidate(Message.alloc(AgentId.localId, msgi.msg.not.deadNotificationAgentId,
                   new ExpiredNot(msgi.msg.not, msgi.msg.from, msgi.msg.to)));
-              Channel.validate();
+              //Channel.validate();
+              
               AgentServer.getTransaction().commit(true);
             } else {
               if (logmon.isLoggable(BasicLevel.DEBUG)) {
@@ -590,10 +596,11 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
               // Remove the message (see below), may be we have to post an error notification to sender.
             }
 
-            AgentServer.getTransaction().begin();
+            // JORAM_PERF_BRANCH
+            //AgentServer.getTransaction().begin();
             if (expiredNot != null) {
-              Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
-              Channel.validate();
+              Channel.postAndValidate(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
+              //Channel.validate();
             }
             qout.pop();
             AgentServer.getTransaction().commit(true);
