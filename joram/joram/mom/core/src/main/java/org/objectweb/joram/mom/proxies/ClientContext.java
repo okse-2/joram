@@ -40,6 +40,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.serialize.EncodedString;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.TransactionObjectFactory;
 
@@ -74,7 +75,8 @@ class ClientContext implements java.io.Serializable, TransactionObject {
    */
   private transient int cancelledRequestId;
   /** Vector of active subscriptions' names. */
-  private transient Vector<String> activeSubs;
+  // JORAM_PERF_BRANCH
+  private transient Vector<EncodedString> activeSubs;
   /** Pending replies waiting for the context to be activated. */
   private transient Vector repliesBuffer;
   /** Contexts waiting for the replies from some local agents*/
@@ -168,17 +170,20 @@ class ClientContext implements java.io.Serializable, TransactionObject {
   }
 
   /** Adds an active subscription name. */
-  void addSubName(String subName) {
+  // JORAM_PERF_BRANCH
+  void addSubName(EncodedString subName) {
     activeSubs.add(subName);
   }
 
   /** Returns the active subscriptions' names. */
-  Iterator getActiveSubs() {
+  // JORAM_PERF_BRANCH
+  Iterator<EncodedString> getActiveSubs() {
     return activeSubs.iterator();
   }
 
   /** Removes an active subscription name. */
-  void removeSubName(String subName) {
+  // JORAM_PERF_BRANCH
+  void removeSubName(EncodedString subName) {
     activeSubs.remove(subName);
   }
   
@@ -331,8 +336,9 @@ class ClientContext implements java.io.Serializable, TransactionObject {
   //JORAM_PERF_BRANCH
   public void encodeTransactionObject(DataOutputStream os) throws IOException {
     os.writeInt(activeSubs.size());
-    for (String activeSub : activeSubs) {
-      os.writeUTF(activeSub);
+    for (EncodedString activeSub : activeSubs) {
+      //os.writeUTF(activeSub);
+      activeSub.writeTo(os);
     }
     os.writeInt(deliveringQueues.size());
     Iterator<Entry<AgentId, AgentId>> deliveringQueueIterator = deliveringQueues.entrySet().iterator();
@@ -362,9 +368,11 @@ class ClientContext implements java.io.Serializable, TransactionObject {
   //JORAM_PERF_BRANCH
   public void decodeTransactionObject(DataInputStream is) throws IOException {
     int activeSubsSize = is.readInt();
-    activeSubs = new Vector<String>(activeSubsSize);
+    activeSubs = new Vector<EncodedString>(activeSubsSize);
     for (int i = 0; i < activeSubsSize; i++) {
-      String activeSub = is.readUTF();
+      //String activeSub = is.readUTF();
+      EncodedString activeSub = new EncodedString();
+      activeSub.readFrom(is);
       activeSubs.add(activeSub);
     }
     int deliveringQueuesSize = is.readInt();
