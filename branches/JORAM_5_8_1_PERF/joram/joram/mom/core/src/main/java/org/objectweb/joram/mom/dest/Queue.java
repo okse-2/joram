@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.Vector;
 
 import javax.management.openmbean.CompositeData;
@@ -90,6 +89,7 @@ import fr.dyade.aaa.agent.ExpiredNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.serialize.EncodedString;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.TransactionObjectFactory;
 
@@ -160,10 +160,12 @@ public class Queue extends Destination implements QueueMBean {
   private int priority; 
 
   /** Table keeping the messages' consumers identifiers. */
-  protected Map<String, AgentId> consumers = new Hashtable<String, AgentId>();
+  // JORAM_PERF_BRANCH
+  protected Map<EncodedString, AgentId> consumers = new Hashtable<EncodedString, AgentId>();
 
   /** Table keeping the messages' consumers contexts. */
-  protected Map<String, Integer> contexts = new Hashtable<String, Integer>();
+  // JORAM_PERF_BRANCH
+  protected Map<EncodedString, Integer> contexts = new Hashtable<EncodedString, Integer>();
 
   /** Counter of messages arrivals. */
   protected long arrivalsCounter = 0;
@@ -1522,8 +1524,9 @@ public class Queue extends Destination implements QueueMBean {
         notMsg.addMessage(message.getFullMessage());
         if (!notRec.getAutoAck()) {
           // putting the message in the delivered messages table:
-          consumers.put(message.getId(), notRec.requester);
-          contexts.put(message.getId(),
+          // JORAM_PERF_BRANCH
+          consumers.put(message.getEncodedId(), notRec.requester);
+          contexts.put(message.getEncodedId(),
                        new Integer(notRec.getClientContext()));
           deliveredMsgs.put(message.getId(), message);
           messages.remove(message);
@@ -1698,17 +1701,19 @@ public class Queue extends Destination implements QueueMBean {
     os.writeInt(ackRequestNumber);
     os.writeLong(arrivalsCounter);
     os.writeInt(consumers.size());
-    Iterator<Entry<String, AgentId>> consumerIterator = consumers.entrySet().iterator();
+    Iterator<Entry<EncodedString, AgentId>> consumerIterator = consumers.entrySet().iterator();
     while (consumerIterator.hasNext()) {
-      Entry<String, AgentId> consumer = consumerIterator.next();
-      os.writeUTF(consumer.getKey());
+      Entry<EncodedString, AgentId> consumer = consumerIterator.next();
+      //os.writeUTF(consumer.getKey());
+      consumer.getKey().writeTo(os);
       consumer.getValue().encodeTransactionObject(os);
     }
     os.writeInt(contexts.size());
-    Iterator<Entry<String, Integer>> contextIterator = contexts.entrySet().iterator();
+    Iterator<Entry<EncodedString, Integer>> contextIterator = contexts.entrySet().iterator();
     while (contextIterator.hasNext()) {
-      Entry<String, Integer> consumer = contextIterator.next();
-      os.writeUTF(consumer.getKey());
+      Entry<EncodedString, Integer> consumer = contextIterator.next();
+      //os.writeUTF(consumer.getKey());
+      consumer.getKey().writeTo(os);
       os.writeInt(consumer.getValue());
     }
     os.writeInt(nbMaxMsg);
@@ -1723,24 +1728,23 @@ public class Queue extends Destination implements QueueMBean {
   public void decodeTransactionObject(DataInputStream is) throws IOException {
     super.decodeTransactionObject(is);
     ackRequestNumber = is.readInt();
-    logger.log(BasicLevel.WARN, "name=" + getName());
-    logger.log(BasicLevel.WARN, "id=" + getId());
-    logger.log(BasicLevel.WARN, "ackRequestNumber=" + arrivalsCounter);
     arrivalsCounter = is.readLong();
-    logger.log(BasicLevel.WARN, "arrivalsCounter=" + arrivalsCounter);
     int consumersSize = is.readInt();
-    logger.log(BasicLevel.WARN, "consumersSize=" + consumersSize);
-    consumers = new Hashtable<String, AgentId>(consumersSize);
+    consumers = new Hashtable<EncodedString, AgentId>(consumersSize);
     for (int i = 0; i < consumersSize; i++) {
-      String key = is.readUTF();
+      //String key = is.readUTF();
+      EncodedString key = new EncodedString();
+      key.readFrom(is);
       AgentId value = new AgentId((short) 0, (short) 0, 0);
       value.decodeTransactionObject(is);
       consumers.put(key, value);
     }
     int contextsSize = is.readInt();
-    contexts = new Hashtable<String, Integer>(contextsSize);
+    contexts = new Hashtable<EncodedString, Integer>(contextsSize);
     for (int i = 0; i < contextsSize; i++) {
-      String key = is.readUTF();
+      //String key = is.readUTF();
+      EncodedString key = new EncodedString();
+      key.readFrom(is);
       Integer value = is.readInt();
       contexts.put(key, value);
     }
