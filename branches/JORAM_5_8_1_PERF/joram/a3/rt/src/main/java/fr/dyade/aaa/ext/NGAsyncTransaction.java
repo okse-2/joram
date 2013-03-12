@@ -502,12 +502,16 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
   
   private LogFileWriter logFileWriter = new LogFileWriter();
   
+  private ReentrantLock lock = new ReentrantLock();
+  
   public void commit(Runnable callback) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "NGAsyncTransaction.commit()");
     try {
-      if (phase != RUN)
-        throw new IllegalStateException("Cannot commit.");
+      //if (phase != RUN)
+      //  throw new IllegalStateException("Cannot commit.");
+      
+      lock.lock();
 
       Hashtable<Object, Operation> log = perThreadContext.get().getLog();
       if (! log.isEmpty()) {
@@ -525,12 +529,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         }
       }
 
-      setPhase(COMMIT);
+      //setPhase(COMMIT);
       
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, "NGAsyncTransaction, to be committed");
     } finally {
-      release();
+      lock.unlock();
     }
   }
   
@@ -617,9 +621,17 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
     private boolean pendingSync;
     
+    //private long beforeSync;
+    
     private void syncCurrentLog() throws IOException {
       //logmon.log(BasicLevel.DEBUG, "*** sync");
+      //beforeSync = System.nanoTime();
+      
       currentLogFile.sync(false);
+      
+      //long syncDuration = System.nanoTime() - beforeSync;
+      //logmon.log(BasicLevel.ERROR, "syncDuration: " + syncDuration);
+      
       validate();
       pendingSync = false;
       syncCount++;
@@ -2013,9 +2025,9 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
   }
   
   public String logContent(int idx) throws IOException {
-    begin();
+    //begin();
     String res = logManager.logContent(idx);
-    commit(true);
+    //commit(true);
     return res;
   }
 
