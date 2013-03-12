@@ -739,9 +739,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
               if (msg.not.deadNotificationAgentId != null) {
                 ExpiredNot expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
                 try {
-                  AgentServer.getTransaction().begin();
-                  Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
-                  Channel.validate();
+                  
+                  // JORAM_PERF_BRANCH
+                  //AgentServer.getTransaction().begin();
+                  Channel.postAndValidate(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
+                  //Channel.validate();
+                  
                   AgentServer.getTransaction().commit(true);
                 } catch (Exception e) {
                   logmon.log(BasicLevel.ERROR, this.getName() + ", cannot post ExpireNotification", e);
@@ -1268,7 +1271,9 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         writeBoot(sock.getOutputStream());
         int boot = readAck(sock.getInputStream());
 
-        AgentServer.getTransaction().begin();
+        // JORAM_PERF_BRANCH
+        //AgentServer.getTransaction().begin();
+        
         testBootTS(sid, boot);
         AgentServer.getTransaction().commit(true);
 
@@ -1341,8 +1346,10 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
         sendList.reset();
 
-        AgentServer.getTransaction().begin();
+        //  JORAM_PERF_BRANCH
+        // AgentServer.getTransaction().begin();
         testBootTS(sid, boot);
+        
         AgentServer.getTransaction().commit(true);
 
         nis = new NetworkInputStream(sock.getInputStream());
