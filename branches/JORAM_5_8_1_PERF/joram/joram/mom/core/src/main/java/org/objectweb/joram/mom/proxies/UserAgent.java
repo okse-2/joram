@@ -151,6 +151,7 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.WakeUpTask;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.serialize.EncodedString;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.TransactionObjectFactory;
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -290,7 +291,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * <b>Value:</b> client subscription
    */
 
-  private Map<String, ClientSubscription> subsTable;
+  private Map<EncodedString, ClientSubscription> subsTable;
 
   /**
    * Table holding the recovered transactions branches.
@@ -1047,19 +1048,24 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           tSub = new TopicSubscription();
           topicsTable.put(destId, tSub);
         }
-        tSub.putSubscription((String) subEntry.getKey(), cSub.getSelector());
         
         // JORAM_PERF_BRANCH
-        tSub.putDurable((String) subEntry.getKey(), Boolean.TRUE);
+        EncodedString encodedString = (EncodedString) subEntry.getKey();
+        
+        tSub.putSubscription(encodedString.getString(), cSub.getSelector());
+        
+        // JORAM_PERF_BRANCH
+        tSub.putDurable(encodedString.getString(), Boolean.TRUE);
       }
     }
     // Browsing the topics and updating their subscriptions.
     for (Iterator topicIds = topics.iterator(); topicIds.hasNext();) {
       
       // JORAM_PERF_BRANCH
-      TopicSubscription topicSubscription = (TopicSubscription) topicsTable.get((AgentId) topicIds.next());
+      AgentId topicId = (AgentId) topicIds.next();
+      TopicSubscription topicSubscription = (TopicSubscription) topicsTable.get(topicId);
       
-      updateSubscriptionToTopic((AgentId) topicIds.next(), -1, -1, topicSubscription.isDurable());
+      updateSubscriptionToTopic(topicId, -1, -1, topicSubscription.isDurable());
     }
   }
 
@@ -1559,8 +1565,13 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (subName == null)
       throw new RequestException("Unauthorized null subscription name.");
     
+    // JORAM_PERF_BRANCH
+    EncodedString encodedSubName = new EncodedString(subName);
+    
     boolean newTopic = ! topicsTable.containsKey(topicId);
-    boolean newSub = ! subsTable.containsKey(subName);
+    
+    // JORAM_PERF_BRANCH
+    boolean newSub = ! subsTable.containsKey(encodedSubName);
 
     TopicSubscription tSub;
     ClientSubscription cSub;
@@ -1579,6 +1590,15 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (req.getDurable()) {
       tSub.putDurable(subName, Boolean.TRUE);
     }
+    
+    
+    // JORAM_PERF_BRANCH
+    EncodedString encodedSelector;
+    if (req.getSelector() == null) {
+      encodedSelector = null;
+    } else {
+      encodedSelector = new EncodedString(req.getSelector());
+    }
 
     if (newSub) { // New subscription...
       // state change, so save.
@@ -1588,8 +1608,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
                                     req.getRequestId(),
                                     req.getDurable(),
                                     topicId,
-                                    req.getSubName(),
-                                    req.getSelector(),
+                                    encodedSubName,
+                                    encodedSelector,
                                     req.getNoLocal(),
                                     dmqId,
                                     threshold,
@@ -1599,8 +1619,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
      
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Subscription " + subName + " created.");
-
-      subsTable.put(subName, cSub);
+      
+      // JORAM_PERF_BRANCH
+      subsTable.put(encodedSubName, cSub);
+      
       try {
         MXWrapper.registerMBean(cSub, getSubMBeanName(subName));
       } catch (Exception e) {
@@ -1610,7 +1632,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       tSub.putSubscription(subName, req.getSelector());
       sent = updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription(), req.getDurable());
     } else { // Existing durable subscription...
-      cSub = (ClientSubscription) subsTable.get(subName);
+      
+      // JORAM_PERF_BRANCH
+      cSub = (ClientSubscription) subsTable.get(encodedSubName);
 
       if (cSub.getActive() > 0)
         throw new StateException("The durable subscription " + subName + " has already been activated.");
@@ -1636,7 +1660,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         updatedSelector = ! req.getSelector().equals(cSub.getSelector());
 
       // Reactivating the subscription.
-      cSub.reactivate(activeCtxId, req.getRequestId(), topicId, req.getSelector(), req.getNoLocal());
+      // JORAM_PERF_BRANCH
+      cSub.reactivate(activeCtxId, req.getRequestId(), topicId, encodedSelector, req.getNoLocal());
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Subscription " + subName + " reactivated.");
@@ -1648,7 +1673,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       }
     }
     // Activating the subscription.
-    activeCtx.addSubName(subName);
+    // JORAM_PERF_BRANCH
+    activeCtx.addSubName(encodedSubName);
 
     // Acknowledging the request, if needed.
     if (!sent)
@@ -1668,8 +1694,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Getting the subscription:
     String subName = req.getTarget();
     ClientSubscription sub = null;
+    
+    // JORAM_PERF_BRANCH
     if (subName != null)
-      sub = (ClientSubscription) subsTable.get(subName);
+      sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
 
     if (sub == null)
       throw new DestinationException("Can't set a listener on the non existing subscription: " + subName);
@@ -1712,15 +1740,19 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private void doReact(ConsumerCloseSubRequest req) throws DestinationException {
     // Getting the subscription:
     String subName = req.getTarget();
+    
+     // JORAM_PERF_BRANCH
+    EncodedString encodedSubName = new EncodedString(subName);
+    
     ClientSubscription sub = null;
     if (subName != null)
-      sub = (ClientSubscription) subsTable.get(subName);
+      sub = (ClientSubscription) subsTable.get(encodedSubName);
 
     if (sub == null)
       throw new DestinationException("Can't desactivate non existing subscription: " + subName);
 
     // De-activating the subscription:
-    activeCtx.removeSubName(subName);
+    activeCtx.removeSubName(encodedSubName);
     sub.deactivate(false);
 
     // Acknowledging the request:
@@ -1739,9 +1771,13 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     // Getting the subscription.
     String subName = req.getTarget();
+    
+    // JORAM_PERF_BRANCH
+    EncodedString encodedSubName = new EncodedString(subName);
+    
     ClientSubscription sub = null;
     if (subName != null)
-      sub = (ClientSubscription) subsTable.get(subName);
+      sub = (ClientSubscription) subsTable.get(encodedSubName);
     if (sub == null)
       throw new DestinationException("Can't unsubscribe non existing subscription: " + subName);
 
@@ -1760,8 +1796,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     // Deleting the subscription.
     sub.delete();
-    activeCtx.removeSubName(subName);
-    subsTable.remove(subName);
+    activeCtx.removeSubName(encodedSubName);
+    subsTable.remove(encodedSubName);
     try {
       MXWrapper.unregisterMBean(getSubMBeanName(subName));
     } catch (Exception e) {
@@ -1788,8 +1824,12 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     String subName = req.getTarget();
     ClientSubscription sub = null;
-    if (subName != null)
-      sub = (ClientSubscription) subsTable.get(subName);
+    
+    // JORAM_PERF_BRANCH
+    if (subName != null) {
+      EncodedString encodedSubName = new EncodedString(subName);
+      sub = (ClientSubscription) subsTable.get(encodedSubName);
+    }
 
     if (sub == null)
       throw new DestinationException("Can't request a message from the unknown subscription: " + subName);
@@ -1843,7 +1883,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       sendNot(qId, not);
     } else {
       String subName = req.getTarget();
-      ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+      ClientSubscription sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
       if (sub != null)
         sub.acknowledge(req.getIds().iterator());
     }
@@ -1868,7 +1908,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         sendNot(getId(), new SyncReply(activeCtxId, new ServerReply(req)));
     } else {
       String subName = req.getTarget();
-      ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+      
+      // JORAM_PERF_BRANCH
+      ClientSubscription sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
 
       if (sub == null)
         return;
@@ -1904,7 +1946,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       }
     } else {
       String subName = req.getTarget();
-      ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+      ClientSubscription sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
       if (sub != null) {
         sub.acknowledge(req.getIds().iterator());
       }
@@ -1931,7 +1973,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         sendNot(getId(), new SyncReply(activeCtxId, new ServerReply(req)));
     } else {
       String subName = req.getTarget();
-      ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+      
+      // JORAM_PERF_BRANCH
+      ClientSubscription sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
 
       if (sub == null)
         return;
@@ -2056,7 +2100,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     ConsumerMessages consM;
     for (Enumeration<String> subs = req.getSubs(); subs.hasMoreElements();) {
       subName = subs.nextElement();
-      sub = (ClientSubscription) subsTable.get(subName);
+      
+      // JORAM_PERF_BRANCH
+      sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
+      
       if (sub != null) {
         sub.deny(req.getSubIds(subName).iterator(), true);
 
@@ -2250,16 +2297,16 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
 
     // Removing or deactivating the subscriptions:
-    String subName = null;
+    EncodedString subName = null;
     ClientSubscription sub;
     List topics = new Vector();
-    for (Iterator subs = activeCtx.getActiveSubs(); subs.hasNext();) {
-      subName = (String) subs.next();
-      sub = (ClientSubscription) subsTable.get(subName);
+    for (Iterator<EncodedString> subs = activeCtx.getActiveSubs(); subs.hasNext();) {
+      subName = subs.next();
+      sub = subsTable.get(subName);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG,
-            "Deactivate subscription " + subName + ", topic id = " + sub.getTopicId());
+            "Deactivate subscription " + subName + ",  subsTable = " + subsTable);
 
       if (sub.getDurable()) {
         sub.deactivate(true);
@@ -2273,14 +2320,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         sub.delete();
         subsTable.remove(subName);
         try {
-          MXWrapper.unregisterMBean(getSubMBeanName(subName));
+          MXWrapper.unregisterMBean(getSubMBeanName(subName.getString()));
         } catch (Exception e) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e);
         }
         TopicSubscription tSub = (TopicSubscription) topicsTable.get(sub
             .getTopicId());
-        tSub.removeSubscription(subName);
+        tSub.removeSubscription(subName.getString());
 
         if (!topics.contains(sub.getTopicId()))
           topics.add(sub.getTopicId());
@@ -2347,7 +2394,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
   private void doReact(int key, ActivateConsumerRequest req) {
     String subName = req.getTarget();
-    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+    ClientSubscription sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
     sub.setActive(req.getActivate());
 
     if (sub.getActive() > 0 ) {
@@ -2411,7 +2458,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           sendNot(qId, not);
         } else {
           String subName = sar.getTarget();
-          ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+          
+          // JORAM_PERF_BRANCH
+          ClientSubscription sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
+          
           if (sub != null) {
             sub.acknowledge(sar.getIds().iterator());
             // TODO (AF): is it needed to save the proxy ?
@@ -2613,7 +2663,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     for (Iterator names = tSub.getNames(); names.hasNext();) {
       subName = (String) names.next();
-      sub = (ClientSubscription) subsTable.get(subName);
+      
+      // JORAM_PERF_BRANCH
+      sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
+      
       if (sub == null) continue;
 
       // Browsing the delivered messages.
@@ -2643,7 +2696,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     for (Iterator names = tSub.getNames(); names.hasNext();) {
       subName = (String) names.next();
-      sub = (ClientSubscription) subsTable.get(subName);
+      
+      // JORAM_PERF_BRANCH
+      sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
+      
       if (sub == null) continue;
 
       // If the subscription is active, launching a delivery sequence.
@@ -2688,6 +2744,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         ClientSubscription sub;
         for (Iterator e = tSub.getNames(); e.hasNext();) {
           name = (String) e.next();
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Remove subsTable " + subsTable + " " + name);
           sub = (ClientSubscription) subsTable.remove(name);
           try {
             MXWrapper.unregisterMBean(getSubMBeanName(name));
@@ -2699,7 +2757,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
           try {
             setCtx(sub.getContextId());
-            activeCtx.removeSubName(name);
+            
+            // JORAM_PERF_BRANCH
+            activeCtx.removeSubName(new EncodedString(name));
+            
             doReply(new MomExceptionReply(rep.getCorrelationId(), exc));
           } catch (StateException pExc) {
             // The context is lost: nothing to do.
@@ -2772,7 +2833,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
         try {
           setCtx(sub.getContextId());
-          activeCtx.removeSubName(name);
+          
+          // JORAM_PERF_BRANCH
+          activeCtx.removeSubName(new EncodedString(name));
+          
           doReply(new MomExceptionReply(sub.getSubRequestId(), exc));
         } catch (StateException pExc) {
           // The context is lost: nothing to do.
@@ -3443,10 +3507,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     os.writeLong(period);
     // TODO: recoveredTransactions
     os.writeInt(subsTable.size());
-    Iterator<Entry<String, ClientSubscription>> subsTableIterator = subsTable.entrySet().iterator();
+    Iterator<Entry<EncodedString, ClientSubscription>> subsTableIterator = subsTable.entrySet().iterator();
     while (subsTableIterator.hasNext()) {
-      Entry<String, ClientSubscription> context = subsTableIterator.next();
-      os.writeUTF(context.getKey());
+      Entry<EncodedString, ClientSubscription> context = subsTableIterator.next();
+      //os.writeUTF(context.getKey());
+      context.getKey().writeTo(os);
       context.getValue().encodeTransactionObject(os);
     }
     os.writeInt(threshold); 
@@ -3483,9 +3548,12 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // TODO: recoveredTransactions
     recoveredTransactions = null;
     int subsTableSize = is.readInt();
-    subsTable = new Hashtable<String, ClientSubscription>(subsTableSize);
+    subsTable = new Hashtable<EncodedString, ClientSubscription>(subsTableSize);
     for (int i = 0; i < subsTableSize; i++) {
-      String key = is.readUTF();
+      //String key = is.readUTF();
+      EncodedString key = new EncodedString();
+      key.readFrom(is);
+      
       ClientSubscription value = new ClientSubscription();
       value.decodeTransactionObject(is);
       subsTable.put(key, value);
