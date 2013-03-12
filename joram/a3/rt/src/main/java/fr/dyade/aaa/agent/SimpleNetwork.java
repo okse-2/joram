@@ -203,6 +203,8 @@ public class SimpleNetwork extends StreamNetwork {
             if (msg.not.expiration > 0L && msg.not.expiration < currentTimeMillis) {
               
               // Remove the message.
+              
+              // JORAM_PERF_BRANCH
               AgentServer.getTransaction().begin();
 
               if (msg.not.deadNotificationAgentId != null) {
@@ -211,8 +213,10 @@ public class SimpleNetwork extends StreamNetwork {
                       + ", " + msg.not + " to " + msg.not.deadNotificationAgentId);
                 }
                 ExpiredNot expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
-                Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
-                Channel.validate();
+                
+                // JORAM_PERF_BRANCH
+                Channel.postAndValidate(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
+                //Channel.validate();
               } else {
                 if (logmon.isLoggable(BasicLevel.DEBUG)) {
                   logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
@@ -240,7 +244,10 @@ public class SimpleNetwork extends StreamNetwork {
                               exc);
               // Remove the message, may be we have to post an error
               // notification to sender.
-              AgentServer.getTransaction().begin();
+              
+              // JORAM_PERF_BRANCH
+              //AgentServer.getTransaction().begin();
+              
               // Deletes the processed notification
               iterator.remove();
     // AF: A reprendre.
@@ -305,7 +312,9 @@ public class SimpleNetwork extends StreamNetwork {
                                 this.getName() + ", error", exc);
               }
 
-              AgentServer.getTransaction().begin();
+              // JORAM_PERF_BRANCH
+              // AgentServer.getTransaction().begin();
+              
               //  Deletes the processed notification
               iterator.remove();
 // AF (TODO): To remove ?
