@@ -454,7 +454,9 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                  this.getName() + ", handle: " + msgout + ", ack=" + ack);
 
     if ((msgout != null) && (msgout.stamp == ack)) {
-      AgentServer.getTransaction().begin();
+      
+      //AgentServer.getTransaction().begin();
+      
       //  Suppress the processed notification from message queue,
       // and deletes it.
       qout.removeMessage(msgout);
@@ -595,10 +597,13 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                   ExpiredNot expiredNot = new ExpiredNot(msgout.not,
                                                          msgout.from,
                                                          msgout.to);
-                  AgentServer.getTransaction().begin();
-                  Channel.post(Message.alloc(AgentId.localId, msgout.not.deadNotificationAgentId,
+                  
+                  // JORAM_PERf_BRANCH
+                  //AgentServer.getTransaction().begin();
+                  Channel.postAndValidate(Message.alloc(AgentId.localId, msgout.not.deadNotificationAgentId,
                                              expiredNot));
-                  Channel.validate();
+                  //Channel.validate();
+                  
                   AgentServer.getTransaction().commit(true);
                 }
                 // Suppress the processed notification from message queue and deletes it.
@@ -637,10 +642,13 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                                  + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
                     }
                     ExpiredNot expiredNot = new ExpiredNot(msgout.not, msgout.from, msgout.to);
-                    AgentServer.getTransaction().begin();
-                    Channel.post(Message.alloc(AgentId.localId, msgout.not.deadNotificationAgentId,
+                    
+                    // JORAM_PERF_BRANCH
+                    // AgentServer.getTransaction().begin();
+                    Channel.postAndValidate(Message.alloc(AgentId.localId, msgout.not.deadNotificationAgentId,
                                                expiredNot));
-                    Channel.validate();
+                    //Channel.validate();
+                    
                     AgentServer.getTransaction().commit(true);
                   } else {
                     if (logmon.isLoggable(BasicLevel.DEBUG)) {
@@ -780,11 +788,14 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                                  + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
                     }
                     ExpiredNot expiredNot = new ExpiredNot(msgout.not, msgout.from, msgout.to);
-                    AgentServer.getTransaction().begin();
-                    Channel.post(Message.alloc(AgentId.localId,
+                    
+                    // JORAM_PERF_BRANCH
+                    //AgentServer.getTransaction().begin();
+                    Channel.postAndValidate(Message.alloc(AgentId.localId,
                                                msgout.not.deadNotificationAgentId,
                                                expiredNot));
-                    Channel.validate();
+                    //Channel.validate();
+                    
                     AgentServer.getTransaction().commit(true);
                   } else {
                     if (logmon.isLoggable(BasicLevel.DEBUG)) {
