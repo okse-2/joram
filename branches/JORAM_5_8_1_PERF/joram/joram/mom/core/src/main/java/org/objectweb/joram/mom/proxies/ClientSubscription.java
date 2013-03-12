@@ -51,6 +51,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.serialize.EncodedString;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.TransactionObjectFactory;
 
@@ -72,9 +73,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
   /** The topic identifier. */
   private AgentId topicId;
   /** The subscription name. */
-  private String name;
+  // JORAM_PERF_BRANCH
+  private EncodedString name;
   /** The selector for filtering messages. */
-  private String selector;
+  // JORAM_PERF_BRANCH
+  private EncodedString selector;
   /**
    * Identifier of the subscriber's dead message queue, <code>null</code> for
    * DMQ not set.
@@ -201,8 +204,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
                      int reqId,
                      boolean durable,
                      AgentId topicId,
-                     String name,
-                     String selector,
+                     EncodedString name,
+                     EncodedString selector,
                      boolean noLocal,
                      AgentId dmqId,
                      int threshold,
@@ -277,7 +280,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
 
   /** Returns the name of the subscription. */
   public String getName() {
-    return name;
+    return name.getString();
   }
 
   /** Returns the identifier of the subscription topic. */
@@ -292,7 +295,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
 
   /** Returns the selector. */
   public String getSelector() {
-    return selector;
+    if (selector == null) return null;
+    else return selector.getString();
   }
 
   /** Returns <code>true</code> if the subscription is durable. */
@@ -401,7 +405,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
   void reactivate(int contextId,
                   int reqId,
                   AgentId topicId,
-                  String selector,
+                  EncodedString selector,
                   boolean noLocal) {
     this.contextId = contextId;
     this.subRequestId = reqId;
@@ -538,7 +542,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
 
       // Keeping the message if filtering is successful.
       if (noFiltering ||
-          (Selector.matches(message.getHeaderMessage(), selector) &&
+          (Selector.matches(message.getHeaderMessage(), selector.getString()) &&
            (! noLocal || ! msgId.startsWith(proxyId.toString().substring(1) + "c" + contextId + "m", 3)))) {
 
         // It's the first delivery, adds the message to the proxy's table
@@ -786,7 +790,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
       nbMsgsDeliveredSinceCreation += deliverables.size();
       ConsumerMessages consM = new ConsumerMessages(requestId,
                                                     deliverables,
-                                                    name,
+                                                    name.getString(),
                                                     false);
       // set The activity: false if the subscription is 
       // passivate by the clientSubscription.
@@ -1120,7 +1124,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     for (String messageId : messageIds) {
       os.writeUTF(messageId);
     }
-    os.writeUTF(name);
+    //os.writeUTF(name);
+    name.writeTo(os);
     os.writeInt(nbMaxMsg);
     os.writeLong(nbMsgsDeliveredSinceCreation);
     os.writeLong(nbMsgsSentToDMQSinceCreation);
@@ -1129,7 +1134,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
       os.writeBoolean(true);
     } else {
       os.writeBoolean(false);
-      os.writeUTF(selector);
+      //os.writeUTF(selector);
+      selector.writeTo(os);
     }
     os.writeInt(threshold);
     topicId.encodeTransactionObject(os);
@@ -1164,7 +1170,10 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
       String messageId = is.readUTF();
       messageIds.add(messageId);
     }
-    name = is.readUTF();
+    //name = is.readUTF();
+    name = new EncodedString();
+    name.readFrom(is);
+    
     nbMaxMsg = is.readInt();
     nbMsgsDeliveredSinceCreation = is.readLong();
     nbMsgsSentToDMQSinceCreation = is.readLong();
@@ -1174,7 +1183,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     if (isNull) {
       selector = null;
     } else {
-      selector = is.readUTF();
+      //selector = is.readUTF();
+      selector = new EncodedString();
+      selector.readFrom(is);
     }
     threshold = is.readInt();
     topicId = new AgentId((short) 0, (short) 0, 0);
