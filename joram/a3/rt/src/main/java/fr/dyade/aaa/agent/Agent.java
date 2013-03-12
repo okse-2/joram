@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.common.serialize.EncodedString;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -802,20 +803,46 @@ public abstract class Agent implements AgentMBean, Serializable, TransactionObje
     return -1;
   }
   
+  //JORAM_PERF_BRANCH
+  private transient EncodedString encodedName;
+  
   // JORAM_PERF_BRANCH
   public void encodeTransactionObject(DataOutputStream os) throws IOException {
+    /*
     if (name == null)
       os.writeUTF(emptyString);
     else
       os.writeUTF(name);
+      */
+    if (name == null) {
+      os.writeBoolean(true);
+    } else {
+      os.writeBoolean(false);
+      if (encodedName == null) {
+        encodedName = new EncodedString(name);
+      }
+      encodedName.writeTo(os);
+    }
+    
     os.writeBoolean(fixed);
   }
   
   //JORAM_PERF_BRANCH
   public void decodeTransactionObject(DataInputStream is) throws IOException {
+    /*
     name = is.readUTF();
     if (name.length() == 0)
       name = null;
+      */
+    boolean isNull = is.readBoolean();
+    if (isNull) {
+      name = null;
+    } else {
+      encodedName = new EncodedString();
+      encodedName.readFrom(is);
+      name = encodedName.getString();
+    }
+    
     fixed = is.readBoolean();
     updated = true;
   }
