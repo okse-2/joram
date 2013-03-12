@@ -199,7 +199,9 @@ public class MessageSoftList {
       removeExpired(msg);
     } else {
       try {
-        AgentServer.getTransaction().begin();
+        
+        // JORAM_PERF_BRANCH
+        //AgentServer.getTransaction().begin();
         msgRef.delete();
         AgentServer.getTransaction().commit(true);
       } catch (Exception exc) {
@@ -218,7 +220,8 @@ public class MessageSoftList {
   private void removeExpired(Message msg) {
 
     try {
-      AgentServer.getTransaction().begin();
+      // JORAM_PERF_BRANCH
+      //AgentServer.getTransaction().begin();
 
       ExpiredNot expiredNot = null;
       if (msg.not.deadNotificationAgentId != null) {
@@ -234,8 +237,9 @@ public class MessageSoftList {
       }
 
       if (expiredNot != null) {
-        Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
-        Channel.validate();
+        // JORAM_PERF_BRANCH
+        Channel.postAndValidate(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
+        //Channel.validate();
       }
 
       msg.delete();
@@ -261,7 +265,10 @@ public class MessageSoftList {
       Iterator iter = msgSentlist.iterator();
 
       int removedCount = 0;
-      AgentServer.getTransaction().begin();
+      
+      // JORAM_PERF_BRANCH
+      //AgentServer.getTransaction().begin();
+      
       while (iter.hasNext()) {
         msgRef = (MessageSoftRef) iter.next();
         if (msgRef.getStamp() <= stamp) {
