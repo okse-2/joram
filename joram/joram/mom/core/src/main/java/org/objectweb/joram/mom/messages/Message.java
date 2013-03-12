@@ -41,6 +41,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.serialize.EncodedString;
 import fr.dyade.aaa.common.stream.StreamUtil;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.TransactionObject;
@@ -188,6 +189,16 @@ public final class Message implements Serializable, MessageView, TransactionObje
   /** Returns the message identifier. */
   public String getId() {
     return msg.id;
+  }
+  
+  private EncodedString encodedId;
+  
+  // JORAM_PERF_BRANCH
+  public EncodedString getEncodedId() {
+    if (encodedId == null) {
+      encodedId = new EncodedString(msg.id);
+    }
+    return encodedId;
   }
 
   /** Sets the message identifier. */ 
@@ -543,7 +554,9 @@ public final class Message implements Serializable, MessageView, TransactionObje
     os.writeBoolean(soft);
 
     // Header
-    os.writeUTF(msg.id);
+    //os.writeUTF(msg.id);
+    getEncodedId().writeTo(os);
+    
     os.writeUTF(msg.toId);
     os.write(msg.toType);
     os.writeLong(msg.timestamp);
@@ -592,7 +605,11 @@ public final class Message implements Serializable, MessageView, TransactionObje
 
     msg = new org.objectweb.joram.shared.messages.Message();
     
-    msg.id = is.readUTF();
+    //msg.id = is.readUTF();
+    encodedId = new EncodedString();
+    encodedId.readFrom(is);
+    msg.id = encodedId.getString();
+    
     msg.toId = is.readUTF();
     msg.toType = (byte) is.read();
     msg.timestamp = is.readLong();
