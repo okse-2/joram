@@ -90,19 +90,19 @@ public class ConnectionManager implements ConnectionManagerMBean {
     
     private int correlationId;
     
-    private long createDate;
+    //private long createDate;
 
     public QueueReplyCallback(AckedQueue replyQueue, int correlationId) {
       super();
       this.replyQueue = replyQueue;
       this.correlationId = correlationId;
-      createDate = System.nanoTime();
+      //createDate = System.nanoTime();
     }
 
     public void run() {
       replyQueue.push(new ProxyMessage(new ServerReply(correlationId), false));
-      long time = System.nanoTime() - createDate;
-      //logger.log(BasicLevel.WARN, "producer blocked: " + time);
+      //long time = System.nanoTime() - createDate;
+      //logger.log(BasicLevel.ERROR, "producer blocked: " + time);
     }
     
   }
