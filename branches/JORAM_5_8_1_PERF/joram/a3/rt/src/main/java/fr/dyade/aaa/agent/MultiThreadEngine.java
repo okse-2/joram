@@ -29,6 +29,7 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -61,7 +62,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   private Vector<AgentId> fixedAgentIdList;
   
   /** Logical timestamp information for messages in "local" domain. */
-  private int stamp;
+  private AtomicInteger stamp;
 
   /** Buffer used to optimize */
   private byte[] stampBuf;
@@ -113,6 +114,14 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     return started;
   }
   
+  public int getReactNumberBeforeCommit() {
+    return reactNumberBeforeCommit;
+  }
+
+  public void setReactNumberBeforeCommit(int reactNumberBeforeCommit) {
+    this.reactNumberBeforeCommit = reactNumberBeforeCommit;
+  }
+
   public EngineWorker getCurrentWorker() {
     Thread currentThread = Thread.currentThread();
     if (currentThread instanceof EngineThread) {
@@ -704,7 +713,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
         // then saves changes.
         List<Message> toValidate = dispatch();
         
-        AgentServer.getTransaction().begin();
+        //AgentServer.getTransaction().begin();
         AgentServer.getTransaction().commit(new CommitCallback(toValidate, (List<Runnable>) callbacks.clone()));
         
         // Now the following is done in the callback
@@ -829,7 +838,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   }
 
   public int getNbMessages() {
-    return stamp;
+    return stamp.get();
   }
 
   public int getNbWaitingMessages() {
@@ -950,10 +959,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
    */
   public void save() throws IOException {
     if (modified) {
-      stampBuf[0] = (byte)((stamp >>> 24) & 0xFF);
-      stampBuf[1] = (byte)((stamp >>> 16) & 0xFF);
-      stampBuf[2] = (byte)((stamp >>>  8) & 0xFF);
-      stampBuf[3] = (byte)(stamp & 0xFF);
+      int stampValue = stamp.get();
+      stampBuf[0] = (byte)((stampValue >>> 24) & 0xFF);
+      stampBuf[1] = (byte)((stampValue >>> 16) & 0xFF);
+      stampBuf[2] = (byte)((stampValue >>>  8) & 0xFF);
+      stampBuf[3] = (byte)(stampValue & 0xFF);
       AgentServer.getTransaction().saveByteArray(stampBuf, getName());
       modified = false;
     }
@@ -965,14 +975,15 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   public void restore() throws Exception {
     stampBuf = AgentServer.getTransaction().loadByteArray(getName());
     if (stampBuf == null) {
-      stamp = 0;
+      stamp = new AtomicInteger(0);
       stampBuf = new byte[4];
       modified = true;
     } else {
-      stamp = ((stampBuf[0] & 0xFF) << 24) +
+      int stampValue = ((stampBuf[0] & 0xFF) << 24) +
       ((stampBuf[1] & 0xFF) << 16) +
       ((stampBuf[2] & 0xFF) <<  8) +
       (stampBuf[3] & 0xFF);
+      stamp = new AtomicInteger(stampValue);
       modified = false;
     }
   }
@@ -999,12 +1010,21 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
+    post(msg, false);
+  }
+  
+  public void post(Message msg, boolean save) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + "post: " + msg);
     // No need to synchronize
     checkAgentCreate(msg);
-    stamp(msg);
-    msg.save();
+    synchronized (stamp) {
+      stamp(msg);
+      msg.save();
+      if (save) {
+        save();
+      }
+    }
   }
   
   private void checkAgentCreate(Message msg) {
@@ -1055,6 +1075,11 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     }
   }
   
+  //JORAM_PERF_BRANCH
+  public void postAndSave(Message msg) throws Exception {
+    post(msg, true);
+  }
+  
   private void execute(AgentContext ctx) {
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, getName() + " execute: " + ctx.getWorker().getAgentId());
@@ -1074,7 +1099,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
       modified = true;
     msg.source = AgentServer.getServerId();
     msg.dest = AgentServer.getServerId();
-    msg.stamp = ++stamp;
+    msg.stamp = stamp.getAndIncrement();
   }
 
   /**
