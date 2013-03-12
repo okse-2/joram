@@ -25,6 +25,7 @@ package fr.dyade.aaa.agent;
 
 import java.io.IOException;
 import java.util.Timer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -242,7 +243,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     return qout.size();
   }
 
-  protected int nbMessageOut = 0;
+  // JORAM_PERF_BRANCH
+  protected AtomicInteger nbMessageOut = new AtomicInteger(0);
   
   /**
    * Returns the number of messages sent since last reboot.
@@ -250,7 +252,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * @return  the number of messages sent since last reboot.
    */
   public int getNbMessageSent() {
-    return nbMessageOut - getNbWaitingMessages();
+    return nbMessageOut.get() - getNbWaitingMessages();
   }
 
   protected int nbMessageIn = 0;
@@ -352,7 +354,10 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * @param msg		the message
    */
   public void insert(Message msg) {
-    qout.insert(msg); nbMessageOut += 1;
+    qout.insert(msg);
+    //nbMessageOut += 1;
+    // JORAM_PERF_BRANCH
+    nbMessageOut.incrementAndGet();
   }
 
   /**
@@ -658,6 +663,11 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     AgentServer.getTransaction().saveByteArray(stampbuf, name);
   }
 
+  // JORAM_PERF_BRANCH
+  public void postAndSave(Message msg) throws Exception {
+    post(msg);
+  }
+  
   /**
    *  Adds a message in "ready to deliver" list. This method allocates a
    * new time stamp to the message ; be Careful, changing the stamp imply
@@ -677,7 +687,10 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     // Push it in "ready to deliver" queue.
     // JORAM_PERF_BRANCH: don't push, done later during the commit (enables concurrent transactions)
     // qout.push(msg);
-    nbMessageOut += 1;
+    
+    // JORAM_PERF_BRANCH
+    //nbMessageOut += 1;
+    nbMessageOut.incrementAndGet();
   }
   
   // JORAM_PERF_BRANCH
@@ -694,7 +707,9 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     msg.save();
     // Push it in "ready to deliver" queue.
     qout.pushAndValidate(msg);
-    nbMessageOut += 1;
+    
+    // JORAM_PERF_BRANCH
+    nbMessageOut.incrementAndGet();
   }
   
   //JORAM_PERF_BRANCH
@@ -843,7 +858,9 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
     // Start a transaction in order to ensure atomicity of clock updates
     // and queue changes.
-    AgentServer.getTransaction().begin();
+    
+    
+    //AgentServer.getTransaction().begin();
 
     // Test if the message can be delivered then deliver it
     // else put it in the waiting list
