@@ -33,25 +33,22 @@ public class FlowControl {
   private static int nbmsg = 0;
 
   public static void flowControl() {
-    // Flow control: gives the opportunity to other threads to consume the
-    // messages.
-    if (inFlow != -1) {
-      synchronized (lock) {
-        if (start == 0L) start = System.currentTimeMillis();
-        nbmsg += 1;
-        if (nbmsg == inFlow) {
-          end = System.currentTimeMillis();
-          flowControl = 1000L - (end - start);
-          if (flowControl > 0) {
-            try {
-              Thread.sleep(flowControl);
-            } catch (InterruptedException exc) {}
-            start = System.currentTimeMillis();
-          } else {
-            start = end;
-          }
-          nbmsg = 0;
+    // Flow control: gives the opportunity to other threads to consume waiting messages.
+    synchronized (lock) {
+      if (start == 0L) start = System.currentTimeMillis();
+      nbmsg += 1;
+      if (nbmsg == inFlow) {
+        end = System.currentTimeMillis();
+        flowControl = 1000L - (end - start);
+        if (flowControl > 0) {
+          try {
+            Thread.sleep(flowControl);
+          } catch (InterruptedException exc) {}
+          start = System.currentTimeMillis();
+        } else {
+          start = end;
         }
+        nbmsg = 0;
       }
     }
   }
