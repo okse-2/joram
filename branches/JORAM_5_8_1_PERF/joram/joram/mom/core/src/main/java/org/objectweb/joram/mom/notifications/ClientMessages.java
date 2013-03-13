@@ -233,11 +233,13 @@ public class ClientMessages extends AbstractRequestNot implements CallbackNotifi
   //JORAM_PERF_BRANCH
   public static class TopicReplyCallback implements Runnable {
     
+    private Runnable callback;
+    
     private AckedQueue replyQueue;
     
     private int correlationId;
     
-    private long createDate;
+    //private long createDate;
     
     private volatile int subscriberCount;
 
@@ -245,7 +247,14 @@ public class ClientMessages extends AbstractRequestNot implements CallbackNotifi
       super();
       this.replyQueue = replyQueue;
       this.correlationId = correlationId;
-      createDate = System.nanoTime();
+      //createDate = System.nanoTime();
+    }
+    
+    public TopicReplyCallback(Runnable callback, int correlationId) {
+      super();
+      this.callback = callback;
+      this.correlationId = correlationId;
+      //createDate = System.nanoTime();
     }
     
     public void setSubscriberCount(int subscriberCount) {
@@ -255,8 +264,13 @@ public class ClientMessages extends AbstractRequestNot implements CallbackNotifi
     public synchronized void run() {
       subscriberCount--;
       if (subscriberCount == 0) {
-        replyQueue.push(new ProxyMessage(new ServerReply(correlationId), false));
-        long time = System.nanoTime() - createDate;
+        if (replyQueue != null) {
+          replyQueue.push(new ProxyMessage(new ServerReply(correlationId), false));
+        }
+        if (callback != null) {
+          callback.run();
+        }
+        //long time = System.nanoTime() - createDate;
         //logger.log(BasicLevel.WARN, "producer blocked: " + time);
       }
     }
