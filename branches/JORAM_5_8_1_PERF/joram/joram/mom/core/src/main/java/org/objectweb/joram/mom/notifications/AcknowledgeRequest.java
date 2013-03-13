@@ -26,11 +26,14 @@ package org.objectweb.joram.mom.notifications;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import fr.dyade.aaa.agent.CallbackNotification;
+
 /**
  * An <code>AcknowledgeRequest</code> instance is used by a client agent
  * for acknowledging one or many messages on a queue.
  */
-public class AcknowledgeRequest extends AbstractRequestNot
+//JORAM_PERF_BRANCH
+public class AcknowledgeRequest extends AbstractRequestNot implements CallbackNotification
 {
   /**
    * 
@@ -79,4 +82,16 @@ public class AcknowledgeRequest extends AbstractRequestNot
     }
     return msgIds.elements();
   }
+  
+  // JORAM_PERF_BRANCH
+  private Runnable callback;
+
+  public Runnable getCallback() {
+    return callback;
+  }
+
+  public void setCallback(Runnable callback) {
+    this.callback = callback;
+  }
+  
 } 
