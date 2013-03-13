@@ -223,7 +223,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
             Channel.sendTo(proxyId, rn);
           }
         } else if (req instanceof CommitRequest) {
-          commit(proxyId, cnxKey, (CommitRequest) req, replyQueue);
+          commit(proxyId, cnxKey, (CommitRequest) req, replyQueue, msg);
         } else {
           RequestNot rn = new RequestNot(cnxKey, msg);
           Channel.sendTo(proxyId, rn);
@@ -240,7 +240,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
   }
   
   // JORAM_PERF_BRANCH
-  private static void commit(AgentId proxyId, int cnxKey, CommitRequest req, AckedQueue replyQueue) {
+  private static void commit(AgentId proxyId, int cnxKey, CommitRequest req, AckedQueue replyQueue, Object msg) {
     // The commit may involve some local agents
     int asyncReplyCount = 0;
     
@@ -278,7 +278,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
       }
     }
     
-    CommitRequest topicAckCommitReq = null;
+    boolean topicAckCommitReq = false;
     
     Enumeration acks = req.getAckRequests();
     if (acks != null) {
@@ -302,17 +302,13 @@ public class ConnectionManager implements ConnectionManagerMBean {
             Channel.sendTo(qId, not);
           }
         } else {
-          if (topicAckCommitReq == null) {
-            topicAckCommitReq = new CommitRequest();
-          }
-          topicAckCommitReq.addAckRequest(sar);
+          topicAckCommitReq = true;
         }
       }
     }
     
-    
-    if (topicAckCommitReq != null) {
-      RequestNot requestNot = new RequestNot(cnxKey, topicAckCommitReq);
+    if (topicAckCommitReq) {
+      RequestNot requestNot = new RequestNot(cnxKey, msg);
       requestNot.setCallback(callback);
       asyncReplyCount++;
       localIds.add(proxyId);
