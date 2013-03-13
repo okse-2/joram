@@ -239,7 +239,7 @@ public class ClientMessages extends AbstractRequestNot implements CallbackNotifi
     
     private long createDate;
     
-    private int subscriberCount;
+    private volatile int subscriberCount;
 
     public TopicReplyCallback(AckedQueue replyQueue, int correlationId) {
       super();
