@@ -268,7 +268,13 @@ public class ConnectionManager implements ConnectionManagerMBean {
           } else {
             asyncReplyCount++;
             not.setAsyncSend(true); // callback is used, see below
-            not.setCallback(callback);
+            if (pm.isQueue()) {
+              not.setCallback(callback);
+            } else {
+              // Indirect callback is required
+              not.setTopicReplyCallback(
+                  new ClientMessages.TopicReplyCallback(callback, pm.getRequestId()));
+            }
           }
           localIds.add(destId);
           localNots.add(not);
