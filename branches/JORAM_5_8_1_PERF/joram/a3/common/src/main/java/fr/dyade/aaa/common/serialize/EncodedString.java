@@ -43,7 +43,16 @@ public class EncodedString {
 
   @Override
   public boolean equals(Object obj) {
-    return string.equals(obj);
+    if (obj instanceof EncodedString) {
+      return ((EncodedString) obj).string.equals(string);
+    } else {
+      return string.equals(obj);
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "EncodedString [string=" + string + "]";
   }
 
 }
