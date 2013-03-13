@@ -122,4 +122,16 @@ public abstract class AbstractJmsRequest extends AbstractJmsMessage {
     requestId = StreamUtil.readIntFrom(is);
     target = StreamUtil.readStringFrom(is);
   }
+  
+  // JORAM_PERF_BRANCH
+  public int getAbstractJmsRequestEncodedSize() throws IOException {
+    int targetLength;
+    if (target == null) {
+      targetLength = 0;
+    } else {
+      targetLength = 4 + target.length();
+    }
+    return 4 + targetLength;
+  }
+  
 }

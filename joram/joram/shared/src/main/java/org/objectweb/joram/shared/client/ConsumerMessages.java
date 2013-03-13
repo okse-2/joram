@@ -215,4 +215,10 @@ public final class ConsumerMessages extends AbstractJmsReply {
     queueMode = StreamUtil.readBooleanFrom(is);
     isActive = StreamUtil.readBooleanFrom(is);
   }
+  
+  //JORAM_PERF_BRANCH
+  public int getEncodedSize() throws IOException {
+     return super.getAbstractJmsReplyEncodedSize() + Message.getEncodedSize(messages) + 4 + comingFrom.length() + 1 + 1;
+  }
+  
 }

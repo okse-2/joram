@@ -27,6 +27,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 
+import org.objectweb.joram.shared.messages.Message;
+
 import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
@@ -124,4 +126,10 @@ public final class ConsumerAckRequest extends AbstractJmsRequest {
   public void setAsyncSend(boolean asyncSend) {
     this.asyncSend = asyncSend;
   }
+  
+  //JORAM_PERF_BRANCH
+  public int getEncodedSize() throws IOException {
+    return super.getAbstractJmsRequestEncodedSize() + StreamUtil.getEncodedSize(ids) + 1 + 1;
+  }
+  
 }

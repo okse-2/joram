@@ -173,4 +173,10 @@ public final class ProducerMessages extends AbstractJmsRequest {
     // JORAM_PERF_BRANCH
     isQueue = StreamUtil.readBooleanFrom(is);
   }
+  
+  // JORAM_PERF_BRANCH
+  public int getEncodedSize() throws IOException {
+    return super.getAbstractJmsRequestEncodedSize() + Message.getEncodedSize(messages) + 1 + 1;
+  }
+  
 }
