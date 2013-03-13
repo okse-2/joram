@@ -479,6 +479,40 @@ public final class Message implements Cloneable, Serializable, Streamable {
     if (deliveryCount != 0) { StreamUtil.writeTo(deliveryCount, os); }
     if (jmsType != null) { StreamUtil.writeTo(jmsType, os); }
   }
+  
+  // JORAM_PERF_BRANCH
+  public int getEncodedSize() throws IOException {
+    int size = 0;
+    // id
+    size += id.length();
+    // toId
+    size += toId.length();
+    // id (size), toId (size), toType, timestamp
+    size += 4 + 4 + 1 + 8;
+    // short (null flags)
+    size += 2;
+    
+    if (type != SIMPLE) { size += 4; }
+    if (replyToId != null) { size += 4 + replyToId.length(); }
+    if (replyToType != 0) { size += 1; }
+    if (properties != null) { size += StreamUtil.getEncodedSize(properties); }
+    if (priority != DEFAULT_PRIORITY) { size += 4; }
+    if (expiration != 0) { size += 8; }
+    if (correlationId != null) { size += 4 + correlationId.length(); }
+    if (deliveryCount != 0) { size += 4; }
+    if (jmsType != null) { size += 4 + jmsType.length(); }
+    
+    int bodyLength;
+    if (body == null) {
+      bodyLength = 0;
+    } else {
+      bodyLength = body.length;
+    }
+    
+    size += 4 + bodyLength;
+    
+    return size;
+  }
 
   /**
    *  The object implements the readFrom method to restore its contents from
@@ -569,6 +603,18 @@ public final class Message implements Cloneable, Serializable, Streamable {
       messages.addElement(msg);
     }
     return messages;
+  }
+  
+  // JORAM_PERF_BRANCH
+  public static int getEncodedSize(Vector messages) throws IOException {
+    int size = 0;
+    if (messages != null) {
+      size += 4;
+      for (int i=0; i<messages.size(); i++) {
+        size += ((Message) messages.elementAt(i)).getEncodedSize();
+      }
+    }
+    return size;
   }
 
 //   /** ***** ***** ***** ***** ***** ***** ***** *****
