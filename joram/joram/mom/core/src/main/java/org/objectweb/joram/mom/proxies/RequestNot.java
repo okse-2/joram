@@ -24,7 +24,8 @@ package org.objectweb.joram.mom.proxies;
 
 import fr.dyade.aaa.agent.*;
 
-public class RequestNot extends Notification {
+// JORAM_PERF_BRANCH
+public class RequestNot extends Notification implements CallbackNotification {
 
   /**
    * 
@@ -66,4 +67,17 @@ public class RequestNot extends Notification {
 
     return output;
   }
+  
+  
+  // JORAM_PERF_BRANCH
+  private Runnable callback;
+
+  public Runnable getCallback() {
+    return callback;
+  }
+
+  public void setCallback(Runnable callback) {
+    this.callback = callback;
+  }
+
 }
