@@ -84,17 +84,37 @@ public class IOControl {
     reader.start();
   }
   
+  static class OpenByteArrayOutputStream extends ByteArrayOutputStream {
+    
+    public OpenByteArrayOutputStream(int capacity) {
+      super(capacity);
+    }
+    
+    public OpenByteArrayOutputStream() {}
+    
+    byte[] getInternalByteArray() {
+      return buf;
+    }
+  }
+  
   public void send(ProxyMessage msg) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "IOControl.send:" + msg);
     try {
       byte[] bytes;
       if (! ReliableConnectionContext.ENGINE_ENCODE) {
+        // JORAM_PERF_BRANCH:
+        OpenByteArrayOutputStream baos;
+        AbstractJmsMessage ajm = (AbstractJmsMessage) msg.getObject();
+        int encodedSize = ajm.getEncodedSize();
+        if (encodedSize > 0) {
+          baos = new OpenByteArrayOutputStream(encodedSize + 4);
+        } else {
+          baos = new OpenByteArrayOutputStream();
+        }
         try {
-          AbstractJmsMessage ajm = (AbstractJmsMessage) msg.getObject();
-          ByteArrayOutputStream baos = new ByteArrayOutputStream();
           AbstractJmsMessage.write(ajm, baos);
-          bytes = baos.toByteArray();
+          bytes = baos.getInternalByteArray();
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
