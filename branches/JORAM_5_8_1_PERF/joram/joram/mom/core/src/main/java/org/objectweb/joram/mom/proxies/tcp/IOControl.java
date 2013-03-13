@@ -26,6 +26,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -128,6 +129,7 @@ public class IOControl {
       } catch (IOException exc) {
         if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN, "", exc);
+        cancel();
       }
     }
   }
@@ -181,7 +183,14 @@ public class IOControl {
         while (running) {
           canStop = true;
           int len = StreamUtil.readIntFrom(bis);
-          byte[] bytes = StreamUtil.readFully(len, bis);
+          byte[] bytes = new byte[len];
+          int count = 0;
+          int nb = -1;
+          do {
+            nb = bis.read(bytes, count, len-count);
+            if (nb < 0) throw new EOFException();
+            count += nb;
+          } while (count != len);
           receiveQueue.offer(bytes);
         }
       } catch (Exception exc) { 
