@@ -700,6 +700,23 @@ public class Properties implements Serializable, Cloneable {
       }
     }
   }
+  
+  // JORAM_PERF_BRANCH
+  public int getEncodedSize() throws IOException {
+    int size = 0;
+    size += 4;
+    for (int index = table.length-1; index >= 0; index--) {
+      Entry entry = table[index];
+      
+      while (entry != null) {
+        size += 4 + entry.key.length();
+        size += StreamUtil.getEncodedSize(entry.value);
+        entry = entry.next;
+      }
+    }
+    
+    return size;
+  }
 
   /**
    *  The object implements the readFrom method to restore its contents from

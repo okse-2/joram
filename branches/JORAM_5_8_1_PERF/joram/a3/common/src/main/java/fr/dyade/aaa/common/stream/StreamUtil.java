@@ -427,6 +427,35 @@ public final class StreamUtil {
       throw new InvalidClassException("Bad primitive type"); 
     }
   }
+  
+  // JORAM_PERF_BRANCH
+  public static int getEncodedSize(Object obj) throws IOException {
+    int size = 0;
+    if (obj == null) {
+      size += 1;
+    } else if (obj instanceof Boolean) {
+      size += 1 + 1;
+    } else if (obj instanceof Byte) {
+      size += 1 + 1;
+    } else if (obj instanceof Short) {
+      size += 1 + 2;
+    } else if (obj instanceof Integer) {
+      size += 1 + 4;
+    } else if (obj instanceof Long) {
+      size += 1 + 8;
+    } else if (obj instanceof Float) {
+      size += 1 + 4;
+    } else if (obj instanceof Double) {
+      size += 1 + 8;
+    } else if (obj instanceof String) {
+      size += 1 + 4 + ((String) obj).length();
+    } else if (obj instanceof byte[]) {
+      size += 1 + 4 + ((byte[]) obj).length;
+    } else {
+      throw new InvalidClassException("Bad primitive type"); 
+    }
+    return size;
+  }
 
   /**
    * This method allows to restore an object from the input stream.
@@ -475,6 +504,17 @@ public final class StreamUtil {
       p.writeTo(os);
     }
   }
+  
+  // JORAM_PERF_BRANCH
+  public static int getEncodedSize(Properties p) throws IOException {
+    int size = 0;
+    if (p == null) {
+      size += 4;
+    } else {
+      size += p.getEncodedSize();
+    }
+    return size;
+  }
 
   /**
    * This method allows to restore a Properties object from the input stream.
@@ -521,6 +561,16 @@ public final class StreamUtil {
       v.addElement(readStringFrom(is));
     }
     return v;
+  }
+  
+  // JORAM_PERF_BRANCH
+  public static int getEncodedSize(Vector v) throws IOException {
+    int size = 0;
+    size += 4;
+    for (int i=0; i < v.size(); i++) {
+      size += 4 + ((String) v.get(i)).length();
+    }
+    return size;
   }
 
   /**
