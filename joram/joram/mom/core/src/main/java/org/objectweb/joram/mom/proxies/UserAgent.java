@@ -2419,6 +2419,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // The commit may involve some local agents
     int asyncReplyCount = 0;
     
+    // JORAM_PERF_BRANCH
+    /*
     Enumeration pms = req.getProducerMessages();
     if (pms != null) {
       while (pms.hasMoreElements()) {
@@ -2439,12 +2441,16 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         sendNot(destId, not);
       }
     }
+    */
     
     Enumeration acks = req.getAckRequests();
     if (acks != null) {
       while (acks.hasMoreElements()) {
         SessAckRequest sar = (SessAckRequest) acks.nextElement();
+        
         if (sar.getQueueMode()) {
+          // JORAM_PERF_BRANCH
+          /*
           AgentId qId = AgentId.fromString(sar.getTarget());
           Vector ids = sar.getIds();
           AcknowledgeRequest not = new AcknowledgeRequest(activeCtxId, req
@@ -2456,6 +2462,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           }
 
           sendNot(qId, not);
+          */
         } else {
           String subName = sar.getTarget();
           
@@ -2466,12 +2473,17 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
             sub.acknowledge(sar.getIds().iterator());
             // TODO (AF): is it needed to save the proxy ?
             // if (sub.getDurable())
-            setSave();
+            
+            // JORAM_PERF_BRANCH
+            // already done in ClientSubscription
+            // setSave();
           }
         }
       }
     }
    
+    // JORAM_PERF_BRANCH
+    /*
     if (!req.getAsyncSend()) {
       if (asyncReplyCount == 0) {
         sendNot(getId(), new SendReplyNot(key, req
@@ -2483,6 +2495,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         activeCtx.addMultiReplyContext(req.getRequestId(), asyncReplyCount);
       }
     }
+    */
     // else the client doesn't expect any ack
   }
 
@@ -3292,6 +3305,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * @param rep  The reply to send.
    */
   private void doReply(AbstractJmsReply reply) {
+    if (reply instanceof MomExceptionReply) {
+      logger.log(BasicLevel.ERROR, "" + reply, new Exception());
+    }
     doReply(reply, false);
   }
   
