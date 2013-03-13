@@ -155,14 +155,33 @@ public class ReliableTcpConnection {
     }
   }
   
+  static class OpenByteArrayOutputStream extends ByteArrayOutputStream {
+    
+    public OpenByteArrayOutputStream(int capacity) {
+      super(capacity);
+    }
+    
+    public OpenByteArrayOutputStream() {}
+    
+    byte[] getInternalByteArray() {
+      return buf;
+    }
+  }
+  
   private void doSend(AbstractJmsMessage msg) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "ReliableTcpConnection.doSend(" + msg + ')');
     // JORAM_PERF_BRANCH:
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    OpenByteArrayOutputStream baos;
+    int encodedSize = msg.getEncodedSize();
+    if (encodedSize > 0) {
+      baos = new OpenByteArrayOutputStream(encodedSize + 4);
+    } else {
+      baos = new OpenByteArrayOutputStream();
+    }
     AbstractJmsMessage.write(msg, baos);
-    byte[] bytes = baos.toByteArray();
+    byte[] bytes = baos.getInternalByteArray();
     synchronized (bos) {
       StreamUtil.writeTo(bytes.length, bos);
       bos.write(bytes);
