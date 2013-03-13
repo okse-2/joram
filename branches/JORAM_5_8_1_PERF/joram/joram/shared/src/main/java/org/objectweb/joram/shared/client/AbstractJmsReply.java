@@ -96,4 +96,9 @@ public abstract class AbstractJmsReply extends AbstractJmsMessage {
   public void readFrom(InputStream is) throws IOException {
     correlationId = StreamUtil.readIntFrom(is);
   }
+  
+  // JORAM_PERF_BRANCH
+  public int getAbstractJmsReplyEncodedSize() throws IOException {
+    return 4;
+  }
 }

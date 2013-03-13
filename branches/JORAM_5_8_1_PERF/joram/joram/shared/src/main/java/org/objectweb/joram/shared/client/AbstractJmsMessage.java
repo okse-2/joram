@@ -185,4 +185,10 @@ public abstract class AbstractJmsMessage implements Externalizable, Streamable {
 
     return msg;
   }
+  
+  // JORAM_PERF_BRANCH
+  public int getEncodedSize() throws IOException {
+    return -1;
+  }
+  
 }
