@@ -23,10 +23,12 @@
 package org.objectweb.joram.mom.proxies;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.dest.Queue;
@@ -37,10 +39,12 @@ import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.CommitRequest;
 import org.objectweb.joram.shared.client.ConsumerAckRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.ServerReply;
+import org.objectweb.joram.shared.client.SessAckRequest;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -48,6 +52,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.TransactionObjectFactoryRepository;
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -103,6 +108,39 @@ public class ConnectionManager implements ConnectionManagerMBean {
       replyQueue.push(new ProxyMessage(new ServerReply(correlationId), false));
       //long time = System.nanoTime() - createDate;
       //logger.log(BasicLevel.ERROR, "producer blocked: " + time);
+    }
+    
+  }
+  
+  static class CommitReplyCallback implements Runnable {
+    
+    private AckedQueue replyQueue;
+    
+    private int correlationId;
+    
+    //private long createDate;
+    
+    private volatile int replyCount;
+
+    public CommitReplyCallback(AckedQueue replyQueue, int correlationId) {
+      super();
+      this.replyQueue = replyQueue;
+      this.correlationId = correlationId;
+      //createDate = System.nanoTime();
+    }
+
+    public void setReplyCount(int replyCount) {
+      this.replyCount = replyCount;
+    }
+
+    public synchronized void run() {
+      //logger.log(BasicLevel.ERROR, "CommitReplyCallback: " + replyCount + " " + correlationId, new Exception());
+      replyCount--;
+      if (replyCount == 0) {
+        replyQueue.push(new ProxyMessage(new ServerReply(correlationId), false));
+        //long time = System.nanoTime() - createDate;
+        //logger.log(BasicLevel.ERROR, "producer blocked: " + time);
+      }
     }
     
   }
@@ -184,6 +222,8 @@ public class ConnectionManager implements ConnectionManagerMBean {
             RequestNot rn = new RequestNot(cnxKey, msg);
             Channel.sendTo(proxyId, rn);
           }
+        } else if (req instanceof CommitRequest) {
+          commit(proxyId, cnxKey, (CommitRequest) req, replyQueue);
         } else {
           RequestNot rn = new RequestNot(cnxKey, msg);
           Channel.sendTo(proxyId, rn);
@@ -197,6 +237,106 @@ public class ConnectionManager implements ConnectionManagerMBean {
     if (req instanceof ProducerMessages) {
       FlowControl.flowControl();
     }
+  }
+  
+  // JORAM_PERF_BRANCH
+  private static void commit(AgentId proxyId, int cnxKey, CommitRequest req, AckedQueue replyQueue) {
+    // The commit may involve some local agents
+    int asyncReplyCount = 0;
+    
+    CommitReplyCallback callback = new CommitReplyCallback(replyQueue, req.getRequestId());
+    
+    List<AgentId> localIds = new ArrayList<AgentId>();
+    List<Notification> localNots = new ArrayList<Notification>();
+    
+    Enumeration pms = req.getProducerMessages();
+    if (pms != null) { 
+      while (pms.hasMoreElements()) {
+        ProducerMessages pm = (ProducerMessages) pms.nextElement();
+        AgentId destId = AgentId.fromString(pm.getTarget());
+        ClientMessages not = new ClientMessages(cnxKey, 
+            req.getRequestId(), pm.getMessages());
+        not.setProxyId(proxyId);
+        // Need to get the DMQ from the proxy
+        //setDmq(not);    
+        
+        if (destId.getTo() == proxyId.getTo()) {
+          // local sending
+          not.setPersistent(false);
+          if (req.getAsyncSend()) {
+            not.setAsyncSend(true);
+          } else {
+            asyncReplyCount++;
+            not.setAsyncSend(true); // callback is used, see below
+            not.setCallback(callback);
+          }
+          localIds.add(destId);
+          localNots.add(not);
+        } else {
+          Channel.sendTo(destId, not);
+        }
+      }
+    }
+    
+    CommitRequest topicAckCommitReq = null;
+    
+    Enumeration acks = req.getAckRequests();
+    if (acks != null) {
+      while (acks.hasMoreElements()) {
+        SessAckRequest sar = (SessAckRequest) acks.nextElement();
+        if (sar.getQueueMode()) {
+          AgentId qId = AgentId.fromString(sar.getTarget());
+          Vector ids = sar.getIds();
+          AcknowledgeRequest not = new AcknowledgeRequest(cnxKey, req
+              .getRequestId(), ids);
+          if (qId.getTo() == proxyId.getTo()) {
+            // local sending
+            not.setPersistent(false);
+            if (! req.getAsyncSend()) {
+              asyncReplyCount++;
+              not.setCallback(callback);
+            }
+            localIds.add(qId);
+            localNots.add(not);
+          } else {
+            Channel.sendTo(qId, not);
+          }
+        } else {
+          if (topicAckCommitReq == null) {
+            topicAckCommitReq = new CommitRequest();
+          }
+          topicAckCommitReq.addAckRequest(sar);
+        }
+      }
+    }
+    
+    
+    if (topicAckCommitReq != null) {
+      RequestNot requestNot = new RequestNot(cnxKey, topicAckCommitReq);
+      requestNot.setCallback(callback);
+      asyncReplyCount++;
+      localIds.add(proxyId);
+      localNots.add(requestNot);
+    }
+    
+    //logger.log(BasicLevel.ERROR, "CommitReplyCallback: " + asyncReplyCount + " " + req.getRequestId());
+    
+    if (!req.getAsyncSend()) {
+      if (asyncReplyCount == 0) {
+        replyQueue.push(new ProxyMessage(new ServerReply(req.getRequestId()), false));
+      } else {
+        // we need to wait for the replies
+        // from the local agents
+        // before replying to the client.
+        if (callback != null) {
+          callback.setReplyCount(asyncReplyCount);
+        }
+        for (int i = 0; i < localIds.size(); i++) {
+          Channel.sendTo(localIds.get(i), localNots.get(i));
+        }
+      }
+    }
+    // else the client doesn't expect any ack
   }
   
   public static final long getMultiThreadSyncDelay() {
