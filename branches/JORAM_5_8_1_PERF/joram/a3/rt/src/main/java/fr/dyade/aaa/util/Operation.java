@@ -76,15 +76,18 @@ public class Operation implements Serializable {
     strbuf.append(",dirName=").append(dirName);
     strbuf.append(",name=").append(name);
     strbuf.append(",logidx=").append(logidx);
+    strbuf.append(",logptr=").append(logptr);
     strbuf.append(')');
     
     return strbuf.toString();
   }
 
-  private static Pool pool = null;
+  // JORAM_PERF_BRANCH
+  //private static Pool pool = null;
   
   public static void initPool(int LogThresholdOperation) {
-    pool = new Pool("Transaction$Operation", LogThresholdOperation);
+    // JORAM_PERF_BRANCH
+    //pool = new Pool("Transaction$Operation", LogThresholdOperation);
   }
 
   public static Operation alloc(int type, String dirName, String name) {
@@ -96,23 +99,25 @@ public class Operation implements Serializable {
                                 byte[] value) {
     Operation op = null;
     
+    // JORAM_PERF_BRANCH
+    /*
     try {
       op = (Operation) pool.allocElement();
     } catch (Exception exc) {
       return new Operation(type, dirName, name, value);
     }
-    op.type = type;
-    op.dirName = dirName;
-    op.name = name;
-    op.value = value;
+    */
+    op = new Operation(type, dirName, name, value);
+    //op.type = type;
+    //op.dirName = dirName;
+    //op.name = name;
+    //op.value = value;
     return op;
   }
-
+  
   public void free() {
-    /* to let gc do its work */
     dirName = null;
     name = null;
     value = null;
-    pool.freeElement(this);
   }
 }
