@@ -170,6 +170,8 @@ public interface NGAsyncTransactionMBean extends TransactionMBean {
   
   int getWriteSyncRatio();
   
+  int getLogFileContextCount();
+  
   /* Not permitted
   public void garbage(int idx) throws IOException;
   */
