@@ -1268,6 +1268,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           // The log file is an older one, garbage it before using it again.
           garbage(oldLogFile, circularLogFile[logidx % nbLogFile], logFileWriter);
         } else {
+          circularLogFile[logidx%nbLogFile] = new LogFile(dir, logidx, syncOnWrite);
+          circularLogFile[logidx%nbLogFile].open();
+          circularLogFile[logidx%nbLogFile].setLength(MaxLogFileSize);
+          circularLogFile[logidx%nbLogFile].logTag = System.currentTimeMillis();
+          circularLogFile[logidx%nbLogFile].reset(circularLogFile[logidx%nbLogFile].logTag);
+          current = 8;
           
           // only for the first n-1 logs?
           // also seems useless
@@ -1288,15 +1294,6 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         // logFile[logidx%nbLogFile].write(Operation.END);
         // current = 1;
         
-        // JORAM_PERF_BRANCH: already done either at creation of the LogManager
-        // or during the garbage (concurrent)
-        if (logidx < nbLogFile) {
-          // These files are not recycled
-          circularLogFile[logidx % nbLogFile].open();
-          circularLogFile[logidx % nbLogFile].reset();
-        }
-        current = 0;
-        
         // Need to add the log id
         sizeToAllocate += 8;
       }
@@ -1306,13 +1303,11 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       OpenByteArrayOutputStream baos = new OpenByteArrayOutputStream(
           sizeToAllocate);
       
-      /*
-      if (garbageRequired) {
+      if (circularLogFile[logidx % nbLogFile].logTag == 0) {
         long newLogId = System.currentTimeMillis();
         circularLogFile[logidx % nbLogFile].logTag = newLogId;
         writeLong(newLogId, baos);
       }
-      */
       
       // JORAM_PERF_BRANCH
       baos.write(Operation.COMMIT);
