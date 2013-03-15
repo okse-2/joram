@@ -55,6 +55,9 @@ public class Operation implements Serializable {
   public int logidx;
   // Pointer of the operation in the log file.
   public int logptr;
+  
+  // JORAM_PERF_BRANCH
+  public int garbageCount;
 
   private Operation(int type, String dirName, String name, byte[] value) {
     this.type = type;
@@ -77,6 +80,7 @@ public class Operation implements Serializable {
     strbuf.append(",name=").append(name);
     strbuf.append(",logidx=").append(logidx);
     strbuf.append(",logptr=").append(logptr);
+    strbuf.append(",garbageCount=").append(garbageCount);
     strbuf.append(')');
     
     return strbuf.toString();
