@@ -176,10 +176,15 @@ public final class DBRepository implements Repository {
     }
   }
 
+  //JORAM_PERF_BRANCH
+  public void save(String dirName, String name, byte[] content) throws IOException {
+    save(dirName, name, content, true);
+  }
+
   /**
    * Save the corresponding bytes array.
    */
-  public void save(String dirName, String name, byte[] content) throws IOException {
+  public void save(String dirName, String name, byte[] content, boolean sync) throws IOException {
     String fname = null;
     if (dirName == null) {
       fname = name;

@@ -50,6 +50,12 @@ public interface Repository {
    * Save the corresponding bytes array.
    */
   public void save(String dirName, String name, byte[] content) throws IOException;
+  
+  /**
+   * Save the corresponding bytes array.
+   */
+  // JORAM_PERF_BRANCH
+  public void save(String dirName, String name, byte[] content, boolean sync) throws IOException;
 
   /**
    * Loads the byte array.
