@@ -39,8 +39,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.ow2.bundles</groupId>
-      <artifactId>ow2-util-substitution</artifactId>
+      <groupId>org.ow2.util.substitution</groupId>
+      <artifactId>substitution</artifactId>
     </dependency>
   </dependencies>
 </project>
