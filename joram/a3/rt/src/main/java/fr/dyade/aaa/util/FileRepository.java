@@ -116,11 +116,16 @@ public final class FileRepository implements Repository {
   public String[] list(String prefix) throws IOException {
     return dir.list(new StartWithFilter(prefix));
   }
+  
+  // JORAM_PERF_BRANCH
+  public void save(String dirName, String name, byte[] content) throws IOException {
+    save(dirName, name, content, true);
+  }
 
   /**
    * Save the corresponding bytes array.
    */
-  public void save(String dirName, String name, byte[] content) throws IOException {
+  public void save(String dirName, String name, byte[] content, boolean sync) throws IOException {
     File file;
     if (dirName == null) {
       file = new File(dir, name);
@@ -135,10 +140,18 @@ public final class FileRepository implements Repository {
     if (useFileOutputStream ) {
       FileOutputStream fos = new FileOutputStream(file);
       fos.write(content);
-      fos.getFD().sync();
+      if (sync) {
+        fos.getFD().sync();
+      }
       fos.close();
     } else {
-      RandomAccessFile raf = new RandomAccessFile(file, "rwd");
+      String mode;
+      if (sync) {
+        mode = "rwd";
+      } else {
+        mode = "rw";
+      }
+      RandomAccessFile raf = new RandomAccessFile(file, mode);
       raf.write(content);
       raf.close();                    
     }
