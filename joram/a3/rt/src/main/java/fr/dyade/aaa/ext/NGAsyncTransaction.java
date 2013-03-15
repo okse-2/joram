@@ -1722,7 +1722,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
           byte buf[] = getFromLog(logf, op);
 
-          repository.save(op.dirName, op.name, buf);
+          repository.save(op.dirName, op.name, buf, syncOnWrite);
         } else if (op.type == Operation.DELETE) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG, "NTransaction, LogFile.Delete ("
