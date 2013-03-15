@@ -193,7 +193,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <stomp.version>1.0</stomp.version>
     <commons-io.version>1.4</commons-io.version>
-    <ow2-util-substitution.version>1.0.32</ow2-util-substitution.version>
+    <ow2-util-substitution.version>2.0.0</ow2-util-substitution.version>
   </properties>
 
   <organization>
@@ -296,8 +296,8 @@
         <version>${commons-io.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.ow2.bundles</groupId>
-        <artifactId>ow2-util-substitution</artifactId>
+        <groupId>org.ow2.util.substitution</groupId>
+        <artifactId>substitution</artifactId>
         <version>${ow2-util-substitution.version}</version>
     </dependency>
     </dependencies>
