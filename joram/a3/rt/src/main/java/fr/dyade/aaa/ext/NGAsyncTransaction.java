@@ -38,6 +38,7 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -345,7 +346,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     LogThresholdOperation = getInteger("Transaction.LogThresholdOperation", LogThresholdOperation).intValue();
     Operation.initPool(LogThresholdOperation);
     
-    maxGarbageCount = getInteger("Transaction.MaxGarbageCount", 10).intValue();
+    maxGarbageCount = getInteger("Transaction.MaxGarbageCount", 5).intValue();
 
     if (asyncLogWriter) {
       executorService = Executors.newSingleThreadScheduledExecutor(new LogFileWriterThreadFactory());
@@ -676,90 +677,76 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     }
     
     public void run() {
-      if (error != null) {
-        logmon.log(BasicLevel.ERROR, "LogFileWriter stopped: cannot run anymore.");
-      }
-      while (true) {
-        LogFileContext ctx = contexts.poll();
-        if (ctx == null) {
-          if (pendingSync) {
-            long now = System.nanoTime();
-            if (now - lastSyncDate > syncTimeout) {
-              try {
-                syncCurrentLog();
-              } catch (Throwable e) {
-                error = e;
-                logmon.log(BasicLevel.ERROR, "", e);
-              }
-            } else {
-              //logmon.log(BasicLevel.WARN, "*** no sync");
-            }
-          }
-          synchronized (contexts) {
-            ctx = contexts.poll();
-            if (ctx == null) {
-              running = false;
-              //logmon.log(BasicLevel.WARN, "*** exit");
-              return;
-            }
-          }
+      try {
+        if (error != null) {
+          logmon.log(BasicLevel.ERROR,
+              "LogFileWriter stopped: cannot run anymore.");
+          return;
         }
-        
-        if (ctx instanceof LogFileWriteContext) {
-          if (pendingSync &&
-              currentLogFile != ctx.logFile) {
-            // The log file has been changed
-            // Need to sync the current log
-            try {
-              syncCurrentLog();
-            } catch (Throwable e) {
-              error = e;
-              logmon.log(BasicLevel.ERROR, "Error raised by: " + ctx, e);
+        while (true) {
+          LogFileContext ctx = contexts.poll();
+          if (ctx == null) {
+            if (pendingSync) {
+              long now = System.nanoTime();
+              if (now - lastSyncDate > syncTimeout) {
+                syncCurrentLog();
+              } else {
+                // logmon.log(BasicLevel.WARN, "*** no sync");
+              }
+            }
+            synchronized (contexts) {
+              ctx = contexts.poll();
+              if (ctx == null) {
+                running = false;
+                // logmon.log(BasicLevel.WARN, "*** exit");
+                return;
+              }
             }
           }
-          
-          currentLogFile = ctx.logFile;
-          
-          LogFileWriteContext writeCtx = (LogFileWriteContext) ctx;
-          try {
+
+          if (ctx instanceof LogFileWriteContext) {
+            if (currentLogFile != ctx.logFile) {
+              if (pendingSync) {
+                // The log file has been changed
+                // Need to sync the current log
+                syncCurrentLog();
+              }
+              if (currentLogFile != null) {
+                currentLogFile.signalCanBeGarbaged();
+              }
+            }
+
+            currentLogFile = ctx.logFile;
+
+            LogFileWriteContext writeCtx = (LogFileWriteContext) ctx;
             currentLogFile.open();
             ByteBuffer buffer = writeCtx.byteBuffer;
-          //logmon.log(BasicLevel.DEBUG, "*** write");
+            // logmon.log(BasicLevel.DEBUG, "*** write");
             currentLogFile.write(buffer);
             writeCount++;
             pendingSync = true;
             toValidate.add(writeCtx);
-          } catch (Throwable e) {
-            error = e;
-            logmon.log(BasicLevel.ERROR, "Error raised by: " + ctx, e);
+          } else {
+            error = new Exception("No more garbage");
+            logmon.log(BasicLevel.ERROR, "Error raised by: " + ctx, error);
+            /*
+             * try { LogGarbageContext garbageCtx = (LogGarbageContext) ctx;
+             * LogFile garbagedLog = ctx.logFile; garbagedLog.open();
+             * //logmon.log(BasicLevel.WARN, "*** garbage log: " + garbagedLog);
+             * 
+             * if (currentLogFile == garbagedLog) { // Need to sync the current
+             * log try { syncCurrentLog(); } catch (Throwable e) { error = e;
+             * logmon.log(BasicLevel.ERROR, "", e); } }
+             * 
+             * logManager.doGarbage(garbagedLog, garbageCtx.newFileName,
+             * garbageCtx.operations); } catch (IOException e) { error = e;
+             * logmon.log(BasicLevel.ERROR, "Error raised by: " + ctx, e); }
+             */
           }
-        } else {
-          error = new Exception("No more garbage");
-          logmon.log(BasicLevel.ERROR, "Error raised by: " + ctx, error);
-          /*
-          try {
-            LogGarbageContext garbageCtx = (LogGarbageContext) ctx;
-            LogFile garbagedLog = ctx.logFile;
-            garbagedLog.open();
-            //logmon.log(BasicLevel.WARN, "*** garbage log: " + garbagedLog);
-                
-            if (currentLogFile == garbagedLog) {
-              // Need to sync the current log
-              try {
-                syncCurrentLog();
-              } catch (Throwable e) {
-                error = e;
-                logmon.log(BasicLevel.ERROR, "", e);
-              }
-            }
-            
-            logManager.doGarbage(garbagedLog, garbageCtx.newFileName, garbageCtx.operations);
-          } catch (IOException e) {
-            error = e;
-            logmon.log(BasicLevel.ERROR, "Error raised by: " + ctx, e);
-          }
-          */
         }
+      } catch (Throwable e) {
+        error = e;
+        logmon.log(BasicLevel.ERROR, "Error: ", e);
       }
     }
     
@@ -1631,10 +1618,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     private final void garbage(LogFile oldLog, LogFile newLog, LogFileWriter logFileWriter) throws IOException {
       //logmon.log(BasicLevel.WARN, "Garbage: log#" + logf);
       //logmon.log(BasicLevel.WARN, "logidx=" + logidx);
-      logmon.log(BasicLevel.ERROR, "mainLog=" + mainLog);
+      //logmon.log(BasicLevel.ERROR, "mainLog=" + mainLog);
       //logmon.log(BasicLevel.WARN, "Log content" + logContent(logf.logidx));
       
       if (oldLog == null) return;
+
+      oldLog.waitCanBeGarbaged();
 
       garbageCount += 1;
       long start = System.currentTimeMillis();
@@ -1655,7 +1644,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           continue;
 
         op.garbageCount++;
-        logmon.log(BasicLevel.ERROR, "TO GARBAGE op=" + op);
+        //logmon.log(BasicLevel.ERROR, "TO GARBAGE op=" + op);
         if (op.garbageCount > maxGarbageCount) {
           if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -1732,7 +1721,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
     void doGarbage(LogFile oldLog, LogFile newLog,
         List<Operation> garbagedOperations) throws IOException {
-      logmon.log(BasicLevel.ERROR, "doGarbage(" + oldLog.logidx + ',' +  newLog.logidx + ',' + garbagedOperations);
+      //logmon.log(BasicLevel.ERROR, "doGarbage(" + oldLog.logidx + ',' +  newLog.logidx + ',' + garbagedOperations);
       
       // Create new log
       if (newLog.getFile().exists()) {
@@ -1805,7 +1794,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           // TODO: Use SoftReference ?
           op.value = null;
           
-          logmon.log(BasicLevel.ERROR, "garbaged op=" + op);
+          //logmon.log(BasicLevel.ERROR, "garbaged op=" + op);
           
           // JORAM_PERF_BRANCH
           writeLong(newLog.logTag, baos);
@@ -1952,6 +1941,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
     private FileChannel channel;
     
+    private CountDownLatch canBeGarbaged;
+    
     /**
      *  Creates a random access file stream to read from and to write to the file specified
      * by the File argument.
@@ -1968,6 +1959,17 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       file = new File(dir, "log#" + logidx);
       if (logidx > maxUsedIdx) maxUsedIdx = logidx;
       cursorLock = new ReentrantLock();
+      canBeGarbaged = new CountDownLatch(1);
+    }
+    
+    public void waitCanBeGarbaged() {
+      try {
+        canBeGarbaged.await();
+      } catch (InterruptedException e) {}
+    }
+    
+    public void signalCanBeGarbaged() {
+      canBeGarbaged.countDown();
     }
     
     public File getFile() {
