@@ -33,6 +33,10 @@ import javax.jms.MessageNotWriteableException;
  * Implements the <code>javax.jms.TextMessage</code> interface.
  */
 public final class TextMessage extends Message implements javax.jms.TextMessage {
+  
+  //JORAM_PERF_BRANCH
+  private String body;
+  
   /** 
    * Instantiates a bright new <code>TextMessage</code>.
    */
@@ -83,8 +87,11 @@ public final class TextMessage extends Message implements javax.jms.TextMessage 
    * @exception JMSException  In case of a problem when getting the body.
    */
   public String getText() throws JMSException {
+    // JORAM_PERF_BRANCH
+    if (body != null) return body;
     try {
-	    return momMsg.getText();
+      body = momMsg.getText();
+	    return body;
     } catch (Exception e) {
     	throw new MessageFormatException("Error while deserializing the text body : " + e);
     }
