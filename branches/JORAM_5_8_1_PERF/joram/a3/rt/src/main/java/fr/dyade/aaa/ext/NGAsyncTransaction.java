@@ -316,6 +316,14 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     return repository.getNbLoadedObjects();
   }
   
+  public int getLargestObjectSize() {
+    return logManager.largestObjectSize;
+  }
+  
+  public String getLargestObjectName() {
+    return logManager.largestObjectName;
+  }
+  
   public int getLogFileContextCount() {
     if (logFileWriter == null) return -1;
     else return logFileWriter.getLogFileContextCount();
@@ -936,6 +944,10 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
     private String mode;
     
+    private int largestObjectSize;
+    
+    private String largestObjectName;
+    
     // JORAM_PERF_BRANCH
     private boolean syncOnWrite;
     
@@ -1329,6 +1341,9 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         // Need to add the log id
         sizeToAllocate += 8;
         logFile = newLogFile;
+        
+        // reset largestObjectSize
+        largestObjectSize = 0;
       } else {
         logFile = circularLogFile.get(logidx % nbLogFile);
       }
@@ -1387,6 +1402,11 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
           writeInt(op.value.length, baos);
           baos.write(op.value);
+          
+          if (largestObjectSize < op.value.length) {
+            largestObjectSize = op.value.length;
+            largestObjectName = op.name;
+          }
         }
         // TODO: Use SoftReference ?
         op.value = null;

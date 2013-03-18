@@ -175,4 +175,9 @@ public interface NGAsyncTransactionMBean extends TransactionMBean {
   /* Not permitted
   public void garbage(int idx) throws IOException;
   */
+  
+  int getLargestObjectSize();
+  
+  String getLargestObjectName();
+  
 }
