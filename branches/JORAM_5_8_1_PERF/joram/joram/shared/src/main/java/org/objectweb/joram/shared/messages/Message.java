@@ -33,6 +33,9 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.objectweb.joram.shared.admin.AbstractAdminMessage;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -162,6 +165,10 @@ public final class Message implements Cloneable, Serializable, Streamable {
 
   /** The message destination type. */
   public transient byte toType;
+  
+  // JORAM_PERF_BRANCH
+  public transient boolean compressed;
+  public final static int COMPRESSED_MIN_SIZE = 2000;
 
   /**
    * Sets the message destination.
@@ -296,12 +303,57 @@ public final class Message implements Cloneable, Serializable, Streamable {
   	return (Serializable) obj;
   }
   
+  //JORAM_PERF_BRANCH
+  public static byte[] compress(byte[] toCompress) throws IOException {
+    ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+    int bodySize = toCompress.length;
+    baos2.write(bodySize >>> 24);
+    baos2.write(bodySize >>> 16);
+    baos2.write(bodySize >>> 8);
+    baos2.write(bodySize >>> 0);
+    ZipOutputStream zos = new ZipOutputStream(baos2);
+    ZipEntry entry = new ZipEntry("");
+    zos.putNextEntry(entry);
+    zos.write(toCompress);
+    zos.closeEntry();
+    zos.flush();
+    zos.close();
+    return baos2.toByteArray();
+  }
+  
   /**
    * Sets a String as the body of the message.
    * @throws IOException In case of an error while setting the text
    */
+  //JORAM_PERF_BRANCH
   public void setText(String text) throws IOException {
-  	body = toBytes(text);
+  	body = text.getBytes();
+  	if (body.length > COMPRESSED_MIN_SIZE) {
+      compressed = true;
+      body = compress(body);
+    } else {
+      compressed = false;
+    }
+  }
+  
+  //JORAM_PERF_BRANCH
+  public static byte[] uncompress(byte[] toUncompress) throws IOException {
+    ByteArrayInputStream bais = new ByteArrayInputStream(toUncompress);
+    int zipEntrySize = (((bais.read() &0xFF) << 24) | 
+        ((bais.read() &0xFF) << 16) |
+        ((bais.read() &0xFF) << 8) | 
+        (bais.read() &0xFF));
+    ZipInputStream zis = new ZipInputStream(bais);
+    zis.getNextEntry();
+    byte[] uncompressed = new byte[zipEntrySize];
+    int offset = 0;
+    int remaining = zipEntrySize;
+    while (remaining > 0) {
+      offset += zis.read(uncompressed, offset, remaining);
+      remaining = zipEntrySize - offset;
+    }
+    zis.close();
+    return uncompressed;
   }
 
   /**
@@ -312,7 +364,12 @@ public final class Message implements Cloneable, Serializable, Streamable {
     if (body == null) {
       return null;
     }
-    return (String) fromBytes(body);
+    // JORAM_PERF_BRANCH
+    if (compressed) {
+      body = uncompress(body);
+      compressed = false;
+    }
+    return new String(body);
   }
 
   /**
@@ -323,6 +380,13 @@ public final class Message implements Cloneable, Serializable, Streamable {
   public void setObject(Serializable object) throws IOException {
     type = Message.OBJECT;
     body = toBytes(object);
+    // JORAM_PERF_BRANCH
+    if (body.length > COMPRESSED_MIN_SIZE) {
+      compressed = true;
+      body = compress(body);
+    } else {
+      compressed = false;
+    }
   }
 
   /**
@@ -332,6 +396,12 @@ public final class Message implements Cloneable, Serializable, Streamable {
    */
   public Serializable getObject() throws Exception {
     // TODO (AF): May be, we should verify that it is an Object message!!
+    
+    // JORAM_PERF_BRANCH
+    if (compressed) {
+      body = uncompress(body);
+      compressed = false;
+    }
     return fromBytes(body);
   }
 
@@ -448,7 +518,10 @@ public final class Message implements Cloneable, Serializable, Streamable {
     StreamUtil.writeTo(toId, os);
     StreamUtil.writeTo(toType, os);
     StreamUtil.writeTo(timestamp, os);
-
+    
+    // JORAM_PERF_BRANCH
+    StreamUtil.writeTo(compressed, os);
+    
     // One short is used to know which fields are set
     short s = 0;
     if (type != SIMPLE) { s |= typeFlag; }
@@ -530,6 +603,9 @@ public final class Message implements Cloneable, Serializable, Streamable {
     toId = StreamUtil.readStringFrom(is);
     toType = StreamUtil.readByteFrom(is);
     timestamp = StreamUtil.readLongFrom(is);
+    
+    // JORAM_PERF_BRANCH
+    compressed = StreamUtil.readBooleanFrom(is);
     
     short s = StreamUtil.readShortFrom(is);
 
