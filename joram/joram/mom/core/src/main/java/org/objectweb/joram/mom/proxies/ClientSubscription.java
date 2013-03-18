@@ -104,7 +104,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
   /** Sets the subscription's threshold value. */
   public void setThreshold(int threshold) {
     this.threshold = threshold;
-    save();
+    //save();
+    // JORAM_PERF_BRANCH
+    isModified = true;
   }
 
   /** Max number of Message stored in the queue (-1 no limit). */
@@ -182,6 +184,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
 
   private int DEFAULT_MAX_NUMBER_OF_MSG_PER_REQUEST = 100;
   
+  public transient boolean isModified;
+  
   public ClientSubscription() {}
   
   /**
@@ -234,6 +238,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     active = DEFAULT_MAX_NUMBER_OF_MSG_PER_REQUEST;
     requestId = -1;
     toListener = false;
+    
+    // JORAM_PERF_BRANCH
+    isModified = true;
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ": created.");
@@ -429,7 +436,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     toListener = false;
     
     // Some updated attributes are persistent
-    save();
+    //save();
+    // JORAM_PERF_BRANCH
+    isModified = true;
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ": reactivated.");
@@ -453,7 +462,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
       deny(h.iterator(), false);
       deliveredIds.clear();
       // deliveredIds is persistent
-      save();
+      //save();
+      // JORAM_PERF_BRANCH
+      isModified = true;
     }
 
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -520,7 +531,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
   /** Sets the subscription's dead message queue identifier. */
   void setDMQId(AgentId dmqId) {
     this.dmqId = dmqId;
-    save();
+    //save();
+    // JORAM_PERF_BRANCH
+    isModified = true;
   }
   
   /**
@@ -566,7 +579,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
         
         // JORAM_PERF_BRANCH
         if (message.isPersistent()) {
-          save();
+          //save();
+          // JORAM_PERF_BRANCH
+          isModified = true;
         }
 
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -631,7 +646,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
         
         // JORAM_PERF_BRANCH
         if (message.isPersistent()) {
-          save();
+          //save();
+          // JORAM_PERF_BRANCH
+          isModified = true;
         }
 
         if (message != null) {
@@ -727,7 +744,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
             
             // JORAM_PERF_BRANCH
             if (message.isPersistent()) {
-              save();
+              //save();
+              // JORAM_PERF_BRANCH
+              isModified = true;
             }
             
             messagesTable.remove(id);
@@ -758,7 +777,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
           
           // JORAM_PERF_BRANCH
           if (message.isPersistent()) {
-            save();
+            //save();
+            // JORAM_PERF_BRANCH
+            isModified = true;
           }
         }
       }
@@ -770,7 +791,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
         
         // JORAM_PERF_BRANCH
         if (keptMsg.isPersistent()) {
-          save();
+          //save();
+          // JORAM_PERF_BRANCH
+          isModified = true;
         }
 
         // Setting the message's deliveryCount and denied fields.
@@ -834,7 +857,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     
     // JORAM_PERF_BRANCH
     if (msg.isPersistent()) {
-      save();
+      //save();
+      // JORAM_PERF_BRANCH
+      isModified = true;
     }
 
     // Message may be null if it is not valid anymore
@@ -892,7 +917,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
       
       // JORAM_PERF_BRANCH
       if (message.isPersistent()) {
-        save();
+        //save();
+        // JORAM_PERF_BRANCH
+        isModified = true;
       }
       
       // Message may be null if it is not valid anymore
@@ -1040,7 +1067,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     
     // JORAM_PERF_BRANCH
     if (message.isPersistent()) {
-      save();
+      //save();
+      // JORAM_PERF_BRANCH
+      isModified = true;
     }
     
     if (message != null) {
@@ -1066,7 +1095,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     if (dmqManager != null)
       dmqManager.sendToDMQ();
     messageIds.clear();
-    save();
+    //save();
+    // JORAM_PERF_BRANCH
+    isModified = true;
   }
 
   /**

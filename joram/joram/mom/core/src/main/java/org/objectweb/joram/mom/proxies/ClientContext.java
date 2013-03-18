@@ -89,6 +89,9 @@ class ClientContext implements java.io.Serializable, TransactionObject {
   public transient String txname;
   
   // JORAM_PERF_BRANCH
+  public transient boolean isModified;
+  
+  // JORAM_PERF_BRANCH
   public ClientContext() {}
 
   /**
@@ -108,6 +111,8 @@ class ClientContext implements java.io.Serializable, TransactionObject {
     cancelledRequestId = -1;
     activeSubs = new Vector();
     repliesBuffer = new Vector();
+    
+    isModified = true;
   }
   
   void setProxyAgent(ProxyAgentItf px) {
@@ -139,7 +144,10 @@ class ClientContext implements java.io.Serializable, TransactionObject {
   /** Adds a temporary destination identifier. */
   void addTemporaryDestination(AgentId destId) {
     tempDestinations.add(destId);
-    proxy.setSave();
+    
+    // JORAM_PERF_BRANCH
+    //proxy.setSave();
+    isModified = true;
   }
    
   Iterator getTempDestinations() {
@@ -155,7 +163,10 @@ class ClientContext implements java.io.Serializable, TransactionObject {
   void removeTemporaryDestination(AgentId destId) {
     deliveringQueues.remove(destId);
     tempDestinations.remove(destId);
-    proxy.setSave();
+    
+    // JORAM_PERF_BRANCH
+    //proxy.setSave();
+    isModified = true;
   }
 
   /** Adds a pending delivery. */
@@ -212,7 +223,10 @@ class ClientContext implements java.io.Serializable, TransactionObject {
     // JORAM_PERF_BRANCH
     if (deliveringQueues.get(queueId) == null) {
       deliveringQueues.put(queueId, queueId);
-      proxy.setSave();
+      
+      // JORAM_PERF_BRANCH
+      // proxy.setSave();
+      isModified = true;
     }
   }
 
@@ -227,15 +241,18 @@ class ClientContext implements java.io.Serializable, TransactionObject {
    * 
    * @param requestId
    * @param asyncReplyCount
-   */
+   *
   void addMultiReplyContext(int requestId, int asyncReplyCount) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "ClientContext[" + proxyId + ':' + id + "].addMultiReplyContext(" + requestId + ',' + asyncReplyCount + ')');
     if (commitTable == null) commitTable = new Hashtable();
     commitTable.put(new Integer(requestId), new MultiReplyContext(asyncReplyCount));
-    proxy.setSave();
-  }
+    
+    // JORAM_PERF_BRANCH
+    //proxy.setSave();
+    isModified = true;
+  }*/
   
   /**
    * Called by UserAgent when a SendReplyNot
@@ -259,7 +276,10 @@ class ClientContext implements java.io.Serializable, TransactionObject {
     ctx.counter--;
     if (ctx.counter == 0) {
       commitTable.remove(ctxKey);
-      proxy.setSave();
+      
+      // JORAM_PERF_BRANCH
+      // proxy.setSave();
+      isModified = true;
     }
     return ctx.counter;
   }
@@ -279,7 +299,10 @@ class ClientContext implements java.io.Serializable, TransactionObject {
 
     if (! transactionsTable.containsKey(key)) {
       transactionsTable.put(key, prepare);
-      proxy.setSave();
+      
+      // JORAM_PERF_BRANCH
+      //proxy.setSave();
+      isModified = true;
     } else
       throw new Exception("Prepare request already received by "
                           + "TM for this transaction.");
@@ -290,7 +313,10 @@ class ClientContext implements java.io.Serializable, TransactionObject {
     XACnxPrepare prepare = null;
     if (transactionsTable != null) {
       prepare = (XACnxPrepare) transactionsTable.remove(key);
-      proxy.setSave();
+      
+      // JORAM_PERF_BRANCH
+      // proxy.setSave();
+      isModified = true;
     }
     return prepare;
   }

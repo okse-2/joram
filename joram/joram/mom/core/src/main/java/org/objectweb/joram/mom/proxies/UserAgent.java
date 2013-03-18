@@ -184,6 +184,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   
   /** the number of erroneous messages forwarded to the DMQ */
   private long nbMsgsSentToDMQSinceCreation = 0;
+  
+  // JORAM_PERF_BRANCH
+  private transient List<ClientContext> modifiedClientContexts;
+  private transient List<ClientSubscription> modifiedClientSubscriptions;
 
   /**
    * Returns  the period value of this queue, -1 if not set.
@@ -357,7 +361,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   public void agentInitialize(boolean firstTime) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "UserAgent.agentInitialize(" + firstTime + ')');
-
+    modifiedClientContexts = new ArrayList<ClientContext>();
+    modifiedClientSubscriptions = new ArrayList<ClientSubscription>();
+    
     super.agentInitialize(firstTime);
     initialize(firstTime);
     if (getPeriod() > 0)
@@ -459,6 +465,34 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       doReact((FwdAdminRequestNot) not);
     } else {
       super.react(from, not);
+    }
+    saveModifiedClientContexts();
+    saveModifiedClientSubscriptions();
+  }
+  
+  private void saveModifiedClientContexts() {
+    // JORAM_PERF_BRANCH
+    if (modifiedClientContexts.size() > 0) {
+      for (ClientContext modifiedCC : modifiedClientContexts) {
+        if (modifiedCC.isModified) {
+          modifiedCC.save();
+          modifiedCC.isModified = false;
+        }
+      }
+      modifiedClientContexts.clear();
+    }
+  }
+  
+  private void saveModifiedClientSubscriptions() {
+    // JORAM_PERF_BRANCH
+    if (modifiedClientSubscriptions.size() > 0) {
+      for (ClientSubscription modifiedCS : modifiedClientSubscriptions) {
+        if (modifiedCS.isModified) {
+          modifiedCS.save();
+          modifiedCS.isModified = false;
+        }
+      }
+      modifiedClientSubscriptions.clear();
     }
   }
 
@@ -695,6 +729,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (cc != null) {
       if (cc.setReply(not.getRequestId()) == 0) {
         sendToClient(not.getKey(), new ServerReply(not.getRequestId()), false);
+        
+        // JORAM_PERF_BRANCH
+        modifiedClient(cc);
+        
       }
     } else if (logger.isLoggable(BasicLevel.DEBUG)) {
       // Can happen if the connection is closed before the SendReplyNot
@@ -1015,6 +1053,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
         recoveredPrepare = (XACnxPrepare) recoveredTransactions.get(xid);
         prepare = activeCtx.getTxPrepare(xid);
+        
+        // JORAM_PERF_BRANCH
+        modifiedClient(activeCtx);
 
         if (recoveredPrepare == null)
           recoveredTransactions.put(xid, prepare);
@@ -1098,6 +1139,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       
       updateSubscriptionToTopic(topicId, -1, -1, topicSubscription.isDurable());
     }
+    
+    saveModifiedClientContexts();
+    saveModifiedClientSubscriptions();
   }
 
   private void setActiveCtxId(int activeCtxId) {
@@ -1300,6 +1344,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           throw new RequestException(pE.toString());
         }
         activeCtx.addDeliveringQueue(destId);
+        
+        // JORAM_PERF_BRANCH
+        modifiedClient(activeCtx);
+        
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "activeCtx.getDeliveringQueues() = " + activeCtx);
       }
@@ -1484,7 +1532,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     contexts.put(new Integer(key), activeCtx);
     
     // JORAM_PERF_BRANCH
-    activeCtx.save();
+    modifiedClient(activeCtx);
     
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Connection " + key + " opened.");
@@ -1571,6 +1619,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       if (DestinationConstants.isTemporary(req.getType())) {
         // Registers the temporary destination in order to clean it at the end of the connection
         activeCtx.addTemporaryDestination(destId);
+        
+        // JORAM_PERF_BRANCH
+        modifiedClient(activeCtx);
       }
 
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -1581,6 +1632,20 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     SessCreateDestReply reply = new SessCreateDestReply(req, destId.toString());
     sendNot(getId(), new SyncReply(activeCtxId, reply));
+  }
+  
+  // JORAM_PERF_BRANCH
+  private void modifiedClient(ClientContext cc) {
+    if (! modifiedClientContexts.contains(cc)) {
+      modifiedClientContexts.add(cc);
+    }
+  }
+  
+  //JORAM_PERF_BRANCH
+  private void modifiedSubscription(ClientSubscription cs) {
+    if (! modifiedClientSubscriptions.contains(cs)) {
+      modifiedClientSubscriptions.add(cs);
+    }
   }
 
   /**
@@ -1658,6 +1723,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       // JORAM_PERF_BRANCH
       subsTable.put(encodedSubName, cSub);
       cSub.save();
+      modifiedSubscription(cSub);
       
       try {
         MXWrapper.registerMBean(cSub, getSubMBeanName(subName));
@@ -1698,6 +1764,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       // Reactivating the subscription.
       // JORAM_PERF_BRANCH
       cSub.reactivate(activeCtxId, req.getRequestId(), topicId, encodedSelector, req.getNoLocal());
+      
+      // JORAM_PERF_BRANCH
+      modifiedSubscription(cSub);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Subscription " + subName + " reactivated.");
@@ -1707,6 +1776,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         tSub.putSubscription(subName, req.getSelector());
         sent = updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription(), req.getDurable());
       }
+      
+      // JORAM_PERF_BRANCH
+      // cSub.save();
     }
     // Activating the subscription.
     // JORAM_PERF_BRANCH
@@ -1741,6 +1813,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     sub.setListener(req.getRequestId());
 
     ConsumerMessages consM = sub.deliver();
+    
+    //JORAM_PERF_BRANCH
+    modifiedSubscription(sub);
+    
     if (consM != null) {
       if (activeCtx.getActivated())
         doReply(consM);
@@ -1789,7 +1865,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     // De-activating the subscription:
     activeCtx.removeSubName(encodedSubName);
-    sub.deactivate(false);
+    //sub.deactivate(false);
+    
+    // JORAM_PERF_BRANCH
+    modifiedSubscription(sub);
 
     // Acknowledging the request:
     doReply(new ServerReply(req));
@@ -1878,6 +1957,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Getting a message from the subscription.
     sub.setReceiver(req.getRequestId(), req.getTimeToLive());
     ConsumerMessages consM = sub.deliver();
+    
+    //JORAM_PERF_BRANCH
+    modifiedSubscription(sub);
 
     if (consM != null && req.getReceiveAck()) {
       // Immediate acknowledge
@@ -1885,6 +1967,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       for (int i = 0; i < messageList.size(); i++) {
         Message msg = (Message) messageList.elementAt(i);
         sub.acknowledge(msg.getId());
+        
+        //JORAM_PERF_BRANCH
+        modifiedSubscription(sub);
       }
     }
 
@@ -1925,8 +2010,12 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     } else {
       String subName = req.getTarget();
       ClientSubscription sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
-      if (sub != null)
+      if (sub != null) {
         sub.acknowledge(req.getIds().iterator());
+
+        // JORAM_PERF_BRANCH
+        modifiedSubscription(sub);
+      }
     }
   }
 
@@ -1960,6 +2049,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
       // Launching a delivery sequence:
       ConsumerMessages consM = sub.deliver();
+      
+      //JORAM_PERF_BRANCH
+      modifiedSubscription(sub);
+      
       // Delivering.
       if (consM != null && activeCtx.getActivated())
         doReply(consM);
@@ -1990,6 +2083,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       ClientSubscription sub = (ClientSubscription) subsTable.get(new EncodedString(subName));
       if (sub != null) {
         sub.acknowledge(req.getIds().iterator());
+        
+        //JORAM_PERF_BRANCH
+        modifiedSubscription(sub);
       }
     }
   }
@@ -2027,6 +2123,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
       // Launching a delivery sequence:
       ConsumerMessages consM = sub.deliver();
+      
+      //JORAM_PERF_BRANCH
+      modifiedSubscription(sub);
+      
       // Delivering.
       if (consM != null && activeCtx.getActivated())
         doReply(consM);
@@ -2047,6 +2147,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Removing the destination from the context's list:
     AgentId tempId = AgentId.fromString(req.getTarget());
     activeCtx.removeTemporaryDestination(tempId);
+    
+    // JORAM_PERF_BRANCH
+    modifiedClient(activeCtx);
 
     // Sending the request to the destination:
     deleteTemporaryDestination(tempId);
@@ -2072,6 +2175,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     try {
       Xid xid = new Xid(req.getBQ(), req.getFI(), req.getGTI());
       activeCtx.registerTxPrepare(xid, req);
+      
+      // JORAM_PERF_BRANCH
+      modifiedClient(activeCtx);
+      
       doReply(new ServerReply(req));
     } catch (Exception exc) {
       throw new StateException(exc.getMessage());
@@ -2092,6 +2199,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     Xid xid = new Xid(req.getBQ(), req.getFI(), req.getGTI());
 
     XACnxPrepare prepare = activeCtx.getTxPrepare(xid);
+    
+    // JORAM_PERF_BRANCH
+    modifiedClient(activeCtx);
 
     if (prepare == null)
       throw new StateException("Unknown transaction identifier.");
@@ -2149,6 +2259,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         sub.deny(req.getSubIds(subName).iterator(), true);
 
         consM = sub.deliver();
+        
+        //JORAM_PERF_BRANCH
+        modifiedSubscription(sub);
+        
         if (consM != null && activeCtx.getActivated())
           doReply(consM);
         else if (consM != null)
@@ -2157,6 +2271,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
 
    XACnxPrepare prepare = activeCtx.getTxPrepare(xid);
+   
+   // JORAM_PERF_BRANCH
+   modifiedClient(activeCtx);
 
     if (prepare != null) {
       Vector acks = prepare.getAcks();
@@ -2206,6 +2323,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         try {
           txs.remove();
           activeCtx.registerTxPrepare(xid, (XACnxPrepare) txEntry.getValue());
+          
+          // JORAM_PERF_BRANCH
+          modifiedClient(activeCtx);
+          
         }
         catch (Exception exc) {
           throw new StateException("Recovered transaction branch has already been prepared by the RM.");
@@ -2351,6 +2472,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
       if (sub.getDurable()) {
         sub.deactivate(true);
+        
+        //JORAM_PERF_BRANCH
+        modifiedSubscription(sub);
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Durable subscription" + subName + " de-activated.");
@@ -2396,6 +2520,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     for (Iterator dests = activeCtx.getTempDestinations(); dests.hasNext();) {
       destId = (AgentId) dests.next();
       activeCtx.removeTemporaryDestination(destId);
+      
+      // JORAM_PERF_BRANCH
+      modifiedClient(activeCtx);
+      
       deleteTemporaryDestination(destId);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -2415,6 +2543,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
       recoveredPrepare = (XACnxPrepare) recoveredTransactions.get(xid);
       prepare = activeCtx.getTxPrepare(xid);
+      
+      // JORAM_PERF_BRANCH
+      modifiedClient(activeCtx);
 
       if (recoveredPrepare == null)
         recoveredTransactions.put(xid, prepare);
@@ -2448,6 +2579,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     if (sub.getActive() > 0 ) {
       ConsumerMessages consM = sub.deliver();
+      
+      //JORAM_PERF_BRANCH
+      modifiedSubscription(sub);
       
       if (consM != null) {
         try {
@@ -2520,6 +2654,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           
           if (sub != null) {
             sub.acknowledge(sar.getIds().iterator());
+            
+            //JORAM_PERF_BRANCH
+            modifiedSubscription(sub);
+            
             // TODO (AF): is it needed to save the proxy ?
             // if (sub.getDurable())
             
@@ -2626,6 +2764,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (rep.getSize() > 0) {
           jRep = new ConsumerMessages(rep.getCorrelationId(), rep.getMessages(), from.toString(), true);
           activeCtx.addDeliveringQueue(from);
+          
+          // JORAM_PERF_BRANCH
+          modifiedClient(activeCtx);
+          
         } else {
           jRep = new ConsumerMessages(rep.getCorrelationId(), (Vector) null, from.toString(), true);
         }
@@ -2733,6 +2875,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
       // Browsing the delivered messages.
       sub.browseNewMessages(messages);
+      
+      // JORAM_PERF_BRANCH
+      modifiedSubscription(sub);
     }
 
     // Save message if it is delivered to a durable subscription.
@@ -2767,6 +2912,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       // If the subscription is active, launching a delivery sequence.
       if (sub.getActive() > 0 ) {
         ConsumerMessages consM = sub.deliver();
+        
+        //JORAM_PERF_BRANCH
+        modifiedSubscription(sub);
         
         if (consM != null) {
           try {
@@ -3021,8 +3169,13 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       else
         dmqId = null;
 
-      for (Iterator subs = subsTable.values().iterator(); subs.hasNext();)
-        ((ClientSubscription) subs.next()).setDMQId(dmqId);
+      for (Iterator subs = subsTable.values().iterator(); subs.hasNext();) {
+        ClientSubscription cs =  ((ClientSubscription) subs.next());
+        cs.setDMQId(dmqId);
+        
+        // JORAM_PERF_BRANCH
+        modifiedSubscription(cs);
+      }
 
       replyToTopic(new AdminReply(true, null), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof SetThresholdRequest) {
@@ -3040,6 +3193,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
         if (sub != null) {
           sub.setThreshold(threshold);
+          
+          // JORAM_PERF_BRANCH
+          modifiedSubscription(sub);
+          
           reply = new AdminReply(true, null);
         } else {
           reply = new AdminReply(AdminReply.NAME_UNKNOWN, "Subscription unknow: " + subName);
@@ -3266,6 +3423,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
     if (cs != null) {
       cs.deleteMessage(request.getMessageId());
+      
+      //JORAM_PERF_BRANCH
+      modifiedSubscription(cs);
+      
       replyToTopic(new AdminReply(true, null), replyTo, requestMsgId, replyMsgId);
     } else {
       replyToTopic(new AdminReply(false, "Subscription not found: " + request.getSubscriptionName()),
@@ -3285,6 +3446,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     ClientSubscription cs = (ClientSubscription) subsTable.get(subName);
     if (cs != null) {
       cs.deleteMessage(msgId);
+      
+      //JORAM_PERF_BRANCH
+      modifiedSubscription(cs);
     }
   }
   
@@ -3296,6 +3460,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
     if (cs != null) {
       cs.clear();
+      
+      // JORAM_PERF_BRANCH
+      modifiedSubscription(cs);
+      
       replyToTopic(new AdminReply(true, null), replyTo, requestMsgId, replyMsgId);
     } else {
       replyToTopic(new AdminReply(false, "Subscription not found: " + request.getSubscriptionName()),
