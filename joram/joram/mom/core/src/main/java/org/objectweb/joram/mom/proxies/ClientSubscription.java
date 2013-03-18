@@ -50,6 +50,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.serialize.EncodedString;
 import fr.dyade.aaa.util.TransactionObject;
@@ -282,6 +283,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
   public String getName() {
     return name.getString();
   }
+  
+  //JORAM_PERF_BRANCH
+  public EncodedString getEncodedName() {
+    return name;
+  }
 
   /** Returns the identifier of the subscription topic. */
   public AgentId getTopicId() {
@@ -340,6 +346,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
   
   void setProxyAgent(ProxyAgentItf px) {
     proxy = px;
+    
+    // JORAM_PERF_BRANCH
+    proxyId = px.getId();
   }
   
   /**
@@ -943,7 +952,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
    * Decreases the subscription's messages acknowledgement expectations,
    * deletes those not to be consumed anymore.
    */
-  void delete() {
+  //JORAM_PERF_BRANCH
+  void deleteMessages() {
     messageIds.addAll(deliveredIds.keySet());
 
     for (Iterator allMessageIds = messageIds.iterator(); allMessageIds.hasNext();) {
@@ -1084,9 +1094,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     }
   }
   
+  /* JORAM_PERF_BRANCH
   private void save() {
     if (durable) proxy.setSave();
   }
+  */
 
   void cleanMessageIds() {
     messageIds.retainAll(messagesTable.keySet());
@@ -1129,7 +1141,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     os.writeInt(nbMaxMsg);
     os.writeLong(nbMsgsDeliveredSinceCreation);
     os.writeLong(nbMsgsSentToDMQSinceCreation);
-    proxyId.encodeTransactionObject(os);
+    
+    //proxyId.encodeTransactionObject(os);
+    
     if (selector == null) {
       os.writeBoolean(true);
     } else {
@@ -1177,8 +1191,10 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     nbMaxMsg = is.readInt();
     nbMsgsDeliveredSinceCreation = is.readLong();
     nbMsgsSentToDMQSinceCreation = is.readLong();
-    proxyId = new AgentId((short) 0, (short) 0, 0);
-    proxyId.decodeTransactionObject(is);
+    
+    //proxyId = new AgentId((short) 0, (short) 0, 0);
+    //proxyId.decodeTransactionObject(is);
+    
     isNull = is.readBoolean();
     if (isNull) {
       selector = null;
@@ -1199,6 +1215,41 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
       return new ClientSubscription();
     }
     
+  }
+  
+  //JORAM_PERF_BRANCH
+  public transient String txname;
+  
+  public void save() {
+    if (! durable) return;
+    
+    try {
+      AgentServer.getTransaction().create(this, getTxName());
+    } catch (IOException exc) {
+      logger.log(BasicLevel.ERROR, "ClientSubscription named [" + txname
+          + "] could not be saved", exc);
+    }
+  }
+  
+  //JORAM_PERF_BRANCH
+  public void delete() {
+    if (! durable) return;
+    
+    AgentServer.getTransaction().delete(getTxName());
+  }
+  
+  //JORAM_PERF_BRANCH
+  private String getTxName() {
+    if (txname == null) {
+      txname = getTransactionPrefix(proxyId);
+    }
+    return txname;
+  }
+  
+  //JORAM_PERF_BRANCH
+  public static String getTransactionPrefix(AgentId proxyId) {
+    StringBuffer subscriptionContextPrefix = new StringBuffer(19).append("CS").append(proxyId.toString()).append('_');
+    return subscriptionContextPrefix.toString();
   }
 
 }

@@ -39,6 +39,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.serialize.EncodedString;
 import fr.dyade.aaa.util.TransactionObject;
@@ -85,6 +86,9 @@ class ClientContext implements java.io.Serializable, TransactionObject {
   private transient ProxyAgentItf proxy;
   
   // JORAM_PERF_BRANCH
+  public transient String txname;
+  
+  // JORAM_PERF_BRANCH
   public ClientContext() {}
 
   /**
@@ -108,6 +112,9 @@ class ClientContext implements java.io.Serializable, TransactionObject {
   
   void setProxyAgent(ProxyAgentItf px) {
     proxy = px;
+    
+    // JORAM_PERF_BRANCH
+    proxyId = px.getId();
   }
  
   /** Returns the identifier of the context. */
@@ -348,7 +355,9 @@ class ClientContext implements java.io.Serializable, TransactionObject {
       // not useful to encode the value
     }
     os.writeInt(id);
-    proxyId.encodeTransactionObject(os);
+    
+    //proxyId.encodeTransactionObject(os);
+    
     os.writeInt(tempDestinations.size());
     for (AgentId tempDestination : tempDestinations) {
       tempDestination.encodeTransactionObject(os);
@@ -383,8 +392,10 @@ class ClientContext implements java.io.Serializable, TransactionObject {
       deliveringQueues.put(key, key);
     }
     id = is.readInt();
-    AgentId proxyId = new AgentId((short) 0, (short) 0, 0); 
-    proxyId.decodeTransactionObject(is);
+    
+    //AgentId proxyId = new AgentId((short) 0, (short) 0, 0); 
+    //proxyId.decodeTransactionObject(is);
+    
     int tempDestinationsSize = is.readInt();
     tempDestinations = new Vector<AgentId>(tempDestinationsSize);
     for (int i = 0; i < tempDestinationsSize; i++) {
@@ -402,6 +413,35 @@ class ClientContext implements java.io.Serializable, TransactionObject {
       return new ClientContext();
     }
     
+  }
+  
+  // JORAM_PERF_BRANCH
+  public void save() {
+    try {
+      AgentServer.getTransaction().create(this, getTxName());
+    } catch (IOException exc) {
+      logger.log(BasicLevel.ERROR, "ClientContext named [" + txname
+          + "] could not be saved", exc);
+    }
+  }
+  
+  //JORAM_PERF_BRANCH
+  public void delete() {
+    AgentServer.getTransaction().delete(getTxName());
+  }
+  
+  //JORAM_PERF_BRANCH
+  private String getTxName() {
+    if (txname == null) {
+      txname = getTransactionPrefix(proxyId);
+    }
+    return txname;
+  }
+  
+  // JORAM_PERF_BRANCH
+  public static String getTransactionPrefix(AgentId proxyId) {
+    StringBuffer clientContextPrefix = new StringBuffer(19).append("CC").append(proxyId.toString()).append('_');
+    return clientContextPrefix.toString();
   }
   
 }
