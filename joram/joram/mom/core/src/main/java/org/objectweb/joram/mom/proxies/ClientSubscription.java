@@ -1241,7 +1241,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
   //JORAM_PERF_BRANCH
   private String getTxName() {
     if (txname == null) {
-      txname = getTransactionPrefix(proxyId);
+      txname = getTransactionPrefix(proxyId) + name.getString();
     }
     return txname;
   }
