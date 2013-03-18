@@ -433,7 +433,7 @@ class ClientContext implements java.io.Serializable, TransactionObject {
   //JORAM_PERF_BRANCH
   private String getTxName() {
     if (txname == null) {
-      txname = getTransactionPrefix(proxyId);
+      txname = getTransactionPrefix(proxyId) + id;
     }
     return txname;
   }
