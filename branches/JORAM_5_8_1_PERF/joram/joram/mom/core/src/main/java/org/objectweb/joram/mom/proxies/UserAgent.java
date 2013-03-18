@@ -34,6 +34,7 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -152,6 +153,7 @@ import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.WakeUpTask;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.serialize.EncodedString;
+import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.TransactionObjectFactory;
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -930,6 +932,35 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     topicsTable = new Hashtable();
     messagesTable = new Hashtable();
     
+    // JORAM_PERF_BRANCH
+    contexts = new Hashtable<Integer, ClientContext>();
+    subsTable = new Hashtable<EncodedString, ClientSubscription>();
+    
+    // JORAM_PERF_BRANCH
+    Transaction tx = AgentServer.getTransaction();
+    String[] persistedClientNames = tx.getList(ClientContext.getTransactionPrefix(getId()));
+    for (int i = 0; i < persistedClientNames.length; i++) {
+      try {
+        ClientContext cc = (ClientContext) tx.load(persistedClientNames[i]);
+        cc.txname = persistedClientNames[i];
+        contexts.put(cc.getId(), cc);
+      } catch (Exception exc) {
+        logger.log(BasicLevel.ERROR, "ClientContext named [" + persistedClientNames[i]
+            + "] could not be loaded", exc);
+      }
+    }
+    String[] persistedSubscriptionNames = tx.getList(ClientSubscription.getTransactionPrefix(getId()));
+    for (int i = 0; i < persistedSubscriptionNames.length; i++) {
+      try {
+        ClientSubscription cs = (ClientSubscription) tx.load(persistedSubscriptionNames[i]);
+        cs.txname = persistedSubscriptionNames[i];
+        subsTable.put(cs.getEncodedName(), cs);
+      } catch (Exception exc) {
+        logger.log(BasicLevel.ERROR, "ClientSubscription named [" + persistedSubscriptionNames[i]
+            + "] could not be loaded", exc);
+      }
+    }
+
     setActiveCtxId(-1);
     
     // Re-initializing after a crash or a server stop.
@@ -1444,12 +1475,16 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    */
   private void doReact(int key, CnxConnectRequest req) throws DestinationException {
     // state change, so save.
-    setSave();
+    // JORAM_PERF_BRANCH: now the CLientContext is separately stored
+    // setSave();
 
     setActiveCtxId(key);
     activeCtx = new ClientContext(getId(), key);
     activeCtx.setProxyAgent(this);
     contexts.put(new Integer(key), activeCtx);
+    
+    // JORAM_PERF_BRANCH
+    activeCtx.save();
     
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Connection " + key + " opened.");
@@ -1622,6 +1657,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       
       // JORAM_PERF_BRANCH
       subsTable.put(encodedSubName, cSub);
+      cSub.save();
       
       try {
         MXWrapper.registerMBean(cSub, getSubMBeanName(subName));
@@ -1795,9 +1831,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     updateSubscriptionToTopic(topicId, -1, -1, tSub.isDurable());
 
     // Deleting the subscription.
+    sub.deleteMessages();
+    
+    // JORAM_PERF_BRANCH
     sub.delete();
+    
     activeCtx.removeSubName(encodedSubName);
     subsTable.remove(encodedSubName);
+
     try {
       MXWrapper.unregisterMBean(getSubMBeanName(subName));
     } catch (Exception e) {
@@ -2317,8 +2358,12 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> topicsTable = " + topicsTable);
 
-        sub.delete();
+        sub.deleteMessages();
         subsTable.remove(subName);
+        
+        // JORAM_PERF_BRANCH
+        sub.delete();
+        
         try {
           MXWrapper.unregisterMBean(getSubMBeanName(subName.getString()));
         } catch (Exception e) {
@@ -2380,7 +2425,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
 
     // Finally, deleting the context:
-    contexts.remove(new Integer(key));
+    ClientContext cc = contexts.remove(new Integer(key));
+    
+    // JORAM_PERF_BRANCH
+    cc.delete();
+    
     activeCtx = null;
     setActiveCtxId(-1);
 
@@ -2766,7 +2815,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
           }
-          sub.delete();
+          sub.deleteMessages();
 
           try {
             setCtx(sub.getContextId());
@@ -2842,6 +2891,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
         }
+        sub.deleteMessages();
+        
+        // JORAM_PERF_BRANCH
         sub.delete();
 
         try {
@@ -3412,7 +3464,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       ClientSubscription sub = (ClientSubscription) subEntry.getValue();
 
       // Deleting the subscription.
-      sub.delete();
+      sub.deleteMessages();
       try {
         MXWrapper.unregisterMBean(getSubMBeanName(subName));
       } catch (Exception e) {
@@ -3502,6 +3554,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   public void encodeTransactionObject(DataOutputStream os) throws IOException {
     super.encodeTransactionObject(os);
     os.writeLong(arrivalsCounter);
+    
+    /*
     os.writeInt(contexts.size());
     Iterator<Entry<Integer, ClientContext>> contextIterator = contexts.entrySet().iterator();
     while (contextIterator.hasNext()) {
@@ -3509,6 +3563,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       os.writeInt(context.getKey());
       context.getValue().encodeTransactionObject(os);
     }
+    */
+    
     if (dmqId == null) {
       os.writeBoolean(true);
     } else {
@@ -3522,6 +3578,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     os.writeLong(nbMsgsSentToDMQSinceCreation);
     os.writeLong(period);
     // TODO: recoveredTransactions
+    
+    /*
     os.writeInt(subsTable.size());
     Iterator<Entry<EncodedString, ClientSubscription>> subsTableIterator = subsTable.entrySet().iterator();
     while (subsTableIterator.hasNext()) {
@@ -3530,6 +3588,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       context.getKey().writeTo(os);
       context.getValue().encodeTransactionObject(os);
     }
+    */
+    
     os.writeInt(threshold); 
   }
   
@@ -3537,6 +3597,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   public void decodeTransactionObject(DataInputStream is) throws IOException {
     super.decodeTransactionObject(is);
     arrivalsCounter = is.readLong();
+    
+    /*
     int contextsSize = is.readInt();
     contexts = new Hashtable<Integer, ClientContext>(contextsSize);
     for (int i = 0; i < contextsSize; i++) {
@@ -3545,7 +3607,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       value.decodeTransactionObject(is);
       contexts.put(key, value);
     }
-    logger.log(BasicLevel.ERROR, " contexts = " + contexts);
+    */
+    
     boolean isNull = is.readBoolean();
     if (isNull) {
       dmqId = null;
@@ -3563,6 +3626,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     period = is.readLong();
     // TODO: recoveredTransactions
     recoveredTransactions = null;
+    
+    /*
     int subsTableSize = is.readInt();
     subsTable = new Hashtable<EncodedString, ClientSubscription>(subsTableSize);
     for (int i = 0; i < subsTableSize; i++) {
@@ -3574,6 +3639,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       value.decodeTransactionObject(is);
       subsTable.put(key, value);
     }
+    */
+    
     threshold = is.readInt(); 
   }
   
