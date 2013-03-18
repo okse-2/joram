@@ -147,7 +147,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
    * <p>
    *  This property can be set only at first launching.
    */
-  static int nbLogFile = 4;
+  static int nbLogFileMax = 4;
   
   /**
    * Returns the number of rolled log files.
@@ -155,7 +155,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
    * @return The number of rolled log files.
    */
   public final int getNbLogFiles() {
-    return nbLogFile;
+    return nbLogFileMax;
   }
 
   /**
@@ -335,10 +335,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
   
   private static int maxGarbageCount;
   
+  private static int maxWriteBeforeSyncCount;
+  
   public final void initRepository() throws IOException {
     LogMemoryCapacity = getInteger("Transaction.LogMemoryCapacity", LogMemoryCapacity).intValue();
     MaxLogFileSize = getInteger("Transaction.MaxLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
-    nbLogFile = getInteger("Transaction.NbLogFile", nbLogFile).intValue();
+    nbLogFileMax = getInteger("Transaction.NbLogFile", nbLogFileMax).intValue();
     minObjInLog = getInteger("Transaction.minObjInLog", minObjInLog).intValue();
     syncTimeout = getInteger("Transaction.syncTimeout", 3000000).intValue();
     asyncLogWriter = getBoolean("Transaction.asyncLogWriter");
@@ -347,10 +349,13 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     Operation.initPool(LogThresholdOperation);
     
     maxGarbageCount = getInteger("Transaction.MaxGarbageCount", 5).intValue();
+    maxWriteBeforeSyncCount = getInteger("Transaction.MaxWriteBeforeSyncCount", 10).intValue();
 
     if (asyncLogWriter) {
       executorService = Executors.newSingleThreadScheduledExecutor(new LogFileWriterThreadFactory());
       executorService.scheduleWithFixedDelay(logFileWriter, 5, 5, TimeUnit.MILLISECONDS);
+      //executorService.scheduleWithFixedDelay(logFileWriter, syncTimeout, syncTimeout, TimeUnit.NANOSECONDS);
+      
     }
     
     try {
@@ -677,6 +682,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     }
     
     public void run() {
+      int currentWriteCount = 0;
       try {
         if (error != null) {
           logmon.log(BasicLevel.ERROR,
@@ -724,8 +730,15 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
             // logmon.log(BasicLevel.DEBUG, "*** write");
             currentLogFile.write(buffer);
             writeCount++;
+            currentWriteCount++;
             pendingSync = true;
             toValidate.add(writeCtx);
+            
+            if (currentWriteCount > maxWriteBeforeSyncCount) {
+              syncCurrentLog();
+              currentWriteCount = 0;
+            }
+            
           } else {
             error = new Exception("No more garbage");
             logmon.log(BasicLevel.ERROR, "Error raised by: " + ctx, error);
@@ -751,6 +764,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     }
     
     public void offer(LogFileContext ctx) throws IOException {
+     /*
+      if (error != null) throw new IOException("LogFileWriter stopped because of: " + error);
+      //logmon.log(BasicLevel.WARN, "*** offer");
+      contexts.offer(ctx);
+      */
+      
       synchronized (contexts) {
         if (error != null) throw new IOException("LogFileWriter stopped because of: " + error);
         //logmon.log(BasicLevel.WARN, "*** offer");
@@ -760,6 +779,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           executorService.execute(this);
         }
       }
+  
     }
     
   }
@@ -861,7 +881,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     int logidx;
     
     /** log file */
-    LogFile[] circularLogFile = null;
+    List<LogFile> circularLogFile;
     
     //private Hashtable<Integer, LogFile> existingLogFiles;
 
@@ -919,9 +939,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     // JORAM_PERF_BRANCH
     private boolean syncOnWrite;
     
+    private int nbLogFile;
+    
     LogManager(File dir, Repository repository,
                boolean useLockFile, boolean syncOnWrite) throws IOException {
       this.repository = repository;
+      nbLogFile = nbLogFileMax;
       
       if (useLockFile) {
         lockFile = new File(dir, LockPathname);
@@ -943,7 +966,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       long start = System.currentTimeMillis();
       
       logidx = -1;
-      circularLogFile = new LogFile[nbLogFile];
+      circularLogFile = new ArrayList<LogFile>(nbLogFile);
       //existingLogFiles = new Hashtable<Integer, NGAsyncTransaction.LogFile>();
       
       this.dir = dir ;
@@ -984,7 +1007,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
             
             // The index of current log is the bigger index of log with 'live' operations. 
             logidx = idx[i];
-            circularLogFile[logidx%nbLogFile] = logf;
+            circularLogFile.add(logf);
             // current is fixed after the log reading
             
             recordLoop:
@@ -997,7 +1020,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
               String name;
               operationLoop:
               while (true) {
-                int optype = circularLogFile[logidx%nbLogFile].read();
+                int optype = logf.read();
                 if ((optype != Operation.CREATE) &&
                     (optype != Operation.SAVE) &&
                     (optype != Operation.DELETE)) {
@@ -1010,19 +1033,19 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                 
                 //logmon.log(BasicLevel.ERROR, "optype=" + optype);
                 
-                int ptr = (int) circularLogFile[logidx%nbLogFile].getFilePointer() -1;
+                int ptr = (int) logf.getFilePointer() -1;
                 
                 //logmon.log(BasicLevel.ERROR, "ptr=" + ptr);
                 
-                circularLogFile[logidx%nbLogFile].logCounter += 1;
+                logf.logCounter += 1;
                 //  Gets all operations of one committed transaction then
                 // adds them to specified log.
-                dirName = circularLogFile[logidx%nbLogFile].readUTF();
+                dirName = logf.readUTF();
                 
                 //logmon.log(BasicLevel.ERROR, "dirName=" + dirName);
                 
                 if (dirName.length() == 0) dirName = null;
-                name = circularLogFile[logidx%nbLogFile].readUTF();
+                name = logf.readUTF();
                 
                 //logmon.log(BasicLevel.ERROR, "name=" + name);
 
@@ -1040,8 +1063,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                   // JORAM_PERF_BRANCH: need to avoid to 'getFromLog' in the current log
                   // Simple solution: reload everything
                   // logFile[logidx%nbLogFile].skipBytes(logFile[logidx%nbLogFile].readInt());
-                  opValue = new byte[circularLogFile[logidx%nbLogFile].readInt()];
-                  circularLogFile[logidx%nbLogFile].readFully(opValue);
+                  opValue = new byte[logf.readInt()];
+                  logf.readFully(opValue);
                 } else {
                   opValue = null;
                 }
@@ -1052,7 +1075,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 //                           "NGTransaction.LogManager, OPERATION=" + optype + ", " + name + " buf=" + Arrays.toString(buf));
                 
                 // JORAM_PERF_BRANCH
-                long commitLogId = circularLogFile[logidx%nbLogFile].readLong();
+                long commitLogId = logf.readLong();
                 //logmon.log(BasicLevel.ERROR, "commitLogId=" + commitLogId);
                 if (commitLogId != logf.logTag) {
                   //logmon.log(BasicLevel.ERROR, "*** STOP ***");
@@ -1062,7 +1085,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                 Operation old = mainLog.get(key);
                 //logmon.log(BasicLevel.ERROR, "old=" + old);
                 if (old != null) {
-                  circularLogFile[old.logidx%nbLogFile].logCounter -= 1;
+                  logf.logCounter -= 1;
 
                   // There is 6 different cases:
                   //
@@ -1097,7 +1120,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                         
                         //old.free();
                         
-                        circularLogFile[logidx%nbLogFile].logCounter -= 1;
+                        logf.logCounter -= 1;
                       } else {
                         //logmon.log(BasicLevel.WARN, "DELETE");
                         // The operation is a save, overload it.
@@ -1128,7 +1151,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
             
             //logmon.log(BasicLevel.ERROR, "mainLog=" + mainLog);
 
-            current = (int) circularLogFile[logidx%nbLogFile].getFilePointer();
+            current = (int) logf.getFilePointer();
             if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG, "NGTransaction.LogManager, END#" + logidx);
 
@@ -1145,11 +1168,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                    "NGTransaction.LogManager, log=" + Arrays.toString(mainLog.values().toArray()));
       }
       
-      if (circularLogFile[logidx%nbLogFile] == null) {
+      if (logidx + 1 > circularLogFile.size()) {
         // Creates a log file
-        circularLogFile[logidx%nbLogFile] = new LogFile(dir, logidx, syncOnWrite);
-        circularLogFile[logidx%nbLogFile].open();
-        circularLogFile[logidx%nbLogFile].setLength(MaxLogFileSize);
+        LogFile logf = new LogFile(dir, logidx, syncOnWrite);
+        circularLogFile.add(logf);
+        logf.open();
+        logf.setLength(MaxLogFileSize);
 
         // Initializes the log file
         
@@ -1158,8 +1182,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         //logFile[logidx%nbLogFile].write(Operation.END);
         
         // JORAM_PERF_BRANCH
-        circularLogFile[logidx%nbLogFile].logTag = System.currentTimeMillis();
-        circularLogFile[logidx%nbLogFile].reset(circularLogFile[logidx%nbLogFile].logTag);
+        logf.logTag = System.currentTimeMillis();
+        logf.reset(logf.logTag);
         current = 8;
       }
       
@@ -1239,45 +1263,53 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       
       boolean garbageRequired = current + sizeToAllocate > MaxLogFileSize;
       
+      LogFile logFile;
       if (garbageRequired) {
         if (logmon.isLoggable(BasicLevel.DEBUG)) {
-          for (int i = 0; i < nbLogFile; i++)
-            if (circularLogFile[i] != null)
-              logmon.log(BasicLevel.DEBUG, "logCounter[" + circularLogFile[i].logidx
-                  + "]=" + circularLogFile[i].logCounter);
+          for (LogFile logf : circularLogFile) {
+            logmon.log(BasicLevel.DEBUG, "logCounter[" + logf.logidx
+                  + "]=" + logf.logCounter);
+          }
           logmon.log(BasicLevel.DEBUG, "log -> " + mainLog.size());
         }
 
         logidx += 1;
         
-        LogFile oldLogFile = circularLogFile[logidx % nbLogFile];
-        
         // Creates and initializes a new log file
         LogFile newLogFile = new LogFile(dir, logidx, syncOnWrite);
-        circularLogFile[logidx % nbLogFile] = newLogFile;
-        //existingLogFiles.put(logidx, newLogFile);
         
-        // Don't open the LogFile as it may be be opened concurrently by the LogFileWriter
-        
-        // long logFileId;
-        if (oldLogFile != null) {
-          
-          // !!! seems useless:
-          //logFileId = logFile[logidx % nbLogFile].logId;
-          
-          // The log file is an older one, garbage it before using it again.
-          garbage(oldLogFile, circularLogFile[logidx % nbLogFile], logFileWriter);
+        if ((logidx % nbLogFile) < circularLogFile.size()) {
+          LogFile oldLogFile = circularLogFile.get(logidx % nbLogFile);
+
+          if (oldLogFile.canBeGarbaged()) {
+            garbage(oldLogFile, newLogFile);
+            circularLogFile.set(logidx % nbLogFile, newLogFile);
+            
+            if (circularLogFile.size() > nbLogFileMax) {
+              int index = (logidx + 1) % nbLogFile;
+              LogFile extraLogFile = circularLogFile.get(index);
+              garbage(extraLogFile, newLogFile);
+              circularLogFile.remove(index);
+              nbLogFile -= 1;
+            }
+                
+          } else {
+            // Increase the circular log size
+            nbLogFile += 1;
+            newLogFile.open();
+            newLogFile.setLength(MaxLogFileSize);
+            newLogFile.logTag = System.currentTimeMillis();
+            newLogFile.reset(newLogFile.logTag);
+            current = 8;
+            circularLogFile.add(newLogFile);
+          }
         } else {
-          circularLogFile[logidx%nbLogFile] = new LogFile(dir, logidx, syncOnWrite);
-          circularLogFile[logidx%nbLogFile].open();
-          circularLogFile[logidx%nbLogFile].setLength(MaxLogFileSize);
-          circularLogFile[logidx%nbLogFile].logTag = System.currentTimeMillis();
-          circularLogFile[logidx%nbLogFile].reset(circularLogFile[logidx%nbLogFile].logTag);
+          newLogFile.open();
+          newLogFile.setLength(MaxLogFileSize);
+          newLogFile.logTag = System.currentTimeMillis();
+          newLogFile.reset(newLogFile.logTag);
           current = 8;
-          
-          // only for the first n-1 logs?
-          // also seems useless
-          //logFileId = 0;
+          circularLogFile.add(newLogFile);
         }
 
         // !!! seems useless:
@@ -1296,6 +1328,9 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         
         // Need to add the log id
         sizeToAllocate += 8;
+        logFile = newLogFile;
+      } else {
+        logFile = circularLogFile.get(logidx % nbLogFile);
       }
       
       // JORAM_PERF_BRANCH: can't reuse the same ByteArrayOutputStream because
@@ -1303,9 +1338,9 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       OpenByteArrayOutputStream baos = new OpenByteArrayOutputStream(
           sizeToAllocate);
       
-      if (circularLogFile[logidx % nbLogFile].logTag == 0) {
+      if (logFile.logTag == 0) {
         long newLogId = System.currentTimeMillis();
-        circularLogFile[logidx % nbLogFile].logTag = newLogId;
+        logFile.logTag = newLogId;
         writeLong(newLogId, baos);
       }
       
@@ -1357,14 +1392,14 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         op.value = null;
         
         // JORAM_PERF_BRANCH
-        writeLong(circularLogFile[logidx%nbLogFile].logTag, baos);
+        writeLong(logFile.logTag, baos);
 
         // Reports all committed operation in current log
         Operation old = mainLog.put(key, op);
-        circularLogFile[logidx % nbLogFile].logCounter += 1;
+        logFile.logCounter += 1;
 
         if (old != null) {
-          circularLogFile[old.logidx % nbLogFile].logCounter -= 1;
+          logFile.logCounter -= 1;
           
           // There are 6 different cases:
           //
@@ -1391,7 +1426,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
               
               //op.free();
               
-              circularLogFile[logidx % nbLogFile].logCounter -= 1;
+              logFile.logCounter -= 1;
             }
           }
           //old.free();
@@ -1412,12 +1447,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
       if (logFileWriter != null) {
         LogFileWriteContext writeContex = new LogFileWriteContext(
-          circularLogFile[logidx % nbLogFile], buffer, callback);
+            logFile, buffer, callback);
         logFileWriter.offer(writeContex);
       } else {
-        circularLogFile[logidx % nbLogFile].open();
-        circularLogFile[logidx % nbLogFile].write(buffer);
-        circularLogFile[logidx % nbLogFile].sync(false);
+        logFile.open();
+        logFile.write(buffer);
+        logFile.sync(false);
         if (callback != null) {
           callback.run();
         }
@@ -1442,7 +1477,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
           if (op.value == null) {
             // reads the value from the log file
             
-            LogFile opLogFile = circularLogFile[op.logidx % nbLogFile];
+            LogFile opLogFile = circularLogFile.get(op.logidx % nbLogFile);
             
             if (opLogFile == null) {
               return getFromLog(opLogFile, op);
@@ -1558,15 +1593,14 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     
     public String logCounters() {
       StringBuffer strbuf = new StringBuffer();
-      for (int i=0; i<circularLogFile.length; i++) {
-        if (circularLogFile[i] == null) continue;
-        strbuf.append("log#").append(circularLogFile[i].logidx).append(" -> ").append(circularLogFile[i].logCounter).append('\n');
+      for (LogFile logf : circularLogFile) {
+        strbuf.append("log#").append(logf.logidx).append(" -> ").append(logf.logCounter).append('\n');
       }
       return strbuf.toString();
     }
 
     public String logContent(int idx) {
-      LogFile logf = circularLogFile[idx%nbLogFile];
+      LogFile logf = circularLogFile.get(idx%nbLogFile);
       if (logf == null) return null;
 
       StringBuffer strbuf = new StringBuffer();
@@ -1610,15 +1644,11 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
      * @param oldLog The log file to garbage.
      * @throws IOException
      */
-    private final void garbage(LogFile oldLog, LogFile newLog, LogFileWriter logFileWriter) throws IOException {
+    private final void garbage(LogFile oldLog, LogFile newLog) throws IOException {
       //logmon.log(BasicLevel.WARN, "Garbage: log#" + logf);
       //logmon.log(BasicLevel.WARN, "logidx=" + logidx);
       //logmon.log(BasicLevel.ERROR, "mainLog=" + mainLog);
       //logmon.log(BasicLevel.WARN, "Log content" + logContent(logf.logidx));
-      
-      if (oldLog == null) return;
-
-      oldLog.waitCanBeGarbaged();
 
       garbageCount += 1;
       long start = System.currentTimeMillis();
@@ -1719,19 +1749,27 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       //logmon.log(BasicLevel.ERROR, "doGarbage(" + oldLog.logidx + ',' +  newLog.logidx + ',' + garbagedOperations);
       
       // Create new log
-      if (newLog.getFile().exists()) {
-        // This is a recycled log file
-        newLog.open();
-      } else {
-        // This is a new log file
-        newLog.open();
-        newLog.setLength(MaxLogFileSize);
-        newLog.reset();
+      if (newLog.logTag == 0) {
+        if (newLog.getFile().exists()) {
+          // This is a recycled log file
+          newLog.open();
+        } else {
+          // This is a new log file
+          newLog.open();
+          newLog.setLength(MaxLogFileSize);
+          newLog.reset();
+        }
+        current = 0;
       }
-      current = 0;
+      //else:
+      // This is the garbage of an extra log file
       
       if (garbagedOperations.size() > 0) {
-        int sizeToAllocate = 8; // log id
+        int sizeToAllocate = 0;
+        
+        if (newLog.logTag == 0) {
+          sizeToAllocate += 8; // log id
+        }
 
         oldLog.open();
         for (Operation op : garbagedOperations) {
@@ -1764,9 +1802,11 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         OpenByteArrayOutputStream baos = new OpenByteArrayOutputStream(
             sizeToAllocate);
         
-        long newLogTag = System.currentTimeMillis();
-        newLog.logTag = newLogTag;
-        writeLong(newLogTag, baos);
+        if (newLog.logTag == 0) {
+          long newLogTag = System.currentTimeMillis();
+          newLog.logTag = newLogTag;
+          writeLong(newLogTag, baos);
+        }
         
         baos.write(Operation.COMMIT);
         
@@ -1830,9 +1870,10 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       }
 
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        for (int i=0; i<circularLogFile.length; i++)
-          if (circularLogFile[i] != null)
-            logmon.log(BasicLevel.DEBUG, "logCounter[" + i + "]=" + circularLogFile[i].logCounter);
+        int i = 0;
+        for (LogFile logf : circularLogFile) {
+          logmon.log(BasicLevel.DEBUG, "logCounter[" + i++ + "]=" + logf.logCounter);
+        }
         logmon.log(BasicLevel.DEBUG, "log -> " + mainLog.size());
 
         for (Enumeration<Operation> e = mainLog.elements(); e.hasMoreElements();) {
@@ -1961,6 +2002,10 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       try {
         canBeGarbaged.await();
       } catch (InterruptedException e) {}
+    }
+    
+    public boolean canBeGarbaged() {
+      return (canBeGarbaged.getCount() == 0);
     }
     
     public void signalCanBeGarbaged() {
