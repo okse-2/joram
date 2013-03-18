@@ -29,6 +29,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.jms.JMSException;
 import javax.jms.MessageEOFException;
@@ -97,6 +100,11 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
     super(session, momMsg);
     
     try {
+      // JORAM_PERF_BRANCH
+      if (momMsg.compressed) {
+        momMsg.body = org.objectweb.joram.shared.messages.Message.uncompress(momMsg.body);
+        momMsg.compressed = false;
+      }
       inputStream = new DataInputStream(new ByteArrayInputStream(momMsg.body));
     } catch (Exception exc) {
       JMSException jE =
@@ -1035,6 +1043,12 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
       if (! RObody) {
         outputStream.flush();
         momMsg.body = outputBuffer.toByteArray();
+        
+        if (momMsg.body.length > org.objectweb.joram.shared.messages.Message.COMPRESSED_MIN_SIZE) {
+          momMsg.body = org.objectweb.joram.shared.messages.Message.compress(momMsg.body);
+          momMsg.compressed = true;
+        }
+        
         prepared = true;
       }
     } catch (IOException exc) {
