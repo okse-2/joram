@@ -41,6 +41,10 @@ import javax.jms.MessageNotWriteableException;
  * clearBody is called, the message can now be both read from and written to. 
  */
 public final class ObjectMessage extends Message implements javax.jms.ObjectMessage {
+  
+  // JORAM_PERF_BRANCH
+  private Serializable body;
+  
   /**
    * Instantiates a bright new <code>ObjectMessage</code>.
    */
@@ -92,10 +96,13 @@ public final class ObjectMessage extends Message implements javax.jms.ObjectMess
    *              body.
    */
   public Serializable getObject() throws MessageFormatException {
+    // JORAM_PERF_BRANCH
+    if (body != null) return body;
     if (momMsg.body == null) return null;
-
     try {
-      return momMsg.getObject();
+      // JORAM_PERF_BRANCH
+      body = momMsg.getObject();
+      return body;
     } catch (Exception exc) {
       throw new MessageFormatException("Error while deserializing the wrapped object: " + exc);
      }
