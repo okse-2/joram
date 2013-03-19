@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -71,7 +71,6 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
   public MonitoringTimerTask(long period, Properties attlist) {
     this.period = period;
     this.attlist = attlist;
-    
   }
   
   /**
