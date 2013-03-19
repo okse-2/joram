@@ -915,15 +915,15 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
       
       message = (Message) messagesTable.get(id);
       
+      // Message may be null if it is not valid anymore
+      if (message == null) continue denyLoop;
+      
       // JORAM_PERF_BRANCH
       if (message.isPersistent()) {
         //save();
         // JORAM_PERF_BRANCH
         isModified = true;
       }
-      
-      // Message may be null if it is not valid anymore
-      if (message == null) continue denyLoop;
       
       Integer value = (Integer) deniedMsgs.get(id);
       if (value != null)
