@@ -181,13 +181,14 @@ public abstract class AbstractTransaction extends BaseTransaction {
 
   public class Context {
     private Hashtable log = null;
-    private ByteArrayOutputStream bos = null;
-    private ObjectOutputStream oos = null;
+    // JORAM_PERF_BRANCH
+    public ByteArrayOutputStream bos = null;
+    public ObjectOutputStream oos = null;
 
     public final Hashtable getLog() {
       return log;
     }
-    
+
     Context() {
       log = new Hashtable<Object, Operation>(15);
       bos = new ByteArrayOutputStream(256);
@@ -271,9 +272,8 @@ public abstract class AbstractTransaction extends BaseTransaction {
   public final void save(Serializable obj,
                          String dirName, String name,
                          boolean first) throws IOException {
-    Context ctx = perThreadContext.get();
-    
-    // JORAM_PERF_BRANCH
+    // JORAM_PERF_BRANCH: moved in commit
+    /*
     if (obj instanceof TransactionObject) {
       TransactionObject to = (TransactionObject) obj;
       if (to.getClassId() != -1) {
@@ -289,24 +289,10 @@ public abstract class AbstractTransaction extends BaseTransaction {
     } else {
       serialize(obj, ctx);
     }
+    */
+    //saveInLog(ctx.bos.toByteArray(), dirName, name, ctx.log, false, first);
     
-    saveInLog(ctx.bos.toByteArray(), dirName, name, ctx.log, false, first);
-  }
-
-  //JORAM_PERF_BRANCH
-  private void serialize(Serializable obj, Context ctx) throws IOException {
-    if (ctx.oos == null) {
-      ctx.bos.reset();
-      ctx.bos.write(0);
-      ctx.oos = new ObjectOutputStream(ctx.bos);
-    } else {
-      ctx.oos.reset();
-      ctx.bos.reset();
-      ctx.bos.write(0);
-      ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
-    }
-    ctx.oos.writeObject(obj);
-    ctx.oos.flush();
+    saveInLog(obj, dirName, name, first);
   }
 
   /**
@@ -395,6 +381,13 @@ public abstract class AbstractTransaction extends BaseTransaction {
                                     Hashtable log,
                                     boolean copy,
                                     boolean first) throws IOException;
+  
+  // JORAM_PERF_BRANCH
+  protected void saveInLog(Serializable obj,
+      String dirName, String name,
+      boolean first) throws IOException {
+    
+  }
 
   /**
    * Load the specified object.
@@ -482,4 +475,10 @@ public abstract class AbstractTransaction extends BaseTransaction {
     // wake-up an eventually user's thread in begin
     notify();
   }
+  
+  // JORAM_PERF_BRANCH
+  public boolean containsOperations() {
+    return (perThreadContext.get().getLog().size() > 0);
+  }
+  
 }
