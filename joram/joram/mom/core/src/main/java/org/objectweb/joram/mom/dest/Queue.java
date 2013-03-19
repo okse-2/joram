@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -456,6 +456,10 @@ public class Queue extends Destination implements QueueMBean {
     return "Queue:" + getId().toString();
   }
 
+  long hprod, hcons;
+  int pload = -1;
+  int cload = -1;
+
   /**
    * wake up, and cleans the queue.
    */
@@ -465,8 +469,32 @@ public class Queue extends Destination implements QueueMBean {
     // Cleaning the possibly expired messages.
     DMQManager dmqManager = cleanPendingMessage(current);
     // If needed, sending the dead messages to the DMQ:
-    if (dmqManager != null)
-      dmqManager.sendToDMQ();
+    if (dmqManager != null) dmqManager.sendToDMQ();
+
+    long prod = getNbMsgsReceiveSinceCreation();
+    long cons = getNbMsgsDeliverSinceCreation();
+//    if ((hprod == 0) && (hcons == 0)) {
+//      hprod = prod;
+//      hcons = cons;
+//    }
+    pload = (pload + 2*(int)((1000L*(prod-hprod))/getPeriod()))/3;
+    cload = (cload + 2*(int)((1000L*(cons-hcons))/getPeriod()))/3;
+    hprod = prod;
+    hcons = cons;
+  }
+  
+  /**
+   * Return the average producer's load during last moments.
+   */
+  public long getProducerLoad() {
+    return pload;
+  }
+
+  /**
+   * Return the average consumer's load during last moments.
+   */
+  public long getConsumerLoad() {
+    return cload;
   }
 
   /**
@@ -953,8 +981,6 @@ public class Queue extends Destination implements QueueMBean {
   protected void doClientMessages(AgentId from, ClientMessages not, boolean throwsExceptionOnFullDest) throws AccessException {
     receiving = true;
     ClientMessages cm = null;
-    
-    nbMsgsReceiveSinceCreationBis += not.getMessages().size();
     
     // interceptors
     if (interceptorsAvailable()) {
@@ -1649,11 +1675,4 @@ public class Queue extends Destination implements QueueMBean {
 		
 		return stats;
 	}
-	
-	protected long nbMsgsReceiveSinceCreationBis = 0;
-	
-	public final long getNbMsgsReceiveSinceCreationBis() {
-		
-	    return nbMsgsReceiveSinceCreationBis;
-	  }
 }

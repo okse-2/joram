@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -79,6 +79,16 @@ public interface QueueMBean extends DestinationMBean {
 //   * @return the load averages for the past 15 minutes.
 //   */
 //  float getAverageLoad15();
+  
+  /**
+   * Return the average producer's load during last moments.
+   */
+  public long getProducerLoad();
+  
+  /**
+   * Return the average consumer's load during last moments.
+   */
+  public long getConsumerLoad();
     
    /**
     * Removes all messages that the time-to-live is expired.
@@ -136,10 +146,4 @@ public interface QueueMBean extends DestinationMBean {
   public List getMessagesView();
 
 //  public CompositeData[] getMessages() throws Exception;
-  
-  /** 
-   * @return the number of messages sent to this queue
-   * since its creation.
-   */
-  long getNbMsgsReceiveSinceCreationBis();
 }
