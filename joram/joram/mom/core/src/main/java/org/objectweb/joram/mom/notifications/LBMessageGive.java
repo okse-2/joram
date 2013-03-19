@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -26,15 +26,11 @@ package org.objectweb.joram.mom.notifications;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 
 public class LBMessageGive extends LBLoadingFactor {
-
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   private ClientMessages clientMessages;
 
-  public LBMessageGive(long validityPeriode,
-                       float rateOfFlow) {
+  public LBMessageGive(long validityPeriode, float rateOfFlow) {
     super(validityPeriode,rateOfFlow);
   }
   
@@ -51,13 +47,12 @@ public class LBMessageGive extends LBLoadingFactor {
    *
    * @param output
    *	buffer to fill in
-   * @return
-	<code>output</code> buffer is returned
+   * @return <code>output</code> buffer is returned
    */
   public StringBuffer toString(StringBuffer output) {
     output.append('(');
     super.toString(output);
-    output.append(",clientMessages=").append(clientMessages);
+    output.append(",clientMessages=").append((clientMessages==null)?0:clientMessages.getMessageCount());
     output.append(')');
 
     return output;
