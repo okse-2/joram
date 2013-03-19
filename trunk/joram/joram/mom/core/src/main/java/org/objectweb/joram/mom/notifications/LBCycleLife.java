@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class LBCycleLife extends ClusterLBNot {
-
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   private ClientMessages clientMessages;
@@ -87,8 +87,8 @@ public class LBCycleLife extends ClusterLBNot {
   public StringBuffer toString(StringBuffer output) {
     output.append('(');
     super.toString(output);
-    output.append(", clientMessages=").append(clientMessages);
-    output.append(", visitTable=").append(visitTable);
+    output.append(", clientMessages=").append((clientMessages==null)?0:clientMessages.getMessageCount());
+//    output.append(", visitTable=").append(visitTable);
     output.append(')');
 
     return output;
