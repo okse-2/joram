@@ -22,10 +22,13 @@
 package fr.dyade.aaa.ext;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -58,6 +61,8 @@ import fr.dyade.aaa.util.OperationKey;
 import fr.dyade.aaa.util.Repository;
 import fr.dyade.aaa.util.StartWithFilter;
 import fr.dyade.aaa.util.Transaction;
+import fr.dyade.aaa.util.TransactionObject;
+import fr.dyade.aaa.util.AbstractTransaction.Context;
 
 /**
  *  The NGTransaction class implements a transactional storage.
@@ -461,6 +466,21 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     //if (old != null) old.free();
 
   }
+  
+  protected void saveInLog(Serializable obj,
+      String dirName, String name,
+      boolean first) throws IOException {
+    Context ctx = perThreadContext.get();
+    Hashtable log = ctx.getLog();
+    Object key = OperationKey.newKey(dirName, name);
+    Operation op = null;
+    if (first)
+      op = Operation.alloc(Operation.CREATE, dirName, name, null);
+    else
+      op = Operation.alloc(Operation.SAVE, dirName, name, null);
+    Operation old = (Operation) log.put(key, op);
+    op.obj = obj;
+  }
 
   private final byte[] getFromLog(Hashtable log, Object key) throws IOException {
     // Searches in the log a new value for the object.
@@ -525,6 +545,88 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     commit(null);
   }
   
+  private static void serialize(Context threadCtx, Operation op) throws IOException {
+    Serializable obj = op.obj;
+    if (obj instanceof TransactionObject) {
+      TransactionObject to = (TransactionObject) obj;
+      if (to.getClassId() != -1) {
+        threadCtx.bos.reset();
+        threadCtx.bos.write(1);
+        DataOutputStream dos = new DataOutputStream(threadCtx.bos);
+        dos.writeInt(to.getClassId());
+        to.encodeTransactionObject(dos);
+        dos.flush();
+      } else {
+        javaSerialize(threadCtx, obj);
+      }
+    } else {
+      javaSerialize(threadCtx, obj);
+    }
+    op.value = threadCtx.bos.toByteArray();
+  }
+  
+  private static void javaSerialize(Context ctx, Serializable obj) throws IOException {
+    if (ctx.oos == null) {
+      ctx.bos.reset();
+      ctx.bos.write(0);
+      ctx.oos = new ObjectOutputStream(ctx.bos);
+    } else {
+      ctx.oos.reset();
+      ctx.bos.reset();
+      ctx.bos.write(0);
+      ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
+    }
+    ctx.oos.writeObject(obj);
+    ctx.oos.flush();
+  }
+  
+  private int serializeObjects(Context threadCtx) throws IOException {
+    Hashtable<Object, Operation> ctxlog = threadCtx.getLog();
+    
+    Set<Entry<Object, Operation>> entries = ctxlog.entrySet();
+    
+    // Compute the size
+    int sizeToAllocate = 0;
+    
+    // JORAM_PERF_BRANCH
+    // Operation.COMMIT
+    sizeToAllocate += 1;
+    
+    Iterator<Entry<Object, Operation>> iterator = entries.iterator();
+    while (iterator.hasNext()) {
+      Entry<Object, Operation> entry = iterator.next();
+      Object key = entry.getKey();
+      Operation op = entry.getValue();
+
+      if (op.type == Operation.NOOP)
+        continue;
+
+      // op.type
+      sizeToAllocate += 1;
+
+      if (op.dirName != null) {
+        sizeToAllocate += op.dirName.length();
+      }
+
+      sizeToAllocate += op.name.length();
+
+      if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
+        sizeToAllocate += 4;
+        
+        if (op.value == null) {
+          serialize(threadCtx, op);
+        }
+        
+        sizeToAllocate += op.value.length;
+      }
+      
+      // Log id
+      sizeToAllocate += 8;
+    }
+    
+    return sizeToAllocate;
+  }
+  
   private LogFileWriter logFileWriter = new LogFileWriter();
   
   private ReentrantLock lock = new ReentrantLock();
@@ -536,14 +638,18 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       //if (phase != RUN)
       //  throw new IllegalStateException("Cannot commit.");
       
+      Context threadCtx = perThreadContext.get();
+      
+      int sizeToAllocate = serializeObjects(threadCtx);
+      
       lock.lock();
 
-      Hashtable<Object, Operation> log = perThreadContext.get().getLog();
+      Hashtable<Object, Operation> log = threadCtx.getLog();
       if (! log.isEmpty()) {
         if (asyncLogWriter) {
-          logManager.commit(log, callback, logFileWriter);
+          logManager.commit(threadCtx, callback, logFileWriter, sizeToAllocate);
         } else {
-          logManager.commit(log, callback, null);
+          logManager.commit(threadCtx, callback, null, sizeToAllocate);
         }
         log.clear();
       } else {
@@ -1009,7 +1115,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
             
             // JORAM_PERF_BRANCH
             logf.logTag = logf.readLong();
-            //logmon.log(BasicLevel.WARN, "logId=" + logf.logId);
+            //logmon.log(BasicLevel.WARN, "logId=" + logf.logTag);
             
             if (logf.logTag == 0) {
               // The log is empty (already garbaged)
@@ -1076,6 +1182,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
                   // Simple solution: reload everything
                   // logFile[logidx%nbLogFile].skipBytes(logFile[logidx%nbLogFile].readInt());
                   opValue = new byte[logf.readInt()];
+                  //logmon.log(BasicLevel.ERROR, "value length=" + opValue.length);
                   logf.readFully(opValue);
                 } else {
                   opValue = null;
@@ -1206,7 +1313,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
     /**
      * Reports all buffered operations in logs.
      */
-    void commit(Hashtable<Object, Operation> ctxlog, Runnable callback, LogFileWriter logFileWriter) throws IOException {
+    void commit(Context threadCtx, Runnable callback, LogFileWriter logFileWriter, int sizeToAllocate) throws IOException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, "NTransaction.LogFile.commit()");
       
@@ -1231,9 +1338,12 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         }
       }
       */
+      
+      Hashtable<Object, Operation> ctxlog = threadCtx.getLog();
 
       commitCount += 1;
       
+      /*
       Set<Entry<Object, Operation>> entries = ctxlog.entrySet();
       
       // Compute the size
@@ -1263,6 +1373,11 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
 
         if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
           sizeToAllocate += 4;
+          
+          if (op.value == null) {
+            serialize(threadCtx, op);
+          }
+          
           sizeToAllocate += op.value.length;
         }
         
@@ -1272,6 +1387,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       
       // Final tag (END)
       sizeToAllocate += 1;
+      */
       
       boolean garbageRequired = current + sizeToAllocate > MaxLogFileSize;
       
@@ -1362,7 +1478,8 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
       // JORAM_PERF_BRANCH
       baos.write(Operation.COMMIT);
 
-      iterator = entries.iterator();
+      Set<Entry<Object, Operation>> entries = ctxlog.entrySet();
+      Iterator<Entry<Object, Operation>> iterator = entries.iterator();
       while (iterator.hasNext()) {
         Entry<Object, Operation> entry = iterator.next();
         Object key = entry.getKey();
