@@ -58,6 +58,9 @@ public class Operation implements Serializable {
   
   // JORAM_PERF_BRANCH
   public int garbageCount;
+  
+  //JORAM_PERF_BRANCH
+  public Serializable obj;
 
   private Operation(int type, String dirName, String name, byte[] value) {
     this.type = type;
