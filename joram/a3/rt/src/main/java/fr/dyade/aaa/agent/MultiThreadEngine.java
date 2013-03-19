@@ -628,7 +628,8 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
             // Else nothing as we have to remember the agent has been
             // updated by a reaction (a 'setNoSave' may override a 'setSave')
             
-            if (msg.not.persistent == true || updatedAgent || persistentPush) {
+            if (msg.not.persistent == true || updatedAgent || persistentPush ||
+                AgentServer.getTransaction().containsOperations()) {
               beginTransaction = true;
             }
             reactMessageList.add(currentMessage);
