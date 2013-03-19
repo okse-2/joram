@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -99,13 +99,6 @@ public interface ClusterQueueMBean extends QueueMBean, ClusterDestinationMBean {
   public float getRateOfFlow();
 
   /**
-   * Tells if the queue is overloaded.
-   * 
-   * @return true if the queue is overloaded
-   */
-  public boolean isOverloaded();
-
-  /**
    * Gets the status of the queue (RUN, INIT or WAIT).
    * 
    * @return the status of the queue
@@ -129,4 +122,6 @@ public interface ClusterQueueMBean extends QueueMBean, ClusterDestinationMBean {
    */
   public String getProducerStatus();
 
+  public int getReceivedFromCluster();
+  public int getSentToCluster();
 }

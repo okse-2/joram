@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -119,8 +119,13 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     int consumThreshold = DEFAULT_CONSUM_THRESHOLD;
     /** automatic evaluation of thresholds */
     boolean autoEvalThreshold = false;
+    /**
+     *  Maximum number of messages forwarded to each queue of cluster by round (by default
+     * set to the same value than producer threshold).
+     */
+    int maxFwdPerQueue = DEFAULT_PRODUC_THRESHOLD;
 
-    long timeThreshold = getPeriod();
+    timeThreshold = getPeriod();
 
     if (prop != null) {
       try {
@@ -146,13 +151,20 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
         timeThreshold = Long.valueOf(prop.getProperty("timeThreshold")).longValue();
       } catch (NumberFormatException exc) {
         logger.log(BasicLevel.WARN, "Incorrect timeThreshold value, set default");
-        timeThreshold = DEFAULT_TIME_THRESHOLD;
+        timeThreshold = getPeriod();
+      }
+      try {
+          maxFwdPerQueue = Integer.valueOf(prop.getProperty("maxFwdPerQueue")).intValue();
+      } catch (NumberFormatException exc) {
+        logger.log(BasicLevel.WARN, "Incorrect maxFwdPerQueue value, set default");
+        maxFwdPerQueue = producThreshold;
       }
     }
 
     loadingFactor = new LoadingFactor(this,
                                       producThreshold, consumThreshold,
-                                      autoEvalThreshold, waitAfterClusterReq);
+                                      autoEvalThreshold, waitAfterClusterReq,
+                                      maxFwdPerQueue);
   }
   
   /**
@@ -353,10 +365,10 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
    * @param not
    */
   public void postProcess(ClientMessages not) {
-    if (getPendingMessageCount() > loadingFactor.producThreshold)
-      loadingFactor.factorCheck(clusters, getPendingMessageCount(), getWaitingRequestCount());
-    else
-      loadingFactor.evalRateOfFlow(getPendingMessageCount(), getWaitingRequestCount());
+    // TODO (AF): Is it useful ?
+    sentToCluster += loadingFactor.factorCheck(clusters,
+                                               getPendingMessageCount(), getWaitingRequestCount(),
+                                               cload, pload);
     receiving = false;
   }
 
@@ -373,61 +385,66 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     
     super.wakeUpNot(not);
 
-    if (clusters.size() > 1)
-      loadingFactor.factorCheck(clusters, getPendingMessageCount(), getWaitingRequestCount());
+    if (clusters.size() <= 1) return;
 
-    // Check if there is message arrived before "timeThreshold".
-    // if is true forwards message to the next (no visited) clusterQueue.
-    List toGive = new ArrayList();
-    long oldTime = System.currentTimeMillis() - timeThreshold;
-    
-    Set keySet = timeTable.keySet();
-    Iterator it = keySet.iterator();
-    while (it.hasNext()) {
-      String msgId = (String) it.next();
-      if (((Long) timeTable.get(msgId)).longValue() < oldTime) {
-        toGive.add(msgId);
-        storeMsgIdInVisitTable(msgId, getId());
-      }
-    }
-    
-    if (toGive.isEmpty()) return;
+    sentToCluster += loadingFactor.factorCheck(clusters,
+                                               getPendingMessageCount(), getWaitingRequestCount(),
+                                               cload, pload);
+      // TODO (AF):
 
-    Map table = new Hashtable();
-    for (int i = 0; i < toGive.size(); i++) {
-      String msgId = (String) toGive.get(i);
-      List visit = (List) visitTable.get(msgId);
-      boolean transmitted = false;
-      for (Iterator e = clusters.keySet().iterator(); e.hasNext();) {
-        AgentId id = (AgentId) e.next();
-        if (! visit.contains(id)) {
-          Message message = getQueueMessage(msgId, true);
-          if (message != null) {
-            LBCycleLife cycle = (LBCycleLife) table.get(id);
-            if (cycle == null) {
-              cycle = new LBCycleLife(loadingFactor.getRateOfFlow());
-              cycle.setClientMessages(new ClientMessages());
-            }
-            ClientMessages cm = cycle.getClientMessages();
-            cm.addMessage(message.getFullMessage());
-            cycle.putInVisitTable(msgId,visit);
-            table.put(id,cycle);
-            transmitted = true;
-            break;
-          }
-        }
-      }
-      if (!transmitted) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " All queues already visited. Re-initialize visitTable.");
-        ((List) visitTable.get(msgId)).clear();
-      }
-    }
-
-    for (Iterator e = table.keySet().iterator(); e.hasNext();) {
-      AgentId id = (AgentId) e.next();
-      forward(id,(LBCycleLife) table.get(id));
-    }
+      // Check if there is message arrived before "timeThreshold".
+      // if is true forwards message to the next (no visited) clusterQueue.
+      //    List toGive = new ArrayList();
+      //    long oldTime = System.currentTimeMillis() - timeThreshold;
+      //    
+      //    Set keySet = timeTable.keySet();
+      //    Iterator it = keySet.iterator();
+      //    while (it.hasNext()) {
+      //      String msgId = (String) it.next();
+      //      if (((Long) timeTable.get(msgId)).longValue() < oldTime) {
+      //        toGive.add(msgId);
+      //        storeMsgIdInVisitTable(msgId, getId());
+      //      }
+      //    }
+      //    
+      //    if (toGive.isEmpty()) return;
+      //
+      //    Map table = new Hashtable();
+      //    for (int i = 0; i < toGive.size(); i++) {
+      //      String msgId = (String) toGive.get(i);
+      //      List visit = (List) visitTable.get(msgId);
+      //      boolean transmitted = false;
+      //      for (Iterator e = clusters.keySet().iterator(); e.hasNext();) {
+      //        AgentId id = (AgentId) e.next();
+      //        if (! visit.contains(id)) {
+      //          Message message = getQueueMessage(msgId, true);
+      //          if (message != null) {
+      //            LBCycleLife cycle = (LBCycleLife) table.get(id);
+      //            if (cycle == null) {
+      //              cycle = new LBCycleLife(loadingFactor.getRateOfFlow());
+      //              cycle.setClientMessages(new ClientMessages());
+      //            }
+      //            ClientMessages cm = cycle.getClientMessages();
+      //            cm.addMessage(message.getFullMessage());
+      //            cycle.putInVisitTable(msgId,visit);
+      //            table.put(id,cycle);
+      //            transmitted = true;
+      //            break;
+      //          }
+      //        }
+      //      }
+      //      if (!transmitted) {
+      //        if (logger.isLoggable(BasicLevel.DEBUG))
+      //          logger.log(BasicLevel.DEBUG, " All queues already visited. Re-initialize visitTable.");
+      //        ((List) visitTable.get(msgId)).clear();
+      //      }
+      //    }
+      //
+      //    for (Iterator e = table.keySet().iterator(); e.hasNext();) {
+      //      AgentId id = (AgentId) e.next();
+      //      forward(id,(LBCycleLife) table.get(id));
+      //      sentToCluster += ((LBCycleLife) table.get(id)).getClientMessages().getMessageCount();
+      //    }
   }
 
   /**
@@ -439,9 +456,14 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
    * @param not
    */
   private void lBCycleLife(AgentId from, LBCycleLife not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.lBCycleLife(" + from + "," + not + ")");
 
     clusters.put(from,new Float(not.getRateOfFlow()));
 
+    ClientMessages cm = not.getClientMessages();
+    if (cm == null) return;
+    
     Map vT = not.getVisitTable();
     for (Iterator e = vT.keySet().iterator(); e.hasNext();) {
       String msgId = (String) e.next();
@@ -450,11 +472,9 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.lBCycleLife(" + not + "), visitTable=" + clusters);
-    ClientMessages cm = not.getClientMessages();
     try {
-      if (cm != null)
-    	nbMsgsReceiveSinceCreationBis -= cm.getMessages().size();
-        doClientMessages(from, cm, false);
+      receivedFromCluster += cm.getMessageCount();
+      doClientMessages(from, cm, false);
     } catch (AccessException e) {/* never happens */}
   }
 
@@ -468,10 +488,10 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.receiveRequest(" + not + ")");
 
-    //loadingFactor.setWait();
-
-    if (getWaitingRequestCount() > loadingFactor.consumThreshold)
-      loadingFactor.factorCheck(clusters, getPendingMessageCount(), getWaitingRequestCount());
+    if (getWaitingRequestCount() >= loadingFactor.consumThreshold)
+      sentToCluster += loadingFactor.factorCheck(clusters,
+                                                 getPendingMessageCount(), getWaitingRequestCount(),
+                                                 cload, pload);
   }
 
   /**
@@ -490,11 +510,11 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
       logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.lBMessageGive(" + from + "," + not + ")");
 
     clusters.put(from,new Float(not.getRateOfFlow()));
-
+    
     ClientMessages cm = not.getClientMessages();
     if (cm != null) {
       try {
-    	nbMsgsReceiveSinceCreationBis -= cm.getMessages().size();
+        receivedFromCluster += cm.getMessageCount();
         doClientMessages(from, cm, false);
       } catch (AccessException e) { /* never happens */}
     }
@@ -521,10 +541,8 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     if (dmqManager != null)
       dmqManager.sendToDMQ();
     
-    if (loadingFactor.getRateOfFlow() < 1) {
-      int possibleGive = getPendingMessageCount() - getWaitingRequestCount();
-      LBMessageGive msgGive = 
-        new LBMessageGive(loadingFactor.validityPeriod, loadingFactor.getRateOfFlow());
+    if ((loadingFactor.getRateOfFlow() < 1) && (getPendingMessageCount() > 0)) {
+      int possibleGive = getPendingMessageCount();
       
       // get client messages, hope or possible give.
       ClientMessages cm = null;
@@ -533,16 +551,19 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
       } else {
         cm = getClientMessages(possibleGive, null, true);
       }
+      if (cm != null) {
+        LBMessageGive msgGive = 
+            new LBMessageGive(loadingFactor.validityPeriod, loadingFactor.getRateOfFlow());
+        msgGive.setClientMessages(cm);
 
-      msgGive.setClientMessages(cm);
-      msgGive.setRateOfFlow(loadingFactor.evalRateOfFlow(getPendingMessageCount(), getWaitingRequestCount()));
+        // send notification contains ClientMessages.
+        forward(from, msgGive);
+        sentToCluster += msgGive.getClientMessages().getMessageCount();
 
-      // send notification contains ClientMessages.
-      forward(from, msgGive);
-      
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "--- " + this
-            + " ClusterQueue.lBMessageHope LBMessageHope : nbMsgSend = " + cm.getMessages().size());
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "--- " + this
+                     + " ClusterQueue.lBMessageHope LBMessageHope : nbMsgSend = " + cm.getMessages().size());
+      }
     }
   }
 
@@ -728,10 +749,6 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     return loadingFactor.getRateOfFlow();
   }
 
-  public boolean isOverloaded() {
-    return loadingFactor.isOverloaded();
-  }
-
   public String getStatus() {
     return loadingFactor.getStatus();
   }
@@ -744,4 +761,15 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     return loadingFactor.getProducerStatus();
   }
 
+  int receivedFromCluster;
+  
+  public int getReceivedFromCluster() {
+    return receivedFromCluster;
+  }
+  
+  int sentToCluster;
+  
+  public int getSentToCluster() {
+    return sentToCluster;
+  }
 }
