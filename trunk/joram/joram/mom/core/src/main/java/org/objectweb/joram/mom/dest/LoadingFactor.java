@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.objectweb.joram.mom.notifications.LBCycleLife;
 import org.objectweb.joram.mom.notifications.LBMessageGive;
 import org.objectweb.joram.mom.notifications.LBMessageHope;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -38,7 +39,6 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.Debug;
 
 public class LoadingFactor implements Serializable {
-
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -104,21 +104,23 @@ public class LoadingFactor implements Serializable {
   /** validity period */
   public long validityPeriod = -1;
 
+  /** maximum number of messages forwarded to each queue of cluster by round */
+  int maxFwdPerQueue;
+
   private float rateOfFlow;
-  private boolean overLoaded;
-  private int nbOfPendingMessages;
-  private int nbOfPendingRequests;
 
   public LoadingFactor(ClusterQueue clusterQueue,
                        int producThreshold,
                        int consumThreshold,
                        boolean autoEvalThreshold,
-                       long validityPeriod) {
+                       long validityPeriod,
+                       int maxFwdPerQueue) {
     this.clusterQueue = clusterQueue;
     this.producThreshold = producThreshold;
     this.consumThreshold = consumThreshold;
     this.autoEvalThreshold = autoEvalThreshold;
     this.validityPeriod = validityPeriod;
+    this.maxFwdPerQueue = maxFwdPerQueue;
     rateOfFlow = 1;
     status = 0;
   }
@@ -149,73 +151,6 @@ public class LoadingFactor implements Serializable {
   }
 
   /**
-   * this method eval the activity
-   * of consumer and producer.
-   */
-  private void evalActivity() {
-    if (nbOfPendingMessages == 0)
-      producerStatus = ProducerStatus.PRODUCER_NO_ACTIVITY;
-    else if (nbOfPendingMessages > producThreshold)
-      producerStatus = ProducerStatus.PRODUCER_HIGH_ACTIVITY;
-    else
-      producerStatus = ProducerStatus.PRODUCER_NORMAL_ACTIVITY;
-
-    if (nbOfPendingRequests == 0)
-      consumerStatus = ConsumerStatus.CONSUMER_NO_ACTIVITY;
-    else if (nbOfPendingRequests > consumThreshold)
-      consumerStatus = ConsumerStatus.CONSUMER_HIGH_ACTIVITY;
-    else
-      consumerStatus = ConsumerStatus.CONSUMER_NORMAL_ACTIVITY;
-  }
-
-  /** 
-   * update the threshold if autoEvalThreshold is true.
-   */
-  private void updateThreshold() {
-    if (autoEvalThreshold) {
-
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, 
-                   "LoadingFactor.updateThreshold before" +
-                   " rateOfFlow=" + rateOfFlow +
-                   ", producThreshold=" + producThreshold +
-                   ", consumThreshold=" + consumThreshold );
-
-      int deltaProd;
-      int deltaCons;
-
-      if (rateOfFlow < 1) {
-        deltaProd = (int) ((nbOfPendingMessages - producThreshold) * rateOfFlow);
-        deltaCons = (int) ((nbOfPendingRequests - consumThreshold) * rateOfFlow);
-      } else {
-        deltaProd = (int) ((nbOfPendingMessages - producThreshold) / rateOfFlow);
-        deltaCons = (int) ((nbOfPendingRequests - consumThreshold) / rateOfFlow);
-      }
-
-      if (nbOfPendingMessages > 0) {
-        if (deltaProd < producThreshold)
-          producThreshold = producThreshold + deltaProd;
-        else
-          producThreshold = deltaProd;
-      }
-
-      if (nbOfPendingRequests > 0) {
-        if (deltaCons < consumThreshold)
-          consumThreshold = consumThreshold + deltaCons;
-        else
-          consumThreshold = deltaCons;
-      }
-
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, 
-                   "LoadingFactor.updateThreshol after" +
-                   " rateOfFlow=" + rateOfFlow +
-                   ", producThreshold=" + producThreshold +
-                   ", consumThreshold=" + consumThreshold );
-    }
-  }
-
-  /**
    * Evaluates the average rate of flow.
    * If rateOfFlow is greater than 1 the queue are more pending requests 
    * than pending messages else if rateOfFlow is lower than 1 the queue are
@@ -226,11 +161,9 @@ public class LoadingFactor implements Serializable {
    * @param pendingRequests   the number of pending requests.
    * @return the rate of flow
    */
-  public float evalRateOfFlow(int pendingMessages,
-                              int pendingRequests) {
+  public void evalRateOfFlow(int pendingMessages, int pendingRequests,
+                              int cload, int pload) {
     float currentROF;
-    nbOfPendingMessages = pendingMessages;
-    nbOfPendingRequests = pendingRequests;
 
     // TODO (AF): Be careful this evaluation is not really useful as either pendingMessages
     // or pendingRequests is equal to zero!
@@ -249,9 +182,9 @@ public class LoadingFactor implements Serializable {
                  "LoadingFactor.evalRateOfFlow" +
                  " pendingMessages = " + pendingMessages + ", pendingRequests = " + pendingRequests +
                  ", rateOfFlow = " + rateOfFlow + ", currentROF = " + currentROF);
-
-    return rateOfFlow;
   }
+  
+  float lastROFSent = -1;
 
   /**
    * This method evaluates the rate of flow and activity.
@@ -261,64 +194,95 @@ public class LoadingFactor implements Serializable {
    * @param pendingMessages
    * @param pendingRequests
    */
-  public void factorCheck(Map clusters,
-                          int pendingMessages,
-                          int pendingRequests) {
+  public int factorCheck(Map clusters,
+                         int pendingMessages,
+                         int pendingRequests,
+                         int cload,
+                         int pload) {
+    int forwarded = 0;
 
-    nbOfPendingMessages = pendingMessages;
-    nbOfPendingRequests = pendingRequests;
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 ">> LoadingFactor.factorCheck " + this + "\nclusters = " + clusters);
+
+    evalRateOfFlow(pendingMessages, pendingRequests, cload, pload);
+    if ((lastROFSent < 0) ||
+        ((lastROFSent < 1) && (rateOfFlow > 1)) ||
+        ((lastROFSent > 1) && (rateOfFlow < 1)) ||
+        ((lastROFSent == 1) && (rateOfFlow != 1))) {
+      dispatchLifeCycle(clusters);
+      lastROFSent = rateOfFlow;
+    }
+
 
     if (status == Status.WAIT && 
         statusTime < System.currentTimeMillis())
       status = Status.RUN;
 
+    if (pendingMessages == 0)
+      producerStatus = ProducerStatus.PRODUCER_NO_ACTIVITY;
+    else if (pendingMessages > producThreshold)
+      producerStatus = ProducerStatus.PRODUCER_HIGH_ACTIVITY;
+    else
+      producerStatus = ProducerStatus.PRODUCER_NORMAL_ACTIVITY;
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 ">> LoadingFactor.factorCheck " +
-                 this + "\nclusters = " + clusters);
+    if (pendingRequests == 0)
+      consumerStatus = ConsumerStatus.CONSUMER_NO_ACTIVITY;
+    else if ((pendingRequests > consumThreshold) || (pload == 0))
+      consumerStatus = ConsumerStatus.CONSUMER_HIGH_ACTIVITY;
+    else 
+      consumerStatus = ConsumerStatus.CONSUMER_NORMAL_ACTIVITY;
 
-    evalRateOfFlow(pendingMessages, pendingRequests);
-
-    evalActivity();
-
-    if ( status == Status.INIT || status == Status.RUN) {
-      if (isOverloaded()) {
-        dispatchAndSendTo(clusters,
-                          pendingMessages,
-                          pendingRequests);
-        status = Status.WAIT;
-        statusTime = System.currentTimeMillis() + validityPeriod;
-      }
+    if ((status != Status.WAIT) &&
+        ((consumerStatus == ConsumerStatus.CONSUMER_HIGH_ACTIVITY) ||
+         (producerStatus == ProducerStatus.PRODUCER_HIGH_ACTIVITY))) {
+      forwarded = dispatchAndSendTo(clusters, pendingMessages, pendingRequests, cload, pload);
+      status = Status.WAIT;
+      statusTime = System.currentTimeMillis() + validityPeriod;
     }
 
-    updateThreshold();
+    if (autoEvalThreshold) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, 
+                   "LoadingFactor.factorCheck updateThreshold - before rateOfFlow=" + rateOfFlow +
+                   ", producThreshold=" + producThreshold + ", consumThreshold=" + consumThreshold );
 
+      int deltaProd;
+      int deltaCons;
+
+      if (rateOfFlow < 1) {
+        deltaProd = (int) ((pendingMessages - producThreshold) * rateOfFlow);
+        deltaCons = (int) ((pendingRequests - consumThreshold) * rateOfFlow);
+      } else {
+        deltaProd = (int) ((pendingMessages - producThreshold) / rateOfFlow);
+        deltaCons = (int) ((pendingRequests - consumThreshold) / rateOfFlow);
+      }
+
+      if (pendingMessages > 0) {
+        if (deltaProd < producThreshold)
+          producThreshold = producThreshold + deltaProd;
+        else
+          producThreshold = deltaProd;
+      }
+
+      if (pendingRequests > 0) {
+        if (deltaCons < consumThreshold)
+          consumThreshold = consumThreshold + deltaCons;
+        else
+          consumThreshold = deltaCons;
+      }
+
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, 
+                   "LoadingFactor.factorCheck updateThreshol - after rateOfFlow=" + rateOfFlow +
+                   ", producThreshold=" + producThreshold + ", consumThreshold=" + consumThreshold );
+    }
+  
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "<< LoadingFactor.factorCheck " 
-                 + this);
-  }
+                 "<< LoadingFactor.factorCheck " + this);
 
-  /**
-   * true if cluster queue is overloaded.
-   * depends on activity.
-   * 
-   * @return  true if cluster queue is overloaded.
-   */
-  public boolean isOverloaded() {
-    overLoaded = false;
-    if ((consumerStatus == 
-      ConsumerStatus.CONSUMER_HIGH_ACTIVITY) ||
-      (producerStatus == 
-        ProducerStatus.PRODUCER_HIGH_ACTIVITY))
-      overLoaded = true;
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "LoadingFactor.isOverloaded " 
-                 + overLoaded);
-    return overLoaded;
+    return forwarded;
   }
 
   /**
@@ -329,36 +293,34 @@ public class LoadingFactor implements Serializable {
    * @param nbOfPendingMessages
    * @param nbOfPendingRequests
    */
-  private void dispatchAndSendTo(Map clusters,
-                                 int nbOfPendingMessages,
-                                 int nbOfPendingRequests) {
+  private int dispatchAndSendTo(Map clusters,
+                                int nbOfPendingMessages,
+                                int nbOfPendingRequests,
+                                int cload,
+                                int pload) {
     int nbMsgHope = -1;
     int nbMsgGive = -1;
 
-    if ((consumerStatus == ConsumerStatus.CONSUMER_NO_ACTIVITY) &&
-        (producerStatus == ProducerStatus.PRODUCER_NO_ACTIVITY))
-      return;
-
-    if (producThreshold < nbOfPendingMessages) {
+    if (nbOfPendingMessages > producThreshold) {
       nbMsgGive = nbOfPendingMessages - producThreshold;
-      if (nbOfPendingRequests < 1)
+      if (cload == 0)
         nbMsgGive = nbOfPendingMessages;
     }
     
-    if (consumThreshold < nbOfPendingRequests)
-      nbMsgHope = 10 * nbOfPendingRequests;
+    if ((consumThreshold < nbOfPendingRequests) || (pload == 0))
+      nbMsgHope = producThreshold * nbOfPendingRequests;
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "LoadingFactor.dispatchAndSendTo" +
-                 "\nnbMsgHope=" + nbMsgHope +
-                 ", nbMsgGive=" + nbMsgGive);
+                 "LoadingFactor.dispatchAndSendTo" + " nbMsgHope=" + nbMsgHope + ", nbMsgGive=" + nbMsgGive);
 
-    if (consumerStatus == ConsumerStatus.CONSUMER_HIGH_ACTIVITY)
+    if (nbMsgGive > 0)
+      return processGive(nbMsgGive,clusters);
+    
+    if (nbMsgHope > 0)
       processHope(nbMsgHope,clusters);
-
-    if (producerStatus == ProducerStatus.PRODUCER_HIGH_ACTIVITY)
-      processGive(nbMsgGive,clusters);
+    
+    return 0;
   }
 
   /**
@@ -367,8 +329,8 @@ public class LoadingFactor implements Serializable {
    * @param nbMsgGive
    * @param clusters Map of cluster Queue
    */
-  private void processGive(int nbMsgGive, Map clusters) {
-    if (nbMsgGive < 1) return;
+  private int processGive(int nbMsgGive, Map clusters) {
+    int forwarded = 0;
 
     // select queue in cluster who have a rateOfFlow > 1
     List selected = new ArrayList();
@@ -378,9 +340,11 @@ public class LoadingFactor implements Serializable {
         selected.add(id);
     }
 
-    if (selected.size() == 0) return;
+    if (selected.size() == 0) return 0;
 
     int nbGivePerQueue = nbMsgGive / selected.size();
+    if (nbGivePerQueue > maxFwdPerQueue) 
+      nbGivePerQueue = maxFwdPerQueue;
     LBMessageGive msgGive = new LBMessageGive(validityPeriod, rateOfFlow);
 
     if (nbGivePerQueue == 0 && nbMsgGive > 0) {
@@ -388,24 +352,25 @@ public class LoadingFactor implements Serializable {
       AgentId id = (AgentId) selected.get(0);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "LoadingFactor.processGive" +
-                   " nbMsgGive = " + nbMsgGive +
-                   ", id = " + id);
+                   "LoadingFactor.processGive nbMsgGive = " + nbMsgGive + ", id = " + id);
       msgGive.setClientMessages(clusterQueue.getClientMessages(nbMsgGive, null, true));
       clusterQueue.forward(id, msgGive);
+      forwarded += msgGive.getClientMessages().getMessageCount();
     } else {
       // dispatch to cluster.
+      
+      // TODO (AF): May be we have to take in account the load of each queue.
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "LoadingFactor.processGive" +
-                   " givePerQueue = " + nbGivePerQueue +
-                   ", selected = " + selected);
+                   "LoadingFactor.processGive givePerQueue = " + nbGivePerQueue + ", selected = " + selected);
       for (Iterator e = selected.iterator(); e.hasNext();) {
         AgentId id = (AgentId) e.next();
         msgGive.setClientMessages(clusterQueue.getClientMessages(nbGivePerQueue, null, true));
         clusterQueue.forward(id, msgGive);
+        forwarded += msgGive.getClientMessages().getMessageCount();
       }
     }
+    return forwarded;
   }
 
   /**
@@ -417,9 +382,7 @@ public class LoadingFactor implements Serializable {
   private void processHope(int nbMsgHope, Map clusters) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "LoadingFactor.processHope" +
-                 " nbMsgHope = " + nbMsgHope);
-    if (nbMsgHope < 1) return;
+                 "LoadingFactor.processHope nbMsgHope = " + nbMsgHope);
 
     List selected = new ArrayList();
     for (Iterator e = clusters.keySet().iterator(); e.hasNext();) {
@@ -437,20 +400,15 @@ public class LoadingFactor implements Serializable {
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "LoadingFactor.processHope" +
-                   " nbMsgHope = " + nbMsgHope +
-                   ", id = " + id);
-      LBMessageHope msgHope = new LBMessageHope(validityPeriod,rateOfFlow);
+                   "LoadingFactor.processHope nbMsgHope = " + nbMsgHope + ", id = " + id);
+      LBMessageHope msgHope = new LBMessageHope(validityPeriod, rateOfFlow);
       msgHope.setNbMsg(nbMsgHope);
       clusterQueue.forward(id, msgHope);
-
     } else {
       // dispatch the hope request to clusterQueue.
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "LoadingFactor.processHope" +
-                   " hopePerQueue = " + nbHopePerQueue +
-                   ", selected = " + selected);
+                   "LoadingFactor.processHope hopePerQueue = " + nbHopePerQueue + ", selected = " + selected);
 
       LBMessageHope msgHope = new LBMessageHope(validityPeriod,rateOfFlow);
       for (Iterator e = selected.iterator(); e.hasNext();) {
@@ -458,6 +416,23 @@ public class LoadingFactor implements Serializable {
         msgHope.setNbMsg(nbHopePerQueue);
         clusterQueue.forward(id, msgHope);
       }
+    }
+  }
+
+  /**
+   * send a hope request on a cluster queue.
+   * 
+   * @param nbMsgHope
+   * @param clusters Map of cluster Queue
+   */
+  public void dispatchLifeCycle(Map clusters) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "LoadingFactor.dispatchLifeCycle");
+
+    for (Iterator e = clusters.keySet().iterator(); e.hasNext();) {
+      AgentId id = (AgentId) e.next();
+      if (!id.equals(clusterQueue.getId()))
+        clusterQueue.forward(id, new LBCycleLife(rateOfFlow));
     }
   }
 
@@ -475,14 +450,8 @@ public class LoadingFactor implements Serializable {
     str.append(consumThreshold);
     str.append(", autoEvalThreshold=");
     str.append(autoEvalThreshold);
-    str.append(", nbOfPendingMessages=");
-    str.append(nbOfPendingMessages);
-    str.append(", nbOfPendingRequests=");
-    str.append(nbOfPendingRequests);
     str.append(", rateOfFlow=");
     str.append(rateOfFlow);
-    str.append(", overLoaded=");
-    str.append(overLoaded);
     str.append(")");
     return str.toString();
   }
