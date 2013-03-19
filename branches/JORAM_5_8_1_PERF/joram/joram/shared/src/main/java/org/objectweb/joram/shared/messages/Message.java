@@ -168,7 +168,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
   
   // JORAM_PERF_BRANCH
   public transient boolean compressed;
-  public final static int COMPRESSED_MIN_SIZE = 2000;
+  public final static int COMPRESSED_MIN_SIZE = 100 * 1024;
 
   /**
    * Sets the message destination.
