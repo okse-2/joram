@@ -474,4 +474,10 @@ public final class JTransaction extends BaseTransaction implements JTransactionM
     } catch (IOException exc) {
     }
   }
+  
+  // JORAM_PERF_BRANCH
+  public boolean containsOperations() {
+    return log.size() > 0;
+  }
+  
 }

@@ -199,4 +199,10 @@ public final class NullTransaction extends BaseTransaction implements NullTransa
     // Change the transaction state.
     setPhase(INIT);
   }
+  
+  // JORAM_PERF_BRANCH
+  public boolean containsOperations() {
+    return false;
+  }
+  
 }

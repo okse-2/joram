@@ -289,4 +289,7 @@ public interface Transaction {
    * anew before reusing it.
    */
   void close();
+  
+  // JORAM_PERF_BRANCH
+  boolean containsOperations();
 }
