@@ -29,6 +29,28 @@
         </configuration>
       </plugin>
       
+      <!-- on deploy phase: zip src, config, ... -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>joram-samples</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>samples-assembly.xml</descriptor>
+              </descriptors>
+              <appendAssemblyId>false</appendAssemblyId>
+              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
       <!-- ship -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
