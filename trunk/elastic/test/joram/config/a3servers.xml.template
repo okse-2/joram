@@ -31,4 +31,11 @@
              args="16001"/>
   </server>
 
+  <server id="2" name="W2" hostname="HOST001">
+    <network domain="D1" port="16052"/>
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
+             args="root root"/>
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
+             args="16002"/>
+  </server>
 </config>

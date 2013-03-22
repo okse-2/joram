@@ -6,7 +6,7 @@
   <property name="Transaction.NbLogFile" value="64"/>
   <property name="Transaction.MaxLogFileSize" value="16"/>
 
-  <server id="101" name="P1" hostname="10.50.71.1">
+  <server id="101" name="P1" hostname="10.208.75.119">
     <network domain="D1" port="16151"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
              args="root root"/>
@@ -15,7 +15,7 @@
     <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
   </server>
 
-  <server id="102" name="P2" hostname="10.246.123.141">
+  <server id="102" name="P2" hostname="10.210.129.19">
     <network domain="D1" port="16152"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
              args="root root"/>
@@ -23,7 +23,7 @@
              args="16102"/>
   </server>
 
-  <server id="1" name="W1" hostname="10.227.205.46">
+  <server id="1" name="W1" hostname="10.208.85.230">
     <network domain="D1" port="16051"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
              args="root root"/>
@@ -31,4 +31,11 @@
              args="16001"/>
   </server>
 
+  <server id="2" name="W2" hostname="10.208.85.230">
+    <network domain="D1" port="16052"/>
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
+             args="root root"/>
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
+             args="16002"/>
+  </server>
 </config>
