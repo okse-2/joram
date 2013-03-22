@@ -26,6 +26,7 @@
 package org.objectweb.joram.client.jms;
 
 import java.net.ConnectException;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 
@@ -52,6 +53,8 @@ import org.objectweb.joram.shared.admin.GetQueueMessage;
 import org.objectweb.joram.shared.admin.GetQueueMessageIds;
 import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
 import org.objectweb.joram.shared.admin.GetQueueMessageRep;
+import org.objectweb.joram.shared.admin.GetQueueMetrics;
+import org.objectweb.joram.shared.admin.GetStatsReply;
 import org.objectweb.joram.shared.admin.SendDestinationsWeights;
 import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
 import org.objectweb.joram.shared.admin.SetSyncExceptionOnFullDestRequest;
@@ -617,6 +620,12 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     doRequest(new DelRemoteDestination(agentId, remote.getName()));
   }
 
+  public Hashtable<String,Integer> getQueueMetrics() throws ConnectException, AdminException {
+	  GetQueueMetrics request = new GetQueueMetrics(agentId);
+	  GetStatsReply reply = (GetStatsReply) doRequest(request);
+	  return reply.getStats();
+  }
+  
   /**
    * Set weights for each remote destination of this alias queue.
    * 

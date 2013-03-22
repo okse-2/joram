@@ -67,6 +67,8 @@ import org.objectweb.joram.shared.admin.GetQueueMessage;
 import org.objectweb.joram.shared.admin.GetQueueMessageIds;
 import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
 import org.objectweb.joram.shared.admin.GetQueueMessageRep;
+import org.objectweb.joram.shared.admin.GetQueueMetrics;
+import org.objectweb.joram.shared.admin.GetStatsReply;
 import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
 import org.objectweb.joram.shared.admin.SetSyncExceptionOnFullDestRequest;
 import org.objectweb.joram.shared.admin.SetThresholdRequest;
@@ -856,8 +858,16 @@ public class Queue extends Destination implements QueueMBean {
                 not.getReplyTo(),
                 not.getRequestMsgId(),
                 not.getReplyMsgId());
+    } else if (adminRequest instanceof GetQueueMetrics) {
+    	Hashtable<String,Integer> ht = new Hashtable<String,Integer>();
+    	ht.put("pending",getPendingMessageCount());
+    	ht.put("delivered", (int)nbMsgsDeliverSinceCreation);
+    	replyToTopic(new GetStatsReply(ht),
+    			not.getReplyTo(),
+    			not.getRequestMsgId(),
+    			not.getReplyMsgId());
     } else {
-      super.handleAdminRequestNot(from, not);
+    	super.handleAdminRequestNot(from, not);
     }
   }
 
