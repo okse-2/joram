@@ -240,13 +240,7 @@ public class AliasInQueue extends Queue {
 			if (!destinations.contains(dest)) {
 				destinations.add(dest);
 				metrics.add(new Long(0l));
-				
-				long newWeight = Long.MIN_VALUE;
-				for (long w : weights) {
-					if (w > newWeight)
-						newWeight = w;
-				}
-				weights.add(newWeight);
+				weights.add(5l); // the max weight being 10l
 			}
 			replyToTopic(new AdminReply(true, null),
 					not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
@@ -304,6 +298,8 @@ public class AliasInQueue extends Queue {
 	private int receivedMetrics = 0;
 	private long minMetrics = Long.MAX_VALUE;
 	private long weightLeft = 1;
+
+	
 
 	private static long pendingMessagesThreshold = 3000;
 
