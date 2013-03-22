@@ -51,12 +51,12 @@ public class Producer {
 	}*/
 	
 	public static int computeLoad(int round) {
-		if (round < 1500)
-			return (round / 100);
-		if (round < 2500)
-			return 15;
-		if (round < 4000)
-			return 15 - (round - 2500) / 100;
+		if (round < 15000)
+			return round / 200;
+		if (round < 20000)
+			return 75;
+		if (round < 35000)
+			return 75 - (round - 20000) / 200;
 		
 		return 0;
 	}
@@ -94,7 +94,9 @@ public class Producer {
 				sender.send(message);
 			session.commit();
 			
-			System.out.println("[Producer " + number + "]\t" + i + "\t" + computeLoad(i));
+			if (i % 10 == 0)
+				System.out.println("[Producer " + number + "]\t" + i / 10 + "\t" + computeLoad(i)*10);
+			
 			wait = start + Constants.PRODUCER_PERIOD * (i+1) - System.currentTimeMillis();
 			if (wait > 0)
 				Thread.sleep(wait);

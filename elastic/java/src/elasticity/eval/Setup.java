@@ -2,10 +2,10 @@ package elasticity.eval;
 
 import java.util.Properties;
 
-import javax.jms.ConnectionFactory;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.Server;
@@ -41,6 +41,7 @@ public class Setup {
 		User.create("anonymous", "anonymous", 101);
 		User.create("anonymous", "anonymous", 102);
 		User.create("anonymous", "anonymous", 1);
+		User.create("anonymous", "anonymous", 2);
 	    
 		//Worker
 		Queue rq1 = Queue.create(1,"queue1");
@@ -64,6 +65,11 @@ public class Setup {
 				TcpConnectionFactory.create(getServerAddress(102), 16102);
 		ConnectionFactory cfw1 =
 				TcpConnectionFactory.create(getServerAddress(1), 16001);
+		ConnectionFactory cfw2 =
+				TcpConnectionFactory.create(getServerAddress(2), 16002);
+		
+		cfp1.getParameters().connectingTimer=120;
+		cfp2.getParameters().connectingTimer=120;
 
 		// Binding the objects in JNDI:
 		Context jndiCtx = new InitialContext();
@@ -73,6 +79,7 @@ public class Setup {
 		jndiCtx.bind("cfp1", cfp1);
 		jndiCtx.bind("cfp2", cfp2);
 		jndiCtx.bind("cfw1", cfw1);
+		jndiCtx.bind("cfw2", cfw2);
 		jndiCtx.close();
 		
 		AdminModule.disconnect();

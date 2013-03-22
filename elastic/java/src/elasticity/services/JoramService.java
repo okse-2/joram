@@ -7,14 +7,16 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.naming.InitialContext;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.AdminWrapper;
 import org.objectweb.joram.client.jms.admin.Server;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-
 
 import elasticity.interfaces.Service;
 
@@ -25,36 +27,55 @@ import elasticity.interfaces.Service;
  *
  */
 public class JoramService extends Service {
+	
 	private static final String tcpProxyService = "org.objectweb.joram.mom.proxies.tcp.TcpProxyService";
-	
+
 	//Scripts used by this service.
-	private static final String launchServer = "/home/ubuntu/joram/bin/launch-vm-server.sh";
-	private static final String launchClient = "/home/ubuntu/joram/bin/launch-vm-client.sh";
-	
+	private static final String launchServerSh = "/home/ubuntu/joram/bin/launch-vm-server.sh";
+	private static final String launchClientSh = "/home/ubuntu/joram/bin/launch-vm-client.sh";
+
 	//Values so that the ports of worker i are base+i.
 	private static final int domainPortBase = 16050;
 	private static final int serverPortBase = 16000;
-	
-	
+
+	/** Specific admin wrapper for background jobs. */
+	private AdminWrapper aw;
+
 	/** A link to the VM service. */
 	private AmazonService as;
+
+	/** List of currently used workers' VMs. */
+	private LinkedList<String> wVms;
 	
-	/** List of pre-rpovisionned VMs. */
-	private LinkedList<String> preVms;
-	
-	/** List of currently used VMs. */
-	private LinkedList<String> vms;
-	
+	/** List of pre-provisioned VMs. */
+	private LinkedList<String> pVms;
+
 	/** Current number of workers. */
 	private int size;
-	
+
 	/** Number of servers per VM. */
 	private int spvm;
-	
+
 
 	@Override
 	protected void initService(Properties props) throws Exception {
-		//Initializes the service beneath.
+		//Setting specific admin connection
+		try {
+			InitialContext jndiCtx = new InitialContext();
+			ConnectionFactory cf = (ConnectionFactory) jndiCtx.lookup("cfp2");
+			jndiCtx.close();
+			
+			Connection cn = cf.createConnection("root", "root");
+			cn.start();
+			
+			aw = AdminModule.getWrapper(); //new AdminWrapper(cn);
+			
+		} catch (Exception e) {
+			logger.log(Level.SEVERE,"Error while setting admin connection!");
+			throw e;
+		}
+		
+		//Initialize the service beneath.
 		as = new AmazonService();
 		try {
 			as.init(props);
@@ -63,99 +84,133 @@ public class JoramService extends Service {
 			logger.log(Level.SEVERE,"Error while initializing Amazon Service.");
 			throw e;
 		}
-		
-		//Get the properties..
-		int ppSize = Integer.valueOf(props.getProperty("pre_provision_size"));
+
+		//Get the properties.
+		size = Integer.valueOf(props.getProperty("init_workers_size"));
 		spvm = Integer.valueOf(props.getProperty("servers_per_vm"));
-		
-		//Pre-provisioning, if requested.
-		preVms = new LinkedList<String>();
-		for (int i = 0; i < ppSize; i++) {
-			PreProvision pp = new PreProvision(as,preVms);
-			pp.start();
-		}
-		
-		//Set initial machine, on which Joram#1 is already running.
-		size = 1;
-		vms = new LinkedList<String>();
-		for (Server s : AdminModule.getServers()) {
-			if (s.getId() == 1) {
-				vms.push(s.getHostName());
-				break;
+		int ppSize = Integer.valueOf(props.getProperty("pre_provision_size"));
+
+		//Set initial machines, on which current workers are working.
+		int vmSize = size / spvm;
+		wVms = new LinkedList<String>();
+		for (int i = 0; i < vmSize; i++) {
+			int id = i * spvm + 1;
+			for (Server s : aw.getServers()) {
+				if (s.getId() == id) {
+					wVms.offerLast(s.getHostName());
+					break;
+				}
 			}
 		}
 		
+		//Pre-provisioning, if requested.
+		pVms = new LinkedList<String>();
+		for (int i = 0; i < ppSize; i++) {
+			PreProvision pp = new PreProvision();
+			pp.start();
+		}
+
 		logger.log(Level.INFO,"Initialization completed.");
 	}
 
 	/**
-	 * Deletes a worker (a consumer along with its queue and Joram server).
+	 * Deletes a worker (i.e., the queue, we keep Joram servers).
 	 * 
 	 * @throws Exception
 	 */
 	public void delWorker() throws Exception {
 		logger.log(Level.INFO,"Deleting worker..");
-		AdminModule.stopServer(size);
-		AdminModule.removeServer(size);
+		//AdminModule.stopServer(size);
+		//AdminModule.removeServer(size);
 		
-		size--;
+		deleteQueue(size--);
+
 		if ((size % spvm) == 0) {
-			String vm =vms.pop();
-			//To be suppressed effectively (needed for the logs though)
+			String w = wVms.pollLast();
+			String p = pVms.pollLast();
+			if (p != null) {
+				pVms.offerFirst(w);
+			}
 		}
-		
+
 		logger.log(Level.INFO,"Deleted worker.");
 	}
 
 	/**
-	 * Creates a new worker (i.e. Joram server, queue and consumer).
+	 * Creates a new worker:
+	 * - Creates the queue,
+	 * - Starts the consumer java client. 
 	 * 
 	 * @return The new workers' destination.
 	 * @throws Exception
 	 */
 	public Queue addWorker() throws Exception {
 		logger.log(Level.INFO,"Adding new worker..");
-		String vm;
-		
-		if ((size % spvm) == 0) {
-			if (preVms.isEmpty()) {
-				vm = as.runInstance();
-				logger.log(Level.INFO,"Runned new VM with IP: " + vm + "..");
-			} else {
-				vm = preVms.poll();
-				PreProvision pp = new PreProvision(as,preVms);
-				pp.start(); //Replaces the VM we just polled
-				logger.log(Level.INFO,"Used pre-provisionned VM..");
-			}
-			vms.push(vm);
+		String ip;
+
+		if ((size % spvm) != 0) {
+			ip = wVms.peekLast();
+			logger.log(Level.INFO,"Used spot on existing VM.");
 		} else {
-			 vm = vms.peek();
-			 logger.log(Level.INFO,"Used spot on existing VM.");
+			ip = pVms.pollLast();
+			if (ip != null) {
+				PreProvision pp = new PreProvision();
+				pp.start(); //Replaces the VM we just polled.
+				logger.log(Level.INFO,"Used pre-provisioned VM..");
+			} else {
+				ip = addJoramHost();
+			}
+			wVms.offerLast(ip);
 		}
 		
-		return addServer(vm,++size);
+		Queue newQ = createQueue(ip,++size);
+		launchWorker(ip,size);
+		return newQ;
 	}
+
+	/**
+	 * Creates a VM and launches spvm Joram servers on it.
+	 * 
+	 * @return IP of the created Joram host.
+	 */
+	private String addJoramHost() throws Exception {
+		String ip = as.runInstance();
+		
+		logger.log(Level.INFO,"Created new VM with IP: " + ip);
+		
+		int s = (wVms.size() + pVms.size()) * spvm + 1;
+		for (int i = s; i < s + spvm; i++) {
+			launchServer(ip,i);
+		}
+		
+		logger.log(Level.INFO,"Successfully created a VM with its Joram servers..");
+		return ip;
+	} 
 	
 	/**
-	 * Creates the worker on the given machine, with the given number.
-	 * Called by addWoker.
+	 * Launches a Joram server.
+	 * Called by addJoramHost.
 	 * 
-	 * @param servIp The address of the machine where the server is to be created.
-	 * @param servNum the number of the server to be created.
-	 * @return The new worker's destination.
+	 * @param ip The address of the machine where the server is to be created.
+	 * @param num The number of the server to be created.
 	 * @throws Exception
 	 */
-	private Queue addServer(String servIp, int servNum) throws Exception {
+	private void launchServer(String ip, int num) throws Exception {
 		//AdminModule.connect("root", "root", 60);
 		String[] service = new String[1];
-		service[0]=tcpProxyService;
+		service[0] = tcpProxyService;
 		String[] serviceArg = new String[1];
-		serviceArg[0]=Integer.toString(serverPortBase+servNum);
-		AdminModule.addServer(servNum,servIp,"D1",domainPortBase+servNum,"W"+servNum,service,serviceArg);
+		serviceArg[0] = Integer.toString(serverPortBase + num);
 		
+		try {
+			aw.removeServer(num);
+		} catch (Exception e) {
+			// Server existence is not given.
+		}
+		aw.addServer(num,ip,"D1",domainPortBase + num,"W" + num,service,serviceArg);
 		logger.log(Level.INFO,"Added new server logically..");
 
-		String platformConfig = AdminModule.getConfiguration();		
+		String platformConfig = aw.getConfiguration();
 		File platformConfigFile = new File("new_a3servers.xml");
 		FileOutputStream fos = new FileOutputStream(platformConfigFile);
 		PrintWriter pw = new PrintWriter(fos);
@@ -165,56 +220,90 @@ public class JoramService extends Service {
 		fos.close();
 
 		// Add new server
-		String[] command = {launchServer,servIp,Integer.toString(servNum)};
+		String[] command = {launchServerSh,ip,Integer.toString(num)};
 		Runtime.getRuntime()
 		.exec(command);
-		//Thread.sleep(5000);
-		
-		logger.log(Level.INFO,"Started new server remotely..");
 
-		User.create("anonymous", "anonymous", servNum);
-		Queue newRq = Queue.create(servNum,"queue"+servNum);
-		newRq.setFreeReading();
-		newRq.setFreeWriting();
+		logger.log(Level.INFO,"Started server #" + num + " remotely on " + ip);
+	}
+	
+	/**
+	 * Creates and sets a message queue.
+	 * Also creates the user anonymous if necessary.
+	 * 
+	 * @param ip The address of the machine where the Joram server is running.
+	 * @param num The ID of the Joram server.
+	 * 
+	 * @return The created queue.
+	 * @throws Exception
+	 */
+	private Queue createQueue(String ip, int num) throws Exception {
+		boolean done = false;
+		while (!done) {
+			try {
+				User.create("anonymous","anonymous",num);
+				done = true;
+				logger.log(Level.INFO,"Connected to Joram server.");
+			} catch (Exception e) {
+				logger.log(Level.INFO,"Trying to connect to Joram server...");
+			}
+		}
+		Queue newQ = Queue.create(num,"queue" + num);
+		newQ.setFreeReading();
+		newQ.setFreeWriting();
 		javax.jms.ConnectionFactory newCf =
-				TcpConnectionFactory.create(servIp,serverPortBase+servNum);
-
+				TcpConnectionFactory.create(ip,serverPortBase + num);
 		InitialContext ictx = new InitialContext();
-		ictx.rebind("cfw"+servNum,newCf);
-		ictx.rebind("worker"+servNum,newRq);
+		ictx.rebind("cfw" + num,newCf);
+		ictx.rebind("worker" + num,newQ);
 		ictx.close();
 		
-		logger.log(Level.INFO,"Created new worker on new server..");
-		
-		command[0] = launchClient;
+		logger.log(Level.INFO,"Created Queue successfully on Joram#" + num);
+		return newQ;
+	}
+	
+	/**
+	 * Deletes a message queue.
+	 * 
+	 * @param num The ID of Joram server containing the queue.
+	 * @throws Exception
+	 */
+	private void deleteQueue(int num) throws Exception {
+		InitialContext ictx = new InitialContext();
+		Queue w = (Queue) ictx.lookup("worker" + num);
+		ictx.close();
+		w.delete();
+	}
+
+	/**
+	 * Launches a consumer client.
+	 * 
+	 * @param ip The address of the machine where it should be launched.
+	 * @param num The ID of the worker.
+	 * @throws Exception
+	 */
+	private void launchWorker(String ip, int num) throws Exception {
+		String command[] = {launchClientSh,ip,Integer.toString(num)};
 		Runtime.getRuntime()
 		.exec(command);
-		//Thread.sleep(5000);
-		
-		logger.log(Level.INFO,"Started client remotely.");
-		return newRq;
-	}
-}
 
-/**
- * A class used to pre-provision vms in parallel.
- */
-class PreProvision extends Thread {
-	
-	private LinkedList<String> preVms;
-	private AmazonService as;
-	
-	public PreProvision(AmazonService as, LinkedList<String> preVms) {
-		this.preVms = preVms;
-		this.as = as;
+		logger.log(Level.INFO,"Started client remotely.");
 	}
-	
-	public void run() {
-		try {
-		String vm = as.runInstance();
-		preVms.offer(vm);
-		} catch (Exception e) {
-			//Well, this is awkward...
+
+	/**
+	 * A class used to pre-provision a VM asynchronously.
+	 * It also pre-launches all the Joram servers the VM can hold.
+	 */
+	private class PreProvision extends Thread {
+		public void run() {
+			try {
+				logger.log(Level.INFO,"Preprovisioning one VM..");
+				String ip = addJoramHost();
+				pVms.offer(ip);
+			} catch (Exception e) {
+				logger.log(Level.SEVERE,"Error while pre-provisioning a VM!");
+				e.printStackTrace(System.out);
+			}
 		}
 	}
 }
