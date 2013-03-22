@@ -634,18 +634,18 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
   public void commit(Runnable callback) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "NGAsyncTransaction.commit()");
-    try {
-      //if (phase != RUN)
-      //  throw new IllegalStateException("Cannot commit.");
-      
-      Context threadCtx = perThreadContext.get();
-      
-      int sizeToAllocate = serializeObjects(threadCtx);
-      
-      lock.lock();
+    
+    // if (phase != RUN)
+    // throw new IllegalStateException("Cannot commit.");
 
+    Context threadCtx = perThreadContext.get();
+
+    int sizeToAllocate = serializeObjects(threadCtx);
+
+    lock.lock();
+    try {
       Hashtable<Object, Operation> log = threadCtx.getLog();
-      if (! log.isEmpty()) {
+      if (!log.isEmpty()) {
         if (asyncLogWriter) {
           logManager.commit(threadCtx, callback, logFileWriter, sizeToAllocate);
         } else {
@@ -654,14 +654,15 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         log.clear();
       } else {
         if (logmon.isLoggable(BasicLevel.WARN))
-          logmon.log(BasicLevel.WARN, "Should not commit an empty log", new Exception());
+          logmon.log(BasicLevel.WARN, "Should not commit an empty log",
+              new Exception());
         if (callback != null) {
           callback.run();
         }
       }
 
-      //setPhase(COMMIT);
-      
+      // setPhase(COMMIT);
+
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, "NGAsyncTransaction, to be committed");
     } finally {
