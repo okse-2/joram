@@ -3,8 +3,10 @@ package fr.dyade.aaa.common.serialize;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Hashtable;
 
-public class EncodedString {
+public class EncodedString implements Serializable {
   
   private String string;
   
@@ -34,6 +36,15 @@ public class EncodedString {
     encodedString = new byte[length];
     is.readFully(encodedString);
     string = new String(encodedString);
+  }
+  
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+    out.writeUTF(string);
+  }
+
+  private void readObject(java.io.ObjectInputStream in) throws IOException,
+      ClassNotFoundException {
+    string = in.readUTF();
   }
 
   @Override
