@@ -1409,7 +1409,7 @@ public final class NGAsyncTransaction extends AbstractTransaction implements NGA
         if ((logidx % nbLogFile) < circularLogFile.size()) {
           LogFile oldLogFile = circularLogFile.get(logidx % nbLogFile);
 
-          if (oldLogFile.canBeGarbaged()) {
+          if (logFileWriter == null || oldLogFile.canBeGarbaged()) {
             garbage(oldLogFile, newLogFile);
             circularLogFile.set(logidx % nbLogFile, newLogFile);
             
