@@ -6,4 +6,6 @@ NUM=$2
 ssh 	-o UserKnownHostsFile=/dev/null \
         -o StrictHostKeyChecking=no \
         -i /home/ubuntu/joram/aws/joram.pem \
-        -f $IPADDR "nohup /home/ubuntu/joram/bin/client.sh elasticity.eval.Worker $NUM > worker$2.log &"
+        -f $IPADDR "nohup /home/ubuntu/joram/bin/client.sh elasticity.eval.Worker $NUM &> worker$2.log &"
+
+echo "Added worker $NUM on $IPADDR." >> /home/ubuntu/launch_script.log
