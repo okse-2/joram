@@ -1,6 +1,8 @@
 package elasticity.services;
 
 
+import java.io.InputStream;
+import java.io.FileInputStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
@@ -28,13 +30,14 @@ import elasticity.interfaces.Service;
  */
 public class AmazonService extends Service {
 	
-	private static final String awsServiceUrl = "ec2.eu-west-1.amazonaws.com";				//"http://194.199.25.115:80/services/Cloud/";
-	private static final String awsAccessKey = "AKIAJEB3ONM4SNB3UIEA";						//"admin";
-	private static final String awsSecretKey = "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"; 	//"password";
-	private static final String awsKeypair = "joram";
-	private static final String awsInstanceType = "m1.small";
-	private static final String awsSecurityGroup = "default";
+	private static final String awsPropFile = "../aws/amazon.properties";
 	
+	private String awsServiceUrl; //"http://194.199.25.115:80/services/Cloud/";
+	private String awsAccessKey;  //"admin";
+	private String awsSecretKey;  //"password";
+	private String awsKeypair;
+	private String awsInstanceType;
+	private String awsSecurityGroup;
 	private String awsImageId;
 	
 	private AmazonEC2 ec2;
@@ -47,7 +50,25 @@ public class AmazonService extends Service {
 	@Override
 	protected void initService(Properties props) throws Exception {
 		//Get the properties..
-		awsImageId = props.getProperty("aws_image_id");
+		Properties awsProps = new Properties();
+		InputStream reader;
+		try {
+			reader = new FileInputStream(awsPropFile);
+			awsProps.load(reader);
+			reader.close();
+		} catch (Exception e) {
+			logger.log(Level.SEVERE,"ERROR while reading the AWS properties file:");
+			e.printStackTrace(System.out);
+			throw e;
+		}
+		
+		awsServiceUrl = awsProps.getProperty("aws_service_url");
+		awsAccessKey = awsProps.getProperty("aws_access_key");
+		awsSecretKey = awsProps.getProperty("aws_secret_key");
+		awsKeypair = awsProps.getProperty("aws_keypair");
+		awsInstanceType = awsProps.getProperty("aws_instance_type");
+		awsSecurityGroup = awsProps.getProperty("aws_security_group");
+		awsImageId = awsProps.getProperty("aws_image_id");
 		
 		ec2 = new AmazonEC2Client(new BasicAWSCredentials(awsAccessKey,awsSecretKey));
 		ec2.setEndpoint(awsServiceUrl);
@@ -56,7 +77,7 @@ public class AmazonService extends Service {
 	}
 	
 	/**
-	 * Runs a VM instance on an AWS compatible cloud.
+	 * Runs a VM instance on an EC2 compatible cloud.
 	 * 
 	 * @return The IP of the started instance.
 	 */
@@ -73,19 +94,23 @@ public class AmazonService extends Service {
 
 		//Executes the run request.
 		String instanceId = ""; //Will be changed eventually.
-		try {
-			RunInstancesResult runInstancesResult = ec2.runInstances(runInstancesRequest);
-			instanceId = runInstancesResult.getReservation().getInstances().get(0).getInstanceId();
-			logger.log(Level.INFO,"Sent RunInstanceRequest successfully..");
-		} catch (Exception e) {
-			logger.log(Level.SEVERE,"Error while sending RunInstanceRequest!" );
-			e.printStackTrace(System.out);
-			throw e; //Forwards the exception
+		boolean done = false;
+		while (!done) {
+			try {
+				RunInstancesResult runInstancesResult = ec2.runInstances(runInstancesRequest);
+				instanceId = runInstancesResult.getReservation().getInstances().get(0).getInstanceId();
+				done = true;
+			} catch (Exception e) {
+				logger.log(Level.INFO,"Error while sending RunInstanceRequest, retrying in 1s..." );
+				Thread.sleep(1000);
+			}
 		}
+		
+		logger.log(Level.INFO,"Sent RunInstanceRequest successfully..");
 				
 		//Waits for the instance to be "running".
 		String instanceIp = ""; //Will be changed eventually.
-		boolean done = false;
+		done = false;
 		while (!done) {
 			try {
 				Thread.sleep(1000);
@@ -102,9 +127,7 @@ public class AmazonService extends Service {
 					done = true;
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
-				logger.log(Level.SEVERE,"Error while waiting for instance to become running!" );
-				throw e;
+				logger.log(Level.INFO,"Failed to get instance description, retrying..");
 			}
 		}
 		

@@ -1,11 +1,11 @@
 package elasticity.services;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import javax.jms.ConnectionFactory;
 import javax.naming.InitialContext;
 
 import org.objectweb.joram.client.jms.Queue;
@@ -24,20 +24,6 @@ public class ElasticityService extends Service {
 	/** A link to the Joram service. */
 	private JoramService js;
 
-	//Properties.
-	/** The value beyond which a worker is considered overloaded. */ 
-	private int maxLoadLimit;
-
-	/** The value beneath which a worker is considered underloaded. */
-	private int minLoadLimit;
-
-	/** 
-	 * Rate by which consumption rates are decreased (a percentage).
-	 * It is used (1) when regulating overloaded queues' rates;
-	 * and (2), when scaling down, which takes 100/downRate rounds. 
-	 */
-	private int stepRate;
-
 	//Involved JMS objects.
 	/** The list of producers */
 	private List<Queue> producers;
@@ -55,32 +41,25 @@ public class ElasticityService extends Service {
 	/** Number of pending messages per worker. */
 	private List<Integer> loads;
 
-	/** Number of monitored underloaded workers. */
-	private int underloaded;
-
-	/** Number of monitored overloaded workers. */
-	private int overloaded;
-
 	/** Average load of the monitored workers. */
 	private int averageLoad;
-	
-	/**
-	 * Stores for how many rounds a scaling down plan has been on-going.
-	 * If < 0, no scaling down plan is being carried on.
-	 */
-	private int scalingDownAge;
 
-	/**
-	 * Stores the rate of the worker to remove, just before initiating
-	 * the scaling down plan.
-	 */
-	private int scalingDownRate;
+	//Decision-related values
+	private int scaleIn;
+	private int downIn;
+	private int upIn;
+
+	private int downLimit;
+	private int upLimit;
+
+	private int downRate;
 
 	@Override
 	public void initService(Properties props) throws Exception {
+		logger.log(Level.FINE, "Started Initialization..");
 		//Setting the admin connection once and for all.
 		AdminModule.connect("localhost",16101,"root","root", 60);
-
+		
 		//Initializes the service beneath.
 		js = new JoramService();
 		try {
@@ -90,11 +69,11 @@ public class ElasticityService extends Service {
 			logger.log(Level.SEVERE,"Error while initializing Amazon Service!");
 			throw e;
 		}
-		
+
 		//Get the properties..
-		maxLoadLimit = Integer.valueOf(props.getProperty("max_load_limit"));
-		minLoadLimit = Integer.valueOf(props.getProperty("min_load_limit"));
-		stepRate = Integer.valueOf(props.getProperty("step_rate"));
+		scaleIn = Integer.valueOf(props.getProperty("scale_in"));
+		upLimit = Integer.valueOf(props.getProperty("up_limit"));
+		downLimit = Integer.valueOf(props.getProperty("down_limit"));
 
 		//Initializing the fields..
 		producers = new ArrayList<Queue>();
@@ -115,7 +94,8 @@ public class ElasticityService extends Service {
 		rates.add(0);
 		loads.add(0);
 
-		scalingDownAge = -1;
+		downIn=-1;
+		upIn=0;
 
 		logger.log(Level.INFO,"Initialization completed.");
 	}
@@ -124,42 +104,37 @@ public class ElasticityService extends Service {
 	 * Updates the values of monitoring variables.
 	 */
 	public void monitorWorkers() throws Exception {
-		underloaded = 0;
-		overloaded = 0;
+		logger.log(Level.FINE,"Started monitoring..");
 		averageLoad = 0;
 		try {
 			for(int i = 0; i < workers.size(); i++) {
 				Queue worker = workers.get(i);
+				Hashtable<String,Integer> ht = worker.getQueueMetrics();
 
-				int newDelivered = worker.getDeliveredMessages();
+				int newDelivered = ht.get("delivered");
 				rates.set(i, newDelivered - delivered.get(i));
 				delivered.set(i,newDelivered);
 
-				loads.set(i, worker.getPendingMessages());
-				if (loads.get(i) < minLoadLimit)
-					underloaded++;
-				else if (loads.get(i) > maxLoadLimit)
-					overloaded++;
-				
+				loads.set(i, ht.get("pending"));
 				averageLoad += loads.get(i);
 			}
-			averageLoad /= workers.size();
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.log(Level.SEVERE, "Couldn't monitor the workers!");
 			throw e;
 		}
 
+		averageLoad /= workers.size();
+
 		String loadStr = "";
 		String rateStr = "";
 		for(int i = 0; i < workers.size(); i++) {
-			loadStr = loadStr + " " + loads.get(i);
-			rateStr = rateStr + " " + rates.get(i);
+			loadStr = loadStr + "\t" + loads.get(i);
+			rateStr = rateStr + "\t" + rates.get(i);
 		}
 
-		logger.log(Level.FINE,"Monitored loads:" + loadStr);
-		logger.log(Level.FINE,"Monitored rates:" + rateStr);
-		logger.log(Level.FINE,"Average load: " + averageLoad);
+		logger.log(Level.INFO,"Monitored loads:" + loadStr + "\t(avg. " + averageLoad  + ")");
+		logger.log(Level.INFO,"Monitored rates:" + rateStr);
 	}
 
 	/**
@@ -172,67 +147,70 @@ public class ElasticityService extends Service {
 	 * @return true if scaling down is started or on-going.
 	 */
 	public boolean testScaleDown() throws Exception {
+		logger.log(Level.FINE, "Testing whether to scale down..");
 		int last = workers.size()-1;
 
 		//Plan should be cancelled.
-		if (overloaded > 0) {
-			if (scalingDownAge >= 0) {
-				rates.set(last, scalingDownRate);
-				scalingDownAge = -1;
+		if (averageLoad > downLimit) {
+			if (downIn > -1) {
+				rates.set(last, downRate);
+				downIn = -1;
+				//nextScaleUp = minScaleUp;
 				logger.log(Level.INFO,"Cancelled scaling down plan.");
 			}
+
+			return false;
+		}
+		
+		if (workers.size() <= 1) {
 			return false;
 		}
 
 		//Should initiate plan.
-		if (workers.size() > 1 && scalingDownAge < 0 && underloaded == workers.size()) {
-			scalingDownRate = rates.get(last);
-			scalingDownAge = 0;
+		if (downIn < 0) {
+			downRate = rates.get(last);
+			downIn = scaleIn;
 		}
 
+		
 		//Plan can continue.
-		if (scalingDownAge >= 0) {
-			if (++scalingDownAge > (100/stepRate)) {
-				//Worker should effectively be removed.
-				Queue worker = workers.remove(last);
-				rates.remove(last);
-				loads.remove(last);
-				delivered.remove(last);
+		if (downIn-- == 0) {
+			//Worker should effectively be removed.
+			logger.log(Level.FINE, "Removing extra worker..");
 
-				//Notify producers.
-				for(Queue producer : producers)
-					try {
-						producer.delRemoteDestination(worker.getName());
-					} catch (Exception e) {
-						e.printStackTrace();
-						logger.log(Level.SEVERE, "Couldn't delete the remote destination from producers!");
-						throw e;
-					}
+			Queue worker = workers.remove(last);
+			rates.remove(last);
+			loads.remove(last);
+			delivered.remove(last);
 
-				//Remove from Joram infrastructure.
+			//Notify producers.
+			for(Queue producer : producers)
 				try {
-					js.delWorker();
+					producer.delRemoteDestination(worker.getName());
 				} catch (Exception e) {
 					e.printStackTrace();
-					logger.log(Level.SEVERE, "Problem while trying to remove the corresponding Joram Server!");
+					logger.log(Level.SEVERE, "Couldn't delete the remote destination from producers!");
 					throw e;
 				}
 
-				scalingDownAge = -1;
-
-				logger.log(Level.INFO, "Removed extra worker successfully.");
-				return false;
-
-			} else {
-				//Gradually decrease the rate of the worker to remove (will affect weights computation).
-				rates.set(last, scalingDownRate*(100-stepRate*scalingDownAge)/100);
-				logger.log(Level.INFO,"Trying to remove extra worker, " + scalingDownAge + "..");
-				return true;
+			//Remove from Joram infrastructure.
+			try {
+				js.delWorker();
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.log(Level.SEVERE, "Problem while trying to remove the corresponding Joram Server!");
+				throw e;
 			}
-		}
 
-		//No scaling down plan started or continued.
-		return false;
+			logger.log(Level.INFO, "Removed extra worker successfully.");
+			return false;
+
+		} else {
+			//Gradually decrease the rate of the worker to remove (will affect weights computation).
+			rates.set(last, downRate * downIn / scaleIn);
+			logger.log(Level.INFO,"Removing extra worker in " + (downIn + 1) + "..");
+			return true;
+		}
 	}
 
 	/**
@@ -242,13 +220,24 @@ public class ElasticityService extends Service {
 	 * @return true if scaling up is achieved.
 	 */
 	public boolean testScaleUp() throws Exception {
-		if (overloaded < workers.size())
+		logger.log(Level.FINE,"Testing whether to scale up..");
+		if (upIn > 0) {
+			upIn--;
+			logger.log(Level.FINE,"Too soon to scale up.");
 			return false;
+		}
+
+		if (averageLoad < upLimit) {
+			logger.log(Level.FINE,"Scaling up not needed.");
+			return false;
+		}
 
 		//Update weights based on new values.
 		updateWeights();
 
 		//Adding the worker to the Joram infrastructure
+		logger.log(Level.INFO,"Adding a new worker..");
+
 		Queue worker;
 		try {
 			worker = js.addWorker();
@@ -269,7 +258,7 @@ public class ElasticityService extends Service {
 		 * max weights of the workers, which is done 
 		 * by addRemoteDestination on producer's side.
 		 */
-		for(Queue producer : producers)
+		for(Queue producer : producers) {
 			try {
 				producer.addRemoteDestination(worker.getName());
 			} catch (Exception e) {
@@ -277,84 +266,70 @@ public class ElasticityService extends Service {
 				logger.log(Level.SEVERE, "Couldn't send weights to a producer!");
 				throw e;
 			}
+		}
+
+		upIn = scaleIn;
+		logger.log(Level.INFO,"Added new worker successfully.");
 
 		//Skip values computed during worker's creation
 		monitorWorkers();
 
-		logger.log(Level.INFO,"Added new worker successfully.");
 		return true;
 	}
-
-	/*
-	 * Decreases the monitored rates of overloaded workers.
-	 *
-	private void regulateRates() {
-		//Return, if no need for regulation.
-		if (overloaded == 0 || overloaded == workers.size())
-			return;
-
-		String rateStr = "";
-		for(int i = 0; i < workers.size(); i++) {
-			if (loads.get(i) > maxLoadLimit)
-				rates.set(i,rates.get(i)*(100-stepRate)/100);
-
-			rateStr = rateStr + " " + rates.get(i);
-		}
-		logger.log(Level.FINE,"Regulated rates:" + rateStr);
-	}*/
 	
-	/**
-	 * Tries to distribute the load over the workers.
-	 */
 	private void regulateRates() {
-		String rateStr = "";
-		for(int i = 0; i < workers.size(); i++) {
-			int max = rates.get(i) * stepRate / 100;
-			int dif = Math.abs(loads.get(i) - averageLoad);
-			int reg = Math.min(dif,max);
-			
-			rates.set(i,rates.get(i) + (int) Math.signum(dif) * reg);
-			rateStr = rateStr + " " + rates.get(i);
+		logger.log(Level.FINE,"Regulating rates..");
+		
+		if (downIn > -1) {
+			logger.log(Level.FINE,"On going scaling down plan, skip.");
+			return;
 		}
-		logger.log(Level.FINE,"Regulated rates:" + rateStr);
+		
+		String rateStr = "";
+		for(int i = 0; i < workers.size(); i++) {			
+			int dif = (loads.get(i) > averageLoad) ? (loads.get(i) - averageLoad) / 2 : 0;
+			int val = Math.max(rates.get(i) - dif,0);
+			rates.set(i,val);
+			rateStr = rateStr + "\t" + val;
+		}
+		
+		logger.log(Level.INFO,"Regulated rates:" + rateStr);
 	}
 
-	/**
-	 * Computes weights and sends them to producers.
-	 * Calls regulateRates.
-	 */
 	public void updateWeights() throws Exception {
-
-		//If necessary..
+		logger.log(Level.FINE,"Updating weights..");
+		
 		regulateRates();
 
 		//Compute weights.
 		int[] weights = new int[workers.size()];
 		int maxRate = Integer.MIN_VALUE;
-		for(int i = 0; i < workers.size(); i++)
+		for (int i = 0; i < workers.size(); i++) {
 			if (rates.get(i) > maxRate)
 				maxRate = rates.get(i);
+		}
 
-		if (maxRate < 1)
+		if (maxRate < 1) {
 			maxRate = 1;
+		}
 
-		int base  = (int)Math.pow(10.0,Math.floor(Math.log10(maxRate))-1);
+		//We guarantee that max weight is 20.
+		double factor = 10.0 / maxRate;
 
 		String weightStr = "";
-		for (int i = 0; i < workers.size(); i++) { 	
-			int weight = (int)Math.round((double)rates.get(i)/(double)base);
-			int wb = (int)Math.pow(10.0,Math.floor(Math.log10(weight)));
+		for (int i = 0; i < workers.size(); i++) {
+			weights[i] = (int) Math.round(rates.get(i) * factor);
+			if (weights[i] == 0) {
+				weights[i] = 1;
+			}
 
-			if (weight < 1) //Weight should NEVER be negative
-				weight = 1;
-
-			weights[i] = weight;
-			weightStr = weightStr + " " + weight;
+			weightStr += "\t" + weights[i];
 		}
-		logger.log(Level.FINE,"Computed weights:" + weightStr);
 
+		logger.log(Level.INFO,"Updated weights:" + weightStr);
+		                       
 		//Notify producers.
-		for(int i = 0; i < producers.size(); i++)
+		for(int i = 0; i < producers.size(); i++) {
 			try {
 				producers.get(i).sendDestinationsWeights(weights);
 
@@ -363,5 +338,8 @@ public class ElasticityService extends Service {
 				logger.log(Level.SEVERE, "Couldn't send weights to a producer!");
 				throw e;
 			}
+		}
+
+		logger.log(Level.FINE,"Done updating weights.");
 	}
 }

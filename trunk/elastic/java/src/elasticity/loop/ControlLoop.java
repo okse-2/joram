@@ -30,7 +30,8 @@ public class ControlLoop {
 			
 			period = Integer.valueOf(props.getProperty("control_loop_period"));
 		} catch (Exception e) {
-			System.out.println("ERROR while reading properties file.");
+			System.out.println("ERROR while reading properties file:");
+			e.printStackTrace(System.out);
 			return;
 		}
 
@@ -44,32 +45,48 @@ public class ControlLoop {
 			es.init(props);
 		} catch (Exception e) {
 			System.out.println("ERROR: couldn't init elasticity service!");
+			e.printStackTrace(System.out);
 			return;
 		}
 		
 		System.out.println("[ControlLoop]\tInitialized ES..");
 
+		long start,wait;
+		long fix = 0;
+		
 		//Begin loop..
 		while(true) {
 			try {
-				Thread.sleep(period);
+				wait = period - fix;
+				if (wait > 0) {
+					Thread.sleep(wait);
+				} else {
+					Thread.sleep(period);
+				}
 			} catch (Exception e) {
 				System.out.println("ERROR: while sleeping..");
 				return;
 			}
-
+			
+			start = System.currentTimeMillis();
 			try {
+				
 				es.monitorWorkers();
 
 				if(!es.testScaleDown())
 					if(es.testScaleUp())
 						continue;
-
+				
 				es.updateWeights();
 			} catch (Exception e) {
-				System.out.println("ERROR: see Elasticity Service log.");
+				System.out.println("ERROR: see Elasticity loop log..");
+				e.printStackTrace(System.out);
 				return;
 			}
+			fix = System.currentTimeMillis() - start;
+			
+			System.out.println("INFO: " + fix);
+			
 		}
 	}	
 }

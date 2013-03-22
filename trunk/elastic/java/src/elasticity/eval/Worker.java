@@ -19,6 +19,7 @@ public class Worker {
 	static int count, load;
 	
 	static class ReceiveRound extends Thread {
+		public Exception e;
 		private MessageConsumer receiver;
 		
 		public ReceiveRound(Connection cnx, Queue dest) {
@@ -26,7 +27,7 @@ public class Worker {
 				Session session = cnx.createSession(false,Session.AUTO_ACKNOWLEDGE);
 				receiver = session.createConsumer(dest);
 			} catch (JMSException e) {
-				e.printStackTrace(System.out);
+				this.e = e;
 			}
 		}
 
@@ -35,7 +36,7 @@ public class Worker {
 				for(count  = 0; count < load; count++)
 					receiver.receive();
 			} catch (Exception e) {
-				e.printStackTrace(System.out);
+				this.e = e;
 			}
 		}
 	}
@@ -61,6 +62,10 @@ public class Worker {
 			rr.start();
 			rr.join(Constants.WORKER_PERIOD);
 			rr.stop();
+			if (rr.e != null) {
+				rr.e.printStackTrace(System.out);
+				return;
+			}
 			rr = new ReceiveRound(cnx,dest);
 			System.out.println("[Worker " + number + "]\t" + count);		
 			wait = rstart + Constants.WORKER_PERIOD - System.currentTimeMillis();
