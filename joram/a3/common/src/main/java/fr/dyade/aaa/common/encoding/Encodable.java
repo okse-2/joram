@@ -4,7 +4,7 @@ public interface Encodable {
   
   int getClassId();
   
-  int getEncodeSize();
+  int getEncodedSize();
   
   void encode(Encoder encoder) throws Exception;
 
