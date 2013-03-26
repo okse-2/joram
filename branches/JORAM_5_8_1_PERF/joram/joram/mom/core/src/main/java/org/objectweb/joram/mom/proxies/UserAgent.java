@@ -152,7 +152,7 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.WakeUpTask;
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.serialize.EncodedString;
+import fr.dyade.aaa.common.encoding.EncodedString;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.TransactionObjectFactory;
