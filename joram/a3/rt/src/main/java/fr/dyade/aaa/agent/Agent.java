@@ -31,7 +31,7 @@ import java.util.Map.Entry;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.common.serialize.EncodedString;
+import fr.dyade.aaa.common.encoding.EncodedString;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.management.MXWrapper;
 
