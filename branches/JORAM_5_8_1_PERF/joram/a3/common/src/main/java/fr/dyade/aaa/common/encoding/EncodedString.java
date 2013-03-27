@@ -5,7 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
-public class EncodedString implements Serializable {
+public class EncodedString implements Serializable, Encodable {
   
   private String string;
   
@@ -63,6 +63,26 @@ public class EncodedString implements Serializable {
   @Override
   public String toString() {
     return "EncodedString [string=" + string + "]";
+  }
+
+  public int getClassId() {
+    return -1;
+  }
+
+  public int getEncodedSize() {
+    return string.length() + 4;
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    if (encodedString == null) {
+      encodedString = string.getBytes();
+    }
+    encoder.encodeByteArray(encodedString);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    encodedString = decoder.decodeByteArray();
+    string = new String(encodedString);
   }
 
 }
