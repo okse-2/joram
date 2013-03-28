@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies 
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -19,22 +20,36 @@
  */
 package fr.dyade.aaa.common.encoding;
 
-public interface Encodable {
+public class StringPair implements Encodable {
+  
+  private EncodedString s1;
+  
+  private EncodedString s2;
 
-  public static final int CLASS_ID_AREA = 0x0000;
-  
-  public static final int ENCODED_STRING_CLASS_ID = CLASS_ID_AREA + 0;
-  
-  public static final int SERIALIZABLE_WRAPPER_CLASS_ID = CLASS_ID_AREA + 1;
-  
-  public static final int STRING_PAIR_CLASS_ID = CLASS_ID_AREA + 2;
-  
-  int getClassId();
-  
-  int getEncodedSize();
-  
-  void encode(Encoder encoder) throws Exception;
+  public StringPair(EncodedString s1, EncodedString s2) {
+    super();
+    this.s1 = s1;
+    this.s2 = s2;
+  }
 
-  void decode(Decoder decoder) throws Exception;
+  public int getClassId() {
+    return STRING_PAIR_CLASS_ID;
+  }
+
+  public int getEncodedSize() {
+    return s1.getEncodedSize() + s2.getEncodedSize();
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    s1.encode(encoder);
+    s2.encode(encoder);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    s1 = new EncodedString();
+    s1.decode(decoder);
+    s2 = new EncodedString();
+    s2.decode(decoder);
+  }
 
 }
