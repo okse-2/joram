@@ -85,7 +85,7 @@ public class EncodedString implements Serializable, Encodable {
   }
 
   public int getClassId() {
-    return -1;
+    return ENCODED_STRING_CLASS_ID;
   }
 
   public int getEncodedSize() {
