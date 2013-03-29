@@ -87,10 +87,12 @@ echo "ADMINISTRATING.."
 ssh $KEY ubuntu@$SERVP1 "nohup joram/bin/client.sh elasticity.eval.Setup &"
 
 echo "LAUNCHING CLIENTS.."
+ssh $KEY ubuntu@$SERVP1 "nohup joram/bin/client.sh elasticity.loop.ControlLoop > elasticity.log &"
+
+sleep 120
+
 ssh $KEY ubuntu@$SERVW1 "nohup joram/bin/client.sh elasticity.eval.Worker 1 > worker1.log &"
 
 ssh $KEY ubuntu@$SERVP1 "nohup joram/bin/client.sh elasticity.eval.Producer 1 > producer1.log &"
 ssh $KEY ubuntu@$SERVP2 "nohup joram/bin/client.sh elasticity.eval.Producer 2 > producer2.log &"
-
-ssh $KEY ubuntu@$SERVP1 "nohup joram/bin/client.sh elasticity.loop.ControlLoop > elasticity.log &"
 

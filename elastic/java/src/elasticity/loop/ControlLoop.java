@@ -3,6 +3,7 @@ package elasticity.loop;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Scanner;
 
 import elasticity.services.ElasticityService;
 
@@ -49,7 +50,8 @@ public class ControlLoop {
 			return;
 		}
 		
-		System.out.println("[ControlLoop]\tInitialized ES..");
+		System.out.println("[ControlLoop]\tInitialized ES, ENTER to continue...");
+		
 
 		long start,wait;
 		long fix = 0;

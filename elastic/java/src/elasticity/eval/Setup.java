@@ -34,7 +34,7 @@ public class Setup {
 		System.out.println("[Setup]\tStarted...");
 		
 		// Connecting the administrator (using TcpProxyService port)
-		AdminModule.connect("localhost",16101,"root","root", 60);
+		AdminModule.connect("localhost",16101,"root","root", 120);
 		servers = AdminModule.getServers();
 		
 		// Creating access for user anonymous on servers
@@ -68,8 +68,8 @@ public class Setup {
 		ConnectionFactory cfw2 =
 				TcpConnectionFactory.create(getServerAddress(2), 16002);
 		
-		cfp1.getParameters().connectingTimer=120;
-		cfp2.getParameters().connectingTimer=120;
+		cfp1.getParameters().connectingTimer = 120;
+		cfp2.getParameters().connectingTimer = 120;
 
 		// Binding the objects in JNDI:
 		Context jndiCtx = new InitialContext();
