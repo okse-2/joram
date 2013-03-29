@@ -35,10 +35,16 @@ public class SerializableWrapper implements Encodable {
   private Serializable value;
   
   private byte[] bytes;
+  
+  public SerializableWrapper() {}
 
   public SerializableWrapper(Serializable value) {
     super();
     this.value = value;
+  }
+
+  public Serializable getValue() {
+    return value;
   }
 
   public int getClassId() {
@@ -69,6 +75,14 @@ public class SerializableWrapper implements Encodable {
     ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
     ObjectInputStream ois = new ObjectInputStream(bais);
     value = (Serializable) ois.readObject();
+  }
+  
+  public static class Factory implements EncodableFactory {
+
+    public Encodable createEncodable() {
+      return new SerializableWrapper();
+    }
+    
   }
 
 }

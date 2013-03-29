@@ -103,5 +103,13 @@ public class EncodedString implements Serializable, Encodable {
     encodedString = decoder.decodeByteArray();
     string = new String(encodedString);
   }
+  
+  public static class Factory implements EncodableFactory {
+
+    public Encodable createEncodable() {
+      return new EncodedString();
+    }
+    
+  }
 
 }

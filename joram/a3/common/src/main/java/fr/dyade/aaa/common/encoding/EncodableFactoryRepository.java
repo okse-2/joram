@@ -25,6 +25,12 @@ public class EncodableFactoryRepository {
   
   private static Hashtable<Integer, EncodableFactory> repository = new Hashtable<Integer, EncodableFactory>();
   
+  static {
+    repository.put(Encodable.ENCODED_STRING_CLASS_ID, new EncodedString.Factory());
+    repository.put(Encodable.SERIALIZABLE_WRAPPER_CLASS_ID, new SerializableWrapper.Factory());
+    repository.put(Encodable.STRING_PAIR_CLASS_ID, new StringPair.Factory());
+  }
+  
   public static EncodableFactory getFactory(Integer classId) {
     return repository.get(classId);
   }
