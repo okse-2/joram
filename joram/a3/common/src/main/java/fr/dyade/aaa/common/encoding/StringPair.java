@@ -51,5 +51,14 @@ public class StringPair implements Encodable {
     s2 = new EncodedString();
     s2.decode(decoder);
   }
+  
+  @Override
+  public String toString() {
+    StringBuffer buf = new StringBuffer();
+    buf.append(s1);
+    buf.append('-');
+    buf.append(s2);
+    return buf.toString();
+  }
 
 }

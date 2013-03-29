@@ -81,7 +81,7 @@ public class EncodedString implements Serializable, Encodable {
 
   @Override
   public String toString() {
-    return "EncodedString [string=" + string + "]";
+    return string;
   }
 
   public int getClassId() {
