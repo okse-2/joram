@@ -31,7 +31,7 @@ public interface Encodable {
   
   int getClassId();
   
-  int getEncodedSize();
+  int getEncodedSize() throws Exception;
   
   void encode(Encoder encoder) throws Exception;
 

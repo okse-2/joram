@@ -37,6 +37,10 @@ public class ByteBufferDecoder implements Decoder {
   public short decodeUnsignedShort() throws Exception {
     return buf.getShort();
   }
+  
+  public short decode16() throws Exception {
+    return buf.getShort();
+  }
 
   public int decodeSignedInt() throws Exception {
     return buf.getInt();
@@ -45,12 +49,20 @@ public class ByteBufferDecoder implements Decoder {
   public int decodeUnsignedInt() throws Exception {
     return buf.getInt();
   }
+  
+  public int decode32() throws Exception {
+    return buf.getInt();
+  }
 
   public long decodeUnsignedLong() throws Exception {
     return buf.getLong();
   }
 
   public long decodeSignedLong() throws Exception {
+    return buf.getLong();
+  }
+  
+  public long decode64() throws Exception {
     return buf.getLong();
   }
   

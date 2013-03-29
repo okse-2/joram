@@ -29,13 +29,19 @@ public interface Encoder {
   
   void encodeUnsignedShort(short s) throws Exception;
   
+  void encode16(short s) throws Exception;
+  
   void encodeSignedInt(int i) throws Exception;
   
   void encodeUnsignedInt(int i) throws Exception;
   
+  void encode32(int i) throws Exception;
+  
   void encodeSignedLong(long l) throws Exception;
   
   void encodeUnsignedLong(long l) throws Exception;
+  
+  void encode64(long l) throws Exception;
   
   void encodeNullableString(String str) throws Exception;
   

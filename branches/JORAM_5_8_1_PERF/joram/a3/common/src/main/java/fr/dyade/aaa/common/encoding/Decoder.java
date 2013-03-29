@@ -25,13 +25,19 @@ public interface Decoder {
   
   short decodeUnsignedShort() throws Exception;
   
+  short decode16() throws Exception;
+  
   int decodeSignedInt() throws Exception;
   
   int decodeUnsignedInt() throws Exception;
   
+  int decode32() throws Exception;
+  
   long decodeUnsignedLong() throws Exception;
   
   long decodeSignedLong() throws Exception;
+  
+  long decode64() throws Exception;
   
   String decodeNullableString() throws Exception;
   

@@ -45,6 +45,10 @@ public class ByteBufferEncoder implements Encoder {
   public void encodeUnsignedShort(short s) throws Exception {
     buf.putShort(s);
   }
+  
+  public void encode16(short s) throws Exception {
+    buf.putShort(s);
+  }
 
   public void encodeSignedInt(int i) throws Exception {
     buf.putInt(i);
@@ -53,12 +57,20 @@ public class ByteBufferEncoder implements Encoder {
   public void encodeUnsignedInt(int i) throws Exception {
     buf.putInt(i);
   }
+  
+  public void encode32(int i) throws Exception {
+    buf.putInt(i);
+  }
 
   public void encodeSignedLong(long l) throws Exception {
     buf.putLong(l);
   }
 
   public void encodeUnsignedLong(long l) throws Exception {
+    buf.putLong(l);
+  }
+  
+  public void encode64(long l) throws Exception {
     buf.putLong(l);
   }
   

@@ -33,6 +33,8 @@ import fr.dyade.aaa.common.encoding.Encoder;
 public class SerializableWrapper implements Encodable {
   
   private Serializable value;
+  
+  private byte[] bytes;
 
   public SerializableWrapper(Serializable value) {
     super();
@@ -43,16 +45,22 @@ public class SerializableWrapper implements Encodable {
     return SERIALIZABLE_WRAPPER_CLASS_ID;
   }
 
-  public int getEncodedSize() {
-    // Unknown
-    return 0;
+  public int getEncodedSize() throws Exception {
+    serialize();
+    return bytes.length;
+  }
+  
+  private void serialize() throws Exception {
+    if (bytes == null) {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(baos);
+      oos.writeObject(value);
+      bytes = baos.toByteArray();
+    }
   }
 
   public void encode(Encoder encoder) throws Exception {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    ObjectOutputStream oos = new ObjectOutputStream(baos);
-    oos.writeObject(value);
-    byte[] bytes = baos.toByteArray();
+    serialize();
     encoder.encodeByteArray(bytes);
   }
 
