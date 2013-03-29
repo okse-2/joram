@@ -47,7 +47,7 @@ public class SerializableWrapper implements Encodable {
 
   public int getEncodedSize() throws Exception {
     serialize();
-    return bytes.length;
+    return bytes.length + 4;
   }
   
   private void serialize() throws Exception {
