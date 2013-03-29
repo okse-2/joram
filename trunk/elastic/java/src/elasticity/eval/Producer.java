@@ -51,12 +51,12 @@ public class Producer {
 	}*/
 	
 	public static int computeLoad(int round) {
-		if (round < 15000)
-			return round / 200;
-		if (round < 20000)
-			return 75;
-		if (round < 35000)
-			return 75 - (round - 20000) / 200;
+		if (round < 1800)
+			return round / 25;
+		if (round < 2200)
+			return 72;
+		if (round < 4000)
+			return 72 - (round - 2200) / 25;
 		
 		return 0;
 	}

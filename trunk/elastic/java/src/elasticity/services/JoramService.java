@@ -52,6 +52,9 @@ public class JoramService extends Service {
 
 	/** Current number of workers. */
 	private int size;
+	
+	/** Size of pre-provisioned VMs. */
+	private int ppvm;
 
 	/** Number of servers per VM. */
 	private int spvm;
@@ -68,7 +71,7 @@ public class JoramService extends Service {
 			Connection cn = cf.createConnection("root", "root");
 			cn.start();
 			
-			aw = AdminModule.getWrapper(); //new AdminWrapper(cn);
+			aw = new AdminWrapper(cn);
 			
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,"Error while setting admin connection!");
@@ -88,10 +91,10 @@ public class JoramService extends Service {
 		//Get the properties.
 		size = Integer.valueOf(props.getProperty("init_workers_size"));
 		spvm = Integer.valueOf(props.getProperty("servers_per_vm"));
-		int ppSize = Integer.valueOf(props.getProperty("pre_provision_size"));
+		ppvm = Integer.valueOf(props.getProperty("pre_provision_size"));
 
 		//Set initial machines, on which current workers are working.
-		int vmSize = size / spvm;
+		int vmSize = (int) Math.ceil((double) size / (double) spvm);
 		wVms = new LinkedList<String>();
 		for (int i = 0; i < vmSize; i++) {
 			int id = i * spvm + 1;
@@ -105,9 +108,11 @@ public class JoramService extends Service {
 		
 		//Pre-provisioning, if requested.
 		pVms = new LinkedList<String>();
-		for (int i = 0; i < ppSize; i++) {
-			PreProvision pp = new PreProvision();
-			pp.start();
+		for (int i = 0; i < ppvm; i++) {
+			/*PreProvision pp = new PreProvision();
+			pp.start();*/
+			String ip = addJoramHost();
+			pVms.offerLast(ip);
 		}
 
 		logger.log(Level.INFO,"Initialization completed.");
@@ -152,8 +157,13 @@ public class JoramService extends Service {
 			ip = wVms.peekLast();
 			logger.log(Level.INFO,"Used spot on existing VM.");
 		} else {
-			ip = pVms.pollLast();
-			if (ip != null) {
+			if (ppvm > 0) {
+				ip = pVms.pollFirst();
+				while (ip == null) {
+					//Wait for VM to be provisioned..
+					Thread.sleep(1000);
+					ip = pVms.pollFirst();
+				}
 				PreProvision pp = new PreProvision();
 				pp.start(); //Replaces the VM we just polled.
 				logger.log(Level.INFO,"Used pre-provisioned VM..");
@@ -299,7 +309,7 @@ public class JoramService extends Service {
 			try {
 				logger.log(Level.INFO,"Preprovisioning one VM..");
 				String ip = addJoramHost();
-				pVms.offer(ip);
+				pVms.offerLast(ip);
 			} catch (Exception e) {
 				logger.log(Level.SEVERE,"Error while pre-provisioning a VM!");
 				e.printStackTrace(System.out);
