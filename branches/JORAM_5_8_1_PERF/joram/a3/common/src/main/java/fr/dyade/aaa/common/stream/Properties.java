@@ -741,9 +741,18 @@ public class Properties implements Serializable, Cloneable, Encodable {
     }
   }
 
+  //JORAM_PERF_BRANCH
   public void decode(Decoder decoder) throws Exception {
-    // TODO Auto-generated method stub
+    int count = decoder.decodeUnsignedInt();
+    if (count == -1) return;
     
+    String key;
+    Object value;
+    for (int i=0; i<count; i++) {
+      key = decoder.decodeString();
+      value = StreamUtil.readObjectFrom(decoder);
+      put(key, value);
+    }
   }
 
   /**
