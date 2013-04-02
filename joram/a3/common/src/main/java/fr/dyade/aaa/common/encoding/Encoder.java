@@ -55,4 +55,8 @@ public interface Encoder {
     
   void encodeByteArray(byte[] tab, int offset, int length) throws Exception;
   
+  void encodeFloat(float f) throws Exception;
+  
+  void encodeDouble(double d) throws Exception;
+  
 }

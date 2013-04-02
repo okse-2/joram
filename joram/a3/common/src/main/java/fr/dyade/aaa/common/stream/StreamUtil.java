@@ -32,6 +32,9 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encoder;
+
 
 public final class StreamUtil {
   // Per-thread buffer for conversion
@@ -456,6 +459,42 @@ public final class StreamUtil {
     }
     return size;
   }
+  
+  //JORAM_PERF_BRANCH
+  public static void writeObjectTo(Object obj, Encoder encoder) throws Exception {
+    if (obj == null) {
+      encoder.encodeByte(NULL);
+    } else if (obj instanceof Boolean) {
+      encoder.encodeByte(BOOLEAN);
+      encoder.encodeBoolean(((Boolean) obj).booleanValue());
+    } else if (obj instanceof Byte) {
+      encoder.encodeByte(BYTE);
+      encoder.encodeByte(((Byte) obj).byteValue());
+    } else if (obj instanceof Short) {
+      encoder.encodeByte(SHORT);
+      encoder.encodeSignedShort(((Short) obj).shortValue());
+    } else if (obj instanceof Integer) {
+      encoder.encodeByte(INT);
+      encoder.encodeSignedInt(((Integer) obj).intValue());
+    } else if (obj instanceof Long) {
+      encoder.encodeByte(LONG);
+      encoder.encodeSignedLong(((Long) obj).longValue());
+    } else if (obj instanceof Float) {
+      encoder.encodeByte(FLOAT);
+      encoder.encodeFloat(((Float) obj).floatValue());
+    } else if (obj instanceof Double) {
+      encoder.encodeByte(DOUBLE);
+      encoder.encodeDouble(((Double) obj).doubleValue());
+    } else if (obj instanceof String) {
+      encoder.encodeByte(STRING);
+      encoder.encodeString((String) obj);
+    } else if (obj instanceof byte[]) {
+      encoder.encodeByte(BYTEARRAY);
+      encoder.encodeByteArray((byte[]) obj);
+    } else {
+      throw new InvalidClassException("Bad primitive type"); 
+    }
+  }
 
   /**
    * This method allows to restore an object from the input stream.
@@ -486,6 +525,35 @@ public final class StreamUtil {
       return readStringFrom(is);
     case BYTEARRAY:
       return readByteArrayFrom(is);
+    default:
+      throw new InvalidClassException("Bad primitive type"); 
+    }
+  }
+  
+  // JORAM_PERF_BRANCH
+  public static Object readObjectFrom(Decoder decoder) throws Exception {
+    byte type = decoder.decodeByte();
+    switch (type) {
+    case NULL:
+      return null;
+    case BOOLEAN:
+      return new Boolean(decoder.decodeBoolean());
+    case BYTE:
+      return new Byte(decoder.decodeByte());
+    case SHORT:
+      return new Short(decoder.decodeSignedShort());
+    case INT:
+      return new Integer(decoder.decodeSignedInt());
+    case LONG:
+      return new Long(decoder.decodeSignedLong());
+    case FLOAT:
+      return new Float(decoder.decodeFloat());
+    case DOUBLE:
+      return new Double(decoder.decodeDouble());
+    case STRING:
+      return decoder.decodeString();
+    case BYTEARRAY:
+      return decoder.decodeByteArray();
     default:
       throw new InvalidClassException("Bad primitive type"); 
     }

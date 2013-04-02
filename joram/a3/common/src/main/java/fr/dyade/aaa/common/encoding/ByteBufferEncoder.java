@@ -121,4 +121,12 @@ public class ByteBufferEncoder implements Encoder {
     buf.put(tab, offset, length);
   }
 
+  public void encodeFloat(float f) throws Exception {
+    buf.putFloat(f);
+  }
+
+  public void encodeDouble(double d) throws Exception {
+    buf.putDouble(d);
+  }
+
 }
