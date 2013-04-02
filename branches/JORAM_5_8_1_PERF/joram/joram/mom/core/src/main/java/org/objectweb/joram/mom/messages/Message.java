@@ -34,14 +34,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
 import fr.dyade.aaa.common.encoding.EncodedString;
+import fr.dyade.aaa.common.encoding.Encoder;
+import fr.dyade.aaa.common.stream.Properties;
 import fr.dyade.aaa.common.stream.StreamUtil;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.TransactionObject;
@@ -54,7 +57,7 @@ import fr.dyade.aaa.util.TransactionObjectFactory;
  * A message content is always wrapped as a bytes array, it is characterized
  * by properties and "header" fields.
  */
-public final class Message implements Serializable, MessageView, TransactionObject {
+public final class Message implements Serializable, MessageView, TransactionObject, Encodable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 2L;
 
@@ -646,6 +649,104 @@ public final class Message implements Serializable, MessageView, TransactionObje
       return new Message();
     }
    
+  }
+
+  public int getEncodedSize() throws Exception {
+    int encodedSize = 0;
+    encodedSize += 8;
+    encodedSize += 1;
+    encodedSize += 4 + msg.id.length();
+    encodedSize += 4 + msg.toId.length();
+    encodedSize += 1 + 8 + 1;
+
+    if (msg.type != org.objectweb.joram.shared.messages.Message.SIMPLE) { encodedSize += 1; }
+    if (msg.replyToId != null) { encodedSize += 4 + msg.replyToId.length(); }
+    if (msg.replyToType != 0) { encodedSize += 1; }
+    if (msg.properties != null) { msg.properties.getEncodedSize(); }
+    if (msg.priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { encodedSize += 4; }
+    if (msg.expiration != 0) { encodedSize += 8; }
+    if (msg.correlationId != null) { encodedSize += 4 + msg.correlationId.length(); }
+    if (msg.deliveryCount != 0) { encodedSize += 4; }
+    if (msg.jmsType != null) { encodedSize += 4 + msg.jmsType.length(); }
+    
+    return encodedSize;
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeUnsignedLong(order);
+    encoder.encodeBoolean(soft);
+
+    // Header
+    //encoder.encodeUTF(msg.id);
+    getEncodedId().encode(encoder);
+    
+    encoder.encodeString(msg.toId);
+    encoder.encodeByte(msg.toType);
+    encoder.encodeUnsignedLong(msg.timestamp);
+
+    // One short is used to know which fields are set
+    short s = 0;
+    if (msg.type != org.objectweb.joram.shared.messages.Message.SIMPLE) { s |= msg.typeFlag; }
+    if (msg.replyToId != null) { s |= msg.replyToIdFlag; }
+    if (msg.replyToType != 0) { s |= msg.replyToTypeFlag; }
+    if (msg.properties != null) { s |= msg.propertiesFlag; }
+    if (msg.priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { s |= msg.priorityFlag; }
+    if (msg.expiration != 0) { s |= msg.expirationFlag; }
+    if (msg.correlationId != null) { s |= msg.corrrelationIdFlag; }
+    if (msg.deliveryCount != 0) { s |= msg.deliveryCountFlag; }
+    if (msg.jmsType != null) { s |= msg.jmsTypeFlag; }
+    if (msg.redelivered) { s |= msg.redeliveredFlag; }
+    if (msg.persistent) { s |= msg.persistentFlag; }
+    
+    encoder.encode16(s);
+    
+    if (msg.type != org.objectweb.joram.shared.messages.Message.SIMPLE) { encoder.encodeByte((byte) msg.type); }
+    if (msg.replyToId != null) { encoder.encodeString(msg.replyToId); }
+    if (msg.replyToType != 0) { encoder.encodeByte(msg.replyToType); }
+    if (msg.properties != null) { msg.properties.encode(encoder); }
+    if (msg.priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { encoder.encodeUnsignedInt(msg.priority); }
+    if (msg.expiration != 0) { encoder.encodeUnsignedLong(msg.expiration); }
+    if (msg.correlationId != null) { encoder.encodeString(msg.correlationId); }
+    if (msg.deliveryCount != 0) { encoder.encodeUnsignedInt(msg.deliveryCount); }
+    if (msg.jmsType != null) { encoder.encodeString(msg.jmsType); }
+    
+    encoder.encodeNullableByteArray(msg.body);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    order = decoder.decodeUnsignedLong();
+    soft = decoder.decodeBoolean();
+
+    acksCounter = 0;
+    durableAcksCounter = 0;
+
+    msg = new org.objectweb.joram.shared.messages.Message();
+    
+    //msg.id = decoder.decodeUTF();
+    encodedId = new EncodedString();
+    encodedId.decode(decoder);
+    msg.id = encodedId.getString();
+    
+    msg.toId = decoder.decodeString();
+    msg.toType = decoder.decodeByte();
+    msg.timestamp = decoder.decodeUnsignedLong();
+    
+    short s = decoder.decode16();
+
+    if ((s & msg.typeFlag) != 0) { msg.type = decoder.decodeByte(); }
+    if ((s & msg.replyToIdFlag) != 0) { msg.replyToId = decoder.decodeString(); }
+    if ((s & msg.replyToTypeFlag) != 0) { msg.replyToType = decoder.decodeByte(); }
+    if ((s & msg.propertiesFlag) != 0) { msg.properties = Properties.readFrom(decoder); }
+    msg.priority = org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY;
+    if ((s & msg.priorityFlag) != 0) { msg.priority = decoder.decodeUnsignedInt(); }
+    if ((s & msg.expirationFlag) != 0) { msg.expiration = decoder.decodeUnsignedLong(); }
+    if ((s & msg.corrrelationIdFlag) != 0) { msg.correlationId = decoder.decodeString(); }
+    if ((s & msg.deliveryCountFlag) != 0) { msg.deliveryCount = decoder.decodeUnsignedInt(); }
+    if ((s & msg.jmsTypeFlag) != 0) { msg.jmsType = decoder.decodeString(); }
+    msg.redelivered = (s & msg.redeliveredFlag) != 0;
+    msg.persistent = (s & msg.persistentFlag) != 0;
+    
+    msg.body = decoder.decodeNullableByteArray();
   } 
   
 }
