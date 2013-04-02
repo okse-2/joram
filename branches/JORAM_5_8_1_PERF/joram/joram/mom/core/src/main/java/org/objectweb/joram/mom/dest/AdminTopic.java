@@ -24,6 +24,7 @@
 package org.objectweb.joram.mom.dest;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -738,6 +739,28 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
         dest.setName(destName);
         dest.setAdminId(adminId);
         dest.setProperties(properties, true);
+        /*
+        PrintWriter destCreationWriter = getDestCreationWriter();
+        if (dest instanceof Queue) {
+          destCreationWriter.print("<queue name=\"");
+          destCreationWriter.print(destName);
+          destCreationWriter.print("\">\n");
+          destCreationWriter.print("  <entry name=\"/queue/");
+          destCreationWriter.print(destName);
+          destCreationWriter.print("\">\n");
+          destCreationWriter.print("</queue>\n");
+          destCreationWriter.flush();
+        } else {
+          destCreationWriter.print("<topic name=\"");
+          destCreationWriter.print(destName);
+          destCreationWriter.print("\">\n");
+          destCreationWriter.print("  <entry name=\"/topic/");
+          destCreationWriter.print(destName);
+          destCreationWriter.print("\">\n");
+          destCreationWriter.print("</topic>\n");
+          destCreationWriter.flush();
+        }
+*/
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR,
                    "Could not instantiate Destination class [" + className + "]: ", exc);
@@ -1857,7 +1880,19 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   public void createQueue(String name, int serverId) {
     createQueue(name, Queue.class.getName(), serverId);
   }
+  /*
+  transient private PrintWriter destCreationWriter;
 
+  private PrintWriter getDestCreationWriter() {
+    if (destCreationWriter == null) {
+      try {
+        destCreationWriter = new PrintWriter(new FileWriter("perfRes.txt", false));
+      } catch (IOException e) {}
+    }
+    return destCreationWriter;
+  }
+  */
+  
   /**
    * {@inheritDoc}
    */

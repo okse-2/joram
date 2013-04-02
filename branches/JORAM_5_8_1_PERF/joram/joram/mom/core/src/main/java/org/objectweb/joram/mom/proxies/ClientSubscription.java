@@ -52,7 +52,11 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
 import fr.dyade.aaa.common.encoding.EncodedString;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.TransactionObjectFactory;
 
@@ -61,7 +65,7 @@ import fr.dyade.aaa.util.TransactionObjectFactory;
  * subscription, and the methods managing the delivery and acknowledgement
  * of the messages.
  */
-class ClientSubscription implements ClientSubscriptionMBean, Serializable, TransactionObject {
+class ClientSubscription implements ClientSubscriptionMBean, Serializable, TransactionObject, Encodable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
@@ -136,6 +140,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
   /** Vector of identifiers of the messages to deliver. */
   private List<String> messageIds;
   /** Table of delivered messages identifiers. */
+  // TODO: should use EncodedString
   private Map<String, String> deliveredIds;
   /** Table keeping the denied messages identifiers. */
   private Map<String, Integer> deniedMsgs;
@@ -1240,9 +1245,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
   }
   
   //JORAM_PERF_BRANCH
-  public static class ClientSubscriptionFactory implements TransactionObjectFactory {
+  public static class ClientSubscriptionFactory implements EncodableFactory {
 
-    public TransactionObject newInstance() {
+    public Encodable createEncodable() {
       return new ClientSubscription();
     }
     
@@ -1281,6 +1286,138 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
   public static String getTransactionPrefix(AgentId proxyId) {
     StringBuffer subscriptionContextPrefix = new StringBuffer(19).append("CS").append(proxyId.toString()).append('_');
     return subscriptionContextPrefix.toString();
+  }
+
+  public int getEncodedSize() throws Exception {
+    int encodedSize = 0;
+    encodedSize += 4;
+    Iterator<Entry<String, String>> deliveredIdIterator = deliveredIds.entrySet().iterator();
+    while (deliveredIdIterator.hasNext()) {
+      Entry<String, String> deliveredId = deliveredIdIterator.next();
+      encodedSize += 4 + deliveredId.getKey().length();
+    }
+    encodedSize += 4;
+    Iterator<Entry<String, Integer>> deniedMsgIterator = deniedMsgs.entrySet().iterator();
+    while (deniedMsgIterator.hasNext()) {
+      Entry<String, Integer> deniedMsg = deniedMsgIterator.next();
+      encodedSize += 4 + deniedMsg.getKey().length();
+      encodedSize += 4;
+    }
+    encodedSize += 1;
+    if (dmqId != null) {
+      encodedSize += dmqId.getEncodedSize();
+    }
+    encodedSize += 1;
+    encodedSize += 4;
+    for (String messageId : messageIds) {
+      encodedSize += 4 + messageId.length();
+    }
+    encodedSize += name.getEncodedSize();
+    encodedSize += 4 + 8 + 8;
+    encodedSize += 1;
+    if (selector != null) {
+      encodedSize += selector.getEncodedSize();
+    }
+    encodedSize += 4;
+    encodedSize += topicId.getEncodedSize();
+    return encodedSize;
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeUnsignedInt(deliveredIds.size());
+    Iterator<Entry<String, String>> deliveredIdIterator = deliveredIds.entrySet().iterator();
+    while (deliveredIdIterator.hasNext()) {
+      Entry<String, String> deliveredId = deliveredIdIterator.next();
+      encoder.encodeString(deliveredId.getKey());
+      // no need to encode the value
+    }
+    encoder.encodeUnsignedInt(deniedMsgs.size());
+    Iterator<Entry<String, Integer>> deniedMsgIterator = deniedMsgs.entrySet().iterator();
+    while (deniedMsgIterator.hasNext()) {
+      Entry<String, Integer> deniedMsg = deniedMsgIterator.next();
+      encoder.encodeString(deniedMsg.getKey());
+      encoder.encodeUnsignedInt(deniedMsg.getValue());
+    }
+    if (dmqId == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      dmqId.encode(encoder);
+    }
+    encoder.encodeBoolean(durable);
+    encoder.encodeUnsignedInt(messageIds.size());
+    for (String messageId : messageIds) {
+      encoder.encodeString(messageId);
+    }
+    //encoder.encodeString(name);
+    name.encode(encoder);
+    encoder.encodeUnsignedInt(nbMaxMsg);
+    encoder.encodeUnsignedLong(nbMsgsDeliveredSinceCreation);
+    encoder.encodeUnsignedLong(nbMsgsSentToDMQSinceCreation);
+    
+    //proxyId.encode(encoder);
+    
+    if (selector == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      //encoder.encodeString(selector);
+      selector.encode(encoder);
+    }
+    encoder.encodeUnsignedInt(threshold);
+    topicId.encode(encoder);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    int deliveredIdsSize = decoder.decodeUnsignedInt();
+    deliveredIds = new Hashtable<String, String>(deliveredIdsSize);
+    for (int i = 0; i < deliveredIdsSize; i++) {
+      String key = decoder.decodeString();
+      deliveredIds.put(key, key);
+    }
+    int deniedMsgSize = decoder.decodeUnsignedInt();
+    deniedMsgs = new Hashtable<String, Integer>(deniedMsgSize);
+    for (int i = 0; i < deniedMsgSize; i++) {
+      String key = decoder.decodeString();
+      Integer value = decoder.decodeUnsignedInt();
+      deniedMsgs.put(key, value);
+    }
+    boolean isNull = decoder.decodeBoolean();
+    if (isNull) {
+      dmqId = null;
+    } else {
+      dmqId = new AgentId((short) 0, (short) 0, 0);
+      dmqId.decode(decoder);
+    }
+    durable = decoder.decodeBoolean();
+    int messageIdsSize = decoder.decodeUnsignedInt();
+    messageIds = new Vector<String>(messageIdsSize);
+    for (int i = 0; i < messageIdsSize; i++) {
+      String messageId = decoder.decodeString();
+      messageIds.add(messageId);
+    }
+    //name = decoder.decodeString();
+    name = new EncodedString();
+    name.decode(decoder);
+    
+    nbMaxMsg = decoder.decodeUnsignedInt();
+    nbMsgsDeliveredSinceCreation = decoder.decodeUnsignedLong();
+    nbMsgsSentToDMQSinceCreation = decoder.decodeUnsignedLong();
+    
+    //proxyId = new AgentId((short) 0, (short) 0, 0);
+    //proxyId.decodeTransactionObject(is);
+    
+    isNull = decoder.decodeBoolean();
+    if (isNull) {
+      selector = null;
+    } else {
+      //selector = decoder.decodeString();
+      selector = new EncodedString();
+      selector.decode(decoder);
+    }
+    threshold = decoder.decodeUnsignedInt();
+    topicId = new AgentId((short) 0, (short) 0, 0);
+    topicId.decode(decoder);
   }
 
 }
