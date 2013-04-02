@@ -60,7 +60,7 @@ public class JoramHelper {
   public static Logger logger = Debug.getLogger(JoramHelper.class.getName());
   
   // JORAM_PERF_BRANCH
-  public static final int CLASS_ID_AREA = 0x10000;
+  public static final int CLASS_ID_AREA = 0x20000;
   public static final int QUEUE_CLASS_ID = CLASS_ID_AREA + 0;
   public static final int USERAGENT_CLASS_ID = CLASS_ID_AREA + 1;
   public static final int CLIENTCONTEXT_CLASS_ID = CLASS_ID_AREA + 2;
