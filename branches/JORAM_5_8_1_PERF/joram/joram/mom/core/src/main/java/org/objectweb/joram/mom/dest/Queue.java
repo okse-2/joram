@@ -1792,7 +1792,7 @@ public class Queue extends Destination implements QueueMBean {
     }
     encodedSize += 4 + 4 + 4;
     for (ReceiveRequest request : requests) {
-      
+      encodedSize += request.getEncodedSize();
     }
     return encodedSize;
   }
