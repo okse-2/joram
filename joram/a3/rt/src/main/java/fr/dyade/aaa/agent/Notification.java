@@ -25,6 +25,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
+import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.TransactionObjectFactory;
 import fr.dyade.aaa.util.TransactionObjectFactoryRepository;
@@ -33,7 +38,7 @@ import fr.dyade.aaa.util.TransactionObjectFactoryRepository;
  * Class Notification is the root of the notifications hierarchy. Every
  * notification's class has Notification as a superclass.
  */
-public class Notification implements Serializable, Cloneable, TransactionObject {
+public class Notification implements Serializable, Cloneable, TransactionObject, Encodable {
   /** define serialVersionUID for interoperability */
   static final long serialVersionUID = 1L;
 
@@ -292,7 +297,7 @@ public class Notification implements Serializable, Cloneable, TransactionObject 
   }
 
   public int getClassId() {
-    return TransactionObject.NOTIFICATION_CLASS_ID;
+    return EncodableHelper.NOTIFICATION_CLASS_ID;
   }
 
   //JORAM_PERF_BRANCH
@@ -340,6 +345,73 @@ public class Notification implements Serializable, Cloneable, TransactionObject 
     if ((tmp & DeadNotificationAgentIdSet) != 0) {
       deadNotificationAgentId = new AgentId();
       deadNotificationAgentId.decodeTransactionObject(is);
+    }
+  }
+  
+  //JORAM_PERF_BRANCH
+  public int getEncodedSize() throws Exception {
+    int encodedSize = 0;
+    encodedSize += 1;
+    if (expiration > 0)
+      encodedSize += 8;
+    if (context != null) {
+      encodedSize += 1;
+      if (context instanceof Encodable) {
+        Encodable encodable = (Encodable) context;
+        encodedSize += 4;
+        encodedSize += encodable.getEncodedSize();
+      }
+    }
+    if (deadNotificationAgentId != null)
+      encodedSize += deadNotificationAgentId.getEncodedSize();
+    return encodedSize;
+  }
+
+  //JORAM_PERF_BRANCH
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeByte((byte) ((priority & 0x0F)
+        | // 4 bits
+        ((expiration > 0) ? ExpirationSet : 0x00)
+        | ((context != null) ? ContextSet : 0x00)
+        | ((deadNotificationAgentId != null) ? DeadNotificationAgentIdSet
+            : 0x00)));
+    if (expiration > 0)
+      encoder.encodeUnsignedLong(expiration);
+    if (context != null) {
+      if (context instanceof Encodable) {
+        encoder.encodeBoolean(true);
+        Encodable encodable = (Encodable) context;
+        encoder.encodeUnsignedInt(encodable.getClassId());
+        encodable.encode(encoder);
+      } else {
+        encoder.encodeBoolean(false);
+      }
+    }
+    if (deadNotificationAgentId != null)
+      deadNotificationAgentId.encode(encoder);
+  }
+
+  //JORAM_PERF_BRANCH
+  public void decode(Decoder decoder) throws Exception {
+    byte tmp = decoder.decodeByte();
+    priority = tmp & 0x0F; // 4 bits
+    if ((tmp & ExpirationSet) != 0)
+      expiration = decoder.decodeUnsignedLong();
+    if ((tmp & ContextSet) != 0) {
+      boolean isEncodable = decoder.decodeBoolean();
+      if (isEncodable) {
+        int classId = decoder.decodeUnsignedInt();
+        EncodableFactory factory = EncodableFactoryRepository.getFactory(classId);
+        Encodable encodable = factory.createEncodable();
+        encodable.decode(decoder);
+        context = encodable;
+      } else {
+        context = null;
+      }
+    }
+    if ((tmp & DeadNotificationAgentIdSet) != 0) {
+      deadNotificationAgentId = new AgentId();
+      deadNotificationAgentId.decode(decoder);
     }
   }
   

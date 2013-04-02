@@ -28,6 +28,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.util.TransactionObject;
 
 /**
@@ -158,7 +161,7 @@ final class AgentIdStamp implements Serializable {
  *
  * @see AgentIdStamp
  */
-public final class AgentId implements Serializable, TransactionObject {
+public final class AgentId implements Serializable, TransactionObject, Encodable {
   /** Define serialVersionUID for interoperability. */
   static final long serialVersionUID = 1L;
 
@@ -469,8 +472,9 @@ public final class AgentId implements Serializable, TransactionObject {
     return false;
   }
 
+  //JORAM_PERF_BRANCH
   public int getClassId() {
-    return TransactionObject.AGENTID_CLASS_ID;
+    return EncodableHelper.AGENTID_CLASS_ID;
   }
 
   //JORAM_PERF_BRANCH
@@ -486,4 +490,23 @@ public final class AgentId implements Serializable, TransactionObject {
     to = is.readShort();
     stamp = is.readInt();
   }
+  
+  //JORAM_PERF_BRANCH
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encode16(from);
+    encoder.encode16(to);
+    encoder.encode32(stamp);
+  }
+  
+  //JORAM_PERF_BRANCH
+  public void decode(Decoder decoder) throws Exception {
+    from = decoder.decode16();
+    to = decoder.decode16();
+    stamp = decoder.decode32();
+  }
+
+  public int getEncodedSize() throws Exception {
+    return 16 + 16 + 32;
+  }
+  
 }
