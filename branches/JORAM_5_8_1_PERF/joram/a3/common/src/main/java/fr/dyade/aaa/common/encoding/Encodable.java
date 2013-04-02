@@ -29,6 +29,8 @@ public interface Encodable {
   
   public static final int STRING_PAIR_CLASS_ID = CLASS_ID_AREA + 2;
   
+  public static final int PROPERTIES_CLASS_ID = CLASS_ID_AREA + 3;
+  
   int getClassId();
   
   int getEncodedSize() throws Exception;

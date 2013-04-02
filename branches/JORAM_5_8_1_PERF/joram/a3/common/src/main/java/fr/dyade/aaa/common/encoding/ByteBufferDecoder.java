@@ -118,4 +118,12 @@ public class ByteBufferDecoder implements Decoder {
     return (b != 0);
   }
 
+  public float decodeFloat() throws Exception {
+    return buf.getFloat();
+  }
+
+  public double decodeDouble() throws Exception {
+    return buf.getDouble();
+  }
+
 }

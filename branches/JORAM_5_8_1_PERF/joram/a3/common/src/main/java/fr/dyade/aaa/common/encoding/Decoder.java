@@ -55,4 +55,8 @@ public interface Decoder {
   
   boolean decodeBoolean() throws Exception;
   
+  float decodeFloat() throws Exception;
+  
+  double decodeDouble() throws Exception;
+  
 }

@@ -33,13 +33,17 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.Encoder;
+
 
 /**
  *  This class implements a set of properties, which maps keys to values.
  * Only string object can be used as a key, all primitives type can be used
  * as a value. <p>
  */
-public class Properties implements Serializable, Cloneable {
+public class Properties implements Serializable, Cloneable, Encodable {
   /** The total number of entries in the hash table. */
   private transient int count;
   /** The hash table data. */
@@ -717,6 +721,30 @@ public class Properties implements Serializable, Cloneable {
     
     return size;
   }
+  
+  //JORAM_PERF_BRANCH
+  public int getClassId() {
+    return Encodable.PROPERTIES_CLASS_ID;
+  }
+
+  //JORAM_PERF_BRANCH
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeUnsignedInt(count);
+    for (int index = table.length-1; index >= 0; index--) {
+      Entry entry = table[index];
+      
+      while (entry != null) {
+        encoder.encodeString(entry.key);
+        StreamUtil.writeObjectTo(entry.value, encoder);
+        entry = entry.next;
+      }
+    }
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
 
   /**
    *  The object implements the readFrom method to restore its contents from
@@ -741,6 +769,24 @@ public class Properties implements Serializable, Cloneable {
     return p;
   }
   
+  // JORAM_PERF_BRANCH
+  public static Properties readFrom(Decoder decoder) throws Exception {
+    int count = decoder.decodeUnsignedInt();
+    if (count == -1) return null;
+
+    Properties p = new Properties(((4*count)/3) +1);
+
+    String key;
+    Object value;
+    for (int i=0; i<count; i++) {
+      key = decoder.decodeString();
+      value = StreamUtil.readObjectFrom(decoder);
+      p.put(key, value);
+    }
+
+    return p;
+  }
+  
   /** ***** ***** ***** ***** ***** ***** ***** *****
    * Serializable interface
    * ***** ***** ***** ***** ***** ***** ***** ***** */
@@ -755,4 +801,5 @@ public class Properties implements Serializable, Cloneable {
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     readFrom(in);
   }
+
 }
