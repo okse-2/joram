@@ -656,19 +656,26 @@ public final class Message implements Serializable, MessageView, TransactionObje
     int encodedSize = 0;
     encodedSize += 8;
     encodedSize += 1;
-    encodedSize += 4 + msg.id.length();
+    
+    encodedSize += getEncodedId().getEncodedSize();
+    
     encodedSize += 4 + msg.toId.length();
-    encodedSize += 1 + 8 + 1;
+    encodedSize += 1 + 8 + 2;
 
     if (msg.type != org.objectweb.joram.shared.messages.Message.SIMPLE) { encodedSize += 1; }
     if (msg.replyToId != null) { encodedSize += 4 + msg.replyToId.length(); }
     if (msg.replyToType != 0) { encodedSize += 1; }
-    if (msg.properties != null) { msg.properties.getEncodedSize(); }
+    if (msg.properties != null) { encodedSize += msg.properties.getEncodedSize(); }
     if (msg.priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { encodedSize += 4; }
     if (msg.expiration != 0) { encodedSize += 8; }
     if (msg.correlationId != null) { encodedSize += 4 + msg.correlationId.length(); }
     if (msg.deliveryCount != 0) { encodedSize += 4; }
     if (msg.jmsType != null) { encodedSize += 4 + msg.jmsType.length(); }
+    
+    encodedSize += 1;
+    if (msg.body != null) {
+      encodedSize += 4 + msg.body.length;
+    }
     
     return encodedSize;
   }
