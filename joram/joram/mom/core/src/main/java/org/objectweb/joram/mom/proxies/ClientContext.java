@@ -41,7 +41,11 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
 import fr.dyade.aaa.common.encoding.EncodedString;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.TransactionObjectFactory;
 
@@ -49,7 +53,7 @@ import fr.dyade.aaa.util.TransactionObjectFactory;
  * The <code>ClientContext</code> class holds the data related to a client
  * context.
  */
-class ClientContext implements java.io.Serializable, TransactionObject {
+class ClientContext implements java.io.Serializable, TransactionObject, Encodable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
@@ -433,9 +437,9 @@ class ClientContext implements java.io.Serializable, TransactionObject {
   }
   
   //JORAM_PERF_BRANCH
-  public static class ClientContextFactory implements TransactionObjectFactory {
+  public static class ClientContextFactory implements EncodableFactory {
 
-    public TransactionObject newInstance() {
+    public Encodable createEncodable() {
       return new ClientContext();
     }
     
@@ -468,6 +472,81 @@ class ClientContext implements java.io.Serializable, TransactionObject {
   public static String getTransactionPrefix(AgentId proxyId) {
     StringBuffer clientContextPrefix = new StringBuffer(19).append("CC").append(proxyId.toString()).append('_');
     return clientContextPrefix.toString();
+  }
+
+  public int getEncodedSize() throws Exception {
+    int encodedSize = 0;
+    encodedSize += 4;
+    for (EncodedString activeSub : activeSubs) {
+      encodedSize += activeSub.getEncodedSize();
+    }
+    encodedSize += 4;
+    Iterator<Entry<AgentId, AgentId>> deliveringQueueIterator = deliveringQueues.entrySet().iterator();
+    while (deliveringQueueIterator.hasNext()) {
+      Entry<AgentId, AgentId> deliveringQueue = deliveringQueueIterator.next();
+      encodedSize += deliveringQueue.getKey().getEncodedSize();
+    }
+    encodedSize += 4;
+    encodedSize += 4;
+    for (AgentId tempDestination : tempDestinations) {
+      encodedSize += tempDestination.getEncodedSize();
+    }
+    return encodedSize;
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeUnsignedInt(activeSubs.size());
+    for (EncodedString activeSub : activeSubs) {
+      //os.writeUTF(activeSub);
+      activeSub.encode(encoder);
+    }
+    encoder.encodeUnsignedInt(deliveringQueues.size());
+    Iterator<Entry<AgentId, AgentId>> deliveringQueueIterator = deliveringQueues.entrySet().iterator();
+    while (deliveringQueueIterator.hasNext()) {
+      Entry<AgentId, AgentId> deliveringQueue = deliveringQueueIterator.next();
+      deliveringQueue.getKey().encode(encoder);
+      // not useful to encode the value
+    }
+    encoder.encodeUnsignedInt(id);
+    
+    //proxyId.encodeTransactionObject(os);
+    
+    encoder.encodeUnsignedInt(tempDestinations.size());
+    for (AgentId tempDestination : tempDestinations) {
+      tempDestination.encode(encoder);
+    }
+    // TODO: transactionsTable
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    int activeSubsSize = decoder.decodeUnsignedInt();
+    activeSubs = new Vector<EncodedString>(activeSubsSize);
+    for (int i = 0; i < activeSubsSize; i++) {
+      //String activeSub = decoder.decodeUTF();
+      EncodedString activeSub = new EncodedString();
+      activeSub.decode(decoder);
+      activeSubs.add(activeSub);
+    }
+    int deliveringQueuesSize = decoder.decodeUnsignedInt();
+    deliveringQueues = new Hashtable<AgentId, AgentId>(deliveringQueuesSize);
+    for (int i = 0; i < deliveringQueuesSize; i++) {
+      AgentId key = new AgentId((short) 0, (short) 0, 0);
+      key.decode(decoder);
+      deliveringQueues.put(key, key);
+    }
+    id = decoder.decodeUnsignedInt();
+    
+    //AgentId proxyId = new AgentId((short) 0, (short) 0, 0); 
+    //proxyId.decodeTransactionObject(is);
+    
+    int tempDestinationsSize = decoder.decodeUnsignedInt();
+    tempDestinations = new Vector<AgentId>(tempDestinationsSize);
+    for (int i = 0; i < tempDestinationsSize; i++) {
+      AgentId tempDestination = new AgentId((short) 0, (short) 0, 0);
+      tempDestination.decode(decoder);
+      tempDestinations.add(tempDestination);
+    }
+    // TODO: transactionsTable
   }
   
 }

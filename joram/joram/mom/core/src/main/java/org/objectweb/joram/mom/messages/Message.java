@@ -42,6 +42,7 @@ import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.encoding.Decoder;
 import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
 import fr.dyade.aaa.common.encoding.EncodedString;
 import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.common.stream.Properties;
@@ -643,9 +644,9 @@ public final class Message implements Serializable, MessageView, TransactionObje
   }
   
   //JORAM_PERF_BRANCH
-  public static class MessageFactory implements TransactionObjectFactory {
+  public static class MessageFactory implements EncodableFactory {
 
-    public TransactionObject newInstance() {
+    public Encodable createEncodable() {
       return new Message();
     }
    

@@ -152,7 +152,11 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.WakeUpTask;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
 import fr.dyade.aaa.common.encoding.EncodedString;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.TransactionObjectFactory;
@@ -3813,9 +3817,73 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   }
   
   //JORAM_PERF_BRANCH
-  public static class UserAgentFactory implements TransactionObjectFactory {
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    encoder.encodeUnsignedLong(arrivalsCounter);
+    
+    if (dmqId == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      dmqId.encode(encoder);
+    }
+    // TODO: interceptors_in
+    // TODO: interceptors_out
+    encoder.encodeUnsignedInt(keyCounter);
+    encoder.encodeUnsignedInt(nbMaxMsg);
+    encoder.encodeUnsignedLong(nbMsgsSentToDMQSinceCreation);
+    encoder.encodeUnsignedLong(period);
+    // TODO: recoveredTransactions
+    
+    encoder.encodeUnsignedInt(threshold); 
+  }
 
-    public TransactionObject newInstance() {
+  //JORAM_PERF_BRANCH
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+    arrivalsCounter = decoder.decodeUnsignedLong();
+    
+    boolean isNull = decoder.decodeBoolean();
+    if (isNull) {
+      dmqId = null;
+    } else {
+      dmqId = new AgentId((short) 0, (short) 0, 0);
+      dmqId.decode(decoder);
+    }
+    // TODO: interceptors_in
+    interceptors_in = null;
+    // TODO: interceptors_out
+    interceptors_out = null;
+    keyCounter = decoder.decodeUnsignedInt();
+    nbMaxMsg = decoder.decodeUnsignedInt();
+    nbMsgsSentToDMQSinceCreation = decoder.decodeUnsignedLong();
+    period = decoder.decodeUnsignedLong();
+    // TODO: recoveredTransactions
+    recoveredTransactions = null;
+    
+    threshold = decoder.decodeUnsignedInt();
+  } 
+  
+  //JORAM_PERF_BRANCH
+  public int getEncodedSize() throws Exception {
+    int encodedSize = super.getEncodedSize();
+    encodedSize += 8;
+    encodedSize += 1;
+    if (dmqId != null) {
+      encodedSize += dmqId.getEncodedSize();
+    }
+    encodedSize += 4;
+    encodedSize += 4;
+    encodedSize += 8;
+    encodedSize += 8;
+    encodedSize += 4;
+    return encodedSize;
+  }
+  
+  //JORAM_PERF_BRANCH
+  public static class UserAgentFactory implements EncodableFactory {
+
+    public Encodable createEncodable() {
       return new UserAgent(null);
     }
 

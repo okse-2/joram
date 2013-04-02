@@ -89,7 +89,11 @@ import fr.dyade.aaa.agent.ExpiredNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
 import fr.dyade.aaa.common.encoding.EncodedString;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.TransactionObjectFactory;
 
@@ -1760,12 +1764,99 @@ public class Queue extends Destination implements QueueMBean {
   }
   
   // JORAM_PERF_BRANCH
-  public static class QueueFactory implements TransactionObjectFactory {
+  public static class QueueFactory implements EncodableFactory {
 
-    public TransactionObject newInstance() {
+    public Encodable createEncodable() {
       return new Queue(null);
     }
     
+  }
+  
+  public int getEncodedSize() throws Exception {
+    int encodedSize = super.getEncodedSize();
+    encodedSize += 4;
+    encodedSize += 8;
+    encodedSize += 4;
+    Iterator<Entry<EncodedString, AgentId>> consumerIterator = consumers.entrySet().iterator();
+    while (consumerIterator.hasNext()) {
+      Entry<EncodedString, AgentId> consumer = consumerIterator.next();
+      encodedSize += consumer.getKey().getEncodedSize();
+      encodedSize += consumer.getValue().getEncodedSize();
+    }
+    encodedSize += 4;
+    Iterator<Entry<EncodedString, Integer>> contextIterator = contexts.entrySet().iterator();
+    while (contextIterator.hasNext()) {
+      Entry<EncodedString, Integer> context = contextIterator.next();
+      encodedSize += context.getKey().getEncodedSize();
+      encodedSize += 4;
+    }
+    encodedSize += 4 + 4 + 4;
+    for (ReceiveRequest request : requests) {
+      
+    }
+    return encodedSize;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    encoder.encodeUnsignedInt(ackRequestNumber);
+    encoder.encodeUnsignedLong(arrivalsCounter);
+    encoder.encodeUnsignedInt(consumers.size());
+    Iterator<Entry<EncodedString, AgentId>> consumerIterator = consumers.entrySet().iterator();
+    while (consumerIterator.hasNext()) {
+      Entry<EncodedString, AgentId> consumer = consumerIterator.next();
+      //encoder.encodeUTF(consumer.getKey());
+      consumer.getKey().encode(encoder);
+      consumer.getValue().encode(encoder);
+    }
+    encoder.encodeUnsignedInt(contexts.size());
+    Iterator<Entry<EncodedString, Integer>> contextIterator = contexts.entrySet().iterator();
+    while (contextIterator.hasNext()) {
+      Entry<EncodedString, Integer> context = contextIterator.next();
+      //encoder.encodeUTF(consumer.getKey());
+      context.getKey().encode(encoder);
+      encoder.encodeUnsignedInt(context.getValue());
+    }
+    encoder.encodeUnsignedInt(nbMaxMsg);
+    encoder.encodeUnsignedInt(priority);
+    encoder.encodeUnsignedInt(requests.size());
+    for (ReceiveRequest request : requests) {
+      request.encode(encoder);
+    }
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+    ackRequestNumber = decoder.decodeUnsignedInt();
+    arrivalsCounter = decoder.decodeUnsignedLong();
+    int consumersSize = decoder.decodeUnsignedInt();
+    consumers = new Hashtable<EncodedString, AgentId>(consumersSize);
+    for (int i = 0; i < consumersSize; i++) {
+      //String key = decoder.decodeUTF();
+      EncodedString key = new EncodedString();
+      key.decode(decoder);
+      AgentId value = new AgentId((short) 0, (short) 0, 0);
+      value.decode(decoder);
+      consumers.put(key, value);
+    }
+    int contextsSize = decoder.decodeUnsignedInt();
+    contexts = new Hashtable<EncodedString, Integer>(contextsSize);
+    for (int i = 0; i < contextsSize; i++) {
+      //String key = decoder.decodeUTF();
+      EncodedString key = new EncodedString();
+      key.decode(decoder);
+      Integer value = decoder.decodeUnsignedInt();
+      contexts.put(key, value);
+    }
+    nbMaxMsg = decoder.decodeUnsignedInt();
+    priority = decoder.decodeUnsignedInt();
+    int requestsSize = decoder.decodeUnsignedInt();
+    requests = new Vector<ReceiveRequest>(requestsSize);
+    for (int i = 0; i < requestsSize; i++) {
+      ReceiveRequest request = new ReceiveRequest();
+      request.decode(decoder);
+      requests.add(request);
+    }
   }
   
 }

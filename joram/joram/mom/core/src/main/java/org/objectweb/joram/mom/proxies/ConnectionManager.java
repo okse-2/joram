@@ -54,6 +54,7 @@ import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
 import fr.dyade.aaa.util.TransactionObjectFactoryRepository;
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -384,12 +385,12 @@ public class ConnectionManager implements ConnectionManagerMBean {
                  "ConnectionManager.init(" + args + ',' + firstTime + ')');
     
     // JORAM_PERF_BRANCH
-    TransactionObjectFactoryRepository.putFactory(JoramHelper.CLIENTCONTEXT_CLASS_ID, new ClientContext.ClientContextFactory());
-    TransactionObjectFactoryRepository.putFactory(JoramHelper.CLIENTSUBSCRIPTION_CLASS_ID, new ClientSubscription.ClientSubscriptionFactory());
-    TransactionObjectFactoryRepository.putFactory(JoramHelper.QUEUE_CLASS_ID, new Queue.QueueFactory());
-    TransactionObjectFactoryRepository.putFactory(JoramHelper.RECEIVEREQUEST_CLASS_ID, new ReceiveRequest.ReceiveRequestFactory());
-    TransactionObjectFactoryRepository.putFactory(JoramHelper.USERAGENT_CLASS_ID, new UserAgent.UserAgentFactory());
-    TransactionObjectFactoryRepository.putFactory(JoramHelper.MESSAGE_CLASS_ID, new Message.MessageFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.CLIENTCONTEXT_CLASS_ID, new ClientContext.ClientContextFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.CLIENTSUBSCRIPTION_CLASS_ID, new ClientSubscription.ClientSubscriptionFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.QUEUE_CLASS_ID, new Queue.QueueFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.RECEIVEREQUEST_CLASS_ID, new ReceiveRequest.ReceiveRequestFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.USERAGENT_CLASS_ID, new UserAgent.UserAgentFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.MESSAGE_CLASS_ID, new Message.MessageFactory());
     
     if (! firstTime) return;
 
