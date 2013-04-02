@@ -31,7 +31,11 @@ import java.util.Map.Entry;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
 import fr.dyade.aaa.common.encoding.EncodedString;
+import fr.dyade.aaa.common.encoding.Encoder;
+import fr.dyade.aaa.common.stream.Properties;
 import fr.dyade.aaa.util.TransactionObject;
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -70,7 +74,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * @see Engine
  * @see Channel
  */
-public abstract class Agent implements AgentMBean, Serializable, TransactionObject {
+public abstract class Agent implements AgentMBean, Serializable, TransactionObject, Encodable {
   /** Define serialVersionUID for interoperability. */
   static final long serialVersionUID = 1L;
 
@@ -845,6 +849,45 @@ public abstract class Agent implements AgentMBean, Serializable, TransactionObje
     
     fixed = is.readBoolean();
     updated = true;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    if (name == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      if (encodedName == null) {
+        encodedName = new EncodedString(name);
+      }
+      encodedName.encode(encoder);
+    }
+    
+    encoder.encodeBoolean(fixed);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    boolean isNull = decoder.decodeBoolean();
+    if (isNull) {
+      name = null;
+    } else {
+      encodedName = new EncodedString();
+      encodedName.decode(decoder);
+      name = encodedName.getString();
+    }
+    
+    fixed = decoder.decodeBoolean();
+    updated = true;
+  } 
+  
+  public int getEncodedSize() throws Exception {
+    int encodedSize = 0;
+    encodedSize += 1;
+    if (name != null) {
+      encodedSize += 4 + name.length();
+    }
+    
+    encodedSize += 1;
+    return encodedSize;
   }
   
 }

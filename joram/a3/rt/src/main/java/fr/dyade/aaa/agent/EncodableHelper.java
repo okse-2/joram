@@ -22,6 +22,6 @@ package fr.dyade.aaa.agent;
 
 public class EncodableHelper {
   
-  public static final int CLASS_ID_AREA = 0x0001;
+  public static final int CLASS_ID_AREA = 0x10000;
 
 }
