@@ -275,7 +275,7 @@ public class ReceiveRequest extends AbstractRequestNot {
     }
     encodedSize += 1;
     if (selector != null) {
-      selector += 4 + selector.length();
+      encodedSize += 4 + selector.length();
     }
     encodedSize += 8;
     return encodedSize;
