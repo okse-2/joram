@@ -44,6 +44,7 @@ import org.objectweb.joram.mom.notifications.GetRightsReplyNot;
 import org.objectweb.joram.mom.notifications.GetRightsRequestNot;
 import org.objectweb.joram.mom.notifications.PingNot;
 import org.objectweb.joram.mom.notifications.PongNot;
+import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.RequestGroupNot;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.proxies.SendRepliesNot;
@@ -85,6 +86,9 @@ import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.agent.WakeUpTask;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.EncodedString;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -1260,4 +1264,93 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     }
   }
   
+  public int getEncodedSize() throws Exception {
+    int encodedSize = super.getEncodedSize();
+    encodedSize += 1;
+    encodedSize += adminId.getEncodedSize();
+    encodedSize += 1 + 1 + 4;
+    Iterator<Entry<AgentId, Integer>> clientIterator = clients.entrySet().iterator();
+    while (clientIterator.hasNext()) {
+      Entry<AgentId, Integer> client = clientIterator.next();
+      encodedSize += client.getKey().getEncodedSize();
+      encodedSize += 4;
+    }
+    encodedSize += 1;
+    if (dmqId != null) {
+      encodedSize += dmqId.getEncodedSize();
+    }
+    encodedSize += 40;
+    encodedSize += 1;
+    if (interceptorsStr != null) {
+      encodedSize += 4 + interceptorsStr.length();
+    }
+    return encodedSize;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    encoder.encodeBoolean(deletable);
+    adminId.encode(encoder);
+    encoder.encodeBoolean(freeReading);
+    encoder.encodeBoolean(freeWriting);
+    encoder.encodeUnsignedInt(clients.size());
+    Iterator<Entry<AgentId, Integer>> clientIterator = clients.entrySet().iterator();
+    while (clientIterator.hasNext()) {
+      Entry<AgentId, Integer> client = clientIterator.next();
+      client.getKey().encode(encoder);
+      encoder.encodeUnsignedInt(client.getValue());
+    }
+    if (dmqId == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      dmqId.encode(encoder);
+    }
+    encoder.encodeUnsignedLong(creationDate);
+    encoder.encodeUnsignedLong(nbMsgsReceiveSinceCreation);
+    encoder.encodeUnsignedLong(nbMsgsDeliverSinceCreation);
+    encoder.encodeUnsignedLong(nbMsgsSentToDMQSinceCreation);
+    encoder.encodeUnsignedLong(period);
+    if (interceptorsStr == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      encoder.encodeString(interceptorsStr);
+    }
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+    deletable = decoder.decodeBoolean();
+    adminId = new AgentId((short) 0, (short) 0, 0);
+    adminId.decode(decoder);
+    freeReading = decoder.decodeBoolean();
+    freeWriting = decoder.decodeBoolean();
+    int clientsSize = decoder.decodeUnsignedInt();
+    clients = new Hashtable<AgentId, Integer>(clientsSize);
+    for (int i = 0; i < clientsSize; i++) {
+      AgentId key = new AgentId((short) 0, (short) 0, 0);
+      key.decode(decoder);
+      int value = decoder.decodeUnsignedInt();
+      clients.put(key, value);
+    }
+    boolean isNull = decoder.decodeBoolean();
+    if (isNull) {
+      dmqId = null;
+    } else {
+      dmqId = new AgentId((short) 0, (short) 0, 0);
+      dmqId.decode(decoder);
+    }
+    creationDate = decoder.decodeUnsignedLong();
+    nbMsgsReceiveSinceCreation = decoder.decodeUnsignedLong();
+    nbMsgsDeliverSinceCreation = decoder.decodeUnsignedLong();
+    nbMsgsSentToDMQSinceCreation = decoder.decodeUnsignedLong();
+    period = decoder.decodeUnsignedLong();
+    isNull = decoder.decodeBoolean();
+    if (isNull) {
+      interceptorsStr = null;
+    } else {
+      interceptorsStr = decoder.decodeString();
+    }
+  } 
 }
