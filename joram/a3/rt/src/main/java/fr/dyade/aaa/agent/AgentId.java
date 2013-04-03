@@ -506,7 +506,8 @@ public final class AgentId implements Serializable, TransactionObject, Encodable
   }
 
   public int getEncodedSize() throws Exception {
-    return 16 + 16 + 32;
+    // 2 + 2 + 4
+    return 8;
   }
   
 }
