@@ -29,6 +29,7 @@
               fr.dyade.aaa.common,
               fr.dyade.aaa.common.monitoring,
               fr.dyade.aaa.common.net,
+              fr.dyade.aaa.common.encoding,
               fr.dyade.aaa.util.management,
               javax.xml.parsers,
               org.objectweb.util.monolog,
