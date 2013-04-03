@@ -31,6 +31,7 @@
               fr.dyade.aaa.common.monitoring,
               fr.dyade.aaa.common.net,
               fr.dyade.aaa.common.osgi,
+              fr.dyade.aaa.common.encoding,
               fr.dyade.aaa.common.stream,
               fr.dyade.aaa.util.management</Export-Package>
             <Import-Package>javax.management;resolution:=optional,
