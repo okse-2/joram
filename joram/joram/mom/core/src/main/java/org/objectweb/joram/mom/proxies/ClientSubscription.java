@@ -1260,7 +1260,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Trans
     if (! durable) return;
     
     try {
-      AgentServer.getTransaction().create(this, getTxName());
+      // TODO: could check if this is a 'create' or a 'save'
+      AgentServer.getTransaction().save(this, getTxName());
     } catch (IOException exc) {
       logger.log(BasicLevel.ERROR, "ClientSubscription named [" + txname
           + "] could not be saved", exc);
