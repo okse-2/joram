@@ -541,7 +541,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
           message.durableAcksCounter++;
 
         messageIds.add(msgId);
-        save();
+        if (message.isPersistent()) {
+          save();
+        }
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, this + ": added msg " + msgId + " for delivery.");
