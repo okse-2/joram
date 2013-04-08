@@ -49,6 +49,7 @@ import org.objectweb.joram.mom.dest.AdminTopic.DestinationDesc;
 import org.objectweb.joram.mom.dest.Destination;
 import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.dest.Topic;
+import org.objectweb.joram.mom.messages.MemoryController;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
 import org.objectweb.joram.mom.notifications.AbstractReplyNot;
@@ -2868,6 +2869,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       message.order = arrivalsCounter++;
       messages.add(message);
     }
+    
+    // JORAM_PERF_BRANCH
+    MemoryController.getMemoryController().checkMemory(rep);
 
     for (Iterator names = tSub.getNames(); names.hasNext();) {
       subName = (String) names.next();

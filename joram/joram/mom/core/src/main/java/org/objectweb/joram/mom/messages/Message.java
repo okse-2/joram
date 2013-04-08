@@ -380,6 +380,15 @@ public final class Message implements Serializable, MessageView, TransactionObje
   public void save() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message.save:" + txname);
+    
+    // JORAM_PERF_BRANCH
+    int bodySize;
+    if (msg.body != null) {
+      bodySize = msg.body.length;
+    } else {
+      bodySize = 0;
+    }
+    MemoryController.getMemoryController().add(bodySize);
 
     if (!isPersistent()) return;
     
@@ -441,6 +450,15 @@ public final class Message implements Serializable, MessageView, TransactionObje
   public void delete() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message.delete:" + txname);
+    
+    // JORAM_PERF_BRANCH
+    int bodySize;
+    if (msg.body != null) {
+      bodySize = msg.body.length;
+    } else {
+      bodySize = 0;
+    }
+    MemoryController.getMemoryController().add(-bodySize);
 
     if (!isPersistent()) return;
     
