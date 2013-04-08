@@ -2542,11 +2542,13 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> save message " + message);
         // TODO (AF): The message saving does it need the proxy saving ?
-        setSave();
-        // Persisting the message.
-        setMsgTxName(message);
-        message.save();
-        message.releaseFullMessage();
+        if (message.isPersistent()) {
+          setSave();
+          // Persisting the message.
+          setMsgTxName(message);
+          message.save();
+          message.releaseFullMessage();
+        }
       }
     } 
 
