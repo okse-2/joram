@@ -1186,10 +1186,12 @@ public class Queue extends Destination implements QueueMBean {
    */
   protected final synchronized void storeMessage(Message msg, boolean throwsExceptionOnFullDest) throws AccessException {
     if (addMessage(msg, throwsExceptionOnFullDest)) {
-      // Persisting the message.
-      setMsgTxName(msg);
-      msg.save();
-      msg.releaseFullMessage();
+      if (msg.isPersistent()) {
+        // Persisting the message.
+        setMsgTxName(msg);
+        msg.save();
+        msg.releaseFullMessage();
+      }
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Message " + msg.getId() + " stored.");
     }
