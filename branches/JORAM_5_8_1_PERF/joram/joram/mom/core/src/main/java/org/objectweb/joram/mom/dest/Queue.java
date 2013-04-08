@@ -38,6 +38,7 @@ import java.util.Vector;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
+import org.objectweb.joram.mom.messages.MemoryController;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.messages.MessageJMXWrapper;
 import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
@@ -1043,6 +1044,9 @@ public class Queue extends Destination implements QueueMBean {
         storeMessage(msg, throwsExceptionOnFullDest);
         if (msg.isPersistent()) setSave();
       }
+      
+      // JORAM_PERF_BRANCH
+      MemoryController.getMemoryController().checkMemory(clientMsgs);
     }
 
     // Launching a delivery sequence:

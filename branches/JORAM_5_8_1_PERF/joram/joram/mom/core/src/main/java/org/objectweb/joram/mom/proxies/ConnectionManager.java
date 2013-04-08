@@ -32,6 +32,7 @@ import java.util.Vector;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.dest.Queue;
+import org.objectweb.joram.mom.messages.MemoryController;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
@@ -391,6 +392,10 @@ public class ConnectionManager implements ConnectionManagerMBean {
     EncodableFactoryRepository.putFactory(JoramHelper.RECEIVEREQUEST_CLASS_ID, new ReceiveRequest.ReceiveRequestFactory());
     EncodableFactoryRepository.putFactory(JoramHelper.USERAGENT_CLASS_ID, new UserAgent.UserAgentFactory());
     EncodableFactoryRepository.putFactory(JoramHelper.MESSAGE_CLASS_ID, new Message.MessageFactory());
+    
+    // JORAM_PERF_BRANCH
+    int memorySizeMax = AgentServer.getInteger("org.objectweb.joram.mom.proxies.ProducerWindowSize", 10000000).intValue();
+    MemoryController.getMemoryController().setMemorySizeMax(memorySizeMax);
     
     if (! firstTime) return;
 
