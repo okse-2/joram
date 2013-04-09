@@ -185,10 +185,12 @@ class ClientContext implements java.io.Serializable {
     return cancelledRequestId;
   }
 
-  /** Adds the identifier of a delivering queue. */ 
+  /** Adds, if not already, the identifier of a delivering queue. */ 
   void addDeliveringQueue(AgentId queueId) {
-    deliveringQueues.put(queueId, queueId);
-    proxy.setSave();
+    if (deliveringQueues.get(queueId) == null) {
+      deliveringQueues.put(queueId, queueId);
+      proxy.setSave();
+    }
   }
 
   /** Returns the identifiers of the delivering queues. */
