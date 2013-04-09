@@ -1056,7 +1056,7 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
     checkAgentCreate(msg);
     stamp(msg);
     msg.save();
-    AgentContext ctx = getAgentContext(msg.to);
+    AgentContext ctx = getAgentContextAndCreate(msg.to);
     ConcurrentLinkedMessageQueue qin = ctx.getWorker().getQin();
     synchronized (qin) {
       qin.pushAndValidate(msg);
