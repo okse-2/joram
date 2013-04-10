@@ -103,6 +103,10 @@ public class MemoryController {
     }
   }
   
+  public long getUsedMemorySize() {
+    return memorySize.get();
+  }
+  
   static class MemoryControlCallback implements Runnable {
     
     private Runnable callback;

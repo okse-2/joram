@@ -29,6 +29,9 @@ public interface UserAgentMBean extends AgentMBean {
   // JORAM_PERF_BRANCH
   public String[] getConnectionInfos();
   
+  //JORAM_PERF_BRANCH
+  public long getUsedMemorySize();
+  
   /**
    * Returns the name of this queue, or its id if not set.
    *

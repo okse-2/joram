@@ -3885,6 +3885,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   }
   
   //JORAM_PERF_BRANCH
+  public long getUsedMemorySize() {
+    return MemoryController.getMemoryController().getUsedMemorySize();
+  }
+  
+  //JORAM_PERF_BRANCH
   public static class UserAgentFactory implements EncodableFactory {
 
     public Encodable createEncodable() {
