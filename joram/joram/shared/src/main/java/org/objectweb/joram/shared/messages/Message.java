@@ -33,6 +33,9 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -168,7 +171,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
   
   // JORAM_PERF_BRANCH
   public transient boolean compressed;
-  public final static int COMPRESSED_MIN_SIZE = 100 * 1024;
+  public final static int COMPRESSED_MIN_SIZE = 50 * 1024;
 
   /**
    * Sets the message destination.
@@ -305,6 +308,19 @@ public final class Message implements Cloneable, Serializable, Streamable {
   
   //JORAM_PERF_BRANCH
   public static byte[] compress(byte[] toCompress) throws IOException {
+    Deflater deflater = new Deflater(Deflater.BEST_SPEED);
+    ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+    deflater.setInput(toCompress);
+    deflater.finish();
+    byte[] buf = new byte[1024];
+    int written;
+    while ((written = deflater.deflate(buf)) > 0) {
+      baos2.write(buf, 0, written);
+    }
+    deflater.end();
+    return baos2.toByteArray();
+    
+    /*
     ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
     int bodySize = toCompress.length;
     baos2.write(bodySize >>> 24);
@@ -319,6 +335,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
     zos.flush();
     zos.close();
     return baos2.toByteArray();
+    */
   }
   
   /**
@@ -338,6 +355,22 @@ public final class Message implements Cloneable, Serializable, Streamable {
   
   //JORAM_PERF_BRANCH
   public static byte[] uncompress(byte[] toUncompress) throws IOException {
+    Inflater inflater = new Inflater();
+    ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+    inflater.setInput(toUncompress);
+    byte[] buf = new byte[1024];
+    int written;
+    try {
+      while ((written = inflater.inflate(buf)) > 0) {
+        baos2.write(buf, 0, written);
+      }
+    } catch (DataFormatException e) {
+      throw new IOException(e);
+    }
+    inflater.end();
+    return baos2.toByteArray();
+    
+    /*
     ByteArrayInputStream bais = new ByteArrayInputStream(toUncompress);
     int zipEntrySize = (((bais.read() &0xFF) << 24) | 
         ((bais.read() &0xFF) << 16) |
@@ -354,6 +387,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
     }
     zis.close();
     return uncompressed;
+    */
   }
 
   /**
