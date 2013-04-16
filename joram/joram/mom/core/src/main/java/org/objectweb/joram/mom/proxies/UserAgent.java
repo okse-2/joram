@@ -3890,6 +3890,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   }
   
   //JORAM_PERF_BRANCH
+  public int getMemoryCallbackCount() {
+    return MemoryController.getMemoryController().getMemoryCallbackCount();
+  }
+  
+  //JORAM_PERF_BRANCH
   public static class UserAgentFactory implements EncodableFactory {
 
     public Encodable createEncodable() {
