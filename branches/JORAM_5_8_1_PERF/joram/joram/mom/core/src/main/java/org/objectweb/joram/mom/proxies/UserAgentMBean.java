@@ -31,6 +31,7 @@ public interface UserAgentMBean extends AgentMBean {
   
   //JORAM_PERF_BRANCH
   public long getUsedMemorySize();
+  public int getMemoryCallbackCount();
   
   /**
    * Returns the name of this queue, or its id if not set.
