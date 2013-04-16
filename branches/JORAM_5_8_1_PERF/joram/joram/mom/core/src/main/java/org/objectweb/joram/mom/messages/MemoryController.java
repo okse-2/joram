@@ -60,6 +60,10 @@ public class MemoryController {
   public void setMemorySizeMax(int memorySizeMax) {
     this.memorySizeMax = memorySizeMax;
   }
+  
+  public int getMemoryCallbackCount() {
+    return memoryCallbacks.size();
+  }
 
   public void add(int delta) {
     if (logger.isLoggable(BasicLevel.DEBUG))
