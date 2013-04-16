@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011- 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -67,7 +67,7 @@ public class JMXConnectorTest {
       clientEnv.put(JMXConnectorServerFactory.PROTOCOL_PROVIDER_PACKAGES, "org.ow2.joram.jmxconnector");
       clientConnector = JMXConnectorFactory.connect(url, clientEnv);
 
-      System.out.println("--> le Connecteur du Client s'est connecté au Connecteur du Serveur!");
+      System.out.println("--> JMXConnector connected to server.");
       MBeanServerConnection mbeanServerConnection = clientConnector.getMBeanServerConnection();
       System.out.println(mbeanServerConnection);
 
