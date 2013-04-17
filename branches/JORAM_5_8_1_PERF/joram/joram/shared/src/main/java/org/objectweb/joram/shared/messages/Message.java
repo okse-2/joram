@@ -309,16 +309,21 @@ public final class Message implements Cloneable, Serializable, Streamable {
   //JORAM_PERF_BRANCH
   public static byte[] compress(byte[] toCompress) throws IOException {
     Deflater deflater = new Deflater(Deflater.BEST_SPEED);
-    ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    int size = toCompress.length;
+    baos.write(size >>> 24);
+    baos.write(size >>> 16);
+    baos.write(size >>> 8);
+    baos.write(size >>> 0);
     deflater.setInput(toCompress);
     deflater.finish();
     byte[] buf = new byte[1024];
     int written;
     while ((written = deflater.deflate(buf)) > 0) {
-      baos2.write(buf, 0, written);
+      baos.write(buf, 0, written);
     }
     deflater.end();
-    return baos2.toByteArray();
+    return baos.toByteArray();
     
     /*
     ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
@@ -356,19 +361,19 @@ public final class Message implements Cloneable, Serializable, Streamable {
   //JORAM_PERF_BRANCH
   public static byte[] uncompress(byte[] toUncompress) throws IOException {
     Inflater inflater = new Inflater();
-    ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
-    inflater.setInput(toUncompress);
-    byte[] buf = new byte[1024];
-    int written;
+    int size = (((toUncompress[0] &0xFF) << 24) | 
+        ((toUncompress[1] &0xFF) << 16) |
+        ((toUncompress[2] &0xFF) << 8) | 
+        (toUncompress[3] &0xFF));
+    inflater.setInput(toUncompress, 4, toUncompress.length - 4);
+    byte[] uncompressed = new byte[size];
     try {
-      while ((written = inflater.inflate(buf)) > 0) {
-        baos2.write(buf, 0, written);
-      }
+      inflater.inflate(uncompressed);
     } catch (DataFormatException e) {
       throw new IOException(e);
     }
     inflater.end();
-    return baos2.toByteArray();
+    return uncompressed;
     
     /*
     ByteArrayInputStream bais = new ByteArrayInputStream(toUncompress);
