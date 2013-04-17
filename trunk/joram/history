@@ -1,4 +1,53 @@
 ###############################################################################
+# 2013/01/14 | Joram 5.8.1 tag.
+###############################################################################
++==============================================================================
+| 2013/01/14 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Adds specialized destinations.
+Javadoc and comment enhancements.
++==============================================================================
+| 2013/01/08 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+JORAM-69 : use only one timer by process for all connections.
++==============================================================================
+| 2012/12/21 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+JORAM-99: unregister the OutboundConnection mbean created by ManagedConnectionImpl.getConnection(null,null).
+JORAM-99: close the joram session in close method.
+Add and use mode constants.
+JORAM-101: add syncExceptionOnFull attribute on Queue description.
++==============================================================================
+| 2012/12/07 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+JORAM-62: add the sendActivity to avoid a connection close on SO_TIMEOUT.
++==============================================================================
+| 2012/11/29 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Adds new Joram-Spring capabilities.
++==============================================================================
+| 2012/11/22 | Thibaut Guinoiseau - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Corrects a bug on subscription names for the cmd joram:mom:list
++==============================================================================
+| 2012/11/29 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Changes the bundle activator to A3ServiceActivator
+Simplification of XML configAdmin files for the user.
+Adds ALIAS_QUEUE constant in Destination class.
++==============================================================================
+| 2012/11/15 | Thibaut Guinoiseau - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+[JIRA JORM-91]Improve joram:mom:delete : can delete destination by only specifying
+"destination" (or "dest") instead of "queue" or "topic" (those still work)
++==============================================================================
+| 2012/11/12 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Bug fixes (JORAM-68, JORAM-84 and JORAM-87):
+ - The period of HeartBeatTask is now correctly fixed.
+ - The context cleaning is done during a reaction of the corresponding user agent.
+ - The HeartBeatTask is canceled when the connection is closed.
+###############################################################################
 # 2012/10/23 | Joram 5.8.0 tag.
 ###############################################################################
 Adds specific factories for specialized destination:
