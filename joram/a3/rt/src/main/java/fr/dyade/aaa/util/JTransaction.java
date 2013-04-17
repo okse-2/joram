@@ -38,6 +38,8 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import fr.dyade.aaa.common.encoding.Encodable;
+
 /**
  *  The JTransaction class implements a transactionnal storage.
  *  This implementation is simple but inefficient, its main advantage is
@@ -478,6 +480,33 @@ public final class JTransaction extends BaseTransaction implements JTransactionM
   // JORAM_PERF_BRANCH
   public boolean containsOperations() {
     return log.size() > 0;
+  }
+  
+  public void create(Encodable obj, Encodable objectId) throws IOException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public void save(Encodable obj, Encodable objectId) throws IOException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public void saveByteArray(byte[] buf, Encodable objectId, boolean copy,
+      boolean first) throws IOException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public Encodable load(Encodable objectId) throws IOException,
+      ClassNotFoundException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public byte[] loadByteArray(Encodable objectId) throws IOException,
+      ClassNotFoundException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public void delete(Encodable objectId) {
+    throw new RuntimeException("Not implemented in JORAM_PERF_BRANCH");
   }
   
 }
