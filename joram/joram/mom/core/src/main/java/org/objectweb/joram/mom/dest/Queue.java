@@ -41,6 +41,7 @@ import javax.management.openmbean.TabularData;
 import org.objectweb.joram.mom.messages.MemoryController;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.messages.MessageJMXWrapper;
+import org.objectweb.joram.mom.messages.MessageTxId;
 import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
 import org.objectweb.joram.mom.notifications.AbstractRequestNot;
 import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
@@ -1178,9 +1179,11 @@ public class Queue extends Destination implements QueueMBean {
   }
 
   protected final void setMsgTxName(Message msg) {
-    if (msg.getTxName() == null) {
-      msg.setTxName(getMsgTxPrefix().append(msg.order).toString());
-      msgTxPrefix.setLength(msgTxPrefixLength);
+    if (msg.getTxId() == null) {
+      // JORAM_PERF_BRANCH
+      //msg.setTxId(getMsgTxPrefix().append(msg.order).toString());
+      //msgTxPrefix.setLength(msgTxPrefixLength);
+      msg.setTxId(new MessageTxId(getId(), msg.order));
     }
   }
 
@@ -1681,10 +1684,11 @@ public class Queue extends Destination implements QueueMBean {
     dmqManager.sendToDMQ();
   }
 
-	public String getTxName(String msgId) {
+  // JORAM_PERF_BRANCH
+	public MessageTxId getTxId(String msgId) {
 		Message momMsg = getMomMessage(msgId);
 		if (momMsg != null)
-			return momMsg.getTxName();
+			return momMsg.getTxId();
 	  return null;
   }
 

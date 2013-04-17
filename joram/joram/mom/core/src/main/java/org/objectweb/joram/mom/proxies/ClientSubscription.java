@@ -65,7 +65,7 @@ import fr.dyade.aaa.util.TransactionObjectFactory;
  * subscription, and the methods managing the delivery and acknowledgement
  * of the messages.
  */
-class ClientSubscription implements ClientSubscriptionMBean, Serializable, TransactionObject, Encodable {
+public class ClientSubscription implements ClientSubscriptionMBean, Serializable, TransactionObject, Encodable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   

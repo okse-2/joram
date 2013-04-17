@@ -25,6 +25,7 @@ package org.objectweb.joram.mom.dest;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectweb.joram.mom.messages.MessageTxId;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -108,12 +109,12 @@ public class DistributionDaemon extends Daemon {
       		logger.log(BasicLevel.DEBUG, "DistributionDaemon run: ackQueue.push : " + msg.id);
 
       	// transaction delete the message
-      	String txName = txDest.getTxName(msg.id);
+      	MessageTxId txid = txDest.getTxId(msg.id);
       	if (logger.isLoggable(BasicLevel.DEBUG))
-      		logger.log(BasicLevel.DEBUG, "DistributionDaemon run: txName(" + msg.id + ")=" + txName);
-      	if (txName != null) {
+      		logger.log(BasicLevel.DEBUG, "DistributionDaemon run: txName(" + msg.id + ")=" + txid);
+      	if (txid != null) {
       		org.objectweb.joram.mom.messages.Message momMsg = new org.objectweb.joram.mom.messages.Message(msg);
-      		momMsg.setTxName(txName);
+      		momMsg.setTxId(txid);
       		momMsg.delete();
       		AgentServer.getTransaction().begin();
       		AgentServer.getTransaction().commit(true);

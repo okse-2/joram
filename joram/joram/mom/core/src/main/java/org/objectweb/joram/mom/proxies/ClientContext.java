@@ -53,7 +53,7 @@ import fr.dyade.aaa.util.TransactionObjectFactory;
  * The <code>ClientContext</code> class holds the data related to a client
  * context.
  */
-class ClientContext implements java.io.Serializable, TransactionObject, Encodable {
+public class ClientContext implements java.io.Serializable, TransactionObject, Encodable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
