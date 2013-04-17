@@ -13,6 +13,22 @@
   <body>
 
     <s1 name="JORAM tutorials">
+    
+      <s2 name="Have fun using Joram on Raspberry PI with Java 8.">
+      <p>Joram requires very few resources to run, this simple tutorial shows how to launch
+      a Joram server on a Raspberry PI and test it.</p>
+      <ul>
+        <li>First you need a <a href="http://www.raspberrypi.org/">Raspberry PI</a> with Java 8, you can
+        find documentation instructions to setup JDK 8 on a Raspberry Pi device
+        <a href="http://jdk8.java.net/fxarmpreview/javafx-arm-developer-preview.html">here</a>.
+        </li>
+        <li>Second download a <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/Releases/release/target/joram-release-5.9.0-SNAPSHOT.zip">snapshot</a>
+        of Joram's distribution, then unzip it on your Raspberry PI.
+        </li>
+        <li>Third, follow the tutorial instructions : <a href="doc/tutorials/raspberry/raspberry.htm">here</a>.</li>
+      </ul>
+      </s2>
+    
       <s2 name="Samples">
     
       <p>Tutorials about the samples included in the Joram distribution:</p>

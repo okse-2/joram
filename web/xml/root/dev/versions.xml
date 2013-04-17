@@ -11,6 +11,29 @@
   </properties>
 
 	<body>
+	<s1 name="January 14 2013: JORAM 5.8.1 maintenance release is available.">
+		<p>Joram 5.8.1 is available in the SVN repository with tag JORAM_5_8_1.</p>
+		<s2 name="New features and improvements">
+			<ul>
+				<li>Factorizes the client timer for any JMS connection (JORAM-69).</li>
+				<li>Adds syncExceptionOnFull option (JORAM-101).</li>
+				<li>Spring intégration and OSGi configuration (DnD).</li>
+			</ul>
+		</s2>
+
+		<s2 name="Bug fixes">
+			<ul>
+				<li>Handles connection close when transmitting large messages
+					between servers (JORAM-62).</li>
+				<li>Best handle of JMS connection loss (JORAM-84).</li>
+				<li>Removes useless connection cleaning tasks (JORAM-87).</li>
+				<li>Unsubscribe Connection and Session MBeans to avoid memory leak (JORAM-99).</li>
+				<li>Fixes potential bug with the cleaning mechanism of client context in the
+				MOM (JORAM-68).</li>
+			</ul>
+		</s2>
+	</s1>
+	
       <s1 name="October 23, 2012: JORAM 5.8.0 release is available.">
         <p>Joram 5.8.0 is available in the SVN repository with tag JORAM_5_8_0.</p>
         <s2 name="New features and improvements">

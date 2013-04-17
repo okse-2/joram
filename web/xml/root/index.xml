@@ -83,7 +83,7 @@
         <li>Fixes potential bug with the cleaning mechanism of client context in the MOM (JORAM-68).</li>
         <li>Factorizes the client timer for any JMS connection (JORAM-69).</li>
         <li>Adds syncExceptionOnFull option (JORAM-101).</li>
-        <li>Spring intégration and OSGi configuration(DnD).</li>
+        <li>Spring intégration and OSGi configuration (DnD).</li>
       </ul>
       <p>This version is tagged in SVN (JORAM_5_8_1) and is available in Maven repository.</p>
       <p>The complete list of changes can be viewed either in
