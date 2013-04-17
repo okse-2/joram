@@ -26,6 +26,8 @@ package fr.dyade.aaa.util;
 import java.io.IOException;
 import java.io.Serializable;
 
+import fr.dyade.aaa.common.encoding.Encodable;
+
 /**
  * The Transaction interface defines the API of the atomic storage component.
  */
@@ -143,6 +145,10 @@ public interface Transaction {
    * @param name  the name of the object.
    */
   void create(Serializable obj, String name) throws IOException;
+  
+  // JORAM_PERF_BRANCH
+  void create(Encodable obj, Encodable objectId) throws IOException;
+  
   /**
    * Register the state of a newly created object in the current transaction.
    * 
@@ -158,6 +164,10 @@ public interface Transaction {
    * @param name    the name of the object.
    */
   void save(Serializable obj, String name) throws IOException;
+  
+  // JORAM_PERF_BRANCH
+  void save(Encodable obj, Encodable objectId) throws IOException;
+  
   /**
    * Register the modified state of an object in the current transaction.
    * 
@@ -217,6 +227,9 @@ public interface Transaction {
    */
   void saveByteArray(byte[] buf, String dirName, String name, boolean copy, boolean first) throws IOException;
   
+  // JORAM_PERF_BRANCH
+  void saveByteArray(byte[] buf, Encodable objectId, boolean copy, boolean first) throws IOException;
+  
   /**
    * Load the specified object.
    * 
@@ -224,6 +237,10 @@ public interface Transaction {
    * @return the loaded object.
    */
   Object load(String name) throws IOException, ClassNotFoundException;
+  
+  // JORAM_PERF_BRANCH
+  Encodable load(Encodable objectId) throws IOException, ClassNotFoundException;
+  
   /**
    * Load the specified object.
    * 
@@ -239,6 +256,9 @@ public interface Transaction {
    * @return the loaded byte array.
    */
   byte[] loadByteArray(String name) throws IOException, ClassNotFoundException;
+  
+  byte[] loadByteArray(Encodable objectId) throws IOException, ClassNotFoundException;
+  
   /**
    * Load the specified byte array.
    * 
@@ -253,6 +273,10 @@ public interface Transaction {
    * @param name    the name of the object.
    */
   void delete(String name);
+  
+  // JORAM_PERF_BRANCH
+  void delete(Encodable objectId);
+  
   /**
    * Deletes the specified object.
    * 

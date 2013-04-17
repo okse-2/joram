@@ -34,6 +34,8 @@ import java.util.Hashtable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
+import fr.dyade.aaa.common.encoding.Encodable;
+
 /**
  *  The AbstractTransaction class implements the common part of the Transaction
  * Transaction interface. A transaction implementation only needs to define several
@@ -479,6 +481,34 @@ public abstract class AbstractTransaction extends BaseTransaction {
   // JORAM_PERF_BRANCH
   public boolean containsOperations() {
     return (perThreadContext.get().getLog().size() > 0);
+  }
+  
+
+  public void create(Encodable obj, Encodable objectId) throws IOException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public void save(Encodable obj, Encodable objectId) throws IOException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public void saveByteArray(byte[] buf, Encodable objectId, boolean copy,
+      boolean first) throws IOException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public Encodable load(Encodable objectId) throws IOException,
+      ClassNotFoundException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public byte[] loadByteArray(Encodable objectId) throws IOException,
+      ClassNotFoundException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public void delete(Encodable objectId) {
+    throw new RuntimeException("Not implemented in JORAM_PERF_BRANCH");
   }
   
 }

@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
+import fr.dyade.aaa.common.encoding.Encodable;
+
 public final class NullTransaction extends BaseTransaction implements NullTransactionMBean {
   protected long startTime = 0L;
 
@@ -203,6 +205,33 @@ public final class NullTransaction extends BaseTransaction implements NullTransa
   // JORAM_PERF_BRANCH
   public boolean containsOperations() {
     return false;
+  }
+  
+  public void create(Encodable obj, Encodable objectId) throws IOException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public void save(Encodable obj, Encodable objectId) throws IOException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public void saveByteArray(byte[] buf, Encodable objectId, boolean copy,
+      boolean first) throws IOException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public Encodable load(Encodable objectId) throws IOException,
+      ClassNotFoundException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public byte[] loadByteArray(Encodable objectId) throws IOException,
+      ClassNotFoundException {
+    throw new IOException("Not implemented in JORAM_PERF_BRANCH");
+  }
+
+  public void delete(Encodable objectId) {
+    throw new RuntimeException("Not implemented in JORAM_PERF_BRANCH");
   }
   
 }
