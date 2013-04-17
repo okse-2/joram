@@ -386,14 +386,6 @@ public class ConnectionManager implements ConnectionManagerMBean {
                  "ConnectionManager.init(" + args + ',' + firstTime + ')');
     
     // JORAM_PERF_BRANCH
-    EncodableFactoryRepository.putFactory(JoramHelper.CLIENTCONTEXT_CLASS_ID, new ClientContext.ClientContextFactory());
-    EncodableFactoryRepository.putFactory(JoramHelper.CLIENTSUBSCRIPTION_CLASS_ID, new ClientSubscription.ClientSubscriptionFactory());
-    EncodableFactoryRepository.putFactory(JoramHelper.QUEUE_CLASS_ID, new Queue.QueueFactory());
-    EncodableFactoryRepository.putFactory(JoramHelper.RECEIVEREQUEST_CLASS_ID, new ReceiveRequest.ReceiveRequestFactory());
-    EncodableFactoryRepository.putFactory(JoramHelper.USERAGENT_CLASS_ID, new UserAgent.UserAgentFactory());
-    EncodableFactoryRepository.putFactory(JoramHelper.MESSAGE_CLASS_ID, new Message.MessageFactory());
-    
-    // JORAM_PERF_BRANCH
     int memorySizeMax = AgentServer.getInteger("org.objectweb.joram.mom.proxies.ProducerWindowSize", 10000000).intValue();
     MemoryController.getMemoryController().setMemorySizeMax(memorySizeMax);
     

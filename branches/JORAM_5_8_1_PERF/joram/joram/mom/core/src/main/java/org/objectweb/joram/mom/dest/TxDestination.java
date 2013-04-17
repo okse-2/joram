@@ -22,6 +22,8 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import org.objectweb.joram.mom.messages.MessageTxId;
+
 public interface TxDestination {
 	
 	/**
@@ -29,5 +31,6 @@ public interface TxDestination {
 	 * @param msgId the message id.
 	 * @return the tx name of the message.
 	 */
-	String getTxName(String msgId);
+  // JORAM_PERF_BRANCH
+	MessageTxId getTxId(String msgId);
 }

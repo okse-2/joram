@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.objectweb.joram.mom.messages.MessageTxId;
 import org.objectweb.joram.mom.notifications.AbstractRequestNot;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.ClusterJoinAck;
@@ -749,7 +750,7 @@ public class Topic extends Destination implements TopicMBean {
     return nbMsgsReceiveSinceCreation;
   }
 
-	public String getTxName(String msgId) {
+	public MessageTxId getTxId(String msgId) {
 	  // TODO Auto-generated method stub
 	  return null;
   }

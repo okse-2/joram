@@ -148,7 +148,7 @@ public final class Message implements Serializable, MessageView, TransactionObje
    */
   public org.objectweb.joram.shared.messages.Message getFullMessage() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MessagePersistenceModule.getFullMessage() " + txname);
+      logger.log(BasicLevel.DEBUG, "MessagePersistenceModule.getFullMessage() " + txid);
     // The message can be soft but releaseFullMessage has not been called !
     if (!soft || msg.body != null)
       return msg;
@@ -163,13 +163,17 @@ public final class Message implements Serializable, MessageView, TransactionObje
 
     // Try to load the body from repository
     try {
-      msg.body = AgentServer.getTransaction().loadByteArray(txname + "B");
+      
+      // JORAM_PERF_BRANCH
+      //msg.body = AgentServer.getTransaction().loadByteArray(txname + "B");
+      msg.body = AgentServer.getTransaction().loadByteArray(new MessageBodyTxId(txid.getOwnerId(), txid.getOrder()));
+      
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Body loaded.");
       bodySoftRef = null;
     } catch (Exception exc) {
       logger.log(BasicLevel.ERROR,
-                 "Body of message named [" + txname + "] could not be loaded", exc);
+                 "Body of message named [" + txid + "] could not be loaded", exc);
     }
     return msg;
   }
@@ -356,21 +360,26 @@ public final class Message implements Serializable, MessageView, TransactionObje
   }
 
   /** Name used to store the message */
-  transient String txname = null;
+  //JORAM_PERF_BRANCH: replaced with 'txid'
+  //transient String txname = null;
+  
+  // JORAM_PERF_BRANCH
+  transient MessageTxId txid;
 
-  public void setTxName(String txname) {
-    this.txname = txname;
+  //JORAM_PERF_BRANCH
+  public void setTxId(MessageTxId txid) {
+    this.txid = txid;
   }
 
-  public String getTxName() {
-    return txname;
+  public MessageTxId getTxId() {
+    return txid;
   }
 
-  public static Message load(String txname) throws IOException, ClassNotFoundException {
+  public static Message load(MessageTxId txid) throws IOException, ClassNotFoundException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Message.load:" + txname);
-    Message msg = (Message) AgentServer.getTransaction().load(txname);
-    msg.txname = txname;
+      logger.log(BasicLevel.DEBUG, "Message.load:" + txid);
+    Message msg = (Message) AgentServer.getTransaction().load(txid);
+    msg.txid = txid;
     return msg;
   }
 
@@ -379,7 +388,7 @@ public final class Message implements Serializable, MessageView, TransactionObje
    */
   public void save() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Message.save:" + txname);
+      logger.log(BasicLevel.DEBUG, "Message.save:" + txid);
     
     // JORAM_PERF_BRANCH
     int bodySize;
@@ -397,23 +406,27 @@ public final class Message implements Serializable, MessageView, TransactionObje
       // sets the body to null to save it in an other file
       msg.body = null;
       try {
-        AgentServer.getTransaction().create(this, txname);
+        // JORAM_PERF_BRANCH
+        AgentServer.getTransaction().create(this, txid);
       } catch (IOException exc) {
-        logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
+        logger.log(BasicLevel.ERROR, "Message named [" + txid + "] could not be saved", exc);
       }
       // save the body
       try {
         // The body is RO do not copy it.
-        AgentServer.getTransaction().saveByteArray(body, null, txname + "B", false, true);
+        // JORAM_PERF_BRANCH
+        //AgentServer.getTransaction().saveByteArray(body, null, txname + "B", false, true);
+        AgentServer.getTransaction().saveByteArray(body, new MessageBodyTxId(txid.getOwnerId(), txid.getOrder()), false, true);
       } catch (IOException exc) {
-        logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
+        logger.log(BasicLevel.ERROR, "Message named [" + txid + "] could not be saved", exc);
       }
       msg.body = body;
     } else {
       try {
-        AgentServer.getTransaction().create(this, txname);
+        // JORAM_PERF_BRANCH
+        AgentServer.getTransaction().create(this, txid);
       } catch (IOException exc) {
-        logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
+        logger.log(BasicLevel.ERROR, "Message named [" + txid + "] could not be saved", exc);
       }
     }
   }
@@ -424,7 +437,7 @@ public final class Message implements Serializable, MessageView, TransactionObje
    */
   public void saveHeader() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Message.saveHeader:" + txname);
+      logger.log(BasicLevel.DEBUG, "Message.saveHeader:" + txid);
 
     if (!isPersistent()) return;
     
@@ -433,23 +446,23 @@ public final class Message implements Serializable, MessageView, TransactionObje
       // sets the body to null to not save it
       msg.body = null;
       try {
-        AgentServer.getTransaction().save(this, txname);
+        AgentServer.getTransaction().save(this, txid);
       } catch (IOException exc) {
-        logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
+        logger.log(BasicLevel.ERROR, "Message named [" + txid + "] could not be saved", exc);
       }
       msg.body = body;
     } else {
       try {
-        AgentServer.getTransaction().save(this, txname);
+        AgentServer.getTransaction().save(this, txid);
       } catch (IOException exc) {
-        logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
+        logger.log(BasicLevel.ERROR, "Message named [" + txid + "] could not be saved", exc);
       }
     }
   }
 
   public void delete() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Message.delete:" + txname);
+      logger.log(BasicLevel.DEBUG, "Message.delete:" + txid);
     
     // JORAM_PERF_BRANCH
     int bodySize;
@@ -462,9 +475,11 @@ public final class Message implements Serializable, MessageView, TransactionObje
 
     if (!isPersistent()) return;
     
-    AgentServer.getTransaction().delete(txname);
+    AgentServer.getTransaction().delete(txid);
     if (soft) {
-      AgentServer.getTransaction().delete(txname + "B");
+      // JORAM_PERF_BRANCH
+      //AgentServer.getTransaction().delete(txname + "B");
+      AgentServer.getTransaction().delete(new MessageBodyTxId(txid.getOwnerId(), txid.getOrder()));
     }
   }
 
@@ -484,10 +499,12 @@ public final class Message implements Serializable, MessageView, TransactionObje
       if (names[i].charAt(names[i].length() - 1) != 'B') {
         try {
           Message msg = (Message) tx.load(names[i]);
-          msg.txname = names[i];
+          
+          // JORAM_PERF_BRANCH
+          msg.txid = MessageTxId.fromString(names[i]);
 
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "loadAll: names[" + i + "] = " + msg.txname);
+            logger.log(BasicLevel.DEBUG, "loadAll: names[" + i + "] = " + msg.txid);
           messages.add(msg);
         } catch (Exception exc) {
           logger.log(BasicLevel.ERROR, "Message named [" + names[i] + "] could not be loaded", exc);

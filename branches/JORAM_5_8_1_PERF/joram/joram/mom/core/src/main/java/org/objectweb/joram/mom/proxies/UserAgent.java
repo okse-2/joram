@@ -51,6 +51,7 @@ import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.dest.Topic;
 import org.objectweb.joram.mom.messages.MemoryController;
 import org.objectweb.joram.mom.messages.Message;
+import org.objectweb.joram.mom.messages.MessageTxId;
 import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
 import org.objectweb.joram.mom.notifications.AbstractReplyNot;
 import org.objectweb.joram.mom.notifications.AbstractRequestNot;
@@ -2844,8 +2845,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   }
 
   protected final void setMsgTxName(Message msg) {
-    if (msg.getTxName() == null)
-      msg.setTxName(getMsgTxname() + msg.order);
+    if (msg.getTxId() == null) {
+      // JORAM_PERF_BRANCH
+      // msg.setTxId(getMsgTxname() + msg.order);
+      msg.setTxId(new MessageTxId(getId(), msg.order));
+    }
   }
 
   /**
