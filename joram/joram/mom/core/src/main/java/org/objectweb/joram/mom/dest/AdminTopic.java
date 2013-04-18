@@ -1984,7 +1984,9 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
     ref.destinationsTable.put(name, desc);
     // Store the AdminTopic in order to save changes
     try {
-      AgentServer.getTransaction().save(ref, ref.getId().toString());
+      // JORAM_PERF_BRANCH
+      // AgentServer.getTransaction().save(ref, ref.getId().toString());
+      AgentServer.getTransaction().save(ref, ref.getId());
     } catch (IOException exc) {
       logger.log(BasicLevel.ERROR, "Cannot unregister destination", exc);
     }
@@ -1999,7 +2001,9 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
     ref.destinationsTable.remove(name);
     // Store the AdminTopic in order to save changes
     try {
-      AgentServer.getTransaction().save(ref, ref.getId().toString());
+      // JORAM_PERF_BRANCH
+      // AgentServer.getTransaction().save(ref, ref.getId().toString());
+      AgentServer.getTransaction().save(ref, ref.getId());
     } catch (IOException exc) {
       logger.log(BasicLevel.ERROR, "Cannot unregister destination", exc);
     }
@@ -2028,7 +2032,9 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
                                        String msgId) throws UnknownServerException, RequestException, IOException {
     ref.doProcess(request, replyTo, msgId);
     //  save Agent AdminTopic
-    AgentServer.getTransaction().save(ref, ref.getId().toString()); 
+    // JORAM_PERF_BRANCH
+    //AgentServer.getTransaction().save(ref, ref.getId().toString()); 
+    AgentServer.getTransaction().save(ref, ref.getId()); 
   }
 
   /**
@@ -2063,7 +2069,9 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
                                                      requestClassName,
                                                      strbuf);
     // save Agent AdminTopic
-    AgentServer.getTransaction().save(ref, ref.getId().toString()); 
+    // JORAM_PERF_BRANCH
+    //AgentServer.getTransaction().save(ref, ref.getId().toString()); 
+    AgentServer.getTransaction().save(ref, ref.getId()); 
     return destDesc;
   }
 
@@ -2086,7 +2094,9 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
                                      String msgId) throws UnknownServerException, IOException {
     ref.doProcess(request, replyTo, msgId);
     // save Agent AdminTopic
-    AgentServer.getTransaction().save(ref, ref.getId().toString()); 
+    // JORAM_PERF_BRANCH
+    // AgentServer.getTransaction().save(ref, ref.getId().toString()); 
+    AgentServer.getTransaction().save(ref, ref.getId()); 
   }
 
   /**
