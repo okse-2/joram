@@ -497,11 +497,13 @@ public final class Message implements Serializable, MessageView, TransactionObje
     // Retrieving the messages individually persisted.
     for (int i = 0; i < names.length; i++) {
       if (names[i].charAt(names[i].length() - 1) != 'B') {
-        try {
-          Message msg = (Message) tx.load(names[i]);
+        try {  
+          // JORAM_PERF_BRANCH
+          MessageTxId txid = MessageTxId.fromString(names[i]);         
+          Message msg = (Message) tx.load(txid);
           
           // JORAM_PERF_BRANCH
-          msg.txid = MessageTxId.fromString(names[i]);
+          msg.txid = txid;
 
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "loadAll: names[" + i + "] = " + msg.txid);
@@ -526,8 +528,14 @@ public final class Message implements Serializable, MessageView, TransactionObje
 
     // Deleting the message.
     for (int i = 0; i < names.length; i++) {
-      tx.delete(names[i]);
-      tx.delete(names[i] + "B");
+      // JORAM_PERF_BRANCH
+      try {
+        MessageTxId txid = MessageTxId.fromString(names[i]);
+        tx.delete(txid);
+        tx.delete(new MessageBodyTxId(txid.getOwnerId(), txid.getOrder()));
+      } catch (Exception e) {
+        logger.log(BasicLevel.ERROR, "Message named [" + names[i] + "] could not be deleted", e);
+      }
     }
   }
 
