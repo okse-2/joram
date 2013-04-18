@@ -29,6 +29,7 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -1236,7 +1237,10 @@ public class MultiThreadEngine implements Engine, MultiThreadEngineMBean {
   }
 
   public void stop() {
-    
+    executorService.shutdown();
+    try {
+      executorService.awaitTermination(10, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {}
   }
 
 }
