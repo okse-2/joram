@@ -198,7 +198,9 @@ public abstract class Agent implements AgentMBean, Serializable, TransactionObje
    */
   protected final void save() throws IOException {
     if (updated) {
-      AgentServer.getTransaction().save(this, id.toString());
+      // JORAM_PERF_BRANCH
+      //AgentServer.getTransaction().save(this, id.toString());
+      AgentServer.getTransaction().save(this, id);
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
                    "Agent" + id + " [" + name + "] saved");
@@ -220,7 +222,9 @@ public abstract class Agent implements AgentMBean, Serializable, TransactionObje
    */
   final static Agent
   load(AgentId id) throws IOException, ClassNotFoundException {
-    Agent ag = (Agent) AgentServer.getTransaction().load(id.toString());
+    // JORAM_PERF_BRANCH
+    // Agent ag = (Agent) AgentServer.getTransaction().load(id.toString());
+    Agent ag = (Agent) AgentServer.getTransaction().load(id);
     if (ag != null) {
       ag.id = id;
       ag.deployed = true;

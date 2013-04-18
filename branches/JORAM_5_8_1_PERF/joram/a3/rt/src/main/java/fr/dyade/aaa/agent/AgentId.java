@@ -30,6 +30,7 @@ import java.io.Serializable;
 
 import fr.dyade.aaa.common.encoding.Decoder;
 import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
 import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.util.TransactionObject;
 
@@ -508,6 +509,14 @@ public final class AgentId implements Serializable, TransactionObject, Encodable
   public int getEncodedSize() throws Exception {
     // 2 + 2 + 4
     return 8;
+  }
+  
+  public static class AgentIdEncodableFactory implements EncodableFactory {
+
+    public Encodable createEncodable() {
+      return new AgentId((short) 0, (short) 0, 0);
+    }
+    
   }
   
 }
