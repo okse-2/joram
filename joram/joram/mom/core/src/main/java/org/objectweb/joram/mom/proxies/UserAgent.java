@@ -985,8 +985,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     String[] persistedClientNames = tx.getList(ClientContext.getTransactionPrefix(getId()));
     for (int i = 0; i < persistedClientNames.length; i++) {
       try {
-        ClientContext cc = (ClientContext) tx.load(persistedClientNames[i]);
-        cc.txname = persistedClientNames[i];
+        ClientContextTxId txid = ClientContextTxId.fromString(persistedClientNames[i]);
+        ClientContext cc = (ClientContext) tx.load(txid);
+        cc.txid = txid;
         contexts.put(cc.getId(), cc);
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR, "ClientContext named [" + persistedClientNames[i]

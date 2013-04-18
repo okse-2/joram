@@ -90,7 +90,7 @@ public class ClientContext implements java.io.Serializable, TransactionObject, E
   private transient ProxyAgentItf proxy;
   
   // JORAM_PERF_BRANCH
-  public transient String txname;
+  public transient ClientContextTxId txid;
   
   // JORAM_PERF_BRANCH
   public transient boolean isModified;
@@ -451,7 +451,7 @@ public class ClientContext implements java.io.Serializable, TransactionObject, E
       // TODO: could check if this is a 'create' or a 'save'
       AgentServer.getTransaction().save(this, getTxName());
     } catch (IOException exc) {
-      logger.log(BasicLevel.ERROR, "ClientContext named [" + txname
+      logger.log(BasicLevel.ERROR, "ClientContext named [" + txid
           + "] could not be saved", exc);
     }
   }
@@ -462,11 +462,12 @@ public class ClientContext implements java.io.Serializable, TransactionObject, E
   }
   
   //JORAM_PERF_BRANCH
-  private String getTxName() {
-    if (txname == null) {
-      txname = getTransactionPrefix(proxyId) + id;
+  private ClientContextTxId getTxName() {
+    if (txid == null) {
+      //txid = getTransactionPrefix(proxyId) + id;
+      txid = new ClientContextTxId(proxyId, id);
     }
-    return txname;
+    return txid;
   }
   
   // JORAM_PERF_BRANCH
