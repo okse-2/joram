@@ -27,6 +27,7 @@ import org.objectweb.joram.mom.messages.MessageBodyTxId;
 import org.objectweb.joram.mom.messages.MessageTxId;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.proxies.ClientContext;
+import org.objectweb.joram.mom.proxies.ClientContextTxId;
 import org.objectweb.joram.mom.proxies.ClientSubscription;
 import org.objectweb.joram.mom.proxies.UserAgent;
 
@@ -44,6 +45,7 @@ public class JoramEncodableFactoryInit {
     EncodableFactoryRepository.putFactory(JoramHelper.MESSAGE_CLASS_ID, new Message.MessageFactory());
     EncodableFactoryRepository.putFactory(JoramHelper.MESSAGETXID_CLASS_ID, new MessageTxId.MessageTxIdFactory());
     EncodableFactoryRepository.putFactory(JoramHelper.MESSAGEBODYTXID_CLASS_ID, new MessageBodyTxId.MessageBodyTxIdFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.CLIENTCONTEXTTXID_CLASS_ID, new ClientContextTxId.ClientContextTxIdEncodableFactory());
   }
 
 }
