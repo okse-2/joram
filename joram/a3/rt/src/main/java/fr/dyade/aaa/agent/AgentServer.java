@@ -879,6 +879,9 @@ public final class AgentServer {
       throw new Exception("usage: java <main> sid storage");
     }
     String path = args[1];
+    
+    // JORAM_PERF_BRANCH
+    EncodableHelper.init();
 
     init(sid, path, null);
 

@@ -20,6 +20,8 @@
  */
 package fr.dyade.aaa.agent;
 
+import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
+
 public class EncodableHelper {
   
   public static final int CLASS_ID_AREA = 0x10000;
@@ -27,5 +29,9 @@ public class EncodableHelper {
   public static final int AGENTID_CLASS_ID = CLASS_ID_AREA + 0;
   
   public static final int NOTIFICATION_CLASS_ID = CLASS_ID_AREA + 1;
+  
+  public static void init() {
+    EncodableFactoryRepository.putFactory(AGENTID_CLASS_ID, new AgentId.AgentIdEncodableFactory());
+  }
 
 }
