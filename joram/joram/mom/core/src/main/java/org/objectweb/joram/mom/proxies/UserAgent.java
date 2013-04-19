@@ -997,8 +997,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     String[] persistedSubscriptionNames = tx.getList(ClientSubscription.getTransactionPrefix(getId()));
     for (int i = 0; i < persistedSubscriptionNames.length; i++) {
       try {
-        ClientSubscription cs = (ClientSubscription) tx.load(persistedSubscriptionNames[i]);
-        cs.txname = persistedSubscriptionNames[i];
+        ClientSubscriptionTxId txid = ClientSubscriptionTxId.fromString(persistedSubscriptionNames[i]);
+        ClientSubscription cs = (ClientSubscription) tx.load(txid);
+        cs.txid = txid;
         subsTable.put(cs.getEncodedName(), cs);
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR, "ClientSubscription named [" + persistedSubscriptionNames[i]

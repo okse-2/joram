@@ -1254,16 +1254,16 @@ public class ClientSubscription implements ClientSubscriptionMBean, Serializable
   }
   
   //JORAM_PERF_BRANCH
-  public transient String txname;
+  public transient ClientSubscriptionTxId txid;
   
   public void save() {
     if (! durable) return;
     
     try {
       // TODO: could check if this is a 'create' or a 'save'
-      AgentServer.getTransaction().save(this, getTxName());
+      AgentServer.getTransaction().save(this, getTxId());
     } catch (IOException exc) {
-      logger.log(BasicLevel.ERROR, "ClientSubscription named [" + txname
+      logger.log(BasicLevel.ERROR, "ClientSubscription named [" + txid
           + "] could not be saved", exc);
     }
   }
@@ -1272,15 +1272,15 @@ public class ClientSubscription implements ClientSubscriptionMBean, Serializable
   public void delete() {
     if (! durable) return;
     
-    AgentServer.getTransaction().delete(getTxName());
+    AgentServer.getTransaction().delete(getTxId());
   }
   
   //JORAM_PERF_BRANCH
-  private String getTxName() {
-    if (txname == null) {
-      txname = getTransactionPrefix(proxyId) + name.getString();
+  private ClientSubscriptionTxId getTxId() {
+    if (txid == null) {
+      txid = new ClientSubscriptionTxId(proxyId, name);
     }
-    return txname;
+    return txid;
   }
   
   //JORAM_PERF_BRANCH
