@@ -29,38 +29,60 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.encoding.Decoder;
 import fr.dyade.aaa.common.encoding.Encodable;
 import fr.dyade.aaa.common.encoding.EncodableFactory;
+import fr.dyade.aaa.common.encoding.EncodedString;
 import fr.dyade.aaa.common.encoding.Encoder;
 
-public class ClientContextTxId implements Encodable {
+public class ClientSubscriptionTxId implements Encodable {
   
   private AgentId ownerId;
   
-  private int clientId;
+  private EncodedString subscriptionId;
 
-  public ClientContextTxId() {
+  public ClientSubscriptionTxId() {
     super();
   }
 
-  public ClientContextTxId(AgentId ownerId, int clientId) {
+  public ClientSubscriptionTxId(AgentId ownerId, EncodedString subscriptionId) {
     super();
     this.ownerId = ownerId;
-    this.clientId = clientId;
+    this.subscriptionId = subscriptionId;
   }
 
   public AgentId getOwnerId() {
     return ownerId;
   }
 
-  public int getClientId() {
-    return clientId;
+  public EncodedString getSubscriptionId() {
+    return subscriptionId;
+  }
+
+  public int getClassId() {
+    return JoramHelper.CLIENTSUBSCRIPTIONTXID_CLASS_ID;
+  }
+
+  public int getEncodedSize() throws Exception {
+    return ownerId.getEncodedSize() + subscriptionId.getEncodedSize();
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    ownerId.encode(encoder);
+    subscriptionId.encode(encoder);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    ownerId = new AgentId((short) 0, (short) 0, 0);
+    ownerId.decode(decoder);
+    subscriptionId = new EncodedString();
+    subscriptionId.decode(decoder);
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + clientId;
     result = prime * result + ((ownerId == null) ? 0 : ownerId.hashCode());
+    result = prime * result
+        + ((subscriptionId == null) ? 0 : subscriptionId.hashCode());
     return result;
   }
 
@@ -72,55 +94,39 @@ public class ClientContextTxId implements Encodable {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ClientContextTxId other = (ClientContextTxId) obj;
-    if (clientId != other.clientId)
-      return false;
+    ClientSubscriptionTxId other = (ClientSubscriptionTxId) obj;
     if (ownerId == null) {
       if (other.ownerId != null)
         return false;
     } else if (!ownerId.equals(other.ownerId))
       return false;
+    if (subscriptionId == null) {
+      if (other.subscriptionId != null)
+        return false;
+    } else if (!subscriptionId.equals(other.subscriptionId))
+      return false;
     return true;
-  }
-
-  public int getClassId() {
-    return JoramHelper.CLIENTCONTEXTTXID_CLASS_ID;
-  }
-
-  public int getEncodedSize() throws Exception {
-    return ownerId.getEncodedSize() + 4;
-  }
-
-  public void encode(Encoder encoder) throws Exception {
-    ownerId.encode(encoder);
-    encoder.encodeUnsignedInt(clientId);
-  }
-
-  public void decode(Decoder decoder) throws Exception {
-    ownerId = new AgentId((short) 0, (short) 0, 0);
-    ownerId.decode(decoder);
-    clientId = decoder.decodeUnsignedInt();
   }
   
   public String toString() {
     StringBuffer buf = new StringBuffer(19);
-    buf.append("CC").append(ownerId.toString()).append('_');
-    buf.append(clientId);
+    buf.append("CS").append(ownerId.toString()).append('_');
+    buf.append(subscriptionId);
     return buf.toString();
   }
   
-  public static ClientContextTxId fromString(String s) throws Exception {
+  public static ClientSubscriptionTxId fromString(String s) throws Exception {
     int sepIndex = s.indexOf('_');
-    if (sepIndex < 0) throw new Exception("Malformed ClientContextTxId: " + s);
-    int id = Integer.parseInt(s.substring(sepIndex + 1));
+    if (sepIndex < 0) throw new Exception("Malformed ClientSubscriptionTxId: " + s);
+    EncodedString subscriptionId = new EncodedString(s.substring(sepIndex + 1));
     AgentId ownerId = AgentId.fromString(s.substring(2, sepIndex));
-    return new ClientContextTxId(ownerId, id);
+    return new ClientSubscriptionTxId(ownerId, subscriptionId);
   }
   
-  public static class ClientContextTxIdEncodableFactory implements EncodableFactory {
+  public static class ClientSubscriptionTxIdEncodableFactory implements EncodableFactory {
 
     public Encodable createEncodable() {
-      return new ClientContextTxId();
+      return new ClientSubscriptionTxId();
     }
     
   }
