@@ -879,9 +879,6 @@ public final class AgentServer {
       throw new Exception("usage: java <main> sid storage");
     }
     String path = args[1];
-    
-    // JORAM_PERF_BRANCH
-    EncodableHelper.init();
 
     init(sid, path, null);
 
@@ -972,6 +969,10 @@ public final class AgentServer {
   public static void init(short sid,
                           String path,
                           LoggerFactory loggerFactory) throws Exception {
+    
+    // JORAM_PERF_BRANCH
+    EncodableHelper.init();
+    
     name = new StringBuffer("AgentServer#").append(sid).toString();
 
     if (loggerFactory != null) Debug.setLoggerFactory(loggerFactory);
