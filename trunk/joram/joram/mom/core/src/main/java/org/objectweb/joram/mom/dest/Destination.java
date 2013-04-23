@@ -601,25 +601,40 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
   /**
    * Returns values of all valid JMX attributes about the destination.
    * 
+   * @param names A comma separated list of requested JMX attribute names.
    * @return a Hashtable containing the values of all valid JMX attributes about the destination.
    *         The keys are the name of corresponding attributes.
    */
-  protected final Hashtable getJMXStatistics() {
+  protected final Hashtable getJMXStatistics(String names) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Destination.getJMXStatistics()");
 
     Hashtable stats = null;
 
     try {
-      List attributes = MXWrapper.getAttributeNames(getMBeanName());
-      if (attributes != null) {
-        stats = new Hashtable(attributes.size());
-        for (int k = 0; k < attributes.size(); k++) {
-          String name = (String) attributes.get(k);
+      if (names != null) {
+        StringTokenizer st = new StringTokenizer(names, ",");
+        stats = new Hashtable(st.countTokens());
+        while (st.hasMoreTokens()) {
+          String name = st.nextToken();
           if (isValidJMXAttribute(name)) {
             Object value = MXWrapper.getAttribute(getMBeanName(), name);
             if ((value != null) && ((value instanceof String) || (value instanceof Number)))
               stats.put(name, value);
+          }
+
+        }
+      } else {
+        List attributes = MXWrapper.getAttributeNames(getMBeanName());
+        if (attributes != null) {
+          stats = new Hashtable(attributes.size());
+          for (int k = 0; k < attributes.size(); k++) {
+            String name = (String) attributes.get(k);
+            if (isValidJMXAttribute(name)) {
+              Object value = MXWrapper.getAttribute(getMBeanName(), name);
+              if ((value != null) && ((value instanceof String) || (value instanceof Number)))
+                stats.put(name, value);
+            }
           }
         }
       }
@@ -1018,7 +1033,8 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       setRight((SetRight) adminRequest,
                not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof GetStatsRequest) {
-      replyToTopic(new GetStatsReply(getJMXStatistics()),
+      String names = ((GetStatsRequest) adminRequest).getAttributes();
+      replyToTopic(new GetStatsReply(getJMXStatistics(names)),
                    not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof SetDMQRequest) {
       // state change, so save.
