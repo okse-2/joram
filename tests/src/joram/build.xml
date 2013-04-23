@@ -157,6 +157,7 @@
     <antcall target="base.test_Q_MStream" />
     <antcall target="base.test_T_MStream" />
     <antcall target="base.test_DMQ_Body" />
+  	<antcall target="base.test_Compress_MText" />
   </target>
 
   <target name="tests.property"
@@ -1137,6 +1138,19 @@
       <param name="args" value="" />
     </antcall>
   </target>
+	
+	<target name="base.test_Compress_MText" depends="init.a3props,compile"
+	    description=" --> test a compress message body">
+	    <antcall target="test.run" inheritAll="true">
+	      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction" />
+	      <param name="testid" value="base.test_Compress_MText" />
+	      <param name="className" value="joram.base.Test_Compress_MText" />
+	      <param name="jndiconf" value="base/jndi.properties" />
+	      <param name="a3conf" value="base/a3servers1.xml" />
+	      <param name="jvmargs" value="" />
+	      <param name="args" value="" />
+	    </antcall>
+	  </target>
 
   <target name="base.test_CAck1_Q" depends="init.a3props,compile"
     description=" --> test client_acknowledgement with one message and  with a queue">
