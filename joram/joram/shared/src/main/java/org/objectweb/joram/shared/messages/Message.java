@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,8 +31,10 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Hashtable;
 import java.util.Vector;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 import org.objectweb.joram.shared.admin.AbstractAdminMessage;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -65,7 +67,10 @@ public final class Message implements Cloneable, Serializable, Streamable {
    */
   public Message() {}
 
-  /** Body of the message. */
+  /** 
+   * Body of the message. 
+   * on client side, used getBody and setBody instead of direct access to the body.
+   */
   public transient byte[] body = null;
 
   /** The message properties table. */
@@ -162,6 +167,17 @@ public final class Message implements Cloneable, Serializable, Streamable {
 
   /** The message destination type. */
   public transient byte toType;
+  
+  /** <code>true</code> if compressed body. */
+  public transient boolean compressed;
+  
+  /** 
+   * If the message body is upper than the <code>compressedMinSize</code>,
+   * this message body is compressed.
+   */
+  public transient int compressedMinSize;
+  
+  public transient int compressionLevel = Deflater.BEST_SPEED;
 
   /**
    * Sets the message destination.
@@ -301,7 +317,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
    * @throws IOException In case of an error while setting the text
    */
   public void setText(String text) throws IOException {
-  	body = toBytes(text);
+  	setBody(toBytes(text));
   }
 
   /**
@@ -312,7 +328,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
     if (body == null) {
       return null;
     }
-    return (String) fromBytes(body);
+    return (String) fromBytes(getBody());
   }
 
   /**
@@ -322,7 +338,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
    */
   public void setObject(Serializable object) throws IOException {
     type = Message.OBJECT;
-    body = toBytes(object);
+    setBody(toBytes(object));
   }
 
   /**
@@ -332,7 +348,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
    */
   public Serializable getObject() throws Exception {
     // TODO (AF): May be, we should verify that it is an Object message!!
-    return fromBytes(body);
+    return fromBytes(getBody());
   }
 
   /**
@@ -349,7 +365,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       AbstractAdminMessage.write(adminMsg, baos);
       baos.flush();
-      body = baos.toByteArray();
+      setBody(baos.toByteArray());
       baos.close();
     }
   }
@@ -367,7 +383,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
     AbstractAdminMessage adminMsg = null;
 
     try {
-     bais = new ByteArrayInputStream(body);
+     bais = new ByteArrayInputStream(getBody());
      adminMsg = AbstractAdminMessage.read(bais);
     } catch (Exception e) {
       if (logger.isLoggable(BasicLevel.ERROR))
@@ -376,6 +392,130 @@ public final class Message implements Cloneable, Serializable, Streamable {
     return adminMsg;
   }
 
+  /**
+   * set the body.
+   * compress if the body length > compressedMinSize
+   * 
+   * @param body a byte array
+   * @throws IOException if an I/O error has occurred
+   */
+  public void setBody(byte[] body) throws IOException {
+    if (compressedMinSize > 0 && body != null && body.length > compressedMinSize) {
+      long length = body.length;
+      this.body = compress(body, compressionLevel);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, type + " : setBody: compressedMinSize = " + compressedMinSize + 
+            ", compressionLevel = " + compressionLevel +
+            ", body.length  before = " + length + 
+            ", after = " + this.body.length + 
+            ", compression = " + (100-this.body.length*100/length) + "%");
+      compressed = true;
+    } else {
+      compressed = false;
+      this.body = body;
+    }
+  }
+  
+  /**
+   * get the body
+   * Uncompress if compressed
+   * 
+   * @return the body
+   * @throws IOException if an I/O error has occurred
+   */
+  public byte[] getBody() throws IOException {
+    if (compressed) {
+      body = uncompress(body);
+      compressed = false;
+    }
+    return body;
+  }
+  
+  /**
+   * set body = null
+   */
+  public void clearBody() {
+    body = null;
+  }
+  
+  
+  /**
+   * @return true if body == null
+   */
+  public boolean isNullBody() {
+    return body == null;
+  }
+  
+  /**
+   * @return the body length, 0 if body == null
+   */
+  public int getBodyLength() {
+    if (body == null) return 0;
+    return body.length;
+  }
+ 
+  /**
+   * compress byte array
+   * 
+   * @param toCompress a byte array to compress
+   * @return the compressed byte array
+   * @throws IOException if an I/O error has occurred
+   */
+  public static byte[] compress(byte[] toCompress, int compressionLevel) throws IOException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "compress(" + toCompress + ')');
+
+    int bodySize = toCompress.length;
+    ByteArrayOutputStream baos = new ByteArrayOutputStream(bodySize+4);
+    baos.write((byte) (bodySize >>> 24));
+    baos.write((byte) (bodySize >>> 16));
+    baos.write((byte) (bodySize >>> 8));
+    baos.write((byte) (bodySize >>> 0));
+    
+    Deflater compresser = new Deflater(compressionLevel);
+    compresser.setInput(toCompress);
+    compresser.finish();
+
+    byte[] buff = new byte[1024];
+    while(!compresser.finished()) {
+      int count = compresser.deflate(buff);
+      baos.write(buff, 0, count);
+    }
+    baos.close();
+    compresser.end();
+    return baos.toByteArray();
+  }
+  
+  /**
+   * Uncompress byte array
+   * 
+   * @param toUncompress a compressed byte array
+   * @return the uncompressed byte array
+   * @throws IOException if an I/O error has occurred
+   */
+  public static byte[] uncompress(byte[] toUncompress) throws IOException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "uncompress(" + toUncompress + ')');
+    
+    try {
+      Inflater decompresser = new Inflater();
+      int size = (((toUncompress[0] &0xFF) << 24) | 
+          ((toUncompress[1] &0xFF) << 16) |
+          ((toUncompress[2] &0xFF) << 8) | 
+          (toUncompress[3] &0xFF));
+
+      byte[] uncompressed = new byte[size];
+      decompresser.setInput(toUncompress, 4, toUncompress.length-4);
+      int resultLength = decompresser.inflate(uncompressed);
+      decompresser.end();
+      return uncompressed;
+    } catch (DataFormatException e) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, e);
+      throw new IOException(e);
+    }
+  }
+  
   public final String toString() {
     StringBuffer strbuf = new StringBuffer();
     toString(strbuf);
@@ -393,6 +533,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
     strbuf.append(",toId=").append(toId);
     strbuf.append(",replyToId=").append(replyToId);
     strbuf.append(",correlationId=").append(correlationId);
+    strbuf.append(",compressed=").append(compressed);
     strbuf.append(')');
   }
 
@@ -447,6 +588,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
     StreamUtil.writeTo(toId, os);
     StreamUtil.writeTo(toType, os);
     StreamUtil.writeTo(timestamp, os);
+    StreamUtil.writeTo(compressed, os);
 
     // One short is used to know which fields are set
     short s = 0;
@@ -495,6 +637,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
     toId = StreamUtil.readStringFrom(is);
     toType = StreamUtil.readByteFrom(is);
     timestamp = StreamUtil.readLongFrom(is);
+    compressed = StreamUtil.readBooleanFrom(is);
     
     short s = StreamUtil.readShortFrom(is);
 
