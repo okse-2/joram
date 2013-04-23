@@ -1678,7 +1678,8 @@ public class Queue extends Destination implements QueueMBean {
 	  return null;
   }
 
-	// Flow Control related fields
+	// Get flow Control related informations.
+	// TODO AF: may be we can use generic Destination.getJMXStatistics method.
 	protected fr.dyade.aaa.common.stream.Properties getStats() {
 	  fr.dyade.aaa.common.stream.Properties stats = new fr.dyade.aaa.common.stream.Properties();
 	  

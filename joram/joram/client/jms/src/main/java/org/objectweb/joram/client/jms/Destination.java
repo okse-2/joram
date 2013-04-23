@@ -972,6 +972,21 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     return  reply.getStats();
   }
 
+  /**
+   * Returns values of specified JMX attributes about the destination.
+   * 
+   * @param  a comma separated list of requested JMX attribute names.
+   * @return a Hashtable containing the values of the specified JMX attributes about
+   *         the destination. The keys are the name of corresponding attributes.
+   * 
+   * @see org.objectweb.joram.client.jms.DestinationMBean#getStatistics()
+   */
+  public Hashtable getStatistics(String attributes) throws ConnectException, AdminException {
+    GetStatsRequest request = new GetStatsRequest(getName(), attributes);
+    GetStatsReply reply = (GetStatsReply) doRequest(request);
+    return  reply.getStats();
+  }
+
   /** Sets the naming reference of a connection factory. */
   public void toReference(Reference ref) throws NamingException {
     ref.add(new StringRefAddr("dest.agentId", agentId));
