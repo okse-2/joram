@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -564,10 +564,12 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
    */
   static final class LogManager extends ByteArrayOutputStream {
     /**
-     * Log of all operations already committed but not reported on disk.
+     * Memory log of all operations already committed but not reported on disk.
      */
     Hashtable<Object, Operation> log = null;
-    
+    /**
+     * Index of log file in used.
+     */
     int logidx;
     
     /** log file */
