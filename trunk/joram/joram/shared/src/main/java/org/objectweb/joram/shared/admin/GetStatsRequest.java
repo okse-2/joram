@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,6 +37,8 @@ public class GetStatsRequest extends AdminRequest {
 
   /** Identifier of the destination. */
   private String destId;
+  /** The comma separated list of requested JMX attribute names. */
+  private String attributes;
 
   /**
    * Constructs a <code>Monitor_GetStat</code> instance.
@@ -45,6 +47,18 @@ public class GetStatsRequest extends AdminRequest {
    */
   public GetStatsRequest(String destId) {
     this.destId = destId;
+    this.attributes = null;
+  }
+  
+  /**
+   * Constructs a <code>Monitor_GetStat</code> instance.
+   *
+   * @param destId      Identifier of the destination.
+   * @param attributes  A comma separated list of requested JMX attribute names.
+   */
+  public GetStatsRequest(String destId, String attributes) {
+    this.destId = destId;
+    this.attributes = attributes;
   }
 
   public GetStatsRequest() { }
@@ -54,15 +68,22 @@ public class GetStatsRequest extends AdminRequest {
     return destId;
   }
   
+  /** Returns the comma separated list of requested JMX attribute names. */
+  public String getAttributes() {
+    return attributes;
+  }
+  
   protected int getClassId() {
     return MONITOR_GET_STAT;
   }
   
   public void readFrom(InputStream is) throws IOException {
     destId = StreamUtil.readStringFrom(is);
+    attributes = StreamUtil.readStringFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
     StreamUtil.writeTo(destId, os);
+    StreamUtil.writeTo(attributes, os);
   }
 }
