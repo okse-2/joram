@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -111,7 +111,7 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
     ByteArrayInputStream bais = null;
     ObjectInputStream ois = null;
     try {
-      bais = new ByteArrayInputStream(momMsg.body);
+      bais = new ByteArrayInputStream(momMsg.getBody());
       ois = new ObjectInputStream(bais);
       map = (HashMap) ois.readObject();
     } catch (Exception exc) {
@@ -552,7 +552,7 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
       ObjectOutputStream oos = new ObjectOutputStream(baos);
       oos.writeObject(map);
       oos.flush();
-      momMsg.body = baos.toByteArray();
+      momMsg.setBody(baos.toByteArray());
       oos.close();
       baos.close();
     } catch (IOException exc) {

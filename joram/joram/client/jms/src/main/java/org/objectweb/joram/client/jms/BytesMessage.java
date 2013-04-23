@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -88,10 +88,18 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    *
    * @param sess  The consuming session.
    * @param momMsg  The MOM message to wrap.
+   * @throws IOException if an I/O error has occurred
    */
-  BytesMessage(Session sess, org.objectweb.joram.shared.messages.Message momMsg) {
+  BytesMessage(Session sess, org.objectweb.joram.shared.messages.Message momMsg) throws JMSException {
     super(sess, momMsg);
-    inputStream = new DataInputStream(new ByteArrayInputStream(momMsg.body));
+    try {
+      inputStream = new DataInputStream(new ByteArrayInputStream(momMsg.getBody()));
+    } catch (IOException exc) {
+      MessageFormatException jExc =
+        new MessageFormatException("The message body could not be uncompressed.");
+      jExc.setLinkedException(exc);
+      throw jExc;
+    } 
   } 
 
   /**
@@ -108,7 +116,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
   public long getBodyLength() throws JMSException {
     if (! RObody)
       throw new MessageNotReadableException("Can't get not readable message's  size.");
-    return momMsg.body.length;
+    return momMsg.getBodyLength();
   } 
 
   /** 
@@ -750,11 +758,11 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
     try {
       if (! RObody) {
         outputStream.flush();
-        momMsg.body = outputBuffer.toByteArray();
+        momMsg.setBody(outputBuffer.toByteArray());
       } else {
         inputStream.close();
       }
-      inputStream = new DataInputStream(new ByteArrayInputStream(momMsg.body));
+      inputStream = new DataInputStream(new ByteArrayInputStream(momMsg.getBody()));
 
       RObody = true;
     } catch (IOException iE) {
@@ -777,7 +785,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
     try {
       if (! RObody) {
         outputStream.flush();
-        momMsg.body = outputBuffer.toByteArray();
+        momMsg.setBody(outputBuffer.toByteArray());
         prepared = true;
       }
     } catch (IOException exc) {

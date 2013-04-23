@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -160,6 +160,8 @@ public final class AdminRequestor {
       logger.log(BasicLevel.DEBUG, "AdminRequestor.request(" + request + ')');
 
     AdminMessage requestMsg = new AdminMessage();
+    if (session instanceof org.objectweb.joram.client.jms.Session)
+      requestMsg.setCompressedMinSize(((org.objectweb.joram.client.jms.Session)session).getCompressedMinSize());
     javax.jms.Message replyMsg = null;
     AdminReply reply = null;
     

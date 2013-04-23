@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -92,7 +92,7 @@ public final class ObjectMessage extends Message implements javax.jms.ObjectMess
    *              body.
    */
   public Serializable getObject() throws MessageFormatException {
-    if (momMsg.body == null) return null;
+    if (momMsg.isNullBody()) return null;
 
     try {
       return momMsg.getObject();
