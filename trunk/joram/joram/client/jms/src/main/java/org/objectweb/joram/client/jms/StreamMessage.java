@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -97,7 +97,7 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
     super(session, momMsg);
     
     try {
-      inputStream = new DataInputStream(new ByteArrayInputStream(momMsg.body));
+      inputStream = new DataInputStream(new ByteArrayInputStream(momMsg.getBody()));
     } catch (Exception exc) {
       JMSException jE =
         new JMSException("Error while creating the stream facility.");
@@ -1004,12 +1004,12 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
     try {
       if (! RObody) {
         outputStream.flush();
-        momMsg.body = outputBuffer.toByteArray();
+        momMsg.setBody(outputBuffer.toByteArray());
       } else {
         inputStream.close();
       }
 
-      inputStream = new DataInputStream(new ByteArrayInputStream(momMsg.body));
+      inputStream = new DataInputStream(new ByteArrayInputStream(momMsg.getBody()));
       if (inputStream != null) inputStream.reset();
 
       RObody = true;
@@ -1034,7 +1034,7 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
     try {
       if (! RObody) {
         outputStream.flush();
-        momMsg.body = outputBuffer.toByteArray();
+        momMsg.setBody(outputBuffer.toByteArray());
         prepared = true;
       }
     } catch (IOException exc) {
