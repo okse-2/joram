@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -76,6 +76,45 @@ public class Message implements javax.jms.Message {
     momMsg = new org.objectweb.joram.shared.messages.Message();
   }
 
+  /**
+   * Set the compressed min size.
+   * If set, overload the value.
+   * @param compressedMinSize the compressed min size value
+   */
+  public void setCompressedMinSize(int compressedMinSize) {
+    momMsg.compressedMinSize = compressedMinSize;
+  }
+  
+  /**
+   * @return the compressed min size value
+   */
+  public int getCompressedMinSize() {
+    return momMsg.compressedMinSize;
+  }
+  
+  /**
+   * @return true if compressed
+   */
+  public boolean isCompressed() {
+    return momMsg.compressed;
+  }
+  
+  /**
+   * Set the compression level.
+   * if set, overload the value.
+   * @param compressionLevel the compression level (0-9)
+   */
+  public void setCompressionLevel(int compressionLevel) {
+    momMsg.compressionLevel = compressionLevel;
+  }
+  
+  /**
+   * @return the compression level
+   */
+  public int getCompressionLevel() {
+    return momMsg.compressionLevel;
+  }
+  
   public static Message wrapMomMessage(Session session,
                                        org.objectweb.joram.shared.messages.Message momMsg) throws JMSException {
     switch (momMsg.type) {
@@ -165,7 +204,7 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  Actually never thrown.
    */
   public void clearBody() throws JMSException {
-    momMsg.body = null;
+    momMsg.clearBody();
     RObody = false;
   }
 
@@ -1148,8 +1187,8 @@ public class Message implements javax.jms.Message {
       }
       strbuf.append(",JMSTimestamp=").append(getJMSTimestamp());
       strbuf.append(",JMSType=").append(getJMSType());
-      if (momMsg.body != null)
-        strbuf.append(",size=").append(momMsg.body.length);
+      if (!momMsg.isNullBody())
+        strbuf.append(",size=").append(momMsg.getBodyLength());
       strbuf.append(')');
     } catch (JMSException exc) {
       // Should never happened

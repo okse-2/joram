@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -437,6 +437,36 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
    */
   public final int getTopicActivationThreshold() {
     return factoryParameters.topicActivationThreshold;
+  }
+  
+  /**
+   * Get the compressedMinSize for this session.
+   * <p>
+   * The minimum message body size before a message body compression.
+   * <p>
+   * This attribute is inherited from Connection at initialization,
+   * default value is 0 no compression
+   *
+   * @return The minimum size before a message body compression
+   *
+   * @see FactoryParameters#compressedMinSize
+   */
+  public final int getCompressedMinSize() {
+    return factoryParameters.compressedMinSize;
+  }
+  
+  /**
+   * Get the compression level for this Connection.
+   * <p>
+   *  This attribute is inherited from FactoryParameters, 
+   *  default value is Deflater.BEST_SPEED (1).
+   *
+   * @return The compression level
+   *
+   * @see FactoryParameters#compressionLevel
+   */
+  public final int getCompressionLevel() {
+    return factoryParameters.compressionLevel;
   }
   
   /**

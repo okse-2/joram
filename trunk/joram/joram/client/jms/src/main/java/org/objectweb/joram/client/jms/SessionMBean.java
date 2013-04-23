@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - ScalAgent Distributed Technologies
+ * Copyright (C) 2013 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -187,7 +187,31 @@ public interface SessionMBean {
    */
   void close() throws JMSException;
 
+  /**
+   * Get the compressedMinSize for this session.
+   * <p>
+   * The minimum message body size before a message body compression.
+   * <p>
+   * This attribute is inherited from Connection at initialization,
+   * default value is 0 no compression
+   *
+   * @return The minimum size before a message body compression
+   *
+   * @see #compressedMinSize
+   */
+  int getCompressedMinSize();
  
+  /**
+   * Get the compression level for this Connection.
+   * <p>
+   *  This attribute is inherited from FactoryParameters, 
+   *  default value is Deflater.BEST_SPEED (1).
+   *
+   * @return The compression level
+   *
+   * @see #compressionLevel
+   */
+  int getCompressionLevel();
 
   /**
    * Starts the asynchronous deliveries in the session.

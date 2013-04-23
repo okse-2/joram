@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -53,8 +53,8 @@ import org.objectweb.joram.shared.client.GetAdminTopicReply;
 import org.objectweb.joram.shared.client.GetAdminTopicRequest;
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.SessAckRequest;
-import org.objectweb.joram.shared.client.SessCreateDestRequest;
 import org.objectweb.joram.shared.client.SessCreateDestReply;
+import org.objectweb.joram.shared.client.SessCreateDestRequest;
 import org.objectweb.joram.shared.client.SessDenyRequest;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -560,6 +560,89 @@ public class Session implements javax.jms.Session, SessionMBean {
   public void setTopicActivationThreshold(int topicActivationThreshold) {
     this.topicActivationThreshold = topicActivationThreshold;
   }
+  
+  /**
+   * If a message body is upper than the <code>compressedMinSize</code>,
+   * this message body is compressed.
+   * <p>
+   * This attribute is inherited from Connection at initialization
+   * default value is 0 no compression
+   *
+   * @see FactoryParameters.compressedMinSize
+   */
+  private int compressedMinSize;
+  
+  /**
+   * Get the compressedMinSize for this session.
+   * <p>
+   * The minimum message body size before a message body compression.
+   * <p>
+   * This attribute is inherited from Connection at initialization,
+   * default value is 0 no compression
+   *
+   * @return The minimum size before a message body compression
+   *
+   * @see FactoryParameters.compressedMinSize
+   */
+  public final int getCompressedMinSize() {
+    return compressedMinSize;
+  }
+
+  /**
+   * Set the compressedMinSize for this session.
+   * <p>
+   * The minimum message body size before a message body compression.
+   * <p>
+   * This attribute is inherited from Connection at initialization,
+   * default value is 0 no compression
+   * This method can overload this attribute.
+   *
+   * @param compressedMinSize The minimum size before a message body compression.
+   *
+   * @see FactoryParameters.compressedMinSize
+   */
+  public void setCompressedMinSize(int compressedMinSize) {
+    this.compressedMinSize = compressedMinSize;
+  }
+  
+  /**
+   * the compression level (0-9)
+   * <p>
+   * This attribute is inherited from Connection at initialization
+   * default value is Deflater.BEST_SPEED (1)
+   * 
+   * @see FactoryParameters.compressionLevel
+   */
+  private int compressionLevel;
+  
+  /**
+   * Get the compression level for this session.
+   * <p>
+   *  This attribute is inherited from FactoryParameters, 
+   *  default value is Deflater.BEST_SPEED (1).
+   *
+   * @return The compression level
+   *
+   * @see FactoryParameters.compressionLevel
+   */
+  public int getCompressionLevel() {
+    return compressionLevel;
+  }
+
+  /**
+   * Set the compression level for this session.
+   * <p>
+   *  This attribute is inherited from FactoryParameters, 
+   *  default value is Deflater.BEST_SPEED (1).
+   *  This method can overload this attribute.
+   *
+   * @param The compression level
+   *
+   * @see FactoryParameters.compressionLevel
+   */
+  public void setCompressionLevel(int compressionLevel) {
+    this.compressionLevel = compressionLevel;
+  }
 
   /**
    *  Indicates whether the subscription requests are asynchronously handled
@@ -712,6 +795,8 @@ public class Session implements javax.jms.Session, SessionMBean {
     topicAckBufferMax = cnx.getTopicAckBufferMax();
     topicActivationThreshold = cnx.getTopicActivationThreshold();
     topicPassivationThreshold = cnx.getTopicPassivationThreshold();
+    compressedMinSize = cnx.getCompressedMinSize();
+    compressionLevel = cnx.getCompressionLevel();
 
     setStatus(Status.STOP);
     setSessionMode(SessionMode.NONE);
@@ -893,7 +978,10 @@ public class Session implements javax.jms.Session, SessionMBean {
    */
   public synchronized javax.jms.Message createMessage() throws JMSException {
     checkClosed();
-    return new Message();
+    Message m = new Message();
+    m.setCompressedMinSize(compressedMinSize);
+    m.setCompressionLevel(compressionLevel);
+    return m;
   }
 
   /**
@@ -909,7 +997,10 @@ public class Session implements javax.jms.Session, SessionMBean {
    */
   public synchronized javax.jms.TextMessage createTextMessage() throws JMSException {
     checkClosed();
-    return new TextMessage();
+    TextMessage m = new TextMessage();
+    m.setCompressedMinSize(compressedMinSize);
+    m.setCompressionLevel(compressionLevel);
+    return m;
   }
 
   /**
@@ -927,6 +1018,8 @@ public class Session implements javax.jms.Session, SessionMBean {
   public synchronized javax.jms.TextMessage createTextMessage(String text) throws JMSException {
     checkClosed();
     TextMessage message = new TextMessage();
+    message.setCompressedMinSize(compressedMinSize);
+    message.setCompressionLevel(compressionLevel);
     message.setText(text);
     return message;
   }
@@ -944,7 +1037,10 @@ public class Session implements javax.jms.Session, SessionMBean {
    */
   public synchronized javax.jms.BytesMessage createBytesMessage() throws JMSException {
     checkClosed();
-    return new BytesMessage();
+    BytesMessage m = new BytesMessage();
+    m.setCompressedMinSize(compressedMinSize);
+    m.setCompressionLevel(compressionLevel);
+    return m;
   }
 
   /**
@@ -960,7 +1056,10 @@ public class Session implements javax.jms.Session, SessionMBean {
    */
   public synchronized javax.jms.MapMessage createMapMessage() throws JMSException {
     checkClosed();
-    return new MapMessage();
+    MapMessage m = new MapMessage();
+    m.setCompressedMinSize(compressedMinSize);
+    m.setCompressionLevel(compressionLevel);
+    return m;
   }
 
   /**
@@ -976,7 +1075,10 @@ public class Session implements javax.jms.Session, SessionMBean {
    */
   public synchronized javax.jms.ObjectMessage createObjectMessage() throws JMSException {
     checkClosed();
-    return new ObjectMessage();
+    ObjectMessage m = new ObjectMessage();
+    m.setCompressedMinSize(compressedMinSize);
+    m.setCompressionLevel(compressionLevel);
+    return m;
   }
 
   /**
@@ -995,6 +1097,8 @@ public class Session implements javax.jms.Session, SessionMBean {
       throws JMSException {
     checkClosed();
     ObjectMessage message = new ObjectMessage();
+    message.setCompressedMinSize(compressedMinSize);
+    message.setCompressionLevel(compressionLevel);
     message.setObject(object);
     return message;
   }
@@ -1012,7 +1116,10 @@ public class Session implements javax.jms.Session, SessionMBean {
    */
   public synchronized javax.jms.StreamMessage createStreamMessage() throws JMSException {
     checkClosed();
-    return new StreamMessage();
+    StreamMessage m = new StreamMessage();
+    m.setCompressedMinSize(compressedMinSize);
+    m.setCompressionLevel(compressionLevel);
+    return m;
   }
 
   /**

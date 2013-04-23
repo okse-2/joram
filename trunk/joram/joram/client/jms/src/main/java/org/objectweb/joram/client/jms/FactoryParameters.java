@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.zip.Deflater;
 
 import javax.naming.RefAddr;
 import javax.naming.Reference;
@@ -244,6 +245,19 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
   public final List outInterceptors = new ArrayList();
   
   /**
+   * if the message body is upper than the <code>compressedMinSize</code>,
+   * this message body is compressed.
+   * <br>default is 0 no compression
+   */
+  public int compressedMinSize = 0;
+  
+  /**
+   * the compression level (0-9)
+   * <br>default is Deflater.BEST_SPEED (1)
+   */
+  public int compressionLevel = Deflater.BEST_SPEED;
+  
+  /**
    * Constructs a <code>FactoryParameters</code> instance.
    *
    * @param host  Name of host hosting the server to create connections with.
@@ -317,6 +331,8 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
                               new Integer(topicPassivationThreshold).toString()));
     ref.add(new StringRefAddr(prefix + ".topicActivationThreshold", 
                               new Integer(topicActivationThreshold).toString()));
+    ref.add(new StringRefAddr(prefix + ".compressedMinSize", new Integer(compressedMinSize).toString()));
+    ref.add(new StringRefAddr(prefix + ".compressionLevel", new Integer(compressionLevel).toString()));
     ref.add(new StringRefAddr(prefix + ".outLocalPort", new Integer(outLocalPort).toString()));
     if (outLocalAddress != null)
       ref.add(new StringRefAddr(prefix + ".outLocalAddress", outLocalAddress));
@@ -357,6 +373,8 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     multiThreadSyncThreshold = new Integer((String) ref.get(prefix + ".multiThreadSyncThreshold").getContent()).intValue();
     topicPassivationThreshold = new Integer((String) ref.get(prefix + ".topicPassivationThreshold").getContent()).intValue();
     topicActivationThreshold = new Integer((String) ref.get(prefix + ".topicActivationThreshold").getContent()).intValue();
+    compressedMinSize = new Integer((String) ref.get(prefix + ".compressedMinSize").getContent()).intValue();
+    compressionLevel = new Integer((String) ref.get(prefix + ".compressionLevel").getContent()).intValue();
     outLocalPort = new Integer((String) ref.get(prefix + ".outLocalPort").getContent()).intValue();
     RefAddr outLocalAddressRef = ref.get(prefix + ".outLocalAddress");
     if (outLocalAddressRef != null)
@@ -398,6 +416,8 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     h.put(prefix + ".multiThreadSyncThreshold", new Integer(multiThreadSyncThreshold));
     h.put(prefix + ".topicPassivationThreshold", new Integer(topicPassivationThreshold));
     h.put(prefix + ".topicActivationThreshold", new Integer(topicActivationThreshold));
+    h.put(prefix + ".compressedMinSize", new Integer(compressedMinSize));
+    h.put(prefix + ".compressionLevel", new Integer(compressionLevel));
     h.put(prefix + ".outLocalPort", new Integer(outLocalPort));
     if (outLocalAddress != null)
       h.put(prefix + ".outLocalAddress", outLocalAddress);
@@ -433,6 +453,8 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     multiThreadSyncThreshold = ((Integer) h.get(prefix + ".multiThreadSyncThreshold")).intValue();
     topicPassivationThreshold = ((Integer) h.get(prefix + ".topicPassivationThreshold")).intValue();
     topicActivationThreshold = ((Integer) h.get(prefix + ".topicActivationThreshold")).intValue();
+    compressedMinSize = ((Integer) h.get(prefix + ".compressedMinSize")).intValue();
+    compressionLevel = ((Integer) h.get(prefix + ".compressionLevel")).intValue();
     outLocalPort = ((Integer) h.get(prefix + ".outLocalPort")).intValue();
     outLocalAddress = (String) h.get(prefix + ".outLocalAddress");
     String listInterceptorClassNames = (String) h.get(prefix + ".inInterceptors");
@@ -474,6 +496,8 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
   strbuf.append(",multiThreadSyncThreshold=").append(multiThreadSyncThreshold);
   strbuf.append(",topicPassivationThreshold=").append(topicPassivationThreshold);
   strbuf.append(",topicActivationThreshold=").append(topicActivationThreshold);
+  strbuf.append(",compressedMinSize=").append(compressedMinSize);
+  strbuf.append(",compressionLevel=").append(compressionLevel);
   strbuf.append(",outLocalAddress=").append(outLocalAddress);
   strbuf.append(",outLocalPort=").append(outLocalPort);
   
@@ -606,6 +630,10 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
           TcpNoDelay = new Boolean(value).booleanValue();
         } else if ("SoLinger".equals(name)) {
           SoLinger = new Integer(value).intValue();
+        } else if ("compressedMinSize".equals(name)) {
+          compressedMinSize = new Integer(value).intValue();
+        } else if ("compressionLevel".equals(name)) {
+          compressionLevel = new Integer(value).intValue();
         } else if ("outLocalPort".equals(name)) {
           outLocalPort = new Integer(value).intValue();
         } else if ("outLocalAddress".equals(name)) {
