@@ -71,9 +71,7 @@ public class MemoryController {
     long currentSize = memorySize.addAndGet(delta);
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "memorySize=" + memorySize.get());
-    if (delta < 0) {
-      checkMemory(currentSize);
-    }
+    checkMemory(currentSize);
   }
   
   private void checkMemory(long currentSize) {
