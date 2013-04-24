@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@ import java.util.Properties;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
@@ -56,9 +57,10 @@ public class TestQ2 extends TestQBase {
       Properties prop = new Properties();
       prop.setProperty("period","1000");
       prop.setProperty("producThreshold","5");
-      prop.setProperty("consumThreshold","2");
+      prop.setProperty("consumThreshold","1");
       prop.setProperty("autoEvalThreshold","false");
       prop.setProperty("waitAfterClusterReq","100");
+      prop.setProperty("maxFwdPerQueue", "50");
       admin(prop);
 
       Context  ictx = new InitialContext();
@@ -114,8 +116,8 @@ public class TestQ2 extends TestQBase {
         msg = sess2b.createTextMessage("Test number#2." + i);
         producer2.send(msg);
       }
-
-      int nbTry = 50;
+      
+      int nbTry = 100;
       while (((listener0.nbMsg + listener1.nbMsg) != (3*i)) && (nbTry-- > 0))
         Thread.sleep(100);
 
@@ -149,6 +151,12 @@ public class TestQ2 extends TestQBase {
 
     public void onMessage(Message msg) {
       nbMsg++;
+      try {
+        System.out.println(ident + " receives " + ((TextMessage) msg).getText());
+      } catch (JMSException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
   }
 }
