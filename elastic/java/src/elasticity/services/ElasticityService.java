@@ -21,6 +21,9 @@ import elasticity.interfaces.Service;
  */
 public class ElasticityService extends Service {
 
+	final static String DELIVERED = "DeliveredMessageCount";
+	final static String PENDING = "PendingMessageCount";
+	
 	/** A link to the Joram service. */
 	private JoramService js;
 
@@ -109,13 +112,13 @@ public class ElasticityService extends Service {
 		try {
 			for(int i = 0; i < workers.size(); i++) {
 				Queue worker = workers.get(i);
-				Hashtable<String,Integer> ht = worker.getQueueMetrics();
+				Hashtable<String,Integer> ht = worker.getStatistics(DELIVERED + "," + PENDING);
 
-				int newDelivered = ht.get("delivered");
+				int newDelivered = ht.get(DELIVERED);
 				rates.set(i, newDelivered - delivered.get(i));
 				delivered.set(i,newDelivered);
 
-				loads.set(i, ht.get("pending"));
+				loads.set(i, ht.get(PENDING));
 				averageLoad += loads.get(i);
 			}
 		} catch (Exception e) {
@@ -287,7 +290,7 @@ public class ElasticityService extends Service {
 		
 		String rateStr = "";
 		for(int i = 0; i < workers.size(); i++) {			
-			int dif = (loads.get(i) > averageLoad) ? (loads.get(i) - averageLoad) / 2 : 0;
+			int dif = (loads.get(i) - averageLoad) / 2;
 			int val = Math.max(rates.get(i) - dif,0);
 			rates.set(i,val);
 			rateStr = rateStr + "\t" + val;

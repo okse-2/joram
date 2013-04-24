@@ -89,7 +89,7 @@ ssh $KEY ubuntu@$SERVP1 "nohup joram/bin/client.sh elasticity.eval.Setup &"
 echo "LAUNCHING CLIENTS.."
 ssh $KEY ubuntu@$SERVP1 "nohup joram/bin/client.sh elasticity.loop.ControlLoop > elasticity.log &"
 
-sleep 120
+#sleep 200
 
 ssh $KEY ubuntu@$SERVW1 "nohup joram/bin/client.sh elasticity.eval.Worker 1 > worker1.log &"
 
