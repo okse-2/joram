@@ -390,6 +390,8 @@ public final class Message implements Serializable, MessageView, TransactionObje
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message.save:" + txid);
     
+    if (!isPersistent()) return;
+    
     // JORAM_PERF_BRANCH
     int bodySize;
     if (msg.body != null) {
@@ -399,8 +401,6 @@ public final class Message implements Serializable, MessageView, TransactionObje
     }
     MemoryController.getMemoryController().add(bodySize);
 
-    if (!isPersistent()) return;
-    
     if (soft) {
       byte[] body = msg.body;
       // sets the body to null to save it in an other file
@@ -464,6 +464,8 @@ public final class Message implements Serializable, MessageView, TransactionObje
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message.delete:" + txid);
     
+    if (!isPersistent()) return;
+    
     // JORAM_PERF_BRANCH
     int bodySize;
     if (msg.body != null) {
@@ -472,8 +474,6 @@ public final class Message implements Serializable, MessageView, TransactionObje
       bodySize = 0;
     }
     MemoryController.getMemoryController().add(-bodySize);
-
-    if (!isPersistent()) return;
     
     AgentServer.getTransaction().delete(txid);
     if (soft) {
