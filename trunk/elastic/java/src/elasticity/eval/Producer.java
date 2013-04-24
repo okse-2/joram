@@ -51,14 +51,15 @@ public class Producer {
 	}*/
 	
 	public static int computeLoad(int round) {
-		if (round < 1800)
+		/*if (round < 1800)
 			return round / 25;
 		if (round < 2200)
 			return 72;
 		if (round < 4000)
 			return 72 - (round - 2200) / 25;
 		
-		return 0;
+		return 0;*/
+		return 1;
 	}
 
 	public static void main(String argv[]) throws Exception {
