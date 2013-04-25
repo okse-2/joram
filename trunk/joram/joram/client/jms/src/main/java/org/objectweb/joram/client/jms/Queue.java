@@ -53,8 +53,6 @@ import org.objectweb.joram.shared.admin.GetQueueMessage;
 import org.objectweb.joram.shared.admin.GetQueueMessageIds;
 import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
 import org.objectweb.joram.shared.admin.GetQueueMessageRep;
-import org.objectweb.joram.shared.admin.GetQueueMetrics;
-import org.objectweb.joram.shared.admin.GetStatsReply;
 import org.objectweb.joram.shared.admin.SendDestinationsWeights;
 import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
 import org.objectweb.joram.shared.admin.SetSyncExceptionOnFullDestRequest;
@@ -618,12 +616,6 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    */
   public void delRemoteDestination(Queue remote) throws ConnectException, AdminException {
     doRequest(new DelRemoteDestination(agentId, remote.getName()));
-  }
-
-  public Hashtable<String,Integer> getQueueMetrics() throws ConnectException, AdminException {
-	  GetQueueMetrics request = new GetQueueMetrics(agentId);
-	  GetStatsReply reply = (GetStatsReply) doRequest(request);
-	  return reply.getStats();
   }
   
   /**
