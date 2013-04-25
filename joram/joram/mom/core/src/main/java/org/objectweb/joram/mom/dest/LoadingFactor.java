@@ -303,7 +303,7 @@ public class LoadingFactor implements Serializable {
 
     if (nbOfPendingMessages > producThreshold) {
       nbMsgGive = nbOfPendingMessages - producThreshold;
-      if (cload == 0)
+      if (cload <= 0)
         nbMsgGive = nbOfPendingMessages;
     }
     
