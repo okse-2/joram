@@ -961,7 +961,13 @@ public class BaseTestCase {
     return startProcess(classname, null, jvmargs, args);
   }
   
-  public static Process startProcess(String classname, String cp, String[] jvmargs, String[] args) throws IOException {
+  
+  public static Process startProcess(String classname,
+                                     String cp, String[] jvmargs, String[] args) throws IOException {
+    return startProcess(classname, cp, jvmargs, args, null);
+  }
+  
+  public static Process startProcess(String classname, String cp, String[] jvmargs, String[] args, File dir) throws IOException {
     logmon.log(BasicLevel.DEBUG, "SCAdmin: launch " + classname);
     
     List<String> argv = new ArrayList<String>();
@@ -992,7 +998,7 @@ public class BaseTestCase {
 
     Process p = null;
     try {
-      p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]));
+      p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]), null, dir);
     } catch (Exception exc) {
       exception(exc);
       // The process is still alive, kill it!
