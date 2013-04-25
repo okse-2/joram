@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -48,7 +48,7 @@ class ExcList15 implements ExceptionListener {
 
   public void onException(JMSException exc) {
     nbexc += 1;
-//     System.err.println(name + ": " + exc.getMessage());
+    // System.err.println(name + ": " + exc.getMessage());
   }
 }
 
@@ -59,10 +59,10 @@ public class Test15 extends BaseTest {
   static ConnectionFactory cf;
   static Destination dest;
 
-  public static void main (String args[]) throws Exception {
+  public static void main(String args[]) throws Exception {
     new Test15().run();
-    }
-  
+  }
+
   public void run() {
     try {
       startServer();
@@ -70,8 +70,8 @@ public class Test15 extends BaseTest {
       String baseclass = "joram.noreg.ColocatedBaseTest";
       baseclass = System.getProperty("BaseClass", baseclass);
 
-      String destclass =  "org.objectweb.joram.client.jms.Queue";
-      destclass =  System.getProperty("Destination", destclass);
+      String destclass = "org.objectweb.joram.client.jms.Queue";
+      destclass = System.getProperty("Destination", destclass);
 
       Thread.sleep(500L);
       cf = createConnectionFactory(baseclass);
@@ -94,37 +94,39 @@ public class Test15 extends BaseTest {
 
       ExcList15 exclst = new ExcList15("Receiver");
 
-      int nb1 = 0; int nb2 = 0; int idx = 0;
-      for (int i=0; i<100; i++) {
-        //       System.out.println("connecting#" + i);
+      int nb1 = 0;
+      int nb2 = 0;
+      int idx = 0;
+      for (int i = 0; i < 100; i++) {
+        // System.out.println("connecting#" + i);
         Connection cnx1 = cf.createConnection();
         cnx1.setExceptionListener(exclst);
         Session sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
         MessageConsumer cons = sess1.createConsumer(dest);
         cnx1.start();
-        //       System.out.println("connected#" + i);
-        for (int j=0; j<50; j++) {
+        // System.out.println("connected#" + i);
+        for (int j = 0; j < 50; j++) {
           Message msg = cons.receive();
           nb2 += 1;
           int index = msg.getIntProperty("index");
           if (index != idx) {
-            //         System.out.println("recv#" + idx + '/' + index);
+            // System.out.println("recv#" + idx + '/' + index);
             nb1 += 1;
           }
-          idx = index +1;
+          idx = index + 1;
         }
-        //       System.out.println("end recv#" + i);
+        // System.out.println("end recv#" + i);
         cnx1.close();
-        //       System.out.println("closed#" + i);
+        // System.out.println("closed#" + i);
       }
 
       sender.stop();
       System.out.println("Test OK: " + exclst.nbexc + ", " + nb1 + ", " + nb2);
 
-    } catch(Throwable exc) {
+    } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
-    } finally{
+    } finally {
       AgentServer.stop();
       endTest();
     }
@@ -137,9 +139,8 @@ class Sender15 implements Runnable {
   MessageProducer producer;
   boolean running;
 
-  public Sender15(Connection cnx,
-                  Session session,
-                  MessageProducer producer) throws Exception {
+  public Sender15(Connection cnx, Session session, MessageProducer producer)
+                                                                            throws Exception {
     this.cnx = cnx;
     this.session = session;
     this.producer = producer;
