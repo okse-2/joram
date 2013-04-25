@@ -55,10 +55,13 @@ public class AMQPSender implements Runnable {
       cnxFactory = new ConnectionFactory();
       connection = cnxFactory.newConnection();
       channel = connection.createChannel();
+//      channel.queueDeclare(queue, true, false, false, null);
     } catch (Exception exc) {
       exc.printStackTrace();
       return;
     }
+    
+    System.out.println(SenderId + " starts");
 
     // Convert message properties
     AMQP.BasicProperties props = new AMQP.BasicProperties();
@@ -83,6 +86,7 @@ public class AMQPSender implements Runnable {
       exc.printStackTrace();
     } finally {
       try {
+        System.out.println(SenderId + " stops");
         connection.close();
       } catch (IOException exc) {
         exc.printStackTrace();

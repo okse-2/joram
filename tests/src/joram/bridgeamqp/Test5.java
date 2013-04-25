@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
  */
 package joram.bridgeamqp;
 
+import java.io.File;
 import java.util.Properties;
 
 import javax.jms.Connection;
@@ -57,10 +58,20 @@ public class Test5 extends TestCase {
   }
 
   public void run() {
+    Process s1 = null;
     try {
       System.out.println("servers start");
+      // Starts Joram JMS server
       startAgentServer((short)0, new String[]{"-DTransaction.UseLockFile=false"});
-      Thread.sleep(1000);
+      // Starts Joram AMQP Server
+      s1 = startProcess("fr.dyade.aaa.agent.AgentServer",
+                                null,
+                                new String[] { "-Dcom.sun.management.jmxremote" },
+                                new String[] { "1", "./s1" },
+                                new File("./amqp"));
+
+      // Wait for the AMQP server starting
+      Thread.sleep(2000);
       
       debug = Boolean.getBoolean("DEBUG");
       nbloop = Integer.getInteger("nbloop", nbloop);
@@ -104,8 +115,6 @@ public class Test5 extends TestCase {
       System.out.println("admin config ok");
       Thread.sleep(1000);
       
-      AMQPReceiver receiver = AMQPReceiver.createAMQPConsumer("amqpQueue");
-      
       // Gets administered objects from JNDI
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();  
       Destination joramOutDest = (Destination) jndiCtx.lookup("joramOutQueue");
@@ -126,6 +135,10 @@ public class Test5 extends TestCase {
         joramProd.send(msgOut);
       }
       joramCnx.close();
+      
+      // Be careful, the AMQP queue is only created by the bridge when the first
+      // message is forwarded !!
+      AMQPReceiver receiver = AMQPReceiver.createAMQPConsumer("amqpQueue");
 
       for (int i=0; i<nbloop; i++) {
         test(1000, 1000+(i*1000));
@@ -140,6 +153,7 @@ public class Test5 extends TestCase {
       error(exc);
     } finally {
       System.out.println("Server stop ");
+      s1.destroy();
       killAgentServer((short)0);
       endTest(); 
     }

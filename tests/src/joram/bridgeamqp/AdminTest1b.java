@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
  */
 package joram.bridgeamqp;
 
+import java.io.File;
 import java.util.Properties;
 
 import javax.jms.Connection;
@@ -51,10 +52,20 @@ public class AdminTest1b extends TestCase {
   }
 
   public void run() {
+    Process s1 = null;
     try {
       System.out.println("servers start");
+      // Starts Joram JMS server
       startAgentServer((short)0, new String[]{"-DTransaction.UseLockFile=false"});
-      Thread.sleep(1000);
+      // Starts Joram AMQP Server
+      s1 = startProcess("fr.dyade.aaa.agent.AgentServer",
+                                null,
+                                new String[] { "-Dcom.sun.management.jmxremote" },
+                                new String[] { "1", "./s1" },
+                                new File("./amqp"));
+
+      // Wait for the AMQP server starting
+      Thread.sleep(2000);
       
       // Administration code
       {
@@ -119,7 +130,7 @@ public class AdminTest1b extends TestCase {
       TextMessage msgOut = joramSess.createTextMessage();
       for (int i = 1; i < 11; i++) {
         msgOut.setText("Message number " + i);
-        System.out.println("send msg = " + msgOut.getText());
+//        System.out.println("send msg = " + msgOut.getText());
         joramProd.send(msgOut);
       }
 
@@ -133,7 +144,7 @@ public class AdminTest1b extends TestCase {
           assertTrue("Message not received", false);
           break;
         }
-        System.out.println("receive msg = " + msgIn.getText());
+//        System.out.println("receive msg = " + msgIn.getText());
         assertEquals("Message number " + i, msgIn.getText());
       }
       assertEquals(10, nbmsg);
@@ -144,6 +155,7 @@ public class AdminTest1b extends TestCase {
       error(exc);
     } finally {
       System.out.println("Server stop ");
+      s1.destroy();
       killAgentServer((short)0);
       endTest(); 
     }
