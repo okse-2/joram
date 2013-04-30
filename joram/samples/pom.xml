@@ -36,7 +36,7 @@
         <executions>
           <execution>
             <id>joram-samples</id>
-            <phase>deploy</phase>
+            <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
