@@ -21,6 +21,7 @@
       </includes>
       <excludes>
         <exclude>**/.svn/**</exclude>
+        <exclude>**/run/**</exclude>
       </excludes>
     </fileSet>
   </fileSets>
