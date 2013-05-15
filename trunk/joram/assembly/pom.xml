@@ -97,6 +97,12 @@
     </dependency>
     <dependency>
       <groupId>org.ow2.joram</groupId>
+      <artifactId>a3-services</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
       <artifactId>jndi-shared</artifactId>
       <version>${project.version}</version>
       <type>jar</type>

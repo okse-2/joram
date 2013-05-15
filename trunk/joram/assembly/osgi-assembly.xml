@@ -23,6 +23,7 @@
         <include>org.ow2.joram:a3-common</include>
         <include>org.ow2.joram:a3-rt</include>
         <include>org.ow2.joram:a3-osgi</include>
+        <include>org.ow2.joram:a3-services</include>
         <include>org.ow2.joram:jndi-shared</include>
         <include>org.ow2.joram:jndi-server</include>
         <include>org.ow2.joram:jndi-client</include>
