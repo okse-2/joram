@@ -70,8 +70,8 @@ public abstract class ServiceDestination {
 
 	
   protected BundleContext bundleContext;
-	private HashMap<String, Destination> destinations;
-	private HashMap<String, String> jndiNames;
+  protected HashMap<String, Destination> destinations;
+  protected HashMap<String, String> jndiNames;
 	private JndiHelper jndiHelper;
 
   public ServiceDestination(final BundleContext bundleContext) {
@@ -280,6 +280,30 @@ public abstract class ServiceDestination {
   		}
 
   		destinations.put(pid, dest);
+  		
+         // register osgi service javax.jms.Queue/Topic
+         props = new Properties();
+         props.setProperty("adminName", dest.getAdminName());
+         props.setProperty("name", dest.getName());
+         if (dest.getDMQ() != null)
+           props.setProperty("DMQ", dest.getDMQ().getAdminName());
+         props.setProperty("interceptors", dest.getInterceptors());
+         props.setProperty("isFreelyReadable", Boolean.toString(dest.isFreelyReadable()));
+         props.setProperty("isFreelyWriteable", Boolean.toString(dest.isFreelyWriteable()));
+         //  props.setProperty("writers", dest.getWriterList());
+         //  props.setProperty("readers", dest.getReaderList());
+         
+         if (dest.isQueue())
+           bundleContext.registerService(
+               javax.jms.Queue.class.getName(),
+               dest,
+               props);
+         else
+           bundleContext.registerService(
+               javax.jms.Topic.class.getName(),
+               dest,
+               props);
+  		 
   	} catch (Exception e) {
   		if (logmon.isLoggable(BasicLevel.ERROR))
 	  		logmon.log(BasicLevel.ERROR, "doUpdated ", e);
