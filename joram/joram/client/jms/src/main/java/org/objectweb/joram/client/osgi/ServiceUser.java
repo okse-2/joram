@@ -116,7 +116,7 @@ public class ServiceUser implements ManagedServiceFactory {
 
   public ServiceUser(final BundleContext bundleContext) {
   	if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "UserMSF(" + bundleContext + ')');
+      logmon.log(BasicLevel.DEBUG, "ServiceUser(" + bundleContext + ')');
     this.bundleContext = bundleContext;
     Properties props = new Properties();
     props.setProperty(Constants.SERVICE_PID, PID_NAME);
