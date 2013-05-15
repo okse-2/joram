@@ -233,6 +233,12 @@ public class ServiceConnectionFactory implements ManagedServiceFactory {
     }
 		// set factory parameters
 		cf.getParameters().setParameters(prop);
+		
+		// register the connection factory
+    bundleContext.registerService(
+        javax.jms.ConnectionFactory.class.getName(),
+        cf,
+        properties);
 		   
 		final String jndiName = (String) properties.get(JNDINAME);
 		final AbstractConnectionFactory cff = cf;
