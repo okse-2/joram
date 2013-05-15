@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,8 +22,11 @@
  */
 package org.objectweb.joram.client.osgi;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Properties;
 
 import javax.naming.Context;
@@ -56,12 +59,14 @@ public class JndiHelper {
     
     if (in == null) {
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
-      	logmon.log(BasicLevel.DEBUG, "jndi.properties not found.");
+        logmon.log(BasicLevel.DEBUG, "jndi.properties not found on class loader.");
       }
-    } else {
-      props.load(in);
+      in = new FileInputStream("jndi.properties");
     }
-
+    
+    props.load(in);
+    in.close();
+    
     Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
     jndiCtx = new InitialContext(props);
     return jndiCtx;
