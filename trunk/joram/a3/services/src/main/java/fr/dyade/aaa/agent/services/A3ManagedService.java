@@ -106,7 +106,7 @@ public class A3ManagedService extends CommonService implements ManagedService {
    */
   public void updated(Dictionary properties) throws ConfigurationException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "A3ManagerService.updated(" + properties + ')');
+      logmon.log(BasicLevel.DEBUG, "A3ManagedService.updated(" + properties + ')');
     if (properties == null) {
       if (initialized)
         doStop();
