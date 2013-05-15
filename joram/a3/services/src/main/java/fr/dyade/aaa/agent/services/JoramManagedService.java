@@ -108,7 +108,7 @@ public class JoramManagedService extends CommonService implements ManagedService
    */
   public void updated(Dictionary properties) throws ConfigurationException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "JoramManagerService.updated(" + properties + ')');
+      logmon.log(BasicLevel.DEBUG, "JoramManagedService.updated(" + properties + ')');
     if (properties == null) {
       if (initialized)
         doStop();
