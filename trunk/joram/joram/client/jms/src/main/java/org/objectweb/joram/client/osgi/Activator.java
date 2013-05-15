@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,8 +22,12 @@
 package org.objectweb.joram.client.osgi;
 
 import org.objectweb.joram.client.jms.admin.JoramAdminConnect;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+
+import fr.dyade.aaa.common.Debug;
 
 
 /**
@@ -31,6 +35,8 @@ import org.osgi.framework.BundleContext;
  * 
  */
 public class Activator implements BundleActivator {
+  
+  public static final Logger logmon = Debug.getLogger(Activator.class.getName());
   
   private JoramAdminConnect joramAdminConnect;
   private DestinationMSF destMSF = null;
@@ -48,11 +54,15 @@ public class Activator implements BundleActivator {
   private ServiceSchedulerQueue ssq = null;
   private ServiceFtpQueue sfq = null;
   private ServiceAliasQueue salq = null;
+  private ServiceAdmin sadmin = null;
   
   /* (non-Javadoc)
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
   public void start(BundleContext context) throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "Activator.start(" + context + ')');
+    
   	joramAdminConnect = new JoramAdminConnect();
   	joramAdminConnect.registerMBean();
 
@@ -73,12 +83,16 @@ public class Activator implements BundleActivator {
   	ssq = new ServiceSchedulerQueue(context);
   	sfq = new ServiceFtpQueue(context);
   	salq = new ServiceAliasQueue(context);
+  	sadmin = new ServiceAdmin(context);
   }
 
   /* (non-Javadoc)
    * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
    */
   public void stop(BundleContext context) throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "Activator.stop(" + context + ')');
+    
     joramAdminConnect.unregisterMBean();
     destMSF.doStop();
     userMSF.doStop();
@@ -95,6 +109,7 @@ public class Activator implements BundleActivator {
     ssq.doStop();
     sfq.doStop();
     salq.doStop();
+    sadmin.doStop();
   }
 
 }
