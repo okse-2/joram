@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,6 +40,7 @@ import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 
 import fr.dyade.aaa.common.Debug;
@@ -72,6 +73,7 @@ public abstract class ServiceDestination {
   protected BundleContext bundleContext;
   protected HashMap<String, Destination> destinations;
   protected HashMap<String, String> jndiNames;
+  protected HashMap<String, ServiceRegistration> registrations;
 	private JndiHelper jndiHelper;
 
   public ServiceDestination(final BundleContext bundleContext) {
@@ -81,6 +83,7 @@ public abstract class ServiceDestination {
     destinations = new HashMap<String, Destination>();
     jndiHelper = new JndiHelper();
     jndiNames = new HashMap<String, String>();
+    registrations = new HashMap<String, ServiceRegistration>();
   }
   
   protected final boolean isSet(String value) {
@@ -293,16 +296,19 @@ public abstract class ServiceDestination {
          //  props.setProperty("writers", dest.getWriterList());
          //  props.setProperty("readers", dest.getReaderList());
          
+         ServiceRegistration reg = null;
          if (dest.isQueue())
-           bundleContext.registerService(
+           reg = bundleContext.registerService(
                javax.jms.Queue.class.getName(),
                dest,
                props);
          else
-           bundleContext.registerService(
+           reg = bundleContext.registerService(
                javax.jms.Topic.class.getName(),
                dest,
                props);
+         
+         registrations.put(pid, reg);
   		 
   	} catch (Exception e) {
   		if (logmon.isLoggable(BasicLevel.ERROR))
@@ -330,5 +336,10 @@ public abstract class ServiceDestination {
           logmon.log(BasicLevel.WARN, "deleted " + dest, e);
       }
 		}
+		
+		//unregister service
+		ServiceRegistration r = registrations.remove(pid);
+		if (r != null)
+		  r.unregister();
   }
 }
