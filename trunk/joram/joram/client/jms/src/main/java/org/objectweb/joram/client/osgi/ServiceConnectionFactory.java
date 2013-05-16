@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -94,6 +94,7 @@ public class ServiceConnectionFactory implements ManagedServiceFactory {
   private HashMap<String, AbstractConnectionFactory> cnxFactories;
   private JndiHelper jndiHelper;
   private HashMap<String, String> jndiNames;
+  protected HashMap<String, ServiceRegistration> registrations;
 
   public ServiceConnectionFactory(final BundleContext bundleContext) {
     this.bundleContext = bundleContext;
@@ -106,6 +107,7 @@ public class ServiceConnectionFactory implements ManagedServiceFactory {
     cnxFactories = new HashMap<String, AbstractConnectionFactory>();
     jndiHelper = new JndiHelper();
     jndiNames = new HashMap<String, String>();
+    registrations = new HashMap<String, ServiceRegistration>();
   }
   
   private final boolean isSet(String value) {
@@ -235,10 +237,11 @@ public class ServiceConnectionFactory implements ManagedServiceFactory {
 		cf.getParameters().setParameters(prop);
 		
 		// register the connection factory
-    bundleContext.registerService(
+    ServiceRegistration reg = bundleContext.registerService(
         javax.jms.ConnectionFactory.class.getName(),
         cf,
         properties);
+    registrations.put(pid, reg);
 		   
 		final String jndiName = (String) properties.get(JNDINAME);
 		final AbstractConnectionFactory cff = cf;
@@ -283,5 +286,10 @@ public class ServiceConnectionFactory implements ManagedServiceFactory {
 			if (jndiName != null)
 				jndiHelper.unbind(jndiName);
 		}
+		
+		//unregister service
+		ServiceRegistration r = registrations.remove(pid);
+		if (r != null)
+		  r.unregister();
   }
 }
