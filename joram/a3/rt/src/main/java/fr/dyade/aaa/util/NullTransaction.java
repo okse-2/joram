@@ -199,4 +199,12 @@ public final class NullTransaction extends BaseTransaction implements NullTransa
     // Change the transaction state.
     setPhase(INIT);
   }
+  
+  /**
+   * Indicates whether some operations have been done in
+   * this transaction.
+   */
+  public boolean containsOperations() {
+    return false;
+  }
 }

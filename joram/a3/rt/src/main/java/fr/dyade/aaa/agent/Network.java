@@ -667,6 +667,25 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     qout.push(msg);
     nbMessageOut += 1;
   }
+  
+  /**
+   * Posts and validates a message.
+   */
+  public void postAndValidate(Message msg) throws Exception {
+    short to = AgentServer.getServerDesc(msg.to.to).gateway;
+    // Allocates a new timestamp. Be careful, if the message needs to be
+    // routed we have to use the next destination in timestamp generation.
+
+    msg.source = AgentServer.getServerId();
+    msg.dest = to;
+    msg.stamp = getSendUpdate(to);
+
+    // Saves the message.
+    msg.save();
+    // Push it in "ready to deliver" queue.
+    qout.pushAndValidate(msg);
+    nbMessageOut += 1;
+  }
 
   /**
    *  Returns the index in internal table of the specified server.

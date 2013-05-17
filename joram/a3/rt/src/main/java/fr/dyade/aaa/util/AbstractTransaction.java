@@ -425,4 +425,12 @@ public abstract class AbstractTransaction extends BaseTransaction {
     // wake-up an eventually user's thread in begin
     notify();
   }
+  
+  /**
+   * Indicates whether some operations have been done in
+   * this transaction.
+   */
+  public boolean containsOperations() {
+    return (perThreadContext.get().getLog().size() > 0);
+  }
 }

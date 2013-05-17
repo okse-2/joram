@@ -474,4 +474,12 @@ public final class JTransaction extends BaseTransaction implements JTransactionM
     } catch (IOException exc) {
     }
   }
+  
+  /**
+   * Indicates whether some operations have been done in
+   * this transaction.
+   */
+  public boolean containsOperations() {
+    return log.size() > 0;
+  }
 }

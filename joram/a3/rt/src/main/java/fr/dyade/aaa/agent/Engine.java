@@ -130,6 +130,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   long now = 0;
   /** Maximum number of memory loaded agents. */
   int NbMaxAgents = 1000;
+  /** Flag to avoid transaction when not needed */
+  boolean noTxIfTransient;
 
   /**
    * Returns the number of agent's reaction since last boot.
@@ -196,6 +198,15 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    */
   public int getNbFixedAgents() {
     return fixedAgentIdList.size();
+  }
+
+  /**
+   * Returns the flag to avoid transactions.
+   * 
+   * @return the flag to avoid transactions
+   */
+  public boolean isNoTxIfTransient() {
+    return noTxIfTransient;
   }
 
   /**
@@ -272,6 +283,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   }
 
   protected Queue mq;
+  
+  private boolean persistentPush;
 
   /**
    * Push a new message in temporary queue until the end of current reaction.
@@ -286,6 +299,10 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
                  getName() + ", push(" + from + ", " + to + ", " + not + ")");
     if ((to == null) || to.isNullId())
       return;
+    
+    if (not.persistent) {
+      persistentPush = true;
+    }
 
     mq.push(Message.alloc(from, to, not));
   }
@@ -363,6 +380,14 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     qin = new MessageVector(name, AgentServer.getTransaction().isPersistent());
     mq = new Queue();
     agentProfiling = AgentServer.getBoolean("AgentProfiling");
+    
+    String noTxIfTransientValue = AgentServer.getProperty("NoTxIfTransient");
+    if (noTxIfTransientValue != null) {
+      noTxIfTransient = Boolean.parseBoolean(noTxIfTransientValue);
+    } else {
+      // Default value
+      noTxIfTransient = true;
+    }
     
     isRunning = false;
     canStop = false;
@@ -887,6 +912,15 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     msg.save();
     qin.push(msg);
   }
+  
+  /**
+   * Posts a message and validates it at the same time.
+   */
+  public void postAndValidate(Message msg) throws Exception {
+    stamp(msg);
+    msg.save();
+    qin.pushAndValidate(msg);
+  }
 
   protected boolean needToBeCommited = false;
   protected long timeout = Long.MAX_VALUE;
@@ -1149,22 +1183,57 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ": commit()");
     
-    if (agent != null) agent.save();
-    AgentServer.getTransaction().begin();
-    // Suppress the processed notification from message queue ..
-    qin.pop();
-    // .. then deletes it ..
-    msg.delete();
-    // .. and frees it.
-    msg.free();
-    // Post all notifications temporary kept in mq to the right consumers,
-    // then saves changes.
-    dispatch();
-    // Saves the agent state then commit the transaction.
-    AgentServer.getTransaction().commit(false);
-    // The transaction has committed, then validate all messages.
-    Channel.validate();
-    AgentServer.getTransaction().release();
+    boolean updatedAgent;
+    if (agent != null) {
+      updatedAgent = agent.isUpdated();
+      agent.save();
+    } else {
+      updatedAgent = false;
+    }
+    
+    if (noTxIfTransient && msg.not.persistent == false && !updatedAgent
+        && !persistentPush
+        && !AgentServer.getTransaction().containsOperations()) {
+      // Suppress the processed notification from message queue ..
+      qin.pop();
+      // .. then deletes it ..
+      msg.delete();
+      // .. and frees it.
+      msg.free();
+      // Post all notifications temporary kept in mq to the right consumers,
+      // then saves changes.
+      Message msgToDispatch = null;
+      while (!mq.isEmpty()) {
+        try {
+          msgToDispatch = (Message) mq.get();
+        } catch (InterruptedException exc) {
+          continue;
+        }
+        if (msgToDispatch.from == null)
+          msgToDispatch.from = AgentId.localId;
+        MessageConsumer cons = AgentServer.getConsumer(msgToDispatch.to.getTo());
+        cons.postAndValidate(msgToDispatch);
+        mq.pop();
+      }
+    } else {
+      AgentServer.getTransaction().begin();
+      // Suppress the processed notification from message queue ..
+      qin.pop();
+      // .. then deletes it ..
+      msg.delete();
+      // .. and frees it.
+      msg.free();
+      // Post all notifications temporary kept in mq to the right consumers,
+      // then saves changes.
+      dispatch();
+      // Saves the agent state then commit the transaction.
+      AgentServer.getTransaction().commit(false);
+      // The transaction has committed, then validate all messages.
+      Channel.validate();
+      AgentServer.getTransaction().release();
+    }
+    
+    persistentPush = false;
     
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ": commited");

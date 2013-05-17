@@ -199,8 +199,12 @@ public class Channel {
     }
 
     try {
-      AgentServer.getTransaction().begin();      
-      consumer.post(msg);
+      if (AgentServer.engine.noTxIfTransient &&
+          msg.not != null && msg.not.persistent == false) {
+        consumer.postAndValidate(msg);
+      } else {
+        AgentServer.getTransaction().begin();      
+        consumer.post(msg);
       
 //      if (AgentServer.sdf != null) {
 //        // SDF generation
@@ -218,14 +222,15 @@ public class Channel {
 //        AgentServer.logsdf.log(BasicLevel.INFO,
 //                             "  sendto " + msg.to + ' ' + StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp()));
       
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, toString() + ".directSendTo() -> " + msg.getStamp());
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, toString() + ".directSendTo() -> " + msg.getStamp());
 
-      consumer.save();
-      AgentServer.getTransaction().commit(false);
-      // then commit and validate the message.
-      consumer.validate();
-      AgentServer.getTransaction().release();
+        consumer.save();
+        AgentServer.getTransaction().commit(false);
+        // then commit and validate the message.
+        consumer.validate();
+        AgentServer.getTransaction().release();
+      }
     } catch (Exception exc) {
       // Should never happened (IOException or ClassNotFoundException).
       logmon.log(BasicLevel.FATAL,

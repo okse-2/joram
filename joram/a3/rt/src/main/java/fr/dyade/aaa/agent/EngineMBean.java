@@ -164,4 +164,11 @@ public interface EngineMBean {
 
   /** Forces the engine to stop executing */
   public void stop();
+  
+  /**
+   * Returns the flag to avoid transactions.
+   * @return the flag to avoid transactions
+   */
+  public boolean isNoTxIfTransient();
+
 }

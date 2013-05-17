@@ -117,6 +117,24 @@ final class MessageVector implements MessageQueue {
   }
   
   /**
+   * Pushes and validates a message. This method should not
+   * be used during a transaction.
+   *
+   * @param   item   the message to be pushed and validated
+   */
+  public synchronized void pushAndValidate(Message item) {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "pushAndValidate(" + item + ")");
+    
+    if (msgTypesTracking) inc(item.not);
+    
+    insertMessageAt(item, validated);
+    validated += 1;
+    
+    notify();
+  }
+  
+  /**
    * Removes the message at the top of this queue.
    * It must only be used during a transaction.
    *
@@ -358,8 +376,31 @@ final class MessageVector implements MessageQueue {
       first = 0;
       data = newData;
     }
-    if (index != count)
-      System.arraycopy(data, index, data, index + 1, count - index);
+    if (index != count) {
+      try {
+        int srcPos = (first + index)%data.length;
+        int destPos = (first + index + 1)%data.length;
+        int copyLength = count - index;
+        int lastDestPos = (destPos + copyLength - 1)%data.length;
+        if (srcPos > lastDestPos) {
+          Object lastElement = data[data.length - 1];
+          int copyLength1 = data.length - srcPos -1;
+          if (copyLength1 > 0) {
+            System.arraycopy(data, srcPos, data, destPos, copyLength1);
+          }
+          int copyLength2 = copyLength - (copyLength1 + 1);
+          if (copyLength2 > 0) {
+            System.arraycopy(data, 0, data, 1, copyLength2);
+          }
+          data[0] = lastElement;
+        } else {
+          System.arraycopy(data, srcPos, data, destPos, copyLength);
+        }
+        
+      } catch (ArrayIndexOutOfBoundsException exc) {
+        throw new RuntimeException("insertMessageAt '" + index + "': " + this, exc);
+      }
+    }
     if (persistent)
       data[(first + index)%data.length] = new MessageSoftRef(item);
     else
@@ -382,6 +423,9 @@ final class MessageVector implements MessageQueue {
       logmon.log(BasicLevel.DEBUG, logmsg + "getMessageAt(" + index + ")");
 
     int idx = (first + index)%data.length;
+    
+    if (data[idx] == null) throw new RuntimeException("Null element in: " + this);
+    
     if (persistent) {
       return ((MessageSoftRef) data[idx]).loadMessage();
     }
