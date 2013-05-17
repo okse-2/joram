@@ -66,6 +66,11 @@ public interface MessageConsumer {
    * the filename change too.
    */
   void post(Message msg) throws Exception;
+  
+  /**
+   * Posts a message and validates it at the same time.
+   */
+  void postAndValidate(Message msg) throws Exception;
 
   /**
    * Validates all messages pushed in queue during transaction session.

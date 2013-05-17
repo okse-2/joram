@@ -285,4 +285,11 @@ public interface Transaction {
    * anew before reusing it.
    */
   void close();
+  
+  /**
+   * Indicates whether some operations have been done in
+   * this transaction.
+   */
+  boolean containsOperations();
+  
 }

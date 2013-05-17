@@ -165,6 +165,13 @@ public abstract class Agent implements AgentMBean, Serializable {
   protected void setSave() {
     updated = true;
   }
+  
+  /**
+   * Indicates whether the agent has been updated or not.
+   */
+  boolean isUpdated() {
+    return updated;
+  }
 
   /**
    * Indicates to the Engine component that a commit is needed.

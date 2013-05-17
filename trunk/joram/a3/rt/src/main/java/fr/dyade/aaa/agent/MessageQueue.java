@@ -47,6 +47,13 @@ interface MessageQueue {
    * @param   item   the message to be pushed onto this queue.
    */
   public void push(Message item);
+  
+  /**
+   * Pushes a message and validates it at the same time.
+   * 
+   * @param   item   the message to be pushed and validated
+   */
+  public void pushAndValidate(Message item);
 
   /**
    * Removes the message at the top of this queue.
