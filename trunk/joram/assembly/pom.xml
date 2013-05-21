@@ -237,7 +237,6 @@
       <artifactId>org.osgi.compendium</artifactId>
       <type>jar</type>
     </dependency>
-    
     <dependency>
       <groupId>org.ow2.joram</groupId>
       <artifactId>shell-mom</artifactId>
@@ -253,6 +252,9 @@
       <artifactId>shell-a3</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+    <dependency>
+      <groupId>org.ow2.util.substitution</groupId>
+      <artifactId>substitution</artifactId>
+    </dependency>
   </dependencies>
 </project>
