@@ -47,6 +47,7 @@
         <include>org.ow2.joram:shell-mom</include>
         <include>org.ow2.joram:shell-jndi</include>
         <include>org.ow2.joram:shell-a3</include>
+        <include>org.ow2.util.substitution:substitution</include>
       </includes>
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>false</unpack>
