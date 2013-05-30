@@ -37,6 +37,7 @@ import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Vector;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -975,6 +976,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
     /** The thread. */
     private Thread thread = null;
+    
+    private ReentrantLock interruptLock;
 
     /** The session's name. */
     private String name = null;
@@ -1076,6 +1079,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       sendList = new MessageSoftList(getName(), AgentServer.getTransaction().isPersistent());
 
       sender = new Sender(this, name + '_' + sid, logmon);
+      
+      interruptLock = new ReentrantLock();
     }
 
     void init() throws UnknownServerException {
@@ -1447,9 +1452,14 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       if (Thread.currentThread() == thread) return;
 
       while (thread != null && thread.isAlive()) {
-        if (canStop) {
-          if (thread.isAlive()) thread.interrupt();
-          shutdown();
+        interruptLock.lock();
+        try {
+          if (canStop) {
+            if (thread.isAlive()) thread.interrupt();
+            shutdown();
+          }
+        } finally {
+          interruptLock.unlock();
         }
         try {
           thread.join(1000L);
@@ -1660,8 +1670,14 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             // The stream is closed, exits !
             break;
           }
-
-          canStop = false;
+          
+          interruptLock.lock();
+          try {
+            if (Thread.interrupted()) break;
+            canStop = false;
+          } finally {
+            interruptLock.unlock();
+          }
 
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG, getName() + ", receives: " + msg);
