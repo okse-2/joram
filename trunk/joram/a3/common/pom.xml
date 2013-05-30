@@ -28,6 +28,7 @@
             <Bundle-Activator>fr.dyade.aaa.common.osgi.Activator</Bundle-Activator>
             <Export-Package>com.scalagent.jmx,
               fr.dyade.aaa.common,
+              fr.dyade.aaa.common.encoding,
               fr.dyade.aaa.common.monitoring,
               fr.dyade.aaa.common.net,
               fr.dyade.aaa.common.osgi,
