@@ -143,6 +143,8 @@ public class TxLog {
   
   private int compactDelay;
   
+  private boolean useNioFileChannel;
+  
   public TxLog(Repository repository) {
     this.repository = repository;
     commitLock = new ReentrantLock();
@@ -403,6 +405,14 @@ public class TxLog {
     this.compactDelay = compactDelay;
   }
 
+  public boolean isUseNioFileChannel() {
+    return useNioFileChannel;
+  }
+
+  public void setUseNioFileChannel(boolean useNioFileChannel) {
+    this.useNioFileChannel = useNioFileChannel;
+  }
+
   public void create(Encodable objectId, Encodable value) throws Exception {
     Record record = ValueRecord.newCreateRecord(objectId, value, null);
     transactionContext.get().records.put(record.getObjectId(), record);
@@ -631,7 +641,7 @@ public class TxLog {
     // Synchronous write
     // TODO: asynchronous write
     buffer.flip();
-    currentFile.write(buffer, syncOnWrite);
+    currentFile.write(buffer);
   }
   
   private void putCreateRecord(ValueRecord record) throws Exception {
@@ -845,15 +855,10 @@ public class TxLog {
         }
         break;
       case Record.DELETE_RECORD:
-        // This case should be the most efficient: the deleted object is in the log
-        // so we remove it
         deleteRecordCount++;
         oldRecord = (ValueRecord) records.remove(updateRecord.getObjectId());   
         if (USE_REPOSITORY) {
           if (oldRecord == null || oldRecord.getRecordType() == Record.SAVE_RECORD) {
-            // This case should happen less frequently: need to keep the delete record
-            // as the object is (or may be) in the repository
-            
             // TODO: check if the file exists
             repository.delete(null, updateRecord.getObjectId().toString());
           }

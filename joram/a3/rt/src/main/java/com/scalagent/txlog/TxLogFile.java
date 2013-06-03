@@ -24,9 +24,7 @@ package com.scalagent.txlog;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,7 +39,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.encoding.Encodable;
 
-public class TxLogFile {
+public abstract class TxLogFile {
   
   public static final Logger logmon = Debug.getLogger(TxLogFileManager.class.getName());
   
@@ -51,10 +49,6 @@ public class TxLogFile {
   public static final int FILE_HEADER_LENGTH = 8;
   
   private File file;
-  
-  private RandomAccessFile raf;
-  
-  private FileChannel channel;
   
   private long logId;
   
@@ -89,6 +83,8 @@ public class TxLogFile {
   private HashMap<Encodable, ValueRecord> liveRecords;
   
   private ReentrantLock ioLock;
+  
+  private boolean open;
   
   public TxLogFile(File file) {
     this.file = file;
@@ -128,21 +124,25 @@ public class TxLogFile {
   public void open() throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, toString() + ".open()");
-    if (channel != null) throw new Exception("File already open: " + this);
-    doOpen();
+    if (open) throw new Exception("File already open: " + this);
+    doOpen(file);
+    open = true;
+    fileSize = getFileSize();
   }
   
-  private void doOpen() throws IOException {
-    raf = new RandomAccessFile(file, "rw");
-    channel = raf.getChannel();
-    fileSize = channel.size();
-  }
+  protected abstract void doOpen(File file) throws IOException;
+  
+  protected abstract long getFileSize() throws IOException;
   
   public void setCurrentPosition() throws IOException {
-    channel.position(currentFilePointer);
+    setPosition(currentFilePointer);
   }
   
-  public void reset(int size, boolean force, boolean fill) throws Exception {
+  protected abstract void setPosition(long filePointer) throws IOException;
+  
+  protected abstract int doWrite(ByteBuffer buf) throws IOException;
+  
+  public void reset(int size, boolean fill) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, toString() + ".reset(" + size + ')');
     ByteBuffer buf;
@@ -159,13 +159,9 @@ public class TxLogFile {
     }
     
     buf.flip();
-    channel.write(buf);
+    doWrite(buf);
     
-    if (force) {
-      channel.force(false);
-    }
-    
-    fileSize = channel.size();
+    fileSize = getFileSize();
     
     currentFilePointer = FILE_HEADER_LENGTH;
     
@@ -179,12 +175,17 @@ public class TxLogFile {
   
   public void read(ByteBuffer buf) throws IOException {
     // No need to take the io lock
-    channel.read(buf);
+    doRead(buf);
   }
   
+  protected abstract int doRead(ByteBuffer buf) throws IOException;
+  
   public long readLong() throws IOException {
-    return raf.readLong();
+    // No need to take the io lock
+    return doReadLong();
   }
+  
+  protected abstract long doReadLong() throws IOException;
   
   public boolean remains(int size) {
     if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -193,20 +194,17 @@ public class TxLogFile {
   }
   
   public long size() throws Exception {
-    if (channel == null) {
+    if (! open) {
       return getFile().length();
     } else {
-      return channel.size();
+      return getFileSize();
     }
   }
   
-  public void write(ByteBuffer buf, boolean sync) throws IOException {
+  public void write(ByteBuffer buf) throws IOException {
     ioLock.lock();
     try {
-      currentFilePointer += channel.write(buf);
-      if (sync) {
-        channel.force(false);
-      }
+      currentFilePointer += doWrite(buf);
     } finally {
       ioLock.unlock();
     }
@@ -216,18 +214,18 @@ public class TxLogFile {
     ioLock.lock();
     try {
       boolean alreadyOpen;
-      if (channel == null) {
-        doOpen();
+      if (! open) {
+        doOpen(file);
         alreadyOpen = false;
       } else {
         alreadyOpen = true;
       }
-      channel.position(valueRecord.getFilePointer());
+      setPosition(valueRecord.getFilePointer());
       int byteArraySize = valueRecord.getByteArraySize();
       ByteBuffer buf = ByteBuffer.allocate(byteArraySize);
       int read = 0;
       while (read < byteArraySize) {
-        int res = channel.read(buf);
+        int res = doRead(buf);
         if (res < 0)
           throw new Exception("Cannot read record: " + valueRecord);
         read += res;
@@ -235,7 +233,7 @@ public class TxLogFile {
       valueRecord.setByteArray(buf.array());
       if (alreadyOpen) {
         if (resetPosition) {
-          channel.position(currentFilePointer);
+          setPosition(currentFilePointer);
         }
       } else {
         close();
@@ -323,13 +321,13 @@ public class TxLogFile {
   public void close() throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, toString() + ".close()");
-    if (channel != null) {
-      channel.close();
-      raf.close();
-      raf = null;
-      channel = null;
+    if (open) {
+      doClose();
+      open = false;
     }
   }
+  
+  protected abstract void doClose() throws IOException;
 
   @Override
   public String toString() {

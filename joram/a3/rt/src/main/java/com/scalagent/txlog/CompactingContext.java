@@ -102,7 +102,7 @@ public class CompactingContext {
       
       currentBuffer.position(finalPosition);
       currentBuffer.flip();
-      currentFile.write(currentBuffer, txlog.isSyncOnWrite());
+      currentFile.write(currentBuffer);
       
       currentFile.close();
       
