@@ -80,4 +80,6 @@ public interface TxLogTransactionMBean {
   
   int getCompactDelay();
   
+  boolean isUseNioFileChannel();
+  
 }

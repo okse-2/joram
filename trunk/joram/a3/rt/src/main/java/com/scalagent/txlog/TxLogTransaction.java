@@ -242,13 +242,11 @@ public class TxLogTransaction extends BaseTransaction implements TxLogTransactio
   }
 
   public int getPhase() {
-    // no phase is managed
-    return 0;
+    return phase;
   }
 
   public String getPhaseInfo() {
-    // no phase is managed
-    return null;
+    return PhaseInfo[phase];
   }
   
   public void init(String path) throws IOException {
@@ -316,6 +314,7 @@ public class TxLogTransaction extends BaseTransaction implements TxLogTransactio
     boolean synchronousCompact = getBoolean("Transaction.SynchronousCompact");
     int maxSaveCount = getInteger("Transaction.MaxSaveCount", 1000).intValue();
     int compactDelay = getInteger("Transaction.CompactDelay", 30000).intValue();
+    boolean useNioFileChannel = getBoolean("Transaction.UseNioFileChannel");
     
     String encodableFactoryInitClassName = getProperty("Transaction.EncodableFactoryInit");
     if (encodableFactoryInitClassName != null) {
@@ -381,6 +380,7 @@ public class TxLogTransaction extends BaseTransaction implements TxLogTransactio
     txlog.setSynchronousCompact(synchronousCompact);
     txlog.setMaxSaveCount(maxSaveCount);
     txlog.setCompactDelay(compactDelay);
+    txlog.setUseNioFileChannel(useNioFileChannel);
     
     txlog.setRepositoryDirectory(repositoryDirectory);
 
@@ -743,6 +743,10 @@ public class TxLogTransaction extends BaseTransaction implements TxLogTransactio
 
   public void setCompactDelay(int compactDelay) {
     txlog.setCompactDelay(compactDelay);
+  }
+  
+  public boolean isUseNioFileChannel() {
+    return txlog.isUseNioFileChannel();
   }
 
 }

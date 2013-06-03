@@ -131,6 +131,14 @@ public class TxLogFileManager {
     
   }
   
+  private TxLogFile newFile(File file) {
+    if (txlog.isUseNioFileChannel()) {
+      return new NioTxLogFile(file, txlog.isSyncOnWrite());
+    } else {
+      return new OioTxLogFile(file, txlog.isSyncOnWrite());
+    }
+  }
+  
   public int getUsedFileCount() {
     return usedFiles.size();
   }
@@ -191,7 +199,7 @@ public class TxLogFileManager {
     
     for (String fileName : fileNames) {
       File file = new File(logDir, fileName);
-      TxLogFile txlogFile = new TxLogFile(file);
+      TxLogFile txlogFile = newFile(file);
       txlogFile.open();
       fileCount.incrementAndGet();
       
@@ -486,7 +494,7 @@ public class TxLogFileManager {
     maxLogId += 1;
     file.setLogId(maxLogId);
     file.open();
-    file.reset(txlog.getFileSize(), txlog.isSyncOnWrite(), fill);
+    file.reset(txlog.getFileSize(), fill);
     file.close();
   }
   
@@ -576,7 +584,7 @@ public class TxLogFileManager {
     maxFileId += 1;
     String fileName = LOG_FILE_PREFIX + maxFileId;
     File file = new File(logDir, fileName);
-    TxLogFile logFile = new TxLogFile(file);
+    TxLogFile logFile = newFile(file);
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "Create file: " + file);
     resetFile(logFile, true);
