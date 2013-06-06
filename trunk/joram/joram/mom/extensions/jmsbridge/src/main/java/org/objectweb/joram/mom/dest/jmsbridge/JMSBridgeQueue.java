@@ -307,4 +307,10 @@ public class JMSBridgeQueue extends Queue {
   private void close() {
     jmsModule.close(); 
   }
+  
+  public int getEncodableClassId() {
+    // Not defined: still not encodable
+    return -1;
+  }
+  
 }
