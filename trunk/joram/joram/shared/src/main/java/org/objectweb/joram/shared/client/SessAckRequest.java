@@ -28,6 +28,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 
+import org.objectweb.joram.shared.messages.Message;
+
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
@@ -38,7 +43,7 @@ public final class SessAckRequest extends AbstractJmsRequest {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   /** Vector of message identifiers. */
-  private Vector ids;
+  private Vector<String> ids;
 
   /** Sets the vector of identifiers. */
   public void setIds(Vector ids) {
@@ -119,4 +124,37 @@ public final class SessAckRequest extends AbstractJmsRequest {
     ids = StreamUtil.readVectorOfStringFrom(is);
     queueMode = StreamUtil.readBooleanFrom(is);
   }
+  
+  public int getEncodableClassId() {
+    // Not defined
+    return -1;
+  }
+  
+  public int getEncodedSize() throws Exception {
+    int res = super.getEncodedSize()
+        + INT_ENCODED_SIZE + BOOLEAN_ENCODED_SIZE;
+    for (String id : ids) {
+      res += EncodableHelper.getStringEncodedSize(id);
+    }
+    return res;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    encoder.encodeUnsignedInt(ids.size());
+    for (String id : ids) {
+      encoder.encodeString(id);
+    }
+    encoder.encodeBoolean(queueMode);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+    int size = decoder.decodeUnsignedInt();
+    for (int i = 0; i < size; i++) {
+      decoder.decodeString();
+    }
+    queueMode = decoder.decodeBoolean();
+  }
+  
 }

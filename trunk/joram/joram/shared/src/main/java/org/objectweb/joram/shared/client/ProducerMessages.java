@@ -31,6 +31,8 @@ import java.util.Vector;
 
 import org.objectweb.joram.shared.messages.Message;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
@@ -155,4 +157,27 @@ public final class ProducerMessages extends AbstractJmsRequest {
     messages = Message.readVectorFrom(is);
     asyncSend = StreamUtil.readBooleanFrom(is);
   }
+  
+  public int getEncodableClassId() {
+    // Not defined
+    return -1;
+  }
+  
+  public int getEncodedSize() throws Exception {
+    return super.getEncodedSize()
+        + Message.getMessageVectorEncodedSize(messages) + BOOLEAN_ENCODED_SIZE;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    Message.encodeMessageVector(messages, encoder);
+    encoder.encodeBoolean(asyncSend);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+    messages = Message.decodeMessageVector(decoder);
+    asyncSend = decoder.decodeBoolean();
+  }
+  
 }

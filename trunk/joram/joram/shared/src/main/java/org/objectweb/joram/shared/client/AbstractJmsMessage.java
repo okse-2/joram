@@ -30,6 +30,7 @@ import java.io.ObjectOutput;
 import java.io.IOException;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Encodable;
 import fr.dyade.aaa.common.stream.StreamUtil;
 import fr.dyade.aaa.common.stream.Streamable;
 
@@ -40,7 +41,7 @@ import org.objectweb.util.monolog.api.Logger;
  * An <code>AbstractJmsMessage</code> is a message exchanged between a
  * Joram client and its proxy.
  */
-public abstract class AbstractJmsMessage implements Externalizable, Streamable {
+public abstract class AbstractJmsMessage implements Externalizable, Streamable, Encodable {
   public static Logger logger = Debug.getLogger(AbstractJmsMessage.class.getName());
 
   protected final static int NULL_CLASS_ID = -1;
