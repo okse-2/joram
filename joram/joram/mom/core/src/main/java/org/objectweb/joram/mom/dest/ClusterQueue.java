@@ -771,4 +771,10 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
   public int getSentToCluster() {
     return sentToCluster;
   }
+  
+  public int getEncodableClassId() {
+    // Not defined: still not encodable
+    return -1;
+  }
+  
 }

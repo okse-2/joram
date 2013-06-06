@@ -29,7 +29,10 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
+import org.objectweb.joram.mom.dest.Queue;
+import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.CommitRequest;
@@ -42,6 +45,7 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -129,6 +133,12 @@ public class ConnectionManager implements ConnectionManagerMBean {
 
   /** Unique ConnectionManager instance. */
   private static ConnectionManager currentInstance;
+  
+  static {
+    EncodableFactoryRepository.putFactory(JoramHelper.MESSAGE_CLASS_ID, new Message.MessageFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.QUEUE_CLASS_ID, new Queue.QueueFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.USER_AGENT_CLASS_ID, new UserAgent.UserAgentFactory());
+  }
   
   public static final void sendToProxy(AgentId proxyId, int cnxKey, AbstractJmsRequest req, Object msg) {
     RequestNot rn = new RequestNot(cnxKey, msg);

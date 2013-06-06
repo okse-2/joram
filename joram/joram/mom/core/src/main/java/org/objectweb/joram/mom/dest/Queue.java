@@ -29,6 +29,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import javax.management.openmbean.CompositeData;
@@ -50,6 +51,7 @@ import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.admin.AdminReply;
@@ -84,6 +86,11 @@ import fr.dyade.aaa.agent.ExpiredNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
 
 /**
  * The <code>Queue</code> class implements the MOM queue behavior,
@@ -151,7 +158,18 @@ public class Queue extends Destination implements QueueMBean {
   protected long arrivalsCounter = 0;
 
   /** List holding the requests before reply or expiry. */
-  protected List requests = new Vector();
+  protected List<ReceiveRequest> requests = new Vector();
+  
+  public Queue() {
+    super();
+  }
+  
+  /**
+   * Used by the Encodable framework
+   */
+  protected Queue(String name, boolean fixed, int stamp) {
+    super(name, fixed, stamp);
+  }
 
   /**
    * Distributes the received notifications to the appropriate reactions.
@@ -1678,4 +1696,96 @@ public class Queue extends Destination implements QueueMBean {
 		
 		return stats;
 	}
+	
+	public int getEncodableClassId() {
+    return JoramHelper.QUEUE_CLASS_ID;
+  }
+  
+  public int getEncodedSize() throws Exception {
+    int encodedSize = super.getEncodedSize();
+    encodedSize += LONG_ENCODED_SIZE;
+    encodedSize += INT_ENCODED_SIZE;
+    Iterator<Entry<String, AgentId>> consumerIterator = consumers.entrySet().iterator();
+    while (consumerIterator.hasNext()) {
+      Entry<String, AgentId> consumer = consumerIterator.next();
+      encodedSize += EncodableHelper.getStringEncodedSize(consumer.getKey());
+      encodedSize += consumer.getValue().getEncodedSize();
+    }
+    encodedSize += INT_ENCODED_SIZE;
+    Iterator<Entry<String, Integer>> contextIterator = contexts.entrySet().iterator();
+    while (contextIterator.hasNext()) {
+      Entry<String, Integer> context = contextIterator.next();
+      encodedSize += EncodableHelper.getStringEncodedSize(context.getKey());
+      encodedSize += INT_ENCODED_SIZE;
+    }
+    encodedSize += INT_ENCODED_SIZE * 3;
+    for (ReceiveRequest request : requests) {
+      encodedSize += request.getEncodedSize();
+    }
+    return encodedSize;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    encoder.encodeUnsignedLong(arrivalsCounter);
+    encoder.encodeUnsignedInt(consumers.size());
+    Iterator<Entry<String, AgentId>> consumerIterator = consumers.entrySet().iterator();
+    while (consumerIterator.hasNext()) {
+      Entry<String, AgentId> consumer = consumerIterator.next();
+      encoder.encodeString(consumer.getKey());
+      consumer.getValue().encode(encoder);
+    }
+    encoder.encodeUnsignedInt(contexts.size());
+    Iterator<Entry<String, Integer>> contextIterator = contexts.entrySet().iterator();
+    while (contextIterator.hasNext()) {
+      Entry<String, Integer> context = contextIterator.next();
+      encoder.encodeString(context.getKey());
+      encoder.encodeUnsignedInt(context.getValue());
+    }
+    encoder.encodeUnsignedInt(nbMaxMsg);
+    encoder.encodeUnsignedInt(priority);
+    encoder.encodeUnsignedInt(requests.size());
+    for (ReceiveRequest request : requests) {
+      request.encode(encoder);
+    }
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+    arrivalsCounter = decoder.decodeUnsignedLong();
+    int consumersSize = decoder.decodeUnsignedInt();
+    consumers = new Hashtable<String, AgentId>(consumersSize);
+    for (int i = 0; i < consumersSize; i++) {
+      String key = decoder.decodeString();
+      AgentId value = new AgentId((short) 0, (short) 0, 0);
+      value.decode(decoder);
+      consumers.put(key, value);
+    }
+    int contextsSize = decoder.decodeUnsignedInt();
+    contexts = new Hashtable<String, Integer>(contextsSize);
+    for (int i = 0; i < contextsSize; i++) {
+      String key = decoder.decodeString();
+      Integer value = decoder.decodeUnsignedInt();
+      contexts.put(key, value);
+    }
+    nbMaxMsg = decoder.decodeUnsignedInt();
+    priority = decoder.decodeUnsignedInt();
+    int requestsSize = decoder.decodeUnsignedInt();
+    requests = new Vector<ReceiveRequest>(requestsSize);
+    for (int i = 0; i < requestsSize; i++) {
+      ReceiveRequest request = new ReceiveRequest();
+      request.decode(decoder);
+      requests.add(request);
+    }
+  }
+  
+  public static class QueueFactory implements EncodableFactory {
+
+    public Encodable createEncodable() {
+      // These are just initial values to be changed when decoding the agent
+      return new Queue(null, false, AgentId.MinWKSIdStamp);
+    }
+    
+  }
+  
 }

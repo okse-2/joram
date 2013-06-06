@@ -26,6 +26,7 @@ package org.objectweb.joram.mom.proxies;
 
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.objectweb.joram.shared.client.AbstractJmsReply;
@@ -35,12 +36,16 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
 
 /**
  * The <code>ClientContext</code> class holds the data related to a client
  * context.
  */
-class ClientContext implements java.io.Serializable {
+class ClientContext implements java.io.Serializable, Encodable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
@@ -53,7 +58,7 @@ class ClientContext implements java.io.Serializable {
   /** Context identifier. */
   private int id;
   /** Vector of temporary destinations. */
-  private Vector tempDestinations;
+  private Vector<AgentId> tempDestinations;
   /** Identifiers of queues delivering messages. */
   private Hashtable deliveringQueues;
   /** Prepared transactions objects waiting for commit. */
@@ -67,13 +72,15 @@ class ClientContext implements java.io.Serializable {
    */
   private transient int cancelledRequestId;
   /** Vector of active subscriptions' names. */
-  private transient Vector activeSubs;
+  private transient Vector<String> activeSubs;
   /** Pending replies waiting for the context to be activated. */
   private transient Vector repliesBuffer;
   /** Contexts waiting for the replies from some local agents*/
   private transient Hashtable commitTable;
   
   private transient ProxyAgentItf proxy;
+  
+  ClientContext() {}
 
   /**
    * Constructs a <code>ClientContext</code> instance.
@@ -94,6 +101,14 @@ class ClientContext implements java.io.Serializable {
     repliesBuffer = new Vector();
   }
   
+  public AgentId getProxyId() {
+    return proxyId;
+  }
+
+  public void setProxyId(AgentId proxyId) {
+    this.proxyId = proxyId;
+  }
+
   void setProxyAgent(ProxyAgentItf px) {
     proxy = px;
   }
@@ -311,4 +326,126 @@ class ClientContext implements java.io.Serializable {
     buff.append(')');
     return buff.toString();
   }
+
+  public int getEncodableClassId() {
+    // Not defined
+    return -1;
+  }
+
+  public int getEncodedSize() throws Exception {
+    int encodedSize = INT_ENCODED_SIZE;
+    for (String activeSub : activeSubs) {
+      encodedSize += EncodableHelper.getStringEncodedSize(activeSub);
+    }
+    encodedSize += INT_ENCODED_SIZE;
+    Iterator<Entry<AgentId, AgentId>> deliveringQueueIterator = deliveringQueues.entrySet().iterator();
+    while (deliveringQueueIterator.hasNext()) {
+      Entry<AgentId, AgentId> deliveringQueue = deliveringQueueIterator.next();
+      encodedSize += deliveringQueue.getKey().getEncodedSize();
+    }
+    encodedSize += INT_ENCODED_SIZE;
+    encodedSize += INT_ENCODED_SIZE;
+    
+    encodedSize += proxyId.getEncodedSize();
+    
+    for (AgentId tempDestination : tempDestinations) {
+      encodedSize += tempDestination.getEncodedSize();
+    }
+    
+    encodedSize += BOOLEAN_ENCODED_SIZE;
+    if (transactionsTable != null) {
+      encodedSize += INT_ENCODED_SIZE;
+      Iterator<Entry<Xid, XACnxPrepare>> transactionsIterator = transactionsTable
+          .entrySet().iterator();
+      while (transactionsIterator.hasNext()) {
+        Entry<Xid, XACnxPrepare> context = transactionsIterator.next();
+        // Not useful to encode the key as it is in the value
+        // context.getKey().encode(encoder);
+        encodedSize += context.getValue().getEncodedSize();
+      }
+    }
+    
+    return encodedSize;
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeUnsignedInt(activeSubs.size());
+    for (String activeSub : activeSubs) {
+      encoder.encodeString(activeSub);
+    }
+    encoder.encodeUnsignedInt(deliveringQueues.size());
+    Iterator<Entry<AgentId, AgentId>> deliveringQueueIterator = deliveringQueues.entrySet().iterator();
+    while (deliveringQueueIterator.hasNext()) {
+      Entry<AgentId, AgentId> deliveringQueue = deliveringQueueIterator.next();
+      deliveringQueue.getKey().encode(encoder);
+      // not useful to encode the value
+    }
+    encoder.encodeUnsignedInt(id);
+    
+    proxyId.encode(encoder);
+    
+    encoder.encodeUnsignedInt(tempDestinations.size());
+    for (AgentId tempDestination : tempDestinations) {
+      tempDestination.encode(encoder);
+    }
+    
+    if (transactionsTable == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      encoder.encodeUnsignedInt(transactionsTable.size());
+      Iterator<Entry<Xid, XACnxPrepare>> transactionsIterator = transactionsTable
+          .entrySet().iterator();
+      while (transactionsIterator.hasNext()) {
+        Entry<Xid, XACnxPrepare> context = transactionsIterator.next();
+        // Not useful to encode the key as it is in the value
+        // context.getKey().encode(encoder);
+        context.getValue().encode(encoder);
+      }
+    }
+
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    int activeSubsSize = decoder.decodeUnsignedInt();
+    activeSubs = new Vector<String>(activeSubsSize);
+    for (int i = 0; i < activeSubsSize; i++) {
+      String activeSub = decoder.decodeString();
+      activeSubs.add(activeSub);
+    }
+    int deliveringQueuesSize = decoder.decodeUnsignedInt();
+    deliveringQueues = new Hashtable<AgentId, AgentId>(deliveringQueuesSize);
+    for (int i = 0; i < deliveringQueuesSize; i++) {
+      AgentId key = new AgentId((short) 0, (short) 0, 0);
+      key.decode(decoder);
+      deliveringQueues.put(key, key);
+    }
+    id = decoder.decodeUnsignedInt();
+    
+    proxyId = new AgentId((short) 0, (short) 0, 0);
+    proxyId.decode(decoder);
+    
+    int tempDestinationsSize = decoder.decodeUnsignedInt();
+    tempDestinations = new Vector<AgentId>(tempDestinationsSize);
+    for (int i = 0; i < tempDestinationsSize; i++) {
+      AgentId tempDestination = new AgentId((short) 0, (short) 0, 0);
+      tempDestination.decode(decoder);
+      tempDestinations.add(tempDestination);
+    }
+    
+    boolean isNull = decoder.decodeBoolean();
+    if (isNull) {
+      transactionsTable = null;
+    } else {
+      int size = decoder.decodeUnsignedInt();
+      transactionsTable = new Hashtable<Xid, XACnxPrepare>(size);
+      for (int i = 0; i < size; i++) {
+        XACnxPrepare ctx = new XACnxPrepare();
+        ctx.decode(decoder);
+        Xid xid = new Xid(ctx.getBQ(), ctx.getFI(), ctx.getGTI());
+        transactionsTable.put(xid, ctx);
+      }
+    }
+  }
+  
 }

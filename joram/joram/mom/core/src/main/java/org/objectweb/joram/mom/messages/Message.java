@@ -32,11 +32,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.common.stream.StreamUtil;
 import fr.dyade.aaa.util.Transaction;
 
@@ -47,7 +53,7 @@ import fr.dyade.aaa.util.Transaction;
  * A message content is always wrapped as a bytes array, it is characterized
  * by properties and "header" fields.
  */
-public final class Message implements Serializable, MessageView {
+public final class Message implements Serializable, MessageView, Encodable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 2L;
 
@@ -100,6 +106,11 @@ public final class Message implements Serializable, MessageView {
    */
   private static final boolean globalUseSoftRef =
     AgentServer.getBoolean("org.objectweb.joram.mom.messages.SWAPALLOWED");
+  
+  /**
+   * Empty constructor.
+   */
+  public Message() {}
 
   /**
    * Constructs a <code>Message</code> instance.
@@ -524,4 +535,39 @@ public final class Message implements Serializable, MessageView {
     }
     return props;
   }
+  
+  public int getEncodableClassId() {
+    return JoramHelper.MESSAGE_CLASS_ID;
+  }
+  
+  public int getEncodedSize() throws Exception {
+    int encodedSize = 0;
+    encodedSize += LONG_ENCODED_SIZE + BOOLEAN_ENCODED_SIZE;
+    encodedSize += msg.getEncodedSize();
+    return encodedSize;
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeUnsignedLong(order);
+    encoder.encodeBoolean(soft);
+    msg.encode(encoder);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    order = decoder.decodeUnsignedLong();
+    soft = decoder.decodeBoolean();
+    acksCounter = 0;
+    durableAcksCounter = 0;
+    msg = new org.objectweb.joram.shared.messages.Message();
+    msg.decode(decoder);
+  }
+  
+  public static class MessageFactory implements EncodableFactory {
+
+    public Encodable createEncodable() {
+      return new Message();
+    }
+   
+  }
+  
 }

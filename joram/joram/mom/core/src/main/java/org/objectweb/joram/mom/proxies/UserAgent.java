@@ -35,6 +35,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -72,6 +73,7 @@ import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.mom.util.InterceptorsHelper;
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.mom.util.MessageInterceptor;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
@@ -153,6 +155,11 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.WakeUpTask;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -287,7 +294,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * <b>Value:</b> client subscription
    */
 
-  private Map subsTable;
+  private Map<String, ClientSubscription> subsTable;
 
   /**
    * Table holding the recovered transactions branches.
@@ -295,7 +302,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * <b>Key:</b> transaction identifier<br>
    * <b>Value:</b> <code>XACnxPrepare</code> instance
    */
-  private Map recoveredTransactions;
+  private Map<Xid, XACnxPrepare> recoveredTransactions;
 
   /** Counter of message arrivals from topics. */ 
   private long arrivalsCounter = 0; 
@@ -341,6 +348,13 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private int keyCounter = 0;
 
   private transient WakeUpTask cleaningTask;
+  
+  /**
+   * Used by the Encodable framework
+   */
+  protected UserAgent(String name, boolean fixed, int stamp) {
+    super(name, fixed, stamp);
+  }
 
   /** (Re)initializes the agent when (re)loading. */
   public void agentInitialize(boolean firstTime) throws Exception {
@@ -3525,13 +3539,236 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       }
     }
   }
+  
+  @Override
+  public int getEncodableClassId() {
+    return JoramHelper.USER_AGENT_CLASS_ID;
+  }
+
+  public int getEncodedSize() throws Exception {
+    int res = super.getEncodedSize();
+    res += LONG_ENCODED_SIZE;
+    
+    res += INT_ENCODED_SIZE;
+    Iterator<Entry<Integer, ClientContext>> contextIterator = contexts.entrySet().iterator();
+    while (contextIterator.hasNext()) {
+      Entry<Integer, ClientContext> context = contextIterator.next();
+      // Not useful to encode the key as it is in the value
+      res += context.getValue().getEncodedSize();
+    }
+    
+    res += BOOLEAN_ENCODED_SIZE;
+    if (dmqId != null) {
+      res += dmqId.getEncodedSize();
+    }
+    
+    res += BOOLEAN_ENCODED_SIZE;
+    if (interceptorsPropIN != null) {
+      res += INT_ENCODED_SIZE;
+      for (Properties properties : interceptorsPropIN) {
+        res += EncodableHelper.getEncodedSize(properties);
+      }
+    }
+    
+    res += BOOLEAN_ENCODED_SIZE;
+    if (interceptorsPropOUT != null) {
+      res += INT_ENCODED_SIZE;
+      for (Properties properties : interceptorsPropOUT) {
+        res += EncodableHelper.getEncodedSize(properties);
+      }
+    }
+    
+    res += 2 * INT_ENCODED_SIZE + 2 * LONG_ENCODED_SIZE;
+    
+    res += BOOLEAN_ENCODED_SIZE;
+    if (recoveredTransactions != null) {
+      res += INT_ENCODED_SIZE;
+      Iterator<Entry<Xid, XACnxPrepare>> recoveredTransactionsIterator = recoveredTransactions
+          .entrySet().iterator();
+      while (recoveredTransactionsIterator.hasNext()) {
+        Entry<Xid, XACnxPrepare> context = recoveredTransactionsIterator.next();
+        // Not useful to encode the key as it is in the value
+        // context.getKey().encode(encoder);
+        res += context.getValue().getEncodedSize();
+      }
+    }
+    
+    res += INT_ENCODED_SIZE;
+    Iterator<Entry<String, ClientSubscription>> subsTableIterator = subsTable.entrySet().iterator();
+    while (subsTableIterator.hasNext()) {
+      Entry<String, ClientSubscription> context = subsTableIterator.next();
+      // Not useful to encode the key as it is in the value
+      res += context.getValue().getEncodedSize();
+    }
+    
+    res += INT_ENCODED_SIZE;
+    
+    return res;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    encoder.encodeUnsignedLong(arrivalsCounter);
+    
+    encoder.encodeUnsignedInt(contexts.size());
+    Iterator<Entry<Integer, ClientContext>> contextIterator = contexts.entrySet().iterator();
+    while (contextIterator.hasNext()) {
+      Entry<Integer, ClientContext> context = contextIterator.next();
+      // Not useful to encode the key as it is in the value
+      //encoder.encodeUnsignedInt(context.getKey());
+      context.getValue().encode(encoder);
+    }
+    
+    if (dmqId == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      dmqId.encode(encoder);
+    }
+    
+    if (interceptorsPropIN == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      encoder.encodeUnsignedInt(interceptorsPropIN.size());
+      for (Properties properties : interceptorsPropIN) {
+        EncodableHelper.encodeProperties(properties, encoder);
+      }
+    }
+    
+    if (interceptorsPropOUT == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      encoder.encodeUnsignedInt(interceptorsPropOUT.size());
+      for (Properties properties : interceptorsPropOUT) {
+        EncodableHelper.encodeProperties(properties, encoder);
+      }
+    }
+    
+    encoder.encodeUnsignedInt(keyCounter);
+    encoder.encodeUnsignedInt(nbMaxMsg);
+    encoder.encodeUnsignedLong(nbMsgsSentToDMQSinceCreation);
+    encoder.encodeUnsignedLong(period);
+    
+    if (recoveredTransactions == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      encoder.encodeUnsignedInt(recoveredTransactions.size());
+      Iterator<Entry<Xid, XACnxPrepare>> recoveredTransactionsIterator = recoveredTransactions
+          .entrySet().iterator();
+      while (recoveredTransactionsIterator.hasNext()) {
+        Entry<Xid, XACnxPrepare> context = recoveredTransactionsIterator.next();
+        // Not useful to encode the key as it is in the value
+        // context.getKey().encode(encoder);
+        context.getValue().encode(encoder);
+      }
+    }
+    
+    encoder.encodeUnsignedInt(subsTable.size());
+    Iterator<Entry<String, ClientSubscription>> subsTableIterator = subsTable.entrySet().iterator();
+    while (subsTableIterator.hasNext()) {
+      Entry<String, ClientSubscription> context = subsTableIterator.next();
+      // Not useful to encode the key as it is in the value
+      context.getValue().encode(encoder);
+    }
+    
+    encoder.encodeUnsignedInt(threshold);
+  }
+  
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+    arrivalsCounter = decoder.decodeUnsignedLong();
+    
+    int contextsSize = decoder.decodeUnsignedInt();
+    contexts = new Hashtable<Integer, ClientContext>(contextsSize);
+    for (int i = 0; i < contextsSize; i++) {
+      ClientContext value = new ClientContext();
+      //value.setProxyId(getId());
+      value.decode(decoder);
+      contexts.put(value.getId(), value);
+    }
+    
+    boolean isNull = decoder.decodeBoolean();
+    if (isNull) {
+      dmqId = null;
+    } else {
+      dmqId = new AgentId((short) 0, (short) 0, 0);
+      dmqId.decode(decoder);
+    }
+    
+    isNull = decoder.decodeBoolean();
+    if (isNull) {
+      interceptorsPropIN = null;
+    } else {
+      int size = decoder.decodeUnsignedInt();
+      interceptorsPropIN = new Vector<Properties>(size);
+      for (int i = 0; i < size; i++) {
+        Properties properties = EncodableHelper.decodeProperties(decoder);
+        interceptorsPropIN.add(properties);
+      }
+    }
+    
+    isNull = decoder.decodeBoolean();
+    if (isNull) {
+      interceptorsPropOUT = null;
+    } else {
+      int size = decoder.decodeUnsignedInt();
+      interceptorsPropOUT = new Vector<Properties>(size);
+      for (int i = 0; i < size; i++) {
+        Properties properties = EncodableHelper.decodeProperties(decoder);
+        interceptorsPropOUT.add(properties);
+      }
+    }
+    
+    keyCounter = decoder.decodeUnsignedInt();
+    nbMaxMsg = decoder.decodeUnsignedInt();
+    nbMsgsSentToDMQSinceCreation = decoder.decodeUnsignedLong();
+    period = decoder.decodeUnsignedLong();
+    
+    isNull = decoder.decodeBoolean();
+    if (isNull) {
+      recoveredTransactions = null;
+    } else {
+      int size = decoder.decodeUnsignedInt();
+      recoveredTransactions = new Hashtable<Xid, XACnxPrepare>(size);
+      for (int i = 0; i < size; i++) {
+        XACnxPrepare ctx = new XACnxPrepare();
+        ctx.decode(decoder);
+        Xid xid = new Xid(ctx.getBQ(), ctx.getFI(), ctx.getGTI());
+        recoveredTransactions.put(xid, ctx);
+      }
+    }
+    
+    int subsTableSize = decoder.decodeUnsignedInt();
+    subsTable = new Hashtable<String, ClientSubscription>(subsTableSize);
+    for (int i = 0; i < subsTableSize; i++) {
+      ClientSubscription value = new ClientSubscription();
+      //value.setProxyId(getId());
+      value.decode(decoder);
+      subsTable.put(value.getName(), value);
+    }
+    
+    threshold = decoder.decodeUnsignedInt();
+  }
+  
+  public static class UserAgentFactory implements EncodableFactory {
+
+    public Encodable createEncodable() {
+      // These are just initial values to be changed when decoding the agent
+      return new UserAgent(null, false, AgentId.MinWKSIdStamp);
+    }
+    
+  }
+  
 }
 
 /**
  * The <code>Xid</code> internal class is a utility class representing
  * a global transaction identifier.
  */
-class Xid implements Serializable {
+class Xid implements Serializable, Encodable {
   /**
    * 
    */
@@ -3539,6 +3776,8 @@ class Xid implements Serializable {
   byte[] bq;
   int fi;
   byte[] gti;
+  
+  Xid() {}
 
   Xid(byte[] bq, int fi, byte[] gti) {
     this.bq = bq;
@@ -3560,4 +3799,26 @@ class Xid implements Serializable {
   public int hashCode() {
     return (new String(bq) + "-" + new String(gti)).hashCode();
   }
+
+  public int getEncodableClassId() {
+    // Not defined
+    return -1;
+  }
+
+  public int getEncodedSize() throws Exception {
+    return bq.length + INT_ENCODED_SIZE + gti.length;
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeByteArray(bq);
+    encoder.encodeUnsignedInt(fi);
+    encoder.encodeByteArray(gti);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    bq = decoder.decodeByteArray();
+    fi = decoder.decodeUnsignedInt();
+    gti = decoder.decodeByteArray();
+  }
+  
 }

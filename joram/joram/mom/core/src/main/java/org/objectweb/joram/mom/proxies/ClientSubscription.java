@@ -29,6 +29,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import javax.management.openmbean.CompositeData;
@@ -46,13 +47,17 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
 
 /**
  * The <code>ClientSubscription</code> class holds the data of a client
  * subscription, and the methods managing the delivery and acknowledgement
  * of the messages.
  */
-class ClientSubscription implements ClientSubscriptionMBean, Serializable {
+class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encodable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
@@ -121,7 +126,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   }
 
   /** Vector of identifiers of the messages to deliver. */
-  private List messageIds;
+  private List<String> messageIds;
   /** Table of delivered messages identifiers. */
   private Map deliveredIds;
   /** Table keeping the denied messages identifiers. */
@@ -170,6 +175,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   protected long nbMsgsDeliveredSinceCreation = 0;
 
   private int DEFAULT_MAX_NUMBER_OF_MSG_PER_REQUEST = 100;
+  
+  ClientSubscription() {}
   
   /**
    * Constructs a <code>ClientSubscription</code> instance.
@@ -251,6 +258,14 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 //      buff.append(")");
 //      return buff.toString();
 //    }
+
+  public AgentId getProxyId() {
+    return proxyId;
+  }
+
+  public void setProxyId(AgentId proxyId) {
+    this.proxyId = proxyId;
+  }
 
   public String toString() {
     return "ClientSubscription" + proxyId + name;
@@ -1043,6 +1058,142 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
   void cleanMessageIds() {
     messageIds.retainAll(messagesTable.keySet());
+  }
+
+  public int getEncodableClassId() {
+    // Not defined
+    return -1;
+  }
+
+  public int getEncodedSize() throws Exception {
+    int encodedSize = INT_ENCODED_SIZE;
+    Iterator<Entry<String, String>> deliveredIdIterator = deliveredIds.entrySet().iterator();
+    while (deliveredIdIterator.hasNext()) {
+      Entry<String, String> deliveredId = deliveredIdIterator.next();
+      encodedSize += EncodableHelper.getStringEncodedSize(deliveredId.getKey());
+    }
+    encodedSize += INT_ENCODED_SIZE;
+    Iterator<Entry<String, Integer>> deniedMsgIterator = deniedMsgs.entrySet().iterator();
+    while (deniedMsgIterator.hasNext()) {
+      Entry<String, Integer> deniedMsg = deniedMsgIterator.next();
+      encodedSize += EncodableHelper.getStringEncodedSize(deniedMsg.getKey());
+      encodedSize += INT_ENCODED_SIZE;
+    }
+    encodedSize += BOOLEAN_ENCODED_SIZE;
+    if (dmqId != null) {
+      encodedSize += dmqId.getEncodedSize();
+    }
+    encodedSize += BOOLEAN_ENCODED_SIZE;
+    encodedSize += INT_ENCODED_SIZE;
+    for (String messageId : messageIds) {
+      encodedSize += EncodableHelper.getStringEncodedSize(messageId);
+    }
+    encodedSize += EncodableHelper.getStringEncodedSize(name);
+    encodedSize += INT_ENCODED_SIZE + LONG_ENCODED_SIZE * 2;
+    
+    encodedSize += proxyId.getEncodedSize();
+    
+    encodedSize += BOOLEAN_ENCODED_SIZE;
+    if (selector != null) {
+      encodedSize += EncodableHelper.getStringEncodedSize(selector);
+    }
+    encodedSize += INT_ENCODED_SIZE;
+    encodedSize += topicId.getEncodedSize();
+    return encodedSize;
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeUnsignedInt(deliveredIds.size());
+    Iterator<Entry<String, String>> deliveredIdIterator = deliveredIds.entrySet().iterator();
+    while (deliveredIdIterator.hasNext()) {
+      Entry<String, String> deliveredId = deliveredIdIterator.next();
+      encoder.encodeString(deliveredId.getKey());
+      // no need to encode the value
+    }
+    encoder.encodeUnsignedInt(deniedMsgs.size());
+    Iterator<Entry<String, Integer>> deniedMsgIterator = deniedMsgs.entrySet().iterator();
+    while (deniedMsgIterator.hasNext()) {
+      Entry<String, Integer> deniedMsg = deniedMsgIterator.next();
+      encoder.encodeString(deniedMsg.getKey());
+      encoder.encodeUnsignedInt(deniedMsg.getValue());
+    }
+    if (dmqId == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      dmqId.encode(encoder);
+    }
+    encoder.encodeBoolean(durable);
+    encoder.encodeUnsignedInt(messageIds.size());
+    for (String messageId : messageIds) {
+      encoder.encodeString(messageId);
+    }
+    
+    encoder.encodeString(name);
+
+    encoder.encodeUnsignedInt(nbMaxMsg);
+    encoder.encodeUnsignedLong(nbMsgsDeliveredSinceCreation);
+    encoder.encodeUnsignedLong(nbMsgsSentToDMQSinceCreation);
+    
+    proxyId.encode(encoder);
+    
+    if (selector == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      encoder.encodeString(selector);
+    }
+    encoder.encodeUnsignedInt(threshold);
+    topicId.encode(encoder);
+  }
+  
+  public void decode(Decoder decoder) throws Exception {
+    int deliveredIdsSize = decoder.decodeUnsignedInt();
+    deliveredIds = new Hashtable<String, String>(deliveredIdsSize);
+    for (int i = 0; i < deliveredIdsSize; i++) {
+      String key = decoder.decodeString();
+      deliveredIds.put(key, key);
+    }
+    int deniedMsgSize = decoder.decodeUnsignedInt();
+    deniedMsgs = new Hashtable<String, Integer>(deniedMsgSize);
+    for (int i = 0; i < deniedMsgSize; i++) {
+      String key = decoder.decodeString();
+      Integer value = decoder.decodeUnsignedInt();
+      deniedMsgs.put(key, value);
+    }
+    boolean isNull = decoder.decodeBoolean();
+    if (isNull) {
+      dmqId = null;
+    } else {
+      dmqId = new AgentId((short) 0, (short) 0, 0);
+      dmqId.decode(decoder);
+    }
+    durable = decoder.decodeBoolean();
+    int messageIdsSize = decoder.decodeUnsignedInt();
+    messageIds = new Vector<String>(messageIdsSize);
+    for (int i = 0; i < messageIdsSize; i++) {
+      String messageId = decoder.decodeString();
+      messageIds.add(messageId);
+    }
+    
+    name = decoder.decodeString();
+    
+    nbMaxMsg = decoder.decodeUnsignedInt();
+    nbMsgsDeliveredSinceCreation = decoder.decodeUnsignedLong();
+    nbMsgsSentToDMQSinceCreation = decoder.decodeUnsignedLong();
+    
+    proxyId = new AgentId((short) 0, (short) 0, 0);
+    proxyId.decode(decoder);
+    
+    isNull = decoder.decodeBoolean();
+    if (isNull) {
+      selector = null;
+    } else {
+      selector = decoder.decodeString();
+    }
+    threshold = decoder.decodeUnsignedInt();
+    topicId = new AgentId((short) 0, (short) 0, 0);
+    topicId.decode(decoder);
   }
 
 }

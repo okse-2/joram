@@ -385,4 +385,10 @@ public class DistributionQueue extends Queue {
     }
     super.processSetRight(user, right);
   }
+  
+  public int getEncodableClassId() {
+    // Not defined: still not encodable
+    return -1;
+  }
+  
 }
