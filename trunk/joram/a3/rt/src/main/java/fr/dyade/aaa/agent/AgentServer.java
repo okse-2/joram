@@ -1198,6 +1198,9 @@ public final class AgentServer {
                    getName() + ", can't initialize services", exc);
         throw new Exception("Can't initialize services");
       }
+      
+      // Load the service classes before initializing the engine
+      ServiceManager.loadServiceClasses();
 
       // initializes fixed agents
       engine.init();

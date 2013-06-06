@@ -117,6 +117,31 @@ public class ServiceManager implements Serializable {
   private ServiceManager() {
     registry = new Hashtable<String, ServiceDesc>();
   }
+  
+  /**
+   * Loads the class of every service.
+   * @throws Exception if an error occurs
+   */
+  public static void loadServiceClasses() throws Exception {
+    for (Enumeration<ServiceDesc> e = manager.registry.elements(); e.hasMoreElements() ;) {
+      ServiceDesc desc = e.nextElement();
+      try {
+        loadServiceClass(desc);
+      } catch (Exception exc) {
+        xlogmon.log(BasicLevel.ERROR,
+                   getName() + ", cannot start service:" + desc.getClassName(), exc);
+      }
+    }
+  }
+  
+  /**
+   * Loads the class of a service.
+   * @param desc the service descriptor
+   * @throws Exception if an error occurs
+   */
+  public static void loadServiceClass(ServiceDesc desc) throws Exception {
+    Class.forName(desc.getClassName());
+  }
 
   /**
    * Start a <code>Service</code> defined by its descriptor.

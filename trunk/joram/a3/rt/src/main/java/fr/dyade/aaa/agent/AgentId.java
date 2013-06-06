@@ -26,6 +26,11 @@ package fr.dyade.aaa.agent;
 import java.io.IOException;
 import java.io.Serializable;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
+import fr.dyade.aaa.common.encoding.Encoder;
+
 /**
  * <code>AgentIdStamp</code> class defines static members, variable and
  * functions, to manage the allocation of new identifiers. It locally
@@ -154,7 +159,7 @@ final class AgentIdStamp implements Serializable {
  *
  * @see AgentIdStamp
  */
-public final class AgentId implements Serializable {
+public final class AgentId implements Serializable, Encodable {
   /** Define serialVersionUID for interoperability. */
   static final long serialVersionUID = 1L;
 
@@ -464,4 +469,43 @@ public final class AgentId implements Serializable {
     }
     return false;
   }
+  
+  /**
+   * The class id is still not defined.
+   */
+  public int getEncodableClassId() {
+    return -1;
+  }
+  
+  /**
+   * Encodes the object.
+   * @param encoder the encoder
+   * @exception if an error occurs
+   */
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encode16(from);
+    encoder.encode16(to);
+    encoder.encode32(stamp);
+  }
+  
+  /**
+   * Decodes the object.
+   * @param decoder the encoder
+   * @exception if an error occurs
+   */
+  public void decode(Decoder decoder) throws Exception {
+    from = decoder.decode16();
+    to = decoder.decode16();
+    stamp = decoder.decode32();
+  }
+
+  /**
+   * Returns the size of the encoded object.
+   * @return the size of the encoded object
+   * @exception if an error occurs
+   */
+  public int getEncodedSize() throws Exception {
+    return SHORT_ENCODED_SIZE + SHORT_ENCODED_SIZE + INT_ENCODED_SIZE;
+  }
+  
 }
