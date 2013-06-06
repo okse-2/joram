@@ -41,6 +41,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.common.stream.Properties;
 import fr.dyade.aaa.common.stream.StreamUtil;
 import fr.dyade.aaa.common.stream.Streamable;
@@ -48,7 +52,7 @@ import fr.dyade.aaa.common.stream.Streamable;
 /**
  * Implements the <code>Message</code> data structure.
  */
-public final class Message implements Cloneable, Serializable, Streamable {
+public final class Message implements Cloneable, Serializable, Streamable, Encodable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 3L;
 
@@ -739,4 +743,134 @@ public final class Message implements Cloneable, Serializable, Streamable {
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     readFrom(in);
   }
+  
+  public int getEncodableClassId() {
+    // Not defined
+    return -1;
+  }
+  
+  public int getEncodedSize() throws Exception {
+    int encodedSize = EncodableHelper.getStringEncodedSize(id);
+    
+    encodedSize += EncodableHelper.getStringEncodedSize(toId);
+    encodedSize += BYTE_ENCODED_SIZE + LONG_ENCODED_SIZE + SHORT_ENCODED_SIZE;
+
+    if (type != org.objectweb.joram.shared.messages.Message.SIMPLE) { encodedSize += BYTE_ENCODED_SIZE; }
+    if (replyToId != null) { encodedSize += EncodableHelper.getStringEncodedSize(replyToId); }
+    if (replyToType != 0) { encodedSize += BYTE_ENCODED_SIZE; }
+    if (properties != null) { encodedSize += properties.getEncodedSize(); }
+    if (priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { encodedSize += INT_ENCODED_SIZE; }
+    if (expiration != 0) { encodedSize += LONG_ENCODED_SIZE; }
+    if (correlationId != null) { encodedSize += EncodableHelper.getStringEncodedSize(correlationId); }
+    if (deliveryCount != 0) { encodedSize += INT_ENCODED_SIZE; }
+    if (jmsType != null) { encodedSize += EncodableHelper.getStringEncodedSize(jmsType); }
+    
+    encodedSize += EncodableHelper.getNullableByteArrayEncodedSize(body);
+    
+    return encodedSize;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeString(id);
+    
+    encoder.encodeString(toId);
+    encoder.encodeByte(toType);
+    encoder.encodeUnsignedLong(timestamp);
+
+    // One short is used to know which fields are set
+    short s = 0;
+    if (type != org.objectweb.joram.shared.messages.Message.SIMPLE) { s |= typeFlag; }
+    if (replyToId != null) { s |= replyToIdFlag; }
+    if (replyToType != 0) { s |= replyToTypeFlag; }
+    if (properties != null) { s |= propertiesFlag; }
+    if (priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { s |= priorityFlag; }
+    if (expiration != 0) { s |= expirationFlag; }
+    if (correlationId != null) { s |= corrrelationIdFlag; }
+    if (deliveryCount != 0) { s |= deliveryCountFlag; }
+    if (jmsType != null) { s |= jmsTypeFlag; }
+    if (redelivered) { s |= redeliveredFlag; }
+    if (persistent) { s |= persistentFlag; }
+    
+    encoder.encode16(s);
+    
+    if (type != org.objectweb.joram.shared.messages.Message.SIMPLE) { encoder.encodeByte((byte) type); }
+    if (replyToId != null) { encoder.encodeString(replyToId); }
+    if (replyToType != 0) { encoder.encodeByte(replyToType); }
+    if (properties != null) { properties.encode(encoder); }
+    if (priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { encoder.encodeUnsignedInt(priority); }
+    if (expiration != 0) { encoder.encodeUnsignedLong(expiration); }
+    if (correlationId != null) { encoder.encodeString(correlationId); }
+    if (deliveryCount != 0) { encoder.encodeUnsignedInt(deliveryCount); }
+    if (jmsType != null) { encoder.encodeString(jmsType); }
+    
+    encoder.encodeNullableByteArray(body);
+  }
+  
+  public void decode(Decoder decoder) throws Exception {    
+    id = decoder.decodeString();
+    
+    toId = decoder.decodeString();
+    toType = decoder.decodeByte();
+    timestamp = decoder.decodeUnsignedLong();
+    
+    short s = decoder.decode16();
+
+    if ((s & typeFlag) != 0) { type = decoder.decodeByte(); }
+    if ((s & replyToIdFlag) != 0) { replyToId = decoder.decodeString(); }
+    if ((s & replyToTypeFlag) != 0) { replyToType = decoder.decodeByte(); }
+    if ((s & propertiesFlag) != 0) {
+      properties = new Properties();
+      properties.decode(decoder); 
+    }
+    priority = org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY;
+    if ((s & priorityFlag) != 0) { priority = decoder.decodeUnsignedInt(); }
+    if ((s & expirationFlag) != 0) { expiration = decoder.decodeUnsignedLong(); }
+    if ((s & corrrelationIdFlag) != 0) { correlationId = decoder.decodeString(); }
+    if ((s & deliveryCountFlag) != 0) { deliveryCount = decoder.decodeUnsignedInt(); }
+    if ((s & jmsTypeFlag) != 0) { jmsType = decoder.decodeString(); }
+    redelivered = (s & redeliveredFlag) != 0;
+    persistent = (s & persistentFlag) != 0;
+    
+    body = decoder.decodeNullableByteArray();
+  }
+  
+  public static int getMessageVectorEncodedSize(Vector<Message> messages) throws Exception {
+    int res = BOOLEAN_ENCODED_SIZE;
+    if (messages != null) {
+      res += INT_ENCODED_SIZE;
+      for (Message msg : messages) {
+        res += msg.getEncodedSize();
+      }
+    }
+    return res;
+  }
+  
+  public static void encodeMessageVector(Vector<Message> messages, Encoder encoder) throws Exception {
+    if (messages == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      encoder.encodeUnsignedInt(messages.size());
+      for (Message msg : messages) {
+        msg.encode(encoder);
+      }
+    }
+  }
+  
+  public static Vector<Message> decodeMessageVector(Decoder decoder) throws Exception {
+    boolean nullFlag = decoder.decodeBoolean();
+    if (nullFlag) {
+      return null;
+    } else {
+      int size = decoder.decodeUnsignedInt();
+      Vector messages = new Vector(size);
+      for (int i=0; i<size; i++) {
+        Message msg = new Message();
+        msg.decode(decoder);
+        messages.addElement(msg);
+      }
+      return messages;
+    }
+  }
+  
 }

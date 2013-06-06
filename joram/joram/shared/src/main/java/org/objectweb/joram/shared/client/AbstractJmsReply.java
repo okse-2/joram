@@ -27,6 +27,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
@@ -96,4 +98,22 @@ public abstract class AbstractJmsReply extends AbstractJmsMessage {
   public void readFrom(InputStream is) throws IOException {
     correlationId = StreamUtil.readIntFrom(is);
   }
+  
+  public int getEncodableClassId() {
+    // Enables sub classes not to define the method
+    return -1;
+  }
+  
+  public int getEncodedSize() throws Exception {
+    return INT_ENCODED_SIZE;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encode32(correlationId);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    correlationId = decoder.decode32();
+  }
+  
 }

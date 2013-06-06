@@ -27,6 +27,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
@@ -121,5 +124,24 @@ public abstract class AbstractJmsRequest extends AbstractJmsMessage {
   public void readFrom(InputStream is) throws IOException {
     requestId = StreamUtil.readIntFrom(is);
     target = StreamUtil.readStringFrom(is);
+  }
+  
+  public int getEncodableClassId() {
+    // Enables sub classes not to define the method
+    return -1;
+  }
+  
+  public int getEncodedSize() throws Exception {
+    return INT_ENCODED_SIZE + EncodableHelper.getNullableStringEncodedSize(target);
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encode32(requestId);
+    encoder.encodeNullableString(target);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    requestId = decoder.decode32();
+    target = decoder.decodeNullableString();
   }
 }

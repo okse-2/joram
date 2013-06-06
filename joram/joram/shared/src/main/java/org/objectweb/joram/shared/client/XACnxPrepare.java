@@ -28,6 +28,9 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.util.Vector;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
@@ -77,7 +80,7 @@ public final class XACnxPrepare extends AbstractJmsRequest {
   }
 
   /** Vector of <code>ProducerMessages</code> instances. */
-  private Vector sendings;
+  private Vector<ProducerMessages> sendings;
 
   /** Returns the vector of <code>ProducerMessages</code> instances. */
   public Vector getSendings() {
@@ -91,7 +94,7 @@ public final class XACnxPrepare extends AbstractJmsRequest {
   }
 
   /** Vector of <code>SessAckRequest</code> instances. */
-  private Vector acks;
+  private Vector<SessAckRequest> acks;
 
   /** Returns the vector of <code>SessAckRequest</code> instances. */
   public Vector getAcks() {
@@ -205,4 +208,95 @@ public final class XACnxPrepare extends AbstractJmsRequest {
       }
     }
   }
+  
+  public int getEncodedSize() throws Exception {
+    int res = super.getEncodedSize();
+        
+    res += EncodableHelper.getByteArrayEncodedSize(bq);
+    res += INT_ENCODED_SIZE;
+    res += EncodableHelper.getByteArrayEncodedSize(gti);
+    
+    res += BOOLEAN_ENCODED_SIZE;
+    if (sendings != null) {
+      res += INT_ENCODED_SIZE;
+      for (ProducerMessages pm : sendings) {
+        res += pm.getEncodedSize();
+      }
+    }
+    
+    res += BOOLEAN_ENCODED_SIZE;
+    if (acks != null) {
+      res += INT_ENCODED_SIZE;
+      for (SessAckRequest sar : acks) {
+        res += sar.getEncodedSize();
+      }
+    }
+    
+    return res;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    
+    encoder.encodeByteArray(bq);
+    encoder.encodeUnsignedInt(fi);
+    encoder.encodeByteArray(gti);
+
+    if (sendings == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      int size = sendings.size();
+      encoder.encodeUnsignedInt(size);
+      for (int i=0; i<size; i++) {
+        sendings.elementAt(i).encode(encoder);
+      }
+    }
+    
+    if (acks == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      int size = acks.size();
+      encoder.encodeUnsignedInt(size);
+      for (int i=0; i<size; i++) {
+        acks.elementAt(i).encode(encoder);
+      }
+    }
+  }
+  
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+    
+    bq = decoder.decodeByteArray();
+    fi = decoder.decodeUnsignedInt();
+    gti = decoder.decodeByteArray();
+
+    boolean isNull = decoder.decodeBoolean();
+    if (isNull) {
+      sendings = null;
+    } else {
+      int size = decoder.decodeUnsignedInt();
+      sendings = new Vector<ProducerMessages>(size);
+      for (int i=0; i<size; i++) {
+        ProducerMessages pm = new ProducerMessages();
+        pm.decode(decoder);
+        sendings.add(pm);
+      }
+    }
+    
+    isNull = decoder.decodeBoolean();
+    if (isNull) {
+      acks = null;
+    } else {
+      int size = decoder.decodeUnsignedInt();
+      acks = new Vector<SessAckRequest>(size);
+      for (int i=0; i<size; i++) {
+        SessAckRequest sar = new SessAckRequest();
+        sar.decode(decoder);
+        acks.add(sar);
+      }
+    }
+  }
+  
 }
