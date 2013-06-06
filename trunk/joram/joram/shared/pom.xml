@@ -46,6 +46,7 @@
               org.objectweb.joram.shared.selectors,
               org.objectweb.joram.shared.stream</Export-Package>
             <Import-Package>fr.dyade.aaa.common,
+              fr.dyade.aaa.common.encoding,
               fr.dyade.aaa.common.stream,
               java_cup.runtime,
               javax.naming,
