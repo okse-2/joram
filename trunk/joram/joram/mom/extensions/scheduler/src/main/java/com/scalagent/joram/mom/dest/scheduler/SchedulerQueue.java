@@ -139,4 +139,10 @@ public class SchedulerQueue extends Queue {
     }
     return false;
   }
+  
+  public int getEncodableClassId() {
+    // Not defined: still not encodable
+    return -1;
+  }
+  
 }
