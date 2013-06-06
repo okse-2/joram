@@ -27,6 +27,10 @@ import java.util.Enumeration;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -64,7 +68,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * @see Engine
  * @see Channel
  */
-public abstract class Agent implements AgentMBean, Serializable {
+public abstract class Agent implements AgentMBean, Serializable, Encodable {
   /** Define serialVersionUID for interoperability. */
   static final long serialVersionUID = 1L;
 
@@ -783,4 +787,45 @@ public abstract class Agent implements AgentMBean, Serializable {
       logmon.log(BasicLevel.DEBUG,
                  "Agent" + id + " [" + name + "],  finalize: " + lastTime);
   }
+  
+  /**
+   * Enables the sub classes not to implement this method.
+   * @return -1
+   */
+  public int getEncodableClassId() {
+    return -1;
+  }
+  
+  /**
+   * Returns the size of the encoded object.
+   * @return the size of the encoded object
+   * @exception if an error occurs
+   */
+  public int getEncodedSize() throws Exception {
+    int encodedSize = EncodableHelper.getNullableStringEncodedSize(name);
+    encodedSize += BOOLEAN_ENCODED_SIZE;
+    return encodedSize;
+  }
+  
+  /**
+   * Encodes the object.
+   * @param encoder the encoder
+   * @exception if an error occurs
+   */
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeNullableString(name);
+    encoder.encodeBoolean(fixed);
+  }
+
+  /**
+   * Decodes the object.
+   * @param decoder the encoder
+   * @exception if an error occurs
+   */
+  public void decode(Decoder decoder) throws Exception {
+    name = decoder.decodeNullableString();
+    fixed = decoder.decodeBoolean();
+    updated = true;
+  } 
+
 }

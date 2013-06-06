@@ -23,11 +23,17 @@ package fr.dyade.aaa.agent;
 import java.io.IOException;
 import java.io.Serializable;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
+import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
+import fr.dyade.aaa.common.encoding.Encoder;
+
 /**
  * Class Notification is the root of the notifications hierarchy. Every
  * notification's class has Notification as a superclass.
  */
-public class Notification implements Serializable, Cloneable {
+public class Notification implements Serializable, Cloneable, Encodable {
   /** define serialVersionUID for interoperability */
   static final long serialVersionUID = 1L;
 
@@ -284,4 +290,87 @@ public class Notification implements Serializable, Cloneable {
     StringBuffer output = new StringBuffer();
     return toString(output).toString();
   }
+  
+  /**
+   * The class id is still not defined.
+   */
+  public int getEncodableClassId() {
+    return -1;
+  }
+  
+  /**
+   * Returns the size of the encoded object.
+   * @return the size of the encoded object
+   * @exception if an error occurs
+   */
+  public int getEncodedSize() throws Exception {
+    int encodedSize = 0;
+    encodedSize += BYTE_ENCODED_SIZE;
+    if (expiration > 0)
+      encodedSize += LONG_ENCODED_SIZE;
+    if (context != null) {
+      if (context instanceof Encodable) {
+        Encodable encodable = (Encodable) context;
+        encodedSize += INT_ENCODED_SIZE;
+        encodedSize += encodable.getEncodedSize();
+      } else {
+        throw new Exception("Context is not Encodable");
+      }
+    }
+    if (deadNotificationAgentId != null)
+      encodedSize += deadNotificationAgentId.getEncodedSize();
+    return encodedSize;
+  }
+
+  /**
+   * Encodes the object.
+   * @param encoder the encoder
+   * @exception if an error occurs
+   */
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeByte((byte) ((priority & 0x0F)
+        | // 4 bits
+        ((expiration > 0) ? ExpirationSet : 0x00)
+        | ((context != null) ? ContextSet : 0x00)
+        | ((deadNotificationAgentId != null) ? DeadNotificationAgentIdSet
+            : 0x00)));
+    if (expiration > 0)
+      encoder.encodeUnsignedLong(expiration);
+    if (context != null) {
+      if (context instanceof Encodable) {
+        encoder.encodeBoolean(true);
+        Encodable encodable = (Encodable) context;
+        encoder.encodeUnsignedInt(encodable.getEncodableClassId());
+        encodable.encode(encoder);
+      } else {
+        throw new Exception("Context is not Encodable");
+      }
+    }
+    if (deadNotificationAgentId != null)
+      deadNotificationAgentId.encode(encoder);
+  }
+
+  /**
+   * Decodes the object.
+   * @param decoder the encoder
+   * @exception if an error occurs
+   */
+  public void decode(Decoder decoder) throws Exception {
+    byte tmp = decoder.decodeByte();
+    priority = tmp & 0x0F; // 4 bits
+    if ((tmp & ExpirationSet) != 0)
+      expiration = decoder.decodeUnsignedLong();
+    if ((tmp & ContextSet) != 0) {
+      int classId = decoder.decodeUnsignedInt();
+      EncodableFactory factory = EncodableFactoryRepository.getFactory(classId);
+      Encodable encodable = factory.createEncodable();
+      encodable.decode(decoder);
+      context = encodable;
+    }
+    if ((tmp & DeadNotificationAgentIdSet) != 0) {
+      deadNotificationAgentId = new AgentId();
+      deadNotificationAgentId.decode(decoder);
+    }
+  }
+  
 }

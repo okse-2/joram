@@ -29,9 +29,17 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamConstants;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.Hashtable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.common.encoding.ByteBufferDecoder;
+import fr.dyade.aaa.common.encoding.ByteBufferEncoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
+import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
+import fr.dyade.aaa.common.encoding.SerializableWrapper;
 
 /**
  *  The AbstractTransaction class implements the common part of the Transaction
@@ -41,6 +49,13 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * @see Transaction
  */
 public abstract class AbstractTransaction extends BaseTransaction {
+  
+  private static final byte JAVA_SERIALIZATION_TAG = 0x0;
+  
+  private static final byte ENCODING_TAG = 0x1;
+  
+  private boolean onlyUseJavaSerialization;
+  
   protected long startTime = 0L;
 
   /**
@@ -123,6 +138,9 @@ public abstract class AbstractTransaction extends BaseTransaction {
     }
 
     loadProperties(dir);
+    
+    onlyUseJavaSerialization = getBoolean("Transaction.OnlyUseJavaSerialization");
+    
     initRepository();
     saveProperties(dir);
     
@@ -236,6 +254,40 @@ public abstract class AbstractTransaction extends BaseTransaction {
                          String dirName, String name) throws IOException {
     save(obj, dirName, name, false);
   }
+  
+  private Encodable isEncodable(Object object) {
+    if (object instanceof Encodable) {
+      Encodable encodable = (Encodable) object;
+      if (encodable.getEncodableClassId() >= 0) {
+        return encodable;
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+  
+  private byte[] serialize(Serializable obj, Context ctx) throws IOException {
+    if (ctx.oos == null) {
+      ctx.bos.reset();
+      if (! onlyUseJavaSerialization) {
+        ctx.bos.write(JAVA_SERIALIZATION_TAG);
+      }
+      ctx.oos = new ObjectOutputStream(ctx.bos);
+    } else {
+      ctx.oos.reset();
+      ctx.bos.reset();
+      if (! onlyUseJavaSerialization) {
+        ctx.bos.write(JAVA_SERIALIZATION_TAG);
+      }
+      ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
+    }
+    
+    ctx.oos.writeObject(obj);
+    ctx.oos.flush();
+    return ctx.bos.toByteArray();
+  }
 
   /**
    * Register the state of an object in the current transaction.
@@ -251,18 +303,29 @@ public abstract class AbstractTransaction extends BaseTransaction {
                          String dirName, String name,
                          boolean first) throws IOException {
     Context ctx = perThreadContext.get();
-    if (ctx.oos == null) {
-      ctx.bos.reset();
-      ctx.oos = new ObjectOutputStream(ctx.bos);
+    byte[] encodedObject;
+    if (onlyUseJavaSerialization) {
+      encodedObject = serialize(obj, ctx);
     } else {
-      ctx.oos.reset();
-      ctx.bos.reset();
-      ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
+      Encodable encodable = isEncodable(obj);
+      if (encodable == null) {
+        encodedObject = serialize(obj, ctx);
+      } else {
+        try {
+          encodedObject = new byte[Encodable.BYTE_ENCODED_SIZE
+              + Encodable.INT_ENCODED_SIZE + encodable.getEncodedSize()];
+          ByteBuffer buf = ByteBuffer.wrap(encodedObject);
+          ByteBufferEncoder encoder = new ByteBufferEncoder(buf);
+          encoder.encodeByte(ENCODING_TAG);
+          encoder.encode32(encodable.getEncodableClassId());
+          encodable.encode(encoder);
+        } catch (Exception exc) {
+          throw new IOException(exc);
+        }
+      }
     }
-    ctx.oos.writeObject(obj);
-    ctx.oos.flush();
     
-    saveInLog(ctx.bos.toByteArray(), dirName, name, ctx.log, false, first);
+    saveInLog(encodedObject, dirName, name, ctx.log, false, first);
   }
 
   /**
@@ -376,17 +439,50 @@ public abstract class AbstractTransaction extends BaseTransaction {
   public final Object load(String dirName, String name) throws IOException, ClassNotFoundException {
     byte[] buf = loadByteArray(dirName, name);
     if (buf != null) {
-      ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-      ObjectInputStream ois = new ObjectInputStream(bis);
-      try {
-      	return ois.readObject();
-      } finally {
-        ois.close();
-        bis.close();
+      if (onlyUseJavaSerialization) {
+        return deserialize(buf, 0);
+      } else if (buf.length > 0) {
+        byte tag = buf[0];
+        switch (tag) {
+        case JAVA_SERIALIZATION_TAG:
+          return deserialize(buf, 1);
+        case ENCODING_TAG:
+          return decode(buf, 1);
+        default:
+          throw new IOException("Unexpected tag: " + tag);
+        }
+      } else {
+        throw new IOException("Unexpected empty byte array");
       }
+    } else {
+      return null;
     }
-    
-    return null;
+  }
+  
+  private Object deserialize(byte[] buf, int offset) throws IOException, ClassNotFoundException {
+    ByteArrayInputStream bis = new ByteArrayInputStream(buf, offset, buf.length - offset);
+    ObjectInputStream ois = new ObjectInputStream(bis);
+    try {
+      return ois.readObject();
+    } finally {
+      ois.close();
+      bis.close();
+    }
+  }
+  
+  private Object decode(byte[] buf, int offset) throws IOException {
+    ByteBuffer byteBuffer = ByteBuffer.wrap(buf, offset, buf.length - offset);
+    ByteBufferDecoder decoder = new ByteBufferDecoder(byteBuffer);
+    try {
+      int classId = decoder.decode32();
+      EncodableFactory factory = EncodableFactoryRepository.getFactory(classId);
+      if (factory == null) throw new Exception("Unknown factory: " + classId);
+      Encodable encodable = factory.createEncodable();
+      encodable.decode(decoder);
+      return encodable;
+    } catch (Exception exc) {
+      throw new IOException(exc);
+    }
   }
 
   /**
