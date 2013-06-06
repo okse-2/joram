@@ -50,7 +50,7 @@ public class SerializableWrapper implements Encodable {
     return value;
   }
 
-  public int getClassId() {
+  public int getEncodableClassId() {
     return EncodableFactoryRepository.SERIALIZABLE_WRAPPER_CLASS_ID;
   }
 
@@ -63,8 +63,13 @@ public class SerializableWrapper implements Encodable {
     if (bytes == null) {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       ObjectOutputStream oos = new ObjectOutputStream(baos);
-      oos.writeObject(value);
-      bytes = baos.toByteArray();
+      try {
+        oos.writeObject(value);
+        bytes = baos.toByteArray();
+      } finally {
+        baos.close();
+        oos.close();
+      }
     }
   }
 

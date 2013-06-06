@@ -88,7 +88,7 @@ public class EncodedString implements Serializable, Encodable {
     return string;
   }
 
-  public int getClassId() {
+  public int getEncodableClassId() {
     return EncodableFactoryRepository.ENCODED_STRING_CLASS_ID;
   }
 

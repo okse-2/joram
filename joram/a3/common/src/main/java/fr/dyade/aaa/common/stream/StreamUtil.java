@@ -32,6 +32,11 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
+
 
 public final class StreamUtil {
   // Per-thread buffer for conversion
@@ -689,6 +694,97 @@ public final class StreamUtil {
       }
     }
     return prop;
+  }
+  
+  public static int getEncodedSize(Object obj) throws IOException {
+    int size = 0;
+    if (obj == null) {
+      size += Encodable.BYTE_ENCODED_SIZE;
+    } else if (obj instanceof Boolean) {
+      size += Encodable.BYTE_ENCODED_SIZE + Encodable.BOOLEAN_ENCODED_SIZE;
+    } else if (obj instanceof Byte) {
+      size += Encodable.BYTE_ENCODED_SIZE + Encodable.BYTE_ENCODED_SIZE;
+    } else if (obj instanceof Short) {
+      size += Encodable.BYTE_ENCODED_SIZE + Encodable.SHORT_ENCODED_SIZE;
+    } else if (obj instanceof Integer) {
+      size += Encodable.BYTE_ENCODED_SIZE + Encodable.INT_ENCODED_SIZE;
+    } else if (obj instanceof Long) {
+      size += Encodable.BYTE_ENCODED_SIZE + Encodable.LONG_ENCODED_SIZE;
+    } else if (obj instanceof Float) {
+      size += Encodable.BYTE_ENCODED_SIZE + Encodable.FLOAT_ENCODED_SIZE;
+    } else if (obj instanceof Double) {
+      size += Encodable.BYTE_ENCODED_SIZE + Encodable.DOUBLE_ENCODED_SIZE;
+    } else if (obj instanceof String) {
+      size += Encodable.BYTE_ENCODED_SIZE + EncodableHelper.getStringEncodedSize((String) obj);
+    } else if (obj instanceof byte[]) {
+      size += Encodable.BYTE_ENCODED_SIZE + EncodableHelper.getByteArrayEncodedSize((byte[]) obj);
+    } else {
+      throw new InvalidClassException("Bad primitive type"); 
+    }
+    return size;
+  }
+  
+  public static void encodeValue(Object obj, Encoder encoder) throws Exception {
+    if (obj == null) {
+      encoder.encodeByte(NULL);
+    } else if (obj instanceof Boolean) {
+      encoder.encodeByte(BOOLEAN);
+      encoder.encodeBoolean(((Boolean) obj).booleanValue());
+    } else if (obj instanceof Byte) {
+      encoder.encodeByte(BYTE);
+      encoder.encodeByte(((Byte) obj).byteValue());
+    } else if (obj instanceof Short) {
+      encoder.encodeByte(SHORT);
+      encoder.encodeSignedShort(((Short) obj).shortValue());
+    } else if (obj instanceof Integer) {
+      encoder.encodeByte(INT);
+      encoder.encodeSignedInt(((Integer) obj).intValue());
+    } else if (obj instanceof Long) {
+      encoder.encodeByte(LONG);
+      encoder.encodeSignedLong(((Long) obj).longValue());
+    } else if (obj instanceof Float) {
+      encoder.encodeByte(FLOAT);
+      encoder.encodeFloat(((Float) obj).floatValue());
+    } else if (obj instanceof Double) {
+      encoder.encodeByte(DOUBLE);
+      encoder.encodeDouble(((Double) obj).doubleValue());
+    } else if (obj instanceof String) {
+      encoder.encodeByte(STRING);
+      encoder.encodeString((String) obj);
+    } else if (obj instanceof byte[]) {
+      encoder.encodeByte(BYTEARRAY);
+      encoder.encodeByteArray((byte[]) obj);
+    } else {
+      throw new InvalidClassException("Bad primitive type"); 
+    }
+  }
+  
+  public static Object decodeValue(Decoder decoder) throws Exception {
+    byte type = decoder.decodeByte();
+    switch (type) {
+    case NULL:
+      return null;
+    case BOOLEAN:
+      return new Boolean(decoder.decodeBoolean());
+    case BYTE:
+      return new Byte(decoder.decodeByte());
+    case SHORT:
+      return new Short(decoder.decodeSignedShort());
+    case INT:
+      return new Integer(decoder.decodeSignedInt());
+    case LONG:
+      return new Long(decoder.decodeSignedLong());
+    case FLOAT:
+      return new Float(decoder.decodeFloat());
+    case DOUBLE:
+      return new Double(decoder.decodeDouble());
+    case STRING:
+      return decoder.decodeString();
+    case BYTEARRAY:
+      return decoder.decodeByteArray();
+    default:
+      throw new InvalidClassException("Bad primitive type"); 
+    }
   }
 
 }

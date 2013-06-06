@@ -24,12 +24,26 @@ package fr.dyade.aaa.common.encoding;
  * needs to be encoded according to the encoding framework.
  */
 public interface Encodable {
+  
+  public static final int BOOLEAN_ENCODED_SIZE = 1;
+  
+  public static final int BYTE_ENCODED_SIZE = 1;
+  
+  public static final int SHORT_ENCODED_SIZE = 2;
+  
+  public static final int INT_ENCODED_SIZE = 4;
+  
+  public static final int LONG_ENCODED_SIZE = 8;
+  
+  public static final int FLOAT_ENCODED_SIZE = 4;
+  
+  public static final int DOUBLE_ENCODED_SIZE = 8;
 
   /***
    * Returns a unique class identifier.
    * @return a unique class identifier
    */
-  int getClassId();
+  int getEncodableClassId();
   
   /**
    * Returns the size of the byte array that results

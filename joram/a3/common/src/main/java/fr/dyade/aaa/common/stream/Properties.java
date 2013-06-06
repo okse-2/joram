@@ -37,6 +37,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
 
 
 /**
@@ -44,7 +49,7 @@ import fr.dyade.aaa.common.Debug;
  * Only string object can be used as a key, all primitives type can be used
  * as a value. <p>
  */
-public class Properties implements Serializable, Cloneable {
+public class Properties implements Serializable, Cloneable, Encodable {
   private static Logger logger = Debug.getLogger("fr.dyade.aaa.common.Properties");
   
   /** The total number of entries in the hash table. */
@@ -764,4 +769,51 @@ public class Properties implements Serializable, Cloneable {
 //      logger.log(BasicLevel.DEBUG, "read", exc);
 //    }
   }
+  
+  public int getEncodedSize() throws IOException {
+    int size = 0;
+    size += INT_ENCODED_SIZE;
+    for (int index = table.length-1; index >= 0; index--) {
+      Entry entry = table[index];
+      
+      while (entry != null) {
+        size += EncodableHelper.getStringEncodedSize(entry.key);
+        size += StreamUtil.getEncodedSize(entry.value);
+        entry = entry.next;
+      }
+    }
+    
+    return size;
+  }
+  
+  public int getEncodableClassId() {
+    return EncodableFactoryRepository.PROPERTIES_CLASS_ID;
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    encoder.encodeUnsignedInt(count);
+    for (int index = table.length-1; index >= 0; index--) {
+      Entry entry = table[index];
+      
+      while (entry != null) {
+        encoder.encodeString(entry.key);
+        StreamUtil.encodeValue(entry.value, encoder);
+        entry = entry.next;
+      }
+    }
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    int count = decoder.decodeUnsignedInt();
+    if (count == -1) return;
+    
+    String key;
+    Object value;
+    for (int i=0; i<count; i++) {
+      key = decoder.decodeString();
+      value = StreamUtil.decodeValue(decoder);
+      put(key, value);
+    }
+  }
+  
 }

@@ -37,7 +37,7 @@ public class StringPair implements Encodable {
     this.s2 = s2;
   }
 
-  public int getClassId() {
+  public int getEncodableClassId() {
     return EncodableFactoryRepository.STRING_PAIR_CLASS_ID;
   }
 
