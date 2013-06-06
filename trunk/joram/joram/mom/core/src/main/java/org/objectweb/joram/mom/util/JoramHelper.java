@@ -63,6 +63,11 @@ public class JoramHelper {
   public static final String JNDI_HOST = "scn.naming.factory.host";
   public static final String JNDI_PORT = "scn.naming.factory.port";
   
+  public static final int ENCODABLE_CLASS_ID_AREA = 0x20000;
+  public static final int MESSAGE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 0;
+  public static final int QUEUE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 1;
+  public static final int USER_AGENT_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 2;
+  
   /**
    * Create user.
    * 

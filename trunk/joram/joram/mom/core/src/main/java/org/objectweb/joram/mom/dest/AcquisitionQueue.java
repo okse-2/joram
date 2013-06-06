@@ -349,5 +349,10 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
   public long getAcquisitionPeriod() {
     return acquisitionModule.getPeriod();
   }
+  
+  public int getEncodableClassId() {
+    // Not defined: still not encodable
+    return -1;
+  }
 
 }

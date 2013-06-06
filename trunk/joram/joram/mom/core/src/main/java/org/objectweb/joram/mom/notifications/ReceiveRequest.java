@@ -23,6 +23,11 @@
  */
 package org.objectweb.joram.mom.notifications;
 
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
+import fr.dyade.aaa.common.encoding.Encoder;
+
 /**
  * A <code>ReceiveRequest</code> instance is used by a client agent for 
  * requesting a message on a queue.
@@ -57,6 +62,11 @@ public class ReceiveRequest extends AbstractRequestNot {
   private String[] msgIds;
 
   private int msgCount;
+  
+  /**
+   * Used by the encoding framework.
+   */
+  public ReceiveRequest() {}
 
   /**
    * Constructs a <code>ReceiveRequest</code> instance.
@@ -134,4 +144,92 @@ public class ReceiveRequest extends AbstractRequestNot {
   public final int getMessageCount() {
     return msgCount;
   }
+  
+  public int getClassId() {
+    // Not defined
+    return -1;
+  }
+  
+  public int getEncodedSize() throws Exception {
+    int encodedSize = super.getEncodedSize();
+    encodedSize += BOOLEAN_ENCODED_SIZE + LONG_ENCODED_SIZE + INT_ENCODED_SIZE
+        + BOOLEAN_ENCODED_SIZE;
+    if (msgIds != null) {
+      encodedSize += INT_ENCODED_SIZE;
+      for (String msgId : msgIds) {
+        encodedSize += EncodableHelper.getStringEncodedSize(msgId);
+      }
+    }
+    encodedSize += BOOLEAN_ENCODED_SIZE;
+    if (requester != null) {
+      encodedSize += requester.getEncodedSize();
+    }
+    encodedSize += BOOLEAN_ENCODED_SIZE;
+    if (selector != null) {
+      encodedSize += EncodableHelper.getStringEncodedSize(selector);
+    }
+    encodedSize += LONG_ENCODED_SIZE;
+    return encodedSize;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    encoder.encodeBoolean(autoAck);
+    encoder.encodeUnsignedLong(expirationTime);
+    encoder.encodeUnsignedInt(msgCount);
+    if (msgIds == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      encoder.encodeUnsignedInt(msgIds.length);
+      for (String msgId : msgIds) {
+        encoder.encodeString(msgId);
+      }
+    }
+    if (requester == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      requester.encode(encoder);
+    }
+    if (selector == null) {
+      encoder.encodeBoolean(true);
+    } else {
+      encoder.encodeBoolean(false);
+      encoder.encodeString(selector);
+    }
+    encoder.encodeUnsignedLong(timeOut);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+    autoAck = decoder.decodeBoolean();
+    expirationTime = decoder.decodeUnsignedLong();
+    msgCount = decoder.decodeUnsignedInt();
+    boolean isNull = decoder.decodeBoolean();
+    if (isNull) {
+      msgIds = null;
+    } else {
+      int msgIdsLength = decoder.decodeUnsignedInt();
+      msgIds = new String[msgIdsLength];
+      for (int i = 0; i < msgIdsLength; i++) {
+        msgIds[i] = decoder.decodeString();
+      }
+    }
+    isNull = decoder.decodeBoolean();
+    if (isNull) {
+      requester = null;
+    } else {
+      requester = new AgentId((short) 0, (short) 0, 0); 
+      requester.decode(decoder);
+    }
+    isNull = decoder.decodeBoolean();
+    if (isNull) {
+      selector = null;
+    } else {
+      selector = decoder.decodeString();
+    }
+    timeOut = decoder.decodeUnsignedLong();
+  }
+  
 } 

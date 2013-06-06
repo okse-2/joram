@@ -365,4 +365,10 @@ public class AliasInQueue extends Queue {
 		}
 
 	}
+	
+	public int getEncodableClassId() {
+    // Not defined: still not encodable
+    return -1;
+  }
+	
 }

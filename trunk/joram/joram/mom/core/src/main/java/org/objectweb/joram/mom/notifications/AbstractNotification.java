@@ -24,6 +24,8 @@
 package org.objectweb.joram.mom.notifications;
 
 import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encoder;
 
 /**
  * The <code>AbstractNotification</code> class is the superclass of the
@@ -78,4 +80,19 @@ public abstract class AbstractNotification extends Notification {
 
     return output;
   }
+  
+  public int getEncodedSize() throws Exception {
+    return super.getEncodedSize() + INT_ENCODED_SIZE;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    encoder.encode32(clientContext);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+    clientContext = decoder.decode32();
+  }
+  
 }

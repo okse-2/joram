@@ -23,6 +23,9 @@
  */
 package org.objectweb.joram.mom.notifications;
 
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encoder;
+
 /**
  * An <code>AbstractRequest</code> is a request sent by a client agent to
  * a destination agent.
@@ -72,4 +75,19 @@ public abstract class AbstractRequestNot extends AbstractNotification {
 
     return output;
   }
+  
+  public int getEncodedSize() throws Exception {
+    return super.getEncodedSize() + INT_ENCODED_SIZE;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    encoder.encode32(requestId);
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+    requestId = decoder.decode32();
+  }
+  
 }
