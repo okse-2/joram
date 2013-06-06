@@ -56,7 +56,7 @@ public class RecordEncodingHelper {
   public static void encodeRecord(Record record, Encoder encoder, ByteBuffer buffer, TxLogFile file) throws Exception {
     encoder.encodeByte(record.getRecordType());
     Encodable objectId = record.getObjectId();
-    encoder.encodeUnsignedInt(objectId.getClassId());
+    encoder.encodeUnsignedInt(objectId.getEncodableClassId());
     objectId.encode(encoder);
     
     record.setFile(file);
@@ -75,7 +75,7 @@ public class RecordEncodingHelper {
       byte[] byteArray = valueRecord.getByteArray();
       if (byteArray == null) {
         Encodable value = valueRecord.getValue();
-        encoder.encodeUnsignedInt(value.getClassId());
+        encoder.encodeUnsignedInt(value.getEncodableClassId());
         value.encode(encoder);
       } else {
         buffer.put(byteArray);

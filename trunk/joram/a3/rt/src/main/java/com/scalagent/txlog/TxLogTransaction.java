@@ -499,7 +499,7 @@ public class TxLogTransaction extends BaseTransaction implements TxLogTransactio
   private Encodable isEncodable(Object object) {
     if (object instanceof Encodable) {
       Encodable encodable = (Encodable) object;
-      if (encodable.getClassId() >= 0) {
+      if (encodable.getEncodableClassId() >= 0) {
         return encodable;
       } else {
         return null;
