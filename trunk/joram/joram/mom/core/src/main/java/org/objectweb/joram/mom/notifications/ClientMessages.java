@@ -45,6 +45,8 @@ public class ClientMessages extends AbstractRequestNot {
   private List messages = null;
   
   private boolean asyncSend;
+  
+  private AgentId proxyId;
 
   /**
    * Constructs a <code>ClientMessages</code> instance.
@@ -106,6 +108,13 @@ public class ClientMessages extends AbstractRequestNot {
    */
   public ClientMessages() {} 
 
+  public AgentId getProxyId() {
+    return proxyId;
+  }
+
+  public void setProxyId(AgentId proxyId) {
+    this.proxyId = proxyId;
+  }
 
   /** Adds a message to deliver. */
   public void addMessage(Message msg) {

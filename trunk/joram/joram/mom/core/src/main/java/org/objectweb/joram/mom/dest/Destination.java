@@ -662,6 +662,10 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
   protected void clientMessages(AgentId from, ClientMessages not) throws AccessException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Destination.clientMessages(" + from + ',' + not + ')');
+    
+    if (AgentId.nullId.equals(from)) {
+      from = not.getProxyId();
+    }
 
     // If sender is not a writer, sending the messages to the DMQ, and
     // throwing an exception:
