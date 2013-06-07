@@ -31,6 +31,7 @@ import java.util.StringTokenizer;
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.messages.Message;
+import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
@@ -122,6 +123,11 @@ public class ConnectionManager implements ConnectionManagerMBean {
    * from the CTRLFLOW_THROUGHPUT parameter.
    */
   private static long ctrlFlowDelay = 1000000000L/AgentServer.getLong(CTRLFLOW_THROUGHPUT, 100000L).longValue();
+  
+  public static final String DIRECT_NOTIFICATION =
+    "org.objectweb.joram.mom.proxies.ConnectionManager.DirectNotification";
+  
+  private static boolean directNotification = AgentServer.getBoolean(DIRECT_NOTIFICATION);
 
   private static final String MBEAN_NAME = "type=Connection";
   
@@ -161,7 +167,39 @@ public class ConnectionManager implements ConnectionManagerMBean {
         }
       }
       
-      Channel.sendTo(proxyId, rn);
+      if (directNotification) {
+        if (req instanceof ProducerMessages) {
+          ProducerMessages pm = (ProducerMessages) req;
+          AgentId destId = AgentId.fromString(req.getTarget());
+
+          if (pm.getAsyncSend()) {
+            ClientMessages not = new ClientMessages(cnxKey, pm.getRequestId(),
+                pm.getMessages());
+            not.setPersistent(false);
+            not.setExpiration(0L);
+            not.setProxyId(proxyId);
+            not.setAsyncSend(true);
+            Channel.sendTo(destId, not);
+          } else {
+            if (destId.getTo() == proxyId.getTo()) {
+              ClientMessages not = new ClientMessages(cnxKey,
+                  pm.getRequestId(), pm.getMessages());
+              not.setPersistent(false);
+              not.setExpiration(0L);
+              not.setProxyId(proxyId);
+              not.setAsyncSend(false);
+              Channel.sendTo(destId, not);
+            } else {
+              // Remote destination
+              Channel.sendTo(proxyId, rn);
+            }
+          }
+        } else {
+          Channel.sendTo(proxyId, rn);
+        }
+      } else {
+        Channel.sendTo(proxyId, rn);
+      }
     }
     if ((inFlow != -1) && (req instanceof ProducerMessages)) {
       FlowControl.flowControl();
