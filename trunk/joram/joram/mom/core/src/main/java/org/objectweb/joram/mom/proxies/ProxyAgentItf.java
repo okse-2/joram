@@ -37,8 +37,8 @@ public interface ProxyAgentItf {
   /** Sends a notification to a given agent. */ 
   public void sendNot(AgentId to, Notification not);
 
-  public void setNoSave();
-
-  public void setSave();
-
+  void modifiedClient(ClientContext cc);
+  
+  void modifiedSubscription(ClientSubscription cs);
+  
 }

@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,6 +47,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.encoding.Decoder;
 import fr.dyade.aaa.common.encoding.Encodable;
@@ -98,7 +100,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
   /** Sets the subscription's threshold value. */
   public void setThreshold(int threshold) {
     this.threshold = threshold;
-    save();
+    setModified();
   }
 
   /** Max number of Message stored in the queue (-1 no limit). */
@@ -176,6 +178,10 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
 
   private int DEFAULT_MAX_NUMBER_OF_MSG_PER_REQUEST = 100;
   
+  public transient String txName;
+  
+  public transient boolean modified;
+  
   ClientSubscription() {}
   
   /**
@@ -228,6 +234,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     active = DEFAULT_MAX_NUMBER_OF_MSG_PER_REQUEST;
     requestId = -1;
     toListener = false;
+    
+    modified = true;
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ": created.");
@@ -422,7 +430,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     toListener = false;
     
     // Some updated attributes are persistent
-    save();
+    setModified();
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ": reactivated.");
@@ -446,7 +454,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
       deny(h.iterator(), false);
       deliveredIds.clear();
       // deliveredIds is persistent
-      save();
+      setModified();
     }
 
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -513,7 +521,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
   /** Sets the subscription's dead message queue identifier. */
   void setDMQId(AgentId dmqId) {
     this.dmqId = dmqId;
-    save();
+    setModified();
   }
   
   /**
@@ -557,7 +565,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
 
         messageIds.add(msgId);
         if (message.isPersistent()) {
-          save();
+          setModified();
         }
 
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -617,7 +625,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
         }
         
         id = (String) messageIds.remove(0);
-        save();
+        setModified();
         message = (Message) messagesTable.get(id);
 
         if (message != null) {
@@ -710,7 +718,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, " -> invalid message");
             messageIds.remove(id);
-            save();
+            setModified();
             messagesTable.remove(id);
             // Deleting the message, if needed.
             if (durable)
@@ -736,7 +744,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
 
           messageIds.remove(id);
           deniedMsgs.remove(id);
-          save();
+          setModified();
         }
       }
 
@@ -744,7 +752,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
       if (keptMsg != null) {
         messageIds.remove(keptMsg.getId());
         deliveredIds.put(keptMsg.getId(), keptMsg.getId());
-        save();
+        setModified();
 
         // Setting the message's deliveryCount and denied fields.
         deliveryAttempts = (Integer) deniedMsgs.get(keptMsg.getId());
@@ -802,7 +810,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     
     deliveredIds.remove(id);
     deniedMsgs.remove(id);
-    save();
+    setModified();
     Message msg = (Message) messagesTable.get(id);
     
     // Message may be null if it is not valid anymore
@@ -852,7 +860,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
           continue denyLoop;
         }
       }
-      save();
+      setModified();
       
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, this + ": deny message: " + id);
@@ -916,7 +924,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
    * Decreases the subscription's messages acknowledgement expectations,
    * deletes those not to be consumed anymore.
    */
-  void delete() {
+  void deleteMessages() {
     messageIds.addAll(deliveredIds.keySet());
 
     for (Iterator allMessageIds = messageIds.iterator(); allMessageIds.hasNext();) {
@@ -1000,7 +1008,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
   public void deleteMessage(String msgId) {
     messageIds.remove(msgId);
     Message message = removeMessage(msgId);
-    save();
+    setModified();
     if (message != null) {
       DMQManager dmqManager = new DMQManager(dmqId, null);
       nbMsgsSentToDMQSinceCreation++;
@@ -1024,7 +1032,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     if (dmqManager != null)
       dmqManager.sendToDMQ();
     messageIds.clear();
-    save();
+    setModified();
   }
 
   /**
@@ -1050,10 +1058,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
       if (message.durableAcksCounter == 0)
         message.delete();
     }
-  }
-  
-  private void save() {
-    if (durable) proxy.setSave();
   }
 
   void cleanMessageIds() {
@@ -1090,8 +1094,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     }
     encodedSize += EncodableHelper.getStringEncodedSize(name);
     encodedSize += INT_ENCODED_SIZE + LONG_ENCODED_SIZE * 2;
-    
-    encodedSize += proxyId.getEncodedSize();
     
     encodedSize += BOOLEAN_ENCODED_SIZE;
     if (selector != null) {
@@ -1134,8 +1136,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     encoder.encodeUnsignedInt(nbMaxMsg);
     encoder.encodeUnsignedLong(nbMsgsDeliveredSinceCreation);
     encoder.encodeUnsignedLong(nbMsgsSentToDMQSinceCreation);
-    
-    proxyId.encode(encoder);
     
     if (selector == null) {
       encoder.encodeBoolean(true);
@@ -1182,9 +1182,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     nbMsgsDeliveredSinceCreation = decoder.decodeUnsignedLong();
     nbMsgsSentToDMQSinceCreation = decoder.decodeUnsignedLong();
     
-    proxyId = new AgentId((short) 0, (short) 0, 0);
-    proxyId.decode(decoder);
-    
     isNull = decoder.decodeBoolean();
     if (isNull) {
       selector = null;
@@ -1194,6 +1191,42 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     threshold = decoder.decodeUnsignedInt();
     topicId = new AgentId((short) 0, (short) 0, 0);
     topicId.decode(decoder);
+  }
+  
+  public static String getTransactionPrefix(AgentId proxyId) {
+    StringBuffer subscriptionContextPrefix = new StringBuffer(19).append("CS").append(proxyId.toString()).append('_');
+    return subscriptionContextPrefix.toString();
+  }
+  
+  private String getTxName() {
+    if (txName == null) {
+      txName = getTransactionPrefix(proxyId) + name;
+    }
+    return txName;
+  }
+  
+  public void save() {
+    if (! durable) return;
+    
+    try {
+      AgentServer.getTransaction().save(this, getTxName());
+    } catch (IOException exc) {
+      logger.log(BasicLevel.ERROR, "ClientContext named [" + txName
+          + "] could not be saved", exc);
+    }
+  }
+  
+  public void delete() {
+    if (! durable) return;
+    
+    AgentServer.getTransaction().delete(getTxName());
+  }
+  
+  private void setModified() {
+    if (! modified) {
+      modified = true;
+      proxy.modifiedSubscription(this);
+    }
   }
 
 }
