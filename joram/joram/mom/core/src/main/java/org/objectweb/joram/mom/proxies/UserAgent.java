@@ -160,6 +160,7 @@ import fr.dyade.aaa.common.encoding.Encodable;
 import fr.dyade.aaa.common.encoding.EncodableFactory;
 import fr.dyade.aaa.common.encoding.EncodableHelper;
 import fr.dyade.aaa.common.encoding.Encoder;
+import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -185,6 +186,16 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   
   /** the number of erroneous messages forwarded to the DMQ */
   private long nbMsgsSentToDMQSinceCreation = 0;
+  
+  /**
+   * The ClientContexts to be saved after a react.
+   */
+  private transient List<ClientContext> modifiedClientContexts;
+  
+  /**
+   * The ClientSubscriptions to be saved after a react.
+   */
+  private transient List<ClientSubscription> modifiedClientSubscriptions;
 
   /**
    * Returns  the period value of this queue, -1 if not set.
@@ -285,7 +296,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * <b>Key:</b> context identifier<br>
    * <b>Value:</b> context
    */
-  private Map contexts;
+  private Map<Integer, ClientContext> contexts;
 
   /**
    * Table holding the <code>ClientSubscription</code> instances.
@@ -360,6 +371,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   public void agentInitialize(boolean firstTime) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "UserAgent.agentInitialize(" + firstTime + ')');
+    
+    modifiedClientContexts = new ArrayList<ClientContext>();
+    modifiedClientSubscriptions = new ArrayList<ClientSubscription>();
 
     super.agentInitialize(firstTime);
     initialize(firstTime);
@@ -463,6 +477,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     } else {
       super.react(from, not);
     }
+    
+    saveModifiedClientContexts();
+    saveModifiedClientSubscriptions();
   }
 
   private void doSetPeriod(long period) {
@@ -941,6 +958,38 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     topicsTable = new Hashtable();
     messagesTable = new Hashtable();
     
+    if (contexts == null) contexts = new Hashtable<Integer, ClientContext>();
+    if (subsTable == null) subsTable = new Hashtable();
+    
+    Transaction tx = AgentServer.getTransaction();
+    String[] persistedClientNames = tx.getList(ClientContext.getTransactionPrefix(getId()));
+    for (int i = 0; i < persistedClientNames.length; i++) {
+      try {
+        ClientContext cc = (ClientContext) tx.load(persistedClientNames[i]);
+        cc.txName = persistedClientNames[i];
+        cc.setProxyId(getId());
+        cc.setProxyAgent(this);
+        contexts.put(cc.getId(), cc);
+      } catch (Exception exc) {
+        logger.log(BasicLevel.ERROR, "ClientContext named [" + persistedClientNames[i]
+            + "] could not be loaded", exc);
+      }
+    }
+    
+    String[] persistedSubscriptionNames = tx.getList(ClientSubscription.getTransactionPrefix(getId()));
+    for (int i = 0; i < persistedSubscriptionNames.length; i++) {
+      try {
+        ClientSubscription cs = (ClientSubscription) tx.load(persistedSubscriptionNames[i]);
+        cs.txName = persistedSubscriptionNames[i];
+        cs.setProxyId(getId());
+        cs.setProxyAgent(this);
+        subsTable.put(cs.getName(), cs);
+      } catch (Exception exc) {
+        logger.log(BasicLevel.ERROR, "ClientSubscription named [" + persistedSubscriptionNames[i]
+            + "] could not be loaded", exc);
+      }
+    }
+    
     setActiveCtxId(-1);
     
     // Re-initializing after a crash or a server stop.
@@ -1055,6 +1104,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Browsing the topics and updating their subscriptions.
     for (Iterator topicIds = topics.iterator(); topicIds.hasNext();)
       updateSubscriptionToTopic((AgentId) topicIds.next(), -1, -1);
+    
+    saveModifiedClientContexts();
+    saveModifiedClientSubscriptions();
   }
 
   private void setActiveCtxId(int activeCtxId) {
@@ -1396,6 +1448,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     setActiveCtxId(key);
     activeCtx = new ClientContext(getId(), key);
     activeCtx.setProxyAgent(this);
+    modifiedClient(activeCtx);
     contexts.put(new Integer(key), activeCtx);
     
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -1544,6 +1597,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
                                     nbMaxMsg,
                                     messagesTable);
       cSub.setProxyAgent(this);
+      modifiedSubscription(cSub);
      
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Subscription " + subName + " created.");
@@ -1703,7 +1757,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     updateSubscriptionToTopic(topicId, -1, -1);
 
     // Deleting the subscription.
+    sub.deleteMessages();
+    
     sub.delete();
+    
     activeCtx.removeSubName(subName);
     subsTable.remove(subName);
     try {
@@ -2204,7 +2261,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> topicsTable = " + topicsTable);
 
+        sub.deleteMessages();
+        
         sub.delete();
+        
         subsTable.remove(subName);
         try {
           MXWrapper.unregisterMBean(getSubMBeanName(subName));
@@ -2261,7 +2321,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
 
     // Finally, deleting the context:
-    contexts.remove(new Integer(key));
+    ClientContext cc = contexts.remove(new Integer(key));
+    
+    cc.delete();
+    
     activeCtx = null;
     setActiveCtxId(-1);
 
@@ -2620,6 +2683,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
           }
+          sub.deleteMessages();
+          
           sub.delete();
 
           try {
@@ -2693,7 +2758,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
         }
-        sub.delete();
+        sub.deleteMessages();
 
         try {
           setCtx(sub.getContextId());
@@ -3257,7 +3322,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       ClientSubscription sub = (ClientSubscription) subEntry.getValue();
 
       // Deleting the subscription.
-      sub.delete();
+      sub.deleteMessages();
       try {
         MXWrapper.unregisterMBean(getSubMBeanName(subName));
       } catch (Exception e) {
@@ -3540,6 +3605,42 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
   }
   
+  public void modifiedClient(ClientContext cc) {
+    if (! modifiedClientContexts.contains(cc)) {
+      modifiedClientContexts.add(cc);
+    }
+  }
+  
+  public void modifiedSubscription(ClientSubscription cs) {
+    if (! modifiedClientSubscriptions.contains(cs)) {
+      modifiedClientSubscriptions.add(cs);
+    }
+  }
+  
+  private void saveModifiedClientContexts() {
+    if (modifiedClientContexts.size() > 0) {
+      for (ClientContext modifiedCC : modifiedClientContexts) {
+        if (modifiedCC.modified) {
+          modifiedCC.save();
+          modifiedCC.modified = false;
+        }
+      }
+      modifiedClientContexts.clear();
+    }
+  }
+  
+  private void saveModifiedClientSubscriptions() {
+    if (modifiedClientSubscriptions.size() > 0) {
+      for (ClientSubscription modifiedCS : modifiedClientSubscriptions) {
+        if (modifiedCS.modified) {
+          modifiedCS.save();
+          modifiedCS.modified = false;
+        }
+      }
+      modifiedClientSubscriptions.clear();
+    }
+  }
+  
   @Override
   public int getEncodableClassId() {
     return JoramHelper.USER_AGENT_CLASS_ID;
@@ -3548,14 +3649,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   public int getEncodedSize() throws Exception {
     int res = super.getEncodedSize();
     res += LONG_ENCODED_SIZE;
-    
-    res += INT_ENCODED_SIZE;
-    Iterator<Entry<Integer, ClientContext>> contextIterator = contexts.entrySet().iterator();
-    while (contextIterator.hasNext()) {
-      Entry<Integer, ClientContext> context = contextIterator.next();
-      // Not useful to encode the key as it is in the value
-      res += context.getValue().getEncodedSize();
-    }
     
     res += BOOLEAN_ENCODED_SIZE;
     if (dmqId != null) {
@@ -3594,14 +3687,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
     
     res += INT_ENCODED_SIZE;
-    Iterator<Entry<String, ClientSubscription>> subsTableIterator = subsTable.entrySet().iterator();
-    while (subsTableIterator.hasNext()) {
-      Entry<String, ClientSubscription> context = subsTableIterator.next();
-      // Not useful to encode the key as it is in the value
-      res += context.getValue().getEncodedSize();
-    }
-    
-    res += INT_ENCODED_SIZE;
     
     return res;
   }
@@ -3609,16 +3694,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   public void encode(Encoder encoder) throws Exception {
     super.encode(encoder);
     encoder.encodeUnsignedLong(arrivalsCounter);
-    
-    encoder.encodeUnsignedInt(contexts.size());
-    Iterator<Entry<Integer, ClientContext>> contextIterator = contexts.entrySet().iterator();
-    while (contextIterator.hasNext()) {
-      Entry<Integer, ClientContext> context = contextIterator.next();
-      // Not useful to encode the key as it is in the value
-      //encoder.encodeUnsignedInt(context.getKey());
-      context.getValue().encode(encoder);
-    }
-    
+
     if (dmqId == null) {
       encoder.encodeBoolean(true);
     } else {
@@ -3666,29 +3742,12 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       }
     }
     
-    encoder.encodeUnsignedInt(subsTable.size());
-    Iterator<Entry<String, ClientSubscription>> subsTableIterator = subsTable.entrySet().iterator();
-    while (subsTableIterator.hasNext()) {
-      Entry<String, ClientSubscription> context = subsTableIterator.next();
-      // Not useful to encode the key as it is in the value
-      context.getValue().encode(encoder);
-    }
-    
     encoder.encodeUnsignedInt(threshold);
   }
   
   public void decode(Decoder decoder) throws Exception {
     super.decode(decoder);
     arrivalsCounter = decoder.decodeUnsignedLong();
-    
-    int contextsSize = decoder.decodeUnsignedInt();
-    contexts = new Hashtable<Integer, ClientContext>(contextsSize);
-    for (int i = 0; i < contextsSize; i++) {
-      ClientContext value = new ClientContext();
-      //value.setProxyId(getId());
-      value.decode(decoder);
-      contexts.put(value.getId(), value);
-    }
     
     boolean isNull = decoder.decodeBoolean();
     if (isNull) {
@@ -3739,15 +3798,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         Xid xid = new Xid(ctx.getBQ(), ctx.getFI(), ctx.getGTI());
         recoveredTransactions.put(xid, ctx);
       }
-    }
-    
-    int subsTableSize = decoder.decodeUnsignedInt();
-    subsTable = new Hashtable<String, ClientSubscription>(subsTableSize);
-    for (int i = 0; i < subsTableSize; i++) {
-      ClientSubscription value = new ClientSubscription();
-      //value.setProxyId(getId());
-      value.decode(decoder);
-      subsTable.put(value.getName(), value);
     }
     
     threshold = decoder.decodeUnsignedInt();

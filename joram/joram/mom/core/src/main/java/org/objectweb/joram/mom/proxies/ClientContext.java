@@ -24,6 +24,7 @@
  */
 package org.objectweb.joram.mom.proxies; 
 
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -35,6 +36,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.encoding.Decoder;
 import fr.dyade.aaa.common.encoding.Encodable;
@@ -80,6 +82,10 @@ class ClientContext implements java.io.Serializable, Encodable {
   
   private transient ProxyAgentItf proxy;
   
+  public transient String txName;
+  
+  public transient boolean modified;
+  
   ClientContext() {}
 
   /**
@@ -99,6 +105,8 @@ class ClientContext implements java.io.Serializable, Encodable {
     cancelledRequestId = -1;
     activeSubs = new Vector();
     repliesBuffer = new Vector();
+    
+    modified = true;
   }
   
   public AgentId getProxyId() {
@@ -135,7 +143,7 @@ class ClientContext implements java.io.Serializable, Encodable {
   /** Adds a temporary destination identifier. */
   void addTemporaryDestination(AgentId destId) {
     tempDestinations.add(destId);
-    proxy.setSave();
+    setModified();
   }
    
   Iterator getTempDestinations() {
@@ -151,7 +159,7 @@ class ClientContext implements java.io.Serializable, Encodable {
   void removeTemporaryDestination(AgentId destId) {
     deliveringQueues.remove(destId);
     tempDestinations.remove(destId);
-    proxy.setSave();
+    setModified();
   }
 
   /** Adds a pending delivery. */
@@ -204,7 +212,7 @@ class ClientContext implements java.io.Serializable, Encodable {
   void addDeliveringQueue(AgentId queueId) {
     if (deliveringQueues.get(queueId) == null) {
       deliveringQueues.put(queueId, queueId);
-      proxy.setSave();
+      setModified();
     }
   }
 
@@ -226,7 +234,7 @@ class ClientContext implements java.io.Serializable, Encodable {
                  "ClientContext[" + proxyId + ':' + id + "].addMultiReplyContext(" + requestId + ',' + asyncReplyCount + ')');
     if (commitTable == null) commitTable = new Hashtable();
     commitTable.put(new Integer(requestId), new MultiReplyContext(asyncReplyCount));
-    proxy.setSave();
+    setModified();
   }
   
   /**
@@ -251,7 +259,7 @@ class ClientContext implements java.io.Serializable, Encodable {
     ctx.counter--;
     if (ctx.counter == 0) {
       commitTable.remove(ctxKey);
-      proxy.setSave();
+      setModified();
     }
     return ctx.counter;
   }
@@ -271,7 +279,7 @@ class ClientContext implements java.io.Serializable, Encodable {
 
     if (! transactionsTable.containsKey(key)) {
       transactionsTable.put(key, prepare);
-      proxy.setSave();
+      setModified();
     } else
       throw new Exception("Prepare request already received by "
                           + "TM for this transaction.");
@@ -282,7 +290,7 @@ class ClientContext implements java.io.Serializable, Encodable {
     XACnxPrepare prepare = null;
     if (transactionsTable != null) {
       prepare = (XACnxPrepare) transactionsTable.remove(key);
-      proxy.setSave();
+      setModified();
     }
     return prepare;
   }
@@ -346,8 +354,6 @@ class ClientContext implements java.io.Serializable, Encodable {
     encodedSize += INT_ENCODED_SIZE;
     encodedSize += INT_ENCODED_SIZE;
     
-    encodedSize += proxyId.getEncodedSize();
-    
     for (AgentId tempDestination : tempDestinations) {
       encodedSize += tempDestination.getEncodedSize();
     }
@@ -381,8 +387,6 @@ class ClientContext implements java.io.Serializable, Encodable {
       // not useful to encode the value
     }
     encoder.encodeUnsignedInt(id);
-    
-    proxyId.encode(encoder);
     
     encoder.encodeUnsignedInt(tempDestinations.size());
     for (AgentId tempDestination : tempDestinations) {
@@ -422,9 +426,6 @@ class ClientContext implements java.io.Serializable, Encodable {
     }
     id = decoder.decodeUnsignedInt();
     
-    proxyId = new AgentId((short) 0, (short) 0, 0);
-    proxyId.decode(decoder);
-    
     int tempDestinationsSize = decoder.decodeUnsignedInt();
     tempDestinations = new Vector<AgentId>(tempDestinationsSize);
     for (int i = 0; i < tempDestinationsSize; i++) {
@@ -445,6 +446,38 @@ class ClientContext implements java.io.Serializable, Encodable {
         Xid xid = new Xid(ctx.getBQ(), ctx.getFI(), ctx.getGTI());
         transactionsTable.put(xid, ctx);
       }
+    }
+  }
+  
+  public static String getTransactionPrefix(AgentId proxyId) {
+    StringBuffer clientContextPrefix = new StringBuffer(19).append("CC").append(proxyId.toString()).append('_');
+    return clientContextPrefix.toString();
+  }
+  
+  public void delete() {
+    AgentServer.getTransaction().delete(getTxName());
+  }
+  
+  private String getTxName() {
+    if (txName == null) {
+      txName = getTransactionPrefix(proxyId) + id;
+    }
+    return txName;
+  }
+  
+  public void save() {
+    try {
+      AgentServer.getTransaction().save(this, getTxName());
+    } catch (IOException exc) {
+      logger.log(BasicLevel.ERROR, "ClientContext named [" + txName
+          + "] could not be saved", exc);
+    }
+  }
+  
+  private void setModified() {
+    if (! modified) {
+      modified = true;
+      proxy.modifiedClient(this);
     }
   }
   
