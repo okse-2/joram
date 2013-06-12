@@ -169,9 +169,9 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   }
 
   /**
-   *  If true use a lock file to avoid multiples activation of Transaction
+   *  If true (default) use a lock file to avoid multiples activation of Transaction
    * component. This value can be adjusted for a particular server by setting
-   * <code>Transaction.UseLockFile</code> specific property.
+   * <code>Transaction.UseLockFile</code> specific property. 
    * <p>
    *  This property can be set only at first launching.
    */
