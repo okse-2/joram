@@ -926,9 +926,10 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   protected long timeout = Long.MAX_VALUE;
 
   /**
-   * Boolean value indicating if the agent profiling is on.
+   * Boolean value indicating if the agent profiling is on, by default false.
    * If true, the cumulative time of reaction and commit is kept for each agent.
    * In addition the total reaction and commit time is calculated for this engine.
+   * This value can be adjusted through the AgentProfiling system property.
    */
   public boolean agentProfiling = false;
   
