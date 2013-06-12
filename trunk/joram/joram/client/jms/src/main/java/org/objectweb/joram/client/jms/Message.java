@@ -77,41 +77,51 @@ public class Message implements javax.jms.Message {
   }
 
   /**
-   * Set the compressed min size.
-   * If set, overload the value.
-   * @param compressedMinSize the compressed min size value
+   * Sets the minimum size beyond which this message's body is compressed.
+   * 
+   * @param compressedMinSize the minimum size beyond which this message's body is compressed
    */
   public void setCompressedMinSize(int compressedMinSize) {
     momMsg.compressedMinSize = compressedMinSize;
   }
   
   /**
-   * @return the compressed min size value
+   * Returns the minimum size beyond which this message's body is compressed.
+   * This attribute is inherited from Session at message creation, the default
+   * value is 0 (no compression).
+   *  
+   * @return the minimum size beyond which this message's body is compressed.
    */
-  public int getCompressedMinSize() {
+  public final int getCompressedMinSize() {
     return momMsg.compressedMinSize;
   }
   
   /**
    * @return true if compressed
    */
-  public boolean isCompressed() {
+  public final boolean isCompressed() {
     return momMsg.compressed;
   }
   
   /**
-   * Set the compression level.
-   * if set, overload the value.
+   * Sets the compression level (0..9) used when this message body is compressed.
+   * This attribute is inherited from Session at message creation, the default
+   * value is 1 (Deflater.BEST_SPEED).
+   * 
    * @param compressionLevel the compression level (0-9)
    */
-  public void setCompressionLevel(int compressionLevel) {
+  public final void setCompressionLevel(int compressionLevel) {
     momMsg.compressionLevel = compressionLevel;
   }
   
   /**
+   * Returns the compression level (0..9) used when this message body is compressed. 
+   * This attribute is inherited from Session at message creation, the default value
+   * is 1 (Deflater.BEST_SPEED).
+   * 
    * @return the compression level
    */
-  public int getCompressionLevel() {
+  public final int getCompressionLevel() {
     return momMsg.compressionLevel;
   }
   
