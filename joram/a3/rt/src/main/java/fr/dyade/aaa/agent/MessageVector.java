@@ -505,13 +505,14 @@ final class MessageVector implements MessageQueue {
   }
 
   /**
-   *  Name of property allowing to track the distribution of the types of messages.
+   *  Name of property allowing to track the distribution of the types of messages,
+   * by default false. If true, for each type of messages the total number of messages
+   * sent since the beginning and the number of those waiting is counted.
    * <p>
    *  This property can be fixed either from <code>java</code> launching command or
    * a3servers.xml configuration file.
    */
-  public static final String MSG_TYPES_TRACKING =
-    "fr.dyade.aaa.agent.MsgTypesTracking";
+  public static final String MSG_TYPES_TRACKING = "fr.dyade.aaa.agent.MsgTypesTracking";
   
   /**
    * True if the tracking of the distribution of messages type is allowed.
