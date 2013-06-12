@@ -245,15 +245,14 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
   public final List outInterceptors = new ArrayList();
   
   /**
-   * if the message body is upper than the <code>compressedMinSize</code>,
-   * this message body is compressed.
-   * <br>default is 0 no compression
+   * This attribute defines the minimum size beyond which the message body is compressed.
+   * The default value is 0 (no compression).
    */
   public int compressedMinSize = 0;
   
   /**
-   * the compression level (0-9)
-   * <br>default is Deflater.BEST_SPEED (1)
+   * This attribute defines the compression level (0-9) used when the message body is compressed.
+   * The default value is 1 (Deflater.BEST_SPEED).
    */
   public int compressionLevel = Deflater.BEST_SPEED;
   

@@ -589,19 +589,15 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   /**
-   * Set the compressedMinSize for this session.
-   * <p>
-   * The minimum message body size before a message body compression.
-   * <p>
-   * This attribute is inherited from Connection at initialization,
-   * default value is 0 no compression
-   * This method can overload this attribute.
+   * Sets the minimum size beyond which the message body is compressed in this session.
+   * This attribute is inherited from Connection at initialization, the default value is
+   * 0 (no compression).
    *
    * @param compressedMinSize The minimum size before a message body compression.
    *
    * @see FactoryParameters.compressedMinSize
    */
-  public void setCompressedMinSize(int compressedMinSize) {
+  public final void setCompressedMinSize(int compressedMinSize) {
     this.compressedMinSize = compressedMinSize;
   }
   
@@ -625,7 +621,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    *
    * @see FactoryParameters.compressionLevel
    */
-  public int getCompressionLevel() {
+  public final int getCompressionLevel() {
     return compressionLevel;
   }
 
@@ -640,7 +636,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    *
    * @see FactoryParameters.compressionLevel
    */
-  public void setCompressionLevel(int compressionLevel) {
+  public final void setCompressionLevel(int compressionLevel) {
     this.compressionLevel = compressionLevel;
   }
 

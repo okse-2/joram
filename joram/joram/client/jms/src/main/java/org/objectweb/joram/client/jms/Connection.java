@@ -440,14 +440,10 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
   }
   
   /**
-   * Get the compressedMinSize for this session.
-   * <p>
-   * The minimum message body size before a message body compression.
-   * <p>
-   * This attribute is inherited from Connection at initialization,
-   * default value is 0 no compression
+   * Returns the minimum size beyond which the message body is compressed.
+   * The default value is 0 (no compression).
    *
-   * @return The minimum size before a message body compression
+   * @return the minimum size beyond which the message body is compressed
    *
    * @see FactoryParameters#compressedMinSize
    */
@@ -456,10 +452,8 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
   }
   
   /**
-   * Get the compression level for this Connection.
-   * <p>
-   *  This attribute is inherited from FactoryParameters, 
-   *  default value is Deflater.BEST_SPEED (1).
+   * Get the compression level (0..9) for this Connection, this attribute is inherited from FactoryParameters. 
+   * The default value is 1 (Deflater.BEST_SPEED).
    *
    * @return The compression level
    *
