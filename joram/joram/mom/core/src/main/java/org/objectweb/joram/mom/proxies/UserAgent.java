@@ -511,7 +511,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     Integer objKey = new Integer(keyCounter);
     ConnectionContext ctx;
       if (not.getReliable()) {
-        ctx = new ReliableConnectionContext(keyCounter, not.getHeartBeat());
+        ctx = new ReliableConnectionContext(keyCounter, not.getHeartBeat(), not.isNoAckedQueue());
       connections.put(objKey, ctx);
       } else {
         ctx = new StandardConnectionContext(keyCounter);
