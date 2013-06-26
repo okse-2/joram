@@ -97,7 +97,7 @@ public class TcpConnectionListener extends Daemon {
    * number or protocol version.
    */
   private int protocolErrorCount;
-
+  
   /**
    * Creates a new connection listener
    *
@@ -206,6 +206,13 @@ public class TcpConnectionListener extends Daemon {
                    "Wildcard protocol version number: from stream = " + magic[7] + ", from MetaData = " + MetaData.joramMagic[7]);
       }
 
+      //read the ack mode(noAckedQueue)
+      boolean noAckedQueue = StreamUtil.readBooleanFrom(is);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, " -> read noAckedQueue = " + noAckedQueue);
+      if (noAckedQueue)
+        TcpProxyService.createExecutors();
+      
       long dt = Math.abs(StreamUtil.readLongFrom(is) - System.currentTimeMillis());
       if (dt > clockSynchroThreshold)
         logger.log(BasicLevel.WARN, " -> bad clock synchronization between client and server: " + dt);
@@ -244,7 +251,7 @@ public class TcpConnectionListener extends Daemon {
       IOControl ioctrl;
       ReliableConnectionContext ctx;
       if (key == -1) {
-        OpenConnectionNot ocn = new OpenConnectionNot(true, heartBeat);
+        OpenConnectionNot ocn = new OpenConnectionNot(true, heartBeat, noAckedQueue);
         ocn.invoke(proxyId);
         StreamUtil.writeTo(0, nos);
         ctx = (ReliableConnectionContext) ocn.getConnectionContext();
