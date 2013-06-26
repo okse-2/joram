@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -63,27 +63,31 @@ public class TcpWriter extends Daemon {
     replyQueue.reset();
   }
 
+  private void handleMessage(ProxyMessage msg) throws Exception {
+    if ((msg.getObject() instanceof MomExceptionReply) &&
+        (((MomExceptionReply) msg.getObject()).getType() == MomExceptionReply.HBCloseConnection)) {
+      // Exception indicating that the connection
+      // has been closed by the heart beat task.
+      // (see UserAgent)
+      new Thread(new Runnable() {
+        public void run() {            
+          tcpConnection.close();
+        }
+      }).start();
+    } else {
+      ioctrl.send(msg);
+      // No queue.pop() !
+      // Done by the proxy (UserAgent)
+    }
+  }
+  
   public void run() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,  "TcpWriter.run()");
     try {
       while (running) {
         ProxyMessage msg = replyQueue.get();
-        if ((msg.getObject() instanceof MomExceptionReply) &&
-            (((MomExceptionReply) msg.getObject()).getType() == MomExceptionReply.HBCloseConnection)) {
-          // Exception indicating that the connection
-          // has been closed by the heart beat task.
-          // (see UserAgent)
-          new Thread(new Runnable() {
-            public void run() {            
-              tcpConnection.close();
-            }
-          }).start();
-        } else {
-          ioctrl.send(msg);
-          // No queue.pop() !
-          // Done by the proxy (UserAgent)
-        }
+        handleMessage(msg);
       }
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
