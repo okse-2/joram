@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -71,8 +71,7 @@ public class ReliableTcpClient {
   private Vector addresses;
   /**
    *  True if the client must try to reconnect in case of connection
-   * failure. It depends of cnxPendingTimer on a "normal" TCP connection,
-   * always true on HA.
+   * failure. It depends of cnxPendingTimer on a "normal" TCP connection.
    */
   private boolean reconnect;
   /**
@@ -276,6 +275,12 @@ public class ReliableTcpClient {
 
     // Writes the Joram magic number
     baos.write(MetaData.joramMagic);
+    
+    // Writes the ack mode (noAckedQueue)
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, " -> write noAckedQueue = " + params.noAckedQueue);
+    StreamUtil.writeTo(params.noAckedQueue, baos);
+    
     // Writes the current date
     StreamUtil.writeTo(System.currentTimeMillis(), baos);
 
@@ -284,6 +289,7 @@ public class ReliableTcpClient {
       logger.log(BasicLevel.DEBUG, " -> write identity = " + identity);
     Identity.write(identity, baos);
 
+    // Writes the key
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, " -> write key = " + key);
     StreamUtil.writeTo(key, baos);
@@ -309,7 +315,7 @@ public class ReliableTcpClient {
       key = StreamUtil.readIntFrom(is);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> key = " + identity.getUserName() + ',' + key);
-      connection = new ReliableTcpConnection(timer);
+      connection = new ReliableTcpConnection(timer, params.noAckedQueue);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> init reliable connection");
     } else {
