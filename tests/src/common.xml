@@ -57,7 +57,9 @@
   </path>
   
   <!-- Default SCAdmin class : "framework.SCAdminClassic" or "framework.SCAdminOSGi" -->
-  <property name="SCAdminClass" value="framework.SCAdminClassic" />
+  <!-- property name="SCAdminClass" value="framework.SCAdminClassic" /-->
+  <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
+  <property name="isOSGi" value="true"/>
   
   <!-- Creates the felix directory. This is useful if the JORAM OSGi
     shipment has not been done to avoid a build error when defining
