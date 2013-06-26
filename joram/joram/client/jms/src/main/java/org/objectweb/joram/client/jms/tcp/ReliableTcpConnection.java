@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,11 +22,14 @@
 package org.objectweb.joram.client.jms.tcp;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Vector;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
@@ -73,14 +76,19 @@ public class ReliableTcpConnection {
   private int status;
   
   private java.util.Timer timer;
+  
+  private boolean noAckedQueue = false;
+  
+  private LinkedBlockingQueue<byte[]> receiveQueue;
+  
+  private Reader reader;
 
-  public ReliableTcpConnection(java.util.Timer timer2) {    
+  public ReliableTcpConnection(java.util.Timer timer2, boolean noAckedQueue) {    
     windowSize = Integer.getInteger(
       WINDOW_SIZE_PROP_NAME,
       DEFAULT_WINDOW_SIZE).intValue();
     if (logger.isLoggable(BasicLevel.INFO))
-      logger.log(BasicLevel.INFO, 
-                 "ReliableTcpConnection.windowSize=" + windowSize);
+      logger.log(BasicLevel.INFO, "ReliableTcpConnection.windowSize=" + windowSize + ", noAckedQueue=" + noAckedQueue);
     timer = timer2;
     inputCounter = -1;
     outputCounter = 0;
@@ -88,10 +96,11 @@ public class ReliableTcpConnection {
     pendingMessages = new Vector();
     inputLock = new Object();
     outputLock = new Object();
-    
+    this.noAckedQueue = noAckedQueue;
+    this.receiveQueue = new LinkedBlockingQueue<byte[]>();
     setStatus(INIT);
   }
-
+  
   private synchronized void setStatus(int status) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
@@ -118,10 +127,12 @@ public class ReliableTcpConnection {
       synchronized (outputLock) {
         nos = new NetOutputStream(sock);
         
-        synchronized (pendingMessages) {
-          for (int i = 0; i < pendingMessages.size(); i++) {
-            TcpMessage pendingMsg = (TcpMessage) pendingMessages.elementAt(i);
-            doSend(pendingMsg.id, inputCounter, pendingMsg.object);
+        if (!noAckedQueue) {
+          synchronized (pendingMessages) {
+            for (int i = 0; i < pendingMessages.size(); i++) {
+              TcpMessage pendingMsg = (TcpMessage) pendingMessages.elementAt(i);
+              doSend(pendingMsg.id, inputCounter, pendingMsg.object);
+            }
           }
         }
       }
@@ -129,11 +140,14 @@ public class ReliableTcpConnection {
       synchronized (inputLock) {
         bis = new BufferedInputStream(sock.getInputStream());
       }
+      
+      reader = new Reader();
+      reader.start();
 
       setStatus(CONNECT);
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
+        logger.log(BasicLevel.DEBUG, exc);
       close();
       throw exc;
     }
@@ -149,8 +163,10 @@ public class ReliableTcpConnection {
     try {      
       synchronized (outputLock) {        
         doSend(outputCounter, inputCounter, request);
-        addPendingMessage(new TcpMessage(
-          outputCounter, request));
+        if (!noAckedQueue) {
+          addPendingMessage(new TcpMessage(
+              outputCounter, request));
+        }
         outputCounter++;
       }
     } catch (IOException exc) {
@@ -207,8 +223,10 @@ public class ReliableTcpConnection {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "ReliableTcpConnection.addPendingMessage(" + msg + ')');
-    synchronized (pendingMessages) {
-      pendingMessages.addElement(msg);
+    if (!noAckedQueue) {
+      synchronized (pendingMessages) {
+        pendingMessages.addElement(msg);
+      }
     }
   }
 
@@ -217,15 +235,17 @@ public class ReliableTcpConnection {
       logger.log(BasicLevel.DEBUG,
                  "ReliableTcpConnection.ackPendingMessages(" + ackId + ')');
     
-    synchronized (pendingMessages) {
-      while (pendingMessages.size() > 0) {
-        TcpMessage pendingMsg = (TcpMessage)pendingMessages.elementAt(0);
-        if (ackId < pendingMsg.id) {
-          // It's an old acknowledge
-          break;
+    if (!noAckedQueue) {
+      synchronized (pendingMessages) {
+        while (pendingMessages.size() > 0) {
+          TcpMessage pendingMsg = (TcpMessage)pendingMessages.elementAt(0);
+          if (ackId < pendingMsg.id) {
+            // It's an old acknowledge
+            break;
+          }
+
+          pendingMessages.removeElementAt(0);
         }
-        
-        pendingMessages.removeElementAt(0);
       }
     }
   }
@@ -239,46 +259,67 @@ public class ReliableTcpConnection {
 
     while (true) {
       try {
+        byte[] bytes = receiveQueue.take();
+        if (bytes.length == 0) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "The reader offer a closing marker, so closed.");
+          throw new IOException("Connection closed.");
+        }
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+
         long messageId;
         long ackId;
         AbstractJmsReply obj;
 
-        synchronized (inputLock) {
-          int len = StreamUtil.readIntFrom(bis);
-          messageId = StreamUtil.readLongFrom(bis);
-          ackId = StreamUtil.readLongFrom(bis);
-          obj =  (AbstractJmsReply) AbstractJmsMessage.read(bis);
-        }
+        messageId = StreamUtil.readLongFrom(bais);
+        ackId = StreamUtil.readLongFrom(bais);
+        obj =  (AbstractJmsReply) AbstractJmsMessage.read(bais);
+
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> id = " + messageId);
-        ackPendingMessages(ackId);
-        if (obj != null) {
-          if (unackCounter < windowSize) {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, " -> unackCounter++");
-            unackCounter++;
-          } else {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, " -> schedule");
-            AckTimerTask ackTimertask = new AckTimerTask();
-            timer.schedule(ackTimertask, 0);
+        if (!noAckedQueue) {
+          ackPendingMessages(ackId);
+          if (obj != null) {
+            if (unackCounter < windowSize) {
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, " -> unackCounter++");
+              unackCounter++;
+            } else {
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, " -> schedule");
+              AckTimerTask ackTimertask = new AckTimerTask();
+              timer.schedule(ackTimertask, 0);
+            }
+            if (messageId > inputCounter) {
+              inputCounter = messageId;
+              return obj;
+            } else if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG,
+                  " -> already received message: " + messageId + " " + obj);
           }
-          if (messageId > inputCounter) {
-            inputCounter = messageId;
+        } else {
+          if (obj != null) {
             return obj;
-          } else if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,
-                       " -> already received message: " + messageId + " " + obj);
-        }        
+          }
+        }
+      } catch (InterruptedException exc) {
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, exc);
+        close();
+        throw new IllegalStateException("Interrupted receive: Connection closed.");
       } catch (IOException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "", exc);
+          logger.log(BasicLevel.DEBUG, exc);
         close();
         throw exc;
       }
     }
   }
 
+  public boolean isReaderRun() {
+    return reader.isRunning();
+  }
+  
   public void close() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ReliableTcpConnection.close()");
@@ -294,6 +335,9 @@ public class ReliableTcpConnection {
     try { 
       sock.close();
     } catch (IOException exc) {}
+    if (reader != null) {
+      reader.stop();
+    }
     setStatus(INIT);
   }
 
@@ -325,5 +369,55 @@ public class ReliableTcpConnection {
           logger.log(BasicLevel.DEBUG, "", exc);
       }
     }
+  }
+  
+  
+  class Reader extends fr.dyade.aaa.common.Daemon {
+    
+    Reader() {
+      super("ReliableTcpConnection.Reader", logger);
+    }
+
+    public void run() {
+      try {
+        while (running) {
+          canStop = true;
+          int len = StreamUtil.readIntFrom(bis);
+          byte[] bytes = new byte[len];
+          int count = 0;
+          int nb = -1;
+          do {
+            nb = bis.read(bytes, count, len-count);
+            if (nb < 0) throw new EOFException();
+            count += nb;
+          } while (count != len);
+          receiveQueue.offer(bytes);
+        }
+      } catch (Exception exc) { 
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, exc);
+      } finally {
+        // offer a closing marker (empty bytes).
+        receiveQueue.offer(new byte[0]);
+      }
+    }
+    
+    /**
+     * Enables the daemon to stop itself.
+     */
+    public void stop() {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Reader stop()");
+      if (isCurrentThread()) {
+        finish();
+      } else {
+        super.stop();
+      }
+    }
+
+    protected void shutdown() {}
+
+    protected void close() {}
+    
   }
 }
