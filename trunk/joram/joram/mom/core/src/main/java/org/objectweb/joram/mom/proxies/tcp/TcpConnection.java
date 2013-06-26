@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -70,7 +70,7 @@ public class TcpConnection implements TcpConnectionMBean {
   private Identity identity;
   
   private Date creationDate;
-
+  
   /**
    * Creates a new TCP connection.
    *
@@ -118,10 +118,16 @@ public class TcpConnection implements TcpConnectionMBean {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "TcpConnection.start()");
     try {
-      tcpWriter = new TcpWriter(ioctrl, ctx.getQueue(), this);
+      if (ctx.isNoAckedQueue()) {
+        ioctrl.setNoAckedQueue(ctx.isNoAckedQueue());
+        ctx.getQueueWorker().ioctrl = ioctrl;
+        ctx.getQueueWorker().tcpConnection= this;
+      } else {
+        tcpWriter = new TcpWriter(ioctrl, ctx.getQueue(), this);
+        tcpWriter.start();
+      }
       tcpReader = new TcpReader(ioctrl, proxyId, this, closeConnection);
       proxyService.registerConnection(this);
-      tcpWriter.start();
       tcpReader.start();
     } catch (Exception exc) {
       close();
@@ -170,4 +176,15 @@ public class TcpConnection implements TcpConnectionMBean {
     return ioctrl.getSentCount();
   }
 
+  public int getAckedQueueSize() {
+    if (ctx.getQueue() == null) return -1;
+    return ctx.getQueue().size();
+  }
+  public int getQueueWorkerSize() {
+    if (ctx.getQueueWorker() == null) return -1;
+    return ctx.getQueueWorker().queue.size();
+  }
+  public int getReaderQueueSize() {
+    return ioctrl.getreceiveQueueSize();
+  }
 }
