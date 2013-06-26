@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -27,20 +27,24 @@ package org.objectweb.joram.mom.proxies;
 
 import java.io.Serializable;
 
+import org.objectweb.joram.mom.proxies.tcp.TcpProxyService;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
 import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.excepts.MomException;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  *
  */
 public class ReliableConnectionContext implements ConnectionContext, Serializable {
+  
+  public static Logger logger = Debug.getLogger(ReliableConnectionContext.class.getName());
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
 
   private int key;
@@ -54,13 +58,22 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
   private int heartBeat;
   
   private boolean closed;
+  
+  private boolean noAckedQueue;
+  
+  private QueueWorker queueWorker;
 
-  ReliableConnectionContext(int key, int heartBeat) {
+  ReliableConnectionContext(int key, int heartBeat, boolean noAckedQueue) {
     this.key = key;
     this.heartBeat = heartBeat;
     inputCounter = -1;
     outputCounter = 0;
-    queue = new AckedQueue();
+    this.noAckedQueue = noAckedQueue;
+    if (noAckedQueue) {
+      queueWorker = new QueueWorker();
+    } else {
+      queue = new AckedQueue();
+    }
     closed = false;
   }
   
@@ -82,25 +95,66 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
   
   public AbstractJmsRequest getRequest(Object obj) {
     ProxyMessage msg = (ProxyMessage)obj;
-    inputCounter = msg.getId();
+    if (!noAckedQueue) {
+      inputCounter = msg.getId();
+      queue.ack(msg.getAckId());
+    }
+    
     AbstractJmsRequest request = (AbstractJmsRequest) msg.getObject();
-    queue.ack(msg.getAckId());
+
     if (request instanceof CnxCloseRequest) {
       closed = true;
     }
     return request;
   }
   
+  public boolean isNoAckedQueue() {
+    return noAckedQueue;
+  }
+
+  private void add(ProxyMessage msg) {
+    synchronized (queueWorker.queue) {
+      queueWorker.queue.offer(msg);
+      if (! queueWorker.running) {
+        queueWorker.running = true;
+        try {
+          if (TcpProxyService.executorService == null) {
+            queueWorker.ioctrl.send(msg);
+            queueWorker.running = false;
+          } else {
+            TcpProxyService.execute(queueWorker);
+          }
+        } catch (Exception e) {
+          logger.log(BasicLevel.ERROR, e);
+        }
+      }
+    }
+  }
+  
+  public QueueWorker getQueueWorker() {
+    return queueWorker;
+  }
+  
   public void pushReply(AbstractJmsReply reply) {
     ProxyMessage msg = new ProxyMessage(outputCounter, inputCounter, reply);
-    queue.push(msg);
-    outputCounter++;
+    if (noAckedQueue) {
+      add(msg);
+    } else {
+      queue.push(msg);
+      if (!noAckedQueue) {
+        outputCounter++;
+      }
+    }
   }
-  
+
   public void pushError(MomException exc) {
-    queue.push(new ProxyMessage(-1, -1, new MomExceptionReply(exc)));
+    if (noAckedQueue) {
+      add(new ProxyMessage(-1, -1, new MomExceptionReply(exc)));
+    } else {
+      queue.push(new ProxyMessage(-1, -1, new MomExceptionReply(exc)));
+    }
   }
-  
+
   public boolean isClosed() {
     return closed;
   }  
