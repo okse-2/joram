@@ -172,7 +172,20 @@ public abstract class AbstractJmsMessage implements Externalizable, Streamable, 
 
     classid = StreamUtil.readIntFrom(is);
     if (classid != NULL_CLASS_ID) {
-      msg = (AbstractJmsMessage) Class.forName(classnames[classid]).newInstance();
+      switch (classid) {
+      case PRODUCER_MESSAGES:
+        msg = new ProducerMessages();
+        break;
+      case CONSUMER_MESSAGES:
+        msg = new ConsumerMessages();
+        break;
+      case CONSUMER_ACK_REQUEST:
+        msg = new ConsumerAckRequest();
+        break;
+      default:
+        msg = (AbstractJmsMessage) Class.forName(classnames[classid]).newInstance();
+      }
+      
       msg.readFrom(is);
     }
 
