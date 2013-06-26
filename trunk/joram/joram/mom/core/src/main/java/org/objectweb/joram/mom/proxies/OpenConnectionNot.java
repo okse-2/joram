@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -22,7 +22,7 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.SyncNotification;
 
 public class OpenConnectionNot extends SyncNotification {
 
@@ -34,11 +34,15 @@ public class OpenConnectionNot extends SyncNotification {
   private boolean reliable;
   
   private int heartBeat;
+  
+  private boolean noAckedQueue;
 
   public OpenConnectionNot(boolean reliable,
-                           int heartBeat) {
+                           int heartBeat,
+                           boolean noAckedQueue) {
     this.reliable = reliable;
     this.heartBeat = heartBeat;
+    this.noAckedQueue = noAckedQueue;
   }
   
   public void Return(ConnectionContext ctx) {
@@ -51,6 +55,10 @@ public class OpenConnectionNot extends SyncNotification {
 
   public final int getHeartBeat() {
     return heartBeat;
+  }
+  
+  public final boolean isNoAckedQueue() {
+    return noAckedQueue;
   }
 
   public final Object getConnectionContext() {
@@ -70,6 +78,7 @@ public class OpenConnectionNot extends SyncNotification {
     super.toString(output);
     output.append(",reliable=").append(reliable);
     output.append(",heartBeat=").append(heartBeat);
+    output.append(",noAckedQueue=").append(noAckedQueue);
     output.append(')');
 
     return output;
