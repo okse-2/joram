@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -23,10 +23,13 @@
 package org.objectweb.joram.mom.proxies.tcp;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.objectweb.joram.mom.proxies.ProxyMessage;
 import org.objectweb.joram.shared.client.AbstractJmsMessage;
@@ -56,6 +59,12 @@ public class IOControl {
   private long receivedCount;
 
   private long sentCount;
+  
+  private LinkedBlockingQueue<byte[]> receiveQueue;
+  
+  private Reader reader;
+  
+  boolean noAckedQueue = false;
 
   public IOControl(Socket sock) throws IOException {
     this(sock, -1);
@@ -70,6 +79,10 @@ public class IOControl {
 
     nos = new NetOutputStream(sock);
     bis = new BufferedInputStream(sock.getInputStream());
+    
+    this.receiveQueue = new LinkedBlockingQueue<byte[]>();
+    reader = new Reader();
+    reader.start();
   }
 
   public synchronized void send(ProxyMessage msg) throws IOException {
@@ -120,31 +133,48 @@ public class IOControl {
     }
   }
   
+  public void setNoAckedQueue(boolean noAckedQueue) {
+    this.noAckedQueue = noAckedQueue;
+  }
+  
   public ProxyMessage receive() throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "IOControl.receive()");
-
+    
     try {
       while (true) {
-        int len = StreamUtil.readIntFrom(bis);
-        long messageId = StreamUtil.readLongFrom(bis);
-        long ackId = StreamUtil.readLongFrom(bis);
-        AbstractJmsRequest obj = (AbstractJmsRequest) AbstractJmsMessage.read(bis);
+        byte[] bytes = receiveQueue.take();
+        if (bytes.length == 0) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "IOControl: The reader offer a closing marker, so closed.");
+          throw new IOException("Connection closed.");
+        }
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        long messageId = StreamUtil.readLongFrom(bais);
+        long ackId = StreamUtil.readLongFrom(bais);
+        AbstractJmsRequest obj = (AbstractJmsRequest) AbstractJmsMessage.read(bais);
         receivedCount++;
 
         if (messageId > inputCounter) {
           inputCounter = messageId;
-          synchronized (this) {
-            if (unackCounter < windowSize) {
-              unackCounter++;
-            } else {
-              send(new ProxyMessage(-1, messageId, null));
+          if (!noAckedQueue) { 
+            synchronized (this) {
+              if (unackCounter < windowSize) {
+                unackCounter++;
+              } else {
+                send(new ProxyMessage(-1, messageId, null));
+              }
             }
           }
           return new ProxyMessage(messageId, ackId, obj);
         }
         logger.log(BasicLevel.DEBUG, "IOControl.receive: already received message: " + messageId + " -> " + obj);
       }
+    } catch (InterruptedException exc) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, exc);
+      close();
+      throw new IllegalStateException("Interrupted receive: Connection closed.");
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "IOControl.receive", exc);
@@ -168,6 +198,9 @@ public class IOControl {
       if (sock != null) sock.close();
       sock = null;
     } catch (IOException exc) {}
+    if (reader != null) {
+      reader.stop();
+    }
   }
   
   Socket getSocket() {
@@ -180,6 +213,56 @@ public class IOControl {
 
   public long getReceivedCount() {
     return receivedCount;
+  }
+  
+  class Reader extends fr.dyade.aaa.common.Daemon {
+    Reader() {
+      super("IOcontrol.Reader", logger);
+    }
+
+    public void run() {
+      try {
+        while (running) {
+          canStop = true;
+          int len = StreamUtil.readIntFrom(bis);
+          byte[] bytes = new byte[len];
+          int count = 0;
+          int nb = -1;
+          do {
+            nb = bis.read(bytes, count, len-count);
+            if (nb < 0) throw new EOFException();
+            count += nb;
+          } while (count != len);
+          receiveQueue.offer(bytes);
+        }
+      } catch (Exception exc) { 
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, exc);
+      } finally {
+        // offer a closing marker (empty bytes).
+        receiveQueue.offer(new byte[0]);
+      }
+    }
+    
+    /**
+     * Enables the daemon to stop itself.
+     */
+    public void stop() {
+      if (isCurrentThread()) {
+        finish();
+      } else {
+        super.stop();
+      }
+    }
+
+    protected void shutdown() {}
+
+    protected void close() {}
+    
+  }
+  
+  public int getreceiveQueueSize() {
+    return receiveQueue.size();
   }
   
 }
