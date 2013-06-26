@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -92,7 +92,8 @@ public class TestCase extends BaseTestCase {
     try {
       getAdmin().startAgentServer(sid, jvmargs);
     } catch (IllegalStateException exc) {
-      exception(exc);
+      if (getAdmin() instanceof SCAdminClassic)
+        exception(exc);
       // The process is still alive, kill it!
       getAdmin().killAgentServer(sid);
       getAdmin().startAgentServer(sid, jvmargs);
@@ -132,7 +133,7 @@ public class TestCase extends BaseTestCase {
 
   public static SCAdminItf getAdmin() throws Exception {
     if (admin == null) {
-      String scAdminClass = System.getProperty("SCAdminClass", SCAdminClassic.class.getName());
+      String scAdminClass = System.getProperty("SCAdminClass", SCAdminOSGi.class.getName());
       admin = (SCAdminItf) Class.forName(scAdminClass).newInstance();
     }
     return admin;
