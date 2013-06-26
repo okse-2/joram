@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -22,12 +22,12 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import java.util.Vector;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
-
-import java.util.*;
 
 public class AckedQueue implements java.io.Serializable {
   /** define serialVersionUID for interoperability */
@@ -37,7 +37,7 @@ public class AckedQueue implements java.io.Serializable {
   public static Logger logger = Debug.getLogger(AckedQueue.class.getName());
 
   private Vector<ProxyMessage> list;
-
+  
   private int current;
 
   public AckedQueue() {
@@ -48,7 +48,7 @@ public class AckedQueue implements java.io.Serializable {
   public void push(ProxyMessage msg) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AckedQueue.push(" + msg + ')');
-    
+
     synchronized (list) {
       list.addElement(msg);
       list.notify();
@@ -58,7 +58,7 @@ public class AckedQueue implements java.io.Serializable {
   public ProxyMessage get() throws InterruptedException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AckedQueue.get()");
-    
+
     synchronized (list) { 
       while ((list.size() - current) == 0) {
         list.wait();
@@ -93,5 +93,9 @@ public class AckedQueue implements java.io.Serializable {
       logger.log(BasicLevel.DEBUG, "AckedQueue.reset()");
     
     current = 0;
+  }
+  
+  public int size() {
+    return list.size();
   }
 }
