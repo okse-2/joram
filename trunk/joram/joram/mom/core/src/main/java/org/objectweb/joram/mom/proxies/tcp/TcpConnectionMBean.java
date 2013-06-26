@@ -68,5 +68,24 @@ public interface TcpConnectionMBean {
    */
   public long getReceivedCount();
   
-
+  /**
+   * Gets the AckedQueue size.
+   * 
+   * @return the size of AckedQueue.
+   */
+  public int getAckedQueueSize();
+  
+  /**
+   * Gets the QueueWorker size.
+   * 
+   * @return the size of QueueWorker.
+   */
+  public int getQueueWorkerSize();
+  
+  /**
+   * Gets the ReaderQueue size.
+   * 
+   * @return the size of ReaderQueue.
+   */
+  public int getReaderQueueSize();
 }
