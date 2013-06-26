@@ -257,6 +257,12 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
   public int compressionLevel = Deflater.BEST_SPEED;
   
   /**
+   * Set this attribute to true to increase performance.
+   * The default value is false (use the AckedQueue)
+   */
+  public boolean noAckedQueue = false;
+  
+  /**
    * Constructs a <code>FactoryParameters</code> instance.
    *
    * @param host  Name of host hosting the server to create connections with.
@@ -332,6 +338,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
                               new Integer(topicActivationThreshold).toString()));
     ref.add(new StringRefAddr(prefix + ".compressedMinSize", new Integer(compressedMinSize).toString()));
     ref.add(new StringRefAddr(prefix + ".compressionLevel", new Integer(compressionLevel).toString()));
+    ref.add(new StringRefAddr(prefix + ".noAckedQueue", new Boolean(noAckedQueue).toString()));
     ref.add(new StringRefAddr(prefix + ".outLocalPort", new Integer(outLocalPort).toString()));
     if (outLocalAddress != null)
       ref.add(new StringRefAddr(prefix + ".outLocalAddress", outLocalAddress));
@@ -374,6 +381,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     topicActivationThreshold = new Integer((String) ref.get(prefix + ".topicActivationThreshold").getContent()).intValue();
     compressedMinSize = new Integer((String) ref.get(prefix + ".compressedMinSize").getContent()).intValue();
     compressionLevel = new Integer((String) ref.get(prefix + ".compressionLevel").getContent()).intValue();
+    noAckedQueue = new Boolean((String) ref.get(prefix + ".noAckedQueue").getContent()).booleanValue();
     outLocalPort = new Integer((String) ref.get(prefix + ".outLocalPort").getContent()).intValue();
     RefAddr outLocalAddressRef = ref.get(prefix + ".outLocalAddress");
     if (outLocalAddressRef != null)
@@ -417,6 +425,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     h.put(prefix + ".topicActivationThreshold", new Integer(topicActivationThreshold));
     h.put(prefix + ".compressedMinSize", new Integer(compressedMinSize));
     h.put(prefix + ".compressionLevel", new Integer(compressionLevel));
+    h.put(prefix + ".noAckedQueue", new Boolean(noAckedQueue));
     h.put(prefix + ".outLocalPort", new Integer(outLocalPort));
     if (outLocalAddress != null)
       h.put(prefix + ".outLocalAddress", outLocalAddress);
@@ -454,6 +463,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     topicActivationThreshold = ((Integer) h.get(prefix + ".topicActivationThreshold")).intValue();
     compressedMinSize = ((Integer) h.get(prefix + ".compressedMinSize")).intValue();
     compressionLevel = ((Integer) h.get(prefix + ".compressionLevel")).intValue();
+    noAckedQueue = ((Boolean) h.get(prefix + ".noAckedQueue")).booleanValue();
     outLocalPort = ((Integer) h.get(prefix + ".outLocalPort")).intValue();
     outLocalAddress = (String) h.get(prefix + ".outLocalAddress");
     String listInterceptorClassNames = (String) h.get(prefix + ".inInterceptors");
@@ -497,6 +507,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
   strbuf.append(",topicActivationThreshold=").append(topicActivationThreshold);
   strbuf.append(",compressedMinSize=").append(compressedMinSize);
   strbuf.append(",compressionLevel=").append(compressionLevel);
+  strbuf.append(",noAckedQueue=").append(noAckedQueue);
   strbuf.append(",outLocalAddress=").append(outLocalAddress);
   strbuf.append(",outLocalPort=").append(outLocalPort);
   
@@ -633,6 +644,8 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
           compressedMinSize = new Integer(value).intValue();
         } else if ("compressionLevel".equals(name)) {
           compressionLevel = new Integer(value).intValue();
+        } else if ("noAckedQueue".equals(name)) {
+          noAckedQueue = new Boolean(value).booleanValue();
         } else if ("outLocalPort".equals(name)) {
           outLocalPort = new Integer(value).intValue();
         } else if ("outLocalAddress".equals(name)) {
