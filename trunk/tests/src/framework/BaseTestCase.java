@@ -27,6 +27,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -35,6 +36,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.InetAddress;
@@ -757,11 +759,13 @@ public class BaseTestCase {
     // computer information
     writeSysInfo();
     
+    StringBuffer writerBuf = new StringBuffer();
+    
     // write Joram version
     if (current.summary)
       System.err.println(ConnectionMetaData.providerName + " " + ConnectionMetaData.providerVersion);
-    if (current.writer != null)
-      current.writer.println("| " + ConnectionMetaData.providerName + " " + ConnectionMetaData.providerVersion);
+    writerBuf.append("| " + ConnectionMetaData.providerName + " " + ConnectionMetaData.providerVersion);
+    writerBuf.append("\n");
 
     // TODO:
     if ((current.failures != null) || (current.errors != null)) {
@@ -771,52 +775,50 @@ public class BaseTestCase {
                            ", failures: " + current.failureCount() +
                            ", errors: " + current.errorCount() + ", [" +
                            (current.endDate - current.startDate) + "].");
-      if (current.writer != null)
-        current.writer.println("TEST \"" + current.name + "\" FAILED" +
-                               ", asserts: " + asserts +
-                               ", failures: " + current.failureCount() +
-                               ", errors: " + current.errorCount() + ", [" +
-                               (current.endDate - current.startDate) + "].");
+      writerBuf.append("TEST \"" + current.name + "\" FAILED" +
+          ", asserts: " + asserts +
+          ", failures: " + current.failureCount() +
+          ", errors: " + current.errorCount() + ", [" +
+          (current.endDate - current.startDate) + "].");
+      writerBuf.append("\n");
     } else {
       if (current.summary)
         System.err.println("TEST \"" + current.name + "\" OK [" + asserts + ", " +
-                           (current.endDate - current.startDate) + "].");
-      if (current.writer != null)
-        current.writer.println("TEST \"" + current.name + "\" OK [" + asserts + ", " +
-                               (current.endDate - current.startDate) + "].");
+            (current.endDate - current.startDate) + "].");
+      writerBuf.append("TEST \"" + current.name + "\" OK [" + asserts + ", " +
+          (current.endDate - current.startDate) + "].");
+      writerBuf.append("\n");
     }
     if (msg != null) {
       if (current.summary) System.err.println(msg);
-      if (current.writer != null) current.writer.println(msg);
+      writerBuf.append(msg);
+      writerBuf.append("\n");
     }
 
     if (current.failures != null) {
       status += current.failures.size();
-      if (current.writer != null) {
-        for (int i=0; i<current.failures.size(); i++) {
-          current.writer.print("+" + i + ") ");
-          ((Throwable) current.failures.get(i)).printStackTrace(current.writer);
-        }
+      for (int i=0; i<current.failures.size(); i++) {
+        writerBuf.append("+" + i + ") ");
+        writerBuf.append(getStackTrace((Throwable) current.failures.get(i)));
       }
+      writerBuf.append("\n");
     }
 
     if (current.errors != null) {
       status += current.errors.size();
-      if (current.writer != null) {
-        for (int i=0; i<current.errors.size(); i++) {
-          current.writer.print("+" + i + ") ");
-          ((Throwable) current.errors.get(i)).printStackTrace(current.writer);
-        }
+      for (int i=0; i<current.errors.size(); i++) {
+        writerBuf.append("+" + i + ") ");
+        writerBuf.append(getStackTrace((Throwable) current.errors.get(i)));
       }
+      writerBuf.append("\n");
     }
 
     if (current.exceptions != null) {
-      if (current.writer != null) {
-        for (int i=0; i<current.exceptions.size(); i++) {
-          current.writer.print("+" + i + ") ");
-          ((Throwable) current.exceptions.get(i)).printStackTrace(current.writer);
-        }
+      for (int i=0; i<current.exceptions.size(); i++) {
+        writerBuf.append("+" + i + ") ");
+        writerBuf.append(getStackTrace((Throwable) current.exceptions.get(i)));
       }
+      writerBuf.append("\n");
     }
 
     if (current.saveErrors
@@ -824,6 +826,16 @@ public class BaseTestCase {
       DateFormat df = new SimpleDateFormat("yy-MM-dd [HH.mm.ss] ");
       File currentDir = new File(".");
       File destDir = new File("../ERROR-" + df.format(new Date()) + current.name);
+      
+      try {
+        PrintWriter currentReport = new PrintWriter(new File("report.txt"));
+        currentReport.print(writerBuf.toString());
+        currentReport.flush();
+        currentReport.close();
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      }
+      
       try {
         copyDirectory(currentDir, destDir);
       } catch (IOException exc) {
@@ -834,6 +846,7 @@ public class BaseTestCase {
     }
 
     if (current.writer != null) {
+      current.writer.print(writerBuf.toString());
       current.writer.flush();
       current.writer.close();
     }
@@ -841,6 +854,15 @@ public class BaseTestCase {
     if (exit) System.exit(status);
   }
 
+  public static String getStackTrace(Throwable exc) {
+    final StringWriter result = new StringWriter();
+    final PrintWriter printWriter = new PrintWriter(result);
+    exc.printStackTrace(printWriter);
+    printWriter.flush();
+    printWriter.close();
+    return result.toString();
+  }
+  
   public static void copyDirectory(File srcPath, File dstPath) throws IOException {
     if (srcPath.isDirectory()) {
       if (!dstPath.exists()) {
