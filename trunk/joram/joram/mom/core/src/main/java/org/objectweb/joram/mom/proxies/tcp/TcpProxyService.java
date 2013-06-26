@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -29,6 +29,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -94,6 +96,10 @@ public class TcpProxyService implements TcpProxyServiceMBean {
    * The proxy service reference (used to stop it).
    */
   private static TcpProxyService proxyService;
+  
+  public static ExecutorService executorService = null;
+  
+  static boolean cnxWithNoAckedQueue = false;
 
   int port;
   int backlog;
@@ -282,6 +288,10 @@ public class TcpProxyService implements TcpProxyServiceMBean {
       logger.log(BasicLevel.DEBUG, "TcpProxyService.activate()");
   	
     try {
+      if (cnxWithNoAckedQueue && executorService == null) {
+        createExecutors();
+      }
+      
       if (serverSocket == null)
         serverSocket = createServerSocket(port, backlog, address);
 
@@ -299,6 +309,36 @@ public class TcpProxyService implements TcpProxyServiceMBean {
     }
   }
 
+  public synchronized static void createExecutors() {
+    if (executorService != null)
+      return;
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "TcpProxyService.createExecutors()");
+    int poolSize = Integer.getInteger("joram.QueueWorkerPoolSize", 5);
+    executorService = Executors.newFixedThreadPool(poolSize);
+    cnxWithNoAckedQueue = true;
+  }
+  
+  public synchronized static void removeExecutors() {
+    if (executorService == null)
+      return;
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "TcpProxyService.removeExecutors()");
+    executorService.shutdown();
+    executorService = null;
+  }
+  
+  public static void execute(Runnable command) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "TcpProxyService.execute(" + command + ')');
+    try {
+      executorService.execute(command);
+    } catch (Exception e) {
+      logger.log(BasicLevel.ERROR, "TcProxyService.execute:: EXCEPTION : " + e.getMessage());
+      throw e;
+    }
+  }
+  
   public void closeAllConnections() {
     Vector stopList = (Vector) connections.clone();
     for (int i = 0; i < stopList.size(); i++) {
@@ -311,6 +351,10 @@ public class TcpProxyService implements TcpProxyServiceMBean {
     for (int i = 0; i < connectionListeners.length; i++) {
       connectionListeners[i].stop();
     }
+    
+    // shutdown the executor service
+    removeExecutors();
+    
     activated = false;
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "TcpProxyService.activated = false");
