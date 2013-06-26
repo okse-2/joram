@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -108,7 +108,7 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
       throw new JMSException(exc.getMessage());
     }
 
-    OpenConnectionNot ocn = new OpenConnectionNot(false, 0);
+    OpenConnectionNot ocn = new OpenConnectionNot(false, 0, true);
     try {
       ocn.invoke(proxyId);
       ctx = (StandardConnectionContext) ocn.getConnectionContext();
