@@ -3096,28 +3096,28 @@
           description=" --> Configurable performance test">
     <antcall target="perf.test6-x" inheritAll="true">
       <param name="testid" value="perf.test6-3"/>
-      <!-- param name="Destination"
-             value="org.objectweb.joram.client.jms.Topic"/ -->
       <param name="Destination"
-             value="org.objectweb.joram.client.jms.Queue"/>
+             value="org.objectweb.joram.client.jms.Topic"/>
+      <!-- param name="Destination"
+             value="org.objectweb.joram.client.jms.Queue"/ -->
       <param name="transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
       <!-- param name="transaction"
              value="fr.dyade.aaa.util.NTransaction"/ -->
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <!-- param name="engine" value="fr.dyade.aaa.agent.GCEngine"/ -->
       <!-- param name="BaseClass" value="joram.perfs.TcpBaseTest"/ -->
-      <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-      <param name="dupsOk" value="false"/>
-      <param name="queueMessageReadMax" value="10"/>
-      <param name="topicAckBufferMax" value="50"/>
-      <param name="implicitAck" value="false"/>
-      <param name="MsgTransient" value="false"/>
-      <param name="SubDurable" value="false"/>
-      <param name="Transacted" value="false"/>
-      <param name="NbRound" value="100"/>
-      <param name="NbMsgPerRound" value="10000"/>
-      <param name="NbProdCons" value="1"/>
-      <param name="MsgSize" value="100"/>
+      <param name="BaseClass" value="joram.perfs.ColocatedBaseTest" />
+      <param name="dupsOk" value="false" />
+      <param name="queueMessageReadMax" value="10" />
+      <param name="topicAckBufferMax" value="50" />
+      <param name="implicitAck" value="false" />
+      <param name="MsgTransient" value="false" />
+      <param name="SubDurable" value="false" />
+      <param name="Transacted" value="false" />
+      <param name="NbRound" value="100" />
+      <param name="NbMsgPerRound" value="10000" />
+      <param name="NbProdCons" value="1" />
+      <param name="MsgSize" value="100" />
     </antcall>
   </target>
 
@@ -3138,6 +3138,10 @@
     <property name="NbMsgPerRound" value="100"/>
     <property name="NbProdCons" value="1"/>
     <property name="MsgSize" value="25"/>
+  	<property name="SyncOnWrite" value="false" />
+  	<property name="compressedMinSize" value="0" />
+  	<property name="noAckedQueue" value="false" />
+  	<property name="isByteMsg" value="true" />
   </target>
 
   <target name="perf.test6-x" depends="init.test6props,compile">
@@ -3145,7 +3149,7 @@
       <param name="className" value="joram.perfs.Test6"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNTLogFileSize=32 -DNTLogMemorySize=4096 -DDestination=${Destination} -DBaseClass=${BaseClass} -DdupsOk=${dupsOk} -DqueueMessageReadMax=${queueMessageReadMax} -DtopicAckBufferMax=${topicAckBufferMax} -DimplicitAck=${implicitAck} -DMsgTransient=${MsgTransient} -DSubDurable=${SubDurable} -DTransacted=${Transacted} -DNbRound=${NbRound} -DNbMsgPerRound=${NbMsgPerRound} -DNbSender=${NbProdCons} -DNbReceiver=${NbProdCons} -DNbDestination=${NbProdCons} -DMsgSize=${MsgSize}"/>
+      <param name="jvmargs" value="-DisByteMsg=${isByteMsg} -DnoAckedQueue=${noAckedQueue} -DcompressedMinSize=${compressedMinSize} -DTransaction.SyncOnWrite=${SyncOnWrite} -DNTLogFileSize=32 -DNTLogMemorySize=4096 -DDestination=${Destination} -DBaseClass=${BaseClass} -DdupsOk=${dupsOk} -DqueueMessageReadMax=${queueMessageReadMax} -DtopicAckBufferMax=${topicAckBufferMax} -DimplicitAck=${implicitAck} -DMsgTransient=${MsgTransient} -DSubDurable=${SubDurable} -DTransacted=${Transacted} -DNbRound=${NbRound} -DNbMsgPerRound=${NbMsgPerRound} -DNbSender=${NbSender} -DNbReceiver=${NbReceiver} -DNbDestination=${NbProdCons} -DMsgSize=${MsgSize}"/>
     </antcall>
   </target>
 
@@ -3269,31 +3273,35 @@
           description=" --> Configurable performance test">
     <antcall target="perf.test6-x" inheritAll="true">
       <param name="testid" value="M-3"/>
-      <param name="Destination"
-             value="org.objectweb.joram.client.jms.Topic"/>
       <!-- param name="Destination"
-             value="org.objectweb.joram.client.jms.Queue"/ -->
+             value="org.objectweb.joram.client.jms.Topic"/-->
+      <param name="Destination"
+             value="org.objectweb.joram.client.jms.Queue"/>
       <param name="transaction"
-             value="fr.dyade.aaa.util.NTransaction"/>
+             value="fr.dyade.aaa.ext.NGTransaction"/>
       <!-- param name="transaction"
              value="fr.dyade.aaa.util.NullTransaction"/ -->
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <!-- param name="engine" value="fr.dyade.aaa.agent.GCEngine"/ -->
-      <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-      <!-- param name="BaseClass" value="joram.perfs.TcpBaseTest"/ -->
-      <param name="MsgTransient" value="true"/>
-      <param name="SubDurable" value="false"/>
-      <param name="Transacted" value="true"/>
-      <param name="NbRound" value="100"/>
-      <param name="NbMsgPerRound" value="100"/>
-      <param name="NbSender" value="20"/>
-      <param name="NbReceiver" value="1"/>
-      <param name="MsgSize" value="25"/>
-      <param name="dupsOk" value="false"/>
-      <param name="queueMessageReadMax" value="1000"/>
-      <param name="topicAckBufferMax" value="1000"/>
-      <param name="multiThreadSyncDelay" value="1"/>
-      <param name="multiCnx" value="true"/>
+      <!--param name="BaseClass" value="joram.perfs.ColocatedBaseTest" /-->
+      <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
+      <param name="SyncOnWrite" value="false" />
+      <param name="MsgTransient" value="true" />
+      <param name="noAckedQueue" value="true" />
+      <param name="SubDurable" value="false" />
+      <param name="Transacted" value="false" />
+      <param name="NbRound" value="10000" />
+      <param name="NbMsgPerRound" value="100" />
+      <param name="NbSender" value="1" />
+      <param name="NbReceiver" value="1" />
+      <param name="compressedMinSize" value="102400" />
+      <param name="MsgSize" value="1000" />
+      <param name="dupsOk" value="false" />
+      <param name="queueMessageReadMax" value="1000" />
+      <param name="topicAckBufferMax" value="1000" />
+      <param name="multiThreadSyncDelay" value="1" />
+      <param name="multiCnx" value="true" />
+    	<param name="isByteMsg" value="false" />
     </antcall>
   </target>
 
