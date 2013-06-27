@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,6 +33,7 @@ import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TemporaryTopic;
+import javax.jms.TextMessage;
 
 import org.objectweb.joram.client.jms.Destination;
 
@@ -55,6 +56,7 @@ public class Sender extends BaseTest implements Runnable {
   Lock lock;
 
   boolean MsgTransient;
+  boolean isByteMsg = true;
 
   public Sender(Connection cnx,
                 Destination dest,
@@ -62,7 +64,8 @@ public class Sender extends BaseTest implements Runnable {
                 int NbMsgPerRound,
                 int MsgSize,
                 Lock lock,
-                boolean MsgTransient) throws Exception {
+                boolean MsgTransient,
+                boolean isByteMsg) throws Exception {
     this.cnx = cnx;
     this.dest = dest;
     this.NbRound = NbRound;
@@ -72,6 +75,7 @@ public class Sender extends BaseTest implements Runnable {
     this.lock = lock;
 
     this.MsgTransient = MsgTransient;
+    this.isByteMsg = isByteMsg;
 
     transacted = Boolean.getBoolean("Transacted");
 
@@ -93,15 +97,37 @@ public class Sender extends BaseTest implements Runnable {
   long dt2 = 0L;
   ArrayList arrayList = null;
 
+  
+  private static String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+  private static int charLength = chars.length();
+  
+  public static String generateString(int length) {
+      StringBuilder  pass = new StringBuilder (charLength);
+      for (int x = 0; x < length; x++) {
+          int i = (int) (Math.random() * charLength);
+          pass.append(chars.charAt(i)).append(" \n");
+      }
+      return pass.toString();
+  }
+  
+  public static byte[] generateBytes(int MsgSize) {
+    byte[] content = new byte[MsgSize];
+    for (int i = 0; i< MsgSize; i++)
+      content[i] = (byte) (i & 0xFF);
+    return content;
+  }
+
   public void run() {
 
     try {
       long t1 = System.currentTimeMillis();
       arrayList = new ArrayList();
-
-      byte[] content = new byte[MsgSize];
-      for (int i = 0; i< MsgSize; i++)
-        content[i] = (byte) (i & 0xFF);
+     
+      Object content = null;
+      if (isByteMsg)
+        content = generateBytes(MsgSize);
+      else
+        content = generateString(Math.round(MsgSize/3)-4);
 
       long min = Long.MAX_VALUE;
       long max = 0;
@@ -109,12 +135,22 @@ public class Sender extends BaseTest implements Runnable {
       for (int i=0; i<NbRound; i++) {
         long start = System.currentTimeMillis();
         for (int j=0; j<NbMsgPerRound; j++) {
-          BytesMessage msg = sess1.createBytesMessage();
+          Message msg = null;
+          if (isByteMsg) {
+            msg = sess1.createBytesMessage();
+          } else {
+            msg = sess1.createTextMessage();
+          }
+          //((org.objectweb.joram.client.jms.TextMessage)msg).setCompressionLevel(Deflater.BEST_COMPRESSION);
           if (MsgTransient) {
             msg.setJMSDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
             producer.setDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
           }
-          msg.writeBytes(content);
+          
+          if (isByteMsg)
+            ((BytesMessage) msg).writeBytes((byte[])content);
+          else
+            ((TextMessage) msg).setText((String) content);
           msg.setLongProperty("time", System.currentTimeMillis());
           msg.setIntProperty("index", NbMsgPerRound-j-1);
           msg.setJMSReplyTo(topic);
@@ -156,6 +192,7 @@ public class Sender extends BaseTest implements Runnable {
 
     AdminConnect(baseclass);
     ConnectionFactory cf =  createConnectionFactory(baseclass);
+    ((org.objectweb.joram.client.jms.ConnectionFactory)cf).getParameters().noAckedQueue = Boolean.getBoolean("noAckedQueue");
     Connection cnx = cf.createConnection();
 
     Destination dest = null;
@@ -171,11 +208,12 @@ public class Sender extends BaseTest implements Runnable {
     MsgSize = Integer.getInteger("MsgSize", MsgSize).intValue();
 
     boolean MsgTransient = Boolean.getBoolean("MsgTransient");
+    boolean isByteMsg = new Boolean(System.getProperty("isByteMsg", "true"));
 
     Lock lock = new Lock(1);
     Sender sender = new Sender(cnx, dest,
                                NbRound, NbMsgPerRound, MsgSize,
-                               lock, MsgTransient);
+                               lock, MsgTransient, isByteMsg);
     sender.start();
     sender.run();
 
