@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -65,6 +65,12 @@ public class Test6 extends BaseTest {
   boolean implicitAck;
   
   static boolean dupsOk;
+  
+  static int compressedMinSize;
+  
+  static boolean noAckedQueue;
+  
+  static boolean isByteMsg = true;
 
   public static void main (String args[]) throws Exception {
     new Test6().run();
@@ -94,6 +100,9 @@ public class Test6 extends BaseTest {
       queueMessageReadMax = Integer.getInteger("queueMessageReadMax", 1).intValue();
       topicAckBufferMax = Integer.getInteger("topicAckBufferMax", 0).intValue();
       implicitAck = Boolean.getBoolean("implicitAck");
+      compressedMinSize = Integer.getInteger("compressedMinSize", 102400).intValue();
+      noAckedQueue = Boolean.getBoolean("noAckedQueue");
+      isByteMsg = new Boolean(System.getProperty("isByteMsg", "true"));
 
       if (multiCnx && multiThreadSync) 
         throw new Exception("Can't test both multiCnx and multiThreadSync");
@@ -132,17 +141,22 @@ public class Test6 extends BaseTest {
                     ", MsgSize=" + MsgSize);
       writeIntoFile("multiThreadSync=" + multiThreadSync + 
                     ", multiThreadSyncDelay=" + multiThreadSyncDelay);
-      writeIntoFile("multiCnx=" + multiCnx);
+      writeIntoFile("multiCnx=" + multiCnx + 
+                    ", noAckedQueue=" + noAckedQueue + 
+                    ", isByteMsg=" + isByteMsg);
       writeIntoFile("----------------------------------------------------");
 
 
       ConnectionFactory cf =  createConnectionFactory(baseclass);
       Connection cnx1 = cf.createConnection();
+      ((org.objectweb.joram.client.jms.ConnectionFactory)cf).getParameters().noAckedQueue = noAckedQueue;
 
       ConnectionFactory cf2 = createConnectionFactory(baseclass);
       ((org.objectweb.joram.client.jms.ConnectionFactory)cf2).getParameters().multiThreadSync = multiThreadSync;
       ((org.objectweb.joram.client.jms.ConnectionFactory)cf2).getParameters().multiThreadSyncDelay = multiThreadSyncDelay;
       ((org.objectweb.joram.client.jms.ConnectionFactory)cf2).getParameters().multiThreadSyncThreshold = NbSender/2;
+      ((org.objectweb.joram.client.jms.ConnectionFactory)cf2).getParameters().compressedMinSize = compressedMinSize;
+      ((org.objectweb.joram.client.jms.ConnectionFactory)cf2).getParameters().noAckedQueue = noAckedQueue;
 
       Connection cnx2 = null;
       if (! multiCnx) {
@@ -164,7 +178,7 @@ public class Test6 extends BaseTest {
         }
         sender[i] = new Sender(cnx2, dest[i%NbDestination],
                                NbRound, NbMsgPerRound, MsgSize,
-                               lock, MsgTransient);
+                               lock, MsgTransient, isByteMsg);
       }
 
       cnx1.start();
