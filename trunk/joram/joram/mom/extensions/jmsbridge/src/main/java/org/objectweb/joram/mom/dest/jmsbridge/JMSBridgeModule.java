@@ -23,6 +23,8 @@
  */
 package org.objectweb.joram.mom.dest.jmsbridge;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -41,6 +43,9 @@ import javax.jms.Topic;
 import javax.jms.XAConnection;
 import javax.jms.XAConnectionFactory;
 import javax.jms.XASession;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
@@ -769,13 +774,61 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
         logger.log(BasicLevel.DEBUG, "StartupDaemon<init> " + agentId);
     }
 
+    
+    protected Object retrieveJndiObject(String jndiName) throws Exception {
+
+      Context jndiCtx = null;
+      ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+
+      try {
+        jndiCtx = getInitialContext();
+        return jndiCtx.lookup(jndiName);
+
+      } catch (Exception exc) {
+        throw exc;
+      } finally {
+        // Closing the JNDI context.
+        if (jndiCtx != null) {
+          jndiCtx.close();
+        }
+        Thread.currentThread().setContextClassLoader(oldClassLoader);
+      }
+    }
+
+    protected Context getInitialContext() throws IOException, NamingException {
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "getInitialContext() - Load jndi.properties file");
+      }
+      Context jndiCtx;
+      Properties props = new Properties();
+      InputStream in = Class.class.getResourceAsStream("/jndi.properties");
+      
+      if (in == null) {
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "jndi.properties not found.");
+        }
+      } else {
+        props.load(in);
+      }
+
+      // Override jndi.properties with properties given at initialization if present
+      if (jndiFactory != null) {
+        props.setProperty(Context.INITIAL_CONTEXT_FACTORY, jndiFactory);
+      }
+      if (jndiUrl != null) {
+        props.setProperty(Context.PROVIDER_URL, jndiUrl);
+      }
+
+      Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+      jndiCtx = new InitialContext(props);
+      return jndiCtx;
+    }
+    
     /** The daemon's loop. */
     public void run() {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "run()");
-      
-      javax.naming.Context jndiCtx = null;
-      ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+
       try {
         canStop = true;
 
@@ -783,18 +836,8 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
         // JNDI.
         if (cnxFact == null || dest == null) {
 
-          Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
-
-          if (jndiFactory == null || jndiUrl == null)
-            jndiCtx = new javax.naming.InitialContext();
-          else {
-            java.util.Hashtable env = new java.util.Hashtable();
-            env.put(javax.naming.Context.INITIAL_CONTEXT_FACTORY, jndiFactory);
-            env.put(javax.naming.Context.PROVIDER_URL, jndiUrl);
-            jndiCtx = new javax.naming.InitialContext(env);
-          }
-          cnxFact = (ConnectionFactory) jndiCtx.lookup(cnxFactName);
-          dest = (Destination) jndiCtx.lookup(destName);
+          cnxFact = (ConnectionFactory) retrieveJndiObject(cnxFactName);
+          dest = (Destination) retrieveJndiObject(destName);
           
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "run: factory=" + cnxFact + ", destination=" + dest);
@@ -876,13 +919,6 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Exception:: notUsableMessage=" + notUsableMessage, exc);
       } finally {
-        Thread.currentThread().setContextClassLoader(oldClassLoader);
-        // Closing the JNDI context.
-        try {
-          jndiCtx.close();
-        }
-        catch (Exception exc) {}
-
         finish();
       }
     }
