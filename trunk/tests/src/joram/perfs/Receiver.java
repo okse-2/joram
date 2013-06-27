@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,6 @@
  */
 package joram.perfs;
 
-import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Message;
@@ -95,6 +94,7 @@ public class Receiver extends BaseTest implements MessageListener {
 
     AdminConnect(baseclass);
     ConnectionFactory cf =  createConnectionFactory(baseclass);
+    ((org.objectweb.joram.client.jms.ConnectionFactory)cf).getParameters().noAckedQueue = Boolean.getBoolean("noAckedQueue");
     Connection cnx = cf.createConnection();
 
     Destination dest = null;
@@ -117,7 +117,7 @@ public class Receiver extends BaseTest implements MessageListener {
     boolean excok = false;
 
     try {
-      BytesMessage msg = (BytesMessage) m;
+      Message msg = m;
 
       last = System.currentTimeMillis();
       if (counter == 0) start = t1 = last;
