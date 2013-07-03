@@ -101,11 +101,9 @@ public class Channel {
 //     }
 
 //  if (Class.EngineThread.isAssignable(Thread.currentThread())) {
-    if (Thread.currentThread() == AgentServer.engine.thread) {
-      AgentServer.engine.push(AgentServer.engine.agent.getId(), to, not);
-    } else {
-      channel.directSendTo(AgentId.localId, to, not);
-    }
+    
+    AgentServer.engine.push(to, not);
+    
   }
 
   /**
@@ -199,7 +197,7 @@ public class Channel {
     }
 
     try {
-      if (AgentServer.engine.noTxIfTransient &&
+      if (AgentServer.engine.isNoTxIfTransient() && 
           msg.not != null && msg.not.persistent == false) {
         consumer.postAndValidate(msg);
       } else {

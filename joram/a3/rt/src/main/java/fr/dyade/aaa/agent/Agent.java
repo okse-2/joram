@@ -663,7 +663,7 @@ public abstract class Agent implements AgentMBean, Serializable, Encodable {
 //     }
 
 //  if (Class.EngineThread.isAssignable(Thread.currentThread())) {
-    if (Thread.currentThread() == AgentServer.engine.thread) {
+    if (AgentServer.isEngineThread()) {
       AgentServer.engine.push(getId(), to, not);
     } else {
       Channel.channel.directSendTo(getId(), to, not);
