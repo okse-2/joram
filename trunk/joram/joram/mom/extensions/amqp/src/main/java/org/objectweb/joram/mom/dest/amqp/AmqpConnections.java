@@ -78,11 +78,11 @@ public class AmqpConnections implements AmqpConnectionsMBean {
       }
     }
     try {
-      if (Thread.currentThread() != AgentServer.getEngineThread()) {
+      if (! AgentServer.isEngineThread()) {
         AgentServer.getTransaction().begin();
       }
       AgentServer.getTransaction().save((HashMap) servers, SAVE_FILE_NAME);
-      if (Thread.currentThread() != AgentServer.getEngineThread()) {
+      if (! AgentServer.isEngineThread()) {
         AgentServer.getTransaction().commit(true);
       }
     } catch (IOException exc) {
@@ -97,11 +97,11 @@ public class AmqpConnections implements AmqpConnectionsMBean {
       if (cnx != null) {
         cnx.stopLiveConnection();
         try {
-          if (Thread.currentThread() != AgentServer.getEngineThread()) {
+          if (! AgentServer.isEngineThread()) {
             AgentServer.getTransaction().begin();
           }
           AgentServer.getTransaction().save((HashMap) servers, SAVE_FILE_NAME);
-          if (Thread.currentThread() != AgentServer.getEngineThread()) {
+          if (! AgentServer.isEngineThread()) {
             AgentServer.getTransaction().commit(true);
           }
         } catch (IOException exc) {
