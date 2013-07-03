@@ -92,7 +92,7 @@ class EngineThread extends Thread {
  * stops the agent server.
  * </ul>
  */
-class Engine implements Runnable, MessageConsumer, EngineMBean {
+class Engine implements Runnable, AgentEngine, EngineMBean {
   /**
    * Queue of messages to be delivered to local agents.
    */ 
@@ -291,7 +291,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * As this method is only  called by engine's thread it does not need to be
    * synchronized.
    */
-  final void push(AgentId from,
+  public final void push(AgentId from,
                   AgentId to,
                   Notification not) {
     if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -305,6 +305,22 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     }
 
     mq.push(Message.alloc(from, to, not));
+  }
+  
+  /**
+   * Push a new message in temporary queue until the end of current reaction.
+   * As this method is only  called by engine's thread it does not need to be
+   * synchronized.
+   */
+  public final void push(AgentId to, Notification not) {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ", push(" + to + ", " + not + ")");
+    if (Thread.currentThread() == thread) {
+      push(agent.getId(), to, not);
+    } else {
+      Channel.channel.directSendTo(AgentId.localId, to, not);
+    }
   }
 
   /**
@@ -399,7 +415,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     if (modified) save();
   }
 
-  void init() throws Exception {
+  public void init() throws Exception {
     // Before any agent may be used, the environment, including the hash table,
     // must be initialized.
     agents = new Hashtable<AgentId, Agent>();
@@ -478,7 +494,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * @exception Exception
    *	unspecialized exception
    */
-  final void createAgent(AgentId id, Agent agent) throws Exception {
+  public final void createAgent(AgentId id, Agent agent) throws Exception {
     agent.id = id;
     agent.deployed = true;
     agent.agentInitialize(true);
@@ -517,7 +533,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    *
    * @param agent	agent to delete
    */
-  void deleteAgent(AgentId from) throws Exception {
+  public void deleteAgent(AgentId from) throws Exception {
     Agent ag;
     Agent old = agent;
     try {
@@ -1350,4 +1366,16 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
     return strbuf.toString();
   }
+  
+  /**
+   * Checks if the current thread calling this method 
+   * belongs to the engine.
+   * 
+   * @return true if the current thread calling this method 
+   * belongs to the engine
+   */
+  public boolean isEngineThread() {
+    return Thread.currentThread() == thread;
+  }
+  
 }

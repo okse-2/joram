@@ -224,20 +224,17 @@ public final class AgentServer {
    * AF: I think we must suppress this dependency in order to be able to run
    * multiples engine.
    */
-  static Engine engine = null;
+  static AgentEngine engine = null;
 
   /**
    * Returns the agent server engine.
    */
-  public static Engine getEngine() {
+  public static AgentEngine getEngine() {
     return engine;
   }
-
-  /**
-   * Returns the agent server engine thread.
-   */
-  public static Thread getEngineThread() {
-    return engine.thread;
+  
+  public static boolean isEngineThread() {
+    return engine.isEngineThread();
   }
 
   public static void resetEngineAverageLoad() {
@@ -702,7 +699,13 @@ public final class AgentServer {
     consumers = new Hashtable<String, MessageConsumer>();
 
     // Creates the local MessageConsumer: the Engine.
-    engine = Engine.newInstance();
+    
+    String cname = "fr.dyade.aaa.agent.Engine";
+    cname = AgentServer.getProperty("Engine", cname);
+
+    Class<?> eclass = Class.forName(cname);
+    engine = (AgentEngine) eclass.newInstance();
+    
     addConsumer("local", engine);
 
     // Search all directly accessible domains.
