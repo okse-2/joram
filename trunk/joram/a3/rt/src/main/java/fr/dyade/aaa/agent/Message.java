@@ -36,7 +36,7 @@ import fr.dyade.aaa.common.Pool;
  * and the current stamp of the message.
  * </ul>
  */
-final class Message implements Serializable {
+public final class Message implements Serializable {
   /** define serialVersionUID for interoperability */
   static final long serialVersionUID = 1L;
 
@@ -65,8 +65,20 @@ final class Message implements Serializable {
   }
 
   /** Get the stamp of this message */
-  int getStamp() {
+  public int getStamp() {
     return stamp;
+  }
+
+  public AgentId getFrom() {
+    return from;
+  }
+
+  public AgentId getTo() {
+    return to;
+  }
+
+  public Notification getNot() {
+    return not;
   }
 
   /**
@@ -222,7 +234,7 @@ final class Message implements Serializable {
    *
    * @return true if the associated notification is persistent.
    */
-  boolean isPersistent() {
+  public boolean isPersistent() {
     return ((not != null) && not.persistent);
   }
 

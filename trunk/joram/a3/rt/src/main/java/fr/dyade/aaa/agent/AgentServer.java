@@ -1206,7 +1206,7 @@ public final class AgentServer {
       ServiceManager.loadServiceClasses();
 
       // initializes fixed agents
-      engine.init();
+      engine.init(new AgentEngineContextImpl());
 
       logmon.log(BasicLevel.WARN,
                  getName() + ", initialized at " + new Date());

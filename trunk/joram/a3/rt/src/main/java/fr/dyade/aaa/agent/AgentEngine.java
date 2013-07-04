@@ -128,12 +128,25 @@ public interface AgentEngine extends MessageConsumer {
    * @return the commitTime
    */
   long getCommitTime();
-
+  
   /**
-   * Initializes the engine
+   * Initializes the engine. The <code>AgentEngineContext</code> 
+   * parameter should be for the unique private use of this 
+   * <code>AgentEngine</code> and should not be shared 
+   * with any other components otherwise
+   * the agent server security would be broken.
+   * @param agentEngineContext context enabling this 
+   * <code>AgentEngine</code> to invoke operations
+   * that cannot be accessed outside of the 
+   * <code>fr.dyade.aaa.agent</code> package.
+   * The <code>AgentEngineContext</code> 
+   * should be for the unique private use of this 
+   * <code>AgentEngine</code> and should not be shared 
+   * with any other components otherwise
+   * the agent server security would be broken.
    * @throws Exception
    */
-  void init() throws Exception;
+  void init(AgentEngineContext agentEngineContext) throws Exception;
   
   /**
    * Gets the number of waiting messages in this engine.
