@@ -415,7 +415,7 @@ class Engine implements Runnable, AgentEngine, EngineMBean {
     if (modified) save();
   }
 
-  public void init() throws Exception {
+  public void init(AgentEngineContext agentEngineContext) throws Exception {
     // Before any agent may be used, the environment, including the hash table,
     // must be initialized.
     agents = new Hashtable<AgentId, Agent>();

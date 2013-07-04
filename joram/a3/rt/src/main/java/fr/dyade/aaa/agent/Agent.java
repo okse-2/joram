@@ -173,7 +173,7 @@ public abstract class Agent implements AgentMBean, Serializable, Encodable {
   /**
    * Indicates whether the agent has been updated or not.
    */
-  boolean isUpdated() {
+  public boolean isUpdated() {
     return updated;
   }
 

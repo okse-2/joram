@@ -30,7 +30,7 @@ import fr.dyade.aaa.common.EmptyQueueException;
  * persistent list of Message (source and target agent identifier,
  * notification).
  */
-interface MessageQueue {
+public interface MessageQueue {
   /**
    * Insert a message in the queue, it should only be used during
    * initialization for restoring the queue state.
