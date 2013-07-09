@@ -146,14 +146,14 @@ public class CommonService {
 		// set System properties if needed
 		Enumeration en = properties.keys();
 		while (en.hasMoreElements()) {
-	    String key = (String) en.nextElement();
+	    Object key = en.nextElement();
 	    if (SID.equals(key) || STORAGE.equals(key) || PATH_TO_CONF.equals(key)) {
 	    	// reserved word.
 	    	continue;
 	    } else {
-	    	String value = (String) properties.get(key);
-	    	if (value != null)
-	    		System.setProperty(key, value);
+	    	Object value = properties.get(key);
+	    	if (value != null && key instanceof String && value instanceof String)
+	    		System.setProperty((String) key, (String) value);
 	    }
     }
 		
