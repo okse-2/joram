@@ -193,7 +193,9 @@ public class UserMSF implements ManagedServiceFactory {
   			while (keys.hasMoreElements()) {
   				String key = (String) keys.nextElement();
   				// TODO: remove unused properties
-  				props.setProperty(key, (String) properties.get(key));
+  				Object value = properties.get(key);
+          if (value instanceof String)
+            props.setProperty(key, (String) value);
   			}
   			//create the user
   			user = wrapper.createUser(name, password, sid, identityClassName, props);
