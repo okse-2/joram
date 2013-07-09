@@ -228,7 +228,9 @@ public abstract class ServiceDestination {
   		while (keys.hasMoreElements()) {
   			String key = (String) keys.nextElement();
   			// TODO: remove unused properties
-  			props.setProperty(key, (String) properties.get(key));
+  			Object value = properties.get(key);
+        if (value instanceof String)
+          props.setProperty(key, (String) value);
   		}
 
   		if (isSet(serverId)) {

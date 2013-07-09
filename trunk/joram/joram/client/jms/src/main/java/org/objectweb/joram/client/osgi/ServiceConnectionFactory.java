@@ -231,7 +231,9 @@ public class ServiceConnectionFactory implements ManagedServiceFactory {
       else if (key.startsWith("jonas"))
         continue;
       // add property
-      prop.put(key, properties.get(key));
+      Object value = properties.get(key);
+      if (value != null && value instanceof String)
+        prop.put(key, (String) value);
     }
 		// set factory parameters
 		cf.getParameters().setParameters(prop);
