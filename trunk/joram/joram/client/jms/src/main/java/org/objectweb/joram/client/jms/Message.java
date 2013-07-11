@@ -1124,6 +1124,7 @@ public class Message implements javax.jms.Message {
     joramMsg.setJMSType(jmsMsg.getJMSType());
     joramMsg.setJMSMessageID(jmsMsg.getJMSMessageID());
     joramMsg.setJMSExpiration(jmsMsg.getJMSExpiration());
+    joramMsg.setJMSRedelivered(jmsMsg.getJMSRedelivered());
 
     Enumeration names = jmsMsg.getPropertyNames();
     if (names != null) {
@@ -1157,7 +1158,9 @@ public class Message implements javax.jms.Message {
    * @throws JMSException 
    */
   protected void prepare() throws JMSException {
-    momMsg.redelivered = false;
+    // Note (AF): the flag is now set in Session.send method using the
+    // corresponding setter (JMS2.0).
+//    momMsg.redelivered = false;
     momMsg.deliveryCount = 0;
   }
 
