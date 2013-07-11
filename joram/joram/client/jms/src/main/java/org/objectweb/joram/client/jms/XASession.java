@@ -347,4 +347,41 @@ public class XASession implements javax.jms.XASession {
   public BytesMessage createBytesMessage() throws JMSException {
     return sess.createBytesMessage();
   }
+
+  public MessageConsumer createSharedConsumer(Topic topic,
+		  String sharedSubscriptionName) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public MessageConsumer createSharedConsumer(Topic topic,
+		  String sharedSubscriptionName, String messageSelector)
+				  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public MessageConsumer createDurableConsumer(Topic topic, String name)
+		  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public MessageConsumer createDurableConsumer(Topic topic, String name,
+		  String messageSelector, boolean noLocal) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public MessageConsumer createSharedDurableConsumer(Topic topic, String name)
+		  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public MessageConsumer createSharedDurableConsumer(Topic topic, String name,
+		  String messageSelector) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
 }

@@ -23,6 +23,7 @@
  */
 package org.objectweb.joram.client.jms;
 
+import javax.jms.CompletionListener;
 import javax.jms.IllegalStateException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.MessageFormatException;
@@ -452,5 +453,41 @@ public class MessageProducer implements javax.jms.MessageProducer {
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
     sess.send(dest, message, deliveryMode, priority, timeToLive, timestampDisabled);
+  }
+
+  public void setDeliveryDelay(long deliveryDelay) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public long getDeliveryDelay() throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public void send(javax.jms.Message message,
+		  CompletionListener completionListener) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public void send(javax.jms.Message message, int deliveryMode, int priority,
+		  long timeToLive, CompletionListener completionListener)
+				  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public void send(javax.jms.Destination destination, javax.jms.Message message,
+		  CompletionListener completionListener) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public void send(javax.jms.Destination destination, javax.jms.Message message,
+		  int deliveryMode, int priority, long timeToLive,
+		  CompletionListener completionListener) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 }

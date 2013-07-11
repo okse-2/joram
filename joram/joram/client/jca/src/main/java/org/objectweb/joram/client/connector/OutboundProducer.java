@@ -23,6 +23,7 @@
  */
 package org.objectweb.joram.client.connector;
 
+import javax.jms.CompletionListener;
 import javax.jms.Destination;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
@@ -213,5 +214,46 @@ public class OutboundProducer implements javax.jms.MessageProducer {
 
     if (! valid)
       throw new IllegalStateException("Invalid call on a closed producer.");
+  }
+
+
+  public void setDeliveryDelay(long deliveryDelay) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+
+  public long getDeliveryDelay() throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+
+  public void send(Message message, CompletionListener completionListener)
+		  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public void send(Message message, int deliveryMode, int priority,
+		  long timeToLive, CompletionListener completionListener)
+				  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+
+  public void send(Destination destination, Message message,
+		  CompletionListener completionListener) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+
+  public void send(Destination destination, Message message, int deliveryMode,
+		  int priority, long timeToLive, CompletionListener completionListener)
+				  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 }

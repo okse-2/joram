@@ -26,11 +26,14 @@ package org.objectweb.joram.client.jms;
 import java.util.List;
 import java.util.Vector;
 
+import javax.jms.ConnectionConsumer;
 import javax.jms.IllegalStateException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
+import javax.jms.ServerSessionPool;
+import javax.jms.Topic;
 
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
@@ -1020,6 +1023,30 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
   }
 
   protected final RequestMultiplexer getRequestMultiplexer() {
-    return mtpx;
+	  return mtpx;
+  }
+
+  public javax.jms.Session createSession(int sessionMode) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public javax.jms.Session createSession() throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public ConnectionConsumer createSharedConnectionConsumer(Topic topic,
+		  String subscriptionName, String messageSelector,
+		  ServerSessionPool sessionPool, int maxMessages) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public ConnectionConsumer createSharedDurableConnectionConsumer(Topic topic,
+		  String subscriptionName, String messageSelector,
+		  ServerSessionPool sessionPool, int maxMessages) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 }

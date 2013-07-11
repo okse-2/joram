@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Random;
 
 import javax.jms.Connection;
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.naming.NamingException;
@@ -216,5 +217,25 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
       }
       i++;
     }
+  }
+
+  public JMSContext createContext() {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+  public JMSContext createContext(String userName, String password) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+  public JMSContext createContext(String userName, String password, int sessionMode) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+  public JMSContext createContext(int sessionMode) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
   }
 }

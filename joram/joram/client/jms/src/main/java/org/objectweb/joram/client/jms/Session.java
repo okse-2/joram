@@ -2618,4 +2618,43 @@ public class Session implements javax.jms.Session, SessionMBean {
       this.messages = messages;
     }
   }
+
+  public javax.jms.MessageConsumer createSharedConsumer(javax.jms.Topic topic,
+		  String sharedSubscriptionName) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public javax.jms.MessageConsumer createSharedConsumer(javax.jms.Topic topic,
+		  String sharedSubscriptionName, String messageSelector)
+				  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
+		  String name) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
+		  String name, String messageSelector, boolean noLocal)
+				  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public javax.jms.MessageConsumer createSharedDurableConsumer(
+		  javax.jms.Topic topic, String name) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public javax.jms.MessageConsumer createSharedDurableConsumer(
+		  javax.jms.Topic topic, String name, String messageSelector)
+				  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
 }
