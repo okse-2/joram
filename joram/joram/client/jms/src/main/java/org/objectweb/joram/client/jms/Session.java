@@ -2429,8 +2429,9 @@ public class Session implements javax.jms.Session, SessionMBean {
   synchronized void send(Destination dest, javax.jms.Message msg, int deliveryMode, int priority,
       long timeToLive, boolean timestampDisabled) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Session.send(" + dest + ',' + msg + ',' + deliveryMode + ',' + priority
-          + ',' + timeToLive + ',' + timestampDisabled + ')');
+      logger.log(BasicLevel.DEBUG,
+                 "Session.send(" + dest + ',' + msg + ',' +
+                 deliveryMode + ',' + priority + ',' + timeToLive + ',' + timestampDisabled + ')');
 
     checkClosed();
     checkThreadOfControl();
@@ -2448,6 +2449,7 @@ public class Session implements javax.jms.Session, SessionMBean {
     if (!timestampDisabled) {
       msg.setJMSTimestamp(System.currentTimeMillis());
     }
+    msg.setJMSRedelivered(false);
     
     Message joramMsg = null;
     try {
