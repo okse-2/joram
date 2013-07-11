@@ -20,8 +20,8 @@
       <version>${project.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>org.apache.geronimo.specs</groupId>
-          <artifactId>geronimo-jms_1.1_spec</artifactId>
+          <groupId>javax.jms</groupId>
+          <artifactId>javax.jms-api</artifactId>
        </exclusion>
        <exclusion>
          <groupId>org.ow2.spec.ee</groupId>
