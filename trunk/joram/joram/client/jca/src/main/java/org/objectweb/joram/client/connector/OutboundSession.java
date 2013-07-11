@@ -25,7 +25,9 @@ package org.objectweb.joram.client.connector;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
 import javax.jms.Session;
+import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -447,5 +449,42 @@ public class OutboundSession implements javax.jms.Session {
   
   public String toString() {
     return "Outbound [" + sess.toString() + "]@" + hashCode();
+  }
+
+  public MessageConsumer createSharedConsumer(Topic topic,
+		  String sharedSubscriptionName) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public MessageConsumer createSharedConsumer(Topic topic,
+		  String sharedSubscriptionName, String messageSelector)
+				  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public MessageConsumer createDurableConsumer(Topic topic, String name)
+		  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public MessageConsumer createDurableConsumer(Topic topic, String name,
+		  String messageSelector, boolean noLocal) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public MessageConsumer createSharedDurableConsumer(Topic topic, String name)
+		  throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public MessageConsumer createSharedDurableConsumer(Topic topic, String name,
+		  String messageSelector) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 }

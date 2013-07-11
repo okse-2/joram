@@ -1208,4 +1208,24 @@ public class Message implements javax.jms.Message {
       logger.log(BasicLevel.ERROR, "Message.toString()", exc);
     }
   }
+
+  public long getJMSDeliveryTime() throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public void setJMSDeliveryTime(long deliveryTime) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public <T> T getBody(Class<T> c) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public boolean isBodyAssignableTo(Class c) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
 }

@@ -23,8 +23,10 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
+import javax.jms.XAJMSContext;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
@@ -520,5 +522,35 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
     reliableClass = (String) ref.get(prefix + ".reliableClass").getContent();
     setIdentityClassName((String) ref.get(prefix + ".identityClassName").getContent());
     params.fromReference(ref, prefix);
+  }
+
+  public JMSContext createContext() {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+  public JMSContext createContext(String userName, String password) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+  public JMSContext createContext(String userName, String password, int sessionMode) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+  public JMSContext createContext(int sessionMode) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+  public XAJMSContext createXAContext() {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+  public XAJMSContext createXAContext(String userName, String password) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
   }
 }

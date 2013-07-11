@@ -24,6 +24,7 @@
 package org.objectweb.joram.client.connector;
 
 import javax.jms.IllegalStateException;
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.naming.Reference;
@@ -149,5 +150,30 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
   public Reference getReference()
   {
     return reference;
+  }
+
+
+  public JMSContext createContext() {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+
+  public JMSContext createContext(String userName, String password) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+
+  public JMSContext createContext(String userName, String password,
+		  int sessionMode) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+
+  public JMSContext createContext(int sessionMode) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
   }
 }

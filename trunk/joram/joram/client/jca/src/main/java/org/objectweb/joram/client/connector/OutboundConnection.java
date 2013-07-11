@@ -372,4 +372,28 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
     }
     return sessTab;
   }
+
+  public Session createSession(int sessionMode) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public Session createSession() throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public ConnectionConsumer createSharedConnectionConsumer(Topic topic,
+		  String subscriptionName, String messageSelector,
+		  ServerSessionPool sessionPool, int maxMessages) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
+
+  public ConnectionConsumer createSharedDurableConnectionConsumer(Topic topic,
+		  String subscriptionName, String messageSelector,
+		  ServerSessionPool sessionPool, int maxMessages) throws JMSException {
+	  //TODO
+	  throw new JMSException("not yet implemented.");
+  }
 }

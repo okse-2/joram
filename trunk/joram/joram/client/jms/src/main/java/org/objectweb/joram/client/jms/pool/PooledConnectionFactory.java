@@ -24,6 +24,7 @@ package org.objectweb.joram.client.jms.pool;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
@@ -146,6 +147,27 @@ public class PooledConnectionFactory implements ConnectionFactory {
    */
   protected ConnectionPool createConnectionPool(int maxFreeConnections) {
     return new ConnectionPool(maxFreeConnections);
+  }
+
+  public JMSContext createContext() {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+  public JMSContext createContext(String userName, String password) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+  public JMSContext createContext(String userName, String password,
+		  int sessionMode) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  }
+
+  public JMSContext createContext(int sessionMode) {
+	  //TODO
+	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
   }
 }
 
