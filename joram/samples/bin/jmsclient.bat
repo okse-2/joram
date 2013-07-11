@@ -38,7 +38,7 @@ REM  Building the Classpath
 set CLASSPATH=%JORAM_BUNDLES%\a3-common.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\jndi-client.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\jndi-shared.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\geronimo-jms_1.1_spec.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\javax.jms-api.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\joram-client-jms.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\joram-shared.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\jcup.jar
