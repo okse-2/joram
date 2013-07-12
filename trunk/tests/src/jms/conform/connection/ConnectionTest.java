@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2002 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2002 INRIA
  * Contact: joram-team@objectweb.org
  * 
@@ -93,6 +93,30 @@ public class ConnectionTest extends PTPTestCase {
     }
   }
 
+  /**
+   * Test session creation without using parameters 
+   */
+  public void testSessionCreation() {	
+    try {senderConnection.start();
+    javax.jms.Session session=senderConnection.createSession();
+    assertTrue("Sesssion is created", (session!=null));
+    } catch (JMSException e) {
+      fail("Unable to create session without parameters "+e);
+    }
+  }
+  
+  /**
+   * Test session creation without using parameters 
+   */
+  public void testSessionCreationSessionMode() { 
+    try {senderConnection.start();
+    javax.jms.Session session=senderConnection.createSession(Session.SESSION_TRANSACTED);
+    assertTrue("Sesssion is created", (session!=null));
+    assertTrue("Sesssion transacted is true", (session.getTransacted()==true));
+    } catch (JMSException e) {
+      fail("Unable to create session with session mode as parameter "+e);
+    }
+  }
   /**
    * Test that a <code>MessageProducer</code> can send messages while a
    * <code>Connection</code> is stopped.
