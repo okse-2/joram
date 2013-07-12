@@ -795,4 +795,16 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
       throw jExc;
     }
   } 
+  /**API  method
+   * get message content as byte
+   * @return byte
+ * @throws JMSException 
+   */
+  byte [] getBytes() throws JMSException
+  
+  {	 reset();
+	  byte [] result= outputBuffer.toByteArray();
+	  reset();
+	  return  result;
+  }
 }

@@ -1219,9 +1219,49 @@ public class Message implements javax.jms.Message {
 	  throw new JMSException("not yet implemented.");
   }
 
+  /**
+   * @param c- The type to which the message body will be assigned. <br/>
+            If the message is a <code>TextMessage</code> then this parameter must 
+            be set to <code>String.class</code> or another type to which
+            a <code>String</code> is assignable. <br/>
+            If the message is a <code>ObjectMessage</code> then parameter must 
+            must be set to <code>java.io.Serializable.class</code> or
+            another type to which the body is assignable. <br/>
+            If the message is a <code>MapMessage</code> then this parameter must 
+            be set to <code>java.util.Map.class</code> (or <code>java.lang.Object.class</code>). <br/>
+            If the message is a <code>BytesMessage</code> then this parameter must 
+            be set to <code>byte[].class</code> (or <code>java.lang.Object.class</code>). This method
+            will reset the <code>BytesMessage</code> before and after use.<br/>
+            If the message is a 
+            <code>TextMessage</code>, <code>ObjectMessage</code>, <code>MapMessage</code> 
+            or <code>BytesMessage</code> and the message has no body, 
+            then the above does not apply and this parameter may be set to any type;
+            the returned value will always be null.<br/>
+            If the message is a <code>Message</code> (but not one of its subtypes)
+            then this parameter may be set to any type;
+            the returned value will always be null.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>the message body</dd>
+
+@return the message body
+@Throws:
+MessageFormatException -if the message is a StreamMessage
+if the message body cannot be assigned to the specified type
+if the message is an ObjectMessage and object deserialization fails.
+JMSException - if the JMS provider fails to get the message body due to some internal error.
+   */
+  @SuppressWarnings("unchecked")
   public <T> T getBody(Class<T> c) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	  if (String.class.isAssignableFrom(c)) {
+		  return (T) ( (TextMessage)(this)).getText();
+	  }  else if (byte[].class.equals (c)|| java.lang.Object.class.equals(c)){
+		  return (T)((BytesMessage)(this)).getBytes();
+	  } else if (java.util.Map.class.equals(c) || java.lang.Object.class.equals(c)){
+		  return (T) ( (MapMessage)(this)).getMap();
+	  }else if (java.io.Serializable.class.isAssignableFrom(c)){
+		  return (T) ( (ObjectMessage)(this)).getObject();
+	  } else {
+		  return null;
+	  }
   }
 
   public boolean isBodyAssignableTo(Class c) throws JMSException {

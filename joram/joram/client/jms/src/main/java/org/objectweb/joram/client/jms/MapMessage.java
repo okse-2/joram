@@ -31,6 +31,7 @@ import java.io.ObjectOutputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.jms.JMSException;
@@ -562,4 +563,11 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
       throw jExc;
     }
   }
+  /**
+   * Retrieve map
+   * @return entire map as message body
+   */
+Map getMap(){
+	return this.map;
+}
 }
