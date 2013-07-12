@@ -25,11 +25,16 @@
 
 package jms.conform.message;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageNotWriteableException;
 import javax.jms.TextMessage;
-
+import javax.jms.ObjectMessage;
+import javax.jms.BytesMessage;
+import javax.jms.MapMessage;
 import jms.conform.connection.ConnectionTest;
 import jms.framework.PTPTestCase;
 import jms.framework.TestConfig;
@@ -97,7 +102,81 @@ public class MessageBodyTest extends PTPTestCase {
       fail(e);
     }
   }
-
+  
+  /**
+   * Test that a call to the <code>TextMessage.getBody()</code> method on a
+   * returns same value as previously setted
+   * <code>javax.jms.jmsException</code>.
+   */
+  public void testGetTextMessageBody(){
+	  try {
+		  String content="abc";
+		  TextMessage message= senderSession.createTextMessage();
+		  message.setText(content);
+		  String result= message.getBody(String.class);
+		  assertTrue (" Text Message body is the same ", content.equals(result));
+	  } catch (JMSException e){
+		  fail (e);
+	  }
+  }
+  
+  
+  /**
+   * Test that a call to the <code>ObjectMessage.getBody()</code> method on a
+   * returns same value as previously setted
+   * <code>javax.jms.jmsException</code>.
+   */
+  public void testGetObjectMessageBody(){
+	  try {
+		  String content="checking getBody()";
+		  Exception excep=new Exception(content);
+		  ObjectMessage message= senderSession.createObjectMessage();
+		  message.setObject(excep);
+		  java.io.Serializable tmp=  message.getBody(java.io.Serializable.class);
+		  assertTrue (" Instance retrieved is the same as expected ",tmp instanceof Exception);
+		  Exception result= (Exception ) tmp;
+		  assertTrue (" Object Message body  content is the same as expected ",result.getMessage().equals(content));
+	  } catch (JMSException e){
+		  fail (e);
+	  }
+  }
+  
+  /**
+   * Test that a call to the <code>MapMessage.getBody()</code> method on a
+   * returns same value as previously setted
+   * <code>javax.jms.jmsException</code>.
+   */
+  public void testGetMapMessageBody(){
+	  try {
+		  String content="checking getBody()";
+		  MapMessage message= senderSession.createMapMessage();
+		  message.setObject("except", new Integer(12));
+		  Map tmp=message.getBody(java.util.Map.class);
+		  assertTrue (" Instance retrieved is the same as expected ",tmp.get("except") instanceof Integer);
+		  Integer result= (Integer ) tmp.get("except");
+		  assertTrue (" Map Message body  content is the same as expected ",result.intValue()==12);	  
+	  } catch (JMSException e){
+		  fail (e);
+	  }
+  }
+  /**
+   * Test that a call to the <code>BytesMessage.getBody()</code> method on a
+   * returns same value as previously setted
+   * <code>javax.jms.jmsException</code>.
+   */
+  public void testGetBytesMessageBody(){
+	  try {
+		  byte [] content= new byte [20];
+		  content [3]=12;
+		  BytesMessage message= senderSession.createBytesMessage();
+		  message.writeBytes(content);
+		  byte [] result=message.getBody(byte[].class);
+		  assertTrue (" get body result is not null ",result!=null);	 
+		  assertTrue (" Bytes Message body  content is the same as expected ",result[3]==12);	  
+	  } catch (JMSException e){
+		  fail (e);
+	  }
+  }
   public static void main(String[] args) {
     run(new MessageBodyTest());
   }
