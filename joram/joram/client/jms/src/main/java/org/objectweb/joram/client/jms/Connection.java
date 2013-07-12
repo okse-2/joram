@@ -688,6 +688,58 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
   }
 
   /**
+   * Creates a session using JMS 2.O specification
+   * <p>
+   * In a <b>Java SE environment</b> or in <b>the Java EE application client container</b>:
+   * <ul>
+   * <li>The session will be non-transacted and received messages will be acknowledged automatically
+   * using an acknowledgement mode of <code>Session.AUTO_ACKNOWLEDGE</code> 
+   * For a definition of the meaning of this acknowledgement mode see the link below.
+   * </ul>
+   * <p>
+   */
+  public javax.jms.Session createSession() throws JMSException {
+    return createSession(false, Session.AUTO_ACKNOWLEDGE);
+  }
+
+  /**
+   * Creates a session using JMS 2.O specification
+   * @param sessionMode 
+   * <p>
+   * In a <b>Java SE environment</b> or in <b>the Java EE application client container</b>:
+   * <ul>
+   * <li>If <code>transacted</code> is set to <code>true</code> then the session 
+   * will use a local transaction which may subsequently be committed or rolled back 
+   * by calling the session's <code>commit</code> or <code>rollback</code> methods. 
+   * The argument <code>acknowledgeMode</code> is ignored.
+   * <li>If <code>transacted</code> is set to <code>false</code> then the session 
+   * will be non-transacted. In this case the argument <code>acknowledgeMode</code>
+   * is used to specify how messages received by this session will be acknowledged.
+   * The permitted values are 
+   * <code>Session.CLIENT_ACKNOWLEDGE</code>, 
+   * <code>Session.AUTO_ACKNOWLEDGE</code> and
+   * <code>Session.DUPS_OK_ACKNOWLEDGE</code>.
+   * For a definition of the meaning of these acknowledgement modes see the links below.
+   * </ul>
+   * <p>
+   * @exception JMSException in case of invalid session mode
+   */
+  
+  public javax.jms.Session createSession(int sessionMode) throws JMSException {
+    if (sessionMode == Session.SESSION_TRANSACTED) {
+      return createSession(true, Session.SESSION_TRANSACTED);
+    } else if(sessionMode == Session.CLIENT_ACKNOWLEDGE || 
+        sessionMode == Session.AUTO_ACKNOWLEDGE || 
+        sessionMode == Session.DUPS_OK_ACKNOWLEDGE) {
+      return createSession(false, sessionMode);
+    } else {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Unrecognised sessionMode given as parameter: " + sessionMode);
+      throw new JMSException("Error occured in session creation");
+    }
+  }
+  
+  /**
    * Called here and by sub-classes.
    */
   protected synchronized void addSession(Session session) {
@@ -1024,16 +1076,6 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 
   protected final RequestMultiplexer getRequestMultiplexer() {
 	  return mtpx;
-  }
-
-  public javax.jms.Session createSession(int sessionMode) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
-  }
-
-  public javax.jms.Session createSession() throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
   }
 
   public ConnectionConsumer createSharedConnectionConsumer(Topic topic,
