@@ -94,7 +94,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * session is transacted.</li>
  * </ul>
  */
-public class Session implements javax.jms.Session, SessionMBean {
+public class Session implements javax.jms.Session, SessionMBean, AutoCloseable {
 
   public static Logger logger = Debug.getLogger(Session.class.getName());
   public static Logger trace = Debug.getLogger(Session.class.getName() + ".Message");
