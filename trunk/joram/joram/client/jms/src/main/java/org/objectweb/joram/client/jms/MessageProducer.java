@@ -50,7 +50,7 @@ import fr.dyade.aaa.common.Debug;
  * for messages sent by a message producer. It can also specify the delivery
  * mode, priority, and time to live for each individual message.
  */
-public class MessageProducer implements javax.jms.MessageProducer {
+public class MessageProducer implements javax.jms.MessageProducer, AutoCloseable {
   /** Default delivery mode. */
   private int deliveryMode = Message.DEFAULT_DELIVERY_MODE;
 
