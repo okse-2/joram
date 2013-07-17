@@ -372,7 +372,6 @@ public class SynchronousAgent extends Agent {
   }
   
   public void react(AgentId from, Notification not) throws Exception {
-    System.out.println("react("+from+", "+not+")");
     if(not instanceof ClientMessages) {
       ClientMessages clientMsg = (ClientMessages) not;
       if(logger.isLoggable(BasicLevel.DEBUG))
