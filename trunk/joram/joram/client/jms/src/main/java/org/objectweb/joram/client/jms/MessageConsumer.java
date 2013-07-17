@@ -63,7 +63,7 @@ import fr.dyade.aaa.common.Debug;
  * </ul>
  * It is a client programming error for a MessageListener to throw an exception.
  */
-public class MessageConsumer implements javax.jms.MessageConsumer, AutoCloseable {
+public class MessageConsumer implements javax.jms.MessageConsumer {
   /**
    * Status of the message consumer.
    */

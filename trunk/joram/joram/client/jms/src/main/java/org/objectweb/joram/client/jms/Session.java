@@ -94,7 +94,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * session is transacted.</li>
  * </ul>
  */
-public class Session implements javax.jms.Session, SessionMBean, AutoCloseable {
+public class Session implements javax.jms.Session, SessionMBean {
 
   public static Logger logger = Debug.getLogger(Session.class.getName());
   public static Logger trace = Debug.getLogger(Session.class.getName() + ".Message");
@@ -2633,16 +2633,16 @@ public class Session implements javax.jms.Session, SessionMBean, AutoCloseable {
   }
 
   public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
-		  String name) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+      String name) throws JMSException {
+    //TODO
+    throw new JMSException("not yet implemented.");
   }
 
   public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
-		  String name, String messageSelector, boolean noLocal)
-				  throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+      String name, String messageSelector, boolean noLocal)
+          throws JMSException {
+    //TODO
+    throw new JMSException("not yet implemented.");
   }
 
   public javax.jms.MessageConsumer createSharedDurableConsumer(

@@ -74,7 +74,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * typical to leave the connection in stopped mode until setup is complete.
  * A message producer can send messages while a connection is stopped.
  */
-public class Connection implements javax.jms.Connection, ConnectionMBean, AutoCloseable {
+public class Connection implements javax.jms.Connection, ConnectionMBean {
   public static Logger logger = Debug.getLogger(Connection.class.getName());
   
   /**
