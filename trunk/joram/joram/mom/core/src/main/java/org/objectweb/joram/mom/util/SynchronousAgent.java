@@ -31,6 +31,7 @@ import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AdminReply;
+import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.ClearQueue;
 import org.objectweb.joram.shared.admin.ClearSubscription;
 import org.objectweb.joram.shared.admin.CreateDestinationRequest;
@@ -39,6 +40,10 @@ import org.objectweb.joram.shared.admin.DeleteDestination;
 import org.objectweb.joram.shared.admin.DeleteQueueMessage;
 import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
 import org.objectweb.joram.shared.admin.DeleteUser;
+import org.objectweb.joram.shared.admin.SetReader;
+import org.objectweb.joram.shared.admin.SetWriter;
+import org.objectweb.joram.shared.admin.UnsetReader;
+import org.objectweb.joram.shared.admin.UnsetWriter;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.security.Identity;
@@ -246,7 +251,7 @@ public class SynchronousAgent extends Agent {
    * @return
    * @throws InterruptedException 
    */
-  public boolean deleteSubMessage(String userName, String subName, String msgId) throws InterruptedException {
+  public synchronized boolean deleteSubMessage(String userName, String subName, String msgId) throws InterruptedException {
     if(logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,this.toString() 
           + ".deleteSubMessage("+ userName + ", " + subName + ", " + msgId + ")" +
@@ -286,7 +291,7 @@ public class SynchronousAgent extends Agent {
    * @return
    * @throws InterruptedException 
    */
-  public boolean clearQueue(String queueName) throws InterruptedException {
+  public synchronized boolean clearQueue(String queueName) throws InterruptedException {
     DestinationDesc queueDesc;
     try {
       queueDesc = AdminTopic.lookupDest(queueName, DestinationConstants.QUEUE_TYPE);
@@ -313,7 +318,7 @@ public class SynchronousAgent extends Agent {
    * @return
    * @throws InterruptedException 
    */
-  public boolean clearSubscription(String userName, String subName) throws InterruptedException {
+  public synchronized boolean clearSubscription(String userName, String subName) throws InterruptedException {
     AgentId userId = AdminTopic.lookupUser(userName);
     if(userId==null)
       return false;
@@ -330,11 +335,44 @@ public class SynchronousAgent extends Agent {
     return reply.succeeded();
   }
   
+  public synchronized boolean setFreeWriting(boolean freeWriting, String destId) throws InterruptedException {
+    AdminRequest req = null;
+    if(freeWriting)
+      req = new SetWriter(null, destId);
+    else
+      req = new UnsetWriter(null, destId);
+    String reqId = nextReqMsgId();
+    FwdAdminRequestNot not = new FwdAdminRequestNot(req, getId(), reqId);
+    sendTo(AdminTopic.getDefault(), not);
+    while(!requests.containsKey(reqId))
+      wait();
+    Message msg = requests.remove(reqId);
+    AdminReply reply = (AdminReply) msg.getAdminMessage();
+    return reply.succeeded();
+  }
+  
+  public synchronized boolean setFreeReading(boolean freeReading, String destId) throws InterruptedException {
+    AdminRequest req = null;
+    if(freeReading)
+      req = new SetReader(null, destId);
+    else
+      req = new UnsetReader(null, destId);
+    String reqId = nextReqMsgId();
+    FwdAdminRequestNot not = new FwdAdminRequestNot(req, getId(), reqId);
+    sendTo(AdminTopic.getDefault(), not);
+    while(!requests.containsKey(reqId))
+      wait();
+    Message msg = requests.remove(reqId);
+    AdminReply reply = (AdminReply) msg.getAdminMessage();
+    return reply.succeeded();
+  }
+  
   private synchronized String nextReqMsgId() {
     return "ID:"+getAgentId()+"m"+nextReqMsgId++;
   }
   
   public void react(AgentId from, Notification not) throws Exception {
+    System.out.println("react("+from+", "+not+")");
     if(not instanceof ClientMessages) {
       ClientMessages clientMsg = (ClientMessages) not;
       if(logger.isLoggable(BasicLevel.DEBUG))
