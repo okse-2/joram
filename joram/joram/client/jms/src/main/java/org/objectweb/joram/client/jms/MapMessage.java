@@ -563,11 +563,12 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
       throw jExc;
     }
   }
+
   /**
    * Retrieve map
    * @return entire map as message body
    */
-Map getMap(){
-	return this.map;
-}
+  Map getMap() {
+    return this.map;
+  }
 }
