@@ -22,14 +22,20 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
+import java.util.Vector;
+
+import javax.jms.CompletionListener;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
+import org.objectweb.joram.client.jms.Message;
+import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.client.MomExceptionReply;
+import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -115,9 +121,13 @@ public class Requestor implements ReplyListener, ErrorListener {
   }
 
   public synchronized AbstractJmsReply request(AbstractJmsRequest request) throws JMSException {
-    return request(request, defaultRequestTimeout);
+    return request(request, defaultRequestTimeout, null);
   }
-
+  
+  public synchronized AbstractJmsReply request(AbstractJmsRequest request, javax.jms.CompletionListener completionListener) throws JMSException {
+    return request(request, defaultRequestTimeout, completionListener);
+  }
+  
   /**
    * Method sending a synchronous request to the server and waiting for an
    * answer.
@@ -131,18 +141,26 @@ public class Requestor implements ReplyListener, ErrorListener {
    *              destination that no longer exists.
    * @exception JMSException  If the request failed for any other reason.
    */
-  public synchronized AbstractJmsReply request(AbstractJmsRequest request, long timeout) throws JMSException {
+  public synchronized AbstractJmsReply request(AbstractJmsRequest request, long timeout, CompletionListener completionListener) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Requestor.request(" + request + ',' + timeout + ')');
 
     if (status != Status.INIT) {
       if (status == Status.CLOSE) return null;
-
-      throw new javax.jms.IllegalStateException("Requestor already used");
+      if (completionListener == null) 
+        throw new javax.jms.IllegalStateException("Requestor already used");
     }
-    mtpx.sendRequest(request, this);
+    
+    mtpx.sendRequest(request, this, completionListener);
     setStatus(Status.RUN);
     requestId = request.getRequestId();
+    
+    if (completionListener != null && request instanceof ProducerMessages) { //TODO: used request.getClassId() == AbstractJmsMessage.PRODUCER_MESSAGES
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, " -> request #" + requestId + ", completionListener = " + completionListener);
+      init();
+      return null;
+    }
     
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, " -> request #" + requestId + " wait");
@@ -151,7 +169,7 @@ public class Requestor implements ReplyListener, ErrorListener {
       wait(timeout);
     } catch (InterruptedException exc) {
       if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "", exc);
+        logger.log(BasicLevel.WARN, exc);
       setStatus(Status.DONE);
     }
 

@@ -2046,7 +2046,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       ConsumerReceiveRequest request = new ConsumerReceiveRequest(targetName, selector, requestTimeToLive, queueMode);
       if (implicitAck)
         request.setReceiveAck(true);
-      reply = (ConsumerMessages) receiveRequestor.request(request, waitTimeOut);
+      reply = (ConsumerMessages) receiveRequestor.request(request, waitTimeOut, null);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> reply = " + reply);
@@ -2327,7 +2327,7 @@ public class Session implements javax.jms.Session, SessionMBean {
     if (queueMode) {
       requestor.request(cdr);
     } else {
-      mtpx.sendRequest(cdr, null);
+      mtpx.sendRequest(cdr);
     }
   }
   
@@ -2427,11 +2427,11 @@ public class Session implements javax.jms.Session, SessionMBean {
    * Called by MessageProducer.
    */
   synchronized void send(Destination dest, javax.jms.Message msg, int deliveryMode, int priority,
-      long timeToLive, boolean timestampDisabled) throws JMSException {
+      long timeToLive, boolean timestampDisabled, javax.jms.CompletionListener completionListener) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "Session.send(" + dest + ',' + msg + ',' +
-                 deliveryMode + ',' + priority + ',' + timeToLive + ',' + timestampDisabled + ')');
+                 deliveryMode + ',' + priority + ',' + timeToLive + ',' + timestampDisabled + ',' + completionListener + ')');
 
     checkClosed();
     checkThreadOfControl();
@@ -2503,7 +2503,7 @@ public class Session implements javax.jms.Session, SessionMBean {
         pM.setAsyncSend(true);
         mtpx.sendRequest(pM);
       } else {
-        requestor.request(pM);
+        requestor.request(pM, completionListener);
       }
     }
   }
