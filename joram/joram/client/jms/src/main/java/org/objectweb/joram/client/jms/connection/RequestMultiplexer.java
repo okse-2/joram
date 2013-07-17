@@ -29,22 +29,25 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
+import javax.jms.CompletionListener;
 import javax.jms.IllegalStateException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.Message;
+import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.PingRequest;
+import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.SessDenyRequest;
 import org.objectweb.joram.shared.excepts.MomException;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
 
@@ -90,7 +93,9 @@ public class RequestMultiplexer {
   private RequestChannel channel;
 
   private Map requestsTable;
-
+  
+  private Map<Integer, CompletionListenerStruc> completionListeners;
+  
   private int requestCounter;
 
   private DemultiplexerDaemon demtpx;
@@ -144,6 +149,7 @@ public class RequestMultiplexer {
     this.channel = channel;
     this.cnx = cnx; 
     requestsTable = new Hashtable();
+    completionListeners = new Hashtable<Integer, CompletionListenerStruc>();
     requestCounter = 0;
     createTimer();
     channel.setTimer(getTimer());
@@ -199,10 +205,10 @@ public class RequestMultiplexer {
   }
 
   public void sendRequest(AbstractJmsRequest request) throws JMSException {
-    sendRequest(request, null);
+    sendRequest(request, null, null);
   }
   
-  public void sendRequest(AbstractJmsRequest request, ReplyListener listener) throws JMSException {
+  public void sendRequest(AbstractJmsRequest request, ReplyListener listener, CompletionListener completionListener) throws JMSException {
 
     synchronized (this) {
       if (status == Status.CLOSE)
@@ -216,6 +222,16 @@ public class RequestMultiplexer {
 
       if (listener != null) {
         requestsTable.put(new Integer(request.getRequestId()), listener);
+      }
+      
+      if (completionListener != null) {
+        if (request instanceof ProducerMessages) { //TODO: used request.getClassId() == AbstractJmsMessage.PRODUCER_MESSAGES
+          ProducerMessages pm = (ProducerMessages) request;
+          Vector msgs = pm.getMessages();
+          org.objectweb.joram.shared.messages.Message sharedMsg = (org.objectweb.joram.shared.messages.Message) msgs.get(0);
+          Message msg = Message.getHeader(sharedMsg);
+          completionListeners.put(new Integer(request.getRequestId()), new CompletionListenerStruc(completionListener, msg));
+        }
       }
 
       if (heartBeatTask != null) {
@@ -296,6 +312,7 @@ public class RequestMultiplexer {
       }
     }
     requestsTable.clear();
+    completionListeners.clear();
   }
   
   public void replyAllError(MomExceptionReply exc) {
@@ -315,6 +332,19 @@ public class RequestMultiplexer {
       	rl.errorReceived(requestIds[i].intValue(), exc);
       }
     }
+    
+    // completionListeners
+    synchronized (completionListeners) {
+      Set keySet = completionListeners.keySet();
+      requestIds = new Integer[keySet.size()];
+      keySet.toArray(requestIds);
+    }
+    for (int i = 0; i < requestIds.length; i++) {
+      CompletionListenerStruc cls = completionListeners.get(requestIds[i]);
+      if (cls != null && cls.cl != null)
+        cls.cl.onException(cls.msg, new Exception(exc.getMessage()));
+    }
+    completionListeners.clear();
     requestsTable.clear();
   }
 
@@ -347,7 +377,7 @@ public class RequestMultiplexer {
    * demultiplexer during a concurrent close. It would deadlock
    * as the close waits for the demultiplexer to stop.
    */
-  private void route(AbstractJmsReply reply) {
+  private void route(AbstractJmsReply reply, boolean isCompletionListener) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "RequestMultiplexer.route(" + reply + ')');
     
@@ -366,10 +396,10 @@ public class RequestMultiplexer {
       }
     } else {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> rl = " + rl + ')');
+        logger.log(BasicLevel.DEBUG, " -> rl = " + rl);
       if (rl != null) {
         try {
-          if (rl.replyReceived(reply)) {
+          if (!isCompletionListener && rl.replyReceived(reply)) {
             requestsTable.remove(requestKey);
           }
         } catch (AbortedRequestException exc) {
@@ -507,7 +537,25 @@ public class RequestMultiplexer {
             break loop;
           }
           canStop = false; 
-          route(reply);
+          
+          boolean isCompletionListener = false;
+          if (!completionListeners.isEmpty()) {
+            CompletionListenerStruc cls = completionListeners.remove(reply.getCorrelationId());
+            if (cls != null && cls.cl != null) {
+              if (reply instanceof MomExceptionReply) {
+                cls.cl.onException(cls.msg, new Exception(((MomExceptionReply) reply).getMessage()));
+              } else {
+                cls.cl.onCompletion(cls.msg);
+              }
+              isCompletionListener = true;
+            }
+          }
+          
+          route(reply, isCompletionListener);
+          
+          if (isCompletionListener)
+            requestsTable.remove(reply.getCorrelationId());
+          
           if (!running && isClosed()) {
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, "DemultiplexerDaemon ended and Socket closed.");
@@ -587,4 +635,13 @@ public class RequestMultiplexer {
     }
   }
 
+  private class CompletionListenerStruc {
+    CompletionListener cl;
+    Message msg;
+    
+    CompletionListenerStruc(CompletionListener completionListener, Message msg) {
+      this.cl = completionListener;
+      this.msg = msg;
+    }
+  }
 }

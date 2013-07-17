@@ -23,7 +23,6 @@
  */
 package org.objectweb.joram.client.jms;
 
-import javax.jms.CompletionListener;
 import javax.jms.IllegalStateException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.MessageFormatException;
@@ -371,7 +370,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
       throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
 
     doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
-                                }
+  }
 
   /**
    * API method.
@@ -400,16 +399,126 @@ public class MessageProducer implements javax.jms.MessageProducer {
                                 javax.jms.Message message,
                                 int deliveryMode, 
                                 int priority,
-                                long timeToLive) throws JMSException
-                                {
+                                long timeToLive) throws JMSException {
     if (identified)
       throw new UnsupportedOperationException("An unidentified message producer can't use this identified message producer.");
     if (dest == null)
       throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
 
     doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
-                                }
+  }
 
+  /**
+   * API 2.0 method.
+   * Sends asynchronous message with the MessageProducer's default delivery parameters.
+   * 
+   * @param message the message to send.
+   * @param completionListener the completion listener (call back).
+   *
+   * @exception UnsupportedOperationException  If the dest is unidentified.
+   * @exception IllegalStateException  If the producer is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public void send(javax.jms.Message message,
+      javax.jms.CompletionListener completionListener) throws JMSException {
+    if (! identified)
+      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
+    doSend(dest, message, deliveryMode, priority, timeToLive, completionListener);
+  }
+
+  /**
+   * API 2.0 method.
+   * Sends asynchronous message to the destination with given delivery parameters.
+   * 
+   * @param message       the message to send.
+   * @param deliveryMode  the delivery mode to use.
+   * @param priority      the priority for this message.
+   * @param timeToLive    the message's lifetime in milliseconds.
+   * @param completionListener the completion listener (call back).
+   *
+   * @exception UnsupportedOperationException  If the dest is unidentified.
+   * @exception IllegalStateException  If the producer is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public void send(javax.jms.Message message, 
+      int deliveryMode, 
+      int priority,
+      long timeToLive, 
+      javax.jms.CompletionListener completionListener)
+          throws JMSException {
+    doSend(dest, message, deliveryMode, priority, timeToLive, completionListener);
+  }
+
+  /**
+   * API 2.0 method.
+   * Sends asynchronous message to a destination for an unidentified message producer using default
+   * delivery parameters.
+   * <p>
+   * Typically, a message producer is assigned a destination at creation time; however the
+   * JMS API also supports unidentified message producers, which require that the destination
+   * be supplied every time a message is sent.
+   * 
+   * @param dest          the destination to send this message to.
+   * @param message       the message to send.
+   * @param completionListener the completion listener (call back).
+   *
+   * @exception UnsupportedOperationException  When the producer did not
+   *              properly identify itself.
+   * @exception JMSSecurityException  If the user if not a WRITER on the
+   *              specified destination.
+   * @exception IllegalStateException  If the producer is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public void send(javax.jms.Destination destination, 
+      javax.jms.Message message,
+      javax.jms.CompletionListener completionListener) throws JMSException {
+    if (identified)
+      throw new UnsupportedOperationException("An unidentified message producer can't use this identified message producer.");
+    if (destination == null)
+      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
+    doSend((Destination) destination, message, deliveryMode, priority, timeToLive, completionListener);
+  }
+
+  /**
+   * API 2.0 method.
+   * Sends asynchronous message to a destination for an unidentified message producer with
+   * given delivery parameters.
+   * <p>
+   * Typically, a message producer is assigned a destination at creation time; however the
+   * JMS API also supports unidentified message producers, which require that the destination
+   * be supplied every time a message is sent.
+   * 
+   * @param dest          the destination to send this message to.
+   * @param message       the message to send.
+   * @param deliveryMode  the delivery mode to use.
+   * @param priority      the priority for this message.
+   * @param timeToLive    the message's lifetime in milliseconds.
+   * @param completionListener the completion listener (call back).
+   *
+   * @exception UnsupportedOperationException  When the producer did not
+   *              properly identify itself.
+   * @exception JMSSecurityException  If the user if not a WRITER on the
+   *              specified destination.
+   * @exception IllegalStateException  If the producer is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public void send(javax.jms.Destination destination, 
+      javax.jms.Message message,
+      int deliveryMode, 
+      int priority, 
+      long timeToLive,
+      javax.jms.CompletionListener completionListener) throws JMSException {
+    if (identified)
+      throw new UnsupportedOperationException("An unidentified message producer can't use this identified message producer.");
+    if (destination == null)
+      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
+    doSend((Destination) destination, message, deliveryMode, priority, timeToLive, completionListener);
+  }
+  
   /**
    * API method.
    * Closes the message producer.
@@ -449,10 +558,28 @@ public class MessageProducer implements javax.jms.MessageProducer {
                       int deliveryMode, 
                       int priority,
                       long timeToLive) throws JMSException {
+    doSend(dest, message, deliveryMode, priority, timeToLive, null);
+  }
+  
+  /**
+   * Actually sends a message to a given destination.
+   *
+   * @exception MessageFormatException  If the message to send is invalid.
+   * @exception InvalidDestinationException  If the specified destination is
+   *              invalid.
+   * @exception IllegalStateException  If the connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  private void doSend(Destination dest, 
+                      javax.jms.Message message,
+                      int deliveryMode, 
+                      int priority,
+                      long timeToLive,
+                      javax.jms.CompletionListener completionListener) throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
-    sess.send(dest, message, deliveryMode, priority, timeToLive, timestampDisabled);
+    sess.send(dest, message, deliveryMode, priority, timeToLive, timestampDisabled, completionListener);
   }
 
   public void setDeliveryDelay(long deliveryDelay) throws JMSException {
@@ -461,32 +588,6 @@ public class MessageProducer implements javax.jms.MessageProducer {
   }
 
   public long getDeliveryDelay() throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
-  }
-
-  public void send(javax.jms.Message message,
-		  CompletionListener completionListener) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
-  }
-
-  public void send(javax.jms.Message message, int deliveryMode, int priority,
-		  long timeToLive, CompletionListener completionListener)
-				  throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
-  }
-
-  public void send(javax.jms.Destination destination, javax.jms.Message message,
-		  CompletionListener completionListener) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
-  }
-
-  public void send(javax.jms.Destination destination, javax.jms.Message message,
-		  int deliveryMode, int priority, long timeToLive,
-		  CompletionListener completionListener) throws JMSException {
 	  //TODO
 	  throw new JMSException("not yet implemented.");
   }

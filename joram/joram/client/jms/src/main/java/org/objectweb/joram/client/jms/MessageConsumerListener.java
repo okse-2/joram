@@ -300,7 +300,7 @@ abstract class MessageConsumerListener implements ReplyListener {
     // so the reply can be received before the end
     // of this method.
     setReceiveStatus(ReceiveStatus.WAIT_FOR_REPLY);
-    rm.sendRequest(req, this);
+    rm.sendRequest(req, this, null);
     requestId = req.getRequestId();
   }
 
