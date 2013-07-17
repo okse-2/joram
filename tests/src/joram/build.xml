@@ -272,6 +272,7 @@
     <antcall target="client.ClientTest27"/>
     <antcall target="client.ClientTest28"/>
     <antcall target="client.ClientTest29"/>
+  	<antcall target="client.ClientTestAsyncSend"/>
   </target>
 
   <target name="tests.connection"
@@ -2088,7 +2089,22 @@
       <param name="args" value=""/>
     </antcall>
   </target>
-
+	
+	<target name="client.ClientTestAsyncSend" depends="init.a3props,compile"
+	        description=" --> Test async send JMS 2.0 API.">
+	  <antcall target="test.run" inheritAll="true">
+	    <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+	    <param name="className" value="joram.client.ClientTestAsyncSend"/>
+	    <param name="jndiconf" value="client/jndi.properties"/>
+	    <param name="a3conf" value="client/a3servers.xml"/>
+	    <param name="jvmargs" value=""/>
+	    <param name="testid" value="client.ClientTestAsyncSend"/>
+	    <param name="args" value=""/>
+	  	<param name="manifest.mf" value="joram/client/manifest.mf"/>
+	  	<param name="include.classes" value="joram/client/InterceptorSlow.class"/>
+	  </antcall>
+	</target>
+	
   <target name="client.SyncExceptionOnFullQueue" depends="init.a3props,compile"
           description=" --> test exception on send on full Queue.">
     <antcall target="test.run" inheritAll="true">
