@@ -110,6 +110,7 @@ public class MOMCommandsImpl implements MOMCommands {
                     "info",       "lsMsg",
                     "ping",       "deleteMsg",
                     "sendMsg",    "receiveMsg",
+                    "setFreeRead","setFreeWrite",
                     "help",       "clear"};
   
   //TODO: retrieve help from file?
@@ -185,6 +186,12 @@ public class MOMCommandsImpl implements MOMCommands {
       buf.append("\n       ").append(fullCommand).append(" ");
       buf.append("subscription <username> <subscription name>");
       buf.append("\nDeletes all pending messages.");
+    } else if(command.equalsIgnoreCase("setFreeRead")) {
+      buf.append("(topic|queue) <destination id> <value>");
+      buf.append("\nChange destination's reading permission.");
+    } else if(command.equalsIgnoreCase("setFreeWrite")) {
+      buf.append("(topic|queue) <destination id> <value>");
+      buf.append("\nChange destination's writing permission.");
     } else {
       System.err.println("Unknown command: "+command);
       return;
@@ -612,6 +619,78 @@ public class MOMCommandsImpl implements MOMCommands {
     }
     System.err.println("Error: "+category.toLowerCase()+" not found.");
   }
+  
+  public void setFreeRead(String[] args) {
+    if(args.length != 3) {
+      help("setFreeRead");
+      return;     
+    }
+    String category = args[0];
+    String destName = args[1];
+    boolean freeReading = Boolean.parseBoolean(args[2]);
+    String destId = null;
+    if(category.equalsIgnoreCase("queue"))
+      try {
+        destId = findQueue(destName).getAgentId();
+      } catch (QueueNotFoundException e) {
+        System.err.println("Error: "+e.getMessage());
+        return;
+      }
+    else if(category.equalsIgnoreCase("topic"))
+      try {
+        destId = findTopic(destName).getAgentId();
+      } catch (TopicNotFoundException e) {
+        System.err.println("Error: "+e.getMessage());
+        return;
+      }
+    try {
+      if(SynchronousAgent.getSynchronousAgent().setFreeReading(freeReading, destId))
+        if(freeReading)
+          System.out.println("Destination is now freely readable.");
+        else
+          System.out.println("Destination is no longer freely readable.");
+      else
+        System.out.println("Destination's rights' modification failed.");
+    } catch (Exception e) {
+      System.err.println("Error: "+e.getMessage());
+    }
+  }
+
+  public void setFreeWrite(String[] args) {
+    if(args.length != 3) {
+      help("setFreeWrite");
+      return;     
+    }
+    String category = args[0];
+    String destName = args[1];
+    boolean freeWriting = Boolean.parseBoolean(args[2]);
+    String destId = null;
+    if(category.equalsIgnoreCase("queue"))
+      try {
+        destId = findQueue(destName).getAgentId();
+      } catch (QueueNotFoundException e) {
+        System.err.println("Error: "+e);
+        return;
+      }
+    else if(category.equalsIgnoreCase("topic"))
+      try {
+        destId = findTopic(destName).getAgentId();
+      } catch (TopicNotFoundException e) {
+        System.err.println("Error: "+e);
+        return;
+      }
+    try {
+      if(SynchronousAgent.getSynchronousAgent().setFreeWriting(freeWriting, destId))
+        if(freeWriting)
+          System.out.println("Destination is now freely writable.");
+        else
+          System.out.println("Destination is no longer freely writable.");
+      else
+        System.out.println("Destination's rights' modification failed.");
+    } catch (Exception e) {
+      System.err.println("Error: "+e);
+    }    
+  }
 
   /**
    * Shows the pending message count<br/>
@@ -638,7 +717,7 @@ public class MOMCommandsImpl implements MOMCommands {
   private QueueMBean findQueue(String name) throws QueueNotFoundException {
     Object[] objs = queueTracker.getServices();
     if(objs==null)
-      return null;
+      throw new QueueNotFoundException(name);
     for(Object o : objs) {
       QueueMBean q = (QueueMBean) o;
       if(q.getName().equals(name)) {
@@ -648,10 +727,10 @@ public class MOMCommandsImpl implements MOMCommands {
     throw new QueueNotFoundException(name);
   }
 
-  private TopicMBean findTopic(String name) {
+  private TopicMBean findTopic(String name) throws TopicNotFoundException {
     Object[] objs = topicTracker.getServices();
     if(objs==null)
-      return null;
+      throw new TopicNotFoundException(name);
     for(Object o : objs) {
       TopicMBean t = (TopicMBean) o;
       if(t.getName().equals(name)) {
@@ -746,8 +825,10 @@ public class MOMCommandsImpl implements MOMCommands {
   }
 
   private void infoTopic(String name) {
-    TopicMBean dest = findTopic(name);
-    if(dest==null) {
+    TopicMBean dest;
+    try {
+      dest = findTopic(name);
+    } catch (TopicNotFoundException e) {
       System.err.println("Error: Topic \""+name+"\" not found.");
       return;
     }
@@ -1172,6 +1253,15 @@ public class MOMCommandsImpl implements MOMCommands {
 
     public QueueNotFoundException(String queueName) {
       super("The queue ["+queueName+"] was not found.");
+    }
+  }
+  
+  private class TopicNotFoundException extends Exception{
+
+    private static final long serialVersionUID = -7614138837435176364L;
+
+    public TopicNotFoundException(String topicName) {
+      super("The topic ["+topicName+"] was not found.");
     }
   }
   
