@@ -34,6 +34,8 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
+import org.objectweb.joram.client.jms.MessageConsumer;
+
 import jms.conform.connection.ConnectionTest;
 import jms.framework.PubSubTestCase;
 import jms.framework.TestConfig;
@@ -124,6 +126,35 @@ public class TopicSessionTest extends PubSubTestCase {
       subscriberSession = subscriberConnection.createTopicSession(false,
           Session.AUTO_ACKNOWLEDGE);
       subscriber = subscriberSession.createDurableSubscriber(subscriberTopic,
+          "testTopic");
+      subscriberConnection.start();
+
+      TextMessage m = (TextMessage) subscriber.receive(TestConfig.TIMEOUT);
+      assertTrue(m != null);
+      assertEquals("test", m.getText());
+    } catch (JMSException e) {
+      fail(e);
+    }
+  }
+  public void testDurableConsumer() {
+    javax.jms.MessageConsumer   subscriber=null;
+    try {
+      subscriber = subscriberSession.createDurableConsumer(subscriberTopic,
+          "testTopic");
+      subscriberConnection.close();
+      subscriberConnection = null;
+
+      TextMessage message = publisherSession.createTextMessage();
+      message.setText("test");
+      publisher.publish(message);
+
+      subscriberConnection = subscriberTCF.createTopicConnection();
+      if (subscriberConnection.getClientID() == null) {
+        subscriberConnection.setClientID("subscriberConnection");
+      }
+      subscriberSession = subscriberConnection.createTopicSession(false,
+          Session.AUTO_ACKNOWLEDGE);
+      subscriber = subscriberSession.createDurableConsumer(subscriberTopic,
           "testTopic");
       subscriberConnection.start();
 
