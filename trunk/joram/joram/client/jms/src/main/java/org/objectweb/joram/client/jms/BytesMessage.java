@@ -803,9 +803,21 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    * @throws JMSException If an error occurs while closing the output stream.
    */
   byte[] getBytes() throws JMSException {
-    reset();
-    byte [] result= outputBuffer.toByteArray();
-    reset();
-    return  result;
+    byte[] result;
+    try {
+      reset();
+      result = momMsg.getBody();
+      reset();
+      return result;
+    } catch (IOException e) {
+      throw new JMSException ("Unable to get byte message body ");
+    }
+  }
+
+  @Override
+  protected <T> T getEffectiveBody(Class<T> c) throws JMSException {
+    return ((T)getBytes());
   }
 }
+
+

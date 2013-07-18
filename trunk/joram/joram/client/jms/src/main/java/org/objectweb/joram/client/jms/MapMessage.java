@@ -564,11 +564,10 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
     }
   }
 
-  /**
-   * Retrieve map
-   * @return entire map as message body
-   */
-  Map getMap() {
-    return this.map;
+  @Override
+  protected <T> T getEffectiveBody(Class<T> c) throws JMSException {
+    return (T) this.map;
   }
+  
+  
 }

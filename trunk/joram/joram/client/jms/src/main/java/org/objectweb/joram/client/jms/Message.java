@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.client.jms;
 
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
@@ -1260,21 +1261,22 @@ public class Message implements javax.jms.Message {
    * if the message is an ObjectMessage and object deserialization fails.
    * JMSException - if the JMS provider fails to get the message body due to some internal error.
    */
-  @SuppressWarnings("unchecked")
   public <T> T getBody(Class<T> c) throws JMSException {
-    if (String.class.isAssignableFrom(c)) {
-      return (T) ((TextMessage)(this)).getText();
-    }  else if (byte[].class.equals (c)|| java.lang.Object.class.equals(c)) {
-      return (T) ((BytesMessage)(this)).getBytes();
-    } else if (java.util.Map.class.equals(c) || java.lang.Object.class.equals(c)) {
-      return (T) ((MapMessage)(this)).getMap();
-    } else if (java.io.Serializable.class.isAssignableFrom(c)) {
-      return (T) ((ObjectMessage)(this)).getObject();
-    } else {
-      return null;
-    }
+    if (isBodyAssignableTo(c))
+      return getEffectiveBody(c);
+    throw new JMSException("Unable to get message body");
   }
-
+  
+/**
+ * Get message body 
+ * @ @param c- The type to which the message body will be assigned.
+ * @return message body
+ * @throws JMSException if the JMS provider fails to return a value due to some internal error.
+ */
+  protected <T> T getEffectiveBody (Class<T> c) throws JMSException {
+    return null;
+  }
+  
   public long getJMSDeliveryTime() throws JMSException {
     //TODO
     throw new JMSException("not yet implemented.");
@@ -1285,8 +1287,36 @@ public class Message implements javax.jms.Message {
     throw new JMSException("not yet implemented.");
   }
 
+  /**
+   * API 2.0 method
+   * @param c the specified type
+   * Check if the message body is capable of being assigned to specified type
+   * @return true if Message is TextMessage or MapMessage, or BytesMessage, or ObjectMessage when 
+   * it's deserializable false otherwise
+   * @throws JMSExeption if fail to return a value due to some internal error
+   * 
+   */
   public boolean isBodyAssignableTo(Class c) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+    if (this instanceof StreamMessage) {
+      return false;
+    } else if (this instanceof TextMessage) {
+      return String.class.isAssignableFrom(c);
+    } else if (this instanceof BytesMessage) {
+      return byte[].class.equals (c)|| java.lang.Object.class.equals(c);
+    } else if (this instanceof MapMessage) {
+      return java.util.Map.class.equals(c) || java.lang.Object.class.equals(c);
+    } else if (this instanceof ObjectMessage && java.io.Serializable.class.isAssignableFrom(c)) {
+      try { 
+        Object tmp = ((ObjectMessage) this).getObject();
+        return true; 
+      } catch (Exception e) {
+        return false;
+      }
+    } else if (Message.class.equals(c)) {
+      return true;
+    } else {
+      throw new JMSException ("Unable to to return a value");
+    }
+
   }
 }
