@@ -2632,10 +2632,38 @@ public class Session implements javax.jms.Session, SessionMBean {
 	  throw new JMSException("not yet implemented.");
   }
 
+  /**
+   * API 2.0 method.
+   * Creates a durable consumer to the specified topic.
+   * <p>
+   * If a client needs to receive all the messages published on a topic, including the ones
+   * published while the subscriber is inactive, it needs to use a durable TopicSubscriber.
+   * Joram retains a record of durable subscribers and insures that all messages from the
+   * topic's publishers are retained until they are acknowledged by this durable consumer
+   * or they have expired.
+   * <p>
+   * A client can change an existing durable consumer by creating a durable MessageConsumer
+   * with the same name and a new topic and/or message selector. Changing a durable consumer
+   * is equivalent to unsubscribing (deleting) the old one and creating a new one.
+   * 
+   * @param topic     the non-temporary Topic to subscribe to.
+   * @param name      the name used to identify this subscription.
+   * @return the created MessageConsumer object.
+   *
+   * @exception InvalidDestinationException if an invalid destination is specified.
+   * @exception IllegalStateException  If the session is closed or if the 
+   *              connection is broken.
+   * @exception JMSException  If the creation fails for any other reason.
+   */
   public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
       String name) throws JMSException {
-    //TODO
-    throw new JMSException("not yet implemented.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Session.createDurableConsumer(" + topic + ',' + name + ')');
+    checkClosed();
+    checkThreadOfControl();
+    MessageConsumer mc = new MessageConsumer(this, (Topic) topic, null, name, false);
+    addConsumer(mc);
+    return mc;
   }
 
   public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
