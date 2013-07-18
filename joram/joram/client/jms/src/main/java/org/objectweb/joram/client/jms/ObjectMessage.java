@@ -97,7 +97,15 @@ public final class ObjectMessage extends Message implements javax.jms.ObjectMess
     try {
       return momMsg.getObject();
     } catch (Exception exc) {
-      throw new MessageFormatException("Error while dgeserializing the wrapped object: " + exc);
+      throw new MessageFormatException("Error while deserializing the wrapped object: " + exc);
      }
   }
+
+  @Override
+  protected <T> T getEffectiveBody(Class<T> c) throws JMSException {
+    return (T) getObject();
+  }
+
+ 
+
 }

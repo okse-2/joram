@@ -89,4 +89,11 @@ public final class TextMessage extends Message implements javax.jms.TextMessage 
     	throw new MessageFormatException("Error while deserializing the text body : " + e);
     }
   }
+
+  @Override
+  protected <T> T getEffectiveBody(Class<T> c) throws JMSException {
+    return (T) getText();
+  }
+  
+  
 }
