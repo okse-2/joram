@@ -15,8 +15,7 @@
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
 #  USA.
-monolog.classname org.objectweb.util.monolog.wrapper.javaLog.LoggerFactory
-
+monolog.classname org.objectweb.util.monolog.wrapper.log4j.MonologLoggerFactory
 # -----------------------------------------------------------------------
 # tty : console handler
 # -----------------------------------------------------------------------
@@ -48,8 +47,6 @@ logger.fr.dyade.aaa.level WARN
 
 #logger.fr.dyade.aaa.agent.Agent.level DEBUG
 #logger.fr.dyade.aaa.agent.Engine.level DEBUG
-#logger.fr.dyade.aaa.util.Transaction.level DEBUG
-#logger.fr.dyade.aaa.util.Network.level DEBUG
 #logger.fr.dyade.aaa.agent.Service.level DEBUG
 
 #logger.fr.dyade.aaa.jndi2.client.level DEBUG
@@ -59,8 +56,3 @@ logger.fr.dyade.aaa.level WARN
 #logger.org.objectweb.joram.client.jms.level DEBUG
 #logger.org.objectweb.joram.client.connector.level DEBUG
 #logger.org.objectweb.joram.shared.level DEBUG
-
-#logger.org.objectweb.joram.client.jms.Session.Message.level INFO
-
-#logger.org.ow2.joram.jmxconnector.level DEBUG
-
