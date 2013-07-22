@@ -187,10 +187,10 @@ public class MOMCommandsImpl implements MOMCommands {
       buf.append("subscription <username> <subscription name>");
       buf.append("\nDeletes all pending messages.");
     } else if(command.equalsIgnoreCase("setFreeRead")) {
-      buf.append("(topic|queue) <destination id> <value>");
+      buf.append("(topic|queue) <destination name> <value>");
       buf.append("\nChange destination's reading permission.");
     } else if(command.equalsIgnoreCase("setFreeWrite")) {
-      buf.append("(topic|queue) <destination id> <value>");
+      buf.append("(topic|queue) <destination name> <value>");
       buf.append("\nChange destination's writing permission.");
     } else {
       System.err.println("Unknown command: "+command);
