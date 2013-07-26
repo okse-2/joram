@@ -2427,7 +2427,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * Called by MessageProducer.
    */
   synchronized void send(Destination dest, javax.jms.Message msg, int deliveryMode, int priority,
-      long timeToLive, boolean timestampDisabled, javax.jms.CompletionListener completionListener) throws JMSException {
+      long timeToLive, boolean timestampDisabled, long deliveryDelay, javax.jms.CompletionListener completionListener) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "Session.send(" + dest + ',' + msg + ',' +
@@ -2450,6 +2450,12 @@ public class Session implements javax.jms.Session, SessionMBean {
       msg.setJMSTimestamp(System.currentTimeMillis());
     }
     msg.setJMSRedelivered(false);
+
+    // set the deliveryTime
+    if (deliveryDelay > 0) {
+      long deliveryTime = System.currentTimeMillis() + deliveryDelay;
+      msg.setJMSDeliveryTime(deliveryTime);
+    }
     
     Message joramMsg = null;
     try {

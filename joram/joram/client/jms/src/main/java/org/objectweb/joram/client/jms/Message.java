@@ -32,7 +32,6 @@ import javax.jms.JMSException;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
-import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminMessage;
 import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.messages.ConversionHelper;
@@ -1216,6 +1215,7 @@ public class Message implements javax.jms.Message {
         logger.log(BasicLevel.ERROR, "Message.toString()", exc);
       }
       strbuf.append(",JMSTimestamp=").append(getJMSTimestamp());
+      strbuf.append(",JMSDeliveryTime=").append(getJMSDeliveryTime());
       strbuf.append(",JMSType=").append(getJMSType());
       if (!momMsg.isNullBody())
         strbuf.append(",size=").append(momMsg.getBodyLength());
@@ -1277,14 +1277,26 @@ public class Message implements javax.jms.Message {
     return null;
   }
   
+  /**
+   * API 2.0
+   * Gets the message delivery time value.
+   * 
+   * @return the message delivery time value.
+   * @exception if fail to get the delivery time due to some internal error.
+   */
   public long getJMSDeliveryTime() throws JMSException {
-    //TODO
-    throw new JMSException("not yet implemented.");
+    return momMsg.deliveryTime;
   }
 
+  /**
+   * API 2.0
+   * Sets the message delivery time value.
+   * 
+   * @param deliveryTime the message delivery time value
+   * @exception if fail to set the delivery time due to some internal error.
+   */
   public void setJMSDeliveryTime(long deliveryTime) throws JMSException {
-    //TODO
-    throw new JMSException("not yet implemented.");
+    momMsg.deliveryTime = deliveryTime;
   }
 
   /**

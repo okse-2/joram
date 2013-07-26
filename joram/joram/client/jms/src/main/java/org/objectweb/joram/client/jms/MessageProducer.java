@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -59,6 +59,9 @@ public class MessageProducer implements javax.jms.MessageProducer {
   /** Default time to live. */
   private long timeToLive = Message.DEFAULT_TIME_TO_LIVE;
 
+  /** Default delivery delay */
+  private long deliveryDelay = Message.DEFAULT_DELIVERY_DELAY;
+      
   /**
    * <code>true</code> if the client requests not to use the message
    * identifiers; however it is not taken into account, as our MOM needs
@@ -579,16 +582,31 @@ public class MessageProducer implements javax.jms.MessageProducer {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
-    sess.send(dest, message, deliveryMode, priority, timeToLive, timestampDisabled, completionListener);
+    sess.send(dest, message, deliveryMode, priority, timeToLive, timestampDisabled, deliveryDelay, completionListener);
   }
-
+  
+  /**
+   * API 2.0
+   * Sets the minimum length of time in milliseconds that must elapse after
+   * a message is sent before the consumer can consume this message.
+   * 
+   * the delivery delay is set to zero by default
+   * 
+   * @param deliveryDelay the delivery delay in milliseconds.
+   * @exception if fail to set the delivery delay due to some internal error.
+   */
   public void setDeliveryDelay(long deliveryDelay) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	  this.deliveryDelay = deliveryDelay;
   }
 
+  /**
+   * API 2.0
+   * Get the delivery delay.
+   * 
+   * @return the delivery delay in milliseconds.
+   * @exception if fail to get the delivery delay due to some internal error.
+   */
   public long getDeliveryDelay() throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	 return deliveryDelay;
   }
 }
