@@ -34,8 +34,8 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -68,6 +68,7 @@ import org.objectweb.joram.mom.notifications.QueueMsgReply;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.SubscribeReply;
 import org.objectweb.joram.mom.notifications.SubscribeRequest;
+import org.objectweb.joram.mom.notifications.TopicDeliveryTimeNot;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
@@ -75,6 +76,7 @@ import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.mom.util.InterceptorsHelper;
 import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.mom.util.MessageInterceptor;
+import org.objectweb.joram.mom.util.TopicDeliveryTimeTask;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.admin.AdminCommandConstant;
@@ -145,6 +147,9 @@ import org.objectweb.joram.shared.excepts.StateException;
 import org.objectweb.joram.shared.messages.MessageHelper;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
+import com.scalagent.scheduler.ScheduleEvent;
+import com.scalagent.scheduler.Scheduler;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
@@ -360,6 +365,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
   private transient WakeUpTask cleaningTask;
   
+  protected transient Scheduler deliveryScheduler = null;
+  
   /**
    * Used by the Encodable framework
    */
@@ -474,6 +481,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       doReact((UnknownAgent) not);
     } else if (not instanceof FwdAdminRequestNot) {
       doReact((FwdAdminRequestNot) not);
+    } else if (not instanceof TopicDeliveryTimeNot) {
+      doReact((TopicDeliveryTimeNot) not);
     } else {
       super.react(from, not);
     }
@@ -2588,20 +2597,33 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Browsing the target subscriptions:
     TopicSubscription tSub = (TopicSubscription) topicsTable.get(from);
     if (tSub == null || tSub.isEmpty()) return;
-
+    
     String subName;
     ClientSubscription sub;
-
+    List<String> delaySubNames = null;
+    long currentTime = System.currentTimeMillis();
     // AF: TODO we should parse each message for each subscription
     // see ClientSubscription.browseNewMessages
     List messages = new ArrayList();
     for (Iterator msgs = rep.getMessages().iterator(); msgs.hasNext();) {
-      Message message = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
-      // Setting the arrival order of the messages
-      message.order = arrivalsCounter++;
-      messages.add(message);
+      org.objectweb.joram.shared.messages.Message sharedMsg = 
+          (org.objectweb.joram.shared.messages.Message) msgs.next();
+      Message message = new Message(sharedMsg);
+      if (sharedMsg.deliveryTime > currentTime) {
+        if (delaySubNames == null) {
+          delaySubNames = new ArrayList<String>();
+          for (Iterator subNames = tSub.getNames(); subNames.hasNext();) {
+            delaySubNames.add((String) subNames.next());
+          }
+        }
+        scheduleDeliveryTimeMessage(from, sharedMsg, delaySubNames);
+      } else {
+        // Setting the arrival order of the messages
+        message.order = arrivalsCounter++;
+        messages.add(message);
+      }
     }
-
+       
     for (Iterator names = tSub.getNames(); names.hasNext();) {
       subName = (String) names.next();
       sub = (ClientSubscription) subsTable.get(subName);
@@ -2653,6 +2675,95 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
   }
 
+  void scheduleDeliveryTimeMessage(AgentId from, org.objectweb.joram.shared.messages.Message msg, List<String> subNames) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "UserAgent.scheduleDeliveryTimeMessage(" + msg + ", " + subNames + ')');
+
+    if (deliveryScheduler == null) {
+      try {
+        deliveryScheduler = new Scheduler(AgentServer.getTimer());
+      } catch (Exception exc) {
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "UserAgent.scheduleDeliveryTimeMessage", exc);
+      }
+    }
+    // schedule a task
+    try {
+      deliveryScheduler.scheduleEvent(
+          new ScheduleEvent(msg.id, 
+          new Date(msg.deliveryTime)), 
+          new TopicDeliveryTimeTask(getId(),
+              from,
+              msg, 
+              subNames));
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "UserAgent.scheduleDeliveryTimeMessage(" + msg + ')', e);
+    }
+  }
+  
+  private void doReact(TopicDeliveryTimeNot not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "UserAgent.doReact(" + not + ')');
+    
+    // Browsing the target subscriptions:
+    TopicSubscription tSub = (TopicSubscription) topicsTable.get(not.topic);
+    if (tSub == null || tSub.isEmpty()) return;
+    
+    Message momMsg = new Message(not.msg);
+    List<Message> messages = new ArrayList<Message>();
+    messages.add(momMsg);
+    
+    String subName;
+    ClientSubscription sub;
+    for (Iterator names = not.subNames.iterator(); names.hasNext();) {
+      subName = (String) names.next();
+      sub = (ClientSubscription) subsTable.get(subName);
+      if (sub == null) continue;
+
+      // Browsing the delivered messages.
+      sub.browseNewMessages(messages);
+    }
+
+    // Save message if it is delivered to a durable subscription.
+    Message message = momMsg;
+    if (message.durableAcksCounter > 0) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, " -> save message " + message);
+      // TODO (AF): The message saving does it need the proxy saving ?
+      if (message.isPersistent()) {
+        setSave();
+        // Persisting the message.
+        setMsgTxName(message);
+        message.save();
+        message.releaseFullMessage();
+      }
+    }
+
+    for (Iterator names = not.subNames.iterator(); names.hasNext();) {
+      subName = (String) names.next();
+      sub = (ClientSubscription) subsTable.get(subName);
+      if (sub == null) continue;
+
+      // If the subscription is active, launching a delivery sequence.
+      if (sub.getActive() > 0 ) {
+        ConsumerMessages consM = sub.deliver();
+        
+        if (consM != null) {
+          try {
+            setCtx(sub.getContextId());
+            if (activeCtx.getActivated())
+              doReply(consM);
+            else
+              activeCtx.addPendingDelivery(consM);
+          } catch (StateException pE) {
+            // The context is lost: nothing to do.
+          }
+        }
+      }
+    }
+  }
+  
   /**
    * Actually forwards an <code>ExceptionReply</code> coming from a destination
    * as a <code>MomExceptionReply</code> destinated to the requesting client.

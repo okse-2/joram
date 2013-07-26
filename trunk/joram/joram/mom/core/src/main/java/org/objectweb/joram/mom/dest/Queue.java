@@ -23,7 +23,9 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -43,6 +45,7 @@ import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
 import org.objectweb.joram.mom.notifications.BrowseReply;
 import org.objectweb.joram.mom.notifications.BrowseRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.QueueDeliveryTimeNot;
 import org.objectweb.joram.mom.notifications.DenyRequest;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
@@ -51,6 +54,7 @@ import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.mom.util.QueueDeliveryTimeTask;
 import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
@@ -79,7 +83,11 @@ import org.objectweb.joram.shared.selectors.Selector;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import com.scalagent.scheduler.ScheduleEvent;
+import com.scalagent.scheduler.Scheduler;
+
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.ExpiredNot;
@@ -160,6 +168,8 @@ public class Queue extends Destination implements QueueMBean {
   /** List holding the requests before reply or expiry. */
   protected List<ReceiveRequest> requests = new Vector();
   
+  protected transient Scheduler deliveryScheduler = null;
+  
   public Queue() {
     super();
   }
@@ -196,6 +206,8 @@ public class Queue extends Destination implements QueueMBean {
         abortReceiveRequest(from, (AbortReceiveRequest) not);
       else if (not instanceof ExpiredNot)
         handleExpiredNot(from, (ExpiredNot) not);
+      else if (not instanceof QueueDeliveryTimeNot)
+        doStoreMessageAfterDeliveryTime(from, (QueueDeliveryTimeNot) not);
       else
         super.react(from, not);
 
@@ -1036,17 +1048,24 @@ public class Queue extends Destination implements QueueMBean {
     
     // pre process the client message
     ClientMessages clientMsgs = preProcess(from, cm);
-
+   
+    long currentTime = System.currentTimeMillis();
+    
     if (clientMsgs != null) {
       Message msg;
       // Storing each received message:
       for (Iterator msgs = clientMsgs.getMessages().iterator(); msgs.hasNext();) {
 
-        msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
+        org.objectweb.joram.shared.messages.Message sharedMsg = (org.objectweb.joram.shared.messages.Message) msgs.next();
+        msg = new Message(sharedMsg);
 
-        msg.order = arrivalsCounter++;
-        storeMessage(msg, throwsExceptionOnFullDest);
-        if (msg.isPersistent()) setSave();
+        if (sharedMsg.deliveryTime > currentTime) {
+          scheduleDeliveryTimeMessage(sharedMsg, throwsExceptionOnFullDest);
+        } else {
+          msg.order = arrivalsCounter++;
+          storeMessage(msg, throwsExceptionOnFullDest);
+          if (msg.isPersistent()) setSave();
+        }
       }
     }
 
@@ -1057,6 +1076,48 @@ public class Queue extends Destination implements QueueMBean {
       postProcess(clientMsgs);
 
     receiving = false;
+  }
+
+  void scheduleDeliveryTimeMessage(org.objectweb.joram.shared.messages.Message msg, boolean throwsExceptionOnFullDest) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Queue.scheduleDeliveryTimeMessage(" + msg + ", " + throwsExceptionOnFullDest + ')');
+
+    if (deliveryScheduler == null) {
+      try {
+        deliveryScheduler = new Scheduler(AgentServer.getTimer());
+      } catch (Exception exc) {
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "Queue.scheduleDeliveryTimeMessage", exc);
+      }
+    }
+    // schedule a task
+    try {
+      deliveryScheduler.scheduleEvent(new ScheduleEvent(msg.id, new Date(msg.deliveryTime)), 
+                              new QueueDeliveryTimeTask(getId(), msg, throwsExceptionOnFullDest));
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "Queue.scheduleDeliveryTimeMessage(" + msg + ')', e);
+    }
+  }
+  
+  void doStoreMessageAfterDeliveryTime(AgentId from, QueueDeliveryTimeNot not) throws AccessException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Queue.doStoreMessageAfterDeliveryTime(" + from + ", " + not + ')');
+
+    if (not.msg == null) return;
+    org.objectweb.joram.shared.messages.Message sharedMsg = not.msg;
+    Message msg = new Message(sharedMsg);
+    msg.order = arrivalsCounter++;
+    storeMessage(msg, not.throwsExceptionOnFullDest);
+    if (msg.isPersistent()) setSave();
+    
+    // Launching a delivery sequence:
+    deliverMessages(0);
+
+    ClientMessages clientMsgs = new ClientMessages();
+    clientMsgs.addMessage(sharedMsg);
+    if (clientMsgs != null)
+      postProcess(clientMsgs);
   }
 
   /**
