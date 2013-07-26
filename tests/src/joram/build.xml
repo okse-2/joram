@@ -144,6 +144,8 @@
     <antcall target="base.test_T_M"/>
     <antcall target="base.test_Q_MText"/>
     <antcall target="base.test_T_MText"/>
+  	<antcall target="base.test_Q_MText_Delay"/>
+  	<antcall target="base.test_T_MText_Delay"/>
     <antcall target="base.test_Q_MObj"/>
     <antcall target="base.test_Q_MObjNull"/>
     <antcall target="base.test_Q_MObjBA"/>
@@ -826,6 +828,19 @@
       <param name="args" value=""/>
     </antcall>
   </target>
+	
+  <target name="base.test_Q_MText_Delay" depends="init.a3props,compile"
+          description=" --> test if the text message received with the delay, with queue">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Q_MText_Delay"/>
+      <param name="className" value="joram.base.Test_Q_MText_Delay"/>
+      <param name="jndiconf" value="base/jndi.properties"/>
+      <param name="a3conf" value="base/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
 
   <target name="base.test_T_MText" depends="init.a3props,compile"
           description=" --> test if the text message receive is the same that the message sent, with topic">
@@ -833,6 +848,19 @@
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="testid" value="base.test_T_MText"/>
       <param name="className" value="joram.base.Test_T_MText"/>
+      <param name="jndiconf" value="base/jndi.properties"/>
+      <param name="a3conf" value="base/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	
+  <target name="base.test_T_MText_Delay" depends="init.a3props,compile"
+          description=" --> test if the text message received with the delay, with topic">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_T_MText_Delay"/>
+      <param name="className" value="joram.base.Test_T_MText_Delay"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
       <param name="jvmargs" value=""/>
