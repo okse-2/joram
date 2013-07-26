@@ -182,6 +182,9 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
   public transient int compressedMinSize;
   
   public transient int compressionLevel = Deflater.BEST_SPEED;
+  
+  /** the message delivery time value. */
+  public transient long deliveryTime;
 
   /**
    * Sets the message destination.
@@ -538,6 +541,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     strbuf.append(",replyToId=").append(replyToId);
     strbuf.append(",correlationId=").append(correlationId);
     strbuf.append(",compressed=").append(compressed);
+    strbuf.append(",deliveryTime=").append(deliveryTime);
     strbuf.append(')');
   }
 
@@ -593,6 +597,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     StreamUtil.writeTo(toType, os);
     StreamUtil.writeTo(timestamp, os);
     StreamUtil.writeTo(compressed, os);
+    StreamUtil.writeTo(deliveryTime, os);
 
     // One short is used to know which fields are set
     short s = 0;
@@ -642,6 +647,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     toType = StreamUtil.readByteFrom(is);
     timestamp = StreamUtil.readLongFrom(is);
     compressed = StreamUtil.readBooleanFrom(is);
+    deliveryTime = StreamUtil.readLongFrom(is);
     
     short s = StreamUtil.readShortFrom(is);
 
@@ -753,7 +759,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     int encodedSize = EncodableHelper.getStringEncodedSize(id);
     
     encodedSize += EncodableHelper.getStringEncodedSize(toId);
-    encodedSize += BYTE_ENCODED_SIZE + LONG_ENCODED_SIZE + SHORT_ENCODED_SIZE;
+    encodedSize += BYTE_ENCODED_SIZE + LONG_ENCODED_SIZE + BOOLEAN_ENCODED_SIZE + LONG_ENCODED_SIZE + SHORT_ENCODED_SIZE;
 
     if (type != org.objectweb.joram.shared.messages.Message.SIMPLE) { encodedSize += BYTE_ENCODED_SIZE; }
     if (replyToId != null) { encodedSize += EncodableHelper.getStringEncodedSize(replyToId); }
@@ -776,6 +782,8 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     encoder.encodeString(toId);
     encoder.encodeByte(toType);
     encoder.encodeUnsignedLong(timestamp);
+    encoder.encodeBoolean(compressed);
+    encoder.encodeUnsignedLong(deliveryTime);
 
     // One short is used to know which fields are set
     short s = 0;
@@ -812,6 +820,8 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     toId = decoder.decodeString();
     toType = decoder.decodeByte();
     timestamp = decoder.decodeUnsignedLong();
+    compressed = decoder.decodeBoolean();
+    deliveryTime = decoder.decodeUnsignedLong();
     
     short s = decoder.decode16();
 
