@@ -622,7 +622,11 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
 //    }
     if (replyToId != null) { StreamUtil.writeTo(replyToId, os); }
     if (replyToType != 0) { StreamUtil.writeTo(replyToType, os); }
-    if (properties != null) { StreamUtil.writeTo(properties, os); }
+    if (properties != null) {
+      // remove JMSXDeliveryCount property before write.
+      properties.remove("JMSXDeliveryCount");
+      StreamUtil.writeTo(properties, os); 
+    }
     if (priority != DEFAULT_PRIORITY) { StreamUtil.writeTo(priority, os); }
     if (expiration != 0) { StreamUtil.writeTo(expiration, os); }
     if (correlationId != null) { StreamUtil.writeTo(correlationId, os); }
@@ -671,6 +675,10 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     if ((s & jmsTypeFlag) != 0) { jmsType = StreamUtil.readStringFrom(is); }
     redelivered = (s & redeliveredFlag) != 0;
     persistent = (s & persistentFlag) != 0;
+    // add JMSXDeliveryCount in properties.
+    if (properties == null)
+      properties = new Properties();
+    properties.setProperty("JMSXDeliveryCount", deliveryCount);
   }
 
   /**
@@ -804,7 +812,11 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     if (type != org.objectweb.joram.shared.messages.Message.SIMPLE) { encoder.encodeByte((byte) type); }
     if (replyToId != null) { encoder.encodeString(replyToId); }
     if (replyToType != 0) { encoder.encodeByte(replyToType); }
-    if (properties != null) { properties.encode(encoder); }
+    if (properties != null) {
+      // remove JMSXDeliveryCount property before write.
+      properties.remove("JMSXDeliveryCount");
+      properties.encode(encoder); 
+    }
     if (priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { encoder.encodeUnsignedInt(priority); }
     if (expiration != 0) { encoder.encodeUnsignedLong(expiration); }
     if (correlationId != null) { encoder.encodeString(correlationId); }
@@ -842,6 +854,11 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     persistent = (s & persistentFlag) != 0;
     
     body = decoder.decodeNullableByteArray();
+    
+    // add JMSXDeliveryCount in properties.
+    if (properties == null)
+      properties = new Properties();
+    properties.setProperty("JMSXDeliveryCount", deliveryCount);
   }
   
   public static int getMessageVectorEncodedSize(Vector<Message> messages) throws Exception {
