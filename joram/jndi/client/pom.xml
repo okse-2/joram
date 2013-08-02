@@ -24,8 +24,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-Activator>fr.dyade.aaa.jndi2.osgi.Activator</Bundle-Activator>
             <Export-Package>
               fr.dyade.aaa.jndi2.client,
+              fr.dyade.aaa.jndi2.osgi,
               fr.dyade.aaa.jndi2.scn</Export-Package>
           </instructions>
         </configuration>
