@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -35,11 +35,11 @@ import org.objectweb.joram.shared.stream.MetaData;
  */
 public final class ConnectionMetaData implements javax.jms.ConnectionMetaData {
   /** JMS major version number */
-  public final static int jmsMajorVersion = 1;
+  public final static int jmsMajorVersion = 2;
   /** JMS minor version number */
-  public final static int jmsMinorVersion = 1;
+  public final static int jmsMinorVersion = 0;
   /** JMS API version, currently 1.1 */
-  public final static String jmsVersion = "1.1";
+  public final static String jmsVersion = "2.0";
   /** JMS provider name: Joram */
   public final static String providerName = "Joram";
   /** Joram's major version number. */
