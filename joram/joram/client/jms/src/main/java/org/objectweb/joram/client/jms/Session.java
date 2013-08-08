@@ -2640,16 +2640,43 @@ public class Session implements javax.jms.Session, SessionMBean {
     }
   }
 
+  /**
+   * API 2.0 method.
+   */
   public javax.jms.MessageConsumer createSharedConsumer(javax.jms.Topic topic,
-		  String sharedSubscriptionName) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+                                                        String name) throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Session.createSharedConsumer(" + topic + ',' + name + ')');
+
+    checkClosed();
+    checkThreadOfControl();
+    
+    // TODO:
+    if (topic == null)
+      throw new InvalidDestinationException("Invalid null destination.");
+    ((Topic) topic).check();
+
+    throw new JMSException("not yet implemented.");
   }
 
+  /**
+   * API 2.0 method.
+   */
   public javax.jms.MessageConsumer createSharedConsumer(javax.jms.Topic topic,
-		  String sharedSubscriptionName, String messageSelector)
-				  throws JMSException {
-	  //TODO
+                                                        String name,
+                                                        String selector) throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "Session.createSharedConsumer(" + topic + ',' + name + ',' + selector + ')');
+
+    checkClosed();
+    checkThreadOfControl();
+    
+	  // TODO:
+    if (topic == null)
+      throw new InvalidDestinationException("Invalid null destination.");
+    ((Topic) topic).check();
+
 	  throw new JMSException("not yet implemented.");
   }
 
@@ -2677,15 +2704,18 @@ public class Session implements javax.jms.Session, SessionMBean {
    * @exception JMSException  If the creation fails for any other reason.
    */
   public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
-      String name) throws JMSException {
+                                                         String name) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Session.createDurableConsumer(" + topic + ',' + name + ')');
+    
     checkClosed();
     checkThreadOfControl();
+    
     MessageConsumer mc = new MessageConsumer(this, (Topic) topic, null, name, false);
     addConsumer(mc);
     return mc;
   }
+  
   /**
    * API 2.0 method.
    * Creates a durable consumer to the specified topic.
@@ -2711,28 +2741,58 @@ public class Session implements javax.jms.Session, SessionMBean {
    * @exception JMSException  If the creation fails for any other reason.
    */
   public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
-      String name, String messageSelector, boolean noLocal)
-          throws JMSException {
+                                                         String name,
+                                                         String messageSelector,
+                                                         boolean noLocal) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Session.createDurableConsumer(" + topic + ',' + name  + ',' + noLocal + ')');
+    
     checkClosed();
     checkThreadOfControl();
+    
     MessageConsumer mc = new MessageConsumer(this, (Topic) topic, null, name, noLocal);
     addConsumer(mc);
     return mc;
-    
   }
 
-  public javax.jms.MessageConsumer createSharedDurableConsumer(
-		  javax.jms.Topic topic, String name) throws JMSException {
-	  //TODO
+  /**
+   * API 2.0 method.
+   */
+  public javax.jms.MessageConsumer createSharedDurableConsumer(javax.jms.Topic topic,
+                                                               String name) throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "Session.createSharedDurableConsumer(" + topic + ',' + name + ')');
+
+    checkClosed();
+    checkThreadOfControl();
+    
+    // TODO:
+    if (topic == null)
+      throw new InvalidDestinationException("Invalid null destination.");
+    ((Topic) topic).check();
+
 	  throw new JMSException("not yet implemented.");
   }
 
-  public javax.jms.MessageConsumer createSharedDurableConsumer(
-		  javax.jms.Topic topic, String name, String messageSelector)
-				  throws JMSException {
-	  //TODO
+  /**
+   * API 2.0 method.
+   */
+  public javax.jms.MessageConsumer createSharedDurableConsumer(javax.jms.Topic topic,
+                                                               String name,
+                                                               String selector) throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "Session.createSharedDurableConsumer(" + topic + ',' + name + ',' + selector + ')');
+
+    checkClosed();
+    checkThreadOfControl();
+    
+    // TODO:
+    if (topic == null)
+      throw new InvalidDestinationException("Invalid null destination.");
+    ((Topic) topic).check();
+
 	  throw new JMSException("not yet implemented.");
   }
 }
