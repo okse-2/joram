@@ -119,6 +119,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
   public synchronized void setDisableMessageID(boolean value) throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
+    
+    messageIDDisabled = value;
   }
 
   /**
