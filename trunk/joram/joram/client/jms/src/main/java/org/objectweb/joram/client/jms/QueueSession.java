@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -52,7 +52,6 @@ public class QueueSession extends Session implements javax.jms.QueueSession {
   public String toString() {
     return "QueueSess:" + getId();
   }
-
 
   /**
    * API method.
@@ -159,4 +158,58 @@ public class QueueSession extends Session implements javax.jms.QueueSession {
   public void unsubscribe(String name) throws JMSException {
     throw new IllegalStateException("Forbidden call on a QueueSession.");
   }
+  
+
+  /**
+   * API 2.0 method.
+   */
+  public javax.jms.MessageConsumer createSharedConsumer(javax.jms.Topic topic,
+                                                        String name) throws JMSException {
+    throw new IllegalStateException("Forbidden call on a QueueSession.");
+  }
+
+  /**
+   * API 2.0 method.
+   */
+  public javax.jms.MessageConsumer createSharedConsumer(javax.jms.Topic topic,
+                                                        String name,
+                                                        String selector) throws JMSException {
+    throw new IllegalStateException("Forbidden call on a QueueSession.");
+  }
+
+  /**
+   * API 2.0 method.
+   */
+  public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
+                                                         String name) throws JMSException {
+    throw new IllegalStateException("Forbidden call on a QueueSession.");
+  }
+  
+  /**
+   * API 2.0 method.
+   */
+  public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
+                                                         String name,
+                                                         String messageSelector,
+                                                         boolean noLocal) throws JMSException {
+    throw new IllegalStateException("Forbidden call on a QueueSession.");
+  }
+
+  /**
+   * API 2.0 method.
+   */
+  public javax.jms.MessageConsumer createSharedDurableConsumer(javax.jms.Topic topic,
+                                                               String name) throws JMSException {
+    throw new IllegalStateException("Forbidden call on a QueueSession.");
+  }
+
+  /**
+   * API 2.0 method.
+   */
+  public javax.jms.MessageConsumer createSharedDurableConsumer(javax.jms.Topic topic,
+                                                               String name,
+                                                               String selector) throws JMSException {
+    throw new IllegalStateException("Forbidden call on a QueueSession.");
+  }
+
 }
