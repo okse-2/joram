@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -29,7 +29,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-import javax.jms.CompletionListener;
 import javax.jms.IllegalStateException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
@@ -37,7 +36,6 @@ import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.Message;
-import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
@@ -94,7 +92,7 @@ public class RequestMultiplexer {
 
   private Map requestsTable;
   
-  private Map<Integer, CompletionListenerStruc> completionListeners;
+  private Map<Integer, CompletionListener> completionListeners;
   
   private int requestCounter;
 
@@ -149,7 +147,7 @@ public class RequestMultiplexer {
     this.channel = channel;
     this.cnx = cnx; 
     requestsTable = new Hashtable();
-    completionListeners = new Hashtable<Integer, CompletionListenerStruc>();
+    completionListeners = new Hashtable<Integer, CompletionListener>();
     requestCounter = 0;
     createTimer();
     channel.setTimer(getTimer());
@@ -207,7 +205,14 @@ public class RequestMultiplexer {
   public void sendRequest(AbstractJmsRequest request) throws JMSException {
     sendRequest(request, null, null);
   }
-  
+
+  public void sendRequest(AbstractJmsRequest request, CompletionListener completionListener) throws JMSException {
+    sendRequest(request, null, null);
+    if (completionListener != null)
+      // TODO (AF): May be we have to use a separate thread
+      completionListener.onCompletion();
+  }
+
   public void sendRequest(AbstractJmsRequest request, ReplyListener listener, CompletionListener completionListener) throws JMSException {
 
     synchronized (this) {
@@ -225,12 +230,13 @@ public class RequestMultiplexer {
       }
       
       if (completionListener != null) {
-        if (request instanceof ProducerMessages) { //TODO: used request.getClassId() == AbstractJmsMessage.PRODUCER_MESSAGES
+        if (request instanceof ProducerMessages) {
+          //TODO: used request.getClassId() == AbstractJmsMessage.PRODUCER_MESSAGES
           ProducerMessages pm = (ProducerMessages) request;
           Vector msgs = pm.getMessages();
           org.objectweb.joram.shared.messages.Message sharedMsg = (org.objectweb.joram.shared.messages.Message) msgs.get(0);
           Message msg = Message.getHeader(sharedMsg);
-          completionListeners.put(new Integer(request.getRequestId()), new CompletionListenerStruc(completionListener, msg));
+          completionListeners.put(new Integer(request.getRequestId()), completionListener);
         }
       }
 
@@ -340,9 +346,9 @@ public class RequestMultiplexer {
       keySet.toArray(requestIds);
     }
     for (int i = 0; i < requestIds.length; i++) {
-      CompletionListenerStruc cls = completionListeners.get(requestIds[i]);
-      if (cls != null && cls.cl != null)
-        cls.cl.onException(cls.msg, new Exception(exc.getMessage()));
+      CompletionListener cl = completionListeners.get(requestIds[i]);
+      if (cl != null)
+        cl.onException(new Exception(exc.getMessage()));
     }
     completionListeners.clear();
     requestsTable.clear();
@@ -540,12 +546,12 @@ public class RequestMultiplexer {
           
           boolean isCompletionListener = false;
           if (!completionListeners.isEmpty()) {
-            CompletionListenerStruc cls = completionListeners.remove(reply.getCorrelationId());
-            if (cls != null && cls.cl != null) {
+            CompletionListener cl = completionListeners.remove(reply.getCorrelationId());
+            if (cl != null) {
               if (reply instanceof MomExceptionReply) {
-                cls.cl.onException(cls.msg, new Exception(((MomExceptionReply) reply).getMessage()));
+                cl.onException(new Exception(((MomExceptionReply) reply).getMessage()));
               } else {
-                cls.cl.onCompletion(cls.msg);
+                cl.onCompletion();
               }
               isCompletionListener = true;
             }
@@ -632,16 +638,6 @@ public class RequestMultiplexer {
       Timer timer = getTimer();
       if (timer != null)
         timer.schedule(this, heartBeat, heartBeat);
-    }
-  }
-
-  private class CompletionListenerStruc {
-    CompletionListener cl;
-    Message msg;
-    
-    CompletionListenerStruc(CompletionListener completionListener, Message msg) {
-      this.cl = completionListener;
-      this.msg = msg;
     }
   }
 }

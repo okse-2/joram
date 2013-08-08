@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,15 +22,10 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
-import java.util.Vector;
-
-import javax.jms.CompletionListener;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
-import org.objectweb.joram.client.jms.Message;
-import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
@@ -124,7 +119,7 @@ public class Requestor implements ReplyListener, ErrorListener {
     return request(request, defaultRequestTimeout, null);
   }
   
-  public synchronized AbstractJmsReply request(AbstractJmsRequest request, javax.jms.CompletionListener completionListener) throws JMSException {
+  public synchronized AbstractJmsReply request(AbstractJmsRequest request, CompletionListener completionListener) throws JMSException {
     return request(request, defaultRequestTimeout, completionListener);
   }
   
@@ -147,6 +142,9 @@ public class Requestor implements ReplyListener, ErrorListener {
 
     if (status != Status.INIT) {
       if (status == Status.CLOSE) return null;
+      
+      // AF: It seems to be bad correction to the lack of reinitialisation of this
+      // requestor from a previous use with a completion listener.
       if (completionListener == null) 
         throw new javax.jms.IllegalStateException("Requestor already used");
     }
@@ -155,10 +153,12 @@ public class Requestor implements ReplyListener, ErrorListener {
     setStatus(Status.RUN);
     requestId = request.getRequestId();
     
-    if (completionListener != null && request instanceof ProducerMessages) { //TODO: used request.getClassId() == AbstractJmsMessage.PRODUCER_MESSAGES
+    if (completionListener != null && request instanceof ProducerMessages) {
+      //TODO: use request.getClassId() == AbstractJmsMessage.PRODUCER_MESSAGES
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> request #" + requestId + ", completionListener = " + completionListener);
-      init();
+
+      init(); // The requestor is no longer used.
       return null;
     }
     
