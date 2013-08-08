@@ -343,7 +343,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
       throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
     // Actually producing it:
     doSend(dest, message, deliveryMode, priority, timeToLive);
-                                }
+  }
 
   /**
    * API method.
@@ -368,9 +368,9 @@ public class MessageProducer implements javax.jms.MessageProducer {
   public synchronized void send(javax.jms.Destination dest,
                                 javax.jms.Message message) throws JMSException {
     if (identified)
-      throw new UnsupportedOperationException("An unidentified message producer can't use this identified message producer.");
+      throw new UnsupportedOperationException("An identified message producer can't use this method.");
     if (dest == null)
-      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
+      throw new InvalidDestinationException("Can't send message to an unidentified destination.");
 
     doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
   }
@@ -404,9 +404,9 @@ public class MessageProducer implements javax.jms.MessageProducer {
                                 int priority,
                                 long timeToLive) throws JMSException {
     if (identified)
-      throw new UnsupportedOperationException("An unidentified message producer can't use this identified message producer.");
+      throw new UnsupportedOperationException("An identified message producer can't use this method.");
     if (dest == null)
-      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
+      throw new InvalidDestinationException("Can't send message to an unidentified destination.");
 
     doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
   }
@@ -427,6 +427,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
       javax.jms.CompletionListener completionListener) throws JMSException {
     if (! identified)
       throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
+    if (completionListener == null)
+      throw new IllegalArgumentException("Completion listener is null");
     doSend(dest, message, deliveryMode, priority, timeToLive, completionListener);
   }
 
@@ -449,8 +451,9 @@ public class MessageProducer implements javax.jms.MessageProducer {
       int deliveryMode, 
       int priority,
       long timeToLive, 
-      javax.jms.CompletionListener completionListener)
-          throws JMSException {
+      javax.jms.CompletionListener completionListener) throws JMSException {
+    if (completionListener == null)
+      throw new IllegalArgumentException("Completion listener is null");
     doSend(dest, message, deliveryMode, priority, timeToLive, completionListener);
   }
 
@@ -479,9 +482,11 @@ public class MessageProducer implements javax.jms.MessageProducer {
       javax.jms.Message message,
       javax.jms.CompletionListener completionListener) throws JMSException {
     if (identified)
-      throw new UnsupportedOperationException("An unidentified message producer can't use this identified message producer.");
+      throw new UnsupportedOperationException("An identified message producer can't use this method.");
     if (destination == null)
-      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
+      throw new InvalidDestinationException("Can't send message to an unidentified destination.");
+    if (completionListener == null)
+      throw new IllegalArgumentException("Completion listener is null");
     doSend((Destination) destination, message, deliveryMode, priority, timeToLive, completionListener);
   }
 
@@ -516,9 +521,11 @@ public class MessageProducer implements javax.jms.MessageProducer {
       long timeToLive,
       javax.jms.CompletionListener completionListener) throws JMSException {
     if (identified)
-      throw new UnsupportedOperationException("An unidentified message producer can't use this identified message producer.");
+      throw new UnsupportedOperationException("An identified message producer can't use this method.");
     if (destination == null)
-      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
+      throw new InvalidDestinationException("Can't send message to an unidentified destination.");
+    if (completionListener == null)
+      throw new IllegalArgumentException("Completion listener is null");
     doSend((Destination) destination, message, deliveryMode, priority, timeToLive, completionListener);
   }
   
