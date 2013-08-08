@@ -38,6 +38,7 @@ import javax.jms.JMSException;
 import javax.jms.MessageFormatException;
 import javax.jms.TransactionRolledBackException;
 
+import org.objectweb.joram.client.jms.connection.CompletionListener;
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 import org.objectweb.joram.client.jms.connection.Requestor;
 import org.objectweb.joram.shared.DestinationConstants;
@@ -834,7 +835,7 @@ public class Session implements javax.jms.Session, SessionMBean {
   public String getSessionMode() {
     return SessionMode.toString(sessionMode);
   }
-  
+
   /**
    * Sets the request status.
    */
@@ -1520,7 +1521,7 @@ public class Session implements javax.jms.Session, SessionMBean {
     checkThreadOfControl();
 
     if (!transacted)
-      throw new IllegalStateException("Can't commit a non transacted" + " session.");
+      throw new IllegalStateException("Can't commit a non transacted session.");
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "--- " + this + ": committing...");
@@ -1688,6 +1689,10 @@ public class Session implements javax.jms.Session, SessionMBean {
     syncRequest(new ConsumerUnsubRequest(name));
   }
 
+  boolean checkThread() {
+    return (daemon != null && daemon.isCurrentThread());
+  }
+  
   /**
    * API method. Closes the session.
    * <p>
@@ -1858,6 +1863,8 @@ public class Session implements javax.jms.Session, SessionMBean {
     // But the JMS 1.1 specification doesn't mention this point. 
     // So we don't implement it: a stop doesn't block until 
     // receives have completed.
+    
+    // TODO: Verify the JMS 2.0 specification.
 
 //     while (requestStatus != RequestStatus.NONE) {
 //       try {
@@ -2436,10 +2443,14 @@ public class Session implements javax.jms.Session, SessionMBean {
     checkClosed();
     checkThreadOfControl();
 
+    if (msg == null)
+      throw new MessageFormatException("Cannot send null message");
+
     // Updating the message property fields:
     msg.setJMSMessageID(cnx.nextMessageId());
     msg.setJMSDeliveryMode(deliveryMode);
     msg.setJMSDestination(dest);
+    
     if (timeToLive == 0) {
       msg.setJMSExpiration(0);
     } else {
@@ -2456,6 +2467,10 @@ public class Session implements javax.jms.Session, SessionMBean {
       long deliveryTime = System.currentTimeMillis() + deliveryDelay;
       msg.setJMSDeliveryTime(deliveryTime);
     }
+    
+    CompletionListener listener = null;
+    if (completionListener != null)
+      listener = new CompletionListener(completionListener, msg);
     
     Message joramMsg = null;
     try {
@@ -2507,9 +2522,9 @@ public class Session implements javax.jms.Session, SessionMBean {
       if (asyncSend || (!joramMsg.momMsg.persistent)) {
         // Asynchronous sending
         pM.setAsyncSend(true);
-        mtpx.sendRequest(pM);
+        mtpx.sendRequest(pM, listener);
       } else {
-        requestor.request(pM, completionListener);
+        requestor.request(pM, listener);
       }
     }
   }
