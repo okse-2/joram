@@ -106,6 +106,4 @@ public final class ObjectMessage extends Message implements javax.jms.ObjectMess
     return (T) getObject();
   }
 
- 
-
 }
