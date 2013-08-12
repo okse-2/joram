@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -23,16 +23,17 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import javax.jms.JMSContext;
 import javax.jms.JMSException;
+import javax.jms.JMSRuntimeException;
 import javax.jms.JMSSecurityException;
-import javax.jms.XAJMSContext;
+import javax.jms.JMSSecurityRuntimeException;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.FactoryParameters;
+import org.objectweb.joram.client.jms.JMSContext;
 import org.objectweb.joram.client.jms.QueueConnection;
 import org.objectweb.joram.client.jms.TopicConnection;
 import org.objectweb.joram.client.jms.XAConnection;
@@ -97,11 +98,11 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
     params = new FactoryParameters();
   }
 
-  
   private boolean isSetIdentityClassName = false;
   
   /**
    * set indentity class name
+   *
    * @param identityClassName default Identity.SIMPLE_IDENTITY_CLASS (user/passwd).
    */
   public void setIdentityClassName(String identityClassName) {
@@ -111,6 +112,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   
   /**
    * initialize the user identity.
+   *
    * @param user    user name
    * @param passwd  user password
    * @throws JMSException
@@ -161,42 +163,37 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   final static String dfltServerHost = "localhost";
 
   /**
-   * Returns default server's hostname for connection.
-   * Default value "localhost" can be adjusted by setting the
-   * <tt>JoramDfltServerHost</tt> property.
+   * Returns default server's hostname for connection. Default value "localhost"
+   * can be adjusted by setting the <tt>JoramDfltServerHost</tt> property.
    */
   public static String getDefaultServerHost() {
     return System.getProperty("JoramDfltServerHost", dfltServerHost);
   }
-
+  
   /**
-   * Default server's port for connection, default value is 16010.
-   * This value can be adjusted through the <tt>JoramDfltServerPort</tt>
-   * property.
+   * Default server's port for connection, default value is 16010. This value
+   * can be adjusted through the <tt>JoramDfltServerPort</tt> property.
    */
   final static int dfltServerPort = 16010;
 
   /**
-   * Returns default server's port for connection.
-   * Default value 16010 can be adjusted by setting the
-   * <tt>JoramDfltServerPort</tt> property.
+   * Returns default server's port for connection. Default value 16010 can be
+   * adjusted by setting the <tt>JoramDfltServerPort</tt> property.
    */
   public static int getDefaultServerPort() {
     return Integer.getInteger("JoramDfltServerPort", dfltServerPort).intValue();
   }
   
   /**
-   * Default administrator login name for connection, default value is
-   * "root".
+   * Default administrator login name for connection, default value is "root".
    * This value can be adjusted through the <tt>JoramDfltRootLogin</tt>
    * property.
    */
   final static String dfltRootLogin = "root";
 
   /**
-   * Returns default administrator login name for connection.
-   * Default value "root" can be adjusted by setting the
-   * <tt>JoramDfltRootLogin</tt> property.
+   * Returns default administrator login name for connection. Default value
+   * "root" can be adjusted by setting the <tt>JoramDfltRootLogin</tt> property.
    */
   public static String getDefaultRootLogin() {
     return System.getProperty("JoramDfltRootLogin", dfltRootLogin);
@@ -204,47 +201,44 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   
   /**
    * Default administrator login password for connection, default value is
-   * "root".
-   * This value can be adjusted through the <tt>JoramDfltRootPassword</tt>
-   * property.
+   * "root". This value can be adjusted through the
+   * <tt>JoramDfltRootPassword</tt> property.
    */
   final static String dfltRootPassword = "root";
 
   /**
-   * Returns the default administrator login password for connection.
-   * Default value "root" can be adjusted by setting the
-   * <tt>JoramDfltRootPassword</tt> property.
+   * Returns the default administrator login password for connection. Default
+   * value "root" can be adjusted by setting the <tt>JoramDfltRootPassword</tt>
+   * property.
    */
   public static String getDefaultRootPassword() {
     return System.getProperty("JoramDfltRootPassword", dfltRootPassword);
   }
 
   /**
-   * Default login name for connection, default value is "anonymous".
-   * This value can be adjusted through the <tt>JoramDfltLogin</tt> property.
+   * Default login name for connection, default value is "anonymous". This value
+   * can be adjusted through the <tt>JoramDfltLogin</tt> property.
    */
   final static String dfltLogin = "anonymous";
 
   /**
-   * Returns default login name for connection.
-   * Default value "anonymous" can be adjusted by setting the
-   * <tt>JoramDfltLogin</tt> property.
+   * Returns default login name for connection. Default value "anonymous" can be
+   * adjusted by setting the <tt>JoramDfltLogin</tt> property.
    */
   public static String getDefaultLogin() {
     return System.getProperty("JoramDfltLogin", dfltLogin);
   }
 
   /**
-   * Default login password for connection, default value is "anonymous".
-   * This value can be adjusted through the <tt>JoramDfltPassword</tt>
-   * property.
+   * Default login password for connection, default value is "anonymous". This
+   * value can be adjusted through the <tt>JoramDfltPassword</tt> property.
    */
   final static String dfltPassword = "anonymous";
 
   /**
-   * Returns the default login password for connection.
-   * Default value "anonymous" can be adjusted by setting the
-   * <tt>JoramDfltPassword</tt> property.
+   * Returns the default login password for connection. Default value
+   * "anonymous" can be adjusted by setting the <tt>JoramDfltPassword</tt>
+   * property.
    */
   public static String getDefaultPassword() {
     return System.getProperty("JoramDfltPassword", dfltPassword);
@@ -315,11 +309,11 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   }
 
   /**
-   * API method, creates a queue connection with the default user identity.
-   * The connection is created in stopped mode.
+   * API method, creates a queue connection with the default user identity. The
+   * connection is created in stopped mode.
    *
-   * @return  a newly created queue connection.
-   * 
+   * @return a newly created queue connection.
+   *
    * @see javax.jms.QueueConnectionFactory#createQueueConnection()
    * @exception JMSSecurityException  If the default identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
@@ -524,33 +518,80 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
     params.fromReference(ref, prefix);
   }
 
-  public JMSContext createContext() {
-	  //TODO
-	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  /**
+   * JMS2.0 API method.
+   */
+  public javax.jms.JMSContext createContext() {
+    try {
+      return new JMSContext((Connection) createConnection());
+    } catch (JMSSecurityException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create JMSContext", e);
+      throw new JMSSecurityRuntimeException("Unable to create JMSContext", e.getMessage(), e);
+    } catch (JMSException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create JMSContext", e);
+      throw new JMSRuntimeException("Unable to create JMSContext", e.getMessage(), e);
+    }
   }
 
-  public JMSContext createContext(String userName, String password) {
-	  //TODO
-	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  /**
+   * JMS2.0 API method.
+   */
+  public javax.jms.JMSContext createContext(int mode) {
+    try {
+      return new JMSContext((Connection) createConnection(), mode);
+    } catch (JMSSecurityException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create JMSContext", e);
+      throw new JMSSecurityRuntimeException("Unable to create JMSContext", e.getMessage(), e);
+    } catch (JMSException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create JMSContext", e);
+      throw new JMSRuntimeException ("Unable to create JMSContext", e.getMessage(), e);
+    }
   }
 
-  public JMSContext createContext(String userName, String password, int sessionMode) {
-	  //TODO
-	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  /**
+   * JMS2.0 API method.
+   */
+  public javax.jms.JMSContext createContext(String userName, String password) {
+    try {
+      return new JMSContext((Connection) createConnection(userName, password));
+    } catch (JMSSecurityException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create JMSContext", e);
+      throw new JMSSecurityRuntimeException("Unable to create JMSContext", e.getMessage(), e);
+    } catch (JMSException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create JMSContext", e);
+      throw new JMSRuntimeException ("Unable to create JMSContext", e.getMessage(), e);
+    }
   }
 
-  public JMSContext createContext(int sessionMode) {
-	  //TODO
-	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  /**
+   * JMS2.0 API method.
+   */
+  public JMSContext createContext(String userName, String password, int mode) {
+    try {
+      return new JMSContext((Connection) createConnection(userName, password), mode);
+    } catch (JMSSecurityException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create JMSContext", e);
+      throw new JMSSecurityRuntimeException("Unable to create JMSContext", e.getMessage(), e);
+    } catch (JMSException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create JMSContext", e);
+      throw new JMSRuntimeException ("Unable to create JMSContext", e.getMessage(), e);
+    }
   }
 
-  public XAJMSContext createXAContext() {
-	  //TODO
-	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  /**
+   * JMS2.0 API method.
+   */
+  public javax.jms.XAJMSContext createXAContext() {
+    // TODO
+    throw new javax.jms.JMSRuntimeException("not yet implemented.");
   }
 
-  public XAJMSContext createXAContext(String userName, String password) {
-	  //TODO
-	  throw new javax.jms.JMSRuntimeException("not yet implemented.");
+  /**
+   * JMS2.0 API method.
+   */
+  public javax.jms.XAJMSContext createXAContext(String userName, String password) {
+    // TODO
+    throw new javax.jms.JMSRuntimeException("not yet implemented.");
   }
+
 }
