@@ -21,13 +21,17 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
+import org.objectweb.joram.client.jms.Session;
+
 public class CompletionListener {
   javax.jms.CompletionListener listener = null;
   javax.jms.Message message = null;
+  Session session = null;
   
-  public CompletionListener(javax.jms.CompletionListener listener, javax.jms.Message message) {
+  public CompletionListener(javax.jms.CompletionListener listener, javax.jms.Message message, Session session) {
     this.listener = listener;
     this.message = message;
+    this.session = session;
   }
   
   /**
@@ -35,11 +39,12 @@ public class CompletionListener {
    */
   void onCompletion() {
     if (listener != null) {
-      new Thread() {
-        public void run() {
-          listener.onCompletion(message);
-        }
-      }.start();
+      listener.onCompletion(message);
+//      new Thread() {
+//        public void run() {
+//          listener.onCompletion(message);
+//        }
+//      }.start();
     }
   }
 
@@ -53,11 +58,12 @@ public class CompletionListener {
    */
   void onException(final Exception exception) {
     if (listener != null) {
-      new Thread() {
-        public void run() {
-          listener.onException(message, exception);
-        }
-      }.start();
+      listener.onException(message, exception);
+//      new Thread() {
+//        public void run() {
+//          listener.onException(message, exception);
+//        }
+//      }.start();
     }
   }
 }

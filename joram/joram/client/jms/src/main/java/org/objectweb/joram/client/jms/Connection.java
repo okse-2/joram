@@ -111,6 +111,14 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
    */
   private RequestMultiplexer mtpx;
 
+  boolean checkThread() {
+    return mtpx.checkDemultiplexerDaemon();
+  }
+  
+  boolean checkCLSession(Session session) {
+    return mtpx.checkCLSession(session);
+  }
+  
   /**
    * The requestor used to communicate
    * with the user proxy.
@@ -898,14 +906,16 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
       Session session = (Session) sessions.get(i);
       session.stop();
     }
-    
+
     synchronized (this) {
       if (status == Status.STOP)
         return;
 
-      // Sending a synchronous "stop" request to the server:
-      requestor.request(new CnxStopRequest());
-
+      // Now send an asynchronous "stop" request to the server in order
+      // to allow stop call from CompletionListener.
+//      requestor.request(new CnxStopRequest());
+      mtpx.sendRequest(new CnxStopRequest());
+      
       // Set the status as STOP as the following operations
       // (Session.stop) can't fail.
       setStatus(Status.STOP);
@@ -929,6 +939,9 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, stringImage + ".close()");
 
+    if (checkThread())
+      throw new IllegalStateException("Cannot close connection");
+    
     unregisterMBean();
     
     closer.close();

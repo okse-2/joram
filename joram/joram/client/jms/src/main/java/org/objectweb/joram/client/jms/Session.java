@@ -225,6 +225,10 @@ public class Session implements javax.jms.Session, SessionMBean {
   /** Daemon distributing asynchronous server deliveries. */
   private SessionDaemon daemon;
 
+  boolean checkThread() {
+    return (daemon != null && daemon.isCurrentThread());
+  }
+
   /** Counter of message listeners. */
   private int listenerCount;
 
@@ -1519,6 +1523,9 @@ public class Session implements javax.jms.Session, SessionMBean {
 
     checkClosed();
     checkThreadOfControl();
+    
+    if (cnx.checkCLSession(this))
+      throw new IllegalStateException("Cannot commit session");
 
     if (!transacted)
       throw new IllegalStateException("Can't commit a non transacted session.");
@@ -1592,6 +1599,9 @@ public class Session implements javax.jms.Session, SessionMBean {
 
     checkClosed();
     checkThreadOfControl();
+    
+    if (cnx.checkCLSession(this))
+      throw new IllegalStateException("Cannot rollback session");
 
     if (!transacted)
       throw new IllegalStateException("Can't rollback a non transacted" + " session.");
@@ -1688,10 +1698,6 @@ public class Session implements javax.jms.Session, SessionMBean {
     }
     syncRequest(new ConsumerUnsubRequest(name));
   }
-
-  boolean checkThread() {
-    return (daemon != null && daemon.isCurrentThread());
-  }
   
   /**
    * API method. Closes the session.
@@ -1715,6 +1721,9 @@ public class Session implements javax.jms.Session, SessionMBean {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Session.close()");
     
+    if (cnx.checkCLSession(this))
+      throw new IllegalStateException("Cannot close session");
+
     if (daemon != null && daemon.isCurrentThread())
       toClose = true;
     else
@@ -2470,7 +2479,7 @@ public class Session implements javax.jms.Session, SessionMBean {
     
     CompletionListener listener = null;
     if (completionListener != null)
-      listener = new CompletionListener(completionListener, msg);
+      listener = new CompletionListener(completionListener, msg, this);
     
     Message joramMsg = null;
     try {
