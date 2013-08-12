@@ -828,7 +828,7 @@
       <param name="args" value=""/>
     </antcall>
   </target>
-	
+
   <target name="base.test_Q_MText_Delay" depends="init.a3props,compile"
           description=" --> test if the text message received with the delay, with queue">
     <antcall target="test.run" inheritAll="true">
@@ -854,7 +854,7 @@
       <param name="args" value=""/>
     </antcall>
   </target>
-	
+
   <target name="base.test_T_MText_Delay" depends="init.a3props,compile"
           description=" --> test if the text message received with the delay, with topic">
     <antcall target="test.run" inheritAll="true">
@@ -2117,7 +2117,7 @@
       <param name="args" value=""/>
     </antcall>
   </target>
-	
+
 	<target name="client.ClientTestAsyncSend" depends="init.a3props,compile"
 	        description=" --> Test async send JMS 2.0 API.">
 	  <antcall target="test.run" inheritAll="true">
@@ -3150,18 +3150,18 @@
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <!-- param name="engine" value="fr.dyade.aaa.agent.GCEngine"/ -->
       <!-- param name="BaseClass" value="joram.perfs.TcpBaseTest"/ -->
-      <param name="BaseClass" value="joram.perfs.ColocatedBaseTest" />
-      <param name="dupsOk" value="false" />
-      <param name="queueMessageReadMax" value="10" />
-      <param name="topicAckBufferMax" value="50" />
-      <param name="implicitAck" value="false" />
-      <param name="MsgTransient" value="false" />
-      <param name="SubDurable" value="false" />
-      <param name="Transacted" value="false" />
-      <param name="NbRound" value="100" />
-      <param name="NbMsgPerRound" value="10000" />
-      <param name="NbProdCons" value="1" />
-      <param name="MsgSize" value="100" />
+      <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
+      <param name="dupsOk" value="false"/>
+      <param name="queueMessageReadMax" value="10"/>
+      <param name="topicAckBufferMax" value="50"/>
+      <param name="implicitAck" value="false"/>
+      <param name="MsgTransient" value="false"/>
+      <param name="SubDurable" value="false"/>
+      <param name="Transacted" value="false"/>
+      <param name="NbRound" value="100"/>
+      <param name="NbMsgPerRound" value="10000"/>
+      <param name="NbProdCons" value="1"/>
+      <param name="MsgSize" value="100"/>
     </antcall>
   </target>
 
@@ -3169,7 +3169,7 @@
   <target name="init.test6props">
     <property name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
     <property name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <property name="transaction" value="com.scalagent.txlog.TxLogTransaction"/>
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
     <property name="dupsOk" value="true"/>
     <property name="queueMessageReadMax" value="100"/>
@@ -3179,14 +3179,14 @@
     <property name="SubDurable" value="false"/>
     <property name="Transacted" value="false"/>
     <property name="NbRound" value="100"/>
-    <property name="NbMsgPerRound" value="100"/>
+    <property name="NbMsgPerRound" value="10000"/>
     <property name="NbProdCons" value="1"/>
-    <property name="MsgSize" value="25"/>
+    <property name="MsgSize" value="256"/>
   	<property name="SyncOnWrite" value="false" />
   	<property name="compressedMinSize" value="0" />
   	<property name="noAckedQueue" value="false" />
   	<property name="isByteMsg" value="true" />
-  </target>
+   </target>
 
   <target name="perf.test6-x" depends="init.test6props,compile">
     <antcall target="test.run" inheritAll="true">
@@ -3330,21 +3330,21 @@
       <!--param name="BaseClass" value="joram.perfs.ColocatedBaseTest" /-->
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
       <param name="SyncOnWrite" value="false" />
-      <param name="MsgTransient" value="true" />
+      <param name="MsgTransient" value="true"/>
       <param name="noAckedQueue" value="true" />
-      <param name="SubDurable" value="false" />
+      <param name="SubDurable" value="false"/>
       <param name="Transacted" value="false" />
       <param name="NbRound" value="10000" />
-      <param name="NbMsgPerRound" value="100" />
+      <param name="NbMsgPerRound" value="100"/>
       <param name="NbSender" value="1" />
-      <param name="NbReceiver" value="1" />
+      <param name="NbReceiver" value="1"/>
       <param name="compressedMinSize" value="102400" />
       <param name="MsgSize" value="1000" />
-      <param name="dupsOk" value="false" />
-      <param name="queueMessageReadMax" value="1000" />
-      <param name="topicAckBufferMax" value="1000" />
-      <param name="multiThreadSyncDelay" value="1" />
-      <param name="multiCnx" value="true" />
+      <param name="dupsOk" value="false"/>
+      <param name="queueMessageReadMax" value="1000"/>
+      <param name="topicAckBufferMax" value="1000"/>
+      <param name="multiThreadSyncDelay" value="1"/>
+      <param name="multiCnx" value="true"/>
     	<param name="isByteMsg" value="false" />
     </antcall>
   </target>
@@ -3570,20 +3570,6 @@
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNbMsg=15000 -DMsgSize=1680000 -Dmin=5000 -Dmax=6000 -DNTLogFileSize=32"/>
       <!-- param name="jvmargs" value="-DNbMsg=15000 -DMsgSize=1680000 -Dmin=5000 -Dmax=6000 -DNTLogFileSize=32 -Dorg.objectweb.joram.mom.messages.SWAPALLOWED=true"/ -->
-    </antcall>
-  </target>
-
-  <target name="perf.test56" depends="init.a3props,compile"
-          description=" --> Platine Scenario.">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.perfs.Test56"/>
-      <param name="testid" value="perf.test56"/>
-      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
-      <param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-Djmx.remote.protocol.provider.pkgs=fr.dyade.aaa -DNbMsg=2000 -DMsgSize=1000000 -DTransaction.MaxLogFileSize=512 -DTransaction.NbLogFile=8 -Dorg.objectweb.joram.mom.messages.SWAPALLOWED=true"/>
-      <!-- param name="jvmargs" value="-DNbMsg=15000 -DMsgSize=1680000 -DTransaction.MaxLogFileSize=512 -DTransaction.NbLogFile=8 -Dorg.objectweb.joram.mom.messages.SWAPALLOWED=true"/ -->
     </antcall>
   </target>
 
@@ -6566,6 +6552,123 @@
       <param name="isOSGi" value="true"/>
       <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
       <param name="include.classes" value="joram/shell/mom/MOMTester.class"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	
+	<!-- Test the JMS2 compliance -->
+	
+  <target name="jms2" description=" --> JMS2 compliance">
+    <antcall target="jms2.test1"/>
+    <antcall target="jms2.test2"/>
+    <antcall target="jms2.test3"/>
+    <antcall target="jms2.test4"/>
+    <antcall target="jms2.test5"/>
+    <antcall target="jms2.test6"/>
+    <antcall target="jms2.test7"/>
+    <antcall target="jms2.test8"/>
+  </target>
+
+  <target name="jms2.test1" depends="init.a3props,compile"
+          description=" --> Test JMSContext creation and configuration">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test1"/>
+      <param name="className" value="joram.jms2.Test1"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="jms2.test2" depends="init.a3props,compile"
+          description=" --> Send a NON_PERSISTENT message in asynchronous mode">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test2"/>
+      <param name="className" value="joram.jms2.Test2"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="jms2.test3" depends="init.a3props,compile"
+          description=" --> Set properties on JMSProducer">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test3"/>
+      <param name="className" value="joram.jms2.Test3"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="jms2.test4" depends="init.a3props,compile"
+          description=" --> Test Message.getBody method exceptions">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test4"/>
+      <param name="className" value="joram.jms2.Test4"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="jms2.test5" depends="init.a3props,compile"
+          description=" --> Test the completion order when sending in asynchronous mode">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test5"/>
+      <param name="className" value="joram.jms2.Test5"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="jms2.test6" depends="init.a3props,compile"
+          description=" --> Test calling stop and close from CompletionListener">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test6"/>
+      <param name="className" value="joram.jms2.Test6"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="jms2.test7" depends="init.a3props,compile"
+          description=" --> Test calling commit and rollback from CompletionListener">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test7"/>
+      <param name="className" value="joram.jms2.Test7"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="jms2.test8" depends="init.a3props,compile"
+          description=" --> Test calling stop from MessageListener">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test8"/>
+      <param name="className" value="joram.jms2.Test8"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
   </target>
