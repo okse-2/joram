@@ -36,6 +36,7 @@ import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.Message;
+import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
@@ -97,6 +98,23 @@ public class RequestMultiplexer {
   private int requestCounter;
 
   private DemultiplexerDaemon demtpx;
+  
+  public boolean checkDemultiplexerDaemon() {
+    return demtpx.isCurrentThread();
+  }
+  
+  public boolean checkCLSession(Session session) {
+    if (checkDemultiplexerDaemon()) {
+      // Check if there is a CompletionListener running
+      if (runningCL != null)
+        return (session == runningCL.session);
+      return false;
+    } else {
+      // The current thread is not the demtpx so there is no
+      // CompletionListener running.
+      return false;
+    }
+  }
 
   private static Timer timer;
   private static int timerInUse;
@@ -497,6 +515,8 @@ public class RequestMultiplexer {
     return demtpx.getName();
   }
 
+  CompletionListener runningCL = null;
+
   private class DemultiplexerDaemon extends fr.dyade.aaa.common.Daemon {
     DemultiplexerDaemon() {
       // The real name is set later when
@@ -504,7 +524,7 @@ public class RequestMultiplexer {
       // see setDemultiplexerDaemonName()
       super("Connection#?", logger);
     }
-
+    
     public void run() {
       try {
         loop:
@@ -548,10 +568,18 @@ public class RequestMultiplexer {
           if (!completionListeners.isEmpty()) {
             CompletionListener cl = completionListeners.remove(reply.getCorrelationId());
             if (cl != null) {
-              if (reply instanceof MomExceptionReply) {
-                cl.onException(new Exception(((MomExceptionReply) reply).getMessage()));
-              } else {
-                cl.onCompletion();
+              try {
+                runningCL = cl;
+                if (reply instanceof MomExceptionReply) {
+                  cl.onException(new Exception(((MomExceptionReply) reply).getMessage()));
+                } else {
+                  cl.onCompletion();
+                }
+              } catch (Throwable t) {
+                logger.log(BasicLevel.ERROR,
+                           "Error during completion listener execution.", t);
+              } finally {
+                runningCL = null;
               }
               isCompletionListener = true;
             }
