@@ -431,7 +431,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
    * @throws IOException if an I/O error has occurred
    */
   public byte[] getBody() throws IOException {
-    if (compressed) {
+    if (compressed && (body != null)) {
       body = uncompress(body);
       compressed = false;
     }
