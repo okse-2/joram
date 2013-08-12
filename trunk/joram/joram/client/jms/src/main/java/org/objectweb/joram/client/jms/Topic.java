@@ -94,7 +94,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception JMSException  Actually never thrown.
    */
   public String getTopicName() throws JMSException {
-    return getName();
+    return getAdminName();
   }
 
   public static Topic createTopic(String agentId, String name) {

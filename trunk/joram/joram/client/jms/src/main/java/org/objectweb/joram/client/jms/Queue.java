@@ -107,7 +107,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 	 * @exception JMSException  Actually never thrown.
 	 */
 	public String getQueueName() throws JMSException {
-		return getName();
+		return getAdminName();
 	}
 
 	public static Queue createQueue(String agentId, String name) {
