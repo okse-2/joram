@@ -813,10 +813,18 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
       throw new JMSException ("Unable to get byte message body ");
     }
   }
+  
+  @Override
+  public <T> T getBody(Class<T> c) throws JMSException {
+    if (! RObody)
+      throw new MessageFormatException("Message is not readable");
+    
+    return super.getBody(c);
+  }
 
   @Override
   protected <T> T getEffectiveBody(Class<T> c) throws JMSException {
-    return ((T)getBytes());
+    return ((T) getBytes());
   }
 }
 

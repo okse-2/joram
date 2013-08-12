@@ -108,6 +108,26 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
     firstTimeBytesRead = true;
   }
   
+  @Override
+  public <T> T getBody(Class<T> c) throws JMSException {
+    throw new MessageFormatException("Unusported operation on StreamMessage");
+  }
+  
+  @Override
+  public boolean isBodyAssignableTo(Class c) throws JMSException {
+    return false;
+  }
+  
+  /**
+   * Get message body 
+   * @ @param c- The type to which the message body will be assigned.
+   * @return message body
+   * @throws JMSException if the JMS provider fails to return a value due to some internal error.
+   */
+  protected <T> T getEffectiveBody (Class<T> c) throws JMSException {
+    throw new MessageFormatException("Unusported operation on StreamMessage.");
+  }
+
   /** 
    * API method.
    * Clears out the message body.

@@ -1227,6 +1227,36 @@ public class Message implements javax.jms.Message {
   }
 
   /**
+   * API 2.0 method
+   * @param c the specified type
+   * Check if the message body is capable of being assigned to specified type
+   * @return true if Message is TextMessage or MapMessage, or BytesMessage, or ObjectMessage when 
+   * it's deserializable false otherwise
+   * @throws JMSExeption if fail to return a value due to some internal error
+   * 
+   */
+  public boolean isBodyAssignableTo(Class c) throws JMSException {
+    if (momMsg.body == null) return true;
+    
+    if (this instanceof StreamMessage) {
+      return false;
+    } else if (this instanceof TextMessage) {
+      return c.isAssignableFrom(String.class);
+    } else if (this instanceof BytesMessage) {
+      return byte[].class.equals(c)|| java.lang.Object.class.equals(c);
+    } else if (this instanceof MapMessage) {
+      return java.util.Map.class.equals(c) || java.lang.Object.class.equals(c);
+    } else if (this instanceof ObjectMessage) {
+        return c.isAssignableFrom(((ObjectMessage) this).getObject().getClass());
+// TODO (AF): This case doesn't seem to be part of the specification/
+//    } else if (Message.class.equals(c)) {
+//      return true;
+    } else {
+      throw new JMSException ("Unable to to return a value");
+    }
+
+  }
+  /**
    * @param c- The type to which the message body will be assigned. <br/>
    * If the message is a <code>TextMessage</code> then this parameter must
    * be set to <code>String.class</code> or another type to which
@@ -1264,19 +1294,30 @@ public class Message implements javax.jms.Message {
   public <T> T getBody(Class<T> c) throws JMSException {
     if (isBodyAssignableTo(c))
       return getEffectiveBody(c);
-    throw new JMSException("Unable to get message body");
+    throw new MessageFormatException("Unable to get message body");
+//    try {
+//      T b = (T) getEffectiveBody(c);
+//      System.out.println("body=" + b);
+//      return b;
+//    } catch (ClassCastException e) {
+//      throw new MessageFormatException("Uncompatible type conversion for message body");
+//    } catch (JMSException e) {
+//      throw e;
+//    } catch (Exception e) {
+//      throw new JMSException("Unable to get message body: " + e.getMessage());
+//    }
   }
-  
-/**
- * Get message body 
- * @ @param c- The type to which the message body will be assigned.
- * @return message body
- * @throws JMSException if the JMS provider fails to return a value due to some internal error.
- */
+
+  /**
+   * Get message body 
+   * @ @param c- The type to which the message body will be assigned.
+   * @return message body
+   * @throws JMSException if the JMS provider fails to return a value due to some internal error.
+   */
   protected <T> T getEffectiveBody (Class<T> c) throws JMSException {
     return null;
   }
-  
+
   /**
    * API 2.0
    * Gets the message delivery time value.
@@ -1299,36 +1340,4 @@ public class Message implements javax.jms.Message {
     momMsg.deliveryTime = deliveryTime;
   }
 
-  /**
-   * API 2.0 method
-   * @param c the specified type
-   * Check if the message body is capable of being assigned to specified type
-   * @return true if Message is TextMessage or MapMessage, or BytesMessage, or ObjectMessage when 
-   * it's deserializable false otherwise
-   * @throws JMSExeption if fail to return a value due to some internal error
-   * 
-   */
-  public boolean isBodyAssignableTo(Class c) throws JMSException {
-    if (this instanceof StreamMessage) {
-      return false;
-    } else if (this instanceof TextMessage) {
-      return String.class.isAssignableFrom(c);
-    } else if (this instanceof BytesMessage) {
-      return byte[].class.equals (c)|| java.lang.Object.class.equals(c);
-    } else if (this instanceof MapMessage) {
-      return java.util.Map.class.equals(c) || java.lang.Object.class.equals(c);
-    } else if (this instanceof ObjectMessage && java.io.Serializable.class.isAssignableFrom(c)) {
-      try { 
-        Object tmp = ((ObjectMessage) this).getObject();
-        return true; 
-      } catch (Exception e) {
-        return false;
-      }
-    } else if (Message.class.equals(c)) {
-      return true;
-    } else {
-      throw new JMSException ("Unable to to return a value");
-    }
-
-  }
 }
