@@ -3169,7 +3169,7 @@
   <target name="init.test6props">
     <property name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
     <property name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-    <property name="transaction" value="com.scalagent.txlog.TxLogTransaction"/>
+    <property name="transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
     <property name="dupsOk" value="true"/>
     <property name="queueMessageReadMax" value="100"/>
