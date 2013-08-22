@@ -83,11 +83,12 @@ public class ClientTestAsyncSend extends TestCase {
       MessageProducer prod = session.createProducer(queue);
       MessageConsumer consumer = session.createConsumer(queue);
       cnx.start();
-      TextMessage msg = session.createTextMessage();
+      TextMessage msg = null;
 
       //Test onCompletion...
       long start = System.currentTimeMillis();
       for (int i = 0; i < 10; i++){
+        msg = session.createTextMessage();
         msg.setText("TEST completion listener " + i);
         msg.setIntProperty("fragment", i+1);
         msg.setBooleanProperty("throwException", false);
