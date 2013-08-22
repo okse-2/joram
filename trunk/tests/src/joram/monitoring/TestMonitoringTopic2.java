@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,13 +36,11 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.MonitoringTopic;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.mom.dest.MonitoringAcquisition;
 
 import framework.TestCase;
 
@@ -146,8 +144,9 @@ public class TestMonitoringTopic2 extends TestCase implements MessageListener {
     try {
       Enumeration enumNames = message.getPropertyNames();
       while (enumNames.hasMoreElements()) {
-        nbMonitoringResults++;
         String name = (String) enumNames.nextElement();
+        if ((name != null) && (name.startsWith("JMS"))) continue;
+        nbMonitoringResults++;
 //        System.out.println(name + " : " + message.getObjectProperty(name));
       }
       assertEquals(2, nbMonitoringResults);
