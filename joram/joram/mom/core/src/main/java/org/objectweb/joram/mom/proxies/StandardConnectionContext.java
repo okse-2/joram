@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,8 +19,6 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
- * Created on 15 mai 2006
- *
  */
 package org.objectweb.joram.mom.proxies;
 
@@ -33,7 +31,8 @@ import org.objectweb.joram.shared.excepts.MomException;
 import fr.dyade.aaa.common.Queue;
 
 /**
- *
+ * Standard implementation of the interface to abstract the communication between
+ * the client and the MOM.
  */
 public class StandardConnectionContext 
   implements ConnectionContext, java.io.Serializable {
@@ -48,13 +47,9 @@ public class StandardConnectionContext
   private Queue queue;
   
   private boolean closed;
-
-  StandardConnectionContext(int key) {
-    this.key = key;
-    queue = new Queue();
-    closed = false;
-  }
   
+  public StandardConnectionContext() {}
+
   public int getKey() {
     return key;
   }
@@ -85,6 +80,12 @@ public class StandardConnectionContext
   
   public boolean isClosed() {
     return closed;
+  }
+
+  public void initialize(int key, OpenConnectionNot not) {
+    this.key = key;
+    queue = new Queue();
+    closed = false;
   }
   
 }

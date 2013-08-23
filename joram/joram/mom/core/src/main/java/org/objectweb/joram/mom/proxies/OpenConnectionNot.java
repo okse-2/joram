@@ -22,6 +22,8 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import org.objectweb.joram.mom.proxies.ConnectionContext.Type;
+
 import fr.dyade.aaa.agent.SyncNotification;
 
 public class OpenConnectionNot extends SyncNotification {
@@ -31,32 +33,30 @@ public class OpenConnectionNot extends SyncNotification {
    */
   private static final long serialVersionUID = 1L;
 
-  private boolean reliable;
-  
+  private ConnectionContext.Type type;
+
   private int heartBeat;
-  
+
   private boolean noAckedQueue;
 
-  public OpenConnectionNot(boolean reliable,
-                           int heartBeat,
-                           boolean noAckedQueue) {
-    this.reliable = reliable;
+  public OpenConnectionNot(ConnectionContext.Type type, int heartBeat, boolean noAckedQueue) {
+    this.type = type;
     this.heartBeat = heartBeat;
     this.noAckedQueue = noAckedQueue;
   }
-  
-  public void Return(ConnectionContext ctx) {
-    Return(new Object[]{ctx});
-  }
 
-  public final boolean getReliable() {
-    return reliable;
+  public void Return(ConnectionContext ctx) {
+    Return(new Object[] { ctx });
+  }
+  
+  public Type getType() {
+    return type;
   }
 
   public final int getHeartBeat() {
     return heartBeat;
   }
-  
+
   public final boolean isNoAckedQueue() {
     return noAckedQueue;
   }
@@ -67,16 +67,14 @@ public class OpenConnectionNot extends SyncNotification {
 
   /**
    * Appends a string image for this object to the StringBuffer parameter.
-   *
-   * @param output
-   *	buffer to fill in
-   * @return
-	<code>output</code> buffer is returned
+   * 
+   * @param output buffer to fill in
+   * @return <code>output</code> buffer is returned
    */
   public StringBuffer toString(StringBuffer output) {
     output.append('(');
     super.toString(output);
-    output.append(",reliable=").append(reliable);
+    output.append(",type=").append(type.toString());
     output.append(",heartBeat=").append(heartBeat);
     output.append(",noAckedQueue=").append(noAckedQueue);
     output.append(')');

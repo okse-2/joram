@@ -30,6 +30,7 @@ import javax.jms.JMSException;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
+import org.objectweb.joram.mom.proxies.ConnectionContext.Type;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.OpenConnectionNot;
 import org.objectweb.joram.mom.proxies.StandardConnectionContext;
@@ -108,7 +109,7 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
       throw new JMSException(exc.getMessage());
     }
 
-    OpenConnectionNot ocn = new OpenConnectionNot(false, 0, true);
+    OpenConnectionNot ocn = new OpenConnectionNot(Type.STANDARD, 0, true);
     try {
       ocn.invoke(proxyId);
       ctx = (StandardConnectionContext) ocn.getConnectionContext();
