@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,9 +19,6 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
- * 
- * Created on 15 mai 2006
- * 
  */
 package org.objectweb.joram.mom.proxies;
 
@@ -31,9 +28,28 @@ import org.objectweb.joram.shared.excepts.MomException;
 
 
 /**
- * 
+ * Interface to abstract the communication between the client and the MOM.
  */
 public interface ConnectionContext {
+  
+  public enum Type {
+    STANDARD, RELIABLE, AMQP;
+    
+    public String getClassName() {
+      switch(this) {
+      case RELIABLE:
+        return "org.objectweb.joram.mom.proxies.ReliableConnectionContext";
+      case AMQP:
+        //TODO
+        return "com.scalagent.amqp.adapter.agent.AMQPConnectionContext";
+      case STANDARD:
+      default:
+        return "org.objectweb.joram.mom.proxies.StandardConnectionContext";
+      }
+    }
+  }
+  
+  public void initialize(int key, OpenConnectionNot not);
   
   public AbstractJmsRequest getRequest(Object req);
 

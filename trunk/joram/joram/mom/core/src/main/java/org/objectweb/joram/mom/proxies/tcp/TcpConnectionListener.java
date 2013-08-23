@@ -34,6 +34,7 @@ import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.proxies.GetConnectionNot;
 import org.objectweb.joram.mom.proxies.OpenConnectionNot;
 import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
+import org.objectweb.joram.mom.proxies.ConnectionContext.Type;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.stream.MetaData;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -251,7 +252,7 @@ public class TcpConnectionListener extends Daemon {
       IOControl ioctrl;
       ReliableConnectionContext ctx;
       if (key == -1) {
-        OpenConnectionNot ocn = new OpenConnectionNot(true, heartBeat, noAckedQueue);
+        OpenConnectionNot ocn = new OpenConnectionNot(Type.RELIABLE, heartBeat, noAckedQueue);
         ocn.invoke(proxyId);
         StreamUtil.writeTo(0, nos);
         ctx = (ReliableConnectionContext) ocn.getConnectionContext();

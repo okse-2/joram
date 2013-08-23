@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,9 +19,6 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
- * 
- * Created on 15 mai 2006
- *
  */
 package org.objectweb.joram.mom.proxies;
 
@@ -39,7 +36,8 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.common.Debug;
 
 /**
- *
+ * Reliable implementation of the interface to abstract the communication between
+ * the client and the MOM.
  */
 public class ReliableConnectionContext implements ConnectionContext, Serializable {
   
@@ -62,21 +60,9 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
   private boolean noAckedQueue;
   
   private QueueWorker queueWorker;
-
-  ReliableConnectionContext(int key, int heartBeat, boolean noAckedQueue) {
-    this.key = key;
-    this.heartBeat = heartBeat;
-    inputCounter = -1;
-    outputCounter = 0;
-    this.noAckedQueue = noAckedQueue;
-    if (noAckedQueue) {
-      queueWorker = new QueueWorker();
-    } else {
-      queue = new AckedQueue();
-    }
-    closed = false;
-  }
   
+  public ReliableConnectionContext() {}
+
   public int getKey() {
     return key;
   }
@@ -157,5 +143,19 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
 
   public boolean isClosed() {
     return closed;
+  }
+
+  public void initialize(int key, OpenConnectionNot not) {
+    this.key = key;
+    this.heartBeat = heartBeat;
+    inputCounter = -1;
+    outputCounter = 0;
+    this.noAckedQueue = noAckedQueue;
+    if (noAckedQueue) {
+      queueWorker = new QueueWorker();
+    } else {
+      queue = new AckedQueue();
+    }
+    closed = false;
   }  
 }
