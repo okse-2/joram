@@ -251,9 +251,6 @@ public class RequestMultiplexer {
         if (request instanceof ProducerMessages) {
           //TODO: used request.getClassId() == AbstractJmsMessage.PRODUCER_MESSAGES
           ProducerMessages pm = (ProducerMessages) request;
-          Vector msgs = pm.getMessages();
-          org.objectweb.joram.shared.messages.Message sharedMsg = (org.objectweb.joram.shared.messages.Message) msgs.get(0);
-          Message msg = Message.getHeader(sharedMsg);
           completionListeners.put(new Integer(request.getRequestId()), completionListener);
         }
       }
