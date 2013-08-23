@@ -37,9 +37,9 @@ import fr.dyade.aaa.common.Configuration;
  *
  */
 public class Test6 extends BaseTest {
-  static int NbSender = 4;
-  static int NbReceiver = 4;
-  static int NbDestination = 2;
+  static int NbSender = 1;
+  static int NbReceiver = 1;
+  static int NbDestination = 1;
 
   static int NbRound = 100;
   static int NbMsgPerRound = 100;
