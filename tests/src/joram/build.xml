@@ -3179,7 +3179,7 @@
     <property name="SubDurable" value="false"/>
     <property name="Transacted" value="false"/>
     <property name="NbRound" value="100"/>
-    <property name="NbMsgPerRound" value="10000"/>
+    <property name="NbMsgPerRound" value="1000"/>
     <property name="NbProdCons" value="1"/>
     <property name="MsgSize" value="256"/>
   	<property name="SyncOnWrite" value="false" />
@@ -3193,7 +3193,7 @@
       <param name="className" value="joram.perfs.Test6"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DisByteMsg=${isByteMsg} -DnoAckedQueue=${noAckedQueue} -DcompressedMinSize=${compressedMinSize} -DTransaction.SyncOnWrite=${SyncOnWrite} -DNTLogFileSize=32 -DNTLogMemorySize=4096 -DDestination=${Destination} -DBaseClass=${BaseClass} -DdupsOk=${dupsOk} -DqueueMessageReadMax=${queueMessageReadMax} -DtopicAckBufferMax=${topicAckBufferMax} -DimplicitAck=${implicitAck} -DMsgTransient=${MsgTransient} -DSubDurable=${SubDurable} -DTransacted=${Transacted} -DNbRound=${NbRound} -DNbMsgPerRound=${NbMsgPerRound} -DNbSender=${NbSender} -DNbReceiver=${NbReceiver} -DNbDestination=${NbProdCons} -DMsgSize=${MsgSize}"/>
+      <param name="jvmargs" value="-DisByteMsg=${isByteMsg} -DnoAckedQueue=${noAckedQueue} -DcompressedMinSize=${compressedMinSize} -DTransaction.SyncOnWrite=${SyncOnWrite} -DNTLogFileSize=32 -DNTLogMemorySize=4096 -DDestination=${Destination} -DBaseClass=${BaseClass} -DdupsOk=${dupsOk} -DqueueMessageReadMax=${queueMessageReadMax} -DtopicAckBufferMax=${topicAckBufferMax} -DimplicitAck=${implicitAck} -DMsgTransient=${MsgTransient} -DSubDurable=${SubDurable} -DTransacted=${Transacted} -DNbRound=${NbRound} -DNbMsgPerRound=${NbMsgPerRound} -DNbSender=${NbProdCons} -DNbReceiver=${NbProdCons} -DNbDestination=${NbProdCons} -DMsgSize=${MsgSize}"/>
     </antcall>
   </target>
 
