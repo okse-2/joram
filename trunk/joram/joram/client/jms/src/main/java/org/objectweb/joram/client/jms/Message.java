@@ -22,7 +22,6 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
@@ -161,8 +160,7 @@ public class Message implements javax.jms.Message {
   protected transient javax.jms.Destination jmsDest = null;
 
   /**
-   * Instantiates a <code>Message</code> wrapping a consumed
-   * MOM simple message.
+   * Instantiates a <code>Message</code> wrapping a consumed MOM simple message.
    *
    * @param session  The consuming session.
    * @param momMsg  The MOM message to wrap.
@@ -221,6 +219,7 @@ public class Message implements javax.jms.Message {
 
   /** set message read-only */
   private void setReadOnly() {
+    momMsg.setProperty("JMSXDeliveryCount", momMsg.redelivered);
     propertiesRO = true;
     RObody = true;
   }
@@ -677,6 +676,8 @@ public class Message implements javax.jms.Message {
   public void getProperties(Map h) {
     if (momMsg.properties == null) return;
     momMsg.properties.copyInto(h);
+    // TODO (AF): is it needed ? This property is added when the JMS message is built.
+    h.put("JMSXDeliveryCount", momMsg.redelivered);
   }
 
   /**
@@ -1145,21 +1146,6 @@ public class Message implements javax.jms.Message {
     return joramMsg;
   }
 
-  static public Message getHeader(org.objectweb.joram.shared.messages.Message sharedMsg) {
-    Message joramMsg = new Message();
-    joramMsg.momMsg.toId = sharedMsg.toId;
-    joramMsg.momMsg.toType = sharedMsg.toType;
-    joramMsg.momMsg.replyToId = sharedMsg.replyToId;
-    joramMsg.momMsg.replyToType = sharedMsg.replyToType;
-    joramMsg.momMsg.correlationId = sharedMsg.correlationId;
-    joramMsg.momMsg.jmsType =  sharedMsg.jmsType;
-    joramMsg.momMsg.id = sharedMsg.id;
-    joramMsg.momMsg.expiration = sharedMsg.expiration;
-    joramMsg.momMsg.redelivered = sharedMsg.redelivered;
-    joramMsg.momMsg.properties = sharedMsg.properties;
-    return joramMsg;
-  }
-  
   /**
    * Prepare a JMS message for sending.
    */
