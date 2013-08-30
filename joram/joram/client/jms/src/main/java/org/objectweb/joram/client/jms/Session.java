@@ -2741,6 +2741,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * 
    * @param topic     the non-temporary Topic to subscribe to.
    * @param name      the name used to identify this subscription.
+   * @param selector  the selector used to filter incoming messages.
    * @param noLocal   if true, inhibits the delivery of messages published by its own connection.
    * @return the created MessageConsumer object.
    *
@@ -2751,15 +2752,16 @@ public class Session implements javax.jms.Session, SessionMBean {
    */
   public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
                                                          String name,
-                                                         String messageSelector,
+                                                         String selector,
                                                          boolean noLocal) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Session.createDurableConsumer(" + topic + ',' + name  + ',' + noLocal + ')');
+      logger.log(BasicLevel.DEBUG,
+                 "Session.createDurableConsumer(" + topic + ',' + name  + ',' + selector  + ',' + noLocal + ')');
     
     checkClosed();
     checkThreadOfControl();
     
-    MessageConsumer mc = new MessageConsumer(this, (Topic) topic, null, name, noLocal);
+    MessageConsumer mc = new MessageConsumer(this, (Topic) topic, selector, name, noLocal);
     addConsumer(mc);
     return mc;
   }
