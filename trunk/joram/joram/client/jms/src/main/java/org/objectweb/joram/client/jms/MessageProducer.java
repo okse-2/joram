@@ -454,6 +454,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
       int priority,
       long timeToLive, 
       javax.jms.CompletionListener completionListener) throws JMSException {
+    if (! identified)
+      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
     if (completionListener == null)
       throw new IllegalArgumentException("Completion listener is null");
     doSend(dest, message, deliveryMode, priority, timeToLive, completionListener);
