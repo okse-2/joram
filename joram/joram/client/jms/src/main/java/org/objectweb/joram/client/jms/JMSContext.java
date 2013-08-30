@@ -348,6 +348,8 @@ public class JMSContext implements javax.jms.JMSContext {
   public void acknowledge() {
     try {
       session.acknowledge();
+    } catch (IllegalStateException e) {
+      throw new IllegalStateRuntimeException("Unable to acknowledge", e.getMessage(), e);
     } catch (JMSException e) {
       logger.log(BasicLevel.ERROR, "Unable to acknowledge", e);
       throw new JMSRuntimeException(e.getMessage());
@@ -770,9 +772,10 @@ public class JMSContext implements javax.jms.JMSContext {
   public void unsubscribe(String name) {
     try {
       session.unsubscribe(name);
-    } catch (JMSException e) {
-      throw new JMSRuntimeException("Unable to unsubcribe to: " + name + " "
-          + e.getMessage());
+    } catch (InvalidDestinationException exc) {
+      throw new InvalidDestinationRuntimeException("Unable to unsubcribe to: " + name, exc.getMessage(), exc);
+    } catch (JMSException exc) {
+      throw new JMSRuntimeException("Unable to unsubcribe to: " + name, exc.getMessage(), exc);
     }
   }
 }
