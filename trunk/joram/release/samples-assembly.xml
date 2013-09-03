@@ -29,7 +29,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>javax.jms:javax.jms-api</include>
+        <include>org.ow2.spec.ee:ow2-jms-2.0-spec</include>
         <include>org.objectweb.joram:jcup</include>
         <include>org.ow2.joram:joram-shared</include>
         <include>org.ow2.joram:joram-mom-core</include>

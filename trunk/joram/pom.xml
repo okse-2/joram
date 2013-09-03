@@ -174,7 +174,7 @@
     <monolog.version>5.2.0</monolog.version>
     <jcup.version>5.3.1</jcup.version>
     <jftp.version>1.52</jftp.version>
-    <jms-api.version>2.0</jms-api.version>
+    <ow2-jms-2.0-spec.version>1.0.0</ow2-jms-2.0-spec.version>
     <osgi.compendium.version>4.2.0</osgi.compendium.version>
     <org.osgi.version>3.0.0</org.osgi.version>
     <activation.version>1.1.1</activation.version>
@@ -253,10 +253,10 @@
         <type>jar</type>
       </dependency>
       <dependency>
-        <groupId>javax.jms</groupId>
-        <artifactId>javax.jms-api</artifactId>
-        <version>${jms-api.version}</version>
-	  </dependency>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-jms-2.0-spec</artifactId>
+        <version>${ow2-jms-2.0-spec.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.ow2.spec.ee</groupId>
         <artifactId>ow2-connector-1.5-spec</artifactId>
