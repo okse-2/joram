@@ -20,8 +20,8 @@
       <version>${project.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>javax.jms</groupId>
-          <artifactId>javax.jms-api</artifactId>
+          <groupId>org.ow2.spec.ee</groupId>
+          <artifactId>ow2-jms-2.0-spec</artifactId>
        </exclusion>
        <exclusion>
          <groupId>org.ow2.spec.ee</groupId>
