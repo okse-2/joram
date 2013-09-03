@@ -2475,6 +2475,8 @@ public class Session implements javax.jms.Session, SessionMBean {
     if (deliveryDelay > 0) {
       long deliveryTime = System.currentTimeMillis() + deliveryDelay;
       msg.setJMSDeliveryTime(deliveryTime);
+    } else {
+      msg.setJMSDeliveryTime(0L);
     }
     
     CompletionListener listener = null;
