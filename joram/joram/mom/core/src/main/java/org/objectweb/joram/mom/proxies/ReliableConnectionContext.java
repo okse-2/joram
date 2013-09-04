@@ -147,10 +147,10 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
 
   public void initialize(int key, OpenConnectionNot not) {
     this.key = key;
-    this.heartBeat = heartBeat;
+    this.heartBeat = not.getHeartBeat();
     inputCounter = -1;
     outputCounter = 0;
-    this.noAckedQueue = noAckedQueue;
+    this.noAckedQueue = not.isNoAckedQueue();
     if (noAckedQueue) {
       queueWorker = new QueueWorker();
     } else {
