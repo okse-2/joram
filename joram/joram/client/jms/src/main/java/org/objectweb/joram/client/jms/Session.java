@@ -249,6 +249,11 @@ public class Session implements javax.jms.Session, SessionMBean {
    * <b>Object:</b> <code>MessageAcks</code> instance
    */
   Hashtable deliveries;
+  
+  /**
+   * The CompletionListener.
+   */
+  CompletionListener listener = null;
 
   /**
    * The request multiplexer used to communicate with the user proxy.
@@ -1562,11 +1567,19 @@ public class Session implements javax.jms.Session, SessionMBean {
       if (asyncSend) {
         // Asynchronous sending
         commitReq.setAsyncSend(true);
-        mtpx.sendRequest(commitReq);
+        if (listener == null)
+          mtpx.sendRequest(commitReq);
+        else
+          mtpx.sendRequest(commitReq, listener);
       } else {
-        requestor.request(commitReq);
+        if (listener == null)
+          requestor.request(commitReq);
+        else
+          requestor.request(commitReq, listener);
       }
 
+      listener = null;
+      
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, this + ": committed.");
     }
@@ -1620,6 +1633,8 @@ public class Session implements javax.jms.Session, SessionMBean {
     // Deleting the produced messages:
     sendings.clear();
 
+    listener = null;
+    
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ": rolled back.");
   }
@@ -2479,9 +2494,11 @@ public class Session implements javax.jms.Session, SessionMBean {
       msg.setJMSDeliveryTime(0L);
     }
     
-    CompletionListener listener = null;
-    if (completionListener != null)
-      listener = new CompletionListener(completionListener, msg, this);
+    if (completionListener != null) {
+      if (listener == null)
+        listener = new CompletionListener(this);
+      listener.addCompletionListener(completionListener, msg);
+    }
     
     Message joramMsg = null;
     try {
@@ -2537,6 +2554,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       } else {
         requestor.request(pM, listener);
       }
+      listener= null;
     }
   }
 

@@ -21,25 +21,44 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
+import java.util.ArrayList;
+
 import org.objectweb.joram.client.jms.Session;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 public class CompletionListener {
-  javax.jms.CompletionListener listener = null;
-  javax.jms.Message message = null;
-  Session session = null;
+  public static Logger logger = Debug.getLogger(CompletionListener.class.getName());
   
-  public CompletionListener(javax.jms.CompletionListener listener, javax.jms.Message message, Session session) {
-    this.listener = listener;
-    this.message = message;
+  Session session = null;
+  ArrayList<javax.jms.CompletionListener> listeners = null;
+  ArrayList<javax.jms.Message> messages = null;
+  
+  public CompletionListener(Session session) {
     this.session = session;
+    listeners = new ArrayList<javax.jms.CompletionListener>();
+    messages = new ArrayList<javax.jms.Message>();
+  }
+  
+  public void addCompletionListener(javax.jms.CompletionListener listener, javax.jms.Message message) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "addCompletionListener(" + listener + ", " + message + ')');
+    if (listener != null) {
+      listeners.add(listener);
+      messages.add(message);
+    }
   }
   
   /**
    * Notifies the application that the message has been successfully sent
    */
   void onCompletion() {
-    if (listener != null) {
-      listener.onCompletion(message);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "onCompletion()");
+    for (int i = 0; i < listeners.size(); i++) {
+      listeners.get(i).onCompletion(messages.get(i));
 //      new Thread() {
 //        public void run() {
 //          listener.onCompletion(message);
@@ -57,13 +76,19 @@ public class CompletionListener {
    * 
    */
   void onException(final Exception exception) {
-    if (listener != null) {
-      listener.onException(message, exception);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "onException(" + exception + ')');
+    for (int i = 0; i < listeners.size(); i++) {
+      listeners.get(i).onException(messages.get(i), exception);
 //      new Thread() {
 //        public void run() {
 //          listener.onException(message, exception);
 //        }
 //      }.start();
     }
+  }
+  
+  public String toString() {
+    return "CompletionListener (" + session + ", " + listeners + ", " + messages +')';
   }
 }
