@@ -39,6 +39,7 @@ import org.objectweb.joram.client.jms.Message;
 import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.CommitRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.PingRequest;
@@ -232,7 +233,6 @@ public class RequestMultiplexer {
   }
 
   public void sendRequest(AbstractJmsRequest request, ReplyListener listener, CompletionListener completionListener) throws JMSException {
-
     synchronized (this) {
       if (status == Status.CLOSE)
         throw new IllegalStateException("Connection closed");
@@ -251,7 +251,10 @@ public class RequestMultiplexer {
         if (request instanceof ProducerMessages) {
           //TODO: used request.getClassId() == AbstractJmsMessage.PRODUCER_MESSAGES
           ProducerMessages pm = (ProducerMessages) request;
-          completionListeners.put(new Integer(request.getRequestId()), completionListener);
+          completionListeners.put(request.getRequestId(), completionListener);
+        } else if (request instanceof CommitRequest) {
+          CommitRequest cr = (CommitRequest) request;
+          completionListeners.put(cr.getRequestId(), completionListener);
         }
       }
 
