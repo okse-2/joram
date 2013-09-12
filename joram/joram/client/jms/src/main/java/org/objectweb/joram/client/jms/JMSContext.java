@@ -778,6 +778,10 @@ public class JMSContext implements javax.jms.JMSContext {
       throw new JMSRuntimeException("Unable to unsubcribe to: " + name, exc.getMessage(), exc);
     }
   }
+
+  Session getSession() {
+    return session;
+  }
 }
 
 class ContextConnection {

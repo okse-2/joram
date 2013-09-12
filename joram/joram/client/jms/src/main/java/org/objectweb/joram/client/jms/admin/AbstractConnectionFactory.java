@@ -37,6 +37,7 @@ import org.objectweb.joram.client.jms.JMSContext;
 import org.objectweb.joram.client.jms.QueueConnection;
 import org.objectweb.joram.client.jms.TopicConnection;
 import org.objectweb.joram.client.jms.XAConnection;
+import org.objectweb.joram.client.jms.XAJMSContext;
 import org.objectweb.joram.client.jms.XAQueueConnection;
 import org.objectweb.joram.client.jms.XATopicConnection;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
@@ -582,16 +583,30 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    * JMS2.0 API method.
    */
   public javax.jms.XAJMSContext createXAContext() {
-    // TODO
-    throw new javax.jms.JMSRuntimeException("not yet implemented.");
+    try {
+      return new XAJMSContext((XAConnection) createXAConnection());
+    } catch (JMSSecurityException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create XAJMSContext", e);
+      throw new JMSSecurityRuntimeException("Unable to create XAJMSContext", e.getMessage(), e);
+    } catch (JMSException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create XAJMSContext", e);
+      throw new JMSRuntimeException ("Unable to create XAJMSContext", e.getMessage(), e);
+    }
   }
 
   /**
    * JMS2.0 API method.
    */
   public javax.jms.XAJMSContext createXAContext(String userName, String password) {
-    // TODO
-    throw new javax.jms.JMSRuntimeException("not yet implemented.");
+    try {
+      return new XAJMSContext((XAConnection) createXAConnection(userName, password));
+    } catch (JMSSecurityException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create XAJMSContext", e);
+      throw new JMSSecurityRuntimeException("Unable to create XAJMSContext", e.getMessage(), e);
+    } catch (JMSException e) {
+      logger.log(BasicLevel.ERROR, "Unable to create XAJMSContext", e);
+      throw new JMSRuntimeException ("Unable to create XAJMSContext", e.getMessage(), e);
+    }
   }
 
 }
