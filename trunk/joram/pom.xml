@@ -175,6 +175,7 @@
     <jcup.version>5.3.1</jcup.version>
     <jftp.version>1.52</jftp.version>
     <ow2-jms-2.0-spec.version>1.0.0</ow2-jms-2.0-spec.version>
+    <ow2-jta-1.1-spec.version>1.0.13</ow2-jta-1.1-spec.version>
     <osgi.compendium.version>4.2.0</osgi.compendium.version>
     <org.osgi.version>3.0.0</org.osgi.version>
     <activation.version>1.1.1</activation.version>
@@ -256,6 +257,11 @@
         <groupId>org.ow2.spec.ee</groupId>
         <artifactId>ow2-jms-2.0-spec</artifactId>
         <version>${ow2-jms-2.0-spec.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.spec.ee</groupId>
+        <artifactId>ow2-jta-1.1-spec</artifactId>
+        <version>${ow2-jta-1.1-spec.version}</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.spec.ee</groupId>
