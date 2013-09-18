@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -182,6 +182,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
   
   public transient boolean modified;
   
+  private String clientID;
+  
   ClientSubscription() {}
   
   /**
@@ -199,6 +201,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
    * @param dmqId  Identifier of the proxy's dead message queue, if any.
    * @param threshold  Proxy's threshold value, if any.
    * @param messagesTable  Proxy's messages table.
+   * @param clientID the clientID
    */
   ClientSubscription(AgentId proxyId,
                      int contextId,
@@ -211,7 +214,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
                      AgentId dmqId,
                      int threshold,
                      int nbMaxMsg,
-                     Map messagesTable) {
+                     Map messagesTable,
+                     String clientID) {
     this.proxyId = proxyId;
     this.contextId = contextId;
     this.subRequestId = reqId;
@@ -224,6 +228,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     this.threshold = threshold;
     this.nbMaxMsg = nbMaxMsg;
     this.messagesTable = messagesTable;
+    this.clientID = clientID;
 
     messageIds = new Vector();
     deliveredIds = new Hashtable();
@@ -550,10 +555,15 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
         continue;
       }
 
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, this + ".browseNewMessages message.getClientID() = " + message.getClientID() + ", clientID = " + clientID + ", noLocal = " + noLocal);
+      
       // Keeping the message if filtering is successful.
       if (noFiltering ||
           (Selector.matches(message.getHeaderMessage(), selector) &&
-           (! noLocal || ! msgId.startsWith(proxyId.toString().substring(1) + "c" + contextId + "m", 3)))) {
+           ((message.getClientID() == null && clientID != null) 
+               || !noLocal 
+               || (message.getClientID() != null && ! message.getClientID().equals(clientID))) )) {
 
         // It's the first delivery, adds the message to the proxy's table
         if (message.acksCounter == 0)
@@ -1101,6 +1111,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     }
     encodedSize += INT_ENCODED_SIZE;
     encodedSize += topicId.getEncodedSize();
+    encodedSize += EncodableHelper.getNullableStringEncodedSize(clientID);
     return encodedSize;
   }
 
@@ -1145,6 +1156,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     }
     encoder.encodeUnsignedInt(threshold);
     topicId.encode(encoder);
+    encoder.encodeString(clientID);
   }
   
   public void decode(Decoder decoder) throws Exception {
@@ -1191,6 +1203,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     threshold = decoder.decodeUnsignedInt();
     topicId = new AgentId((short) 0, (short) 0, 0);
     topicId.decode(decoder);
+    clientID = decoder.decodeString();
   }
   
   public static String getTransactionPrefix(AgentId proxyId) {

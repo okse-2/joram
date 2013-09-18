@@ -28,6 +28,7 @@ import java.util.Vector;
 
 import javax.jms.ConnectionConsumer;
 import javax.jms.IllegalStateException;
+import javax.jms.InvalidClientIDException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
@@ -40,6 +41,7 @@ import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 import org.objectweb.joram.client.jms.connection.Requestor;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.AddClientIDRequest;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
 import org.objectweb.joram.shared.client.CnxConnectReply;
 import org.objectweb.joram.shared.client.CnxConnectRequest;
@@ -186,6 +188,14 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
   private int hashCode;
   
   private Identity identity = null;
+  
+  /** Client's identifier. */
+  private String clientID = null;
+  private boolean lockClientID = false;
+  
+  public void lockClientId() {
+    lockClientID = true;
+  }
 
   /**
    * Creates a <code>Connection</code> instance.
@@ -246,6 +256,13 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
     mtpx.setDemultiplexerDaemonName(toString());
     
     identity = requestChannel.getIdentity();
+    
+    if (factoryParameters.clientID != null) {
+      clientID = factoryParameters.clientID;
+      addClientIDToProxy(clientID);
+      lockClientId();
+    }
+      
     registerMBean(JMXBeanBaseName);
   }
 
@@ -557,6 +574,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
       logger.log(BasicLevel.DEBUG, 
                  stringImage + ".createConnectionConsumer(" + dest + ',' + selector + ',' +
                  sessionPool + ',' + maxMessages + ')');
+    lockClientId();
     checkClosed();
     return createConnectionConsumer(dest, null, selector, sessionPool, maxMessages);
   }
@@ -592,6 +610,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
       logger.log(BasicLevel.DEBUG, 
                  stringImage + ".createDurableConnectionConsumer(" + topic + ',' + subName + ',' + selector + ',' +
                  sessionPool + ',' + maxMessages + ')');
+    lockClientId();
     checkClosed();
     if (subName == null) 
       throw new JMSException("Invalid subscription name: " + subName);
@@ -606,6 +625,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
         javax.jms.ServerSessionPool sessionPool,
         int maxMessages)  throws JMSException {
     checkClosed();
+    lockClientId();
     
     try {
       org.objectweb.joram.shared.selectors.Selector.checks(selector);
@@ -637,7 +657,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
         durable = true;
       }
       requestor.request(new ConsumerSubRequest(((Destination) dest).getName(),
-          targetName, selector, false, durable, false));
+          targetName, selector, false, durable, false, getClientID()));
     }
     
     MultiSessionConsumer msc =
@@ -681,7 +701,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
   public synchronized javax.jms.Session createSession(boolean transacted, 
-                                                      int acknowledgeMode) throws JMSException {
+      int acknowledgeMode) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  stringImage + ".createSession(" + transacted + ',' +  acknowledgeMode + ')');
@@ -732,7 +752,6 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
    * <p>
    * @exception JMSException in case of invalid session mode
    */
-  
   public javax.jms.Session createSession(int sessionMode) throws JMSException {
     if (sessionMode == Session.SESSION_TRANSACTED) {
       return createSession(true, Session.SESSION_TRANSACTED);
@@ -773,6 +792,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
    * @exception IllegalStateException  If the connection is closed.
    */
   public synchronized void setExceptionListener(javax.jms.ExceptionListener listener) throws JMSException {
+    lockClientId();
     checkClosed();
     mtpx.setExceptionListener(listener);
   }
@@ -787,6 +807,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
    * @exception IllegalStateException  If the connection is closed.
    */
   public javax.jms.ExceptionListener getExceptionListener() throws JMSException {
+    lockClientId();
     checkClosed();
     return mtpx.getExceptionListener();
   }
@@ -799,12 +820,48 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
    * 
    * @param clientID  the unique client identifier.
    *
-   * @exception IllegalStateException  Systematically thrown.
+   * @InvalidClientIDException  if the JMS client specifies an invalid or duplicate client ID.
+   * @exception IllegalStateException  if the JMS client attempts to set a connection's client ID at the wrong time or 
+   *                                   when it has been administratively configured.
    */
   public void setClientID(String clientID) throws JMSException {
-    throw new IllegalStateException("ClientID is already set by the provider.");
-  }
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "setClientID(" + clientID + ')');
+    
+    if ((clientID != null && clientID.length() == 0))
+      throw new InvalidClientIDException("The JMS client specifies an invalid client ID \""+ clientID + "\".");
+    if (lockClientID)
+      throw new IllegalStateException("ClientID is already set by the provider.");
 
+    checkClosed();
+    // add clientID to the proxy
+    addClientIDToProxy(clientID);
+    // set the clientID
+    this.clientID = clientID;
+    lockClientId();
+  }
+  
+  void setProviderClientID() throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "setProviderClientID()");
+    checkClosed();
+    // set the clientID
+    this.clientID = stringImage;
+    lockClientId();
+  }
+  
+  private void addClientIDToProxy(String clientID) throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "addClientIDToProxy(" + clientID + ')');
+    try {
+      requestor.request(new AddClientIDRequest(clientID));
+    } catch (JMSException e) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, e);
+      throw new InvalidClientIDException("The JMS client specifies a duplicate client ID \""+ clientID + "\". " + e.getMessage());
+    }
+  }
+  
   /**
    * API method.
    * Gets the client identifier for this connection. This value is specific to the Joram, it
@@ -816,7 +873,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
    */
   public String getClientID() throws JMSException {
     checkClosed();
-    return proxyId;
+    return clientID;
   }
 
   /**
@@ -830,6 +887,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
    * @see ConnectionMetadata
    */
   public javax.jms.ConnectionMetaData getMetaData() throws JMSException {
+    lockClientId();
     checkClosed();
     if (metaData == null)
       metaData = new ConnectionMetaData();
@@ -868,6 +926,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
     mtpx.sendRequest(new CnxStartRequest());
 
     setStatus(Status.START);
+    lockClientId();
   }
 
   /**
@@ -920,6 +979,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
       // (Session.stop) can't fail.
       setStatus(Status.STOP);
     }
+    lockClientId();
   }
 
   /**
@@ -939,6 +999,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, stringImage + ".close()");
 
+    lockClientId();
     if (checkThread())
       throw new IllegalStateException("Cannot close connection");
     

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,10 +33,11 @@ public class AdminCommandConstant {
   public static final int CMD_START_HANDLER = 6;
   public static final int CMD_STOP_HANDLER = 7;
   public static final int CMD_INVOKE_STATIC = 8;
+  public static final int CMD_ADD_CLIENTID = 9;
 
   public static final String[] commandNames = { "CMD_NO", "CMD_ADD_INTERCEPTORS", "CMD_REMOVE_INTERCEPTORS",
       "CMD_GET_INTERCEPTORS", "CMD_REPLACE_INTERCEPTORS", "CMD_SET_PROPERTIES", "CMD_START_HANDLER",
-      "CMD_STOP_HANDLER", "CMD_INVOKE_STATIC" };
+      "CMD_STOP_HANDLER", "CMD_INVOKE_STATIC", "CMD_ADD_CLIENTID" };
 
   /** use by destination */
   public static final String INTERCEPTORS = "jms_joram_interceptors";

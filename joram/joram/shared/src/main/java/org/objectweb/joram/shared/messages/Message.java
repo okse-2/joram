@@ -185,6 +185,9 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
   
   /** the message delivery time value. */
   public transient long deliveryTime;
+  
+  /** The client connection identification */
+  public transient String clientID;
 
   /**
    * Sets the message destination.
@@ -542,6 +545,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     strbuf.append(",correlationId=").append(correlationId);
     strbuf.append(",compressed=").append(compressed);
     strbuf.append(",deliveryTime=").append(deliveryTime);
+    strbuf.append(",clientID=").append(clientID);
     strbuf.append(')');
   }
 
@@ -598,6 +602,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     StreamUtil.writeTo(timestamp, os);
     StreamUtil.writeTo(compressed, os);
     StreamUtil.writeTo(deliveryTime, os);
+    StreamUtil.writeTo(clientID, os);
 
     // One short is used to know which fields are set
     short s = 0;
@@ -648,6 +653,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     timestamp = StreamUtil.readLongFrom(is);
     compressed = StreamUtil.readBooleanFrom(is);
     deliveryTime = StreamUtil.readLongFrom(is);
+    clientID = StreamUtil.readStringFrom(is);
     
     short s = StreamUtil.readShortFrom(is);
 
@@ -772,6 +778,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     if (jmsType != null) { encodedSize += EncodableHelper.getStringEncodedSize(jmsType); }
     
     encodedSize += EncodableHelper.getNullableByteArrayEncodedSize(body);
+    encodedSize += EncodableHelper.getNullableStringEncodedSize(clientID);
     
     return encodedSize;
   }
@@ -812,6 +819,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     if (jmsType != null) { encoder.encodeString(jmsType); }
     
     encoder.encodeNullableByteArray(body);
+    encoder.encodeNullableString(clientID);
   }
   
   public void decode(Decoder decoder) throws Exception {    
@@ -842,6 +850,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     persistent = (s & persistentFlag) != 0;
     
     body = decoder.decodeNullableByteArray();
+    clientID = decoder.decodeNullableString();
   }
   
   public static int getMessageVectorEncodedSize(Vector<Message> messages) throws Exception {
