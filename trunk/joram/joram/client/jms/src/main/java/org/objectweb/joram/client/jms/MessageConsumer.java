@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -190,13 +190,18 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
       } else {
         durableSubscriber = true;
       }
+      
+      if (noLocal && !durableSubscriber && sess.getConnection().getClientID() == null)
+        sess.getConnection().setProviderClientID();
+      
       sess.syncRequest(
         new ConsumerSubRequest(dest.getName(),
                                subName,
                                selector,
                                noLocal,
                                durableSubscriber,
-                               sess.isAsyncSub()));
+                               sess.isAsyncSub(),
+                               sess.getConnection().getClientID()));
       targetName = subName;
       this.noLocal = noLocal;
       queueMode = false;

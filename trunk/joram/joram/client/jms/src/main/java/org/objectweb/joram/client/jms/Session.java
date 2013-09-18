@@ -889,6 +889,11 @@ public class Session implements javax.jms.Session, SessionMBean {
       throw new IllegalStateException("Bad session mode");
     }
   }
+  
+  private void checkClientID() throws JMSException {
+    if (cnx.getClientID() == null)
+    throw new IllegalStateException("The client identifier is unset.");
+  }
 
   /** Returns a String image of this session. */
   public String toString() {
@@ -1289,7 +1294,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    * 
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the 
-   *              connection is broken.
+   *              connection is broken or if the client identifier is unset.
    * @exception JMSException  If the creation fails for any other reason.
    */
   public synchronized javax.jms.TopicSubscriber createDurableSubscriber(javax.jms.Topic topic, String name,
@@ -1299,6 +1304,7 @@ public class Session implements javax.jms.Session, SessionMBean {
           + ',' + noLocal + ')');
     checkClosed();
     checkThreadOfControl();
+    checkClientID();
     TopicSubscriber ts = new TopicSubscriber(this, (Topic) topic, name, selector, noLocal);
     addConsumer(ts);
     return ts;
@@ -1324,7 +1330,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    *
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the 
-   *              connection is broken.
+   *              connection is broken or if the client identifier is unset.
    * @exception JMSException  If the creation fails for any other reason.
    */
   public synchronized javax.jms.TopicSubscriber createDurableSubscriber(javax.jms.Topic topic, String name)
@@ -1333,6 +1339,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       logger.log(BasicLevel.DEBUG, "Session.createDurableSubscriber(" + topic + ',' + name + ')');
     checkClosed();
     checkThreadOfControl();
+    checkClientID();
     TopicSubscriber ts = new TopicSubscriber(this, (Topic) topic, name, null, false);
     addConsumer(ts);
     return ts;
@@ -2469,7 +2476,7 @@ public class Session implements javax.jms.Session, SessionMBean {
 
     if (msg == null)
       throw new MessageFormatException("Cannot send null message");
-
+    
     // Updating the message property fields:
     msg.setJMSMessageID(cnx.nextMessageId());
     msg.setJMSDeliveryMode(deliveryMode);
@@ -2535,6 +2542,9 @@ public class Session implements javax.jms.Session, SessionMBean {
     }
     joramMsg.prepare();
 
+    //set clientID
+    joramMsg.momMsg.clientID = cnx.getClientID();
+    
     if (transacted) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Buffering the message.");
@@ -2729,7 +2739,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    *
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the 
-   *              connection is broken.
+   *              connection is broken or if the client identifier is unset.
    * @exception JMSException  If the creation fails for any other reason.
    */
   public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
@@ -2739,6 +2749,9 @@ public class Session implements javax.jms.Session, SessionMBean {
     
     checkClosed();
     checkThreadOfControl();
+    if (topic == null)
+      throw new InvalidDestinationException("Invalid null topic.");
+    checkClientID();
     
     MessageConsumer mc = new MessageConsumer(this, (Topic) topic, null, name, false);
     addConsumer(mc);
@@ -2767,7 +2780,7 @@ public class Session implements javax.jms.Session, SessionMBean {
    *
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the 
-   *              connection is broken.
+   *              connection is broken or if the client identifier is unset.
    * @exception JMSException  If the creation fails for any other reason.
    */
   public javax.jms.MessageConsumer createDurableConsumer(javax.jms.Topic topic,
@@ -2780,6 +2793,9 @@ public class Session implements javax.jms.Session, SessionMBean {
     
     checkClosed();
     checkThreadOfControl();
+    if (topic == null)
+      throw new InvalidDestinationException("Invalid null topic.");
+    checkClientID();
     
     MessageConsumer mc = new MessageConsumer(this, (Topic) topic, selector, name, noLocal);
     addConsumer(mc);

@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -105,6 +106,8 @@ import org.objectweb.joram.shared.admin.SetThresholdRequest;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ActivateConsumerRequest;
+import org.objectweb.joram.shared.client.AddClientIDReply;
+import org.objectweb.joram.shared.client.AddClientIDRequest;
 import org.objectweb.joram.shared.client.CnxCloseReply;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
 import org.objectweb.joram.shared.client.CnxConnectReply;
@@ -185,6 +188,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private transient List<MessageInterceptor> interceptorsIN = null;
   private List<Properties> interceptorsPropIN = null;
   private List<Properties> interceptorsPropOUT = null;
+  
+  /** Map contains the clientID */
+  private transient Map<Integer, String> clientIDs = new HashMap<Integer, String>();
 
   /** period to run the cleaning task, by default 60s. */
   private long period = 60000L;
@@ -310,9 +316,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * <b>Key:</b> subscription name<br>
    * <b>Value:</b> client subscription
    */
-
   private Map<String, ClientSubscription> subsTable;
-
+  
+  /**
+   * <b>Key:</b> subscription name<br>
+   * <b>Value:</b> clientID
+   */
+  private Properties subsClientIDs;
+  
   /**
    * Table holding the recovered transactions branches.
    * <p>
@@ -381,6 +392,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     modifiedClientContexts = new ArrayList<ClientContext>();
     modifiedClientSubscriptions = new ArrayList<ClientSubscription>();
+    clientIDs = new HashMap<Integer, String>();
 
     super.agentInitialize(firstTime);
     initialize(firstTime);
@@ -540,7 +552,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         heartBeatTasks.remove(objKey);
       }
     }
-
+    
     // Differs the reply because the connection key counter
     // must be saved before the OpenConnectionNot returns.
     sendTo(getId(), new ReturnConnectionNot(not, ctx));
@@ -671,6 +683,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
         if (hbt != null) hbt.cancel();
       }
+      //remove the clientID
+      clientIDs.remove(key);
     }
     // else should not happen:
     // 1- CloseConnectionNot is transient
@@ -973,6 +987,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     if (contexts == null) contexts = new Hashtable<Integer, ClientContext>();
     if (subsTable == null) subsTable = new Hashtable();
+    if (subsClientIDs == null) subsClientIDs = new Properties();
 
     Transaction tx = AgentServer.getTransaction();
     String[] persistedClientNames = tx.getList(ClientContext.getTransactionPrefix(getId()));
@@ -1412,6 +1427,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         doReact(key, (ActivateConsumerRequest) request);
       else if (request instanceof CommitRequest)
         doReact(key, (CommitRequest) request);
+      else if (request instanceof AddClientIDRequest)
+        doReact(key, (AddClientIDRequest) request);
       else
         logger.log(BasicLevel.WARN, this + " - unhandling request: " + request);
     } catch (MomException mE) {
@@ -1571,6 +1588,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private void doReact(ConsumerSubRequest req) throws StateException, RequestException {
     AgentId topicId = AgentId.fromString(req.getTarget());
     String subName = req.getSubName();
+    String clientId = req.getClientID();
 
     if (topicId == null)
       throw new RequestException("Cannot subscribe to an undefined topic (null).");
@@ -1580,7 +1598,17 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     boolean newTopic = !topicsTable.containsKey(topicId);
     boolean newSub = !subsTable.containsKey(subName);
-
+    
+    if (!newSub && !req.getClientID().equals(subsClientIDs.get(subName))) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, "throw Exception : unshared durable subscription \"" + subName + "\" must use \"" 
+            + subsClientIDs.get(subName) + "\" client identifier instead of " + clientId);
+      throw new RequestException("unshared durable subscription \"" + subName + "\" must use \"" 
+          + subsClientIDs.get(subName) + "\" client identifier instead of " + clientId);
+    }
+    if (clientId != null)
+      subsClientIDs.put(subName, clientId);
+    
     TopicSubscription tSub;
     ClientSubscription cSub;
 
@@ -1608,7 +1636,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
                                     dmqId,
                                     threshold,
                                     nbMaxMsg,
-                                    messagesTable);
+                                    messagesTable,
+                                    clientId);
       cSub.setProxyAgent(this);
       modifiedSubscription(cSub);
 
@@ -1775,6 +1804,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     activeCtx.removeSubName(subName);
     subsTable.remove(subName);
+    subsClientIDs.remove(subName);
     try {
       MXWrapper.unregisterMBean(getSubMBeanName(subName));
     } catch (Exception e) {
@@ -2229,6 +2259,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // state change, so save.
     setSave();
 
+    // remove the clientID
+    clientIDs.remove(key);
+    
     // setCtx(cKey);
 
     // Denying the non acknowledged messages:
@@ -2275,14 +2308,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         sub.delete();
 
         subsTable.remove(subName);
+
         try {
           MXWrapper.unregisterMBean(getSubMBeanName(subName));
         } catch (Exception e) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e);
         }
-        TopicSubscription tSub = (TopicSubscription) topicsTable.get(sub
-            .getTopicId());
+        TopicSubscription tSub = (TopicSubscription) topicsTable.get(sub.getTopicId());
         tSub.removeSubscription(subName);
 
         if (!topics.contains(sub.getTopicId()))
@@ -2436,6 +2469,23 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // else the client doesn't expect any ack
   }
 
+  /**
+   * Method implementing the reaction to a <code>AddClientIDRequest</code>
+   * instance add the clientID value of a connection.
+   * 
+   */
+  private void doReact(int key, AddClientIDRequest req) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "AddClientIDRequest  key = " + key + ", clientID = " + req.clientID);
+    if (clientIDs.containsValue(req.clientID))
+      throw new Exception("clientID \""+req.clientID + "\" already presente.");
+    clientIDs.put(new Integer(key), req.clientID);
+    
+    AddClientIDReply reply = new AddClientIDReply();
+    reply.setCorrelationId(req.getRequestId());
+    sendToClient(key, reply);
+  }
+  
   /**
    * Distributes the JMS replies to the appropriate reactions.
    * <p>
@@ -3804,7 +3854,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
 
     res += INT_ENCODED_SIZE;
-
+    res += EncodableHelper.getEncodedSize(subsClientIDs);
     return res;
   }
 
@@ -3860,6 +3910,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
 
     encoder.encodeUnsignedInt(threshold);
+    EncodableHelper.encodeProperties(subsClientIDs, encoder);
   }
 
   public void decode(Decoder decoder) throws Exception {
@@ -3918,6 +3969,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
 
     threshold = decoder.decodeUnsignedInt();
+    subsClientIDs= EncodableHelper.decodeProperties(decoder);
   }
 
   public static class UserAgentFactory implements EncodableFactory {

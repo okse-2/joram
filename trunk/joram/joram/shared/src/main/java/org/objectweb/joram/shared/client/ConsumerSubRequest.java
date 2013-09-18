@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -95,6 +95,15 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
     return durable;
   }
 
+  private String clientID = null;
+
+  /**
+   * @return the clientID
+   */
+  public String getClientID() {
+    return clientID;
+  }
+
   /** Returns <code>true</code> for asynchronous subscription. */
   public boolean isAsyncSubscription() {
     return asyncSub;
@@ -113,15 +122,17 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
    * @param noLocal  <code>true</code> for not consuming the local messages.
    * @param durable  <code>true</code> for a durable subscription.
    * @param asyncSub  <code>true</code> for a asynchronous subscription request.
+   * @param clientID The clientID
    */
   public ConsumerSubRequest(String topic, String subName, String selector,
-                            boolean noLocal, boolean durable, boolean asyncSub) {
+                            boolean noLocal, boolean durable, boolean asyncSub, String clientID) {
     super(topic);
     this.subName = subName;
     this.selector = selector;
     this.noLocal = noLocal;
     this.durable = durable;
     this.asyncSub = asyncSub;
+    this.clientID = clientID;
   }
 
   /**
@@ -146,6 +157,7 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
     StreamUtil.writeTo(noLocal, os);
     StreamUtil.writeTo(durable, os);
     StreamUtil.writeTo(asyncSub, os);
+    StreamUtil.writeTo(clientID, os);
   }
 
   /**
@@ -161,5 +173,6 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
     noLocal = StreamUtil.readBooleanFrom(is);
     durable = StreamUtil.readBooleanFrom(is);
     asyncSub = StreamUtil.readBooleanFrom(is);
+    clientID = StreamUtil.readStringFrom(is);
   }
 }

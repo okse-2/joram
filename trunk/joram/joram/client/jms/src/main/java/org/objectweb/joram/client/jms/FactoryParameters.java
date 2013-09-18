@@ -92,6 +92,9 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     return url;
   }
 
+  /** The clientID used by connection */
+  public String clientID = null;
+  
   /**
    *  Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm),
    * default value is true.
@@ -302,6 +305,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
 
     ref.add(new StringRefAddr(prefix + ".url", getUrl()));
 
+    ref.add(new StringRefAddr(prefix + ".clientID", clientID));
     ref.add(new StringRefAddr(prefix + ".TcpNoDelay",
                               new Boolean(TcpNoDelay).toString()));
     ref.add(new StringRefAddr(prefix + ".SoLinger",
@@ -360,6 +364,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
 
     url = (String) ref.get(prefix + ".url").getContent();
 
+    clientID = (String) ref.get(prefix + ".clientID").getContent();
     TcpNoDelay = new Boolean((String) ref.get(prefix + ".TcpNoDelay").getContent()).booleanValue();
     SoLinger = new Integer((String) ref.get(prefix + ".SoLinger").getContent()).intValue();
     SoTimeout = new Integer((String) ref.get(prefix + ".SoTimeout").getContent()).intValue();
@@ -404,6 +409,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     if (getUrl() != null)
       h.put(prefix + ".url", getUrl());
 
+    h.put(prefix + ".clientID", clientID);
     h.put(prefix + ".TcpNoDelay", new Boolean(TcpNoDelay));
     h.put(prefix + ".SoLinger", new Integer(SoLinger));
     h.put(prefix + ".SoTimeout", new Integer(SoTimeout));
@@ -442,6 +448,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
 
     url = (String) h.get(prefix + ".url");
 
+    clientID = (String) h.get(prefix + ".clientID");
     TcpNoDelay = ((Boolean) h.get(prefix + ".TcpNoDelay")).booleanValue();
     SoLinger = ((Integer) h.get(prefix + ".SoLinger")).intValue();
     SoTimeout = ((Integer) h.get(prefix + ".SoTimeout")).intValue();
@@ -650,6 +657,8 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
           outLocalPort = new Integer(value).intValue();
         } else if ("outLocalAddress".equals(name)) {
           outLocalAddress = value;
+        } else if ("clientID".equals(name)) {
+          clientID = value;
         } else {
           logger.log(BasicLevel.ERROR,
                      "Could not set FactoryParameters <" + name + ", " + value + ">",

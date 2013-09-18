@@ -84,6 +84,8 @@ public abstract class AbstractJmsMessage implements Externalizable, Streamable, 
   protected final static int XA_CNX_RECOVER_REPLY = 34;
   protected final static int XA_CNX_RECOVER_REQUEST = 35;
   protected final static int XA_CNX_ROLLBACK = 36;
+  protected final static int ADD_CLIENTID_REQUEST = 37;
+  protected final static int ADD_CLIENTID_REPLY = 38;
 
   protected int classid;
 
@@ -125,7 +127,9 @@ public abstract class AbstractJmsMessage implements Externalizable, Streamable, 
     XACnxPrepare.class.getName(),
     XACnxRecoverReply.class.getName(),
     XACnxRecoverRequest.class.getName(),
-    XACnxRollback.class.getName()
+    XACnxRollback.class.getName(),
+    AddClientIDRequest.class.getName(),
+    AddClientIDReply.class.getName()
   };
 
   protected abstract int getClassId();

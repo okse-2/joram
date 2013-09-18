@@ -23,12 +23,15 @@
 package org.objectweb.joram.client.jms;
 
 import java.io.Serializable;
+
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionMetaData;
 import javax.jms.ExceptionListener;
 import javax.jms.IllegalStateException;
 import javax.jms.IllegalStateRuntimeException;
+import javax.jms.InvalidClientIDException;
+import javax.jms.InvalidClientIDRuntimeException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.InvalidDestinationRuntimeException;
 import javax.jms.InvalidSelectorException;
@@ -46,8 +49,10 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.management.JMRuntimeException;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
 import fr.dyade.aaa.common.Debug;
 
 /**
@@ -208,10 +213,10 @@ public class JMSContext implements javax.jms.JMSContext {
   /**
    * Creates a new Context using a newly created JMS connection.
    * 
-   * @param connection  the created JMS connection.
+   * @param cnx  the created JMS connection.
    */
-  public JMSContext(Connection connection) {
-    this.connection = new ContextConnection(connection);
+  public JMSContext(Connection cnx) {
+    this.connection = new ContextConnection(cnx);
     try {
       session = (Session) connection.createSession();
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -227,11 +232,11 @@ public class JMSContext implements javax.jms.JMSContext {
   /**
    * Creates a new Context using a newly created JMS connection.
    * 
-   * @param connection  the created JMS connection.
+   * @param cnx  the created JMS connection.
    * @param sessionMode indicates which of four possible session modes will be used.
    */
-  public JMSContext(Connection connection, int sessionMode) {
-    this.connection = new ContextConnection(connection);
+  public JMSContext(Connection cnx, int sessionMode) {
+    this.connection = new ContextConnection(cnx);
     try {
       session = (Session) connection.createSession(sessionMode);
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -326,6 +331,7 @@ public class JMSContext implements javax.jms.JMSContext {
    *                connection can cause this exception to be thrown. 
    */
   public synchronized void close() {
+    connection.lockClientID();
     if (session.checkThread())
       throw new IllegalStateRuntimeException("Cannot stop context from listener");
 
@@ -346,6 +352,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public void acknowledge() {
+    connection.lockClientID();
     try {
       session.acknowledge();
     } catch (IllegalStateException e) {
@@ -357,6 +364,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public void commit() {
+    connection.lockClientID();
     try {
       session.commit();
     } catch (IllegalStateException e) {
@@ -367,6 +375,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public void recover() {
+    connection.lockClientID();
     try {
       session.recover();
     } catch (IllegalStateException e) {
@@ -377,6 +386,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public void rollback() {
+    connection.lockClientID();
     try {
       session.rollback();
     } catch (IllegalStateException e) {
@@ -389,6 +399,7 @@ public class JMSContext implements javax.jms.JMSContext {
   // Message creation
 
   public Message createMessage() {
+    connection.lockClientID();
     try {
       return session.createMessage();
     } catch (JMSException e) {
@@ -397,6 +408,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
   
   public BytesMessage createBytesMessage() {
+    connection.lockClientID();
     try {
       return  session.createBytesMessage();
     } catch (JMSException e) {
@@ -405,6 +417,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
   
   public MapMessage createMapMessage() {
+    connection.lockClientID();
     try {
       return session.createMapMessage();
     } catch (JMSException e) {
@@ -413,6 +426,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public ObjectMessage createObjectMessage() {
+    connection.lockClientID();
     try {
       return session.createObjectMessage();
     } catch (JMSException e) {
@@ -421,6 +435,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public ObjectMessage createObjectMessage(Serializable object) {
+    connection.lockClientID();
     try {
       return session.createObjectMessage(object);
     } catch (JMSException e) {
@@ -429,6 +444,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public TextMessage createTextMessage() {
+    connection.lockClientID();
     try {
       return session.createTextMessage();
     } catch (JMSException e) {
@@ -437,6 +453,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public TextMessage createTextMessage(String text) {
+    connection.lockClientID();
     try {
       return session.createTextMessage(text);
     } catch (JMSException e) {
@@ -445,6 +462,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public StreamMessage createStreamMessage() {
+    connection.lockClientID();
     try {
       return session.createStreamMessage();
     } catch (JMSException e) {
@@ -455,6 +473,7 @@ public class JMSContext implements javax.jms.JMSContext {
   // Destination creation
   
   public TemporaryQueue createTemporaryQueue() {
+    connection.lockClientID();
     try {
       return session.createTemporaryQueue();
     } catch (JMSException e) {
@@ -463,6 +482,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public TemporaryTopic createTemporaryTopic() {
+    connection.lockClientID();
     try {
       return session.createTemporaryTopic();
     } catch (JMSException e) {
@@ -471,6 +491,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public Queue createQueue(String name) {
+    connection.lockClientID();
     try {
       return session.createQueue(name);
     } catch (JMSException e) {
@@ -479,6 +500,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public Topic createTopic(String name) {
+    connection.lockClientID();
     try {
       return session.createTopic(name);
     } catch (JMSException e) {
@@ -489,10 +511,12 @@ public class JMSContext implements javax.jms.JMSContext {
   // 
 
   public boolean getAutoStart() {
+    connection.lockClientID();
     return connection.getAutoStart();
   }
 
   public void setAutoStart(boolean autoStart) {
+    connection.lockClientID();
     connection.setAutoStart(autoStart);
   }
 
@@ -507,6 +531,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public javax.jms.JMSConsumer createConsumer(javax.jms.Destination destination, String selector, boolean noLocal) {
+    connection.lockClientID();
     try {
       MessageConsumer consumer = (MessageConsumer) session.createConsumer(destination, selector, noLocal);
       return new JMSConsumer(consumer);
@@ -529,6 +554,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public QueueBrowser createBrowser(Queue queue, String messageSelector) {
+    connection.lockClientID();
     try {
       return session.createBrowser(queue, messageSelector);
     } catch (InvalidDestinationException e) {
@@ -545,6 +571,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public JMSConsumer createDurableConsumer(Topic topic, String name, String selector, boolean noLocal) {
+    connection.lockClientID();
     try {
       MessageConsumer consumer = (MessageConsumer) session.createDurableConsumer(topic, name, selector, noLocal);
       return new JMSConsumer(consumer);
@@ -565,6 +592,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public JMSProducer createProducer() {
+    connection.lockClientID();
     try {
       return new org.objectweb.joram.client.jms.JMSProducer(session);
     } catch (JMSException e) {
@@ -580,6 +608,7 @@ public class JMSContext implements javax.jms.JMSContext {
 
   public javax.jms.JMSConsumer createSharedConsumer(Topic topic,
       String sharedSubscriptionName, String messageSelector) {
+    connection.lockClientID();
     JMSConsumer consumer = null;
 //    try {
 //      consumer = new JMSConsumer(this, topic, messageSelector, false);
@@ -596,6 +625,7 @@ public class JMSContext implements javax.jms.JMSContext {
 
   public javax.jms.JMSConsumer createSharedDurableConsumer(Topic topic,
       String name) {
+    connection.lockClientID();
     JMSConsumer consumer = null;
 //    try {
 //      consumer = new JMSConsumer(getCopyOfSession(), (Destination) topic);
@@ -612,6 +642,7 @@ public class JMSContext implements javax.jms.JMSContext {
 
   public javax.jms.JMSConsumer createSharedDurableConsumer(Topic topic,
       String name, String messageSelector) {
+    connection.lockClientID();
     JMSConsumer consumer = null;
 //    try {
 //      consumer = new JMSConsumer(getCopyOfSession(), (Destination) topic,
@@ -661,6 +692,7 @@ public class JMSContext implements javax.jms.JMSContext {
    * @since JMS 2.0
    */
   public int getSessionMode() {
+    connection.lockClientID();
     try {
       return session.getAcknowledgeMode();
     } catch (JMSException e) {
@@ -669,10 +701,12 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public boolean getTransacted() {
+    connection.lockClientID();
     return session.transacted;
   }
 
   public ConnectionMetaData getMetaData() {
+    connection.lockClientID();
     return connection.getMetaData();
   }
   
@@ -685,14 +719,17 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public ExceptionListener getExceptionListener() {
+    connection.lockClientID();
     return connection.getExceptionListener();
   }
 
   public void setExceptionListener(ExceptionListener listener) {
+    connection.lockClientID();
     connection.setExceptionListener(listener);
   }
 
   public void start() {
+    connection.lockClientID();
     connection.start();
   }
   
@@ -763,6 +800,7 @@ public class JMSContext implements javax.jms.JMSContext {
    * @see javax.jms.JMSContext#start
    */
   public void stop() {
+    connection.lockClientID();
     if (session.checkThread())
       throw new IllegalStateRuntimeException("Cannot stop context from listener");
     
@@ -770,6 +808,7 @@ public class JMSContext implements javax.jms.JMSContext {
   }
 
   public void unsubscribe(String name) {
+    connection.lockClientID();
     try {
       session.unsubscribe(name);
     } catch (InvalidDestinationException exc) {
@@ -787,10 +826,15 @@ public class JMSContext implements javax.jms.JMSContext {
 class ContextConnection {
   private int counter = 1;
   private boolean autoStart = true;
-  private Connection connection = null;
+  private org.objectweb.joram.client.jms.Connection connection = null;
+  private boolean lockClientID = false;
+  
+  void lockClientID() {
+    lockClientID = true;
+  }
   
   ContextConnection(Connection connection) {
-    this.connection = connection;
+    this.connection = (org.objectweb.joram.client.jms.Connection) connection;
   }
 
   public synchronized Session createSession() throws JMSException {
@@ -836,7 +880,7 @@ class ContextConnection {
     try {
       return connection.getMetaData();
     } catch (JMSException e) {
-      throw new JMSRuntimeException(e.getMessage());
+      throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
     }
   }
 
@@ -844,7 +888,7 @@ class ContextConnection {
     try {
       return connection.getExceptionListener();
     } catch (JMSException e) {
-      throw new JMSRuntimeException(e.getMessage());
+      throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
     }
   }
 
@@ -852,7 +896,7 @@ class ContextConnection {
     try {
       connection.setExceptionListener(listener);
     } catch (JMSException e) {
-      throw new JMSRuntimeException(e.getMessage());
+      throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
     }
   }
 
@@ -860,15 +904,22 @@ class ContextConnection {
     try {
       return connection.getClientID();
     } catch (JMSException e) {
-      throw new JMSRuntimeException(e.getMessage());
+      throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
     }
   }
 
   public void setClientID(String clientID) {
     try {
+      if (lockClientID)
+        throw new IllegalStateException("ClientID is already set by the provider.");
       connection.setClientID(clientID);
+      lockClientID = true;
+    } catch (InvalidClientIDException e) {
+      throw new InvalidClientIDRuntimeException(e.getMessage(), e.getErrorCode(), e);
+    } catch (IllegalStateException e) {
+      throw new IllegalStateRuntimeException(e.getMessage(), e.getErrorCode(), e);
     } catch (JMSException e) {
-      throw new JMSRuntimeException(e.getMessage());
+      throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
     }
   }
   

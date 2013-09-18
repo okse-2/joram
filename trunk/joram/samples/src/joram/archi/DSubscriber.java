@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -41,7 +41,7 @@ public class DSubscriber
     ictx.close();
 
     Connection cnx = cnxF.createConnection();
-
+    cnx.setClientID("cnx_dursub");
     Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
     TopicSubscriber sub = session.createDurableSubscriber(dest, "mySub");

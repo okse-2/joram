@@ -84,6 +84,7 @@ public class Consumer implements MessageListener {
     System.out.println("Subscriber:       implicitAck=" + implicitAck);
 
     Connection cnx = cf.createConnection();
+    cnx.setClientID("cnx_dursub");
     int mode;
     if (dupsOk) {
       mode = Session.DUPS_OK_ACKNOWLEDGE;

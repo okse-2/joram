@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,7 +41,6 @@ import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.encoding.Decoder;
 import fr.dyade.aaa.common.encoding.Encodable;
 import fr.dyade.aaa.common.encoding.EncodableFactory;
-import fr.dyade.aaa.common.encoding.EncodableHelper;
 import fr.dyade.aaa.common.encoding.Encoder;
 import fr.dyade.aaa.common.stream.StreamUtil;
 import fr.dyade.aaa.util.Transaction;
@@ -275,6 +274,14 @@ public final class Message implements Serializable, MessageView, Encodable {
   /** Sets the message redelivered flag. */
   public void setRedelivered() {
     msg.redelivered = true;
+  }
+  
+  /**
+   * Get the clientID
+   * @return the clientID
+   */
+  public String getClientID() {
+    return msg.clientID;
   }
 
   /**
