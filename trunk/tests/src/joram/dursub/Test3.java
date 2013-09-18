@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -72,6 +72,7 @@ public class Test3 extends TestCase  {
 
       // Creates a connection and initializes the durable subscriber
       Connection cnx2 = cf.createConnection();
+      cnx2.setClientID("cnx_dursub");
       Session sess2 = cnx2.createSession(false, Session.AUTO_ACKNOWLEDGE);
       TopicSubscriber cons = sess2.createDurableSubscriber(topic, "dursub");  
       cnx2.start();
@@ -87,6 +88,7 @@ public class Test3 extends TestCase  {
       
       // reconnection of subscribe
       cnx2 = cf.createConnection();
+      cnx2.setClientID("cnx_dursub");
       sess2 = cnx2.createSession(false,Session.AUTO_ACKNOWLEDGE);
       cons = sess2.createDurableSubscriber(topic, "dursub");
       cnx2.start();

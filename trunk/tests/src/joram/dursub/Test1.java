@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,14 +33,12 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
-import fr.dyade.aaa.agent.AgentServer;
-
 /**
  * Test durable subscription:
- * - Create a durable subscriber with name "dursub1".
+ * - Create a durable subscriber with name "dursub1" and clientId "cnx1".
  * - Create another durable subscriber with the same subscription name and verify
  *   that using an already active subscription generate an exception.
- * - Close the session of the active subscriber.
+ * - Close the session and connection of the active subscriber.
  * - Create a subscriber to the durable subscription and verify that it is ok.
  * - Close the connection.
  * - Create a subscriber to the durable subscription and verify that it is ok.
@@ -68,6 +66,7 @@ public class Test1 extends framework.TestCase {
       AdminModule.disconnect();
 
       Connection cnx1 = cf.createConnection();
+      cnx1.setClientID("cnx1");
       cnx1.start();
       
       Session sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -76,6 +75,7 @@ public class Test1 extends framework.TestCase {
       Connection cnx2 = cf.createConnection();
       JMSException exc = null;
       try {
+        cnx2.setClientID("cnx1");
         Session sess2 = cnx2.createSession(false, Session.AUTO_ACKNOWLEDGE);
         MessageConsumer cons2 = sess2.createDurableSubscriber(topic, "dursub1");
       } catch (JMSException e) {
@@ -84,13 +84,16 @@ public class Test1 extends framework.TestCase {
       assertTrue(exc != null);
 
       sess1.close();
+      cnx1.close();
+      
+      cnx2.setClientID("cnx1");
       Session sess2 = cnx2.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer cons2 = sess2.createDurableSubscriber(topic, "dursub1");
-
-      cnx1.close();
+      
       cnx2.close();
 
       cnx1 = cf.createConnection();
+      cnx1.setClientID("cnx1");
       Session sess3 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer cons3 = sess3.createDurableSubscriber(topic, "dursub1");
     } catch(Throwable exc){

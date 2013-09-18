@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -72,6 +72,7 @@ public class BridgeTest3 extends TestCase {
       MessageProducer joramSender = joramSess.createProducer(joramDest);
 
       Connection foreignCnx = foreignCF.createConnection();
+      foreignCnx.setClientID("foreignCnx");
       Session foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer foreignCons = foreignSess.createDurableSubscriber((Topic) foreignDest, "durable");
       foreignCnx.start();
@@ -107,6 +108,7 @@ public class BridgeTest3 extends TestCase {
       Thread.sleep(5000);
       
       foreignCnx = foreignCF.createConnection();
+      foreignCnx.setClientID("foreignCnx");
       foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       foreignCons = foreignSess.createDurableSubscriber((Topic) foreignDest, "durable");
       foreignCnx.start();
@@ -149,6 +151,7 @@ public class BridgeTest3 extends TestCase {
       Thread.sleep(5000);
       
       foreignCnx = foreignCF.createConnection();
+      foreignCnx.setClientID("foreignCnx");
       foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       foreignCons = foreignSess.createDurableSubscriber((Topic) foreignDest, "durable");
       foreignCnx.start();

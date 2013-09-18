@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -60,6 +60,7 @@ public class ClientTest16_2 extends TestCase {
       ((TcpConnectionFactory) cf).getParameters().cnxPendingTimer = 500;
 
       Connection connection = cf.createConnection("anonymous", "anonymous");
+      connection.setClientID("ClientTest16_2");
 
       Session recSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
