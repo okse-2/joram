@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -86,6 +86,7 @@ public class Test17 extends BaseTest implements ExceptionListener, MessageListen
     try {
 //      System.out.println("connect");
       cnx1 = cf.createConnection();
+      cnx1.setClientID("Test17");
       cnx1.setExceptionListener(this);
       sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
       if (dest instanceof org.objectweb.joram.client.jms.Queue)

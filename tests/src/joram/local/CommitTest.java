@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -97,6 +97,7 @@ public class CommitTest extends TestCase {
       remoteTopic.setFreeWriting();
 
       ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
+      ((TcpConnectionFactory) cf).getParameters().clientID = "CommitTest";
 
       Connection c = cf.createConnection();
       Session s = c.createSession(true, 0);

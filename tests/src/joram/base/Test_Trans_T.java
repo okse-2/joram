@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -60,6 +60,7 @@ public class Test_Trans_T extends TestCase {
 	    ictx.close();
 
 	    Connection cnx = cf.createConnection();
+	    cnx.setClientID("test_Trans_T");
 	    Session sessionp = cnx.createSession(true,
 						Session.AUTO_ACKNOWLEDGE);
 	    Session sessionc = cnx.createSession(true,

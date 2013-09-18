@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -61,7 +61,8 @@ public class Test51 extends framework.TestCase {
 	    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
 
 	    Connection cnx = cf.createConnection();
-
+	    cnx.setClientID("Test51");
+	    
 	    Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 	    MessageConsumer cons = sess.createDurableSubscriber(topic, "subname");
 	    MessageProducer prod = sess.createProducer(topic);

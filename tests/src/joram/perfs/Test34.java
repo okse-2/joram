@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -126,6 +126,7 @@ public class Test34 extends BaseTest {
 	    writeIntoFile("| sender " +  ((NbMsg *1000L)/(dt1)) + " msg/s");
 
 	    Connection cnx2 = cf.createConnection();
+	    cnx2.setClientID("Test34");
 	    Session sess2 = cnx2.createSession(false, Session.AUTO_ACKNOWLEDGE);
 	    MessageConsumer cons = null;
 	    if (SubDurable && (dest instanceof Topic))

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -86,6 +86,7 @@ public class ClientTest25 extends TestCase {
           org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create("localhost", 2560);
 
       Connection connection = cf.createConnection("anonymous", "anonymous");
+      connection.setClientID("ClientTest25");
       connection.start();
 
       testRedelivered(queue, connection);

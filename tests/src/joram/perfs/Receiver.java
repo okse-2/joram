@@ -96,6 +96,7 @@ public class Receiver extends BaseTest implements MessageListener {
     ConnectionFactory cf =  createConnectionFactory(baseclass);
     ((org.objectweb.joram.client.jms.ConnectionFactory)cf).getParameters().noAckedQueue = Boolean.getBoolean("noAckedQueue");
     Connection cnx = cf.createConnection();
+    cnx.setClientID("Receiver");
 
     Destination dest = null;
 
