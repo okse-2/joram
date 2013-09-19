@@ -317,7 +317,7 @@ public class Message implements javax.jms.Message {
 
     if (momMsg.toId != null) {
       try {
-        return Destination.newInstance(momMsg.toId, null, momMsg.toType);
+        return Destination.newInstance(momMsg.toId, momMsg.toName, momMsg.toType);
       } catch (Exception exc) {
         // The destination name is unknown
         throw new JMSException(exc.getMessage());
@@ -342,10 +342,10 @@ public class Message implements javax.jms.Message {
     if ((dest != null) &&
         (dest instanceof org.objectweb.joram.client.jms.Destination)) {
       Destination d = (org.objectweb.joram.client.jms.Destination) dest;
-      momMsg.setDestination(d.getName(), d.getType());
+      momMsg.setDestination(d.getName(), d.getAdminName(), d.getType());
       return;
     }
-    momMsg.setDestination(null, (byte) 0);
+    momMsg.setDestination(null, null, (byte) 0);
   }
 
   /**
@@ -431,7 +431,7 @@ public class Message implements javax.jms.Message {
     if (momMsg.replyToId != null) {
       // The destination name is unknown
       try {
-        return Destination.newInstance(momMsg.replyToId, null, momMsg.replyToType);
+        return Destination.newInstance(momMsg.replyToId, momMsg.replyToName, momMsg.replyToType);
       } catch (Exception exc) {
         throw new JMSException(exc.getMessage());
       }
@@ -454,10 +454,10 @@ public class Message implements javax.jms.Message {
     if ((replyTo != null) &&
         (replyTo instanceof org.objectweb.joram.client.jms.Destination)) {
       Destination d = (org.objectweb.joram.client.jms.Destination) replyTo;
-      momMsg.setReplyTo(d.getName(), d.getType());
+      momMsg.setReplyTo(d.getName(), d.getAdminName(), d.getType());
       return;
     }
-    momMsg.setReplyTo(null, (byte) 0);
+    momMsg.setReplyTo(null, null, (byte) 0);
   }
 
   /**

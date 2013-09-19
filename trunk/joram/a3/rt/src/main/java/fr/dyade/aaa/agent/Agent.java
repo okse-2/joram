@@ -237,6 +237,10 @@ public abstract class Agent implements AgentMBean, Serializable, Encodable {
   /** Symbolic name of the agent */
   transient String name;
 
+  public boolean hasName() {
+    return (name != null);
+  }
+  
   /**
    * Returns this <code>Agent</code>'s name.
    * If the name is not set returns the string representation of its unique id.

@@ -169,6 +169,9 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
   /** The message destination identifier. */
   public transient String toId = null;
 
+  /** The message destination name. */
+  public transient String toName = null;
+
   /** The message destination type. */
   public transient byte toType;
   
@@ -193,10 +196,12 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
    * Sets the message destination.
    *
    * @param id  The destination identifier.
+   * @param name The destination name.
    * @param type The type of the destination.
    */
-  public final void setDestination(String id, byte type) {
+  public final void setDestination(String id, String name, byte type) {
     toId = id;
+    toName = name;
     toType = type;
   }
 
@@ -212,6 +217,10 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
 
   /** The reply to destination identifier. */
   public transient String replyToId = null;
+  
+  /** The reply to destination name. */
+  public transient String replyToName = null;
+  
   /** <code>true</code> if the "reply to" destination is a queue. */
   public transient byte replyToType;
 
@@ -231,8 +240,9 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
    * @param id  The destination identifier.
    * @param type The destination type.
    */
-  public final void setReplyTo(String id, byte type) {
+  public final void setReplyTo(String id, String name, byte type) {
     replyToId = id;
+    replyToName = name;
     replyToType = type;
   }
 
@@ -541,7 +551,11 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     strbuf.append(",expiration=").append(expiration);
     strbuf.append(",timestamp=").append(timestamp);
     strbuf.append(",toId=").append(toId);
+    if (toName != null)
+      strbuf.append('(').append(toName).append(')');
     strbuf.append(",replyToId=").append(replyToId);
+    if (replyToName != null)
+      strbuf.append('(').append(replyToName).append(')');
     strbuf.append(",correlationId=").append(correlationId);
     strbuf.append(",compressed=").append(compressed);
     strbuf.append(",deliveryTime=").append(deliveryTime);
@@ -570,7 +584,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
 
   private static final short typeFlag = 0x0001;
   private static final short replyToIdFlag = 0x0002;
-  private static final short replyToTypeFlag = 0x0004;
+//  private static final short replyToTypeFlag = 0x0004;
   private static final short propertiesFlag = 0x0008;
   private static final short priorityFlag = 0x0010;
   private static final short expirationFlag = 0x0020;
@@ -598,6 +612,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
   public void writeHeaderTo(OutputStream os) throws IOException {
     StreamUtil.writeTo(id, os);
     StreamUtil.writeTo(toId, os);
+    StreamUtil.writeTo(toName, os);
     StreamUtil.writeTo(toType, os);
     StreamUtil.writeTo(timestamp, os);
     StreamUtil.writeTo(compressed, os);
@@ -608,7 +623,6 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     short s = 0;
     if (type != SIMPLE) { s |= typeFlag; }
     if (replyToId != null) { s |= replyToIdFlag; }
-    if (replyToType != 0) { s |= replyToTypeFlag; }
     if (properties != null) { s |= propertiesFlag; }
     if (priority != DEFAULT_PRIORITY) { s |= priorityFlag; }
     if (expiration != 0) { s |= expirationFlag; }
@@ -625,8 +639,11 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
 //      byte b = (byte) (((priority << 4) & 0xF0) | (type & 0x0F));
 //      StreamUtil.writeTo(b, os);
 //    }
-    if (replyToId != null) { StreamUtil.writeTo(replyToId, os); }
-    if (replyToType != 0) { StreamUtil.writeTo(replyToType, os); }
+    if (replyToId != null) {
+      StreamUtil.writeTo(replyToId, os);
+      StreamUtil.writeTo(replyToName, os);
+      StreamUtil.writeTo(replyToType, os);
+    }
     if (properties != null) { StreamUtil.writeTo(properties, os); }
     if (priority != DEFAULT_PRIORITY) { StreamUtil.writeTo(priority, os); }
     if (expiration != 0) { StreamUtil.writeTo(expiration, os); }
@@ -649,6 +666,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
   public void readHeaderFrom(InputStream is) throws IOException {
     id = StreamUtil.readStringFrom(is);
     toId = StreamUtil.readStringFrom(is);
+    toName = StreamUtil.readStringFrom(is);
     toType = StreamUtil.readByteFrom(is);
     timestamp = StreamUtil.readLongFrom(is);
     compressed = StreamUtil.readBooleanFrom(is);
@@ -666,8 +684,11 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
 //      type = SIMPLE;
 //      priority = DEFAULT_PRIORITY;
 //    }
-    if ((s & replyToIdFlag) != 0) { replyToId = StreamUtil.readStringFrom(is); }
-    if ((s & replyToTypeFlag) != 0) { replyToType = StreamUtil.readByteFrom(is); }
+    if ((s & replyToIdFlag) != 0) {
+      replyToId = StreamUtil.readStringFrom(is);
+      replyToName = StreamUtil.readStringFrom(is);
+      replyToType = StreamUtil.readByteFrom(is);
+    }
     if ((s & propertiesFlag) != 0) { properties = StreamUtil.readPropertiesFrom(is); }
     priority = DEFAULT_PRIORITY;
     if ((s & priorityFlag) != 0) { priority = StreamUtil.readIntFrom(is); }
@@ -765,11 +786,15 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     int encodedSize = EncodableHelper.getStringEncodedSize(id);
     
     encodedSize += EncodableHelper.getStringEncodedSize(toId);
+    encodedSize += EncodableHelper.getStringEncodedSize(toName);
     encodedSize += BYTE_ENCODED_SIZE + LONG_ENCODED_SIZE + BOOLEAN_ENCODED_SIZE + LONG_ENCODED_SIZE + SHORT_ENCODED_SIZE;
 
     if (type != org.objectweb.joram.shared.messages.Message.SIMPLE) { encodedSize += BYTE_ENCODED_SIZE; }
-    if (replyToId != null) { encodedSize += EncodableHelper.getStringEncodedSize(replyToId); }
-    if (replyToType != 0) { encodedSize += BYTE_ENCODED_SIZE; }
+    if (replyToId != null) {
+      encodedSize += EncodableHelper.getStringEncodedSize(replyToId);
+      encodedSize += EncodableHelper.getStringEncodedSize(replyToName);
+      encodedSize += BYTE_ENCODED_SIZE;
+    }
     if (properties != null) { encodedSize += properties.getEncodedSize(); }
     if (priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { encodedSize += INT_ENCODED_SIZE; }
     if (expiration != 0) { encodedSize += LONG_ENCODED_SIZE; }
@@ -787,6 +812,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     encoder.encodeString(id);
     
     encoder.encodeString(toId);
+    encoder.encodeString(toName);
     encoder.encodeByte(toType);
     encoder.encodeUnsignedLong(timestamp);
     encoder.encodeBoolean(compressed);
@@ -796,7 +822,6 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     short s = 0;
     if (type != org.objectweb.joram.shared.messages.Message.SIMPLE) { s |= typeFlag; }
     if (replyToId != null) { s |= replyToIdFlag; }
-    if (replyToType != 0) { s |= replyToTypeFlag; }
     if (properties != null) { s |= propertiesFlag; }
     if (priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { s |= priorityFlag; }
     if (expiration != 0) { s |= expirationFlag; }
@@ -809,8 +834,11 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     encoder.encode16(s);
     
     if (type != org.objectweb.joram.shared.messages.Message.SIMPLE) { encoder.encodeByte((byte) type); }
-    if (replyToId != null) { encoder.encodeString(replyToId); }
-    if (replyToType != 0) { encoder.encodeByte(replyToType); }
+    if (replyToId != null) {
+      encoder.encodeString(replyToId);
+      encoder.encodeString(replyToName);
+      encoder.encodeByte(replyToType);
+    }
     if (properties != null) { properties.encode(encoder); }
     if (priority != org.objectweb.joram.shared.messages.Message.DEFAULT_PRIORITY) { encoder.encodeUnsignedInt(priority); }
     if (expiration != 0) { encoder.encodeUnsignedLong(expiration); }
@@ -826,6 +854,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     id = decoder.decodeString();
     
     toId = decoder.decodeString();
+    toName = decoder.decodeString();
     toType = decoder.decodeByte();
     timestamp = decoder.decodeUnsignedLong();
     compressed = decoder.decodeBoolean();
@@ -834,8 +863,11 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     short s = decoder.decode16();
 
     if ((s & typeFlag) != 0) { type = decoder.decodeByte(); }
-    if ((s & replyToIdFlag) != 0) { replyToId = decoder.decodeString(); }
-    if ((s & replyToTypeFlag) != 0) { replyToType = decoder.decodeByte(); }
+    if ((s & replyToIdFlag) != 0) {
+      replyToId = decoder.decodeString();
+      replyToName = decoder.decodeString();
+      replyToType = decoder.decodeByte();
+    }
     if ((s & propertiesFlag) != 0) {
       properties = new Properties();
       properties.decode(decoder); 
