@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -416,7 +416,9 @@ public class AcquisitionModule implements ReliableTransmitter {
       Message message = (Message) iterator.next();
 
       message.id = "ID:" + destination.getDestinationId() + '_' + msgCount;
-      message.setDestination(destination.getId().toString(), destination.getType());
+      message.setDestination(destination.getId().toString(),
+                             destination.hasName()?destination.getName():null,
+                             destination.getType());
 
       if (message.timestamp == 0) {
         message.timestamp = currentTime;

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -146,9 +146,13 @@ public class MailDistribution implements DistributionHandler {
     buf.append("expiration=" + msg.expiration + "\n");
     buf.append("timestamp=" + msg.timestamp + "\n");
     buf.append("toId=" + msg.toId + "\n");
+    if (msg.toName != null)
+      buf.append('(').append(msg.toName).append(')');
     buf.append("destType=" + msg.toType + "\n");
     buf.append("correlationId=" + msg.correlationId + "\n");
     buf.append("replyToId=" + msg.replyToId + "\n");
+    if (msg.replyToName != null)
+      buf.append('(').append(msg.replyToName).append(')');
     buf.append("replyDestType=" + msg.replyToType + "\n");
     buf.append("deliveryCount=" + msg.deliveryCount + "\n");
     buf.append("denied=" + msg.redelivered + "\n");

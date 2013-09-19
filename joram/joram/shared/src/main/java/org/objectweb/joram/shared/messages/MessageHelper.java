@@ -46,7 +46,7 @@ public class MessageHelper {
     message.id = msgId;
     message.correlationId = correlationId;
     message.timestamp = System.currentTimeMillis();
-    message.setDestination(destId, destType);
+    message.setDestination(destId, null, destType);
     return message;
   }
 
