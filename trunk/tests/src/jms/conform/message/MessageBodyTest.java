@@ -170,6 +170,7 @@ public class MessageBodyTest extends PTPTestCase {
 		  content [3]=12;
 		  BytesMessage message= senderSession.createBytesMessage();
 		  message.writeBytes(content);
+		  message.reset();
 		  byte [] result=message.getBody(byte[].class);
 		  assertTrue (" get body result is not null ",result!=null);	 
 		  assertTrue (" Bytes Message body  content is the same as expected ",result[3]==12);	  
