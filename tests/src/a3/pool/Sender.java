@@ -59,7 +59,8 @@ public class Sender extends TestCase {
     
     String log = "server.log.0.1";
     assertFileExist(log);
-    assertTrue("The file \"" + log + "\" not contains \"The session is active but Read timed out\"", isFileContains(log, "The session is active but Read timed out"));
+    assertTrue("The file \"" + log + "\" not contains \"The session is active but Read timed out\"",
+               isFileContains(log, "The session is active (sending) but Read timed out"));
     endTest();
   }
   
