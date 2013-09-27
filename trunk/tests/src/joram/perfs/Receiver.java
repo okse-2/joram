@@ -52,6 +52,7 @@ public class Receiver extends BaseTest implements MessageListener {
     this.cnx = cnx;
     this.dest = dest;
 
+    this.cnx.setClientID("Receiver");
     transacted = Boolean.getBoolean("Transacted");
     durable = Boolean.getBoolean("SubDurable");
     dupsOk = Boolean.getBoolean("dupsOk");
@@ -96,7 +97,6 @@ public class Receiver extends BaseTest implements MessageListener {
     ConnectionFactory cf =  createConnectionFactory(baseclass);
     ((org.objectweb.joram.client.jms.ConnectionFactory)cf).getParameters().noAckedQueue = Boolean.getBoolean("noAckedQueue");
     Connection cnx = cf.createConnection();
-    cnx.setClientID("Receiver");
 
     Destination dest = null;
 
