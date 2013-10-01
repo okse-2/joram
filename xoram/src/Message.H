@@ -1,7 +1,7 @@
 /*
  * XORAM: Open Reliable Asynchronous Messaging
  * Copyright (C) 2006 CNES
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -140,6 +140,8 @@ class Message : Streamable {
 
   /** The message destination identifier. */
   char* toId;
+  /** The message destination name. */
+  char* toName;
   /** The message destination type. */
   byte toType;
 
@@ -147,6 +149,8 @@ class Message : Streamable {
   char* replyToId;
   /** <code>true</code> if the "reply to" destination is a queue. */
   byte replyToType;
+  /** The reply to destination name. */
+  char* replyToName;
 
   /** The correlation identifier field. */
   char* correlationId;
@@ -158,12 +162,20 @@ class Message : Streamable {
   char* jmsType;
 
   Properties* properties;
+  
+  /** true if compressed body.  */
+  boolean compressed;
+  
+  /** the message delivery time value. */
+  long long deliveryTime;
+  
+  /** The client connection identification */
+  char* clientID;
 
   void checkPropertyName(char* name) throw (MessageFormatException);
 
   const static short typeFlag = 0x0001;
   const static short replyToIdFlag = 0x0002;
-  const static short replyToTypeFlag = 0x0004;
   const static short propertiesFlag = 0x0008;
   const static short priorityFlag = 0x0010;
   const static short expirationFlag = 0x0020;

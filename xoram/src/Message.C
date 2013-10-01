@@ -1,7 +1,7 @@
 /*
  * XORAM: Open Reliable Asynchronous Messaging
  * Copyright (C) 2006 CNES
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -51,11 +51,16 @@ Message::Message() {
   redelivered = false;
   deliveryCount = 0;
   toId = (char*) NULL;
+  toName = (char*) NULL;
   replyToId = (char*) NULL;
+  replyToName = (char*) NULL;
   correlationId = (char*) NULL;
   jmsType = (char*) NULL;
   properties = (Properties*) NULL;
   body = (byte*) NULL;
+  compressed = false;
+  deliveryTime = 0;
+  clientID = (char*) NULL;
   //replyToType = Destination::NOTYPE;
   if(DEBUG)
     printf("<= Message():\n");
@@ -190,6 +195,7 @@ boolean Message::getRedelivered() {
 
 void Message::setReplyTo(Destination* replyTo) {
   replyToId = replyTo->getUID();
+  replyToName = replyTo->getName();
   replyToType = replyTo->getType();
 }
 
@@ -391,9 +397,13 @@ Message* Message::clone() {
   clone->toId = toId;
   clone->toType = toType;
   clone->replyToId = replyToId;
+  clone->replyToName = replyToName;
   clone->replyToType = replyToType;
   clone->correlationId = correlationId;
   clone->jmsType = jmsType;
+  clone->compressed = compressed;
+  clone->deliveryTime = deliveryTime;
+  clone->clientID = clientID;
 
   if (body != (byte*) NULL) {
     //    throw NotYetImplementedException();
@@ -422,16 +432,18 @@ Message* Message::clone() {
  * @param os the stream to write the object to
  */
 void Message::writeTo(OutputStream* os) throw (IOException) {
-  
   os->writeString(id);
   os->writeString(toId);
+  os->writeString(toName);
   os->writeByte(toType);
   os->writeLong(timestamp);
-  
+  os->writeBoolean(compressed);
+  os->writeLong(deliveryTime);
+  os->writeString(clientID);
+
   short b = 0;
   b = b | (type != SIMPLE ? typeFlag : 0);
   b = b | (replyToId != NULL ? replyToIdFlag : 0);
-  b = b | (replyToType != 0 ? replyToTypeFlag : 0);
   b = b | (properties != NULL ? propertiesFlag : 0);
   b = b | (priority != 4 ? priorityFlag : 0);
   b = b | (expiration != 0 ? expirationFlag : 0);
@@ -444,8 +456,11 @@ void Message::writeTo(OutputStream* os) throw (IOException) {
   os->writeShort(b);
   
   if (type != SIMPLE) { os->writeInt(type); }					// AF: Should be a byte
-  if (replyToId != NULL) { os->writeString(replyToId); }
-  if (replyToType != 0) { os->writeByte(replyToType); }
+  if (replyToId != NULL) { 
+    os->writeString(replyToId); 
+    os->writeString(replyToName);
+    os->writeByte(replyToType);
+  }
   if (properties != NULL) { os->writeProperties(properties); }			// Should be null !!
   if (priority != 4) { os->writeInt(priority); }				// AF: Should be a byte
   if (expiration != 0) { os->writeLong(expiration); }
@@ -463,18 +478,24 @@ void Message::writeTo(OutputStream* os) throw (IOException) {
  * @param is the stream to read data from in order to restore the object
  */
 void Message::readFrom(InputStream* is) throw (IOException) {
-
   is->readString(&id);
   is->readString(&toId);
+  is->readString(&toName);
   is->readByte(&toType);
   is->readLong(&timestamp);
+  is->readBoolean(&compressed);
+  is->readLong(&deliveryTime);
+  is->readString(&clientID);
   
   short b;
   is->readShort(&b);
-  
+
   if (b & typeFlag) { is->readInt(&type); }
-  if (b & replyToIdFlag) { is->readString(&replyToId); }
-  if (b & replyToTypeFlag) { is->readByte(&replyToType); }
+  if (b & replyToIdFlag) { 
+    is->readString(&replyToId); 
+    is->readString(&replyToName); 
+    is->readByte(&replyToType); 
+  }
   if (b & propertiesFlag) { properties = is->readProperties(); }
   if (b & priorityFlag) { is->readInt(&priority); }
   if (b & expirationFlag) { is->readLong(&expiration); }

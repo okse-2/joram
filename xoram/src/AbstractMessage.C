@@ -1,7 +1,7 @@
 /*
  * XORAM: Open Reliable Asynchronous Messaging
  * Copyright (C) 2006 CNES
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -750,6 +750,10 @@ ConsumerSubRequest::~ConsumerSubRequest() {
     delete[] selector;
     selector = (char*) NULL;
   }
+  if (clientID != (char*) NULL) {
+    delete[] clientID;
+    clientID = (char*) NULL;
+  }
 }
 
 /** Sets the subscription name. */
@@ -809,6 +813,7 @@ void ConsumerSubRequest::writeTo(OutputStream* os) throw(IOException) {
   if (os->writeBoolean(noLocal) == -1)  throw IOException();
   if (os->writeBoolean(durable) == -1)  throw IOException();
   if (os->writeBoolean(asyncSub) == -1)  throw IOException();
+  if (os->writeString(clientID) == -1)  throw IOException();
 }
 
 /**
@@ -824,6 +829,7 @@ void ConsumerSubRequest::readFrom(InputStream* is) throw(IOException) {
   if (is->readBoolean(&noLocal) == -1)  throw IOException();
   if (is->readBoolean(&durable) == -1)  throw IOException();
   if (is->readBoolean(&asyncSub) == -1)  throw IOException();
+  if (is->readString(&clientID) == -1)  throw IOException();
 }
 
 // ######################################################################
