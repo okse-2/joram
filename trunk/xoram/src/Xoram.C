@@ -1,6 +1,6 @@
 /*
  * XORAM: Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2006 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -187,10 +187,14 @@ class TcpChannel : public Channel {
     in = new InputStream();
 
     // Joram magic number: should be defined in another way..
-    byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 8, 58};
+    byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 9, 59};
 
     // Writes the Joram magic number
     if (out->writeBuffer(magic, 8) ==-1) throw IOException();
+    
+    // Writes the ack mode (noAckedQueue)
+    if (out->writeBoolean(false) ==-1) throw IOException();
+    
     // Writes the current date
     long long date = currentTimeMillis();
     if (out->writeLong(date) == -1) throw IOException();

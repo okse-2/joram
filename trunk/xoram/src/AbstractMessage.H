@@ -1,7 +1,7 @@
 /*
  * XORAM: Open Reliable Asynchronous Messaging
  * Copyright (C) 2006 CNES
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -79,12 +79,14 @@ class AbstractMessage : Streamable {
     SESS_CREATE_DEST_REQUEST = 29,
 //    SESS_CREATE_TQREQUEST = 29,
     XXX_CREATE_TTREQUEST = 30,
-    TEMP_DEST_DELETE_REQUEST = 31
+    TEMP_DEST_DELETE_REQUEST = 31,
 //    XA_CNX_COMMIT = 32,
 //    XA_CNX_PREPARE = 33,
 //    XA_CNX_RECOVER_REPLY = 34,
 //    XA_CNX_RECOVER_REQUEST = 35,
 //    XA_CNX_ROLLBACK = 36
+//    ADD_CLIENTID_REQUEST = 37,
+//    ADD_CLIENTID_REPLY = 38   
   };
 
   boolean instanceof(int classid);
@@ -571,6 +573,8 @@ class ConsumerSubRequest : public AbstractRequest {
 
   /** <code>true</code> if the subscription is asynchrone. */
   boolean asyncSub;
+
+  char* clientID;
 
  public:
   /**
