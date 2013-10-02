@@ -6673,4 +6673,56 @@
     </antcall>
   </target>
 
+  <target name="jms2.test9" depends="init.a3props,compile"
+          description=" --> Test durable consumer">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test9"/>
+      <param name="className" value="joram.jms2.Test9"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="jms2.test10" depends="init.a3props,compile"
+          description=" --> Call JMSContext.acknowledge() on a closed session which is illegal">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test10"/>
+      <param name="className" value="joram.jms2.Test10"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="jms2.test11" depends="init.a3props,compile"
+          description=" --> Testing JMSContext.unsubscribe(String) for InvalidDestinationRuntimeException">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test11"/>
+      <param name="className" value="joram.jms2.Test11"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="jms2.test12" depends="init.a3props,compile"
+          description=" --> Test start and stop of JMSContext">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.test12"/>
+      <param name="className" value="joram.jms2.Test12"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
 </project>
