@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -260,7 +260,8 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     
     try {
       consumerCnx.stop();
-      consumer.setMessageListener(null);
+      if (consumer != null)
+        consumer.setMessageListener(null);
       unsetConsumer();
     } catch (JMSException exc) {}
     listener = false;
