@@ -103,6 +103,7 @@ public class ConnectionClose2 extends TestCase {
               try {
                 TextMessage msg = session.createTextMessage("hello");
                 producer.send(msg);
+                Thread.sleep(50);
               } catch (Exception exc) {
                 assertTrue("unexpected exception: " + exc,
                     exc instanceof javax.jms.IllegalStateException);
