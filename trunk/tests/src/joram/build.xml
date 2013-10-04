@@ -6565,8 +6565,9 @@
     <antcall target="jms2.test4"/>
     <antcall target="jms2.test5"/>
     <antcall target="jms2.test6"/>
-    <antcall target="jms2.test7"/>
+    <!-- antcall target="jms2.test7"/ -->
     <antcall target="jms2.test8"/>
+    <!-- antcall target="jms2.test9"/ -->
   </target>
 
   <target name="jms2.test1" depends="init.a3props,compile"
