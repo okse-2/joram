@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+  <id>samples</id>
+  <includeBaseDirectory>false</includeBaseDirectory>
+
+  <formats>
+    <format>zip</format>
+    <!-- <format>tar.gz</format> -->
+  </formats>
+
+  <fileSets>
+    <fileSet>
+      <directory>../samples</directory>
+      <outputDirectory>/samples</outputDirectory>
+      <excludes>
+        <exclude>**/*.class</exclude>
+        <exclude>**/run/**</exclude>
+        <exclude>**/ship/**</exclude>
+        <exclude>**/target/**</exclude>
+        <exclude>**/.svn/**</exclude>
+      </excludes>
+    </fileSet>
+  </fileSets>
+
+  <dependencySets>
+    <!-- ship/bundle -->
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.spec.ee:ow2-jms-2.0-spec</include>
+        <include>org.objectweb.joram:jcup</include>
+        <include>org.ow2.joram:joram-shared</include>
+        <include>org.ow2.joram:joram-mom-core</include>
+        <include>org.ow2.joram:joram-mom-amqp</include>
+        <include>org.ow2.joram:joram-client-jms</include>
+        <include>org.ow2.joram:a3-common</include>
+        <include>org.ow2.joram:a3-rt</include>
+        <include>org.ow2.joram:a3-osgi</include>
+        <include>org.ow2.joram:jndi-shared</include>
+        <include>org.ow2.joram:jndi-server</include>
+        <include>org.ow2.joram:jndi-client</include>
+        <include>org.ow2.jonas.osgi:monolog</include>
+        <include>org.ow2.joram:joram-mom-extensions-amqp</include>
+        <include>org.ow2.joram:joram-mom-extensions-ftp</include>
+        <include>org.ow2.joram:joram-mom-extensions-jmsbridge</include>
+        <include>org.ow2.joram:joram-mom-extensions-mail</include>
+        <include>org.ow2.joram:joram-mom-extensions-collector</include>
+        <include>org.ow2.joram:joram-mom-extensions-scheduler</include>
+        <include>org.ow2.joram:joram-tools-jasp</include>
+        <include>org.apache.felix:org.apache.felix.shell</include>
+        <include>org.apache.felix:org.apache.felix.shell.remote</include>
+        <include>org.apache.felix:org.apache.felix.shell.tui</include>
+      </includes>
+      <unpack>false</unpack>
+    </dependencySet>
+
+    <!-- ship/lib -->
+    <dependencySet>
+      <outputDirectory>/ship/lib</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>javax.activation:activation</include>
+        <include>org.ow2.spec.ee:ow2-connector-1.5-spec</include>
+        <include>org.ow2.jonas.osgi:monolog</include>
+        <include>javax.mail:mail</include>
+        <include>org.ow2.joram:joram-client-jca</include>
+      </includes>
+      <unpack>false</unpack>
+    </dependencySet>
+
+    <!-- ship/bin -->
+    <dependencySet>
+      <outputDirectory>/ship/bin</outputDirectory>
+      <outputFileNameMapping>felix.jar</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.apache.felix:org.apache.felix.main</include>
+      </includes>
+      <unpack>false</unpack>
+    </dependencySet>
+
+    <!-- ship/conf -->
+    <dependencySet>
+      <outputDirectory>/ship/conf</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:conf</include>
+      </includes>
+      <unpack>true</unpack>
+    </dependencySet>
+
+    <!-- ship/licenses -->
+    <dependencySet>
+      <outputDirectory>/ship/licenses</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.ow2.joram:licenses</include>
+      </includes>
+      <unpack>true</unpack>
+    </dependencySet>
+  </dependencySets>
+</assembly>
