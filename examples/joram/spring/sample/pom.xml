@@ -28,15 +28,20 @@
   </build>
   
   <properties>
-    <joram.version>5.9.0-SNAPSHOT</joram.version>
+    <joram.version>5.9.1-SNAPSHOT</joram.version>
     <spring.version>3.1.2.RELEASE</spring.version>
   </properties>
   
   <dependencies>
-   <dependency>
-      <groupId>org.apache.geronimo.specs</groupId>
-      <artifactId>geronimo-jms_1.1_spec</artifactId>
-      <version>1.1.1</version>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jms-2.0-spec</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jta-1.1-spec</artifactId>
+      <version>1.0.13</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.joram</groupId>
