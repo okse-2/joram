@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -296,11 +296,14 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
     } else {
       cnx = cnxFact.createConnection();
     }
-    cnx.setExceptionListener(this);
 
-    if (clientID != null) {
+    if (clientID == null) {
+      cnx.setClientID("joramBridge_" + name + "_" + AgentServer.getServerId());
+    } else {
       cnx.setClientID(clientID);
     }
+    
+    cnx.setExceptionListener(this);
 
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "doConnect: cnx=" + cnx);

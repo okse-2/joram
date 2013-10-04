@@ -644,13 +644,16 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
       producerCnx = ((XAConnectionFactory) cnxFact).createXAConnection();
       consumerCnx = ((XAConnectionFactory) cnxFact).createXAConnection();
     }
-    producerCnx.setExceptionListener(this);
-    consumerCnx.setExceptionListener(this);
 
-    if (clientID != null) {
+    if (clientID == null) {
+      consumerCnx.setClientID("joramBridgeCons_" + agentId);
+    } else {
       producerCnx.setClientID(clientID);
       consumerCnx.setClientID(clientID);
     }
+    
+    producerCnx.setExceptionListener(this);
+    consumerCnx.setExceptionListener(this);
 
     producerCnx.start();
     consumerCnx.start();
@@ -689,16 +692,19 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
       producerCnx = cnxFact.createConnection();
       consumerCnx = cnxFact.createConnection();
     }
-    producerCnx.setExceptionListener(this);
-    consumerCnx.setExceptionListener(this);
 
-    if (clientID != null) {
+    if (clientID == null) {
+      consumerCnx.setClientID("joramBridgeCons_" + agentId);
+    } else {
       producerCnx.setClientID(clientID);
       consumerCnx.setClientID(clientID);
     }
     
+    producerCnx.setExceptionListener(this);
+    consumerCnx.setExceptionListener(this);
+    
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "doConnect: cnx=" + producerCnx + ", consumerCnx=" + consumerCnx);
+      logger.log(BasicLevel.DEBUG, "doConnect: producerCnx=" + producerCnx + ", consumerCnx=" + consumerCnx);
     
     producerSession = producerCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
     producer = producerSession.createProducer(dest);
