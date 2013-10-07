@@ -56,6 +56,11 @@
     	<artifactId>stompconnect</artifactId>
     </dependency>
   </dependencies>
-  <modules>
-  </modules>
+  
+  <repositories>
+    <repository>
+      <id>central</id>
+      <url>http://repo.maven.apache.org/maven2</url>
+    </repository>
+  </repositories>
 </project>
