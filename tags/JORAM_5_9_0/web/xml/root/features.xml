@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+	<properties>
+		<author email="joram-team@ow2.org">JORAM team</author>
+		<title>Features</title>
+		<filename>features.xml</filename>
+		<pathtoroot>.</pathtoroot>
+	</properties>
+
+	<body>
+
+		<s1 name="JORAM Features">
+
+			<table border="0" width="100%">
+				<tr>
+					<td align="left" rowspan="2">
+						<img src="images/joram.png" alt="JORAM Logo" height="140"
+							width="300" border="0" hspace="2" />
+					</td>
+					<td align="center"></td>
+					<td align="right">
+						<script type="text/javascript"
+							src="http://www.ohloh.net/p/4238/widgets/project_thin_badge.js"></script>
+					</td>
+				</tr>
+				<tr>
+					<td align="center"></td>
+					<td align="left">
+						<p>
+							Here's a listing of the main features available in JORAM.
+							<br></br>
+							For a full description of all features and how to use them, please consult the
+							<a href="http://joram.ow2.org/doc/index.html">documentation</a>.
+						</p>
+					</td>
+				</tr>
+			</table>
+
+			<s2 name="General">
+
+				<p>
+					JORAM fully supports <strong>JMS 1.1</strong> and <strong>Java EE 5</strong> with support
+					for transient, persistent, transactional and XA messaging (JORAM provide a fully functional
+					XAResource implementation, JORAM sessions can then be enlisted in any JTA transaction acording
+					to the normal JTA semantics).
+				</p>
+				<p>
+					All the features described in the JMS 1.1 specification are provided by JORAM.
+				</p>
+				<p>
+					JORAM is an <strong>open-source</strong> software component released under the
+					<strong>LGPL</strong> license. JORAM availability on a wide range of Java-based
+					platforms - from J2EE<sup>TM</sup> to J2ME<sup>TM</sup> allows your ownership
+					investment to be rationalized over your numerous heterogeneous systems and
+					Internet devices.
+				</p>
+				<p>
+					JORAM is an <strong>all-in-one</strong> mature messaging solution, it includes many features
+					that are missing in competitive offerings and it does not require third-party products, it
+					provides a built-in atomic storage and a distributed JNDI server.
+					JORAM is shipped with multiples transport implementations: an InVM transport implementation
+					for when both the client(s) and server are in the same Java virtual machine, and also a TCP based
+					implementation when clients and server are remote.
+				</p>
+				<p>
+					In default configuration it only requires standard JDK classes to run.
+				</p>
+
+			</s2>
+
+			<s2 name="Architecture">
+
+				<p>
+				<strong>JCA adaptor and seamless integration into Application Server.</strong><br></br>
+				JORAM provides a fully functional JCA adaptor that can be used in any JEE compliant application
+				server to integrate JORAM so it can be used for consuming messages via Message Driven Beans (MDBs),
+				or for sending messages in Enterprise JavaBeans or servlets.<br></br>
+				JORAM can easily be installed as the JMS provider of any JCA compliant Application Server. Bu default,
+				JORAM is embedded in JOnAS Application Server.<br></br>
+				Simple instructions are provided in the distribution showing you how to do this with popular Application Server.
+				</p>
+				
+				<p>
+				<strong>Standalone server</strong><br></br>
+				JORAM can also be run as a 100% standalone messaging server with no dependencies on Application Server.
+				This is of interest if you want messaging, but don't want an application server.
+				</p>
+
+				<p>
+				<strong>OSGi Design</strong><br></br>
+				Joram is  designed with an OSGiTM based services architecture to provide a dynamically adaptable
+				messaging server:
+				</p>
+				<ul>
+					<li>The Joram server can be launched as a set of OSGi bundles (it is always possible to launch
+					the server as a classic Java program).</li>
+					<li>Additional services can be started, stopped, reconfigured: Command line interface,
+					Web console, etc.</li>
+				</ul>
+
+				<p>
+				<strong>Embedded server.</strong><br></br>
+				JORAM can be configured as a set of Plain Old Java Objects, it can therefore be embedded in any
+				third party product and instantiated directly.
+				</p>
+
+				<p>
+				<strong>Configurable Client/Server communication system.</strong><br></br>
+				The JORAM Client/Server transport is configurable and extensible.
+				<br></br>
+				JORAM is shipped with multiples transport implementations:
+				</p>
+				<ul>
+					<li><em>In-VM transport</em> - If client(s) and servers are running in the same Java
+					virtual machine, then can be configured to use the InVM tranport which creates direct connections
+					in code.
+					</li>
+					<li><em>TCP or SSL transport</em> - Clients and servers can be configured to communicate using
+					standard TCP or encrypted sockets (using the Secure Sockets Layer - SSL).
+					</li>
+				</ul>
+
+				<p>
+				<strong>Very high performance journal for message persistence.</strong><br></br>
+				JORAM provides message persistence using its own built-in high performance journal.
+				<br></br>
+				The JORAM persistence system is completely pluggable, it defines a Service Provider Interface (SPI)
+				that you can implement in order to plug-in a new implementation.
+				<br></br>
+				JORAM is shipped with additionnal persistence modules using relational databases for example.
+				</p>
+
+				<p>
+				<strong>Fully pluggable transport system for communication between servers.</strong><br></br>
+				The JORAM low level transport is completely pluggable, it defines a Service Provider Interface (SPI)
+				that you can implement in order to plug-in a new provider.
+				<br></br>
+				JORAM is shipped with multiples transport implementations:
+				</p>
+				<ul>
+					<li><em>TCP transport</em> - Servers can be configured to communicate using standard
+					TCP sockets.</li>
+					<li><em>SSL transport</em> - Servers can be configured to communicate through encrypted
+					TCP sockets using the Secure Sockets Layer (SSL).</li>
+					<li><em>HTTP(S) transport</em> - Servers can be configured to communicate messaging traffic
+					tunnelling over HTTP(S) requests and responses. This can be useful when you are running through a
+					firewall.</li>
+					<li><em>UDP transport</em> - Servers can be configured to communicate using UDP sockets.</li>
+				</ul>
+
+			</s2>
+
+			<s2 name="Flexible distributed architecture, Load-Balancing and availability">
+
+				<p>
+				<strong>Scalability and Distribution.</strong><br></br>
+				The combination of the Store and Forward facility with the use of a highly reliable MOM
+				provides 100% guaranteed message delivery despite network transient failures or disconnected
+				mode.	The fully distributed message broker architecture enables a high level of scalability
+				for JORAM systems.
+				</p>
+				
+				<p>
+				<strong>Clustered destinations.</strong><br></br>
+				A destination, queue or topic, might be distributed among many servers. Such a logical destination
+				is made of physical destination representatives on different servers. Such destinations allow both
+				a higher degree of availability as well as bandwidth reduction on a wide area network basis.
+				<br></br>
+				Whereas a regular destination totally depends on the server it is deployed on, a clustered destination
+				still works even when some of the servers it is deployed on are down.
+				<br></br>
+				This feature also allows to spread the inherent load of the transport and processing of messages on
+				different servers, reducing the CPU load of each server and the network traffic between servers.
+				</p>
+				
+				<p>
+				<strong>Master/Slave high availability server.</strong><br></br>
+				If you don't have an existing HA infrastructure, the JORAM Master/Slave configuration is a
+				way for providing high availability and fault tolerance to your messaging solution.
+				</p>
+				
+				<p>
+				<strong>Replication of data store and Failover via shared file system.</strong><br></br>
+				The data store of a live server can be replicated to a backup server, so in event of failure of
+				the live server, the data is available immediately for a backup server. The backup server can be
+				configured to start from the replicated data store in case of failure of backup server, thus making
+				the service available.
+				</p>
+			
+			</s2>
+
+			<s2 name="Management">
+
+				<p>
+				Joram includes a distributed management and deployment infrastructure that will dramatically
+				simplify your administration operations.
+				It provides authentication, authorization, and encryption support that ensure the protection of
+				your messages.
+				</p>
+
+				<p>
+				<strong>JMX support.</strong><br></br>
+				JORAM has extensive support for JMX allowing you to monitor and control the behavior of the
+				broker through standard JMX Management facilities.
+				</p>
+
+				<p>
+				<strong>Administration API and management over JMS connection.</strong><br></br>
+				The management API is available using a standard JMS connection, by sending and consuming messages
+				to and from a special JMS destination. It allows to remotely manage your distributed JORAM configuration
+				through a simple JMS connection.
+				<br></br>
+				This is over and above the standard functionality available in the JMS 1.1 API which does not define
+				a management API.
+				</p>
+				
+				<p>
+				<strong>Programmatic creation of connection factories and JMS destinations.</strong><br></br>
+				Connection factories, JMS queues and topics can be created programmatically on client side.
+				<br></br>
+				You are not limited to looking up administered objects via JNDI as per JMS. They can be instantiated
+				directly allowing you to remove JNDI from the equation if you do not want to use it.
+				</p>
+
+				<p>
+				<strong>XML based scripts for deployment and configuration.</strong><br></br>
+				Joram defines a XML scripting language for configuring your application. this allows the deployment
+				of all the administered objects of your application without writing a line of code.
+				</p>
+
+				<p>
+				<strong>Administration console.</strong><br></br>
+				A user friendly interface based on GWT (Google Web Toolkit) is now available.
+				</p>
+
+				<p>
+				<strong>Management destinations.</strong><br></br>
+				Management destinations are special destinations producing monitoring messages like number of
+				destinations, number of messages in a subscription, etc. You can subscribe to them using the normal
+				JMS semantics.
+				</p>
+
+				<p>
+				<strong>Message counters and statistics.</strong><br></br>
+				JORAM message counters allow you to see a history of the messages that arrived in yours destinations
+				or subscription over time. It defines several metrics above and beyond a simple message count.
+				</p>
+
+			</s2>
+
+			<s2 name="Specialized destinations">
+
+				<p>
+				<strong>Hierarchic topics.</strong><br></br>
+				Also known as "topic wild-cards", the idea is to build a hierarchical structure of topics.
+				<br></br>
+				The interest of such a structure is to allow a subscriber to specifically choose the type
+				of information it is interested in, by allowing it to subscribe to the corresponding subtopic.
+				For example you could create a topic subscriber on <em>news.sports</em> then it will receive all
+				messages sent to <em>news.sports.tennis</em> and also <em>news.sports.soccer</em>.
+				<br></br>
+				To be noted, a hierarchy may be spread over many servers, such a distributed architecture
+				introduces flexibility and availability.
+				</p>
+
+				<p>
+				<strong>Dead message queue.</strong><br></br>
+				A dead message queue is a JMS Queue where a message gets sent when it can't be handled normally by
+				the system. A dead message is a message considered as undeliverable for various reasons, for example:
+				</p>
+				<ul>
+					<li>The message can't be delivered after X number of retries.</li>
+					<li>The message expires before it is delivered to the client. Not only does JORAM guarantee it
+					will never deliver an expired message to a consumer, it also has a configurable garbage collector
+					that inspects queues in memory, weeding out expired messages and sending to expiry queues if
+					appropriate.
+					</li>
+					<li>The target destination does not exist or the sender does not have the writing right
+					on this target destination.</li>
+					<li>The maximum number of messages in the queue has been reached or the message has been
+					explicitly deleted on the destination or subscription (a maximum size for a queue or a
+					subscription can be configured).
+					</li>
+				</ul>
+				<p>
+				Dead message queue are highly configurable in JORAM - they can be configured either globally or
+				individually (User, Destination or subscription).
+				</p>
+
+				<p>
+				<strong>Scheduled queue.</strong><br></br>
+				A scheduled queue allows to specify time in future when you want message delivered. The message
+				won't get delivered until then.
+				</p>
+
+				<p>
+				<strong>Pluggable acquisition / distribution bridge.</strong><br></br>
+				Queue and Topic implements an extension framework for data acquisition (create JMS message from
+				external data), and data distribution (create external data from JMS message). JORAM is shipped
+				with various acquisition / distribution modules:
+				</p>
+				
+				<ul>
+					<li>JMS acquisition / distribution (JMS bridge), 100% once and only once delivery is
+					guaranteed with a JMS bridge without having to resort to more heavyweight solutions
+					such as JTA (XA). The last implementation (5.5) allows load-balancing and fail-over
+					through multiples JMS providers.</li>
+					<li>AMQP acquisition / distribution (AMQP bridge since 5.4), the implementation allows
+					load-balancing and fail-over through multiples AMQP providers with a 100% once and only
+					once delivery guaranteed.</li>
+					<li>Mail acquisition / distribution,</li>
+					<li>URL acquisition,</li>
+					<li>JMX acquisition,</li>
+					<li>FTP acquisition / distribution.</li>
+				</ul>
+
+			</s2>
+
+			<s2 name="Interoperability and extensibility">
+
+				<p>
+				<strong>Support for multi-language clients.</strong><br></br>
+				Joram offers a "JMS like" API for C and C++ clients, additionnaly JORAM can be accessed by clients
+				in many different languages by using Stomp Connect.
+				<br></br>
+				JORAM supports the AMQP v0.9.1 specification, later releases of JORAM will provide full AMQP v1 support
+				allowing access natively by clients written in many different languages.
+				</p>
+
+				<p>
+				<strong>JMS bridge and others.</strong><br></br>
+				This allows you to bridge between JORAM and any other JMS 1.1 compliant provider.
+				This generic gateway allows JORAM applications to interoperate seamlessly with foreign applications
+				running on any JMS compliant messaging service. Additional gateways are also available with AMQP, the
+				SMTP mail system and with the FTP file transfer.
+				Bridges are highly configurable.
+				</p>
+
+				<p>
+				<strong>Extensibility.</strong><br></br>
+				Queue and Topic implement an extension framework for data acquisition (create JMS message from
+				external data), handling, transformation, and data distribution (create external data from JMS message).
+				The agent API, available besides the pure JMS API, allows the rapid development of complex distributed
+				applications while ensuring full interoperability with JMS applications.
+				</p>
+
+
+			</s2>
+
+			<s2 name="Miscellaneous">
+
+				<p>
+				<strong>Transparent auto-reconnection of JMS clients.</strong><br></br>
+				Clients can be configured to auto-reconnect to servers when they become unavailable, e.g. due to
+				a temporary network problem. Reconnection can be configured with retry-interval, it includes an
+				heart-beat mechanism to detect network failures. 
+				<br></br>
+				Needed data is safely resent in case of failure without running the risk of lost or duplicate
+				messages.
+				</p>
+
+				<p>
+				<strong>Automatic reconnection for inbound connections in JCA Resource Adapter.</strong><br></br>
+				Inbound connections will be destroyed and reconnected, if the connection that receives the
+				messages fails. This mechanism allows transparent fail-over for MDBs when the JMS provider
+				become unavailable, e.g. due to a temporary network problem or perhaps the server is being
+				rebooted or has crashed.
+				</p>
+	
+				<p>
+				<strong>Configurable message buffering.</strong><br></br>
+				Consumers can be configured to buffer messages on the client side to give optimal performance.
+				This can also be disabled to give deterministic distribution of messages in a queue with multiple
+				consumers.
+				</p>
+
+				<p>
+				<strong>Producer flow control.</strong><br></br>
+				JORAM provides a flow control mechanism to prevent clients overwhelming a server with messages.
+				On a per connection basic you can specify the maximum rate, that a producer is allowed to send
+				messages at.
+				</p>
+				
+				<p>
+				<strong>Implicit acknowledge mode.</strong><br></br>
+				With implicit acknowledge mode, messages are acked before delivery, thus avoiding having to ack
+				from the client side and reducing the overall traffic on the wire.
+				</p>
+				
+				<p>
+				<strong>Non blocking sends.</strong><br></br>
+				JORAM can be configured to either send messages blocking or non blocking. With a blocking send (default)
+				the call to send() will not return until the message has reached the server.
+				</p>
+
+				<p>
+				<strong>Pluggable JMS and MOM interceptor.</strong><br></br>
+				JORAM defines an interceptor mechanism allowing to transparently process incoming and outgoing
+				messages through JMS sessions.<br></br>
+				A similar interception mechanism is available for processing messages in the MOM. Interceptors can
+				be located on destinations and on connection in/out channels.
+				</p>
+
+			</s2>
+
+			<s2 name="Performances">
+
+				<p>JORAM performances are dependent on the target architecture: hardware (CPU, Memory, Disk),
+				network, operating system and JVM.<br></br>
+				They also differ depending on many factors:</p>
+				<ul>
+					<li>the type of JMS destination used: Queue or Topic,</li>
+					<li>the communication link between the client and the server: In-VM, TCP, etc</li>
+					<li>the quality of service requested and the size of messages,</li>
+					<li>the number of clients: producers and consumers.</li>
+				</ul>
+				<p>When running the JORAM server on a laptop (Intel Core i7 1.8Ghz) and a single producer and
+				consumer client in separate VMs on the same box, using a single topic we got around 25,000
+				messages per second using JMS messages with a payload of 500 bytes.<br></br>
+				To obtain an indication of what kind of performance you can expect from JORAM, the distribution
+				includes a set of tests you can run easily on your hardware architecture (a simple tutorial
+				shows the use of these tests <a href="doc/tutorials.html">here</a>).
+				</p>
+
+			</s2>
+
+		</s1>
+	</body>
+</document>
