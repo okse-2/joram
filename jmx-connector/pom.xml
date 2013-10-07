@@ -7,12 +7,12 @@
 		<dependency>
 			<groupId>org.ow2.joram</groupId>
 			<artifactId>joram-client-jms</artifactId>
-			<version>5.9.1-SNAPSHOT</version>
+			<version>5.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.joram</groupId>
 			<artifactId>jndi-client</artifactId>
-			<version>5.9.1-SNAPSHOT</version>
+			<version>5.9.0</version>
 		</dependency>
 	</dependencies>
 

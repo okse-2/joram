@@ -21,7 +21,7 @@
   </parent>
     
   <properties>
-    <joram.version>5.9.1-SNAPSHOT</joram.version>
+    <joram.version>5.9.0</joram.version>
     <gwt.version>2.4.0</gwt.version>
     <smartgwt.version>2.5-patch</smartgwt.version>
     <gwt-log.version>3.1.0</gwt-log.version>
