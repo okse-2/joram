@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.jms.CompletionListener;
 import javax.jms.Destination;
+import javax.jms.IllegalStateException;
+import javax.jms.IllegalStateRuntimeException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.InvalidDestinationRuntimeException;
 import javax.jms.JMSException;
@@ -103,6 +105,8 @@ public class JMSProducer implements javax.jms.JMSProducer {
       throw new MessageFormatRuntimeException(e.getMessage());
     } catch (InvalidDestinationException e) {
       throw new InvalidDestinationRuntimeException(e.getMessage());
+    } catch (IllegalStateException e) {
+      throw new IllegalStateRuntimeException(e.getMessage());
     } catch (JMSException e) {
       throw new JMSRuntimeException(e.getMessage());
     }
