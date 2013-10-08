@@ -13,6 +13,77 @@
   <body>
     <s1 name="JORAM History">
 
+      <s2 name="October 2, 2013: JORAM 5.9.0 release is available.">
+      <p>This release introduces many improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Implementation of JMS 2.0 specification:<ul>
+            <li>Open-source implementation of new API.</li>
+            <li>Implementation of the updated specification.</li>
+          </ul>
+          All functions of the new JMS 2.0 specification are now implemented except the shared subscriptions.
+          Currently Joram succeeds 98% of the compliance tests for the specification 2.0.
+        </li>
+        <li>An significant work to optimize the performances, among other things:<ul>
+            <li>A new marshalling framewwork.</li>
+            <li>An optimized handling of connections and marshalling.</li>
+            <li>Optional message compression.</li>
+          </ul>
+        </li>
+        <li>A Xoram component (C/C++ client API), corrected and updated.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>It is tagged in SVN (JORAM_5_9_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+
+      <s2 name="April 17, 2013: Have fun using Joram on Raspberry PI with Java 8.">
+      <p>Joram requires very few resources to run, this simple tutorial shows how to launch
+      a Joram server on a Raspberry PI and test it.</p>
+      <ul>
+        <li>First you need a <a href="http://www.raspberrypi.org/">Raspberry PI</a> with Java 8, you can
+        find documentation instructions to setup JDK 8 on a Raspberry Pi device
+        <a href="http://jdk8.java.net/fxarmpreview/javafx-arm-developer-preview.html">here</a>.
+        </li>
+        <li>Second download a <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/Releases/release/target/joram-release-5.9.0-SNAPSHOT.zip">snapshot</a>
+        of Joram's distribution, then unzip it on your Raspberry PI.
+        </li>
+        <li>Third, follow the tutorial instructions : <a href="doc/tutorials/raspberry/raspberry.htm">here</a>.</li>
+      </ul>
+      </s2>
+   
+      <s2 name="January 14 2013: JORAM 5.8.1 maintenance release is available.">
+      <p>This release introduces somes improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Handles connection close when transmitting large messages between servers (JORAM-62).</li>
+        <li>Best handle of JMS connection loss (JORAM-84).</li>
+        <li>Removes useless connection cleaning tasks (JORAM-87).</li>
+        <li>Unsubscribe Connection and Session MBeans to avoid memory leak (JORAM-99).</li>
+        <li>Fixes potential bug with the cleaning mechanism of client context in the MOM (JORAM-68).</li>
+        <li>Factorizes the client timer for any JMS connection (JORAM-69).</li>
+        <li>Adds syncExceptionOnFull option (JORAM-101).</li>
+        <li>Spring intégration and OSGi configuration (DnD).</li>
+      </ul>
+      <p>This version is tagged in SVN (JORAM_5_8_1) and is available in Maven repository.</p>
+      <p>The complete list of changes can be viewed either in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+      
+      <s2 name="October 24, 2012: Optimal JORAM performance reports.">
+      <p>The <a href="http://www.scalagent.com/en/mqperf-69/produits-70/presentation-370">MQPerf</a> service
+      helps you to understand the behavior of your application using Joram, and enables you to find out Joram
+      optimal performances on your own system, without paying the necessary cost in terms of skill development
+      and work load.</p>
+       
+      <p><a href="http://www.scalagent.com/en/mqperf-69/produits-70/presentation-370">MQPerf</a> is very easy to
+      execute, it requires only 5 mns of your time to get a free performance report. Please have a look at this
+      service at  <a href="http://www.scalagent.com/en/mqperf-69/produits-70/presentation-370">ScalAgent D.T.</a>,
+      test it as much as you want and let us know how you like it. You may also use our new
+      <a href="http://www.scalagent.com/forum/">forum</a>, dedicated to MQPerf, for any question about this
+      service.</p>
+      </s2>
+
       <s2 name="October 23, 2012: JORAM 5.8.0 release is available.">
       <p>This release introduces many improvements and bug fixes, essentially:</p>
       <ul>

@@ -11,6 +11,47 @@
   </properties>
 
 	<body>
+		
+      <s1 name="October 2, 201: JORAM 5.9.0 release is available.">
+        <p>Joram 5.9.0 is available in the SVN repository with tag JORAM_5_9_0.</p>
+        <s2 name="New features and improvements">
+        <ul>
+        <li>Implementation of JMS 2.0 specification:<ul>
+            <li>Open-source implementation of new API (JORAM-128).</li>
+            <li>Implementation of the updated specification (JORAM-[131-150], JORAM-[150-158]).</li>
+          </ul>
+          All functions of the new JMS 2.0 specification are now implemented except the shared subscriptions.
+          Currently Joram succeeds 98% of the compliance tests for the specification 2.0.
+        </li>
+        <li>An significant work to optimize the performances, among other things:<ul>
+            <li>A new marshalling framewwork (JORAM-117).</li>
+            <li>An optimized handling of connections and marshalling.</li>
+            <li>Optional message compression (JORAM-114).</li>
+            <li>JORAM-108: Release of transactional mechanism in cases where it is unnecessary.</li>
+            <li>JORAM-111: Fewer notifications when sending a JMS message.</li>
+            <li>JORAM-112: Removing unnecessary persistent backup when receiving a QueueMsgReply.</li>
+            <li>JORAM-113: Removing unnecessary persistent backup during the publication of transient
+            messages to durable subscription.</li>
+            <li>JORAM-121: Optimisation of the persitent backup of the user proxy.</li>
+          </ul>
+        </li>
+        </ul>
+        </s2>
+
+        <s2 name="Bug fixes">
+        <ul>
+        <li>JORAM-124: JNDI issue when using the JMS Bridge in an OSGi environment.</li>
+        <li>JORAM-118: Avoid a potential deadlock when using PoolNetwork component.</li>
+        <li>JORAM-106: Allow the call of interceptor in transacted mode.</li>
+        <li>JORAM-104: Avoid a potential deadlock occuring in Jonas 5.2.2 when using a
+        jms-listener provided by Spring and cutting/resuming the remote Joram RAR which
+        is used.</li>
+        <li>JORAM-102: Avoid a NPE when using the A3 Properties class outside of the
+        marshalling framework.</li>
+        </ul>
+        </s2>
+    </s1>
+	
 	<s1 name="January 14 2013: JORAM 5.8.1 maintenance release is available.">
 		<p>Joram 5.8.1 is available in the SVN repository with tag JORAM_5_8_1.</p>
 		<s2 name="New features and improvements">

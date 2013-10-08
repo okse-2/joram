@@ -57,7 +57,32 @@
     </s1>
    
     <s1 name="Latest News">
-          
+
+      <s2 name="October 2, 2013: JORAM 5.9.0 release is available.">
+      <p>This release introduces many improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Implementation of JMS 2.0 specification:<ul>
+            <li>Open-source implementation of new API.</li>
+            <li>Implementation of the updated specification.</li>
+          </ul>
+          All functions of the new JMS 2.0 specification are now implemented except the shared subscriptions.
+          Currently Joram succeeds 98% of the compliance tests for the specification 2.0.
+        </li>
+        <li>An significant work to optimize the performances, among other things:<ul>
+            <li>A new marshalling framewwork.</li>
+            <li>An optimized handling of connections and marshalling.</li>
+            <li>Optional message compression.</li>
+          </ul>
+        </li>
+        <li>A Xoram component (C/C++ client API), corrected and updated.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>It is tagged in SVN (JORAM_5_9_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+      </s2>
+
       <s2 name="April 17, 2013: Have fun using Joram on Raspberry PI with Java 8.">
       <p>Joram requires very few resources to run, this simple tutorial shows how to launch
       a Joram server on a Raspberry PI and test it.</p>
@@ -161,21 +186,6 @@
       <s2 name="October 03, 2011: JORAM JMX/JMS Connector tutorial is available.">
       <p>A short tutorial demonstrating the use of JORAM JMX/JMS connector is available in the
       <a href="doc/tutorials.html">tutorial</a> section.</p>
-      </s2>
-
-      <s2 name="September 09, 2011: JORAM 5.7.0 release is available.">
-      <p>This release introduces some improvements and bug fixes, essentially:</p>
-      <ul>
-        <li>A new JMS bridge component using a connection pool similarly to the AMQP bridge.</li>
-        <li>Persistent handling of transaction properties and enhancements in NGTransaction component.</li>
-        <li>A new AliasQueue destination forwarding messages to a remote Joram destination.</li>
-        <li>A Xoram component (C/C++ client API), corrected and updated.</li>
-      </ul>
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
-      and in Maven repository.</p>
-      <p>It is tagged in SVN (JORAM_5_7_0), the complete list of changes can be viewed either in
-      <a href="dev/versions.html">code updates</a> or in
-      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
       </s2>
 
       <s2 name="July 13, 2011: JORAM/AMQP 1.0 is released">
