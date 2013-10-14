@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -348,40 +348,52 @@ public class XASession implements javax.jms.XASession {
     return sess.createBytesMessage();
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public MessageConsumer createSharedConsumer(Topic topic,
 		  String sharedSubscriptionName) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	  return sess.createSharedConsumer(topic, sharedSubscriptionName);
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public MessageConsumer createSharedConsumer(Topic topic,
 		  String sharedSubscriptionName, String messageSelector)
 				  throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	  return sess.createSharedConsumer(topic, sharedSubscriptionName, messageSelector);
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public MessageConsumer createDurableConsumer(Topic topic, String name)
 		  throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	  return sess.createDurableConsumer(topic, name);
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public MessageConsumer createDurableConsumer(Topic topic, String name,
 		  String messageSelector, boolean noLocal) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	  return sess.createDurableConsumer(topic, name, messageSelector, noLocal);
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public MessageConsumer createSharedDurableConsumer(Topic topic, String name)
 		  throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	  return sess.createSharedDurableConsumer(topic, name);
   }
 
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
   public MessageConsumer createSharedDurableConsumer(Topic topic, String name,
 		  String messageSelector) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+    return sess.createSharedDurableConsumer(topic, name, messageSelector);
   }
 }
