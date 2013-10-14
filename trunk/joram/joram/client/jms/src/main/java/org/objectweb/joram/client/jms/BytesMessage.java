@@ -145,8 +145,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
       prepared = false;
     } catch (IOException ioE) {
-      JMSException jE = new JMSException("Error while closing the stream"
-                                         + " facilities.");
+      JMSException jE = new JMSException("Error while closing the stream facilities.");
       jE.setLinkedException(ioE);
       throw jE;
     }
@@ -205,8 +204,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */   
   public void writeBytes(byte[] value, int offset, int length) throws JMSException {
     if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+      throw new MessageNotWriteableException("Can't write a value as the message body is read-only.");
 
     if (prepared) {
       prepared = false;
@@ -329,8 +327,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */ 
   public void writeObject(Object value) throws JMSException {
     if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+      throw new MessageNotWriteableException("Can't write a value as the message body is read-only.");
 
     if (value == null)
       throw new NullPointerException("Forbidden null value.");
@@ -363,8 +360,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
       else if (value instanceof byte[])
         outputStream.write((byte[]) value);
       else
-        throw new MessageFormatException("Can't write non Java primitive type"
-                                         + " as a bytes array.");
+        throw new MessageFormatException("Can't write non Java primitive type as a bytes array.");
     } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
@@ -383,8 +379,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public boolean readBoolean() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     try {
       return inputStream.readBoolean();
     } catch (Exception e) {
@@ -409,8 +404,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public byte readByte() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     try {
       return inputStream.readByte();
     } catch (Exception e) {
@@ -435,8 +429,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public int readUnsignedByte() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     try {
       return inputStream.readUnsignedByte();
     } catch (Exception e) {
@@ -461,8 +454,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public short readShort() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     try {
       return inputStream.readShort();
     } catch (Exception e) {
@@ -487,8 +479,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public int readUnsignedShort() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     try {
       return inputStream.readUnsignedShort();
     } catch (Exception e) {
@@ -513,8 +504,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public char readChar() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     try {
       return inputStream.readChar();
     } catch (Exception e) {
@@ -539,8 +529,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public int readInt() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     try {
       return inputStream.readInt();
     } catch (Exception e) {
@@ -565,8 +554,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public long readLong() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     try {
       return inputStream.readLong();
     } catch (Exception e) {
@@ -591,8 +579,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public float readFloat() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     try {
       return inputStream.readFloat();
     } catch (Exception e) {
@@ -617,8 +604,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public double readDouble() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     try {
       return inputStream.readDouble();
     } catch (Exception e) {
@@ -697,8 +683,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
     if (! RObody)
       throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     if (length > value.length || length < 0)
-      throw new IndexOutOfBoundsException("Invalid length parameter: "
-                                          + length);
+      throw new IndexOutOfBoundsException("Invalid length parameter: " + length);
     int counter = 0;
 
     try {
@@ -732,8 +717,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    */
   public String readUTF() throws JMSException {
     if (! RObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
+      throw new MessageNotReadableException("Can't read the message body as it is write-only.");
     try {
       return inputStream.readUTF();
     } catch (Exception e) {
