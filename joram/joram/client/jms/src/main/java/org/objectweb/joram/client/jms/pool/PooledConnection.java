@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -165,26 +165,22 @@ public class PooledConnection implements Connection {
   }
 
   public Session createSession(int sessionMode) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	  return delegate.createSession(sessionMode);
   }
 
   public Session createSession() throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	  return delegate.createSession();
   }
 
   public ConnectionConsumer createSharedConnectionConsumer(Topic topic,
 		  String subscriptionName, String messageSelector,
 		  ServerSessionPool sessionPool, int maxMessages) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	  return delegate.createSharedConnectionConsumer(topic, subscriptionName, messageSelector, sessionPool, maxMessages);
   }
 
   public ConnectionConsumer createSharedDurableConnectionConsumer(Topic topic,
 		  String subscriptionName, String messageSelector,
 		  ServerSessionPool sessionPool, int maxMessages) throws JMSException {
-	  //TODO
-	  throw new JMSException("not yet implemented.");
+	  return delegate.createSharedDurableConnectionConsumer(topic, subscriptionName, messageSelector, sessionPool, maxMessages);
   }
 }
