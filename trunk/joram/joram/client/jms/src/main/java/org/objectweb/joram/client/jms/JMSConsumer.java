@@ -54,7 +54,7 @@ public class JMSConsumer implements javax.jms.JMSConsumer {
     try {
       message = consumer.receive();
     } catch (JMSException e) {
-      throw new JMSRuntimeException("Unable to receive message");
+      throw new JMSRuntimeException("Unable to receive message", e.getMessage(), e);
     }
     return message;
   }
@@ -106,7 +106,7 @@ public class JMSConsumer implements javax.jms.JMSConsumer {
     } catch (MessageFormatException e) {
       throw new MessageFormatRuntimeException(e.getMessage());
     } catch (JMSException e) {
-      throw new MessageFormatRuntimeException("Unable to get message body");
+      throw new MessageFormatRuntimeException("Unable to get message body", e.getMessage(), e);
     }
   }
 
@@ -119,7 +119,7 @@ public class JMSConsumer implements javax.jms.JMSConsumer {
       try {
         return m.getBody(c);
       } catch (JMSException e) {
-        throw new MessageFormatRuntimeException("Unable to get message body");
+        throw new MessageFormatRuntimeException("Unable to get message body", e.getMessage(), e);
       }
     return null;
   }
@@ -132,7 +132,7 @@ public class JMSConsumer implements javax.jms.JMSConsumer {
     try {
       message = consumer.receiveNoWait();
     } catch (JMSException e) {
-      throw new JMSRuntimeException("Unable to receive message");
+      throw new JMSRuntimeException("Unable to receive message", e.getMessage(), e);
     }
     return message;
   }
@@ -144,7 +144,7 @@ public class JMSConsumer implements javax.jms.JMSConsumer {
     try {
       consumer.setMessageListener(listener);
     } catch (JMSException e) {
-      throw new JMSRuntimeException("Unable to set message listener");
+      throw new JMSRuntimeException("Unable to set message listener", e.getMessage(), e);
     }
   }
 }
