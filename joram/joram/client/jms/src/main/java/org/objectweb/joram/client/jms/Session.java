@@ -2248,6 +2248,12 @@ public class Session implements javax.jms.Session, SessionMBean {
     }
   }
 
+  private void checkCLMessageProducer(MessageProducer mp) throws IllegalStateException {
+    if (cnx.checkCLMessageProducer(this, mp)) {
+      throw new IllegalStateException("Illegal call.");
+    }
+  }
+  
   /**
    * Called here and by sub-classes.
    */
@@ -2257,8 +2263,10 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   /**
    * Called by MessageProducer.
+   * @throws IllegalStateException 
    */
-  synchronized void closeProducer(MessageProducer mp) {
+  synchronized void closeProducer(MessageProducer mp) throws IllegalStateException {
+    checkCLMessageProducer(mp);
     producers.removeElement(mp);
   }
 
@@ -2272,11 +2280,14 @@ public class Session implements javax.jms.Session, SessionMBean {
   /**
    * Called by MessageConsumer
    */
-  synchronized MessageConsumerListener addMessageListener(MessageConsumerListener mcl) throws JMSException {
+  synchronized MessageConsumerListener addMessageListener(MessageConsumerListener mcl, boolean check) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Session.addMessageListener(" + mcl + ')');
-    checkClosed();
-    checkThreadOfControl();
+    
+    if (check) {
+      checkClosed();
+      checkThreadOfControl();
+    }
 
     checkSessionMode(SessionMode.LISTENER);
 
@@ -2465,11 +2476,11 @@ public class Session implements javax.jms.Session, SessionMBean {
    * Called by MessageProducer.
    */
   synchronized void send(Destination dest, javax.jms.Message msg, int deliveryMode, int priority,
-      long timeToLive, boolean timestampDisabled, long deliveryDelay, javax.jms.CompletionListener completionListener) throws JMSException {
+      long timeToLive, boolean timestampDisabled, long deliveryDelay, javax.jms.CompletionListener completionListener, MessageProducer messageProducer) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "Session.send(" + dest + ',' + msg + ',' +
-                 deliveryMode + ',' + priority + ',' + timeToLive + ',' + timestampDisabled + ',' + completionListener + ')');
+                 deliveryMode + ',' + priority + ',' + timeToLive + ',' + timestampDisabled + ',' + completionListener + ',' + messageProducer + ')');
 
     checkClosed();
     checkThreadOfControl();
@@ -2503,7 +2514,7 @@ public class Session implements javax.jms.Session, SessionMBean {
     
     if (completionListener != null) {
       if (listener == null)
-        listener = new CompletionListener(this);
+        listener = new CompletionListener(this, messageProducer);
       listener.addCompletionListener(completionListener, msg);
     }
     
@@ -2564,7 +2575,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       } else {
         requestor.request(pM, listener);
       }
-      listener= null;
+      listener = null;
     }
   }
 
