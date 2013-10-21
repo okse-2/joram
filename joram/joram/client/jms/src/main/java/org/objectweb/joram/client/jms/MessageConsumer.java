@@ -286,10 +286,17 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     checkClosed();
     if (mcl != null) {
       if (messageListener == null) {
-        sess.removeMessageListener(mcl, true);
+        sess.removeMessageListener(mcl, false);
         mcl = null;
       } else {
-        throw new IllegalStateException("Message listener already exist");
+        sess.removeMessageListener(mcl, false);
+        mcl = sess.addMessageListener(new SingleSessionConsumer(queueMode,
+            durableSubscriber,
+            selector,
+            dest.getAdminName(),
+            targetName,
+            sess,
+            messageListener), false);
       }
     } else {
       if (messageListener != null) {
@@ -299,7 +306,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
                                                                 dest.getAdminName(),
                                                                 targetName,
                                                                 sess,
-                                                                messageListener));
+                                                                messageListener), true);
       }
       // else idempotent
     }
