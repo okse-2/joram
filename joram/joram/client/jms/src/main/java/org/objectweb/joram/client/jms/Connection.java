@@ -121,6 +121,10 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
     return mtpx.checkCLSession(session);
   }
   
+  boolean checkCLMessageProducer(Session session, MessageProducer mp) {
+    return mtpx.checkCLMessageProducer(session, mp);
+  }
+  
   /**
    * The requestor used to communicate
    * with the user proxy.

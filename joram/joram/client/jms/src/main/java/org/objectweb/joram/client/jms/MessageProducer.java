@@ -593,7 +593,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
-    sess.send(dest, message, deliveryMode, priority, timeToLive, timestampDisabled, deliveryDelay, completionListener);
+    sess.send(dest, message, deliveryMode, priority, timeToLive, timestampDisabled, deliveryDelay, completionListener, this);
   }
   
   /**
