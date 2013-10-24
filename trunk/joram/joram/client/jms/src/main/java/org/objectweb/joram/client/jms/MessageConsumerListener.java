@@ -305,6 +305,11 @@ abstract class MessageConsumerListener implements ReplyListener {
   }
 
   /**
+   * @return true if the currentThread is the SessionThread.
+   */
+  abstract protected boolean checkSessionThread();
+  
+  /**
    * Called by Session.
    */
   public void close() throws JMSException {
@@ -330,7 +335,12 @@ abstract class MessageConsumerListener implements ReplyListener {
         try {
           // Wait for the message listener to return from 
           // onMessage()
-          wait();
+          if (!checkSessionThread()) {
+            wait();
+          } else {
+            setStatus(Status.CLOSE);
+            break;
+          }
         } catch (InterruptedException exc) {}
       }
       
