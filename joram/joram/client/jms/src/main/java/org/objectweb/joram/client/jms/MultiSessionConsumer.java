@@ -266,4 +266,9 @@ public class MultiSessionConsumer extends MessageConsumerListener
       }
     } 
   }
+
+  @Override
+  protected boolean checkSessionThread() {
+    return false;
+  }
 }
