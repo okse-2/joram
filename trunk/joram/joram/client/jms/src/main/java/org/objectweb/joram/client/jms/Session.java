@@ -1851,6 +1851,9 @@ public class Session implements javax.jms.Session, SessionMBean {
       return;
     if (status == Status.START)
       return;
+    
+    receiveRequestor.start();
+    
     if (listenerCount > 0) {
       doStart();
     }
@@ -1909,6 +1912,8 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   private void doStop() {
+    receiveRequestor.stop();
+    
     if (daemon != null) {
       daemon.stop();
       daemon = null;
