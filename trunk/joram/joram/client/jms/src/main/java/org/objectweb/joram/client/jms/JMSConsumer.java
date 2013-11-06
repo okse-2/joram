@@ -67,7 +67,7 @@ public class JMSConsumer implements javax.jms.JMSConsumer {
     try {
       message = consumer.receive(timeout);
     } catch (JMSException e) {
-      throw new JMSRuntimeException("Unable to receive message");
+      throw new JMSRuntimeException("Unable to receive message", e.getMessage(), e);
     }
     return message;
   }
