@@ -39,6 +39,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -319,6 +320,24 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private Map<String, ClientSubscription> subsTable;
   
   /**
+   * Table holding the <code>SharedCtx</code> instances.
+   * <p>
+   * <b>Key:</b> subscription name<br>
+   * <b>Value:</b> the shared context
+   */
+  private transient Map<String, SharedCtx> sharedSubs;
+  
+  /**
+   * This kind of SharedCts (LinkedHashMap) is well-suited to building LRU caches.
+   */
+  class SharedCtx extends LinkedHashMap<Integer, Integer> {
+    SharedCtx(int ctxId, int requestId) {
+      super(100, 1.1f, true);
+      put(ctxId, requestId);
+    }
+  }
+  
+  /**
    * <b>Key:</b> subscription name<br>
    * <b>Value:</b> clientID
    */
@@ -393,6 +412,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     modifiedClientContexts = new ArrayList<ClientContext>();
     modifiedClientSubscriptions = new ArrayList<ClientSubscription>();
     clientIDs = new HashMap<Integer, String>();
+    sharedSubs = new HashMap<String, SharedCtx>();
 
     super.agentInitialize(firstTime);
     initialize(firstTime);
@@ -1294,7 +1314,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
                                               0,
                                               false,
                                               req.getMessageIdsToAck(),
-          req.getMessageCount());
+                                              req.getMessageCount());
       AgentId destId = AgentId.fromString(req.getTarget());
       if (destId == null)
         throw new RequestException("Request to an undefined destination (null).");
@@ -1589,6 +1609,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     AgentId topicId = AgentId.fromString(req.getTarget());
     String subName = req.getSubName();
     String clientId = req.getClientID();
+    boolean shared = req.isShared();
 
     if (topicId == null)
       throw new RequestException("Cannot subscribe to an undefined topic (null).");
@@ -1599,13 +1620,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     boolean newTopic = !topicsTable.containsKey(topicId);
     boolean newSub = !subsTable.containsKey(subName);
     
-    if (!newSub && !req.getClientID().equals(subsClientIDs.get(subName))) {
+    if (!newSub && !shared && !req.getClientID().equals(subsClientIDs.get(subName))) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, "throw Exception : unshared durable subscription \"" + subName + "\" must use \"" 
             + subsClientIDs.get(subName) + "\" client identifier instead of " + clientId);
       throw new RequestException("unshared durable subscription \"" + subName + "\" must use \"" 
           + subsClientIDs.get(subName) + "\" client identifier instead of " + clientId);
     }
+    
     if (clientId != null)
       subsClientIDs.put(subName, clientId);
     
@@ -1625,26 +1647,35 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (newSub) { // New subscription...
       // state change, so save.
       setSave();
+
       cSub = new ClientSubscription(getId(),
-                                    activeCtxId,
-                                    req.getRequestId(),
-                                    req.getDurable(),
-                                    topicId,
-                                    req.getSubName(),
-                                    req.getSelector(),
-                                    req.getNoLocal(),
-                                    dmqId,
-                                    threshold,
-                                    nbMaxMsg,
-                                    messagesTable,
-                                    clientId);
+          activeCtxId,
+          req.getRequestId(),
+          req.getDurable(),
+          topicId,
+          req.getSubName(),
+          req.getSelector(),
+          req.getNoLocal(),
+          dmqId,
+          threshold,
+          nbMaxMsg,
+          messagesTable,
+          clientId);
+
       cSub.setProxyAgent(this);
       modifiedSubscription(cSub);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Subscription " + subName + " created.");
 
+      if (shared) {
+        sharedSubs.put(subName, new SharedCtx(activeCtxId, req.getRequestId()));
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "Subscription sharedSubs = " + sharedSubs);
+      }
+      
       subsTable.put(subName, cSub);
+      
       try {
         MXWrapper.registerMBean(cSub, getSubMBeanName(subName));
       } catch (Exception e) {
@@ -1655,8 +1686,25 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       sent = updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription());
     } else { // Existing durable subscription...
       cSub = (ClientSubscription) subsTable.get(subName);
-
-      if (cSub.getActive() > 0)
+      boolean newShared = false;
+      if (shared) {
+        SharedCtx sharedCtx = sharedSubs.get(subName);
+        if (sharedCtx == null) {
+          // the server restart, and the sharedSubs Tab is transient.
+          // So set the SharedCtx.
+          sharedCtx = new SharedCtx(activeCtxId, req.getRequestId());
+          sharedSubs.put(subName, sharedCtx);
+        }
+        
+        if (!sharedCtx.containsKey(activeCtxId)) {
+          sharedCtx.put(activeCtxId, req.getRequestId());
+          newShared = true;
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Existing durable subscription add new SharedCtx : " + sharedCtx);
+        }
+      }
+      
+      if (cSub.getActive() > 0 && !newShared)
         throw new StateException("The durable subscription " + subName + " has already been activated.");
 
       // Updated topic: updating the subscription to the previous topic.
@@ -1762,9 +1810,23 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (sub == null)
       throw new DestinationException("Can't desactivate non existing subscription: " + subName);
 
-    // De-activating the subscription:
-    activeCtx.removeSubName(subName);
-    sub.deactivate(false);
+    if (!sharedSubs.containsKey(subName)) {
+      // De-activating the subscription:
+      activeCtx.removeSubName(subName);
+      sub.deactivate(false);
+    } else {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "ConsumerCloseSubRequest: SharedCtx remove ctxId = " + activeCtx.getId());
+      SharedCtx sharedCtx = sharedSubs.get(subName);
+      sharedCtx.remove(activeCtx.getId());
+      activeCtx.removeSubName(subName);
+      if (sharedCtx.isEmpty()) {
+        sub.deactivate(false);
+        sharedSubs.remove(subName);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "ConsumerCloseSubRequest: activCtx remove " + subName);
+      }
+    }
 
     // Acknowledging the request:
     doReply(new ServerReply(req));
@@ -1788,6 +1850,22 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (sub == null)
       throw new DestinationException("Can't unsubscribe non existing subscription: " + subName);
 
+    if (sharedSubs.containsKey(subName)) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "ConsumerUnsubRequest: SharedCtx remove ctxId = " + activeCtx.getId());
+      SharedCtx sharedCtx = sharedSubs.get(subName);
+      sharedCtx.remove(activeCtx.getId());
+      activeCtx.removeSubName(subName);
+      if (!sharedCtx.isEmpty()) {
+        // Acknowledging the request:
+        sendNot(getId(), new SyncReply(activeCtxId, new ServerReply(req)));
+        return;
+      }
+      sharedSubs.remove(subName);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "ConsumerUnsubRequest: sharedSubs remove " + subName);
+    }
+    
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Deleting subscription " + subName);
 
@@ -1840,7 +1918,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Getting a message from the subscription.
     sub.setReceiver(req.getRequestId(), req.getTimeToLive());
     ConsumerMessages consM = sub.deliver();
-
+    
     if (consM != null && req.getReceiveAck()) {
       // Immediate acknowledge
       Vector messageList = consM.getMessages();
@@ -2711,7 +2789,28 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
         if (consM != null) {
           try {
-            setCtx(sub.getContextId());
+            int ctxId = sub.getContextId();
+            SharedCtx sharedCtx = sharedSubs.get(subName);
+            if (sharedCtx != null) {
+              if(logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "Subscription "+ subName + ", sharedCtx = " + sharedCtx);
+              int i = 0;
+              do {
+                // if shared, used the next contextId 
+                Iterator<Entry<Integer, Integer>> it = sharedCtx.entrySet().iterator();
+                Entry<Integer, Integer> entry = it.next();
+                ClientContext ctx = (ClientContext) contexts.get(new Integer(entry.getKey()));
+                if (ctx.getActivated()) {
+                  ctxId = ctx.getId();
+                  if(logger.isLoggable(BasicLevel.DEBUG))
+                    logger.log(BasicLevel.DEBUG, "Subscription "+ subName + ", ctxId = " + ctxId);
+                  sharedCtx.get(ctxId);//update LRU
+                  break;
+                }
+                i++;
+              } while (sharedCtx.size() < i);
+            }
+            setCtx(ctxId);
             if (activeCtx.getActivated())
               doReply(consM);
             else

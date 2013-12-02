@@ -28,6 +28,7 @@ import javax.jms.InvalidDestinationException;
 import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
+import javax.jms.MessageListener;
 
 import org.objectweb.joram.shared.client.ConsumerCloseSubRequest;
 import org.objectweb.joram.shared.client.ConsumerSubRequest;
@@ -118,11 +119,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   boolean queueMode;
 
   /**
-   * Message listener context (null if no message listener).
-   */
-  private MessageConsumerListener mcl;
-
-  /**
    * Status of the message consumer
    * OPEN, CLOSE
    */
@@ -132,6 +128,9 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    * Used to synchronize the method close()
    */
   private Closer closer;
+  
+  private boolean shared = false;
+  private MessageListener messageListener;
 
   /**
    * Constructs a consumer.
@@ -142,6 +141,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    * @param subName  The durableSubscriber subscription's name, if any.
    * @param noLocal  <code>true</code> for a subscriber not wishing to consume
    *          messages produced by its connection.
+   * @param shared true if shared consumer.
+   * @param durableSubscriber true if durable
    *
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception InvalidSelectorException  If the selector syntax is invalid.
@@ -154,10 +155,11 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
                   Destination dest, 
                   String selector,
                   String subName, 
-                  boolean noLocal) throws JMSException {
+                  boolean noLocal,
+                  boolean shared,
+                  boolean durableSubscriber) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MessageConsumer.<init>(" + sess + ',' + dest + ',' + selector + ','
-          + subName + ',' + noLocal + ')');
+      logger.log(BasicLevel.DEBUG, "MessageConsumer.<init>(" + sess + ',' + dest + ',' + selector + ',' + subName + ',' + noLocal + ',' + shared + ',' + durableSubscriber + ')');
     
     if (dest == null)
       throw new InvalidDestinationException("Invalid null destination.");
@@ -165,13 +167,10 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     
     if (dest instanceof TemporaryQueue) {
       Connection tempQCnx = ((TemporaryQueue) dest).getCnx();
-
       if (tempQCnx == null || ! tempQCnx.equals(sess.getConnection()))
         throw new JMSSecurityException("Forbidden consumer on this temporary destination.");
-    }
-    else if (dest instanceof TemporaryTopic) {
+    } else if (dest instanceof TemporaryTopic) {
       Connection tempTCnx = ((TemporaryTopic) dest).getCnx();
-    
       if (tempTCnx == null || ! tempTCnx.equals(sess.getConnection()))
         throw new JMSSecurityException("Forbidden consumer on this temporary destination.");
     }
@@ -181,30 +180,32 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     } catch (org.objectweb.joram.shared.excepts.SelectorException sE) {
       throw new InvalidSelectorException("Invalid selector syntax: " + sE);
     }
-
+    
     // If the destination is a topic, the consumer is a subscriber:
     if (dest instanceof javax.jms.Topic) {
-      if (subName == null) {
-        subName = sess.getConnection().nextSubName();
-        durableSubscriber = false;
-      } else {
-        durableSubscriber = true;
-      }
-      
-      if (noLocal && !durableSubscriber && sess.getConnection().getClientID() == null)
-        sess.getConnection().setProviderClientID();
-      
-      sess.syncRequest(
-        new ConsumerSubRequest(dest.getName(),
-                               subName,
-                               selector,
-                               noLocal,
-                               durableSubscriber,
-                               sess.isAsyncSub(),
-                               sess.getConnection().getClientID()));
-      targetName = subName;
+      this.durableSubscriber = durableSubscriber;
       this.noLocal = noLocal;
       queueMode = false;
+      if (subName == null)
+        targetName = sess.getConnection().nextSubName();
+      else
+        targetName = subName;
+      
+      if (!shared || !sess.getConnection().isOpenMessageConsumer(targetName)) {
+        if (noLocal && !durableSubscriber && sess.getConnection().getClientID() == null)
+          sess.getConnection().setProviderClientID();
+
+        sess.syncRequest(
+            new ConsumerSubRequest(dest.getName(),
+                targetName,
+                selector,
+                noLocal,
+                durableSubscriber,
+                sess.isAsyncSub(),
+                sess.getConnection().getClientID(),
+                shared));
+      }
+      sess.getConnection().openMessageConsumer(targetName);
     } else {
       targetName = dest.getName();
       queueMode = true;
@@ -213,6 +214,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     this.sess = sess;
     this.dest = dest;
     this.selector = selector;
+    this.shared = shared;
     
     closer = new Closer();
 
@@ -234,7 +236,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    * @exception JMSException           Generic exception.
    */
   MessageConsumer(Session sess, Destination dest, String selector) throws JMSException {
-    this(sess, dest, selector, null, false);
+    this(sess, dest, selector, null, false, false, false);
   }
 
   private synchronized void setStatus(int status) {
@@ -284,19 +286,35 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MessageConsumer.setMessageListener(" + messageListener + ')');
     checkClosed();
+    MessageConsumerListener mcl = sess.getMessageConsumerListener(targetName);
     if (mcl != null) {
       if (messageListener == null) {
-        sess.removeMessageListener(mcl, false);
-        mcl = null;
+        if (shared) {
+          mcl.removeMessageListener(this.messageListener);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "MessageConsumer.setMessageListener mcl.getMessageListenersSize() = " + mcl.getMessageListenersSize());
+          if (mcl.getMessageListenersSize() < 1) {
+            sess.removeMessageListener(mcl, false);
+            sess.removeMessageConsumerListener(targetName);
+          }
+        } else {
+          sess.removeMessageListener(mcl, false);
+          sess.removeMessageConsumerListener(targetName);
+        }
       } else {
-        sess.removeMessageListener(mcl, false);
-        mcl = sess.addMessageListener(new SingleSessionConsumer(queueMode,
-            durableSubscriber,
-            selector,
-            dest.getAdminName(),
-            targetName,
-            sess,
-            messageListener), false);
+        if (shared && mcl.getMessageListenersSize() > 0) {
+          mcl.addMessageListener(messageListener);
+        } else {
+          sess.removeMessageListener(mcl, false);
+          mcl = sess.addMessageListener(new SingleSessionConsumer(queueMode,
+              durableSubscriber,
+              selector,
+              dest.getAdminName(),
+              targetName,
+              sess,
+              messageListener), false);
+          sess.putMessageConsumerListener(targetName, mcl);
+        }
       }
     } else {
       if (messageListener != null) {
@@ -307,9 +325,11 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
                                                                 targetName,
                                                                 sess,
                                                                 messageListener), true);
+        sess.putMessageConsumerListener(targetName, mcl);
       }
       // else idempotent
     }
+    this.messageListener = messageListener;
   }
 
   /**
@@ -322,6 +342,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    */
   public synchronized javax.jms.MessageListener getMessageListener() throws JMSException {
     checkClosed();
+    MessageConsumerListener mcl = sess.getMessageConsumerListener(targetName);
     if (mcl == null)
       return null;
     return mcl.getMessageListener();
@@ -420,7 +441,10 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   public void close() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MessageConsumer.close()");
-    closer.close();
+    if (sess.getConnection().closeMessageConsumer(targetName))
+      closer.close();
+    else
+      setStatus(Status.CLOSE);
   }
 
   /**
@@ -466,12 +490,26 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     
     sess.closeConsumer(this);
     
+    MessageConsumerListener mcl = sess.getMessageConsumerListener(targetName);
     if (mcl != null) {
       // Stop the listener.
       sess.removeMessageListener(mcl, false);
+      sess.removeMessageConsumerListener(targetName);
     }
   }
 
+  public Destination getDest() {
+    return dest;
+  }
+
+  public boolean isQueueMode() {
+    return queueMode == true;
+  }
+
+  public boolean isOpen() {
+    return status == Status.OPEN;
+  }
+  
 //  void activateMessageInput() throws JMSException {
 //    if (mcl != null) 
 //      mcl.activateMessageInput();

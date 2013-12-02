@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.client.jms;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.jms.MessageListener;
@@ -136,7 +137,8 @@ abstract class MessageConsumerListener implements ReplyListener {
   
   private int topicAckBufferMax;
   
-  private MessageListener listener;
+  private ArrayList<MessageListener> listeners;
+  private int listenerPosition = 0;
   
   MessageConsumerListener(boolean queueMode,
                           boolean durable,
@@ -162,7 +164,6 @@ abstract class MessageConsumerListener implements ReplyListener {
     this.selector = selector;
     this.destName = destName;
     this.targetName = targetName;
-    this.listener = listener;
     this.queueMessageReadMax = queueMessageReadMax;
     this.topicActivationThreshold = topicActivationThreshold;
     this.topicPassivationThreshold = topicPassivationThreshold;
@@ -172,6 +173,8 @@ abstract class MessageConsumerListener implements ReplyListener {
     requestId = -1;
     messageCount = 0;
     topicMsgInputPassivated = false;
+    listeners = new ArrayList<MessageListener>();
+    listeners.add(listener);
     setStatus(Status.INIT);
     setReceiveStatus(ReceiveStatus.INIT);
   }
@@ -444,7 +447,8 @@ abstract class MessageConsumerListener implements ReplyListener {
   }
   
   public final MessageListener getMessageListener() {
-    return listener;
+    //TODO: select the good listenerPosition for shared consumer
+    return listeners.get(listenerPosition);
   }
   
   public final boolean getQueueMode() {
@@ -492,12 +496,44 @@ abstract class MessageConsumerListener implements ReplyListener {
                                  MessageListener listener,
                                  int ackMode) throws JMSException;
   
+  synchronized void addMessageListener(MessageListener messageListener) {
+    listeners.add(messageListener);
+  }
+  
+  synchronized boolean removeMessageListener(MessageListener messageListener) {
+    return listeners.remove(messageListener);
+  }
+  
+  public int getMessageListenersSize() {
+    return listeners.size();
+  }
+  
+  synchronized private MessageListener getNextlistener() {
+    int size = listeners.size();
+    if (size == 1)
+      return listeners.get(0);
+    else if (size < 1)
+      return null;
+    
+    // shared ConsumerListener
+    listenerPosition++;
+    if (listenerPosition >= size)
+      listenerPosition = 0;
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "MessageConsumerListener.getNextlistener() listenerPosition = " + listenerPosition);
+    return listeners.get(listenerPosition);
+  }
+  
   /**
    * Called by Session (standard JMS, mono-threaded)
    */
   public void onMessage(Message msg, int ackMode) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" + msg + ')');
+    
+    MessageListener listener = getNextlistener();
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "MessageConsumerListener.onMessage listener = " + listener);
     
     if (listener != null) {
       synchronized (this) {
