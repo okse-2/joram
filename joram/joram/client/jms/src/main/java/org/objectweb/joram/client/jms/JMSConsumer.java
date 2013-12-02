@@ -3,6 +3,7 @@ package org.objectweb.joram.client.jms;
 import javax.jms.JMSException;
 import javax.jms.JMSRuntimeException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageFormatRuntimeException;
 import javax.jms.MessageListener;
@@ -43,7 +44,11 @@ public class JMSConsumer implements javax.jms.JMSConsumer {
    * API method
    */
   public String getMessageSelector() {
-    return consumer.selector;
+    try {
+      return consumer.getMessageSelector();
+    } catch (JMSException e) {
+      throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
+    }
   }
 
   /**

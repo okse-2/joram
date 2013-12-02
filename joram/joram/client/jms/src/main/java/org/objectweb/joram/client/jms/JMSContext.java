@@ -609,55 +609,48 @@ public class JMSContext implements javax.jms.JMSContext {
   public javax.jms.JMSConsumer createSharedConsumer(Topic topic,
       String sharedSubscriptionName, String messageSelector) {
     connection.lockClientID();
-    JMSConsumer consumer = null;
-//    try {
-//      consumer = new JMSConsumer(this, topic, messageSelector, false);
-//      consumer = consumer.createSharedConsumer(topic, sharedSubscriptionName);
-//    } catch (JMSException e) {
-//      if (logger.isLoggable(BasicLevel.DEBUG))
-//        logger.log(BasicLevel.DEBUG,
-//            "Unable to crate shared consumer " + e.getMessage());
-//      throw new JMSRuntimeException("Unable to create shared consumer "
-//          + e.getMessage());
-//    }
-    return consumer;
+    try {
+      return new JMSConsumer(session.createSharedConsumer(topic, sharedSubscriptionName, messageSelector));
+    } catch (InvalidDestinationException e) {
+      throw new InvalidDestinationRuntimeException(e.getMessage(), e.getErrorCode(), e);
+    } catch (InvalidSelectorException e) {
+      throw new InvalidSelectorRuntimeException(e.getMessage(), e.getErrorCode(), e);
+    } catch (IllegalStateException e) {
+      throw new IllegalStateRuntimeException(e.getMessage(), e.getErrorCode(), e);
+    } catch (JMSException e) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Unable to crate shared consumer " + e.getMessage());
+      throw new JMSRuntimeException("Unable to create shared consumer " + e.getMessage(), e.getErrorCode(), e);
+    } finally {
+      if (connection.getAutoStart())
+        connection.start();
+    }
   }
 
-  public javax.jms.JMSConsumer createSharedDurableConsumer(Topic topic,
-      String name) {
-    connection.lockClientID();
-    JMSConsumer consumer = null;
-//    try {
-//      consumer = new JMSConsumer(getCopyOfSession(), (Destination) topic);
-//      consumer = consumer.createDurableConsumer(topic, name);
-//    } catch (JMSException e) {
-//      if (logger.isLoggable(BasicLevel.DEBUG))
-//        logger.log(BasicLevel.DEBUG,
-//            "Unable to crate shared  durable consumer " + e.getMessage());
-//      throw new JMSRuntimeException("Unable to create shared durable consumer "
-//          + e.getMessage());
-//    }
-    return consumer;
+  public javax.jms.JMSConsumer createSharedDurableConsumer(Topic topic, String name) {
+    return createSharedDurableConsumer(topic, name, null);
   }
 
   public javax.jms.JMSConsumer createSharedDurableConsumer(Topic topic,
       String name, String messageSelector) {
     connection.lockClientID();
-    JMSConsumer consumer = null;
-//    try {
-//      consumer = new JMSConsumer(getCopyOfSession(), (Destination) topic,
-//          messageSelector);
-//      consumer = consumer.createDurableConsumer(topic, name);
-//    } catch (JMSException e) {
-//      if (logger.isLoggable(BasicLevel.DEBUG))
-//        logger.log(BasicLevel.DEBUG, "Unable to crate shared durable consumer "
-//            + e.getMessage());
-//      throw new JMSRuntimeException("Unable to create shared durable consumer "
-//          + e.getMessage());
-//    }
-    return consumer;
+    try {
+      return new JMSConsumer(session.createSharedDurableConsumer(topic, name, messageSelector));
+    } catch (InvalidDestinationException e) {
+      throw new InvalidDestinationRuntimeException(e.getMessage(), e.getErrorCode(), e);
+    } catch (InvalidSelectorException e) {
+      throw new InvalidSelectorRuntimeException(e.getMessage(), e.getErrorCode(), e);
+    } catch (IllegalStateException e) {
+      throw new IllegalStateRuntimeException(e.getMessage(), e.getErrorCode(), e);
+    } catch (JMSException e) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Unable to crate shared durable consumer " + e.getMessage());
+      throw new JMSRuntimeException("Unable to create shared durable consumer " + e.getMessage(), e.getErrorCode(), e);
+    } finally {
+      if (connection.getAutoStart())
+        connection.start();
+    }
   }
-
 
   private Session getCopyOfSession() {
     try {
@@ -666,8 +659,7 @@ public class JMSContext implements javax.jms.JMSContext {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR,
             "Unable to create a session " + e.getMessage());
-      throw new JMRuntimeException("Unable to create a session "
-          + e.getMessage());
+      throw new JMRuntimeException("Unable to create a session " + e.getMessage());
     }
   }
   

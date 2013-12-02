@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -41,13 +41,14 @@ public class TopicSubscriber extends MessageConsumer implements javax.jms.TopicS
    * @param selector  The selector for filtering messages.
    * @param noLocal <code>true</code> if the subscriber does not wish to
    *          consume messages published through the same connection.
+   * @param durableSubscriber true if durable
    *
    * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  TopicSubscriber(Session sess, Destination topic, String name, String selector, boolean noLocal) throws JMSException {
-    super(sess, topic, selector, name, noLocal);
+  TopicSubscriber(Session sess, Destination topic, String name, String selector, boolean noLocal, boolean durableSubscriber) throws JMSException {
+    super(sess, topic, selector, name, noLocal, false, durableSubscriber);
   }
 
    /** Returns a string view of this receiver. */

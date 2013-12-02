@@ -23,7 +23,9 @@
  */
 package org.objectweb.joram.client.jms;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.jms.ConnectionConsumer;
@@ -661,7 +663,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
         durable = true;
       }
       requestor.request(new ConsumerSubRequest(((Destination) dest).getName(),
-          targetName, selector, false, durable, false, getClientID()));
+          targetName, selector, false, durable, false, getClientID(), false));
     }
     
     MultiSessionConsumer msc =
@@ -1168,5 +1170,39 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
 		  ServerSessionPool sessionPool, int maxMessages) throws JMSException {
 	  //TODO
 	  throw new JMSException("not yet implemented.");
+  }
+  
+  
+  Map<String, Integer> messageConsumers = new HashMap<String, Integer>();
+
+  synchronized void openMessageConsumer(String targetName) {
+    if (messageConsumers.containsKey(targetName)) {
+      int count = messageConsumers.get(targetName);
+      messageConsumers.put(targetName, count+1);
+    } else {
+      messageConsumers.put(targetName, 1);
+    }
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Connection.openMessageConsumer(" + targetName + ") count = " + messageConsumers.get(targetName));
+  }
+  
+  synchronized boolean isOpenMessageConsumer(String targetName) {
+    return messageConsumers.containsKey(targetName);
+  }
+  
+  synchronized boolean closeMessageConsumer(String targetName) {
+    boolean ret = true;
+    if (messageConsumers.containsKey(targetName)) {
+      int count = messageConsumers.get(targetName);
+      if (count > 1) {
+        messageConsumers.put(targetName, count-1);
+        ret = false;
+      } else {
+        messageConsumers.remove(targetName);
+      }
+    }
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Connection.closeMessageConsumer(" + targetName + ") = " + ret);
+    return ret;
   }
 }
