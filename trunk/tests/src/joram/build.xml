@@ -58,6 +58,7 @@
     <antcall target="tests.collector"/>
     <antcall target="tests.interceptors"/>
     <antcall target="tests.distribution"/>
+  	<antcall target="tests.jms2"/>
   </target>
 
   <target name="custom.tests.bamboo"
@@ -89,6 +90,7 @@
     <antcall target="tests.collector"/>
     <antcall target="tests.interceptors"/>
     <antcall target="tests.distribution"/>
+  	<antcall target="tests.jms2"/>
   </target>
 
   <target name="custom.tests.vtest"
@@ -120,6 +122,7 @@
     <antcall target="tests.collector"/>
     <antcall target="tests.interceptors"/>
     <antcall target="tests.distribution"/>
+  	<antcall target="tests.jms2"/>
   </target>
 
   <target name="tests.base"
@@ -6557,8 +6560,7 @@
   </target>
 	
 	<!-- Test the JMS2 compliance -->
-	
-  <target name="jms2" description=" --> JMS2 compliance">
+  <target name="tests.jms2" description=" --> JMS2 compliance">
     <antcall target="jms2.test1"/>
     <antcall target="jms2.test2"/>
     <antcall target="jms2.test3"/>
@@ -6568,6 +6570,8 @@
     <!-- antcall target="jms2.test7"/ -->
     <antcall target="jms2.test8"/>
     <!-- antcall target="jms2.test9"/ -->
+  	<antcall target="jms2.sharedTest1"/>
+  	<antcall target="jms2.sharedTest2"/>
   </target>
 
   <target name="jms2.test1" depends="init.a3props,compile"
@@ -6719,6 +6723,32 @@
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="testid" value="jms2.test12"/>
       <param name="className" value="joram.jms2.Test12"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	
+  <target name="jms2.sharedTest1" depends="init.a3props,compile"
+          description=" --> Test shared consumer">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.sharedTest1"/>
+      <param name="className" value="joram.jms2.TestSharedConsumer1"/>
+      <param name="jndiconf" value="jms2/jndi.properties"/>
+      <param name="a3conf" value="jms2/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="jms2.sharedTest2" depends="init.a3props,compile"
+          description=" --> Test shared consumer">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="jms2.sharedTest2"/>
+      <param name="className" value="joram.jms2.TestSharedConsumer2"/>
       <param name="jndiconf" value="jms2/jndi.properties"/>
       <param name="a3conf" value="jms2/a3servers.xml"/>
       <param name="jvmargs" value=""/>
