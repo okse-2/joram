@@ -27,9 +27,12 @@ package org.objectweb.joram.mom.proxies;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.XACnxPrepare;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -40,6 +43,7 @@ import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.encoding.Decoder;
 import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
 import fr.dyade.aaa.common.encoding.EncodableHelper;
 import fr.dyade.aaa.common.encoding.Encoder;
 
@@ -47,7 +51,7 @@ import fr.dyade.aaa.common.encoding.Encoder;
  * The <code>ClientContext</code> class holds the data related to a client
  * context.
  */
-class ClientContext implements java.io.Serializable, Encodable {
+public class ClientContext implements java.io.Serializable, Encodable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
@@ -62,9 +66,9 @@ class ClientContext implements java.io.Serializable, Encodable {
   /** Vector of temporary destinations. */
   private Vector<AgentId> tempDestinations;
   /** Identifiers of queues delivering messages. */
-  private Hashtable deliveringQueues;
+  private Hashtable<AgentId, AgentId> deliveringQueues;
   /** Prepared transactions objects waiting for commit. */
-  private Hashtable transactionsTable;
+  private Hashtable<Xid, XACnxPrepare> transactionsTable;
 
   /** <code>true</code> if the context is activated. */
   private transient boolean started;
@@ -278,7 +282,7 @@ class ClientContext implements java.io.Serializable, Encodable {
       transactionsTable = new Hashtable();
 
     if (! transactionsTable.containsKey(key)) {
-      transactionsTable.put(key, prepare);
+      transactionsTable.put((Xid) key, prepare);
       setModified();
     } else
       throw new Exception("Prepare request already received by "
@@ -336,8 +340,7 @@ class ClientContext implements java.io.Serializable, Encodable {
   }
 
   public int getEncodableClassId() {
-    // Not defined
-    return -1;
+    return JoramHelper.CLIENT_CONTEXT_CLASS_ID;
   }
 
   public int getEncodedSize() throws Exception {
@@ -479,6 +482,30 @@ class ClientContext implements java.io.Serializable, Encodable {
       modified = true;
       proxy.modifiedClient(this);
     }
+  }
+  
+  List<String> getActiveSubList() {
+    return activeSubs;
+  }
+  
+  Map<AgentId, AgentId> getDeliveringQueueTable() {
+    return deliveringQueues;
+  }
+  
+  List<AgentId> getTempDestinationList() {
+    return tempDestinations; 
+  }
+  
+  Hashtable<Xid, XACnxPrepare> getTransactionsTable() {
+    return transactionsTable;
+  }
+
+  public static class ClientContextFactory implements EncodableFactory {
+
+    public Encodable createEncodable() {
+      return new ClientContext();
+    }
+
   }
   
 }
