@@ -43,12 +43,18 @@ public class EncodableFactoryRepository {
   
   public static final int PROPERTIES_CLASS_ID = CLASS_ID_AREA + 3;
   
+  public static final int STRING_LIST_CLASS_ID = CLASS_ID_AREA + 4;
+  
+  public static final int ENCODABLE_INTEGER_CLASS_ID = CLASS_ID_AREA + 5;
+  
   private static Hashtable<Integer, EncodableFactory> repository = new Hashtable<Integer, EncodableFactory>();
   
   static {
     repository.put(EncodableFactoryRepository.ENCODED_STRING_CLASS_ID, new EncodedString.Factory());
     repository.put(EncodableFactoryRepository.SERIALIZABLE_WRAPPER_CLASS_ID, new SerializableWrapper.Factory());
     repository.put(EncodableFactoryRepository.STRING_PAIR_CLASS_ID, new StringPair.Factory());
+    repository.put(EncodableFactoryRepository.STRING_LIST_CLASS_ID, new EncodedStringList.Factory());
+    repository.put(EncodableFactoryRepository.ENCODABLE_INTEGER_CLASS_ID, new EncodableInteger.Factory());
   }
   
   /**
