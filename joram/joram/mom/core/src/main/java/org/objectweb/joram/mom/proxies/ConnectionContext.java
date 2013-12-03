@@ -33,7 +33,7 @@ import org.objectweb.joram.shared.excepts.MomException;
 public interface ConnectionContext {
   
   public enum Type {
-    STANDARD, RELIABLE, AMQP;
+    STANDARD, RELIABLE, AMQP, MQTT;
     
     public String getClassName() {
       switch(this) {
@@ -42,6 +42,8 @@ public interface ConnectionContext {
       case AMQP:
         //TODO
         return "com.scalagent.amqp.adapter.agent.AMQPConnectionContext";
+      case MQTT:
+        return "com.scalagent.jorammq.mqtt.adapter.JoramConnectionContext";
       case STANDARD:
       default:
         return "org.objectweb.joram.mom.proxies.StandardConnectionContext";
