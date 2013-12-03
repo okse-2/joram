@@ -34,6 +34,8 @@ import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.util.JoramHelper;
+import org.objectweb.joram.mom.util.MessageIdListFactory;
+import org.objectweb.joram.mom.util.MessageIdListImpl;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.CommitRequest;
@@ -144,6 +146,10 @@ public class ConnectionManager implements ConnectionManagerMBean {
     EncodableFactoryRepository.putFactory(JoramHelper.MESSAGE_CLASS_ID, new Message.MessageFactory());
     EncodableFactoryRepository.putFactory(JoramHelper.QUEUE_CLASS_ID, new Queue.QueueFactory());
     EncodableFactoryRepository.putFactory(JoramHelper.USER_AGENT_CLASS_ID, new UserAgent.UserAgentFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.CLIENT_SUBSCRIPTION_CLASS_ID, new ClientSubscription.ClientSubscriptionFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.CLIENT_CONTEXT_CLASS_ID, new ClientContext.ClientContextFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.MESSAGE_ID_LIST_IMPL_CLASS_ID, new MessageIdListImpl.MessageIdListImplEncodableFactory());
+    EncodableFactoryRepository.putFactory(JoramHelper.USER_AGENT_ARRIVAL_STATE_CLASS_ID, new UserAgentArrivalState.UserAgentArrivalStateFactory());
   }
   
   public static final void sendToProxy(AgentId proxyId, int cnxKey, AbstractJmsRequest req, Object msg) {
