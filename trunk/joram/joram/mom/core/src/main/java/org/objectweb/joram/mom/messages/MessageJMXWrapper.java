@@ -37,6 +37,8 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 
+import org.objectweb.joram.mom.util.MessageIdList;
+
 import fr.dyade.aaa.common.stream.Properties;
 
 public class MessageJMXWrapper {
@@ -123,7 +125,7 @@ public class MessageJMXWrapper {
    * 
    * @throws Exception
    */
-  public static TabularData createTabularDataSupport(Map messages, List ids) throws Exception {
+  public static TabularData createTabularDataSupport(Map messages, MessageIdList ids) throws Exception {
     String[] id = { "identifier" };
     TabularDataSupport tds = new TabularDataSupport(new TabularType("Messages", "Messages", rowType, id));
 
