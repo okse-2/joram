@@ -78,6 +78,8 @@ import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.mom.util.InterceptorsHelper;
 import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.mom.util.MessageInterceptor;
+import org.objectweb.joram.mom.util.MessageTable;
+import org.objectweb.joram.mom.util.MessageTableFactory;
 import org.objectweb.joram.mom.util.TopicDeliveryTimeTask;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
@@ -183,6 +185,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(UserAgent.class.getName());
+  
+  public static final String ARRIVAL_STATE_PREFIX = "AS_";
+  public static final String MESSAGE_TABLE_PREFIX = "MT_";
 
   /** the in and out interceptors list. */
   private transient List<MessageInterceptor> interceptorsOUT = null;
@@ -352,7 +357,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private Map<Xid, XACnxPrepare> recoveredTransactions;
 
   /** Counter of message arrivals from topics. */
-  private long arrivalsCounter = 0;
+  private UserAgentArrivalState arrivalState;
 
   /**
    * Table holding the <code>TopicSubscription</code> instances.
@@ -368,7 +373,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * <b>Key:</b> message identifier<br>
    * <b>Value:</b> message
    */
-  private transient Map messagesTable;
+  private transient MessageTable messagesTable;
 
   /**
    * Identifier of the active context. 
@@ -443,6 +448,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     strbuf.append(':');
     strbuf.append("type=User,name=").append(getName());
     return strbuf;
+  }
+  
+  public int getMessageTableConsumedMemory() {
+    return messagesTable.getConsumedMemory();
   }
 
   /**
@@ -519,8 +528,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       super.react(from, not);
     }
 
-    saveModifiedClientContexts();
-    saveModifiedClientSubscriptions();
+    // Called even if the notification is a DeleteNot but
+    // nothing should be saved as DeleteNot doesn't modify
+    // the UserAgent state.
+    saveUserAgentState();
   }
 
   private void doSetPeriod(long period) {
@@ -1003,7 +1014,15 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       logger.log(BasicLevel.DEBUG, "--- " + this + " (re)initializing...");
 
     topicsTable = new Hashtable();
-    messagesTable = new Hashtable();
+    
+    if (firstTime) {
+      arrivalState = new UserAgentArrivalState(ARRIVAL_STATE_PREFIX + getId().toString());
+    } else {
+      arrivalState = UserAgentArrivalState.load(ARRIVAL_STATE_PREFIX + getId().toString());
+    }
+    
+    MessageTableFactory messageTableFactory = MessageTableFactory.newFactory();
+    messagesTable = messageTableFactory.createMessageTable(MESSAGE_TABLE_PREFIX + getId().toString());
 
     if (contexts == null) contexts = new Hashtable<Integer, ClientContext>();
     if (subsTable == null) subsTable = new Hashtable();
@@ -1031,6 +1050,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         cs.txName = persistedSubscriptionNames[i];
         cs.setProxyId(getId());
         cs.setProxyAgent(this);
+        
+        cs.initMessageIds();
+        cs.loadMessageIds();
+        
         subsTable.put(cs.getName(), cs);
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR, "ClientSubscription named [" + persistedSubscriptionNames[i]
@@ -1153,6 +1176,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     for (Iterator topicIds = topics.iterator(); topicIds.hasNext();)
       updateSubscriptionToTopic((AgentId) topicIds.next(), -1, -1);
 
+    saveUserAgentState();
+  }
+  
+  private void saveUserAgentState() throws Exception {
+    arrivalState.save();
     saveModifiedClientContexts();
     saveModifiedClientSubscriptions();
   }
@@ -1662,6 +1690,12 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           messagesTable,
           clientId);
 
+      try {
+        cSub.initMessageIds();
+      } catch (Exception e) {
+        throw new RequestException(e.toString());
+      }
+      
       cSub.setProxyAgent(this);
       modifiedSubscription(cSub);
 
@@ -2527,7 +2561,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
             sub.acknowledge(sar.getIds().iterator());
             // TODO (AF): is it needed to save the proxy ?
             // if (sub.getDurable())
-            setSave();
+            // Assumes that there is nothing to save in the UserAgent.
+            //setSave();
           }
         }
       }
@@ -2746,7 +2781,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         scheduleDeliveryTimeMessage(from, sharedMsg, delaySubNames);
       } else {
         // Setting the arrival order of the messages
-        message.order = arrivalsCounter++;
+        message.order = arrivalState.getAndIncrementArrivalCount(
+            message.isPersistent() && 
+            message.durableAcksCounter > 0);
         messages.add(message);
       }
     }
@@ -2768,8 +2805,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> save message " + message);
         // TODO (AF): The message saving does it need the proxy saving ?
-        if (message.isPersistent()) {
-          setSave();
+        if (message.isPersistent()) {          
           // Persisting the message.
           setMsgTxName(message);
           message.save();
@@ -2822,6 +2858,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       } else if(logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Subscription " + sub + " is not active");
     }
+    
+    messagesTable.checkConsumedMemory();
   }
 
   void scheduleDeliveryTimeMessage(AgentId from, org.objectweb.joram.shared.messages.Message msg, List<String> subNames) {
@@ -3503,28 +3541,20 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     Message message = null;
     DMQManager dmqManager = null;
 
-    for (Iterator values = messagesTable.values().iterator(); values.hasNext();) {
-      message = (Message) values.next();
-      if ((message == null) || message.isValid(currentTime))
-        continue;
+    if (dmqManager == null)
+      dmqManager = new DMQManager(dmqId, null);
+    
+    // The table cleaning is delegated to the table itself
+    messagesTable.clean(currentTime, dmqManager);
 
-      values.remove();
-      if (message.durableAcksCounter > 0)
-        message.delete();
-
-      if (dmqManager == null)
-        dmqManager = new DMQManager(dmqId, null);
-      nbMsgsSentToDMQSinceCreation++;
-      dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
-
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "UserAgent expired message " + message.getId());
-    }
-
+    // Now each ClientSubscription is cleaned in a lazy way: the identifier
+    // of an invalid message is removed when the message is required by the
+    // ClientSubscription (see method 'deliver').
+    /*
     Iterator subs = subsTable.values().iterator();
     while (subs.hasNext()) {
       ((ClientSubscription) subs.next()).cleanMessageIds();
-    }
+    }*/
 
     // If needed, sending the dead messages to the DMQ:
     if (dmqManager != null)
@@ -3914,7 +3944,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
   public int getEncodedSize() throws Exception {
     int res = super.getEncodedSize();
-    res += LONG_ENCODED_SIZE;
 
     res += BOOLEAN_ENCODED_SIZE;
     if (dmqId != null) {
@@ -3959,8 +3988,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
   public void encode(Encoder encoder) throws Exception {
     super.encode(encoder);
-    encoder.encodeUnsignedLong(arrivalsCounter);
-
+    
     if (dmqId == null) {
       encoder.encodeBoolean(true);
     } else {
@@ -4014,8 +4042,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
   public void decode(Decoder decoder) throws Exception {
     super.decode(decoder);
-    arrivalsCounter = decoder.decodeUnsignedLong();
-
+    
     boolean isNull = decoder.decodeBoolean();
     if (isNull) {
       dmqId = null;
