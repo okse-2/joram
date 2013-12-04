@@ -664,11 +664,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           JmsRequestGroup jrg = (JmsRequestGroup) request;
           AbstractJmsRequest[] groupedRequests = jrg.getRequests();
           for (int j = 0; j < groupedRequests.length; j++) {
-            if (groupedRequests[i] instanceof ProducerMessages) {
-              ProducerMessages pm = (ProducerMessages) groupedRequests[i];
+            if (groupedRequests[j] instanceof ProducerMessages) {
+              ProducerMessages pm = (ProducerMessages) groupedRequests[j];
               rm.put(req.getConnectionKey(), pm);
             } else {
-              reactToClientRequest(key.intValue(), groupedRequests[i]);
+              reactToClientRequest(key.intValue(), groupedRequests[j]);
             }
           }
         } else {
