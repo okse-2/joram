@@ -786,7 +786,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     int encodedSize = EncodableHelper.getStringEncodedSize(id);
     
     encodedSize += EncodableHelper.getStringEncodedSize(toId);
-    encodedSize += EncodableHelper.getStringEncodedSize(toName);
+    encodedSize += EncodableHelper.getNullableStringEncodedSize(toName);
     encodedSize += BYTE_ENCODED_SIZE + LONG_ENCODED_SIZE + BOOLEAN_ENCODED_SIZE + LONG_ENCODED_SIZE + SHORT_ENCODED_SIZE;
 
     if (type != org.objectweb.joram.shared.messages.Message.SIMPLE) { encodedSize += BYTE_ENCODED_SIZE; }
@@ -812,7 +812,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     encoder.encodeString(id);
     
     encoder.encodeString(toId);
-    encoder.encodeString(toName);
+    encoder.encodeNullableString(toName);
     encoder.encodeByte(toType);
     encoder.encodeUnsignedLong(timestamp);
     encoder.encodeBoolean(compressed);
@@ -854,7 +854,7 @@ public final class Message implements Cloneable, Serializable, Streamable, Encod
     id = decoder.decodeString();
     
     toId = decoder.decodeString();
-    toName = decoder.decodeString();
+    toName = decoder.decodeNullableString();
     toType = decoder.decodeByte();
     timestamp = decoder.decodeUnsignedLong();
     compressed = decoder.decodeBoolean();
