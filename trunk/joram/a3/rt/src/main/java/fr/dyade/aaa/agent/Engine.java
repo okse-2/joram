@@ -761,7 +761,7 @@ class Engine implements Runnable, AgentEngine, EngineMBean {
         logmon.log(BasicLevel.DEBUG,
                    getName() + "Agent" + ag.id + " [" + ag.name + "] loaded");
     } else {
-      throw new UnknownAgentException();
+      throw new UnknownAgentException(null, id);
     }
 
     return ag;
@@ -1059,6 +1059,13 @@ class Engine implements Runnable, AgentEngine, EngineMBean {
 
             continue;
           }
+          
+          CallbackNotification callbackNotification;
+          if (msg.getNot() instanceof CallbackNotification) {
+            callbackNotification = (CallbackNotification) msg.getNot();
+          } else {
+            callbackNotification = null;
+          }
 
           if ((msg.not.expiration <= 0L) ||
               (msg.not.expiration >= System.currentTimeMillis())) {
@@ -1072,6 +1079,9 @@ class Engine implements Runnable, AgentEngine, EngineMBean {
                          getName() + ": Unknown agent, " + msg.to + ".react(" +
                          msg.from + ", " + msg.not + ")");
               agent = null;
+              if (callbackNotification != null) {
+                callbackNotification.failed(exc);
+              }
               push(AgentId.localId, msg.from, new UnknownAgent(msg.to, msg.not));
             } catch (Exception exc) {
               //  Can't load agent then send an error notification
@@ -1154,6 +1164,10 @@ class Engine implements Runnable, AgentEngine, EngineMBean {
 
           // Commit all changes then continue.
           commit();
+          
+          if (callbackNotification != null) {
+            callbackNotification.done();
+          }
           
 //          // SDF generation
 //          if (AgentServer.sdf != null) {
