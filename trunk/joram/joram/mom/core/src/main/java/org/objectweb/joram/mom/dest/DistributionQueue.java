@@ -170,7 +170,7 @@ public class DistributionQueue extends Queue {
   	return false;
   }
   
-  public void initialize(boolean firstTime) {
+  public void initialize(boolean firstTime) throws Exception {
     super.initialize(firstTime);
     if (distributionModule == null) {
       distributionModule = new DistributionModule(distributionClassName, properties, firstTime);

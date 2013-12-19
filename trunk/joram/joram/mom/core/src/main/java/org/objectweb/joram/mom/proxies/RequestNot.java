@@ -24,7 +24,7 @@ package org.objectweb.joram.mom.proxies;
 
 import fr.dyade.aaa.agent.*;
 
-public class RequestNot extends Notification {
+public class RequestNot extends CallbackNotification {
 
   /**
    * 

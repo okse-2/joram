@@ -80,7 +80,9 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.CallbackNotification;
 import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.CountDownCallback;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
@@ -187,7 +189,7 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
    * 
    * @param firstTime true when first called by the factory
    */
-  protected abstract void initialize(boolean firstTime);
+  protected abstract void initialize(boolean firstTime) throws Exception;
 
   /**
    * Finalizes the agent before it is garbaged.
@@ -238,13 +240,17 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
 
     // set agent no save (this is the default).
     setNoSave();
+    
+    CallbackNotification callbackNotification = null;
 
     try {
       if (not instanceof GetRightsRequestNot)
         getRights(from, (GetRightsRequestNot) not);
-      else if (not instanceof ClientMessages)
-        clientMessages(from, (ClientMessages) not);
-      else if (not instanceof UnknownAgent)
+      else if (not instanceof ClientMessages) {
+        ClientMessages clientMessages = (ClientMessages) not;
+        callbackNotification = clientMessages;
+        clientMessages(from, clientMessages);
+      } else if (not instanceof UnknownAgent)
         unknownAgent(from, (UnknownAgent) not);
       else if (not instanceof RequestGroupNot)
         requestGroupNot(from, (RequestGroupNot) not);
@@ -279,7 +285,9 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       // MOM Exceptions are sent to the requester.
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, this + ".react()", exc);
-
+      if (callbackNotification != null) {
+        callbackNotification.failed(exc); 
+      } 
       AbstractRequestNot req = (AbstractRequestNot) not;
       Channel.sendTo(from, new ExceptionReply(req, exc));
     } catch (UnknownNotificationException exc) {
@@ -682,13 +690,14 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       throw new AccessException("WRITE right not granted");
     }
 
+    // TODO: remove 'from'
     doClientMessages(from, not, true);
 
     // For topic performance we must send reply after process ClientMessage. It results
     // in a best flow-control of sender allowing the handling of forwarded messages before
     // sender freeing.
     
-    if (!not.isPersistent() && !not.getAsyncSend()) {
+    if (!not.isPersistent() && !not.getAsyncSend() && !not.hasCallback()) {
       forward(from, new SendReplyNot(not.getClientContext(), not.getRequestId()));
     }
   }

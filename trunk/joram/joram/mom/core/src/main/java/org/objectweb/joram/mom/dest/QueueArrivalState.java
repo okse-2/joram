@@ -20,7 +20,7 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
-package org.objectweb.joram.mom.proxies;
+package org.objectweb.joram.mom.dest;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -35,13 +35,13 @@ import fr.dyade.aaa.common.encoding.Encodable;
 import fr.dyade.aaa.common.encoding.EncodableFactory;
 import fr.dyade.aaa.common.encoding.Encoder;
 
-public class UserAgentArrivalState implements Encodable, Serializable {
+public class QueueArrivalState implements Encodable, Serializable {
   
-  public static Logger logger = Debug.getLogger(UserAgentArrivalState.class.getName());
+  public static Logger logger = Debug.getLogger(QueueArrivalState.class.getName());
   
-  public static UserAgentArrivalState load(String id) throws Exception {
+  public static QueueArrivalState load(String id) throws Exception {
     // TODO: as we know the type, the method 'loadByteArray' would be more efficient
-    UserAgentArrivalState res = (UserAgentArrivalState) AgentServer.getTransaction().load(id);
+    QueueArrivalState res = (QueueArrivalState) AgentServer.getTransaction().load(id);
     res.id = id;
     res.modified = false;
     return res;
@@ -53,15 +53,15 @@ public class UserAgentArrivalState implements Encodable, Serializable {
   
   private boolean modified;
   
-  public UserAgentArrivalState() {}
+  public QueueArrivalState() {}
   
-  public UserAgentArrivalState(String id) {
+  public QueueArrivalState(String id) {
     this.id = id;
     arrivalCount = 0;
     modified = true;
   }
   
-  long getAndIncrementArrivalCount(boolean persistent) {
+  public long getAndIncrementArrivalCount(boolean persistent) {
     if (persistent) {
       modified = true;
     }
@@ -86,7 +86,7 @@ public class UserAgentArrivalState implements Encodable, Serializable {
   }
 
   public int getEncodableClassId() {
-    return JoramHelper.USER_AGENT_ARRIVAL_STATE_CLASS_ID;
+    return JoramHelper.QUEUE_ARRIVAL_STATE_CLASS_ID;
   }
 
   public int getEncodedSize() throws Exception {
@@ -101,10 +101,10 @@ public class UserAgentArrivalState implements Encodable, Serializable {
     arrivalCount = decoder.decode64();
   }
   
-  public static class UserAgentArrivalStateFactory implements EncodableFactory {
+  public static class Factory implements EncodableFactory {
 
     public Encodable createEncodable() {
-      return new UserAgentArrivalState();
+      return new QueueArrivalState();
     }
 
   }
