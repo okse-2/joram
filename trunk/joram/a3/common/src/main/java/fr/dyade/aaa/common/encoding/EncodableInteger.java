@@ -23,6 +23,9 @@ package fr.dyade.aaa.common.encoding;
 
 import java.io.Serializable;
 
+/**
+ * Encodable object that wraps an integer.
+ */
 public class EncodableInteger implements Encodable, Serializable {
   
   private int value;
@@ -38,6 +41,10 @@ public class EncodableInteger implements Encodable, Serializable {
   }
   
   public int incrementAndGet() {
+    return ++value;
+  }
+  
+  public int getAndIncrement() {
     return value++;
   }
 
