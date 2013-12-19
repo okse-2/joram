@@ -186,6 +186,15 @@ public abstract class AbstractJmsMessage implements Externalizable, Streamable, 
       case CONSUMER_ACK_REQUEST:
         msg = new ConsumerAckRequest();
         break;
+      case CONSUMER_RECEIVE_REQUEST:
+        msg = new ConsumerReceiveRequest();
+        break;
+      case SERVER_REPLY:
+        msg = new ServerReply();
+        break;
+      case CONSUMER_SET_LIST_REQUEST:
+        msg = new ConsumerSetListRequest();
+        break;
       default:
         msg = (AbstractJmsMessage) Class.forName(classnames[classid]).newInstance();
       }
