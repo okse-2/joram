@@ -89,6 +89,8 @@ public class AliasTestQ2 extends TestCase {
         assertEquals("Message n�" + i, ((TextMessage) msg).getText());
       }
 
+      Thread.sleep(1000);
+      
       // Kill server holding the final queue
       killAgentServer((short) 1);
 
