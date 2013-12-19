@@ -67,7 +67,7 @@ public class SchedulerQueue extends Queue {
    * 
    * @param firstTime   true when first called by the factory
    */
-  public void initialize(boolean firstTime) {
+  public void initialize(boolean firstTime) throws Exception {
     super.initialize(firstTime);
 
     try {
@@ -107,6 +107,10 @@ public class SchedulerQueue extends Queue {
       try {
         scheduler.scheduleEvent(new ScheduleEvent(msg.id, new Date(scheduleDate)), 
                                 new SchedulerQueueTask(getId()));
+        
+        // Needs to save the SchedulerQueue.
+        // Queue may not be modified so a 'setSave' is required.
+        setSave();
       } catch (Exception e) {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, "SchedulerQueue.postProcess(" + not + ')', e);
