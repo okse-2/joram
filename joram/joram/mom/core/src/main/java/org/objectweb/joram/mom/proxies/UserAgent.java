@@ -160,7 +160,9 @@ import com.scalagent.scheduler.Scheduler;
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.CallbackNotification;
 import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.CountDownCallback;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
@@ -527,11 +529,13 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     } else {
       super.react(from, not);
     }
-
-    // Called even if the notification is a DeleteNot but
-    // nothing should be saved as DeleteNot doesn't modify
-    // the UserAgent state.
-    saveUserAgentState();
+  }
+  
+  protected void agentSave() throws IOException {
+    super.agentSave();
+    arrivalState.save();
+    saveModifiedClientContexts();
+    saveModifiedClientSubscriptions();
   }
 
   private void doSetPeriod(long period) {
@@ -624,7 +628,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         }
 
         AbstractJmsRequest request = ctx.getRequest(not.getMessage());
-        reactToClientRequest(key.intValue(), request);
+        reactToClientRequest(key.intValue(), request, not);
 
         if (ctx.isClosed()) {
           // CnxCloseRequest request = (CnxCloseRequest) not.getMessage();
@@ -668,11 +672,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
               ProducerMessages pm = (ProducerMessages) groupedRequests[j];
               rm.put(req.getConnectionKey(), pm);
             } else {
-              reactToClientRequest(key.intValue(), groupedRequests[j]);
+              reactToClientRequest(key.intValue(), groupedRequests[j], null);
             }
           }
         } else {
-          reactToClientRequest(key.intValue(), request);
+          reactToClientRequest(key.intValue(), request, null);
         }
       }
     }
@@ -691,7 +695,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       // Normally the task is already cancelled by the task itself.
       if (hbt != null) hbt.cancel();
 
-      reactToClientRequest(not.getKey(), new CnxCloseRequest());
+      reactToClientRequest(not.getKey(), new CnxCloseRequest(), null);
 
       if (ctx != null) {
         MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
@@ -709,7 +713,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       Integer key = new Integer(not.getKey());
       // The connection may have already been explicitly closed by a CnxCloseRequest.
       if (connections.remove(key) != null) {
-        reactToClientRequest(not.getKey(), new CnxCloseRequest());
+        reactToClientRequest(not.getKey(), new CnxCloseRequest(), null);
         connections.remove(key);
         HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
         if (hbt != null) hbt.cancel();
@@ -733,7 +737,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         // Only reliable connections can be recovered.
         if (obj instanceof StandardConnectionContext) {
           ConnectionContext cc = (ConnectionContext) obj;
-          reactToClientRequest(cc.getKey(), new CnxCloseRequest());
+          reactToClientRequest(cc.getKey(), new CnxCloseRequest(), null);
           HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(cc.getKey());
           if (hbt != null) hbt.cancel();
           iterator.remove();
@@ -1175,14 +1179,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Browsing the topics and updating their subscriptions.
     for (Iterator topicIds = topics.iterator(); topicIds.hasNext();)
       updateSubscriptionToTopic((AgentId) topicIds.next(), -1, -1);
-
-    saveUserAgentState();
-  }
-  
-  private void saveUserAgentState() throws Exception {
-    arrivalState.save();
-    saveModifiedClientContexts();
-    saveModifiedClientSubscriptions();
   }
 
   private void setActiveCtxId(int activeCtxId) {
@@ -1200,14 +1196,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * A <code>MomExceptionReply</code> wrapping a <tt>DestinationException</tt>
    * might be sent back if a target destination can't be identified.
    */
-  protected void reactToClientRequest(int key, AbstractJmsRequest request) {
+  protected void reactToClientRequest(int key, AbstractJmsRequest request, CallbackNotification callbackNotification) {
     try {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "--- " + this + " got " + request.getClass().getName() + " with id: "
             + request.getRequestId() + " through activeCtx: " + key);
 
       if (request instanceof ProducerMessages)
-        reactToClientRequest(key, (ProducerMessages) request);
+        reactToClientRequest(key, (ProducerMessages) request, callbackNotification);
       else if (request instanceof ConsumerReceiveRequest)
         reactToClientRequest(key, (ConsumerReceiveRequest) request);
       else if (request instanceof ConsumerSetListRequest)
@@ -1217,7 +1213,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       else if (request instanceof JmsRequestGroup)
         reactToClientRequest(key, (JmsRequestGroup) request);
       else {
-        doReact(key, request);
+        doReact(key, request, callbackNotification);
       }
     } catch (IllegalArgumentException iE) {
       // Catching an exception due to an invalid agent identifier to
@@ -1237,7 +1233,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * 
    * @throws RequestException The destination id is undefined
    */
-  private void reactToClientRequest(int key, ProducerMessages req) throws RequestException {
+  private void reactToClientRequest(int key, ProducerMessages req, CallbackNotification callbackNotification) throws RequestException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "UserAgent.reactToClientRequest(" + key + ',' + req + ')');
 
@@ -1250,7 +1246,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (pm == null) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "UserAgent.reactToClientRequest : no message to send.");
-      if (destId.getTo() == getId().getTo() && !req.getAsyncSend()) {
+      
+      if (destId.getTo() == getId().getTo() && !req.getAsyncSend() &&  !callbackNotification.hasCallback()) {
         // send producer reply
         sendNot(getId(), new SendReplyNot(key, req.getRequestId()));
       }
@@ -1267,11 +1264,13 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       not.setExpiration(0L);
       if (pm.getAsyncSend()) {
         not.setAsyncSend(true);
+      } else {
+        callbackNotification.passCallback(not);
       }
     } else {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> remote sending");
-      if (!pm.getAsyncSend()) {
+      if (!pm.getAsyncSend() && !callbackNotification.hasCallback()) {
         sendNot(getId(), new SendReplyNot(key, pm.getRequestId()));
       }
     }
@@ -1321,7 +1320,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         sendNot(destId, not);
       }
     } else {
-      doReact(key, req);
+      doReact(key, req, null);
     }
   }
 
@@ -1356,7 +1355,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         sendNot(destId, not);
       }
     } else {
-      doReact(key, req);
+      doReact(key, req, null);
     }
   }
 
@@ -1384,7 +1383,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (pm != null)
           rm.put(key, pm);
       } else {
-        reactToClientRequest(key, requests[i]);
+        reactToClientRequest(key, requests[i], null);
       }
     }
 
@@ -1422,7 +1421,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * A <code>JmsExceptReply</code> is sent back to the client when an
    * exception is thrown by the reaction.
    */
-  private void doReact(int key, AbstractJmsRequest request) {
+  private void doReact(int key, AbstractJmsRequest request, CallbackNotification callbackNotification) {
     try {
       // Updating the active context if the request is not a new context
       // request!
@@ -1474,7 +1473,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       else if (request instanceof ActivateConsumerRequest)
         doReact(key, (ActivateConsumerRequest) request);
       else if (request instanceof CommitRequest)
-        doReact(key, (CommitRequest) request);
+        doReact(key, (CommitRequest) request, callbackNotification);
       else if (request instanceof AddClientIDRequest)
         doReact(key, (AddClientIDRequest) request);
       else
@@ -2510,7 +2509,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
   }
 
-  private void doReact(int key, CommitRequest req) {
+  private void doReact(int key, CommitRequest req, CallbackNotification callbackNotification) {
     // The commit may involve some local agents
     int asyncReplyCount = 0;
 
@@ -2530,6 +2529,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           not.setPersistent(false);
           if (req.getAsyncSend()) {
             not.setAsyncSend(true);
+          } else if (callbackNotification.hasCallback()) {
+            callbackNotification.passCallback(not);
           } else {
             asyncReplyCount++;
           }
@@ -2569,15 +2570,18 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
 
     if (!req.getAsyncSend()) {
-      if (asyncReplyCount == 0) {
-        sendNot(getId(), new SendReplyNot(key, req
+      if (! callbackNotification.hasCallback()) {
+        if (asyncReplyCount == 0) {
+          sendNot(getId(), new SendReplyNot(key, req
             .getRequestId()));
-      } else {
-        // we need to wait for the replies
-        // from the local agents
-        // before replying to the client.
-        activeCtx.addMultiReplyContext(req.getRequestId(), asyncReplyCount);
+        } else {
+          // we need to wait for the replies
+          // from the local agents
+          // before replying to the client.
+          activeCtx.addMultiReplyContext(req.getRequestId(), asyncReplyCount);
+        }
       }
+      // else the callback handles the ack
     }
     // else the client doesn't expect any ack
   }

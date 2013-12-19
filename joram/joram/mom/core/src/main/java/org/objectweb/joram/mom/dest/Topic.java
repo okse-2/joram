@@ -680,7 +680,13 @@ public class Topic extends Destination implements TopicMBean {
       if (! deliverables.isEmpty()) {
         TopicMsgsReply topicMsgsReply = new TopicMsgsReply(deliverables);
         topicMsgsReply.setPersistent(persistent);
-        setDmq(topicMsgsReply); 
+        
+        // If local, set callback
+        if (subscriber.getTo() == getId().getTo()) {
+          not.passCallback(topicMsgsReply);
+        }
+
+        setDmq(topicMsgsReply);
         forward(subscriber, topicMsgsReply);
         nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation + deliverables.size();
       }
