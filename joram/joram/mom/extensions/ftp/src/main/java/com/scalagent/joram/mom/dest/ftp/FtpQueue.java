@@ -90,7 +90,7 @@ public class FtpQueue extends Queue {
    * 
    * @param firstTime   true when first called by the factory
    */
-  public void initialize(boolean firstTime) {
+  public void initialize(boolean firstTime) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
     
