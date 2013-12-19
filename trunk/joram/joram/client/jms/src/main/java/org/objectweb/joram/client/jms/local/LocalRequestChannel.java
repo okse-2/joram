@@ -137,7 +137,7 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
   public void send(AbstractJmsRequest request) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "LocalConnection.send(" + request + ')');
-    ConnectionManager.sendToProxy(proxyId, ctx.getKey(), request, request);
+    ConnectionManager.sendToProxy(proxyId, ctx.getKey(), request, request, ctx);
     sentCount++;
   }
 
