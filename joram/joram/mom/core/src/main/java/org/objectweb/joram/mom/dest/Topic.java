@@ -40,6 +40,7 @@ import org.objectweb.joram.mom.notifications.ClusterJoinNot;
 import org.objectweb.joram.mom.notifications.ClusterRemoveNot;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
+import org.objectweb.joram.mom.notifications.ClientSubscriptionNot;
 import org.objectweb.joram.mom.notifications.SubscribeReply;
 import org.objectweb.joram.mom.notifications.SubscribeRequest;
 import org.objectweb.joram.mom.notifications.TopicForwardNot;
@@ -151,6 +152,8 @@ public class Topic extends Destination implements TopicMBean {
         unsubscribeRequest(from);
       else if (not instanceof TopicForwardNot)
         topicForwardNot(from, (TopicForwardNot) not);
+      else if (not instanceof ClientSubscriptionNot)
+        {}
       else
         super.react(from, not);
     } catch (MomException exc) {

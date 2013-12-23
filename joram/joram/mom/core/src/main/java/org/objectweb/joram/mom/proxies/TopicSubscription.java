@@ -100,4 +100,9 @@ class TopicSubscription {
   Iterator getNames() {
     return subs.keySet().iterator();
   }
+  
+  /** Returns the number of subscriptions. */
+  int size() {
+	return subs.keySet().size();
+  }
 }
