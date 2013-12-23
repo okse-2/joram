@@ -12,7 +12,6 @@ import javax.jms.ConnectionFactory;
 import javax.naming.InitialContext;
 
 import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.AdminWrapper;
 import org.objectweb.joram.client.jms.admin.Server;
 import org.objectweb.joram.client.jms.admin.User;
@@ -68,7 +67,7 @@ public class JoramService extends Service {
 			ConnectionFactory cf = (ConnectionFactory) jndiCtx.lookup("cfp2");
 			jndiCtx.close();
 			
-			Connection cn = cf.createConnection("root", "root");
+			Connection cn = cf.createConnection("root","root");
 			cn.start();
 			
 			aw = new AdminWrapper(cn);

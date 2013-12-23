@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import javax.jms.ConnectionFactory;
 import javax.naming.InitialContext;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import elasticity.interfaces.Service;
 
@@ -61,7 +63,8 @@ public class ElasticityService extends Service {
 	public void initService(Properties props) throws Exception {
 		logger.log(Level.FINE, "Started Initialization..");
 		//Setting the admin connection once and for all.
-		AdminModule.connect("localhost",16101,"root","root", 60);
+		ConnectionFactory cfa = TcpConnectionFactory.create("localhost",16101);
+		AdminModule.connect(cfa,"root","root");
 		
 		//Initializes the service beneath.
 		js = new JoramService();

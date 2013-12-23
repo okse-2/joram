@@ -4,7 +4,7 @@
 JORAM_HOME=/home/ubuntu/joram
 if [ -z $JAVA_HOME ]
 then
-	JAVA_HOME=/home/ubuntu/jdk1.7.0_10
+	JAVA_HOME=/home/ubuntu/jdk1.7.0_25
 fi
 
 if [ -z $1 ]
@@ -22,7 +22,7 @@ CLASSES=$JORAM_HOME/classes/
 CLASSPATH=$JORAM_BUNDLES/a3-common.jar
 CLASSPATH=$CLASSPATH:$JORAM_BUNDLES/jndi-client.jar
 CLASSPATH=$CLASSPATH:$JORAM_BUNDLES/jndi-shared.jar
-CLASSPATH=$CLASSPATH:$JORAM_BUNDLES/geronimo-jms_1.1_spec.jar
+CLASSPATH=$CLASSPATH:$JORAM_BUNDLES/javax.jms-api.jar
 CLASSPATH=$CLASSPATH:$JORAM_BUNDLES/joram-client-jms.jar
 CLASSPATH=$CLASSPATH:$JORAM_BUNDLES/joram-shared.jar
 CLASSPATH=$CLASSPATH:$JORAM_BUNDLES/jcup.jar

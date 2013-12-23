@@ -3,7 +3,7 @@ SERVP2=$(ec2-describe-instances | grep running | sed -n '2p' | cut -f17)
 SERVW1=$(ec2-describe-instances | grep running | sed -n '3p' | cut -f17)
 TMPLTE=$(ec2-describe-instances | grep running | sed -n '4p' | cut -f17)
 
-PEM="/home/elrhedda/Amazon/joram.pem"
+PEM="/home/elrhedda/Joram/amazon/joram.pem"
 KEY="-i $PEM"
 
 echo "BUILDING.."
