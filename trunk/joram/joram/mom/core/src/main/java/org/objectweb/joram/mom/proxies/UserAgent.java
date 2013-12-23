@@ -66,8 +66,11 @@ import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.DenyRequest;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
+import org.objectweb.joram.mom.notifications.GetClientSubscriptions;
+import org.objectweb.joram.mom.notifications.ClientSubscriptionNot;
 import org.objectweb.joram.mom.notifications.QueueMsgReply;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
+import org.objectweb.joram.mom.notifications.ReconnectSubscribersNot;
 import org.objectweb.joram.mom.notifications.SubscribeReply;
 import org.objectweb.joram.mom.notifications.SubscribeRequest;
 import org.objectweb.joram.mom.notifications.TopicDeliveryTimeNot;
@@ -526,6 +529,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       doReact((FwdAdminRequestNot) not);
     } else if (not instanceof TopicDeliveryTimeNot) {
       doReact((TopicDeliveryTimeNot) not);
+    } else if (not instanceof GetClientSubscriptions) {
+      doReact(from, (GetClientSubscriptions) not);
+    } else if (not instanceof ReconnectSubscribersNot) {
+      doReact(from, (ReconnectSubscribersNot) not);
     } else {
       super.react(from, not);
     }
@@ -536,6 +543,81 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     arrivalState.save();
     saveModifiedClientContexts();
     saveModifiedClientSubscriptions();
+  }
+  
+  /**
+   * Used to get number of local subscribers to 'from'.
+   * This number is sent as an Admin reply.
+   * 
+   * @param from should be a Topic agent ID.
+   * @param not contains the original Admin not sent to 'from'.
+   */
+  private void doReact(AgentId from, GetClientSubscriptions not) {
+	FwdAdminRequestNot aNot = (FwdAdminRequestNot) not.getAdminNot();
+	int ls = ((TopicSubscription) topicsTable.get(from)).size();
+	
+    replyToTopic(new GetNumberReply(ls),
+      aNot.getReplyTo(), aNot.getRequestMsgId(), aNot.getReplyMsgId());
+  }
+  
+  /**
+   * Sends reconnection messages to one or more subscribers.
+   * 
+   * @param from
+   * @param not
+   */
+  private void doReact(AgentId from, ReconnectSubscribersNot not) {
+	ClientSubscription sub;
+	ConsumerMessages consM;
+	
+	String subName = not.getSubName();
+	ArrayList msgs = not.getMsgs();
+	List message = new ArrayList();
+	message.add(
+	  new Message((org.objectweb.joram.shared.messages.Message) msgs.get(0)));
+	if (subName != null) {
+      // Redirect a specific subscriber.
+	  sub = subsTable.get(subName);
+	  sub.browseNewMessages(message);
+	  consM = sub.deliver();
+	  try {
+	    setCtx(sub.getContextId());
+	    if (activeCtx.getActivated()) {
+		  doReply(consM);
+	    }
+	  } catch (StateException e) {}
+	} else {
+	  // Redirect many subscribers..
+	  ArrayList<Integer> subs = not.getSubs(); 
+	  TopicSubscription tSub = (TopicSubscription) topicsTable.get(from);
+	  int i = 0;
+	  int c = subs.get(i);
+	  for (Iterator names = tSub.getNames(); names.hasNext();) {
+	    subName = (String) names.next();
+	    sub = (ClientSubscription) subsTable.get(subName);
+		if (sub != null && sub.getActive() > 0) {
+		  sub.browseNewMessages(message);
+		  consM = sub.deliver();
+		  try {
+			setCtx(sub.getContextId());
+		    if (activeCtx.getActivated()) {
+		      doReply(consM);
+		    }
+		  } catch (StateException e) {}
+		}
+		
+		c--;
+		if (c == 0)
+		  i++;
+		
+		if (i < subs.size()) {
+		  c = subs.get(i);
+		  message.set(0,new Message((org.objectweb.joram.shared.messages.Message) msgs.get(i)));
+		} else {
+		  break;
+		}
+	  }
+	}
   }
 
   private void doSetPeriod(long period) {
@@ -1778,6 +1860,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Acknowledging the request, if needed.
     if (!sent)
       sendNot(getId(), new SyncReply(activeCtxId, new ServerReply(req)));
+    
+    Channel.sendTo(topicId,new ClientSubscriptionNot(subName));
   }
 
   /**
@@ -3469,7 +3553,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           replyTo, requestMsgId, replyMsgId);
     }
   }
-
+  
   private void replyToTopic(AdminReply reply, AgentId replyTo, String requestMsgId, String replyMsgId) {
     if (replyTo == null) // In some cases the request needs no response
       return;
@@ -4169,5 +4253,4 @@ class Xid implements Serializable, Encodable {
     fi = decoder.decodeUnsignedInt();
     gti = decoder.decodeByteArray();
   }
-
 }

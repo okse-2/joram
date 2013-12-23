@@ -150,6 +150,7 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected final static int MONITOR_GET_DELIVERED_MESSAGES = 99;
   protected final static int SND_DEST_WEIGHTS = 100;
   protected final static int SET_SYNC_EXCEPTION_ON_FULL_DEST = 101;
+  protected final static int SCALE_REQUEST = 102;
 
   protected int classid;
 
@@ -255,7 +256,8 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
     DelRemoteDestination.class.getName(),
     GetDeliveredMessages.class.getName(),
     SendDestinationsWeights.class.getName(),
-    SetSyncExceptionOnFullDestRequest.class.getName()
+    SetSyncExceptionOnFullDestRequest.class.getName(),
+    ScaleRequest.class.getName()
   };
   
   protected abstract int getClassId();
