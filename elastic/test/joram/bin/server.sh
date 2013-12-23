@@ -4,7 +4,7 @@
 JORAM_HOME=/home/ubuntu/joram
 if [ -z $JAVA_HOME ]
 then
-	JAVA_HOME=/home/ubuntu/jdk1.7.0_10
+	JAVA_HOME=/home/ubuntu/jdk1.7.0_25
 fi
 
 # Test the argument number

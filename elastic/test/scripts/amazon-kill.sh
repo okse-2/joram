@@ -1,7 +1,7 @@
 #!/bin/bash
 
-for VM in `ec2-describe-instances | grep INSTANCE | cut -f17 | head -n 3`
+for VM in `ec2-describe-instances | grep INSTANCE | cut -f17`
 do
-	ssh 	-i /home/elrhedda/Amazon/joram.pem \
+	ssh 	-i /home/elrhedda/Joram/amazon/joram.pem \
 		ubuntu@$VM killall java
 done

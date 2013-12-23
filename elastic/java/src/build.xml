@@ -1,4 +1,4 @@
-<project default="compile" basedir="." xmlns:m2="urn:maven-artifact-ant">
+<project name ="elastic-joram" default="compile" basedir="." xmlns:m2="urn:maven-artifact-ant">
 
   <!-- Initializes the environment paths and properties -->
   <target name="init">
