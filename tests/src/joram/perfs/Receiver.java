@@ -22,6 +22,8 @@
  */
 package joram.perfs;
 
+import java.util.UUID;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Message;
@@ -52,7 +54,7 @@ public class Receiver extends BaseTest implements MessageListener {
     this.cnx = cnx;
     this.dest = dest;
 
-    this.cnx.setClientID("Receiver");
+    this.cnx.setClientID("Receiver" + UUID.randomUUID());
     transacted = Boolean.getBoolean("Transacted");
     durable = Boolean.getBoolean("SubDurable");
     dupsOk = Boolean.getBoolean("dupsOk");
