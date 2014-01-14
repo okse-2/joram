@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 
 <config>
+  <property name="Transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
+  <property name="Transaction.SyncOnWrite" value="false"/>
+  
   <server id="0" name="s0" hostname="localhost">
     <service class="fr.dyade.aaa.agent.AdminProxy" args="8090"/>
     <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16600"/>
