@@ -2,7 +2,11 @@
 <config>
   <property name="Engine" value="@engine@"/>
   <property name="Transaction" value="@transaction@"/>
-
+  
+  <!--property name="Transaction.NbLogFile" value="256"/ -->
+  <!--property name="Transaction.MaxLogFileSize" value="256"/ -->
+  <!--property name="Transaction.minObjInLog" value="0"/ -->
+  
   <server id="0" name="S0" hostname="localhost">
     <property name="fr.dyade.aaa.util.ReliableTcpConnection.windowSize" 
               value="100"/>
