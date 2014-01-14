@@ -94,15 +94,23 @@ class TcpBaseTest {
   public static void AdminConnect() throws Exception {
     String host = System.getProperty("hostname", "localhost");
     int port = Integer.getInteger("port", 16010).intValue();
-      
-    AdminModule.connect(host, port, "root", "root", 60);
+
+    boolean ssl = Boolean.getBoolean("WithSSL");
+    if (ssl)
+      AdminModule.connect(host, port, "root", "root", 60, "org.objectweb.joram.client.jms.tcp.ReliableSSLTcpClient");
+    else
+      AdminModule.connect(host, port, "root", "root", 60);
   }
 
   public static ConnectionFactory createConnectionFactory() throws Exception {
     String host = System.getProperty("hostname", "localhost");
     int port = Integer.getInteger("port", 16010).intValue();
 
-    return TcpConnectionFactory.create(host, port);
+    boolean ssl = Boolean.getBoolean("WithSSL");
+    if (ssl)
+      return TcpConnectionFactory.create(host, port, "org.objectweb.joram.client.jms.tcp.ReliableSSLTcpClient");
+    else
+      return TcpConnectionFactory.create(host, port);
   }
 }
 
