@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2014 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -823,81 +822,81 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
 
       Set<Entry<Object, Operation>> entries = ctxlog.entrySet();
       Iterator<Entry<Object, Operation>> iterator = entries.iterator();
-      try {
-        while (true) {
-          Entry<Object, Operation> entry = iterator.next();
-          Object key = entry.getKey();
-          Operation op = entry.getValue();
 
-          if (op.type == Operation.NOOP) continue;
+      while (iterator.hasNext()) {
+        Entry<Object, Operation> entry = iterator.next();
+        Object key = entry.getKey();
+        Operation op = entry.getValue();
 
-//        if (logmon.isLoggable(BasicLevel.DEBUG)) {
-//           if (op.type == Operation.SAVE) {
-//             logmon.log(BasicLevel.DEBUG, "NTransaction save " + op.name);
-//           } else if (op.type == Operation.CREATE) {
-//             logmon.log(BasicLevel.DEBUG, "NTransaction create " + op.name);
-//           } else if (op.type == Operation.DELETE) {
-//             logmon.log(BasicLevel.DEBUG, "NTransaction delete " + op.name);
-//           } else {
-//             logmon.log(BasicLevel.DEBUG, "NTransaction unknown(" + op.type + ") " + op.name);
-//           }
-//        }
+        if (op.type == Operation.NOOP) continue;
 
-          op.logidx = logidx;
-          op.logptr = current + count;
+        //        if (logmon.isLoggable(BasicLevel.DEBUG)) {
+        //           if (op.type == Operation.SAVE) {
+        //             logmon.log(BasicLevel.DEBUG, "NTransaction save " + op.name);
+        //           } else if (op.type == Operation.CREATE) {
+        //             logmon.log(BasicLevel.DEBUG, "NTransaction create " + op.name);
+        //           } else if (op.type == Operation.DELETE) {
+        //             logmon.log(BasicLevel.DEBUG, "NTransaction delete " + op.name);
+        //           } else {
+        //             logmon.log(BasicLevel.DEBUG, "NTransaction unknown(" + op.type + ") " + op.name);
+        //           }
+        //        }
 
-          // Save the operation to the log on disk
-          write(op.type);
-          if (op.dirName != null) {
-            writeUTF(op.dirName);
-          } else {
-            write(emptyUTFString);
-          }
-          writeUTF(op.name);
-          if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
-            writeInt(op.value.length);
-            write(op.value);
-          }
-          // TODO: Use SoftReference ?
-          op.value = null;
+        op.logidx = logidx;
+        op.logptr = current + count;
 
-          // Reports all committed operation in current log
-          Operation old = log.put(key, op);
-          logFile[logidx%nbLogFile].logCounter += 1;
-
-          if (old != null) {
-            logFile[old.logidx%nbLogFile].logCounter -= 1;
-
-            // There is 6 different cases:
-            //
-            //   new |
-            // old   |  C  |  S  |  D
-            // ------+-----+-----+-----+
-            //   C   |  C  |  C  | NOP
-            // ------+-----+-----+-----+
-            //   S   |  S  |  S  |  D
-            // ------+-----+-----+-----+
-            //   D   |  S  |  S  |  D
-            //
-
-            if (old.type == Operation.CREATE) {
-              if (op.type == Operation.SAVE) {
-                // The object has never been created on disk, the resulting operation
-                // is still a creation.
-                op.type = Operation.CREATE;
-              } else if (op.type == Operation.DELETE) {
-                // There is no more need to memorize the deletion the object will be
-                // never created on disk.
-                op.type = Operation.NOOP;
-                log.remove(key);
-                op.free();
-                logFile[logidx%nbLogFile].logCounter -= 1;
-              }
-            }
-            old.free();
-          }
+        // Save the operation to the log on disk
+        write(op.type);
+        if (op.dirName != null) {
+          writeUTF(op.dirName);
+        } else {
+          write(emptyUTFString);
         }
-      } catch (NoSuchElementException exc) {}
+        writeUTF(op.name);
+        if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
+          writeInt(op.value.length);
+          write(op.value);
+        }
+        // TODO: Use SoftReference ?
+        op.value = null;
+
+        // Reports all committed operation in current log
+        Operation old = log.put(key, op);
+        logFile[logidx%nbLogFile].logCounter += 1;
+
+        if (old != null) {
+          logFile[old.logidx%nbLogFile].logCounter -= 1;
+
+          // There is 6 different cases:
+          //
+          //   new |
+          // old   |  C  |  S  |  D
+          // ------+-----+-----+-----+
+          //   C   |  C  |  C  | NOP
+          // ------+-----+-----+-----+
+          //   S   |  S  |  S  |  D
+          // ------+-----+-----+-----+
+          //   D   |  S  |  S  |  D
+          //
+
+          if (old.type == Operation.CREATE) {
+            if (op.type == Operation.SAVE) {
+              // The object has never been created on disk, the resulting operation
+              // is still a creation.
+              op.type = Operation.CREATE;
+            } else if (op.type == Operation.DELETE) {
+              // There is no more need to memorize the deletion the object will be
+              // never created on disk.
+              op.type = Operation.NOOP;
+              log.remove(key);
+              op.free();
+              logFile[logidx%nbLogFile].logCounter -= 1;
+            }
+          }
+          old.free();
+        }
+      }
+
       write(Operation.END);
 
       logFile[logidx%nbLogFile].seek(current);
@@ -1109,24 +1108,22 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
 
       Iterator<Operation> iterator = log.values().iterator();
 
-      try {
-        while (true) {
-          Operation op = iterator.next();
+      while (iterator.hasNext()) {
+        Operation op = iterator.next();
 
-          if (op.logidx != logf.logidx) continue;
+        if (op.logidx != logf.logidx) continue;
 
-          if (op.type == Operation.SAVE) {
-            strbuf.append("SAVE ");
-          } else if (op.type == Operation.CREATE) {
-            strbuf.append("CREATE ");
-          } else if (op.type == Operation.DELETE) {
-            strbuf.append("DELETE ");
-          } else {
-            strbuf.append("OP(").append(op.type).append(") ");
-          }
-          strbuf.append(op.dirName).append('/').append(op.name).append('\n');
+        if (op.type == Operation.SAVE) {
+          strbuf.append("SAVE ");
+        } else if (op.type == Operation.CREATE) {
+          strbuf.append("CREATE ");
+        } else if (op.type == Operation.DELETE) {
+          strbuf.append("DELETE ");
+        } else {
+          strbuf.append("OP(").append(op.type).append(") ");
         }
-      } catch (NoSuchElementException exc) {}
+        strbuf.append(op.dirName).append('/').append(op.name).append('\n');
+      }
 
       return strbuf.toString();
     }
@@ -1150,32 +1147,30 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       
       if (logf.logCounter > 0) {
         Iterator<Operation> iterator = log.values().iterator();
-        try {
-          while (true) {
-            Operation op = iterator.next();
+        while (iterator.hasNext()) {
+          Operation op = iterator.next();
 
-            if (op.logidx != logf.logidx) continue;
+          if (op.logidx != logf.logidx) continue;
 
-            if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
-              if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG,
-                           "NTransaction, LogFile.Save (" + op.dirName + '/' + op.name + ')');
+          if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG,
+                         "NTransaction, LogFile.Save (" + op.dirName + '/' + op.name + ')');
 
-              byte buf[] = getFromLog(op);
+            byte buf[] = getFromLog(op);
 
-              repository.save(op.dirName, op.name, buf);
-            } else if (op.type == Operation.DELETE) {
-              if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG,
-                           "NTransaction, LogFile.Delete (" + op.dirName + '/' + op.name + ')');
+            repository.save(op.dirName, op.name, buf);
+          } else if (op.type == Operation.DELETE) {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG,
+                         "NTransaction, LogFile.Delete (" + op.dirName + '/' + op.name + ')');
 
-              repository.delete(op.dirName, op.name);
-            }
-
-            iterator.remove();
-            op.free();
+            repository.delete(op.dirName, op.name);
           }
-        } catch (NoSuchElementException exc) {}
+
+          iterator.remove();
+          op.free();
+        }
 
         repository.commit();
       }
