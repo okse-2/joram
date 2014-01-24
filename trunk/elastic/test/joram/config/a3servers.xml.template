@@ -1,41 +1,26 @@
 <?xml version="1.0"?>
 <config>
-  <domain name="D1" network="fr.dyade.aaa.agent.PoolNetwork"/>
+  <domain name="D0" network="fr.dyade.aaa.agent.PoolNetwork"/>
 	
   <property name="Transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
   <property name="Transaction.NbLogFile" value="64"/>
   <property name="Transaction.MaxLogFileSize" value="16"/>
 
-  <server id="101" name="P1" hostname="HOST101">
-    <network domain="D1" port="16151"/>
+  <server id="0" name="T0" hostname="HOST0">
+    <network domain="D0" port="16050"/>
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
+             args="16000"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
              args="root root"/>
-    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
-             args="16101"/>
-    <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
+    <service class="fr.dyade.aaa.jndi2.server.JndiServer"
+             args="16400"/>
   </server>
 
-  <server id="102" name="P2" hostname="HOST102">
-    <network domain="D1" port="16152"/>
-    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
-             args="root root"/>
-    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
-             args="16102"/>
-  </server>
-
-  <server id="1" name="W1" hostname="HOST001">
-    <network domain="D1" port="16051"/>
-    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
-             args="root root"/>
+  <server id="1" name="T1" hostname="HOST1">
+    <network domain="D0" port="16051"/>
     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
              args="16001"/>
-  </server>
-
-  <server id="2" name="W2" hostname="HOST001">
-    <network domain="D1" port="16052"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
              args="root root"/>
-    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
-             args="16002"/>
   </server>
 </config>

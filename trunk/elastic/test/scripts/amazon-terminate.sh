@@ -4,7 +4,7 @@ if [ "$1" = "all" ]
 then
 	START=1
 else
-	START=5
+	START=4
 fi
 
 for VM in $(ec2-describe-instances | grep running | tail -n +$START | cut -f2)
