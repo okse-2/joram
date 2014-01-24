@@ -40,8 +40,10 @@ public class ReconnectSubscribersNot extends Notification {
 	
 	private String subName;
 	
-	ArrayList<Integer> subs;
-	ArrayList<Message> msgs;
+	private ArrayList<Integer> subs;
+	private ArrayList<Message> msgs;
+	
+	private FwdAdminRequestNot not;
 	
 	public ReconnectSubscribersNot(String subName, Message msg) {
 		this.subName = subName;
@@ -49,9 +51,10 @@ public class ReconnectSubscribersNot extends Notification {
 		msgs.add(msg);
 	}
 	
-	public ReconnectSubscribersNot(ArrayList<Integer> subs, ArrayList<Message> msgs) {
+	public ReconnectSubscribersNot(ArrayList<Integer> subs, ArrayList<Message> msgs,FwdAdminRequestNot not) {
 		this.subs = subs;
 		this.msgs = msgs;
+		this.not = not;
 	}
 	
 	public String getSubName() {
@@ -64,5 +67,9 @@ public class ReconnectSubscribersNot extends Notification {
 	
 	public ArrayList<Message> getMsgs() {
 		return msgs;
+	}
+	
+	public FwdAdminRequestNot getNot() {
+		return not;
 	}
 }

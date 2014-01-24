@@ -618,6 +618,13 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 		}
 	  }
 	}
+	
+	// If there is an Admin request to reply to..
+	FwdAdminRequestNot adr = not.getNot();
+	if (adr != null) {
+	  replyToTopic(new AdminReply(true, null),
+	    adr.getReplyTo(), adr.getRequestMsgId(), adr.getReplyMsgId());
+	}
   }
 
   private void doSetPeriod(long period) {
@@ -967,7 +974,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         // reactToClientRequest(key.intValue(), new CnxCloseRequest());
         //
         // if (ctx != null) {
-//          MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
+        //   MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
         // + ':' + key + " closed");
         // ctx.pushError(exc);
         // }
@@ -1861,6 +1868,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (!sent)
       sendNot(getId(), new SyncReply(activeCtxId, new ServerReply(req)));
     
+    // Forward client subscription (should be ignored if topicId isn't an ElasticTopic)
     Channel.sendTo(topicId,new ClientSubscriptionNot(subName));
   }
 
