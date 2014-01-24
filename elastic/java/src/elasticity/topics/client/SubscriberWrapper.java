@@ -5,7 +5,7 @@ import javax.jms.MessageListener;
 import javax.jms.Topic;
 
 /**
- * Creates subscribers on specified topic.
+ * Wraps JMS subscriber to handle reconnection.
  * 
  * @author Ahmed El Rheddane
  *
@@ -18,7 +18,6 @@ public class SubscriberWrapper {
 	 * Listener specified by the user.
 	 */
 	MessageListener listener;
-	boolean reconnecting;
 	
 	SubscriberThread t0;
 	SubscriberThread t1;
@@ -27,8 +26,6 @@ public class SubscriberWrapper {
 		this.topic = topic;
 		this.cf = cf;
 		this.listener = listener;
-		this.reconnecting = false;
-		
 	}
 	
 	public void start() {
@@ -44,21 +41,15 @@ public class SubscriberWrapper {
 		if (t1 != null) {
 			t1.terminate();
 		}
-		
-		reconnecting = false;
 	}
 	
 	void reconnect(Topic topic, ConnectionFactory cf) {
-		reconnecting = true;
-		
 		t1 = t0;
 		t0 = new SubscriberThread(topic,cf,this);
 		t0.start();
 	}
 	
 	void reconnected() {
-		reconnecting = false;
-		
 		if (t1 != null) {
 			t1.terminate();
 		}

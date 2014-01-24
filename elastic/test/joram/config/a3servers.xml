@@ -6,7 +6,7 @@
   <property name="Transaction.NbLogFile" value="64"/>
   <property name="Transaction.MaxLogFileSize" value="16"/>
 
-  <server id="0" name="S0" hostname="10.104.185.235">
+  <server id="0" name="T0" hostname="10.80.20.131">
     <network domain="D0" port="16050"/>
     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
              args="16000"/>
@@ -16,18 +16,10 @@
              args="16400"/>
   </server>
 
-  <server id="1" name="S1" hostname="10.104.164.190">
+  <server id="1" name="T1" hostname="10.36.173.211">
     <network domain="D0" port="16051"/>
     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
              args="16001"/>
-    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
-             args="root root"/>
-  </server>
-
-  <server id="2" name="S2" hostname="10.104.197.7">
-    <network domain="D0" port="16052"/>
-    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
-             args="16002"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
              args="root root"/>
   </server>
