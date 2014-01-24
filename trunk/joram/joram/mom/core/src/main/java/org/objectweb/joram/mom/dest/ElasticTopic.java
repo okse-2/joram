@@ -21,6 +21,7 @@
  * Initial developer(s): Université Joseph Fourier
  * Contributor(s): ScalAgent Distributed Technologies
  */
+
 package org.objectweb.joram.mom.dest;
 
 import java.io.Serializable;
@@ -48,7 +49,6 @@ import fr.dyade.aaa.agent.Notification;
 
 /**
  * Class describing a node of a scalable topic tree.
- * The difference with Topic is that it allows more than one father.
  * 
  * @author Ahmed El Rheddane
  */
@@ -81,7 +81,6 @@ public class ElasticTopic extends Topic {
 
 	public void setProperties(Properties properties, boolean firstTime) throws Exception {
 		super.setProperties(properties, firstTime);
-
 		if (properties != null && properties.containsKey("root")) {
 			isRoot = true;
 		}
@@ -109,7 +108,8 @@ public class ElasticTopic extends Topic {
 		if (not instanceof ClientSubscriptionNot) {
 			handleClientSubscriptionNot(from, (ClientSubscriptionNot) not);
 		} else if (not instanceof ReconnectSubscribersNot) {
-			// Forward to local default user agent.
+			/* Forward to local default user agent.
+			   Should reply to initial Admin request. */
 			Channel.sendTo((AgentId) subscribers.get(0), not);
 		} else {
 			super.react(from, not);
@@ -137,8 +137,9 @@ public class ElasticTopic extends Topic {
 	}
 
 	private void handleGetSubscriptionsRequest(FwdAdminRequestNot not) {
+		logger.log(BasicLevel.ERROR, "Number of subsribers: " + subscribers.size());
 		if (subscribers.isEmpty()) {
-			replyToTopic(new GetNumberReply(getNumberOfSubscribers()),
+			replyToTopic(new GetNumberReply(0),
 					not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
 		} else {
 			Channel.sendTo((AgentId) subscribers.get(0),
@@ -170,8 +171,8 @@ public class ElasticTopic extends Topic {
 			subId = subId % pool.size();
 			break;
 		case ScaleRequest.BALANCE:
-			/* Reconnect a given number of subscribers.
-			 * param should be: "init_topic:topic_index1;number_of_subscribers1;topic_index1;..." */
+			/* Reconnect a given number of subscribers ON THE SAME TOPIC.
+			   param should be: "init_topic:topic_index1;number_of_subscribers1;topic_index1;..." */
 			param = sr.getParameter().split(":");
 			AgentId topic = pool.get(Integer.parseInt(param[0])).id;
 			String[] param1 = param[1].split(";");
@@ -182,10 +183,10 @@ public class ElasticTopic extends Topic {
 				subs.add(Integer.parseInt(param1[i + 1]));
 			}
 			ReconnectSubscribersNot rsn = 
-					new ReconnectSubscribersNot(subs, msgs);
+					new ReconnectSubscribersNot(subs, msgs,not);
+			//Destination should do the Admin reply.
 			Channel.sendTo(topic,rsn);
-			
-			break;
+			return;
 		default:
 			// Should never happen.
 		}
@@ -197,14 +198,18 @@ public class ElasticTopic extends Topic {
 	/**
 	 * If root, redirects subscriptions to proper topic.
 	 * 
-	 * @param from shoud be the local default user agent.
+	 * @param from should be the local default user agent.
 	 * @param not Notification of a new client subscriptions.
 	 */
 	private void handleClientSubscriptionNot(AgentId from, ClientSubscriptionNot not) {
-		if (!isRoot)
+		if (!isRoot) {
+			logger.log(BasicLevel.ERROR,"Received subscription!");
 			return;
+		}
 
 		Message msg = createReconnectionMessage(subId);
+		logger.log(BasicLevel.ERROR,"Redirecting sub to: " + subId + ";" + pool.get(subId).server);
+		
 		subId = (subId + 1) % pool.size();
 
 		ReconnectSubscribersNot rsn = 

@@ -62,6 +62,7 @@ import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.DeleteDestination;
 import org.objectweb.joram.shared.admin.GetStatsReply;
 import org.objectweb.joram.shared.admin.GetStatsRequest;
+import org.objectweb.joram.shared.admin.ScaleRequest;
 import org.objectweb.joram.shared.admin.SetDMQRequest;
 import org.objectweb.joram.shared.admin.SetReader;
 import org.objectweb.joram.shared.admin.SetRight;
@@ -1065,6 +1066,8 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
                    not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof AdminCommandRequest) {
       processAdminCommand((AdminCommandRequest) adminRequest, not.getReplyTo(), not.getRequestMsgId());
+    } else if (adminRequest instanceof ScaleRequest) {
+    	// Ignored, should be handled either by Queues or Topics.
     } else {
       logger.log(BasicLevel.ERROR, "Unknown administration request for destination " + getId());
       replyToTopic(new AdminReply(AdminReply.UNKNOWN_REQUEST, null),
