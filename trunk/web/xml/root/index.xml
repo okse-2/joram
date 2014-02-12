@@ -58,6 +58,20 @@
    
     <s1 name="Latest News">
 
+      <s2 name="February 19, 2014: Eclipse IoT Day Grenoble 2014 conference, France.">
+      <p><a href="www.scalagent.com">ScalAgent D.T.</a>) is currently implementing version 3.1 of
+      the MQTT protocol. This work is to be presented by David Féliot at the
+      <a href="http://wiki.eclipse.org/Eclipse_IoT_Day_Grenoble_2014">Eclipse IoT Day Grenoble 2014 conference</a>,
+      organised by Eclipse at Grenoble on the 19th of february 2014.</p>
+      <p>David's presentation will be available on the <a href="http://mqtt.jorammq.com/">ScalAgent's MQTT</a> web
+      page after the conference.</p>
+      </s2>
+
+      <s2 name="November 13, 2013: OW2 Annual Conference, Paris, France.">
+      <p>Serge Lacourte, CEO of ScalAgent DT, participates to a panel at the annual OW2 conference
+	  on the subject : Benefits and challenges of integrating open source components.</p>
+      </s2>
+      
       <s2 name="October 2, 2013: JORAM 5.9.0 release is available.">
       <p>This release introduces many improvements and bug fixes, essentially:</p>
       <ul>
