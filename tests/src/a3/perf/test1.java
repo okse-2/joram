@@ -41,7 +41,7 @@ public class test1 extends TestCase {
 
     int bounce = Integer.getInteger("bounce", 499).intValue();
 
-    timeout = (long) (bounce);
+    timeout = 5000L + (long) (bounce);
     timeout = Long.getLong("timeout", timeout).longValue();
 
     Ping ping = new Ping(ServerPing);
