@@ -19,8 +19,12 @@
 -->
 <config>
   <property name="Transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
-  <property name="Transaction.NbLogFile" value="64"/>
-  <property name="Transaction.MaxLogFileSize" value="16"/>
+  <property name="Transaction.NbLogFile" value="256"/>
+  <property name="Transaction.MaxLogFileSize" value="256"/>
+  <property name="Transaction.minObjInLog" value="0"/>
+  
+	<!-- property name="org.objectweb.joram.mom.proxies.ConnectionManager.multiCnxSync" value="true" / -->
+	<!-- property name="org.objectweb.joram.mom.proxies.ConnectionManager.multiCnxSyncDelay" value="1" / -->
   
   <server id="0" name="S0" hostname="localhost">
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
