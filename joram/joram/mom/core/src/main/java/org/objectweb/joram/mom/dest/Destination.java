@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2014 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -62,7 +62,6 @@ import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.DeleteDestination;
 import org.objectweb.joram.shared.admin.GetStatsReply;
 import org.objectweb.joram.shared.admin.GetStatsRequest;
-import org.objectweb.joram.shared.admin.ScaleRequest;
 import org.objectweb.joram.shared.admin.SetDMQRequest;
 import org.objectweb.joram.shared.admin.SetReader;
 import org.objectweb.joram.shared.admin.SetRight;
@@ -83,7 +82,6 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.CallbackNotification;
 import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.CountDownCallback;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
@@ -1066,8 +1064,6 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
                    not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof AdminCommandRequest) {
       processAdminCommand((AdminCommandRequest) adminRequest, not.getReplyTo(), not.getRequestMsgId());
-    } else if (adminRequest instanceof ScaleRequest) {
-    	// Ignored, should be handled either by Queues or Topics.
     } else {
       logger.log(BasicLevel.ERROR, "Unknown administration request for destination " + getId());
       replyToTopic(new AdminReply(AdminReply.UNKNOWN_REQUEST, null),
