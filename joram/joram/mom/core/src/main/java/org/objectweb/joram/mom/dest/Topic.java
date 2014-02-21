@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2014 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -152,9 +152,9 @@ public class Topic extends Destination implements TopicMBean {
         unsubscribeRequest(from);
       else if (not instanceof TopicForwardNot)
         topicForwardNot(from, (TopicForwardNot) not);
-      else if (not instanceof ClientSubscriptionNot)
-        {}
-      else
+      else if (not instanceof ClientSubscriptionNot) {
+        // Do nothing, this notification is only handled by ElasticTopic.
+      } else
         super.react(from, not);
     } catch (MomException exc) {
       // MOM exceptions are sent to the requester.
