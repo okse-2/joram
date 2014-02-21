@@ -29,7 +29,6 @@ import fr.dyade.aaa.agent.Notification;
  * Used by ElasticTopic.
  * 
  * @author Ahmed El Rheddane
- *
  */
 public class GetClientSubscriptions extends Notification {
 	private static final long serialVersionUID = 1L;
