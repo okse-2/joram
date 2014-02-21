@@ -33,10 +33,8 @@ import fr.dyade.aaa.common.stream.StreamUtil;
  * Class to gather all scaling requests
  * 
  * @author Ahmed El Rheddane
- *
  */
 public class ScaleRequest extends DestinationAdminRequest {
-	
 	/**
 	 * Operation corresponding to the addition of one resource.
 	 */
@@ -58,7 +56,6 @@ public class ScaleRequest extends DestinationAdminRequest {
 	private int op;
 	private String param;
 	
-
 	/**
 	 * Adds a destination to a cluster.
 	 * <p>
