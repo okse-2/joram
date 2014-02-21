@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2014 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -55,8 +55,8 @@ public class MsgListener implements MessageListener {
 
   public MsgListener(String ident) {
     this.ident = ident;
-    int sleep = Integer.getInteger("sleep", 10).intValue();
-    int nbMsgSleep = Integer.getInteger("nbMsgSleep", 10).intValue();
+    sleep = Integer.getInteger("sleep", 10).intValue();
+    nbMsgSleep = Integer.getInteger("nbMsgSleep", 10).intValue();
     System.out.println("sleep = " + sleep + ", nbMsgSleep=" + nbMsgSleep);
     stats = new Hashtable<String, Counter>();
   }
@@ -64,9 +64,9 @@ public class MsgListener implements MessageListener {
   public void onMessage(Message msg) {
     try {
       nbMsg++;
-      if (nbMsg == 1)
-        startTime = System.currentTimeMillis();
       long time = System.currentTimeMillis();
+      if (nbMsg == 1)
+        startTime = time;
       time = time - startTime;
 
       String location = (String) msg.getStringProperty("location");
@@ -79,12 +79,20 @@ public class MsgListener implements MessageListener {
         counter.inc();
       }
       
+      if (sleep > 0 && (nbMsg % nbMsgSleep) == 0) {
+        try {
+          Thread.sleep(sleep);
+        } catch (InterruptedException e) {}
+      }
+
       if ((nbMsg % 100) == 99) {
-        System.out.println("time = " + time + " nbMsg=" + nbMsg);
+        StringBuffer strbuf = new StringBuffer();
+        strbuf.append(ident).append(": time = ").append(time).append(" nbMsg=").append(nbMsg);
         for (Enumeration<String> e = stats.keys(); e.hasMoreElements();) {
           String key = e.nextElement();
-          System.out.println(key + " -> "+ stats.get(key).get());
+          strbuf.append(key).append("->").append(stats.get(key).get()).append(',');
         }
+        System.out.println(strbuf.toString());
       }
     } catch (JMSException jE) {
       System.err.println("Exception in listener: " + jE);

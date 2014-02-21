@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2014 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -65,15 +65,16 @@ public class ClusterAdmin {
     ictx.rebind("clusterCF", clusterCF);
 
     Properties prop = new Properties();
-    prop.setProperty("period","100");
-    prop.setProperty("producThreshold","1000");
-    prop.setProperty("consumThreshold","5");
+    prop.setProperty("period","5000");
+    prop.setProperty("producThreshold","150");
+    prop.setProperty("consumThreshold","1");
     prop.setProperty("autoEvalThreshold","false");
-    prop.setProperty("waitAfterClusterReq","10000");
+    prop.setProperty("waitAfterClusterReq","5000");
+    prop.setProperty("maxFwdPerQueue", "1000");
 
-    Queue queue0 = Queue.create(0, null, Queue.CLUSTER_QUEUE, prop);
-    Queue queue1 = Queue.create(1, null, Queue.CLUSTER_QUEUE, prop);
-    Queue queue2 = Queue.create(2, null, Queue.CLUSTER_QUEUE, prop);
+    Queue queue0 = Queue.create(0, "queue", Queue.CLUSTER_QUEUE, prop);
+    Queue queue1 = Queue.create(1, "queue", Queue.CLUSTER_QUEUE, prop);
+    Queue queue2 = Queue.create(2, "queue", Queue.CLUSTER_QUEUE, prop);
     
     System.out.println("queue0 = " + queue0);
     System.out.println("queue1 = " + queue1);
