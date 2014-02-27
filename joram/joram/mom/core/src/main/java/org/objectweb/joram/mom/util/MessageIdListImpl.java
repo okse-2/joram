@@ -142,6 +142,11 @@ public class MessageIdListImpl implements MessageIdList, Encodable,
     }
   }
   
+  @Override
+  public String toString() {
+    return "MessageIdListImpl [listId=" + listId + ", list=" + list + "]";
+  }
+
   public static class MessageIdListImplEncodableFactory implements EncodableFactory {
 
     public Encodable createEncodable() {

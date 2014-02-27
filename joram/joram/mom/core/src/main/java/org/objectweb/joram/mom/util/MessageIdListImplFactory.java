@@ -36,7 +36,9 @@ public class MessageIdListImplFactory extends MessageIdListFactory {
   public MessageIdList loadMessageIdList(String listId) throws Exception {
     // TODO: as we know the type, the method 'loadByteArray' would be more efficient
     MessageIdListImpl res = (MessageIdListImpl) AgentServer.getTransaction().load(listId);
-    res.setListId(listId);
+    if (res != null) {
+      res.setListId(listId);
+    }
     return res;
   }
 
