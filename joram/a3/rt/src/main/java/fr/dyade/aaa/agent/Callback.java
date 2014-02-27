@@ -24,7 +24,7 @@ package fr.dyade.aaa.agent;
 import java.util.List;
 
 /**
- * Callback interface notified either when a <code>CountDownCallback</code>
+ * Callback interface notified when a <code>CountDownCallback</code>
  * transmitted by a <code>CallbackNotification</code> reaches zero. If at least
  * one error has been raised, the method <code>failed</code> is called.
  * Otherwise the method <code>done</code> is called.
