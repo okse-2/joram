@@ -38,7 +38,7 @@ public class EncodedStringList implements Serializable, Encodable {
   }
   
   public int getEncodableClassId() {
-    return EncodableFactoryRepository.ENCODED_STRING_CLASS_ID;
+    return EncodableFactoryRepository.ENCODED_STRING_LIST_CLASS_ID;
   }
 
   public int getEncodedSize() throws Exception {
