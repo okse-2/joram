@@ -2862,7 +2862,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     long currentTime = System.currentTimeMillis();
     // AF: TODO we should parse each message for each subscription
     // see ClientSubscription.browseNewMessages
-    List messages = new ArrayList();
+    List<Message> messages = new ArrayList<Message>();
     for (Iterator msgs = rep.getMessages().iterator(); msgs.hasNext();) {
       org.objectweb.joram.shared.messages.Message sharedMsg = 
           (org.objectweb.joram.shared.messages.Message) msgs.next();
@@ -2877,9 +2877,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         scheduleDeliveryTimeMessage(from, sharedMsg, delaySubNames);
       } else {
         // Setting the arrival order of the messages
-        message.order = arrivalState.getAndIncrementArrivalCount(
-            message.isPersistent() && 
-            message.durableAcksCounter > 0);
+        message.order = arrivalState.getAndIncrementArrivalCount();
         messages.add(message);
       }
     }
@@ -2901,7 +2899,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> save message " + message);
         // TODO (AF): The message saving does it need the proxy saving ?
-        if (message.isPersistent()) {          
+        if (message.isPersistent()) { 
+          arrivalState.setModified();
+          
           // Persisting the message.
           setMsgTxName(message);
           message.save();
