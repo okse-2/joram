@@ -27,9 +27,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.messages.Message;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
+import fr.dyade.aaa.common.encoding.Encoder;
 
 /**
  * A <code>ClientMessages</code> instance is used by a client agent for
@@ -42,11 +47,100 @@ public class ClientMessages extends AbstractRequestNot {
   /** Message sent by the client. */
   private Message message = null;
   /** Messages sent by the client. */
-  private List messages = null;
+  private List<Message> messages = null;
   
   private boolean asyncSend;
   
   private AgentId proxyId;
+  
+  @Override
+  public int getEncodableClassId() {
+    return JoramHelper.CLIENT_MESSAGES_CLASS_ID;
+  }
+
+  public int getEncodedSize() throws Exception {
+    int res = super.getEncodedSize() ;
+    
+    res += BOOLEAN_ENCODED_SIZE;
+    if (message != null) {
+      res += message.getEncodedSize();
+    }
+    
+    res += BOOLEAN_ENCODED_SIZE;
+    if (messages != null) {
+      res += INT_ENCODED_SIZE;
+      for (Message msg : messages) {
+        res += msg.getEncodedSize();
+      }
+    }
+    
+    res += BOOLEAN_ENCODED_SIZE;
+    
+    res += BOOLEAN_ENCODED_SIZE;
+    if (proxyId != null) {
+      res += proxyId.getEncodedSize();
+    }
+    return res;
+  }
+  
+  public void encode(Encoder encoder) throws Exception {
+    super.encode(encoder);
+    
+    if (message != null) {
+      encoder.encodeBoolean(true);
+      message.encode(encoder);
+    } else {
+      encoder.encodeBoolean(false);
+    }
+    
+    if (messages != null) {
+      encoder.encodeBoolean(true);
+      encoder.encodeUnsignedInt(messages.size());
+      for (Message msg : messages) {
+        msg.encode(encoder);
+      }
+    } else {
+      encoder.encodeBoolean(false);
+    }
+    
+    encoder.encodeBoolean(asyncSend);
+    
+    if (proxyId == null) {
+      encoder.encodeBoolean(false);
+    } else {
+      encoder.encodeBoolean(true);
+      proxyId.encode(encoder);
+    }
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    super.decode(decoder);
+   
+    boolean flag = decoder.decodeBoolean();
+    if (flag) {
+      message = new Message();
+      message.decode(decoder);
+    }
+    
+    flag = decoder.decodeBoolean();
+    if (flag) {
+      int size = decoder.decodeUnsignedInt();
+      messages = new ArrayList<Message>(size);
+      for (int i = 0; i < size; i++) {
+        Message msg = new Message();
+        msg.decode(decoder);
+        messages.add(msg);
+      }
+    }
+    
+    asyncSend = decoder.decodeBoolean();
+    
+    flag = decoder.decodeBoolean();
+    if (flag) {
+      proxyId = new AgentId((short) 0, (short) 0, 0);
+      proxyId.decode(decoder);
+    }
+  }
 
   /**
    * Constructs a <code>ClientMessages</code> instance.
@@ -196,8 +290,18 @@ public class ClientMessages extends AbstractRequestNot {
     output.append(",message=").append(message);
     output.append(",messages=").append(messages);
     output.append(",asyncSend=").append(asyncSend);
+    output.append(",proxyId=").append(proxyId);
     output.append(')');
 
     return output;
   }
+  
+  public static class Factory implements EncodableFactory {
+
+    public Encodable createEncodable() {
+      return new ClientMessages();
+    }
+
+  }
+  
 } 

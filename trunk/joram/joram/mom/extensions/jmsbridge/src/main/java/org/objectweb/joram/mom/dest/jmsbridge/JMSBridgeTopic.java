@@ -266,7 +266,7 @@ public class JMSBridgeTopic extends Topic {
     if (getId().equals(from)) return not;
 
     // Forwarding the messages to the father or the cluster fellows, if any:
-    forwardMessages(not);
+    forwardMessages(from, not);
 
     // Sending the received messages to the foreign JMS destination:
     Message message;
