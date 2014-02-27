@@ -26,6 +26,12 @@ import java.io.Serializable;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.common.Pool;
+import fr.dyade.aaa.common.encoding.Decoder;
+import fr.dyade.aaa.common.encoding.Encodable;
+import fr.dyade.aaa.common.encoding.EncodableFactory;
+import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
+import fr.dyade.aaa.common.encoding.Encoder;
+import fr.dyade.aaa.common.encoding.SerializableWrapper;
 
 /**
  * The internal message structure.
@@ -36,7 +42,7 @@ import fr.dyade.aaa.common.Pool;
  * and the current stamp of the message.
  * </ul>
  */
-public final class Message implements Serializable {
+public final class Message implements Serializable, Encodable {
   /** define serialVersionUID for interoperability */
   static final long serialVersionUID = 1L;
 
@@ -55,12 +61,12 @@ public final class Message implements Serializable {
   transient int stamp;
 
   /** Get the unique server id. of the sender of this message */
-  short getSource() {
+  public short getSource() {
     return source;
   }
  
   /** Get the unique server id. of the addressee of this message */
-  short getDest() {
+  public short getDest() {
     return dest;
   }
 
@@ -346,4 +352,140 @@ public final class Message implements Serializable {
       this.not.messageId = not.messageId;
     }
   }
+
+  public int getEncodableClassId() {
+    return AgentServer.MESSAGE_CLASS_ID;
+  }
+  
+  private SerializableWrapper serializedNot;
+
+  public int getEncodedSize() throws Exception {
+    int encodedSize = 2 + 2 + 4 + 2 + 2 + 4 + 2 + 2 + 4 + 1;
+
+    if (not != null) {
+      if (! not.detachable) {
+        // Writes notification object
+        encodedSize += 1;
+        if (not.getEncodableClassId() == -1) {
+          serializedNot = new SerializableWrapper(not);
+          encodedSize += serializedNot.getEncodedSize();
+        } else {
+          encodedSize += 4;
+          encodedSize += not.getEncodedSize();
+        }
+      } else {
+        Debug.getLogger(getClass().getName()).log(BasicLevel.DEBUG,
+            "Message.writeObject() -> detachable notification: " + not);
+      }
+    }
+    return encodedSize;
+  }
+
+  public void encode(Encoder encoder) throws Exception {
+    // Writes sender's AgentId
+    encoder.encode16(from.from);
+    encoder.encode16(from.to);
+    encoder.encode32(from.stamp);
+    // Writes adressee's AgentId
+    encoder.encode16(to.from);
+    encoder.encode16(to.to);
+    encoder.encode32(to.stamp);
+    // Writes source server id of message
+    encoder.encode16(source);
+    // Writes destination server id of message
+    encoder.encode16(dest);
+    // Writes stamp of message
+    encoder.encode32(stamp);
+
+    if (not == null) {
+      Debug.getLogger(getClass().getName()).log(BasicLevel.ERROR,
+          "Message.writeObject() -> null notification.");
+      encoder.encodeByte(NULL);
+    } else {
+      // Writes notification attributes
+      encoder.encodeByte(optToByte());
+      if (! not.detachable) {
+        // Writes notification object
+        if (not.getEncodableClassId() == -1) {
+          encoder.encodeBoolean(false);
+          if (serializedNot == null) {
+            serializedNot = new SerializableWrapper(not);
+          }
+          serializedNot.encode(encoder);
+        } else {
+          encoder.encodeBoolean(true);
+          encoder.encodeUnsignedInt(not.getEncodableClassId());
+          not.encode(encoder);
+        }
+      } else {
+        Debug.getLogger(getClass().getName()).log(BasicLevel.DEBUG,
+            "Message.writeObject() -> detachable notification: " + not);
+      }
+    }
+  }
+
+  public void decode(Decoder decoder) throws Exception {
+    // Reads sender's AgentId
+    from = new AgentId(decoder.decode16(), decoder.decode16(), decoder.decode32());
+    // Reads adressee's AgentId
+    to = new AgentId(decoder.decode16(), decoder.decode16(), decoder.decode32());
+    // Reads source server id of message
+    source = decoder.decode16();
+    // Reads destination server id of message
+    dest = decoder.decode16();
+    // Reads stamp of message
+    stamp = decoder.decode32();
+
+    int opt = decoder.decodeByte();
+    if (opt == NULL) {
+      Debug.getLogger(getClass().getName()).log(BasicLevel.ERROR,
+          "Message.readObject -> null notification.");
+      not = null;
+    } else {
+      // Reads notification attributes
+      boolean persistent = ((opt & PERSISTENT) != 0);
+      boolean detachable = ((opt & DETACHABLE) != 0);
+
+      if (! detachable) {
+        // Reads notification object
+        boolean isEncodable = decoder.decodeBoolean();
+        if (isEncodable) {
+          int classId = decoder.decodeUnsignedInt();
+          EncodableFactory factory = EncodableFactoryRepository.getFactory(classId);
+          if (factory == null) {
+            Debug.getLogger(getClass().getName()).log(BasicLevel.ERROR,
+                "from=" + from) ;
+            Debug.getLogger(getClass().getName()).log(BasicLevel.ERROR,
+                "to=" + to) ;
+            Debug.getLogger(getClass().getName()).log(BasicLevel.ERROR,
+                "dest=" + dest) ;
+            Debug.getLogger(getClass().getName()).log(BasicLevel.ERROR,
+                "stamp=" + stamp) ;
+            throw new Exception("Notification factory not found: " + classId);
+          }
+          not = (Notification) factory.createEncodable();
+          not.decode(decoder);
+        } else {
+          SerializableWrapper sw = new SerializableWrapper();
+          sw.decode(decoder);
+          not = (Notification) sw.getValue();
+        }
+        not.detachable = detachable;
+        not.persistent = persistent;
+        not.detached = false;
+      } else {
+        Debug.getLogger(getClass().getName()).log(BasicLevel.DEBUG,
+            "Message.readObject -> " + opt);
+      }
+    }
+  }
+  
+  static class Factory implements EncodableFactory {
+
+    public Encodable createEncodable() {
+      return new Message();
+    }
+    
+  }
+  
 }
