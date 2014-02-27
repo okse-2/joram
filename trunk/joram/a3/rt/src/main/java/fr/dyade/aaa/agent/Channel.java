@@ -127,6 +127,18 @@ public class Channel {
         post(Message.alloc(AgentId.localId, msg.from, new UnknownAgent(msg.to, msg.not)));
     }
   }
+  
+  static final void postAndValidate(Message msg) throws Exception {
+    try {
+      MessageConsumer cons = AgentServer.getConsumer(msg.to.getTo());
+      cons.postAndValidate(msg);
+    } catch (UnknownServerException exc) {
+      channel.logmon.log(BasicLevel.ERROR,
+                         channel.toString() + ", can't post message: " + msg, exc);
+      if ((msg.from != null) && (msg.from.stamp != AgentId.NullIdStamp))
+        post(Message.alloc(AgentId.localId, msg.from, new UnknownAgent(msg.to, msg.not)));
+    }
+  }
 
   /**
    * Save state of all modified consumer.
