@@ -1152,6 +1152,11 @@ class Engine implements Runnable, AgentEngine, EngineMBean {
                 // In case of unrecoverable error during the reaction we have
                 // to rollback.
                 abort(exc);
+                
+                if (callbackNotification != null) {
+                  callbackNotification.failed(exc);
+                }
+                
                 // then continue.
                 continue;
               case RP_EXIT:
@@ -1214,15 +1219,11 @@ class Engine implements Runnable, AgentEngine, EngineMBean {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ": commit()");
     
-    boolean updatedAgent;
     if (agent != null) {
-      updatedAgent = agent.isUpdated();
       agent.save();
-    } else {
-      updatedAgent = false;
     }
     
-    if (noTxIfTransient && msg.not.persistent == false && !updatedAgent
+    if (noTxIfTransient && msg.not.persistent == false
         && !persistentPush
         && !AgentServer.getTransaction().containsOperations()) {
       // Suppress the processed notification from message queue ..
