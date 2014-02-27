@@ -500,7 +500,7 @@ public class Topic extends Destination implements TopicMBean {
     ClientMessages clientMsgs = preProcess(from, not);
     if (clientMsgs != null) {
       // Forwarding the messages to the father or the cluster fellows, if any:
-      forwardMessages(clientMsgs, fromCluster);
+      forwardMessages(from, clientMsgs, fromCluster);
 
       // Processing the messages:
       processMessages(clientMsgs);
@@ -567,17 +567,60 @@ public class Topic extends Destination implements TopicMBean {
    * Actually forwards a list of messages to the father or the cluster
    * fellows, if any.
    */
-  protected void forwardMessages(ClientMessages messages) {
-    forwardMessages(messages, false);
+  protected void forwardMessages(AgentId from, ClientMessages messages) {
+    forwardMessages(from, messages, false);
+  }
+  
+  private TopicForwardNot createTopicForward(AgentId destId, ClientMessages messages, boolean fromCluster) {
+    TopicForwardNot topicForwardNot = new TopicForwardNot(messages, fromCluster);
+    if (destId.getTo() == AgentServer.getServerId()) {
+      // Local destination
+      // The initial notification may be persistent (e.g. if remote).
+      // In that case the forward needs to be persistent too.
+      topicForwardNot.setPersistent(messages.isPersistent());
+      
+      // Pass the callback in any cases (transient or persistent)
+      // in order to provide flow control.
+      messages.passCallback(topicForwardNot);
+    } else {
+      // Remote destination
+      // The initial notification may be persistent.
+      // In that case the forward needs to be persistent too.
+      boolean persistent = messages.isPersistent();
+      
+      if (!persistent) {
+        // Check if there is a persistent message to transmit.
+        // In that case, the forward needs to be persistent.
+        List<Message> msgList = messages.getMessages();
+        for (Message msg : msgList) {
+          if (msg.persistent) {
+            persistent = true;
+            break;
+          }
+        }
+      }
+      topicForwardNot.setPersistent(persistent);
+      
+      // Pass the callback in any cases (transient or persistent)
+      // in order to provide flow control with the network.
+      messages.passCallback(topicForwardNot);
+    }
+    return topicForwardNot;
   }
 
-  private void forwardMessages(ClientMessages messages, boolean fromCluster) {
+  private void forwardMessages(AgentId from, ClientMessages messages, boolean fromCluster) {
     if (!fromCluster) {
-      sendToCluster(new TopicForwardNot(messages, true));
+      if (friends != null && friends.size() > 1) {
+        for (Iterator e = friends.iterator(); e.hasNext();) {
+          AgentId id = (AgentId) e.next();
+          if (!id.equals(getId()))
+            forward(id, createTopicForward(id, messages, true));
+        }
+      }
     }
-    if (fatherId != null) {
-      forward(fatherId, new TopicForwardNot(messages, false));
-
+    
+    if (fatherId != null && !fatherId.equals(from)) {
+      forward(fatherId, createTopicForward(fatherId, messages, false));
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Messages forwarded to father " + fatherId.toString());
     }
@@ -684,10 +727,11 @@ public class Topic extends Destination implements TopicMBean {
         TopicMsgsReply topicMsgsReply = new TopicMsgsReply(deliverables);
         topicMsgsReply.setPersistent(persistent);
         
-        // If local, set callback
-        if (subscriber.getTo() == getId().getTo()) {
-          not.passCallback(topicMsgsReply);
-        }
+        // Set the callback in any cases: local and remote
+        // Remotely, the callback provides flow control.
+        // Locally, the callback provides flow control and
+        // reliability for persistent messages.
+        not.passCallback(topicMsgsReply);
 
         setDmq(topicMsgsReply);
         forward(subscriber, topicMsgsReply);

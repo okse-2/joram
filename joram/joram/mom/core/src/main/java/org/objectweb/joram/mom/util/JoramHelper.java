@@ -73,6 +73,8 @@ public class JoramHelper {
   public static final int USER_AGENT_ARRIVAL_STATE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 6;
   public static final int QUEUE_DELIVERY_TABLE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 7;
   public static final int QUEUE_ARRIVAL_STATE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 8;
+  public static final int TOPIC_FWD_NOT_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 9;
+  public static final int CLIENT_MESSAGES_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 10;
   
   /**
    * Create user.

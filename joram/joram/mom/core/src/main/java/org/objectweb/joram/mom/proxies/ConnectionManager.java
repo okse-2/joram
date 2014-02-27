@@ -35,6 +35,7 @@ import org.objectweb.joram.mom.dest.QueueDeliveryTable;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
+import org.objectweb.joram.mom.notifications.TopicForwardNot;
 import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.mom.util.MessageIdListFactory;
 import org.objectweb.joram.mom.util.MessageIdListImpl;
@@ -161,6 +162,8 @@ public class ConnectionManager implements ConnectionManagerMBean {
     EncodableFactoryRepository.putFactory(JoramHelper.USER_AGENT_ARRIVAL_STATE_CLASS_ID, new UserAgentArrivalState.UserAgentArrivalStateFactory());
     EncodableFactoryRepository.putFactory(JoramHelper.QUEUE_DELIVERY_TABLE_CLASS_ID, new QueueDeliveryTable.Factory());
     EncodableFactoryRepository.putFactory(JoramHelper.QUEUE_ARRIVAL_STATE_CLASS_ID, new QueueArrivalState.Factory());
+    EncodableFactoryRepository.putFactory(JoramHelper.TOPIC_FWD_NOT_CLASS_ID, new TopicForwardNot.Factory());
+    EncodableFactoryRepository.putFactory(JoramHelper.CLIENT_MESSAGES_CLASS_ID, new ClientMessages.Factory());
   }
   
   private static CountDownCallback createCallback(final AbstractJmsRequest req, final ConnectionContext ctx) {
@@ -252,6 +255,9 @@ public class ConnectionManager implements ConnectionManagerMBean {
               Channel.sendTo(destId, not);
             } else {
               // Remote destination
+              // Set a callback too in order to provide flow control
+              // with the network.
+              rn.setCountDownCallback(createCallback(req, ctx));
               Channel.sendTo(proxyId, rn);
             }
           }
