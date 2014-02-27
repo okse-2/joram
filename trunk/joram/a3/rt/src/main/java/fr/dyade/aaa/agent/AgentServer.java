@@ -50,6 +50,7 @@ import fr.dyade.aaa.agent.conf.A3CMLProperty;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -150,6 +151,13 @@ public final class AgentServer {
 
   public final static String ADMIN_DOMAIN = "D0";
   public final static String ADMIN_SERVER = "s0";
+  
+  public static final int ENCODABLE_CLASS_ID_AREA = 0x10000;
+  public static final int MESSAGE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 0;
+  
+  static {
+    EncodableFactoryRepository.putFactory(MESSAGE_CLASS_ID, new Message.Factory());
+  }
 
   /**
    * Default configuration used if no other configuration is found, by default empty.
@@ -880,13 +888,16 @@ public final class AgentServer {
     return desc;
   }
 
-  private static void initServices(A3CMLServer server, ServerDesc desc) {
+  private static void initServices(A3CMLServer server, ServerDesc desc) throws Exception {
     if (server.services != null) {
       ServiceDesc services[]  = new ServiceDesc[server.services.size()];
       int idx = 0;
       for (Enumeration<A3CMLService> x = server.services.elements(); x.hasMoreElements();) {
         A3CMLService service = x.nextElement();
         services[idx++] = new ServiceDesc(service.classname, service.args);
+        
+        // Need to load the service classes in order to register the Encodable factories
+        Class.forName(service.classname);
       }
       desc.services = services;
     }
