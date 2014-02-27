@@ -61,13 +61,16 @@ public class UserAgentArrivalState implements Encodable, Serializable {
     modified = true;
   }
   
-  long getAndIncrementArrivalCount(boolean persistent) {
-    if (persistent) {
-      modified = true;
-    }
+  long getAndIncrementArrivalCount() {
     return arrivalCount++;
   }
   
+  public void setModified() {
+    if (! modified) {
+      modified = true;
+    }
+  }
+
   /**
    * Saves this state if modified.
    * @throws Exception
