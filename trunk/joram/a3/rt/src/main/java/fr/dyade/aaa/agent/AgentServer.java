@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2014 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -151,7 +151,7 @@ public final class AgentServer {
 
   public final static String ADMIN_DOMAIN = "D0";
   public final static String ADMIN_SERVER = "s0";
-  
+
   public static final int ENCODABLE_CLASS_ID_AREA = 0x10000;
   public static final int MESSAGE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 0;
   
@@ -1174,13 +1174,15 @@ public final class AgentServer {
         //  Try to load an initial configuration (serialized or XML), or
         // generates a default one in case of failure.
         try {
+          // Try to load a serialized configuration file directly in the filesystem.
+          // TODO (AF): Is it used ? During Mediation deployment ?
           a3config = A3CMLConfig.getConfig(DEFAULT_SER_CFG_FILE);
         } catch (Exception exc) {
           logmon.log(BasicLevel.WARN, getName() + ", serialized a3cmlconfig not found", exc);
         }
         
         if (a3config == null) {
-          // Try to found XML configuration file, then parse it.
+          // Try to found an existing XML configuration file, then parse it.
           try {
             a3config = A3CML.getXMLConfig();
           } catch (Exception exc) {
@@ -1199,7 +1201,8 @@ public final class AgentServer {
         }
 
         if (a3config == null) {
-          // 3rd, Generate A3CMLConfig base.
+          // Last, Generate A3CMLConfig base.
+          // TODO (AF): Is it used ? During Mediation deployment ?
           logmon.log(BasicLevel.WARN, "Generate default configuration");
           A3CMLDomain d = new A3CMLDomain(ADMIN_DOMAIN, SimpleNetwork.class.getName());
           A3CMLServer s = new A3CMLServer((short) sid, ADMIN_SERVER, "localhost");
