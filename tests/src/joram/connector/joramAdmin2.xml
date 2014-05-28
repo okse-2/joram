@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<JoramAdmin>
+
+  <AdminModule>
+    <collocatedConnect name="root" password="root"/>
+  </AdminModule>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost" port="17010"/>
+    <jndi name="JCF"/>
+  </ConnectionFactory>
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory">
+    <tcp host="localhost" port="17010"/>
+    <jndi name="JQCF"/>
+  </ConnectionFactory>
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory">
+    <tcp host="localhost" port="17010"/>
+    <jndi name="JTCF"/>
+  </ConnectionFactory>
+  
+  <User name="anonymous"  password="anonymous" serverId="0"/>
+  
+  <Queue name="sampleQueue">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="sampleQueue"/>
+  </Queue>
+  <Topic name="sampleTopic">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="sampleTopic"/>
+  </Topic>
+</JoramAdmin>

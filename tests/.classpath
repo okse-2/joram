@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/amqp-client-2.4.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/joram/ship/lib/monolog.jar"/>
+	<classpathentry kind="lib" path="/joram/ship/bundle/ow2-jms-2.0-spec.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/joram"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>
