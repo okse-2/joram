@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 PROJECT_NAME           = Joram
-PROJECT_NUMBER         = 5.2.7
+PROJECT_NUMBER         = 5.9
 OUTPUT_DIRECTORY       = ../dox
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
