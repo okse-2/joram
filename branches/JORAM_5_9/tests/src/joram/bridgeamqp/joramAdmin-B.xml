@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<JoramAdmin>
+  <TcpAdminModule host="localhost" port="16010" name="root" password="root">
+    <property name="connectingTimer" value="60"/>
+  </TcpAdminModule>
+    
+  <InitialContext>
+    <property name="java.naming.factory.initial" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
+    <property name="java.naming.factory.host" value="localhost"/>
+    <property name="java.naming.factory.port" value="16400"/>
+  </InitialContext>
+
+  <TcpConnectionFactory name="joramCF" host="localhost" port="16010">
+    <jndi name="joramCF"/>
+  </TcpConnectionFactory>
+  
+  <User name="anonymous0" login="anonymous" password="anonymous" serverId="0"/>
+
+	<AMQPAcquisitionTopic name="joramInTopic" foreign="amqpQueue" serverId="0">
+    <property name="period" value="1000"/>
+    <property name="amqp.Queue.DeclarePassive" value="false"/>
+    <property name="amqp.Queue.DeclareExclusive" value="false"/>
+    <property name="amqp.Queue.DeclareDurable" value="true"/>
+    <property name="amqp.Queue.DeclareAutoDelete" value="false"/>
+    <property name="amqp.ConnectionUpdatePeriod" value="1000"/>
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="joramInDest"/>
+  </AMQPAcquisitionTopic>
+
+	<AMQPDistributionTopic name="joramOutTopic" foreign="amqpQueue" serverId="0">
+    <property name="period" value="1000"/>
+    <property name="amqp.Queue.DeclarePassive" value="false"/>
+    <property name="amqp.Queue.DeclareExclusive" value="false"/>
+    <property name="amqp.Queue.DeclareDurable" value="true"/>
+    <property name="amqp.Queue.DeclareAutoDelete" value="false"/>
+    <property name="jms.ConnectionUpdatePeriod" value="1000"/>
+    <freeWriter/>
+    <jndi name="joramOutDest"/>
+  </AMQPDistributionTopic>
+  
+</JoramAdmin>
