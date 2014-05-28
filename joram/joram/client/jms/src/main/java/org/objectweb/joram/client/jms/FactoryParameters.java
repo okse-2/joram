@@ -116,7 +116,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
    * might take time if the server is temporarily not reachable); the 0 value
    * is set for connecting only once and aborting if connecting failed.
    */
-  public int connectingTimer = 0;
+  public int connectingTimer = 30;
   /**
    * Duration in seconds during which a JMS transacted (non XA) session might
    * be pending; above that duration the session is rolled back and closed;

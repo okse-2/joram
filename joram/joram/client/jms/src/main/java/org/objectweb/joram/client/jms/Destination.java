@@ -58,7 +58,6 @@ import org.objectweb.joram.shared.admin.GetRightsReply;
 import org.objectweb.joram.shared.admin.GetRightsRequest;
 import org.objectweb.joram.shared.admin.GetStatsReply;
 import org.objectweb.joram.shared.admin.GetStatsRequest;
-import org.objectweb.joram.shared.admin.ScaleRequest;
 import org.objectweb.joram.shared.admin.SetDMQRequest;
 import org.objectweb.joram.shared.admin.SetReader;
 import org.objectweb.joram.shared.admin.SetWriter;
@@ -1103,17 +1102,5 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    */
   public AdminReply setProperties(Properties prop) throws ConnectException, AdminException {
   	return getWrapper().processAdmin(getName(), AdminCommandConstant.CMD_SET_PROPERTIES, prop);
-  }
-  
-  /**
-   * Administration method for scaling operations.
-   * 
-   * @param op scaling operation: scale up, scale down or balance.
-   * @param param parameter of the scaling operation.
-   * @throws ConnectException
-   * @throws AdminException
-   */
-  public void scale(int op, String param) throws ConnectException, AdminException {
-	doRequest(new ScaleRequest(agentId, op, param));
   }
 }

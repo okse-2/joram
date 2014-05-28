@@ -25,11 +25,9 @@
 package org.objectweb.joram.client.jms;
 
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.TimerTask;
 import java.util.Vector;
 
@@ -213,7 +211,7 @@ public class Session implements javax.jms.Session, SessionMBean {
   private boolean autoAck;
 
   /** Vector of message consumers. */
-  private Vector<MessageConsumer> consumers;
+  private Vector consumers;
 
   /** Vector of message producers. */
   private Vector producers;
@@ -715,24 +713,7 @@ public class Session implements javax.jms.Session, SessionMBean {
 //  public void setOutMessageInterceptors(List pOutInterceptors) {
 //    outInterceptors = pOutInterceptors;
 //  }
-  
-  /**
-   * Map of Message listener context (null if no message listener).
-   */
-  Map<String, MessageConsumerListener> messageConsumerListeners = new HashMap<String, MessageConsumerListener>();
-  
-  synchronized MessageConsumerListener getMessageConsumerListener(String targetName) {
-    return messageConsumerListeners.get(targetName);
-  }
-  
-  synchronized void putMessageConsumerListener(String targetName, MessageConsumerListener mcl) {
-    messageConsumerListeners.put(targetName, mcl);
-  }
-  
-  synchronized MessageConsumerListener removeMessageConsumerListener(String targetName) {
-    return messageConsumerListeners.remove(targetName);
-  }
-  
+
   /**
    * Returns the MBean name.
    * @return the MBean name.
@@ -1239,7 +1220,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       boolean noLocal) throws JMSException {
     checkClosed();
     checkThreadOfControl();
-    MessageConsumer mc = new MessageConsumer(this, (Destination) dest, selector, null, noLocal, false, false);
+    MessageConsumer mc = new MessageConsumer(this, (Destination) dest, selector, null, noLocal);
     addConsumer(mc);
     return mc;
   }
@@ -1324,7 +1305,7 @@ public class Session implements javax.jms.Session, SessionMBean {
     checkClosed();
     checkThreadOfControl();
     checkClientID();
-    TopicSubscriber ts = new TopicSubscriber(this, (Topic) topic, name, selector, noLocal, true);
+    TopicSubscriber ts = new TopicSubscriber(this, (Topic) topic, name, selector, noLocal);
     addConsumer(ts);
     return ts;
   }
@@ -1359,7 +1340,7 @@ public class Session implements javax.jms.Session, SessionMBean {
     checkClosed();
     checkThreadOfControl();
     checkClientID();
-    TopicSubscriber ts = new TopicSubscriber(this, (Topic) topic, name, null, false, true);
+    TopicSubscriber ts = new TopicSubscriber(this, (Topic) topic, name, null, false);
     addConsumer(ts);
     return ts;
   }
@@ -1732,7 +1713,7 @@ public class Session implements javax.jms.Session, SessionMBean {
     if (consumers != null) {
       for (int i = 0; i < consumers.size(); i++) {
         cons = (MessageConsumer) consumers.get(i);
-        if (!cons.isQueueMode() && cons.getTargetName().equals(name) && cons.isOpen())
+        if (!cons.queueMode && cons.targetName.equals(name))
           throw new JMSException("Can't delete durable subscription " + name
               + " as long as an active subscriber exists.");
       }
@@ -1870,9 +1851,6 @@ public class Session implements javax.jms.Session, SessionMBean {
       return;
     if (status == Status.START)
       return;
-    
-    receiveRequestor.start();
-    
     if (listenerCount > 0) {
       doStart();
     }
@@ -1931,8 +1909,6 @@ public class Session implements javax.jms.Session, SessionMBean {
   }
 
   private void doStop() {
-    receiveRequestor.stop();
-    
     if (daemon != null) {
       daemon.stop();
       daemon = null;
@@ -2140,7 +2116,7 @@ public class Session implements javax.jms.Session, SessionMBean {
             msg.session = this;
             if (trace.isLoggable(BasicLevel.INFO))
               trace.log(BasicLevel.INFO,
-                         this + " handling message=" + msg + ", from=" + mc.getDest().getAdminName() + '/' + mc.getTargetName());
+                         this + " handling message=" + msg + ", from=" + mc.dest.getAdminName() + '/' + mc.targetName);
             // Executes IN interceptors
             if ((inInterceptors != null) && (!inInterceptors.isEmpty())) {
               for (Iterator it = inInterceptors.iterator(); it.hasNext();) {
@@ -2266,18 +2242,12 @@ public class Session implements javax.jms.Session, SessionMBean {
   synchronized void checkConsumers(String agentId) throws JMSException {
     for (int j = 0; j < consumers.size(); j++) {
       MessageConsumer cons = (MessageConsumer) consumers.elementAt(j);
-      if (agentId.equals(cons.getDest().agentId)) {
+      if (agentId.equals(cons.dest.agentId)) {
         throw new JMSException("Consumers still exist for this temp queue.");
       }
     }
   }
 
-  private void checkCLMessageProducer(MessageProducer mp) throws IllegalStateException {
-    if (cnx.checkCLMessageProducer(this, mp)) {
-      throw new IllegalStateException("Illegal call.");
-    }
-  }
-  
   /**
    * Called here and by sub-classes.
    */
@@ -2287,10 +2257,8 @@ public class Session implements javax.jms.Session, SessionMBean {
 
   /**
    * Called by MessageProducer.
-   * @throws IllegalStateException 
    */
-  synchronized void closeProducer(MessageProducer mp) throws IllegalStateException {
-    checkCLMessageProducer(mp);
+  synchronized void closeProducer(MessageProducer mp) {
     producers.removeElement(mp);
   }
 
@@ -2304,14 +2272,11 @@ public class Session implements javax.jms.Session, SessionMBean {
   /**
    * Called by MessageConsumer
    */
-  synchronized MessageConsumerListener addMessageListener(MessageConsumerListener mcl, boolean check) throws JMSException {
+  synchronized MessageConsumerListener addMessageListener(MessageConsumerListener mcl) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Session.addMessageListener(" + mcl + ')');
-    
-    if (check) {
-      checkClosed();
-      checkThreadOfControl();
-    }
+    checkClosed();
+    checkThreadOfControl();
 
     checkSessionMode(SessionMode.LISTENER);
 
@@ -2500,11 +2465,11 @@ public class Session implements javax.jms.Session, SessionMBean {
    * Called by MessageProducer.
    */
   synchronized void send(Destination dest, javax.jms.Message msg, int deliveryMode, int priority,
-      long timeToLive, boolean timestampDisabled, long deliveryDelay, javax.jms.CompletionListener completionListener, MessageProducer messageProducer) throws JMSException {
+      long timeToLive, boolean timestampDisabled, long deliveryDelay, javax.jms.CompletionListener completionListener) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "Session.send(" + dest + ',' + msg + ',' +
-                 deliveryMode + ',' + priority + ',' + timeToLive + ',' + timestampDisabled + ',' + completionListener + ',' + messageProducer + ')');
+                 deliveryMode + ',' + priority + ',' + timeToLive + ',' + timestampDisabled + ',' + completionListener + ')');
 
     checkClosed();
     checkThreadOfControl();
@@ -2538,7 +2503,7 @@ public class Session implements javax.jms.Session, SessionMBean {
     
     if (completionListener != null) {
       if (listener == null)
-        listener = new CompletionListener(this, messageProducer);
+        listener = new CompletionListener(this);
       listener.addCompletionListener(completionListener, msg);
     }
     
@@ -2599,7 +2564,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       } else {
         requestor.request(pM, listener);
       }
-      listener = null;
+      listener= null;
     }
   }
 
@@ -2714,73 +2679,44 @@ public class Session implements javax.jms.Session, SessionMBean {
     }
   }
 
-  private MessageConsumer getMessageConsumer(String sharedSubscriptionName) {
-    Iterator<MessageConsumer> it = consumers.iterator();
-    while (it.hasNext()) {
-      MessageConsumer messageConsumer = (MessageConsumer) it.next();
-      if (sharedSubscriptionName.equals(messageConsumer.targetName))
-        return messageConsumer;
-    }
-    return null;
-  }
-  
-  private void checkShared(Topic topic, String sharedSubscriptionName, String selector) throws JMSException {
-    if (sharedSubscriptionName == null)
-      throw new JMSException("the sharedSubscriptionName must be set.");
-    
-    MessageConsumer mc = getMessageConsumer(sharedSubscriptionName);
-    if (mc != null && mc.isOpen()) {
-      if (!mc.getDest().getName().equals(topic.getName())) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, "The shared \"" + sharedSubscriptionName + "\" durable/non-durable subscription already exists and active with a different topic name (" + mc.getDest() + ").");
-        throw new JMSException("The shared \"" + sharedSubscriptionName + "\" durable/non-durable subscription already exists and active with a different topic name (" + mc.getDest() + ").");
-      }
-      if ((mc.getMessageSelector() != null && selector == null) || (selector != null && !selector.equals(mc.getMessageSelector()))) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, "The shared \"" + sharedSubscriptionName + "\" durable/non-durable subscription already exists and active with a different selector (" + mc.getMessageSelector() + ").");
-        throw new JMSException("The shared \"" + sharedSubscriptionName + "\" durable/non-durable subscription already exists and active with a different selector (" + mc.getMessageSelector() + ").");
-
-      }
-    }
-  }
-  
   /**
    * API 2.0 method.
    */
   public javax.jms.MessageConsumer createSharedConsumer(javax.jms.Topic topic,
-                                                        String sharedSubscriptionName) throws JMSException {
+                                                        String name) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Session.createSharedConsumer(" + topic + ',' + sharedSubscriptionName + ')');
-
-    return createSharedConsumer(topic, sharedSubscriptionName, null);
-  }
-
-  /**
-   * API 2.0 method.
-   */
-  public javax.jms.MessageConsumer createSharedConsumer(javax.jms.Topic topic,
-                                                        String sharedSubscriptionName,
-                                                        String selector) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "Session.createSharedConsumer(" + topic + ',' + sharedSubscriptionName + ',' + selector + ')');
+      logger.log(BasicLevel.DEBUG, "Session.createSharedConsumer(" + topic + ',' + name + ')');
 
     checkClosed();
     checkThreadOfControl();
     
+    // TODO:
     if (topic == null)
       throw new InvalidDestinationException("Invalid null destination.");
     ((Topic) topic).check();
+
+    throw new JMSException("not yet implemented.");
+  }
+
+  /**
+   * API 2.0 method.
+   */
+  public javax.jms.MessageConsumer createSharedConsumer(javax.jms.Topic topic,
+                                                        String name,
+                                                        String selector) throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "Session.createSharedConsumer(" + topic + ',' + name + ',' + selector + ')');
+
+    checkClosed();
+    checkThreadOfControl();
     
-    checkShared((Topic) topic, sharedSubscriptionName, selector);
-    
-    //TODO : If there is an active (i.e. not closed) consumer on the shared non-durable subscription, 
-    // and an attempt is made to create an additional consumer, specifying the same name and client identifier
-    // (if set) but a different topic or message selector, then a JMSException or JMSRuntimeException 
-    // (depending on the method signature) will be thrown.
-    MessageConsumer mc = new MessageConsumer(this, (Topic) topic, selector, sharedSubscriptionName, false, true, false);
-    addConsumer(mc);
-    return mc;
+	  // TODO:
+    if (topic == null)
+      throw new InvalidDestinationException("Invalid null destination.");
+    ((Topic) topic).check();
+
+	  throw new JMSException("not yet implemented.");
   }
 
   /**
@@ -2817,7 +2753,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       throw new InvalidDestinationException("Invalid null topic.");
     checkClientID();
     
-    MessageConsumer mc = new MessageConsumer(this, (Topic) topic, null, name, false, false, true);
+    MessageConsumer mc = new MessageConsumer(this, (Topic) topic, null, name, false);
     addConsumer(mc);
     return mc;
   }
@@ -2861,7 +2797,7 @@ public class Session implements javax.jms.Session, SessionMBean {
       throw new InvalidDestinationException("Invalid null topic.");
     checkClientID();
     
-    MessageConsumer mc = new MessageConsumer(this, (Topic) topic, selector, name, noLocal, false, true);
+    MessageConsumer mc = new MessageConsumer(this, (Topic) topic, selector, name, noLocal);
     addConsumer(mc);
     return mc;
   }
@@ -2875,7 +2811,15 @@ public class Session implements javax.jms.Session, SessionMBean {
       logger.log(BasicLevel.DEBUG,
                  "Session.createSharedDurableConsumer(" + topic + ',' + name + ')');
 
-    return createSharedDurableConsumer(topic, name, null);
+    checkClosed();
+    checkThreadOfControl();
+    
+    // TODO:
+    if (topic == null)
+      throw new InvalidDestinationException("Invalid null destination.");
+    ((Topic) topic).check();
+
+	  throw new JMSException("not yet implemented.");
   }
 
   /**
@@ -2891,18 +2835,11 @@ public class Session implements javax.jms.Session, SessionMBean {
     checkClosed();
     checkThreadOfControl();
     
+    // TODO:
     if (topic == null)
       throw new InvalidDestinationException("Invalid null destination.");
     ((Topic) topic).check();
 
-    checkShared((Topic) topic, name, selector);
-
-    //TODO : If there is an active (i.e. not closed) consumer on the shared non-durable subscription, 
-    // and an attempt is made to create an additional consumer, specifying the same name and client identifier
-    // (if set) but a different topic or message selector, then a JMSException or JMSRuntimeException 
-    // (depending on the method signature) will be thrown.
-    MessageConsumer mc = new MessageConsumer(this, (Topic) topic, selector, name, false, true, true);
-    addConsumer(mc);
-    return mc;
+	  throw new JMSException("not yet implemented.");
   }
 }

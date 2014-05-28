@@ -33,8 +33,6 @@ public class UnknownAgentException extends Exception {
    * 
    */
   private static final long serialVersionUID = 1L;
-  
-  private AgentId unknownAgentId;
 
   /**
    *  Constructs a new <code>UnknownAgentException</code> with no
@@ -53,26 +51,4 @@ public class UnknownAgentException extends Exception {
   public UnknownAgentException(String s) {
     super(s);
   }
-  
-  /**
-   *  Constructs a new <code>UnknownAgentException</code> with the
-   * specified detail message and agent identifier. 
-   *
-   * @param   s   the detail message
-   * @param   unknownAgentId   identifier of the unknown agent
-   */
-  public UnknownAgentException(String s, AgentId unknownAgentId) {
-    super(s);
-    this.unknownAgentId = unknownAgentId;
-  }
-
-  /**
-   * Returns the unknown agent identifier.
-   * 
-   * @return the unknown agent identifier
-   */
-  public AgentId getUnknownAgentId() {
-    return unknownAgentId;
-  }
-  
 }

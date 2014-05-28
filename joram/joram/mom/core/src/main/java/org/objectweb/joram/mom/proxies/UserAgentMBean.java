@@ -109,10 +109,4 @@ public interface UserAgentMBean extends AgentMBean {
    * Deletes this proxy.
    */
   void delete();
-  
-  /**
-   * Returns the amount of memory consumed by the message table.
-   */
-  int getMessageTableConsumedMemory();
-  
 }

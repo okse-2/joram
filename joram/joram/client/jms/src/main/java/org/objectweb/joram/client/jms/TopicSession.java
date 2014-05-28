@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -86,7 +86,7 @@ public class TopicSession extends Session implements javax.jms.TopicSession
   {
     checkClosed();
     TopicSubscriber ts = new TopicSubscriber(
-      this, (Destination) topic, null, selector, noLocal, false);
+      this, (Destination) topic, null, selector, noLocal);
     addConsumer(ts);
     return ts;
   }
@@ -103,7 +103,7 @@ public class TopicSession extends Session implements javax.jms.TopicSession
   {
     checkClosed();
     TopicSubscriber ts = new TopicSubscriber(
-      this, (Destination) topic, null, null, false, false);
+      this, (Destination) topic, null, null, false);
     addConsumer(ts);
     return ts;
   }

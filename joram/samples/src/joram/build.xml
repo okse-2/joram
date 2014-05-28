@@ -83,8 +83,7 @@
           failonerror="no" fork="yes"
           dir="${run.dir}/server${sid}">
       <classpath path="${felix.class.path}"/>
-      <jvmarg line="-Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=${sid} -Dcom.sun.management.jmxremote -DTransaction.SyncOnWrite=false"/>
-      <!-- jvmarg line="-server -Xmx1500m -Xincgc -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=${sid} -Dcom.sun.management.jmxremote"/ -->
+      <jvmarg line="-Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=${sid} -Dcom.sun.management.jmxremote"/>
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
   </target>
@@ -125,7 +124,7 @@
     <antcall target="server">
       <param name="sid" value="0"/>
       <param name="a3.conf" value="${conf.dir}/ngt_a3servers.xml"/>
-      <param name="osgi.conf" value="${conf.dir}/config.properties"/>
+      <param name="osgi.conf" value="${conf.dir}/config.properties"/>    	
     </antcall>
   </target>
 
@@ -630,91 +629,6 @@
       <arg line="./joramAdmin.xml"/>
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
-  </target>
-
-  <!-- Runs the queue cluster consumers -->
-  <target name="cluster_xcons" depends="simple_init">
-  	<parallel>
-      <java classname="cluster.queue.XConsumer" failonerror="no" fork="yes"
-            dir="${run.dir}">
-        <classpath path="${project.class.path}"/>
-        <jvmarg line="-Dmps=140"/>
-        <arg value="0"/>
-      </java>
-      <java classname="cluster.queue.XConsumer" failonerror="no" fork="yes"
-            dir="${run.dir}">
-        <classpath path="${project.class.path}"/>
-        <jvmarg line="-Dmps=60"/>
-        <arg value="1"/>
-      </java>
-  	</parallel>
-  </target>
-
-  <!-- Runs the queue cluster producers -->
-  <target name="cluster_xprod" depends="simple_init">
-  	<parallel>
-    	<java classname="cluster.queue.XProducer" failonerror="no" fork="yes"
-     	     dir="${run.dir}">
-     	 <classpath path="${project.class.path}"/>
-    	  <jvmarg line="-DRound=1280 -DNbMsgPerRound=30 -Dmps=60"/>
-   	   <arg line="0"/>
-  	  </java>
-    	<java classname="cluster.queue.XProducer" failonerror="no" fork="yes"
-     	     dir="${run.dir}">
-     	 <classpath path="${project.class.path}"/>
-    	  <jvmarg line="-DRound=3000 -DNbMsgPerRound=30 -Dmps=140"/>
-   	   <arg line="1"/>
-  	  </java>
-    </parallel>
-  </target>
-
-
-  <!-- Runs the queue cluster consumers -->
-  <target name="cluster_consumers" depends="simple_init">
-  	<parallel>
-      <java classname="cluster.queue.Consumer" failonerror="no" fork="yes"
-            dir="${run.dir}">
-        <classpath path="${project.class.path}"/>
-        <jvmarg line="-Dsleep=10 -DnbMsgSleep=5"/>
-        <arg value="0"/>
-      </java>
-      <java classname="cluster.queue.Consumer" failonerror="no" fork="yes"
-            dir="${run.dir}">
-        <classpath path="${project.class.path}"/>
-        <jvmarg line="-Dsleep=30 -DnbMsgSleep=5"/>
-        <arg value="1"/>
-      </java>
-      <java classname="cluster.queue.Consumer" failonerror="no" fork="yes"
-            dir="${run.dir}">
-        <classpath path="${project.class.path}"/>
-        <jvmarg line="-Dsleep=10 -DnbMsgSleep=5"/>
-        <arg value="2"/>
-      </java>
-  	</parallel>
-  </target>
-
-  <!-- Runs the queue cluster producers -->
-  <target name="cluster_producers" depends="simple_init">
-  	<parallel>
-    	<java classname="cluster.queue.Producer" failonerror="no" fork="yes"
-     	     dir="${run.dir}">
-     	 <classpath path="${project.class.path}"/>
-    	  <jvmarg line="-Dsleep=30 -DnbMsgSleep=5"/>
-   	   <arg line="0 50000"/>
-  	  </java>
-    	<java classname="cluster.queue.Producer" failonerror="no" fork="yes"
-     	     dir="${run.dir}">
-     	 <classpath path="${project.class.path}"/>
-    	  <jvmarg line="-Dsleep=10 -DnbMsgSleep=5"/>
-   	   <arg line="1 50000"/>
-  	  </java>
-      	<java classname="cluster.queue.Producer" failonerror="no" fork="yes"
-       	     dir="${run.dir}">
-       	 <classpath path="${project.class.path}"/>
-      	  <jvmarg line="-Dsleep=30 -DnbMsgSleep=5"/>
-     	   <arg line="2 50000"/>
-    	  </java>
-    </parallel>
   </target>
 
   <!-- Runs a queue cluster consumer -->
@@ -1248,7 +1162,7 @@
     <java classname="perfs.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DRound=50 -DasyncSend=true -DMsgSize=500 -DMsgTransient=true -Dmps=150000" />
+      <jvmarg line="-DRound=50 -DMsgSize=500 -DMsgTransient=true" />
       <arg line="queue"/>
     </java>
   </target>
@@ -1270,7 +1184,6 @@
     <java classname="perfs.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line=" -DTransacted=false" />
       <arg line="queue"/>
     </java>
   </target>
@@ -1281,9 +1194,7 @@
     <java classname="perfs.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DNbClient=1 -DRound=10000 -DNbMsgPerRound=1000 -Dmps=10000 -DMsgSize=10000 -DMsgTransient=true -DTransacted=true" />
-      <!-- jvmarg line="-DNbClient=1 -DRound=1000 -DNbMsgPerRound=10000 -Dmps=10000 -DMsgSize=500 -DMsgTransient=false -DTransacted=false -DSwapAllowed=true" / -->
-      <!-- jvmarg line="-DNbClient=1 -DRound=1600 -DNbMsgPerRound=100 -Dmps=500 -DMsgSize=32768 -DMsgTransient=false -DTransacted=false -DSwapAllowed=true" / -->
+      <jvmarg line="-DNbClient=1 -DRound=10000 -DNbMsgPerRound=1000 -Dmps=8000 -DMsgSize=10000 -DMsgTransient=true -DTransacted=true" />
       <!-- jvmarg line="-DNbClient=25 -DRound=40 -DNbMsgPerRound=50 -Dmps=50 -DMsgSize=500 -DMsgTransient=false -DTransacted=false" / -->
       <arg line="queue"/>
     </java>
@@ -1587,80 +1498,5 @@
 	      <classpath path="${project.class.path}"/>
 	    </java>
 	  </target>
-
-  <!-- ***************************************************************** -->
-  <!-- *                          CTRL-Green                           * -->
-  <!-- ***************************************************************** -->
-
-  <target name="ctrlg.server" depends="init">
-    <mkdir dir="${run.dir}/server"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/server"/>
-    <java classname="com.scalagent.ctrlgreen.ServerFramework"
-          failonerror="no" fork="yes"
-          dir="${run.dir}/server">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
-    </java>
-  </target>
-
-  <target name="ctrlg.talend" depends="init">
-    <mkdir dir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <java classname="com.scalagent.testctrlgreen.SimTalend"
-          failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
-      <arg line="localhost 16010"/>
-    </java>
-  </target>
-
-  <target name="ctrlg.cmdb" depends="init">
-    <mkdir dir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <java classname="com.scalagent.testctrlgreen.TestCMDBFramework"
-          failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
-      <arg line="localhost 16010"/>
-    </java>
-  </target>
-
-  <target name="ctrlg.scopebr" depends="init">
-    <mkdir dir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <java classname="com.scalagent.testctrlgreen.TestScopeBRFramework"
-          failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
-      <arg line="localhost 16010"/>
-    </java>
-  </target>
-
-  <target name="ctrlg.dns" depends="init">
-    <mkdir dir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <java classname="com.scalagent.testctrlgreen.TestDNSFramework"
-          failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
-      <arg line="localhost 16010"/>
-    </java>
-  </target>
-
-  <target name="ctrlg.tune" depends="init">
-    <mkdir dir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <java classname="com.scalagent.testctrlgreen.TestTuneFramework"
-          failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote"/>
-      <arg line="localhost 16010"/>
-    </java>
-  </target>
 
 </project>

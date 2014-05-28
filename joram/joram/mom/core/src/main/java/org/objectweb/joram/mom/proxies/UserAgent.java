@@ -39,7 +39,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -66,11 +65,8 @@ import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.DenyRequest;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
-import org.objectweb.joram.mom.notifications.GetClientSubscriptions;
-import org.objectweb.joram.mom.notifications.ClientSubscriptionNot;
 import org.objectweb.joram.mom.notifications.QueueMsgReply;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
-import org.objectweb.joram.mom.notifications.ReconnectSubscribersNot;
 import org.objectweb.joram.mom.notifications.SubscribeReply;
 import org.objectweb.joram.mom.notifications.SubscribeRequest;
 import org.objectweb.joram.mom.notifications.TopicDeliveryTimeNot;
@@ -81,8 +77,6 @@ import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.mom.util.InterceptorsHelper;
 import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.mom.util.MessageInterceptor;
-import org.objectweb.joram.mom.util.MessageTable;
-import org.objectweb.joram.mom.util.MessageTableFactory;
 import org.objectweb.joram.mom.util.TopicDeliveryTimeTask;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
@@ -163,9 +157,7 @@ import com.scalagent.scheduler.Scheduler;
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.CallbackNotification;
 import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.CountDownCallback;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
@@ -190,9 +182,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(UserAgent.class.getName());
-  
-  public static final String ARRIVAL_STATE_PREFIX = "AS_";
-  public static final String MESSAGE_TABLE_PREFIX = "MT_";
 
   /** the in and out interceptors list. */
   private transient List<MessageInterceptor> interceptorsOUT = null;
@@ -330,24 +319,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private Map<String, ClientSubscription> subsTable;
   
   /**
-   * Table holding the <code>SharedCtx</code> instances.
-   * <p>
-   * <b>Key:</b> subscription name<br>
-   * <b>Value:</b> the shared context
-   */
-  private transient Map<String, SharedCtx> sharedSubs;
-  
-  /**
-   * This kind of SharedCts (LinkedHashMap) is well-suited to building LRU caches.
-   */
-  class SharedCtx extends LinkedHashMap<Integer, Integer> {
-    SharedCtx(int ctxId, int requestId) {
-      super(100, 1.1f, true);
-      put(ctxId, requestId);
-    }
-  }
-  
-  /**
    * <b>Key:</b> subscription name<br>
    * <b>Value:</b> clientID
    */
@@ -362,7 +333,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private Map<Xid, XACnxPrepare> recoveredTransactions;
 
   /** Counter of message arrivals from topics. */
-  private UserAgentArrivalState arrivalState;
+  private long arrivalsCounter = 0;
 
   /**
    * Table holding the <code>TopicSubscription</code> instances.
@@ -378,7 +349,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * <b>Key:</b> message identifier<br>
    * <b>Value:</b> message
    */
-  private transient MessageTable messagesTable;
+  private transient Map messagesTable;
 
   /**
    * Identifier of the active context. 
@@ -422,7 +393,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     modifiedClientContexts = new ArrayList<ClientContext>();
     modifiedClientSubscriptions = new ArrayList<ClientSubscription>();
     clientIDs = new HashMap<Integer, String>();
-    sharedSubs = new HashMap<String, SharedCtx>();
 
     super.agentInitialize(firstTime);
     initialize(firstTime);
@@ -453,10 +423,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     strbuf.append(':');
     strbuf.append("type=User,name=").append(getName());
     return strbuf;
-  }
-  
-  public int getMessageTableConsumedMemory() {
-    return messagesTable.getConsumedMemory();
   }
 
   /**
@@ -529,102 +495,12 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       doReact((FwdAdminRequestNot) not);
     } else if (not instanceof TopicDeliveryTimeNot) {
       doReact((TopicDeliveryTimeNot) not);
-    } else if (not instanceof GetClientSubscriptions) {
-      doReact(from, (GetClientSubscriptions) not);
-    } else if (not instanceof ReconnectSubscribersNot) {
-      doReact(from, (ReconnectSubscribersNot) not);
     } else {
       super.react(from, not);
     }
-  }
-  
-  protected void agentSave() throws IOException {
-    super.agentSave();
-    arrivalState.save();
+
     saveModifiedClientContexts();
     saveModifiedClientSubscriptions();
-  }
-  
-  /**
-   * Used to get number of local subscribers to 'from'.
-   * This number is sent as an Admin reply.
-   * 
-   * @param from should be a Topic agent ID.
-   * @param not contains the original Admin not sent to 'from'.
-   */
-  private void doReact(AgentId from, GetClientSubscriptions not) {
-	FwdAdminRequestNot aNot = (FwdAdminRequestNot) not.getAdminNot();
-	int ls = ((TopicSubscription) topicsTable.get(from)).size();
-	
-    replyToTopic(new GetNumberReply(ls),
-      aNot.getReplyTo(), aNot.getRequestMsgId(), aNot.getReplyMsgId());
-  }
-  
-  /**
-   * Sends reconnection messages to one or more subscribers.
-   * 
-   * @param from
-   * @param not
-   */
-  private void doReact(AgentId from, ReconnectSubscribersNot not) {
-	ClientSubscription sub;
-	ConsumerMessages consM;
-	
-	String subName = not.getSubName();
-	ArrayList msgs = not.getMsgs();
-	List message = new ArrayList();
-	message.add(
-	  new Message((org.objectweb.joram.shared.messages.Message) msgs.get(0)));
-	if (subName != null) {
-      // Redirect a specific subscriber.
-	  sub = subsTable.get(subName);
-	  sub.browseNewMessages(message);
-	  consM = sub.deliver();
-	  try {
-	    setCtx(sub.getContextId());
-	    if (activeCtx.getActivated()) {
-		  doReply(consM);
-	    }
-	  } catch (StateException e) {}
-	} else {
-	  // Redirect many subscribers..
-	  ArrayList<Integer> subs = not.getSubs(); 
-	  TopicSubscription tSub = (TopicSubscription) topicsTable.get(from);
-	  int i = 0;
-	  int c = subs.get(i);
-	  for (Iterator names = tSub.getNames(); names.hasNext();) {
-	    subName = (String) names.next();
-	    sub = (ClientSubscription) subsTable.get(subName);
-		if (sub != null && sub.getActive() > 0) {
-		  sub.browseNewMessages(message);
-		  consM = sub.deliver();
-		  try {
-			setCtx(sub.getContextId());
-		    if (activeCtx.getActivated()) {
-		      doReply(consM);
-		    }
-		  } catch (StateException e) {}
-		}
-		
-		c--;
-		if (c == 0)
-		  i++;
-		
-		if (i < subs.size()) {
-		  c = subs.get(i);
-		  message.set(0,new Message((org.objectweb.joram.shared.messages.Message) msgs.get(i)));
-		} else {
-		  break;
-		}
-	  }
-	}
-	
-	// If there is an Admin request to reply to..
-	FwdAdminRequestNot adr = not.getNot();
-	if (adr != null) {
-	  replyToTopic(new AdminReply(true, null),
-	    adr.getReplyTo(), adr.getRequestMsgId(), adr.getReplyMsgId());
-	}
   }
 
   private void doSetPeriod(long period) {
@@ -717,7 +593,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         }
 
         AbstractJmsRequest request = ctx.getRequest(not.getMessage());
-        reactToClientRequest(key.intValue(), request, not);
+        reactToClientRequest(key.intValue(), request);
 
         if (ctx.isClosed()) {
           // CnxCloseRequest request = (CnxCloseRequest) not.getMessage();
@@ -757,15 +633,15 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           JmsRequestGroup jrg = (JmsRequestGroup) request;
           AbstractJmsRequest[] groupedRequests = jrg.getRequests();
           for (int j = 0; j < groupedRequests.length; j++) {
-            if (groupedRequests[j] instanceof ProducerMessages) {
-              ProducerMessages pm = (ProducerMessages) groupedRequests[j];
+            if (groupedRequests[i] instanceof ProducerMessages) {
+              ProducerMessages pm = (ProducerMessages) groupedRequests[i];
               rm.put(req.getConnectionKey(), pm);
             } else {
-              reactToClientRequest(key.intValue(), groupedRequests[j], null);
+              reactToClientRequest(key.intValue(), groupedRequests[i]);
             }
           }
         } else {
-          reactToClientRequest(key.intValue(), request, null);
+          reactToClientRequest(key.intValue(), request);
         }
       }
     }
@@ -784,7 +660,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       // Normally the task is already cancelled by the task itself.
       if (hbt != null) hbt.cancel();
 
-      reactToClientRequest(not.getKey(), new CnxCloseRequest(), null);
+      reactToClientRequest(not.getKey(), new CnxCloseRequest());
 
       if (ctx != null) {
         MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
@@ -802,7 +678,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       Integer key = new Integer(not.getKey());
       // The connection may have already been explicitly closed by a CnxCloseRequest.
       if (connections.remove(key) != null) {
-        reactToClientRequest(not.getKey(), new CnxCloseRequest(), null);
+        reactToClientRequest(not.getKey(), new CnxCloseRequest());
         connections.remove(key);
         HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
         if (hbt != null) hbt.cancel();
@@ -826,7 +702,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         // Only reliable connections can be recovered.
         if (obj instanceof StandardConnectionContext) {
           ConnectionContext cc = (ConnectionContext) obj;
-          reactToClientRequest(cc.getKey(), new CnxCloseRequest(), null);
+          reactToClientRequest(cc.getKey(), new CnxCloseRequest());
           HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(cc.getKey());
           if (hbt != null) hbt.cancel();
           iterator.remove();
@@ -974,7 +850,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         // reactToClientRequest(key.intValue(), new CnxCloseRequest());
         //
         // if (ctx != null) {
-        //   MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
+//          MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
         // + ':' + key + " closed");
         // ctx.pushError(exc);
         // }
@@ -1107,15 +983,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       logger.log(BasicLevel.DEBUG, "--- " + this + " (re)initializing...");
 
     topicsTable = new Hashtable();
-    
-    if (firstTime) {
-      arrivalState = new UserAgentArrivalState(ARRIVAL_STATE_PREFIX + getId().toString());
-    } else {
-      arrivalState = UserAgentArrivalState.load(ARRIVAL_STATE_PREFIX + getId().toString());
-    }
-    
-    MessageTableFactory messageTableFactory = MessageTableFactory.newFactory();
-    messagesTable = messageTableFactory.createMessageTable(MESSAGE_TABLE_PREFIX + getId().toString());
+    messagesTable = new Hashtable();
 
     if (contexts == null) contexts = new Hashtable<Integer, ClientContext>();
     if (subsTable == null) subsTable = new Hashtable();
@@ -1143,10 +1011,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         cs.txName = persistedSubscriptionNames[i];
         cs.setProxyId(getId());
         cs.setProxyAgent(this);
-        
-        cs.initMessageIds();
-        cs.loadMessageIds();
-        
         subsTable.put(cs.getName(), cs);
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR, "ClientSubscription named [" + persistedSubscriptionNames[i]
@@ -1268,6 +1132,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Browsing the topics and updating their subscriptions.
     for (Iterator topicIds = topics.iterator(); topicIds.hasNext();)
       updateSubscriptionToTopic((AgentId) topicIds.next(), -1, -1);
+
+    saveModifiedClientContexts();
+    saveModifiedClientSubscriptions();
   }
 
   private void setActiveCtxId(int activeCtxId) {
@@ -1285,14 +1152,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * A <code>MomExceptionReply</code> wrapping a <tt>DestinationException</tt>
    * might be sent back if a target destination can't be identified.
    */
-  protected void reactToClientRequest(int key, AbstractJmsRequest request, CallbackNotification callbackNotification) {
+  protected void reactToClientRequest(int key, AbstractJmsRequest request) {
     try {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "--- " + this + " got " + request.getClass().getName() + " with id: "
             + request.getRequestId() + " through activeCtx: " + key);
 
       if (request instanceof ProducerMessages)
-        reactToClientRequest(key, (ProducerMessages) request, callbackNotification);
+        reactToClientRequest(key, (ProducerMessages) request);
       else if (request instanceof ConsumerReceiveRequest)
         reactToClientRequest(key, (ConsumerReceiveRequest) request);
       else if (request instanceof ConsumerSetListRequest)
@@ -1302,7 +1169,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       else if (request instanceof JmsRequestGroup)
         reactToClientRequest(key, (JmsRequestGroup) request);
       else {
-        doReact(key, request, callbackNotification);
+        doReact(key, request);
       }
     } catch (IllegalArgumentException iE) {
       // Catching an exception due to an invalid agent identifier to
@@ -1322,7 +1189,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * 
    * @throws RequestException The destination id is undefined
    */
-  private void reactToClientRequest(int key, ProducerMessages req, CallbackNotification callbackNotification) throws RequestException {
+  private void reactToClientRequest(int key, ProducerMessages req) throws RequestException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "UserAgent.reactToClientRequest(" + key + ',' + req + ')');
 
@@ -1335,8 +1202,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (pm == null) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "UserAgent.reactToClientRequest : no message to send.");
-      
-      if (destId.getTo() == getId().getTo() && !req.getAsyncSend() &&  !callbackNotification.hasCallback()) {
+      if (destId.getTo() == getId().getTo() && !req.getAsyncSend()) {
         // send producer reply
         sendNot(getId(), new SendReplyNot(key, req.getRequestId()));
       }
@@ -1353,13 +1219,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       not.setExpiration(0L);
       if (pm.getAsyncSend()) {
         not.setAsyncSend(true);
-      } else {
-        callbackNotification.passCallback(not);
       }
     } else {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> remote sending");
-      if (!pm.getAsyncSend() && !callbackNotification.hasCallback()) {
+      if (!pm.getAsyncSend()) {
         sendNot(getId(), new SendReplyNot(key, pm.getRequestId()));
       }
     }
@@ -1409,7 +1273,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         sendNot(destId, not);
       }
     } else {
-      doReact(key, req, null);
+      doReact(key, req);
     }
   }
 
@@ -1430,7 +1294,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
                                               0,
                                               false,
                                               req.getMessageIdsToAck(),
-                                              req.getMessageCount());
+          req.getMessageCount());
       AgentId destId = AgentId.fromString(req.getTarget());
       if (destId == null)
         throw new RequestException("Request to an undefined destination (null).");
@@ -1444,7 +1308,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         sendNot(destId, not);
       }
     } else {
-      doReact(key, req, null);
+      doReact(key, req);
     }
   }
 
@@ -1472,7 +1336,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (pm != null)
           rm.put(key, pm);
       } else {
-        reactToClientRequest(key, requests[i], null);
+        reactToClientRequest(key, requests[i]);
       }
     }
 
@@ -1510,7 +1374,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * A <code>JmsExceptReply</code> is sent back to the client when an
    * exception is thrown by the reaction.
    */
-  private void doReact(int key, AbstractJmsRequest request, CallbackNotification callbackNotification) {
+  private void doReact(int key, AbstractJmsRequest request) {
     try {
       // Updating the active context if the request is not a new context
       // request!
@@ -1562,7 +1426,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       else if (request instanceof ActivateConsumerRequest)
         doReact(key, (ActivateConsumerRequest) request);
       else if (request instanceof CommitRequest)
-        doReact(key, (CommitRequest) request, callbackNotification);
+        doReact(key, (CommitRequest) request);
       else if (request instanceof AddClientIDRequest)
         doReact(key, (AddClientIDRequest) request);
       else
@@ -1725,7 +1589,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     AgentId topicId = AgentId.fromString(req.getTarget());
     String subName = req.getSubName();
     String clientId = req.getClientID();
-    boolean shared = req.isShared();
 
     if (topicId == null)
       throw new RequestException("Cannot subscribe to an undefined topic (null).");
@@ -1736,14 +1599,13 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     boolean newTopic = !topicsTable.containsKey(topicId);
     boolean newSub = !subsTable.containsKey(subName);
     
-    if (!newSub && !shared && !req.getClientID().equals(subsClientIDs.get(subName))) {
+    if (!newSub && !req.getClientID().equals(subsClientIDs.get(subName))) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, "throw Exception : unshared durable subscription \"" + subName + "\" must use \"" 
             + subsClientIDs.get(subName) + "\" client identifier instead of " + clientId);
       throw new RequestException("unshared durable subscription \"" + subName + "\" must use \"" 
           + subsClientIDs.get(subName) + "\" client identifier instead of " + clientId);
     }
-    
     if (clientId != null)
       subsClientIDs.put(subName, clientId);
     
@@ -1763,41 +1625,26 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (newSub) { // New subscription...
       // state change, so save.
       setSave();
-
       cSub = new ClientSubscription(getId(),
-          activeCtxId,
-          req.getRequestId(),
-          req.getDurable(),
-          topicId,
-          req.getSubName(),
-          req.getSelector(),
-          req.getNoLocal(),
-          dmqId,
-          threshold,
-          nbMaxMsg,
-          messagesTable,
-          clientId);
-
-      try {
-        cSub.initMessageIds();
-      } catch (Exception e) {
-        throw new RequestException(e.toString());
-      }
-      
+                                    activeCtxId,
+                                    req.getRequestId(),
+                                    req.getDurable(),
+                                    topicId,
+                                    req.getSubName(),
+                                    req.getSelector(),
+                                    req.getNoLocal(),
+                                    dmqId,
+                                    threshold,
+                                    nbMaxMsg,
+                                    messagesTable,
+                                    clientId);
       cSub.setProxyAgent(this);
       modifiedSubscription(cSub);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Subscription " + subName + " created.");
 
-      if (shared) {
-        sharedSubs.put(subName, new SharedCtx(activeCtxId, req.getRequestId()));
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "Subscription sharedSubs = " + sharedSubs);
-      }
-      
       subsTable.put(subName, cSub);
-      
       try {
         MXWrapper.registerMBean(cSub, getSubMBeanName(subName));
       } catch (Exception e) {
@@ -1808,25 +1655,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       sent = updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription());
     } else { // Existing durable subscription...
       cSub = (ClientSubscription) subsTable.get(subName);
-      boolean newShared = false;
-      if (shared) {
-        SharedCtx sharedCtx = sharedSubs.get(subName);
-        if (sharedCtx == null) {
-          // the server restart, and the sharedSubs Tab is transient.
-          // So set the SharedCtx.
-          sharedCtx = new SharedCtx(activeCtxId, req.getRequestId());
-          sharedSubs.put(subName, sharedCtx);
-        }
-        
-        if (!sharedCtx.containsKey(activeCtxId)) {
-          sharedCtx.put(activeCtxId, req.getRequestId());
-          newShared = true;
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "Existing durable subscription add new SharedCtx : " + sharedCtx);
-        }
-      }
-      
-      if (cSub.getActive() > 0 && !newShared)
+
+      if (cSub.getActive() > 0)
         throw new StateException("The durable subscription " + subName + " has already been activated.");
 
       // Updated topic: updating the subscription to the previous topic.
@@ -1867,9 +1697,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Acknowledging the request, if needed.
     if (!sent)
       sendNot(getId(), new SyncReply(activeCtxId, new ServerReply(req)));
-    
-    // Forward client subscription (should be ignored if topicId isn't an ElasticTopic)
-    Channel.sendTo(topicId,new ClientSubscriptionNot(subName));
   }
 
   /**
@@ -1935,23 +1762,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (sub == null)
       throw new DestinationException("Can't desactivate non existing subscription: " + subName);
 
-    if (!sharedSubs.containsKey(subName)) {
-      // De-activating the subscription:
-      activeCtx.removeSubName(subName);
-      sub.deactivate(false);
-    } else {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "ConsumerCloseSubRequest: SharedCtx remove ctxId = " + activeCtx.getId());
-      SharedCtx sharedCtx = sharedSubs.get(subName);
-      sharedCtx.remove(activeCtx.getId());
-      activeCtx.removeSubName(subName);
-      if (sharedCtx.isEmpty()) {
-        sub.deactivate(false);
-        sharedSubs.remove(subName);
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "ConsumerCloseSubRequest: activCtx remove " + subName);
-      }
-    }
+    // De-activating the subscription:
+    activeCtx.removeSubName(subName);
+    sub.deactivate(false);
 
     // Acknowledging the request:
     doReply(new ServerReply(req));
@@ -1975,22 +1788,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (sub == null)
       throw new DestinationException("Can't unsubscribe non existing subscription: " + subName);
 
-    if (sharedSubs.containsKey(subName)) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "ConsumerUnsubRequest: SharedCtx remove ctxId = " + activeCtx.getId());
-      SharedCtx sharedCtx = sharedSubs.get(subName);
-      sharedCtx.remove(activeCtx.getId());
-      activeCtx.removeSubName(subName);
-      if (!sharedCtx.isEmpty()) {
-        // Acknowledging the request:
-        sendNot(getId(), new SyncReply(activeCtxId, new ServerReply(req)));
-        return;
-      }
-      sharedSubs.remove(subName);
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "ConsumerUnsubRequest: sharedSubs remove " + subName);
-    }
-    
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Deleting subscription " + subName);
 
@@ -2043,7 +1840,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     // Getting a message from the subscription.
     sub.setReceiver(req.getRequestId(), req.getTimeToLive());
     ConsumerMessages consM = sub.deliver();
-    
+
     if (consM != null && req.getReceiveAck()) {
       // Immediate acknowledge
       Vector messageList = consM.getMessages();
@@ -2601,7 +2398,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
   }
 
-  private void doReact(int key, CommitRequest req, CallbackNotification callbackNotification) {
+  private void doReact(int key, CommitRequest req) {
     // The commit may involve some local agents
     int asyncReplyCount = 0;
 
@@ -2621,8 +2418,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           not.setPersistent(false);
           if (req.getAsyncSend()) {
             not.setAsyncSend(true);
-          } else if (callbackNotification.hasCallback()) {
-            callbackNotification.passCallback(not);
           } else {
             asyncReplyCount++;
           }
@@ -2654,26 +2449,22 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
             sub.acknowledge(sar.getIds().iterator());
             // TODO (AF): is it needed to save the proxy ?
             // if (sub.getDurable())
-            // Assumes that there is nothing to save in the UserAgent.
-            //setSave();
+            setSave();
           }
         }
       }
     }
 
     if (!req.getAsyncSend()) {
-      if (! callbackNotification.hasCallback()) {
-        if (asyncReplyCount == 0) {
-          sendNot(getId(), new SendReplyNot(key, req
+      if (asyncReplyCount == 0) {
+        sendNot(getId(), new SendReplyNot(key, req
             .getRequestId()));
-        } else {
-          // we need to wait for the replies
-          // from the local agents
-          // before replying to the client.
-          activeCtx.addMultiReplyContext(req.getRequestId(), asyncReplyCount);
-        }
+      } else {
+        // we need to wait for the replies
+        // from the local agents
+        // before replying to the client.
+        activeCtx.addMultiReplyContext(req.getRequestId(), asyncReplyCount);
       }
-      // else the callback handles the ack
     }
     // else the client doesn't expect any ack
   }
@@ -2862,7 +2653,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     long currentTime = System.currentTimeMillis();
     // AF: TODO we should parse each message for each subscription
     // see ClientSubscription.browseNewMessages
-    List<Message> messages = new ArrayList<Message>();
+    List messages = new ArrayList();
     for (Iterator msgs = rep.getMessages().iterator(); msgs.hasNext();) {
       org.objectweb.joram.shared.messages.Message sharedMsg = 
           (org.objectweb.joram.shared.messages.Message) msgs.next();
@@ -2877,7 +2668,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         scheduleDeliveryTimeMessage(from, sharedMsg, delaySubNames);
       } else {
         // Setting the arrival order of the messages
-        message.order = arrivalState.getAndIncrementArrivalCount();
+        message.order = arrivalsCounter++;
         messages.add(message);
       }
     }
@@ -2899,9 +2690,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> save message " + message);
         // TODO (AF): The message saving does it need the proxy saving ?
-        if (message.isPersistent()) { 
-          arrivalState.setModified();
-          
+        if (message.isPersistent()) {
+          setSave();
           // Persisting the message.
           setMsgTxName(message);
           message.save();
@@ -2921,28 +2711,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
         if (consM != null) {
           try {
-            int ctxId = sub.getContextId();
-            SharedCtx sharedCtx = sharedSubs.get(subName);
-            if (sharedCtx != null) {
-              if(logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "Subscription "+ subName + ", sharedCtx = " + sharedCtx);
-              int i = 0;
-              do {
-                // if shared, used the next contextId 
-                Iterator<Entry<Integer, Integer>> it = sharedCtx.entrySet().iterator();
-                Entry<Integer, Integer> entry = it.next();
-                ClientContext ctx = (ClientContext) contexts.get(new Integer(entry.getKey()));
-                if (ctx.getActivated()) {
-                  ctxId = ctx.getId();
-                  if(logger.isLoggable(BasicLevel.DEBUG))
-                    logger.log(BasicLevel.DEBUG, "Subscription "+ subName + ", ctxId = " + ctxId);
-                  sharedCtx.get(ctxId);//update LRU
-                  break;
-                }
-                i++;
-              } while (sharedCtx.size() < i);
-            }
-            setCtx(ctxId);
+            setCtx(sub.getContextId());
             if (activeCtx.getActivated())
               doReply(consM);
             else
@@ -2954,8 +2723,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       } else if(logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Subscription " + sub + " is not active");
     }
-    
-    messagesTable.checkConsumedMemory();
   }
 
   void scheduleDeliveryTimeMessage(AgentId from, org.objectweb.joram.shared.messages.Message msg, List<String> subNames) {
@@ -3561,7 +3328,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           replyTo, requestMsgId, replyMsgId);
     }
   }
-  
+
   private void replyToTopic(AdminReply reply, AgentId replyTo, String requestMsgId, String replyMsgId) {
     if (replyTo == null) // In some cases the request needs no response
       return;
@@ -3637,20 +3404,28 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     Message message = null;
     DMQManager dmqManager = null;
 
-    if (dmqManager == null)
-      dmqManager = new DMQManager(dmqId, null);
-    
-    // The table cleaning is delegated to the table itself
-    messagesTable.clean(currentTime, dmqManager);
+    for (Iterator values = messagesTable.values().iterator(); values.hasNext();) {
+      message = (Message) values.next();
+      if ((message == null) || message.isValid(currentTime))
+        continue;
 
-    // Now each ClientSubscription is cleaned in a lazy way: the identifier
-    // of an invalid message is removed when the message is required by the
-    // ClientSubscription (see method 'deliver').
-    /*
+      values.remove();
+      if (message.durableAcksCounter > 0)
+        message.delete();
+
+      if (dmqManager == null)
+        dmqManager = new DMQManager(dmqId, null);
+      nbMsgsSentToDMQSinceCreation++;
+      dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
+
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "UserAgent expired message " + message.getId());
+    }
+
     Iterator subs = subsTable.values().iterator();
     while (subs.hasNext()) {
       ((ClientSubscription) subs.next()).cleanMessageIds();
-    }*/
+    }
 
     // If needed, sending the dead messages to the DMQ:
     if (dmqManager != null)
@@ -4040,6 +3815,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
   public int getEncodedSize() throws Exception {
     int res = super.getEncodedSize();
+    res += LONG_ENCODED_SIZE;
 
     res += BOOLEAN_ENCODED_SIZE;
     if (dmqId != null) {
@@ -4084,7 +3860,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
   public void encode(Encoder encoder) throws Exception {
     super.encode(encoder);
-    
+    encoder.encodeUnsignedLong(arrivalsCounter);
+
     if (dmqId == null) {
       encoder.encodeBoolean(true);
     } else {
@@ -4138,7 +3915,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
   public void decode(Decoder decoder) throws Exception {
     super.decode(decoder);
-    
+    arrivalsCounter = decoder.decodeUnsignedLong();
+
     boolean isNull = decoder.decodeBoolean();
     if (isNull) {
       dmqId = null;
@@ -4261,4 +4039,5 @@ class Xid implements Serializable, Encodable {
     fi = decoder.decodeUnsignedInt();
     gti = decoder.decodeByteArray();
   }
+
 }

@@ -114,7 +114,7 @@ public class AcquisitionTopic extends Topic implements AcquisitionTopicMBean {
 
   public void react(AgentId from, Notification not) throws Exception {
     if (not instanceof AcquisitionNot) {
-      acquisitionNot(from, (AcquisitionNot) not);
+      acquisitionNot((AcquisitionNot) not);
     } else {
       super.react(from, not);
     }
@@ -182,7 +182,7 @@ public class AcquisitionTopic extends Topic implements AcquisitionTopicMBean {
    * 
    * @param not
    */
-  private void acquisitionNot(AgentId from, AcquisitionNot not) {
+  private void acquisitionNot(AcquisitionNot not) {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "acquisitionNot(" + not + ")");
     }
@@ -197,7 +197,7 @@ public class AcquisitionTopic extends Topic implements AcquisitionTopicMBean {
     ClientMessages clientMessages = acquisitionModule.acquisitionNot(not, msgCount);
     if (clientMessages != null) {
       msgCount += clientMessages.getMessageCount();
-      forwardMessages(from, clientMessages);
+      forwardMessages(clientMessages);
       processMessages(clientMessages);
       postProcess(clientMessages);
     }

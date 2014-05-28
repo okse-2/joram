@@ -23,7 +23,6 @@
  */
 package org.objectweb.joram.mom.notifications;
 
-import fr.dyade.aaa.agent.CallbackNotification;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.common.encoding.Decoder;
 import fr.dyade.aaa.common.encoding.Encoder;
@@ -32,7 +31,7 @@ import fr.dyade.aaa.common.encoding.Encoder;
  * The <code>AbstractNotification</code> class is the superclass of the
  * notifications exchanged by a client agent and a MOM destination agent.
  */
-public abstract class AbstractNotification extends CallbackNotification {
+public abstract class AbstractNotification extends Notification {
   /**
    * The <code>clientContext</code> field allows a client to identify a context
    * within which a notification is exchanged with a destination.

@@ -276,34 +276,6 @@ public final class Message implements Serializable, MessageView, Encodable {
     msg.redelivered = true;
   }
   
-  public long getOrder() {
-    return order;
-  }
-
-  public void setOrder(long order) {
-    this.order = order;
-  }
-
-  public int getAcksCounter() {
-    return acksCounter;
-  }
-
-  public void incAcksCounter() {
-    this.acksCounter++;
-  }
-
-  public int getDurableAcksCounter() {
-    return durableAcksCounter;
-  }
-
-  public void incDurableAcksCounter() {
-    this.durableAcksCounter++;
-  }
-
-  public org.objectweb.joram.shared.messages.Message getMsg() {
-    return msg;
-  }
-
   /**
    * Get the clientID
    * @return the clientID

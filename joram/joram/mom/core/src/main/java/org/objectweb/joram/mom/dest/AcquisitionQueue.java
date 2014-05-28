@@ -180,7 +180,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     }
   }
 
-  public void initialize(boolean firstTime) throws Exception {
+  public void initialize(boolean firstTime) {
     super.initialize(firstTime);
     if (acquisitionModule == null) {
       acquisitionModule = new AcquisitionModule(this, acquisitionClassName, properties);

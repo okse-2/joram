@@ -170,7 +170,7 @@ public class DistributionQueue extends Queue {
   	return false;
   }
   
-  public void initialize(boolean firstTime) throws Exception {
+  public void initialize(boolean firstTime) {
     super.initialize(firstTime);
     if (distributionModule == null) {
       distributionModule = new DistributionModule(distributionClassName, properties, firstTime);
@@ -220,15 +220,18 @@ public class DistributionQueue extends Queue {
       			logger.log(BasicLevel.WARN, "DistributionQueue.preProcess: distribution error.", exc);
       		}
       	} else {
-      		// a processMessage exception is normal with async mode.
-      		if (distributionDaemon != null) {
-      			// use msg.id ?
-      			distributionDaemon.push(msg);
-      		} else {
-      			if (logger.isLoggable(BasicLevel.WARN)) {
-        			logger.log(BasicLevel.WARN, "DistributionQueue.preProcess: distribution distributionDaemon = null but we are in async distribution mode.", exc);
-        		}
-      		}
+      	  // Bug fix (JORAM-198): Avoid parallelism access during message serialization (save method).
+      	  // Do nothing, the handling of message is now in post-process.
+
+//      		// a processMessage exception is normal with async mode.
+//      		if (distributionDaemon != null) {
+//      			// use msg.id ?
+//      			distributionDaemon.push(msg);
+//      		} else {
+//      			if (logger.isLoggable(BasicLevel.WARN)) {
+//        			logger.log(BasicLevel.WARN, "DistributionQueue.preProcess: distribution distributionDaemon = null but we are in async distribution mode.", exc);
+//        		}
+//      		}
       	}
         // if we don't do batch distribution, stop on first error
         if (!batchDistribution) {
@@ -242,35 +245,78 @@ public class DistributionQueue extends Queue {
     }
     return null;
   }
+  
+  private void removeAndDeleteMessages(List ackList) {
+    logger.log(BasicLevel.DEBUG,
+               "DistributionQueue.wakeUpNot() - Handles AckList: " + ackList);
+
+    String id = null;
+    Iterator itMessages = ackList.iterator();
+    while (itMessages.hasNext()) {
+      id = (String) itMessages.next();
+      
+//      if (logger.isLoggable(BasicLevel.DEBUG))
+//        logger.log(BasicLevel.DEBUG, "DistributionQueue.removeAndDeleteMessages() - Acked: " + id);
+      
+      int i = 0;
+      org.objectweb.joram.mom.messages.Message message = null;
+      while (i < messages.size()) {
+        message = (org.objectweb.joram.mom.messages.Message) messages.get(i);
+        
+//        if (logger.isLoggable(BasicLevel.DEBUG))
+//          logger.log(BasicLevel.DEBUG, "DistributionQueue.removeAndDeleteMessages() - handles: " + message.getId());
+        
+        if (id.equals(message.getId())) {
+          messages.remove(i);
+          message.delete();
+          
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "DistributionQueue.removeAndDeleteMessages() - removes " + id);
+          
+          break;
+        }
+        // Bug fix (JORAM-199): avoid infinite loop!!
+        i++;
+      }
+    }
+  }
 
   @Override
-  protected void postProcess(ClientMessages msgs) {
-    super.postProcess(msgs);
-    if (distributionDaemon != null) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "DistributionQueue.postProcess(...)");
-      List ackList = distributionDaemon.getAckList();
-      if (ackList != null) {
-        // Bug fix (JORAM-74): delete anew the forwarded messages
-        // Replaces the call to removeMessages(ackList) by a similar code deleting the
-        // related messages.
-        String id = null;
-        Iterator itMessages = ackList.iterator();
-        while (itMessages.hasNext()) {
-          id = (String) itMessages.next();
-          int i = 0;
-          org.objectweb.joram.mom.messages.Message message = null;
-          while (i < messages.size()) {
-            message = (org.objectweb.joram.mom.messages.Message) messages.get(i);
-            if (id.equals(message.getId())) {
-              messages.remove(i);
-              message.delete();
-              if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "DistributionQueue.postProcess removes " + id);
-              break;
-            }
+  protected void postProcess(ClientMessages cm) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "DistributionQueue.postProcess(...)");
+
+    super.postProcess(cm);
+    
+    // Bug fix (JORAM-198): Avoid parallelism access during message serialization (save method).
+    // The handling of messages is no longer in pre-process.
+    if (isAsyncDistribution) {
+      List msgs = cm.getMessages();
+
+      for (Iterator ite = msgs.iterator(); ite.hasNext();) {
+        Message msg = (Message) ite.next();
+
+        // a processMessage exception is normal with async mode.
+        if (distributionDaemon != null) {
+          // use msg.id ?
+          distributionDaemon.push(msg);
+        } else {
+          if (logger.isLoggable(BasicLevel.WARN)) {
+            logger.log(BasicLevel.WARN,
+                       "DistributionQueue.postProcess: distribution distributionDaemon = null in async mode.");
           }
         }
+      }
+    }
+    
+    if (distributionDaemon != null) {
+      // Cleans message list using ackList from daemon.
+      List ackList = distributionDaemon.getAckList();
+      if (ackList != null) {
+        // Bug fix (JORAM-74): delete anew the forwarded messages, replacing the call to removeMessages(ackList)
+        // by a similar code deleting the related messages. Since the fix of JORAM-198 it should not be longer
+        // useful.
+        removeAndDeleteMessages(ackList);
       }
     }
   }
@@ -293,26 +339,10 @@ public class DistributionQueue extends Queue {
     if (distributionDaemon != null) {
     	List ackList = distributionDaemon.getAckList();
     	if (ackList != null) {
-    	  // Bug fix (JORAM-74): delete anew the forwarded messages
-    	  // Replaces the call to removeMessages(ackList) by a similar code deleting the
-    	  // related messages.
-    	  String id = null;
-    	  Iterator itMessages = ackList.iterator();
-    	  while (itMessages.hasNext()) {
-    	    id = (String) itMessages.next();
-    	    int i = 0;
-    	    org.objectweb.joram.mom.messages.Message message = null;
-    	    while (i < messages.size()) {
-    	      message = (org.objectweb.joram.mom.messages.Message) messages.get(i);
-    	      if (id.equals(message.getId())) {
-    	        messages.remove(i);
-    	        message.delete();
-    	        if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot removes " + id);
-    	        break;
-    	      }
-    	    }
-    	  }
+        // Bug fix (JORAM-74): delete anew the forwarded messages, replacing the call to removeMessages(ackList)
+        // by a similar code deleting the related messages. Since the fix of JORAM-198 it should not be longer
+        // useful.
+        removeAndDeleteMessages(ackList);
     	}
     }
     
@@ -368,7 +398,13 @@ public class DistributionQueue extends Queue {
         		// because the distributionDaemon can't distribute message now.
         		break;
         	} else {
-        		distributionDaemon.push(msg.getFullMessage());
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot " + msg.getId());
+
+            // Bug fix (JORAM-200): Avoid to duplicate a message already known by the daemon (either in
+            // the distributeQueue or the ackedQueue).
+            if (! distributionDaemon.isHandling(msg.getId()))
+              distributionDaemon.push(msg.getFullMessage());
         	}
         }
         

@@ -6,7 +6,7 @@
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
   <!-- version : major.minor.build -->
-  <version>5.9.1-SNAPSHOT</version>
+  <version>5.9.0</version>
   <name>JORAM</name>
   <url>http://maven.apache.org</url>
   <description>Builds the Joram project.</description>
@@ -195,7 +195,6 @@
     <stomp.version>1.0</stomp.version>
     <commons-io.version>1.4</commons-io.version>
     <ow2-util-substitution.version>2.0.0</ow2-util-substitution.version>
-    <junit.version>4.6</junit.version>
   </properties>
 
   <organization>
@@ -306,12 +305,7 @@
         <groupId>org.ow2.util.substitution</groupId>
         <artifactId>substitution</artifactId>
         <version>${ow2-util-substitution.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${junit.version}</version>
-      </dependency>
+    </dependency>
     </dependencies>
   </dependencyManagement>
 

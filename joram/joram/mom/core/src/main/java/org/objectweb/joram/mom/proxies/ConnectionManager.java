@@ -30,33 +30,21 @@ import java.util.StringTokenizer;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.dest.Queue;
-import org.objectweb.joram.mom.dest.QueueArrivalState;
-import org.objectweb.joram.mom.dest.QueueDeliveryTable;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
-import org.objectweb.joram.mom.notifications.TopicForwardNot;
 import org.objectweb.joram.mom.util.JoramHelper;
-import org.objectweb.joram.mom.util.MessageIdListFactory;
-import org.objectweb.joram.mom.util.MessageIdListImpl;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.CommitRequest;
-import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.ProducerMessages;
-import org.objectweb.joram.shared.client.ServerReply;
-import org.objectweb.joram.shared.excepts.DestinationException;
-import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.Callback;
 import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.CountDownCallback;
-import fr.dyade.aaa.agent.UnknownAgentException;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -156,61 +144,9 @@ public class ConnectionManager implements ConnectionManagerMBean {
     EncodableFactoryRepository.putFactory(JoramHelper.MESSAGE_CLASS_ID, new Message.MessageFactory());
     EncodableFactoryRepository.putFactory(JoramHelper.QUEUE_CLASS_ID, new Queue.QueueFactory());
     EncodableFactoryRepository.putFactory(JoramHelper.USER_AGENT_CLASS_ID, new UserAgent.UserAgentFactory());
-    EncodableFactoryRepository.putFactory(JoramHelper.CLIENT_SUBSCRIPTION_CLASS_ID, new ClientSubscription.ClientSubscriptionFactory());
-    EncodableFactoryRepository.putFactory(JoramHelper.CLIENT_CONTEXT_CLASS_ID, new ClientContext.ClientContextFactory());
-    EncodableFactoryRepository.putFactory(JoramHelper.MESSAGE_ID_LIST_IMPL_CLASS_ID, new MessageIdListImpl.MessageIdListImplEncodableFactory());
-    EncodableFactoryRepository.putFactory(JoramHelper.USER_AGENT_ARRIVAL_STATE_CLASS_ID, new UserAgentArrivalState.UserAgentArrivalStateFactory());
-    EncodableFactoryRepository.putFactory(JoramHelper.QUEUE_DELIVERY_TABLE_CLASS_ID, new QueueDeliveryTable.Factory());
-    EncodableFactoryRepository.putFactory(JoramHelper.QUEUE_ARRIVAL_STATE_CLASS_ID, new QueueArrivalState.Factory());
-    EncodableFactoryRepository.putFactory(JoramHelper.TOPIC_FWD_NOT_CLASS_ID, new TopicForwardNot.Factory());
-    EncodableFactoryRepository.putFactory(JoramHelper.CLIENT_MESSAGES_CLASS_ID, new ClientMessages.Factory());
   }
   
-  private static CountDownCallback createCallback(final AbstractJmsRequest req, final ConnectionContext ctx) {
-    return new CountDownCallback(new Callback() {
-      
-      public void failed(List<Throwable> errors) {
-        if (! directNotification) {
-          // Errors are handled by UserAgent
-          return;
-        }
-        
-        Throwable error = errors.get(0);
-        if (error instanceof MomException) {
-          MomException exc = (MomException) error;
-          ctx.pushReply(new MomExceptionReply(req.getRequestId(), exc));
-        } else if (error instanceof UnknownAgentException) {
-          UnknownAgentException uae = (UnknownAgentException) error;
-          DestinationException exc = new DestinationException("Destination "
-              + uae.getUnknownAgentId() + " does not exist.");
-          ctx.pushReply(new MomExceptionReply(req.getRequestId(), exc));
-        } else {
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, errors.toString(), error);
-        }
-      }
-      
-      public void done() {
-        ctx.pushReply(new ServerReply(req.getRequestId()));
-      }
-    });
-  }
-  
-  private static void flowControl() {
-    int load = AgentServer.getEngineLoad();
-    if (load > ctrlFlowThreshold) {
-      try {
-        long delay = load * ctrlFlowDelay;
-        Thread.sleep(delay/1000000, (int) (delay%1000000));
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
-  }
-  
-  public static final void sendToProxy(AgentId proxyId, int cnxKey,
-      AbstractJmsRequest req, Object msg, ConnectionContext ctx) {
+  public static final void sendToProxy(AgentId proxyId, int cnxKey, AbstractJmsRequest req, Object msg) {
     RequestNot rn = new RequestNot(cnxKey, msg);
     if (multiCnxSync
         && (req instanceof ProducerMessages || 
@@ -218,16 +154,17 @@ public class ConnectionManager implements ConnectionManagerMBean {
       MultiCnxSync mcs = ConnectionManager.getMultiCnxSync(proxyId);
       mcs.send(rn);
     } else {
-      if (req instanceof ProducerMessages) {
-        if (! ((ProducerMessages) req).getAsyncSend()) {
-          rn.setCountDownCallback(createCallback(req, ctx));
+      if ((req instanceof CommitRequest) || (req instanceof ProducerMessages)) {
+        int load = AgentServer.getEngineLoad();
+        if (load > ctrlFlowThreshold) {
+          try {
+            long delay = load * ctrlFlowDelay;
+            Thread.sleep(delay/1000000, (int) (delay%1000000));
+          } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
         }
-        flowControl();
-      } else if (req instanceof CommitRequest) {
-        if (! ((CommitRequest) req).getAsyncSend()) {
-          rn.setCountDownCallback(createCallback(req, ctx));
-        }
-        flowControl();
       }
       
       if (directNotification) {
@@ -250,14 +187,10 @@ public class ConnectionManager implements ConnectionManagerMBean {
               not.setPersistent(false);
               not.setExpiration(0L);
               not.setProxyId(proxyId);
-              not.setAsyncSend(false);    
-              not.setCountDownCallback(createCallback(req, ctx));
+              not.setAsyncSend(false);
               Channel.sendTo(destId, not);
             } else {
               // Remote destination
-              // Set a callback too in order to provide flow control
-              // with the network.
-              rn.setCountDownCallback(createCallback(req, ctx));
               Channel.sendTo(proxyId, rn);
             }
           }
