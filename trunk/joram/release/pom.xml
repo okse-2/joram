@@ -377,6 +377,11 @@
       <artifactId>ow2-jta-1.1-spec</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <type>jar</type>
+    </dependency>
+    <dependency>
       <groupId>org.ow2.jonas.osgi</groupId>
       <artifactId>monolog</artifactId>
     </dependency>
