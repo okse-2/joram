@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 - ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2014 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@
 package org.objectweb.joram.mom.dest;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.objectweb.joram.shared.messages.Message;
@@ -36,10 +37,6 @@ import fr.dyade.aaa.common.EmptyQueueException;
 import fr.dyade.aaa.common.Queue;
 
 public class DistributionDaemon extends Daemon {
-
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
   public static Logger logger = Debug.getLogger(DistributionDaemon.class.getName());
 
   /** Holds the distribution logic. */
@@ -58,6 +55,41 @@ public class DistributionDaemon extends Daemon {
   	this.txDest = txDest;
   	if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "DistributionDaemon<> distributionHandler = " + distributionHandler + ", txDest = " + txDest);
+  }
+  
+  class ComparatorMessage implements Comparator {
+    @Override
+    public int compare(Object o1, Object o2) {
+      if (((Message) o1).id.equals(o2)) return 0;
+      return (o1.hashCode() - o2.hashCode());
+    }
+  }
+  
+  class ComparatorString implements Comparator {
+    @Override
+    public int compare(Object o1, Object o2) {
+      if (o1.equals(o2)) return 0;
+      return (o1.hashCode() - o2.hashCode());
+    }
+  }
+  
+  synchronized boolean isHandling(String id) {
+    if (distributeQueue.search(new ComparatorMessage(), id)) return true;
+    if (ackQueue.search(new ComparatorString(), id)) return true;
+    return false;
+  }
+  
+  synchronized void ackMessage(String id) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "DistributionDaemon run: distributeQueue.pop = " + id);
+    
+    // delete the message from the distributeQueue
+    distributeQueue.pop();
+    // add message id to the ackQueue
+    ackQueue.push(id);
+    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "DistributionDaemon run: ackQueue.push : " + id);    
   }
   
 	public void run() {
@@ -96,16 +128,7 @@ public class DistributionDaemon extends Daemon {
       try {
       	// distribute the message
       	distributionHandler.distribute(msg);
-      	
-      	if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "DistributionDaemon run: distributeQueue.pop = " + msg.id);
-      	// delete the message from the distributeQueue
-      	distributeQueue.pop();
-
-      	// add message id to the ackQueue
-      	ackQueue.push(msg.id);
-      	if (logger.isLoggable(BasicLevel.DEBUG))
-      		logger.log(BasicLevel.DEBUG, "DistributionDaemon run: ackQueue.push : " + msg.id);
+      	ackMessage(msg.id);
 
       	// transaction delete the message
       	String txName = txDest.getTxName(msg.id);
@@ -120,10 +143,10 @@ public class DistributionDaemon extends Daemon {
       		if (logger.isLoggable(BasicLevel.DEBUG))
         		logger.log(BasicLevel.DEBUG, "DistributionDaemon run: " + msg.id + " deleted.");
       	} else {
-      		if (logger.isLoggable(BasicLevel.ERROR))
-            logger.log(BasicLevel.ERROR, "DistributionDaemon run: txName == null for msg " + msg.id + " can't be delete.");
+      	  // The destination is a DistributionTopic.
+      		if (logger.isLoggable(BasicLevel.INFO))
+            logger.log(BasicLevel.INFO, "DistributionDaemon run: txName == null for msg " + msg.id + " can't be delete.");
       	}
-      	
       } catch (Exception e) {
       	if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN, "DistributionDaemon run()", e);
@@ -171,7 +194,7 @@ public class DistributionDaemon extends Daemon {
 
 	public void push(Message msg) {
 		if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "DistributionDaemon distributeQueue.push(" + msg.id + ')');
+      logger.log(BasicLevel.DEBUG, "DistributionDaemon.push(" + msg.id + ')');
 		distributeQueue.push(msg);
   }
 
