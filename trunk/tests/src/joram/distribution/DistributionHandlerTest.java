@@ -50,7 +50,7 @@ public class DistributionHandlerTest implements DistributionHandler {
   }
 
   private static synchronized void addMessage(Message msg) {
-    messages.add(msg);
+    messages.add(msg.clone());
   }
 
   public static synchronized List getAllMessages() {

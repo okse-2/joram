@@ -44,7 +44,9 @@ public class DistributionHandlerTest3 implements DistributionHandler {
   }
 
   private static synchronized void addMessage(Message msg) {
-    messages.add(msg);
+    // Be careful, clone the message to avoid modification of source message
+    // in the acquisition destination.
+    messages.add(msg.clone());
   }
 
   public static synchronized List getAllMessages() {
