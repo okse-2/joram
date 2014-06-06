@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -107,6 +107,8 @@ public class AsyncBridgeTest extends TestCase {
     }
   }
   
+  // The assertion in this test are not absolute, they depend of the speed
+  // of message consumption by the listener :-(.
   public void test(String destName) throws Exception {
     System.out.println("\n\n" + destName + ": Async ON...\n");
 
@@ -138,11 +140,12 @@ public class AsyncBridgeTest extends TestCase {
       System.out.println("send msg = " + msg.getText());
       joramSender.send(msg);
     }
-
     assertEquals("The foreign listener count", 0, foreignListener.count);
     
-    synchronized (lock) {
-    	lock.wait(30000);
+    if (foreignListener.count < MSG_COUNT) {
+      synchronized (lock) {
+        lock.wait(30000);
+      }
     }
     assertEquals("The foreign listener received", MSG_COUNT, foreignListener.count);
     Thread.sleep(1000);
