@@ -169,6 +169,8 @@ public class AliasInQueueTest2 extends TestCase {
       int wait = nbmsg * (((weight1 * weight2 *100)/(weight1 + weight2)) - (weight0 *100)) /100;
       System.out.println(wait);
       Thread.sleep(wait +5000L);
+      if ((list1.count + list2.count) != nbmsg)
+        Thread.sleep(5000L);
       
       assertEquals(nbmsg, list1.count + list2.count);
       System.out.println(((weight2 * nbmsg *95)/(weight1 + weight2))/100);
