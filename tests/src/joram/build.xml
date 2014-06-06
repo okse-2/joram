@@ -31,7 +31,7 @@
   <target name="tests.noperf.all"
           description=" --> launch all no perf joram tests">
     <antcall target="tests.base"/>
-  	<antcall target="tests.alias"/>
+    <antcall target="tests.alias"/>
     <antcall target="tests.recovery"/>
     <antcall target="tests.dist"/>
     <antcall target="tests.admin"/>
@@ -470,8 +470,9 @@
     <antcall target="bridge.jms.test12x"/>
     <antcall target="bridge.jms.test13x"/>
     <antcall target="bridge.jms.test14x"/>
+    <antcall target="bridge.jms.test15x"/>
   </target>
-
+	
   <target name="tests.schedqueue"
           description=" --> launch all schedqueue tests">
     <antcall target="schedqueue.test1"/>
@@ -3372,7 +3373,7 @@
       <param name="testid" value="M-1.1"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-      <param name="multiThreadSync" value="true"/>
+      <param name="multiThreadSync" value="false"/>
     </antcall>
   </target>
 
@@ -3381,7 +3382,7 @@
       <param name="testid" value="M-1.2"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
-      <param name="multiThreadSync" value="true"/>
+      <param name="multiThreadSync" value="false"/>
     </antcall>
   </target>
 
@@ -3398,7 +3399,7 @@
       <param name="testid" value="M-2.1"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-      <param name="multiThreadSync" value="true"/>
+      <param name="multiThreadSync" value="false"/>
     </antcall>
   </target>
 
@@ -3407,7 +3408,7 @@
       <param name="testid" value="M-2.2"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
-      <param name="multiThreadSync" value="true"/>
+      <param name="multiThreadSync" value="false"/>
     </antcall>
   </target>
 
@@ -3468,7 +3469,7 @@
     <property name="queueMessageReadMax" value="50"/>
     <property name="topicAckBufferMax" value="100"/>
     <property name="multiThreadSyncDelay" value="1"/>
-    <property name="multiCnx" value="true"/>
+    <property name="multiCnx" value="false"/>
   </target>
 
   <target name="perf.test6M-x" depends="init.test6Mprops,compile">
@@ -5016,6 +5017,16 @@
       <param name="className" value="joram.bridgejms.BridgeTest14x"/>
       <param name="jndiconf" value="bridgejms/jndi.properties"/>
       <param name="a3conf" value="bridgejms/a3servers.xml"/>
+    </antcall>
+  </target>
+
+  <target name="bridge.jms.test15x" depends="init.a3props,compile"
+          description=" --> Test the bridge with specific architecture">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.test15x"/>
+      <param name="className" value="joram.bridgejms.BridgeTest15x"/>
+      <param name="jndiconf" value="bridgejms/jndi15.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers15.xml"/>
     </antcall>
   </target>
 
