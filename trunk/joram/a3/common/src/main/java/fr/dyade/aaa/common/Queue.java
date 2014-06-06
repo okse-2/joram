@@ -21,6 +21,7 @@
 package fr.dyade.aaa.common;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
@@ -46,6 +47,13 @@ public class Queue implements Serializable {
    */
   private List<Object> elements = new Vector<Object>();
 
+  public synchronized boolean search(Comparator<Object> c, Object o2) {
+    for (Object o1 : elements) {
+      if (c.compare(o1, o2) == 0) return true;
+    }
+    return false;
+  }
+  
   /**
    * <code>true</code> if a producer called the <code>stop()</code>
    * method.
