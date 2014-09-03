@@ -270,6 +270,10 @@ public final class AgentServer {
     defaultConfig = strbuf.toString();
   }
   
+  public static void setDefaultConfig(String config) {
+    defaultConfig = config;
+  }
+
   private static short serverId = NULL_ID;
 
   private static Logger logmon = null;
@@ -1089,7 +1093,8 @@ public final class AgentServer {
       logmon.log(BasicLevel.WARN, getName() + ", init()");
 
     // Fix a Joram configuration as default.
-    setDefaultConfig(sid);
+    if (defaultConfig == null)
+      setDefaultConfig(sid);
     
     synchronized(status) {
       if (status.value == Status.STOPPED) {
