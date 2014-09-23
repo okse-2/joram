@@ -49,7 +49,7 @@
         <li>Additional services can be started, stopped, reconfigured: Command line interface, Web console, etc.</li>
       </ul>
 
-      <p>Stable versions of JORAM are JMS 1.1 certified. Moreover JORAM is used by JOnAS to undergo the Java EE
+      <p>Stable versions of JORAM are JMS 1.1 and 2.0 compliant. Moreover JORAM is used by JOnAS to undergo the Java EE
       certification, and has passed all tests concerning JMS certification in this J2EE TCK.<br></br>
       Professional Support and training are available from
       <a href="http://www.scalagent.com/en/joram-33/services-35/support">Scalagent D.T.</a>.</p>
@@ -57,6 +57,25 @@
     </s1>
    
     <s1 name="Latest News">
+
+      <s2 name="September 18, 2014: CNES workshop - Mobility for operations">
+      <p>CNES (the french space agency) has organized a workshop on 18th September about mobility for
+      operations. The question is to allow remote users to use the services of an operations center from
+      Internet. This could be for controlling a satellite, or for managing scientific on-board instruments.
+      The topic covers also cooperative missions which involve several agencies and other entities.</p>
+      <p>David Féliot will be there for <a href="http://www.scalagent.com">ScalAgent D.T.</a> to present the
+      interest of the MQTT technology in this context, and the value of the MQTT implementation in JoramMQ
+      Entreprise.</p>
+      </s2>
+
+      <s2 name="September, 2014:  MQTT implementation on top of Joram.">
+      <p><a href="http://www.scalagent.com">ScalAgent D.T.</a> has implemented the version 3.1 of the
+      MQTT protocol integrated with JoramMQ Entreprise. An intensive performance evaluation campain demonstrates
+      the stability and scalability of the middleware, under stress conditions including a very high throuput
+      of messages and an extremely large number of clients.</p>
+      <p>Find all détails of this study in the white paper to download:
+      <a href="http://www.scalagent.com/IMG/pdf/JoramMQ_MQTT_white_paper-v1-2.pdf">JoramMQ_MQTT_white_paper</a></p>
+      </s2>
 
       <s2 name="February 19, 2014: Eclipse IoT Day Grenoble 2014 conference, France.">
       <p><a href="www.scalagent.com">ScalAgent D.T.</a>) is currently implementing version 3.1 of
