@@ -1007,6 +1007,18 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     msg.save();
   }
   
+  protected void prepareMessageWithoutStamp(Message msg) throws Exception {
+    short to = AgentServer.getServerDesc(msg.getTo().getTo()).getGateway();
+    // Allocates a new timestamp. Be careful, if the message needs to be
+    // routed we have to use the next destination in timestamp generation.
+
+    msg.source = AgentServer.getServerId();
+    msg.dest = to;
+
+    // Saves the message.
+    msg.save();
+  }
+  
   class NetworkAverageLoadTask extends AverageLoadTask {
     public NetworkAverageLoadTask(Timer timer) {
       start(timer);
