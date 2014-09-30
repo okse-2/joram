@@ -292,4 +292,10 @@ public interface Transaction {
    */
   boolean containsOperations();
   
+  /**
+   * Returns the number of operations to be committed.
+   * @return the number of operations to be committed.
+   */
+  int getOperationCount();
+  
 }
