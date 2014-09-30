@@ -482,4 +482,13 @@ public final class JTransaction extends BaseTransaction implements JTransactionM
   public boolean containsOperations() {
     return log.size() > 0;
   }
+  
+  /**
+   * Returns the number of operations to be committed.
+   * @return the number of operations to be committed.
+   */
+  public int getOperationCount() {
+    return log.size();
+  }
+  
 }

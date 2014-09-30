@@ -529,4 +529,13 @@ public abstract class AbstractTransaction extends BaseTransaction {
   public boolean containsOperations() {
     return (perThreadContext.get().getLog().size() > 0);
   }
+  
+  /**
+   * Returns the number of operations to be committed.
+   * @return the number of operations to be committed.
+   */
+  public int getOperationCount() {
+    return perThreadContext.get().getLog().size();
+  }
+  
 }
