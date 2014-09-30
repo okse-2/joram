@@ -198,7 +198,7 @@ public class AcquisitionTopic extends Topic implements AcquisitionTopicMBean {
     if (clientMessages != null) {
       msgCount += clientMessages.getMessageCount();
       forwardMessages(from, clientMessages);
-      processMessages(clientMessages);
+      processMessages(from, clientMessages);
       postProcess(clientMessages);
     }
   }
