@@ -503,7 +503,7 @@ public class Topic extends Destination implements TopicMBean {
       forwardMessages(from, clientMsgs, fromCluster);
 
       // Processing the messages:
-      processMessages(clientMsgs);
+      processMessages(from, clientMsgs);
 
       postProcess(clientMsgs);
     }
@@ -571,7 +571,7 @@ public class Topic extends Destination implements TopicMBean {
     forwardMessages(from, messages, false);
   }
   
-  private TopicForwardNot createTopicForward(AgentId destId, ClientMessages messages, boolean fromCluster) {
+  protected TopicForwardNot createTopicForward(AgentId destId, ClientMessages messages, boolean fromCluster) {
     TopicForwardNot topicForwardNot = new TopicForwardNot(messages, fromCluster);
     if (destId.getTo() == AgentServer.getServerId()) {
       // Local destination
@@ -608,7 +608,7 @@ public class Topic extends Destination implements TopicMBean {
     return topicForwardNot;
   }
 
-  private void forwardMessages(AgentId from, ClientMessages messages, boolean fromCluster) {
+  protected void forwardMessages(AgentId from, ClientMessages messages, boolean fromCluster) {
     if (!fromCluster) {
       if (friends != null && friends.size() > 1) {
         for (Iterator e = friends.iterator(); e.hasNext();) {
@@ -631,7 +631,7 @@ public class Topic extends Destination implements TopicMBean {
    * valid subscriptions by sending a <code>TopicMsgsReply</code> notification
    * to the valid subscribers.
    */
-  protected void processMessages(ClientMessages not) {
+  protected void processMessages(AgentId from, ClientMessages not) {
     List messages = not.getMessages();
     AgentId subscriber;
     boolean local;
