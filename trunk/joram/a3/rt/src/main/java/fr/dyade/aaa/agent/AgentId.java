@@ -252,6 +252,8 @@ public final class AgentId implements Serializable, Encodable {
   public static int MqttAgentStamp = 16;
   /** Reserved stamp for MQTT default topic. */
   public static int MqttDefaultTopicStamp = 17;
+  /** Reserved stamp for MQTT default $ topic. */
+  public static int MqttDefault$TopicStamp = 18;
   /** Maximum reserved stamp for well known services. */
   public static int MaxWKSIdStamp = 1024;
   /** Maximum reserved stamp. */
