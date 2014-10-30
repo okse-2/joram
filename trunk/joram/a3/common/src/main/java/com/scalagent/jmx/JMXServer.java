@@ -102,7 +102,7 @@ public class JMXServer implements MXServer {
     computeOSGiServiceNames(beanClass.getSuperclass(), bean, registered);
   }
 
-  public void registerMBean(Object bean, String fullName) throws Exception {
+  public synchronized void registerMBean(Object bean, String fullName) throws Exception {
     if (mxserver == null) return;
     
     ObjectName objName = ObjectName.getInstance(fullName);
@@ -110,7 +110,7 @@ public class JMXServer implements MXServer {
     registerOSGi(bean, objName);
   }
 
-  public void unregisterMBean(String fullName) throws Exception {
+  public synchronized void unregisterMBean(String fullName) throws Exception {
     if (mxserver == null) return;
     
     ObjectName objName = ObjectName.getInstance(fullName);
