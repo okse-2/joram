@@ -1183,7 +1183,7 @@ public final class AgentServer {
           // TODO (AF): Is it used ? During Mediation deployment ?
           a3config = A3CMLConfig.getConfig(DEFAULT_SER_CFG_FILE);
         } catch (Exception exc) {
-          logmon.log(BasicLevel.WARN, getName() + ", serialized a3cmlconfig not found", exc);
+          logmon.log(BasicLevel.INFO, getName() + ", serialized a3cmlconfig not found", exc);
         }
         
         if (a3config == null) {
