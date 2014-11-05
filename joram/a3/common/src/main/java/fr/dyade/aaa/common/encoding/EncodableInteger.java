@@ -64,6 +64,11 @@ public class EncodableInteger implements Encodable, Serializable {
     value = decoder.decode32();
   }
   
+  @Override
+  public String toString() {
+    return "EncodableInteger [value=" + value + "]";
+  }
+
   public static class Factory implements EncodableFactory {
 
     public Encodable createEncodable() {
