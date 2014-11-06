@@ -767,7 +767,7 @@ public abstract class Agent implements AgentMBean, Serializable, Encodable {
                  this.toString() + ".react(" + from + ", " + not + ")");
      } else {
       logmon.log(BasicLevel.ERROR,
-                 this.toString() + ".react(" + from + ", " + not + ")");
+                 "Unknown notification, " + this.toString() + ".react(" + from + ", " + not + ")");
       sendTo(from, new UnknownNotification(id, not));
     }
   }
