@@ -1198,10 +1198,10 @@ public final class AgentServer {
         if ((a3config == null) && (defaultConfig != null)) {
           // Try to parse default XML configuration.
           try {
-            logmon.log(BasicLevel.FATAL, defaultConfig);
+            logmon.log(BasicLevel.WARN, "Start AgentServer with configuration: \n" + defaultConfig);
             a3config = A3CML.getConfig(new StringReader(defaultConfig));
           } catch (Exception exc) {
-            logmon.log(BasicLevel.WARN, getName() + ", bad default XML configuration", exc);
+            logmon.log(BasicLevel.ERROR, getName() + ", bad default XML configuration", exc);
           }
         }
 
