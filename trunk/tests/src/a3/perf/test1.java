@@ -116,7 +116,7 @@ class Ping extends Agent {
       } else {
         long stop = System.currentTimeMillis();
         System.out.println("dT[" + (((test+1)*X)/1000) + "Kb] = " +
-            ((1000*(stop - start))/(2*(bounce+1))) + "us");
+            ((1000000*(stop - start))/(2*(bounce+1))) + "ns");
         total += (stop - start);
         if (test >= 0) {
           sendTo(getId(), new Start());
