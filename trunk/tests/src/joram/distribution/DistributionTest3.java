@@ -41,6 +41,9 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
 
+/**
+ * Test distribution async mode (ON and OFF) on a distribution Queue.
+ */
 public class DistributionTest3 extends TestCase {
 
   // /!\ Must be odd to work properly.
@@ -53,7 +56,6 @@ public class DistributionTest3 extends TestCase {
   public void run() {
 
     try {
-
       System.out.println("Administration...");
 
       startAgentServer((short) 0);
@@ -65,7 +67,7 @@ public class DistributionTest3 extends TestCase {
       Properties prop = new Properties();
       prop.put("distribution.className", DistributionHandlerTest3.class.getName());
       prop.put("distribution.async", "true");
-      prop.put("period", Long.toString(1000));
+      prop.put("period", Long.toString(2000));
       Queue distributionQueue = Queue.create(0, null, Destination.DISTRIBUTION_QUEUE, prop);
       System.out.println("distributionQueue = " + distributionQueue);
 
@@ -103,7 +105,7 @@ public class DistributionTest3 extends TestCase {
         producer.send(msg);
       }
 
-      Thread.sleep(5000);
+      Thread.sleep(30000);
 
       assertEquals(MSG_COUNT, ((MessageListener1) listener).count);
 
