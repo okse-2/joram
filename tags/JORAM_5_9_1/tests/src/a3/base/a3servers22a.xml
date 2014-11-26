@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+
+<config>
+  <property name="Engine" value="@engine@"/>
+  <property name="Transaction" value="@transaction@"/>
+  
+  <property name="PoolNetwork.nbMaxCnx" value="@nbMaxCnx@"/>
+  <property name="PoolNetwork.compressedFlows" value="@compressedFlows@"/>
+  <property name="PoolNetwork.maxMessageInFlow" value="@maxMessageInFlow@"/>
+  <property name="PoolNetwork.IdleTimeout" value="15"/>
+  
+  <domain name="D1" network="@network@"/>
+
+  <server id="0" name="S0" hostname="localhost">
+    <network domain="D1" port="16300"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8090"/>
+  </server>
+  <server id="1" name="S1" hostname="localhost">
+    <network domain="D1" port="16301"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8091"/>
+  </server>
+  <server id="2" name="S2" hostname="localhost">
+    <network domain="D1" port="16302"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8092"/>
+  </server>
+  <server id="3" name="S3" hostname="localhost">
+    <network domain="D1" port="16303"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8093"/>
+  </server>
+  <server id="4" name="S4" hostname="localhost">
+    <network domain="D1" port="16304"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8094"/>
+  </server>
+  <server id="5" name="S5" hostname="localhost">
+    <network domain="D1" port="16305"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8095"/>
+  </server>
+  <server id="6" name="S6" hostname="localhost">
+    <network domain="D1" port="16306"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8096"/>
+  </server>
+  <server id="7" name="S7" hostname="localhost">
+    <network domain="D1" port="16307"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8097"/>
+  </server>
+  <server id="8" name="S8" hostname="localhost">
+    <network domain="D1" port="16308"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8098"/>
+  </server>
+  <server id="9" name="S9" hostname="localhost">
+    <network domain="D1" port="16309"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8099"/>
+  </server>
+</config>

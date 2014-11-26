@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>FAQ - Questions relating to persistence</title>
+    <filename>persistence.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="Questions relating to long term persistence of messages.">
+
+		<p>Here are a list of commonly asked questions and answers.</p>
+    
+    <p>See also these other sources of information:</p>
+    <ul>
+      <li>The <a href="../doc/index.html">documentation page</a> which includes links to presentations,
+      user's guide and API javadoc.</li>
+      <li>The <a href="../doc/starting.html">Getting started</a> page,</li>
+      <li>The <a href="../doc/tutorials.html">Tutorials</a> page,</li>
+      <li>and the <a href="../features.html">Features</a> page that gives a listing of the main
+      features available in Joram.</li>
+    </ul>
+    <p>If you have a question not answered here, please join the <a href="mailto:joram@ow2.org">
+    community mailing list</a> or alternatively, contact the development team directly at
+    <a href="mailto:joram-team@ow2.org">joram-team@ow2.org</a>.</p>
+    <p>We welcome contributions so please help us make the documentation better!</p>
+    
+    <s2 name="How persistence is achieved in Joram?">
+    <p>Joram is shipped with a built-in atomic storage using the underlying filesystem. This
+    component exists in multiples versions, NTransaction is the most stable (default), the most
+    efficient is NGTransaction.</p>
+    <p>The NTransaction module works with a transactionnal log and a directory as repository to store
+    long term object (each destination, user or message is stored in a file). there are many other
+    implementation of the Transaction component, in particular NullTransaction enables Joram to operate
+    without any kind of persistence.</p>
+    </s2>
+    
+    <s2 name="Can I use database to perform persistence in Joram?">
+    <p>Yes, There are multiple ways to achieve the persistence of Joram with a database:</p><ul>
+    <li>First, using the NTransaction or NGTransaction components you can specify a different
+    repository implementation. There is a MySQL based implementation (MySqlDBRepository) and a
+    generic one using JDBC (DBRepository).</li>
+    <li>Second, you can use an alternate implementation of the Transaction interface. There are
+    currently 2 implementations of DBTransaction: DerbyDBTransaction and MySQLDBTransaction.</li>
+    </ul>
+    <p>If needed you can easily implement your own version of DBRepository or DBTransaction
+    corresponding to the database you are using. We will be happy to host this code in Joram.</p>
+    </s2>
+    
+    <s2 name="When do I use persistence in database?">
+    <p>Default Transaction implementations are optimized to fit with classic MOM Behavior: messages
+    are sent then consumed and there is few retention of messages in the system. if your use of
+    Joram implies a significant retention of messages, so the performance of the filesystem decreases.
+    Then we advise you to use a database persistence.</p>
+    </s2>
+    
+    <s2 name="Can I use different Transaction implementation in a distributed configuration of Joram?">
+    <p>Yes, each server in the configuration can have its own implementation of the Transaction
+    component.</p>
+    </s2>
+    
+    <s2 name="Can I change the Transaction implementation of an existing server?">
+    <p>No, when a server starts its configuration is saved with the specified implementation of
+    the Transaction component. Thereafter, this implementation can not be changed.</p>
+    </s2>
+    
+    <s2 name="Submit a question or problem?">
+    <p>Please join our <a href="mailto:joram@ow2.org">mailing-list</a>. We'd like to hear from you.</p>
+    </s2>
+    </s1>
+
+</body>
+</document>

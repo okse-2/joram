@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+	<properties>
+		<author email="joram-team@ow2.org">JORAM team</author>
+		<title>FAQ - General questions about Joram</title>
+		<filename>general.xml</filename>
+		<pathtoroot>..</pathtoroot>
+	</properties>
+
+	<body>
+		<s1 name="General questions about Joram.">
+
+		<p>Here are a list of commonly asked questions and answers.</p>
+    
+    <p>See also these other sources of information:</p>
+    <ul>
+      <li>The <a href="../doc/index.html">documentation page</a> which includes links to presentations,
+      user's guide and API javadoc.</li>
+      <li>The <a href="../doc/starting.html">Getting started</a> page,</li>
+      <li>The <a href="../doc/tutorials.html">Tutorials</a> page,</li>
+      <li>and the <a href="../features.html">Features</a> page that gives a listing of the main
+      features available in Joram.</li>
+    </ul>
+    <p>If you have a question not answered here, please join the <a href="mailto:joram@ow2.org">
+    community mailing list</a> or alternatively, contact the development team directly at
+    <a href="mailto:joram-team@ow2.org">joram-team@ow2.org</a>.</p>
+    <p>We welcome contributions so please help us make the documentation better!</p>
+
+			<s2 name="What is Joram?">
+				<p>JORAM is an open sourced implementation of JMS 1.1 as part of the J2EE specification.
+					It provides access to a true distributed MOM (Message Oriented Middleware), built on
+					top of the ScalAgent agent based distributed platform.</p>
+				<p>JORAM, the MOM it gives access to, and the Scalagent platform are open source softwares
+				  and released under the LGPL license.</p>
+			</s2>
+
+			<s2 name="Why use Joram?">
+				<p>Message-Oriented Middleware is increasingly being seen as a key to improve the
+					enterprise productivity and to facilitate the open services market. Today enterprises
+					are faced with the challenges of time-to-market, data distribution, application integration
+					and business flexibility in the context of loosely-coupled distributed systems encountered
+					in multi-organization environments over the Internet:</p>
+				<ul>
+					<li>E-business, EAI and B2B solutions,</li>
+					<li>Telco management systems,</li>
+					<li>Networked devices management solutions: energy, building/home automation, etc.</li>
+				</ul>
+			</s2>
+
+			<s2 name="What is the license?">
+				<p>
+					This software is open source using the
+					<a href="http://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License">LGPL license</a>
+					(GNU Lesser General Public License or formerly the GNU Library General Public License).
+					The LGPL is a free software license published by the Free Software Foundation (FSF).
+				</p>
+			</s2>
+
+			<s2 name="How is JORAM priced?">
+				<p>JORAM is free software in both the gratis and libre senses.</p>
+			</s2>
+
+			<s2 name="Can I get commercial support?">
+				<p>
+					Absolutely, see our <a href="../support.html">Support</a> page for information about
+					commercial support.
+				</p>
+				<p>
+					You can also directly check the detailed description of
+					<a href="http://www.scalagent.com/spip.php?article41">ScalAgent D.T. professional services</a>
+					on JORAM.
+				</p>
+				<p>
+					JORAM is also supported as an open-source project, for general questions please join
+					our <a href="mailto:joram@ow2.org">mailing list</a> or contact the development team at
+					<a href="mailto:joram-team@ow2.org">joram-team@ow2.org</a>.
+				</p>
+			</s2>
+
+			<s2 name="What is JMS?">
+				<p>
+					The Java Message Service (JMS) API is an API for accessing enterprise messaging systems.
+					It is a crucial component of the Java 2 Platform, Enterprise Edition (J2EE).
+					If you need mor information see:
+					<a href="http://java.sun.com/products/jms/faq.html#what_is_jms">what is JMS</a>.
+				</p>
+			</s2>
+
+			<s2 name="What is AMQP?">
+				<p>AMQP stands for the Advanced Message Queue Protocol and is a specification for how
+					messaging clients and brokers can interoperate. AMQP is a specification of a
+					wire-level protocol for client to message broker communication. It is not a messaging
+					system like Joram, but just a messaging protocol.</p>
+				<p>Joram has code in the sandbox for implementing AMQP v0.9.1, it is aiming to provide
+					support for AMQP 1.0 once it is finalised, as well as other open protocols.</p>
+				<p>Through these protocols, Joram can support clients in C/C++, C#, Ruby, Python, Perl,
+				PHP, etc.</p>
+			</s2>
+
+			<s2 name="What is Stomp?">
+				<p>Stomp is a simpler text based protocol which is designed to be very simple to implement
+					in any language or platform (e.g. you can use a telnet client to communicate via Stomp).
+					There are already clients for many languages: C, C++, C#, Delphi, Erlang, Flash, Lisp,
+					Objective-C, Perl, PHP, Python, etc.</p>
+				<p>Joram supports Stomp since 5.4.0, see the corresponding
+				<a href="../doc/tutorials/stomp/stomp.htm">tutorial</a>.</p>
+			</s2>
+      
+      <s2 name="Is Joram transactional?">
+      <p>Yes. Persistent messages are handled by the Joram MOM in a transactionnal way
+      providing atomicity and durability properties to the clients that request them.</p>
+      <p>The JMS client provides either regular JMS and XA transactions.</p>
+      </s2>
+      
+      <s2 name="Does Joram support store-and-forward?">
+      <p>Yes, as a MOM Joram supports store-and-forward message sending.</p>
+      </s2>
+
+			<s2 name="Submit a question or problem?">
+				<p>
+					Please join our <a href="mailto:joram@ow2.org">mailing-list</a> We'd like to hear from you.
+				</p>
+			</s2>
+		</s1>
+
+	</body>
+</document>

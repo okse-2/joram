@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - Copyright (C) 2012 ScalAgent Distributed Technologies
+  - 
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or any later version.
+  - 
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  - 
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+  - USA.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:joram="http://joram.ow2.org/schema/joramns"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:jms="http://www.springframework.org/schema/jms"
+  xmlns:util="http://www.springframework.org/schema/util"
+  xsi:schemaLocation="
+    http://joram.ow2.org/schema/joramns http://joram.ow2.org/schema/joramns/joram-spring-1.0.xsd
+    http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-3.1.xsd
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
+    
+    
+  <!-- lets create an embedded Joram server for test, create a user "anonymous" and create a collocated admin wrapper -->
+  <joram:testserver id="server" />
+  
+  <!--  lets create an embedded Joram server -->
+<!--   <joram:joramserver id="server" sid="0" persistent="true" pathToConf="/JONAS/jb53m6/conf" storage="/JONAS/jb53m6/work/s0" stopServer="false"/> -->
+
+  <!--  Joram administration to use  -->
+<!--   <joram:admin id="wrapper" user="root" pass="root" host="localhost" port="16010" /> -->
+  
+  <!--  Joram User to use  -->
+<!--   <joram:user id="user" name="anonymous" password="anonymous" deleteOnStop="true"/> -->
+  
+   <!--  Joram queue destination to use  -->
+   <joram:queue id="destination" name="queue1" />
+   
+   <!--  Joram local connection factory to use -->
+   <joram:localConnectionFactory id="LCF"/>
+   
+  <bean id="consumerJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    <property name="connectionFactory" ref="LCF"/>
+    <property name="defaultDestination" ref="destination" />
+  </bean>
+  
+  <bean id="prodJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    <property name="connectionFactory" ref="LCF"/>
+    <property name="defaultDestination" ref="destination" />
+  </bean>
+
+  <!-- a sample POJO which uses a Spring JmsTemplate -->
+  <bean id="producer" class="org.ow2.joram.spring.sample.Producer" init-method="generateMessages">
+    <property name="template">
+      <ref bean="prodJmsTemplate" />
+    </property>
+    <property name="destination">
+      <ref bean="destination" />
+    </property>
+    <property name="messageCount">
+      <value>10</value>
+    </property>
+  </bean>
+
+  <!-- a sample POJO consumer, this is the Message Driven POJO (MDP) -->
+  <bean id="consumer" class="org.ow2.joram.spring.sample.Consumer">
+    <property name="template" ref="consumerJmsTemplate"/>
+  </bean>
+
+  <!-- the message listener container -->
+  <jms:listener-container cache="none" connection-factory="LCF" concurrency="5">
+    <jms:listener destination="queue1" ref="consumer" />
+  </jms:listener-container>
+</beans>
