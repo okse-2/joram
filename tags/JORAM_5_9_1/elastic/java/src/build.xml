@@ -1,0 +1,52 @@
+<project name ="elastic-joram" default="compile" basedir="." xmlns:m2="urn:maven-artifact-ant">
+
+  <!-- Initializes the environment paths and properties -->
+  <target name="init">
+    <!-- Initializes the directory structure properties -->
+    <property name="src.dir" location="."/>
+    <property name="ship.dir" location="../../../joram/ship"/>
+    <property name="obj.dir" location="../classes"/>
+    <property name="lib.dir" location="${ship.dir}/lib"/>
+    <property name="bundle.dir" location="${ship.dir}/bundle" />
+    <property name="aws.dir" location="../aws" />
+  	
+    <!-- Project classpath needed for execution -->
+    <path id="project.class.path">
+      <pathelement path="${java.class.path}/"/>
+      <fileset dir="${lib.dir}">
+         <include name="*.jar"/>
+      </fileset>
+      <fileset dir="${bundle.dir}">
+         <include name="*.jar"/>
+      </fileset>
+      <fileset dir="${aws.dir}">
+         <include name="*.jar"/>
+      </fileset>
+      <pathelement path="${obj.dir}"/>
+      <pathelement path="${run.dir}"/>
+    </path>
+    <property name="project.class.path" refid="project.class.path"/>	
+  </target>
+	
+  <!-- Cleans samples - deletes generated files -->
+  <target name="clean" depends="init"
+          description="--> Deletes generated files">
+    <delete quiet="true" dir="${obj.dir}"/>
+  </target>
+
+  <!-- Compiles -->
+  <target name="compile" depends="init,clean"
+    description="--> Compile all samples">
+    <mkdir dir="${obj.dir}"/>
+    <javac srcdir="${src.dir}"
+           destdir="${obj.dir}"
+           source="1.5" target="1.5" debug="true"
+           deprecation="${deprecation}"
+           optimize="${optimize}"
+           nowarn="${nowarn}"
+           verbose="${verbose}"
+           includeantruntime="false">
+      <classpath refid="project.class.path"/>
+    </javac>
+  </target>
+</project>

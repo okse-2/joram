@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JORAM :: Test bridge classes
+Bundle-SymbolicName: bridge
+Export-Package: joram.bridgejms
+Import-Package: fr.dyade.aaa.common,
+ org.objectweb.util.monolog,
+ org.objectweb.util.monolog.api,
+ org.objectweb.joram.mom.util,
+ org.objectweb.joram.shared.messages
+Bundle-Description: Joram Agent Server
+Bundle-Vendor: Scalagent D.T.
