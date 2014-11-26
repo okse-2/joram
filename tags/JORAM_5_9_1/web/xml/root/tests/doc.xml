@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="test@objectweb.org">JORAM team</author>
+    <title>Test Suite Documentation</title>
+    <filename>doc.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="Test Suite Documentation">
+      <p>To use the Test Suite, have a look at its <a
+	  href="../current/doc/TEST_SUITE.pdf">documentation</a>.
+      </p>
+    </s1>
+  </body>
+</document>
+
