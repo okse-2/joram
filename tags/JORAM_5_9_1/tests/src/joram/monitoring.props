@@ -1,0 +1,4 @@
+AgentServer\:server\=AgentServer#0,cons\=Engine#0=NbWaitingMessages
+AgentServer\:server\=AgentServer#0,cons\=Transaction=*
+Joram#0\:type\=User,*=NbMsgsSentToDMQSinceCreation
+Joram#0\:type\=Destination,*=NbMsgsDeliverSinceCreation,NbMsgsReceiveSinceCreation,NbMsgsSentToDMQSinceCreation

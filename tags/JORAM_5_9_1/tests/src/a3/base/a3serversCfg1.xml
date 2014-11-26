@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<config>
+  <domain name="D1"/>
+  <domain name="D2"/>
+
+  <server id="0" name="S0" hostname="localhost">
+    <network domain="D1" port="16301"/>
+  </server>
+
+  <server id="1" name="S1" hostname="localhost">
+    <network domain="D2" port="16312"/>
+  </server>
+</config>
