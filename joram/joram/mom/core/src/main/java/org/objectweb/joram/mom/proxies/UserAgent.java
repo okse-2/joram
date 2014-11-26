@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2014 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
@@ -1565,6 +1565,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         doReact(key, (CommitRequest) request, callbackNotification);
       else if (request instanceof AddClientIDRequest)
         doReact(key, (AddClientIDRequest) request);
+      else if (request instanceof org.objectweb.joram.shared.client.PingRequest)
+        // TODO:
+        logger.log(BasicLevel.INFO, this + " - unhandling ping request");
       else
         logger.log(BasicLevel.WARN, this + " - unhandling request: " + request);
     } catch (MomException mE) {
