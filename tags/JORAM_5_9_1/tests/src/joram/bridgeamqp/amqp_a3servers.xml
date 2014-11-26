@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<config>
-	<property name="Transaction" value="fr.dyade.aaa.util.NTransaction" />
-	
-	<server id="1" name="S1" hostname="localhost">
-		<service class="org.ow2.joram.mom.amqp.AMQPService" args="5672" />
-	</server>
-</config>
