@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<JoramAdmin>
+  <TcpAdminModule host="localhost" port="16010" name="root" password="root">
+    <property name="connectingTimer" value="60"/>
+  </TcpAdminModule>
+    
+  <InitialContext>
+    <property name="java.naming.factory.initial" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
+    <property name="java.naming.factory.host" value="localhost"/>
+    <property name="java.naming.factory.port" value="16400"/>
+  </InitialContext>
+
+  <TcpConnectionFactory name="joramCF" host="localhost" port="16010">
+    <jndi name="joramCF"/>
+  </TcpConnectionFactory>
+  
+  <TcpConnectionFactory name="foreignCF" host="localhost" port="16011">
+    <jndi name="foreignCF"/>
+  </TcpConnectionFactory>
+  
+  <User name="anonymous0" login="anonymous" password="anonymous" serverId="0"/>
+  <User name="anonymous1" login="anonymous" password="anonymous" serverId="1"/>
+
+  <Topic name="foreignTopic" serverId="1">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="foreignTopic"/>
+  </Topic>
+
+	<JMSAcquisitionTopic name="joramInTopic" foreign="foreignTopic" serverId="0">
+    <property name="period" value="1000"/>
+    <property name="jms.ConnectionUpdatePeriod" value="1000"/>
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="joramInDest"/>
+  </JMSAcquisitionTopic>
+
+	<JMSDistributionTopic name="joramOutTopic" foreign="foreignTopic" serverId="0">
+    <property name="period" value="1000"/>
+    <property name="jms.ConnectionUpdatePeriod" value="1000"/>
+    <freeWriter/>
+    <jndi name="joramOutDest"/>
+  </JMSDistributionTopic>
+  
+</JoramAdmin>
