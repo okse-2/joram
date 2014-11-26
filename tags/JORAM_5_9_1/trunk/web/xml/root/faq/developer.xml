@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>FAQ - General questions about Joram</title>
+    <filename>developer.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="Questions about programming with Joram.">
+
+		<p>Here are a list of commonly asked questions and answers.</p>
+    
+    <p>See also these other sources of information:</p><ul>
+      <li>The <a href="../doc/index.html">documentation page</a> which includes links to presentations,
+      user's guide and API javadoc.</li>
+      <li>The <a href="../doc/starting.html">Getting started</a> page,</li>
+      <li>The <a href="../doc/tutorials.html">Tutorials</a> page,</li>
+      <li>and the <a href="../features.html">Features</a> page that gives a listing of the main
+      features available in Joram.</li>
+    </ul>
+    <p>If you have a question not answered here, please join the <a href="mailto:joram@ow2.org">
+    community mailing list</a> or alternatively, contact the development team directly at
+    <a href="mailto:joram-team@ow2.org">joram-team@ow2.org</a>.</p>
+    <p>We welcome contributions so please help us make the documentation better!</p>
+    
+    <s2 name="What JDK release does Joram need?">
+      <p>Normally Joram requires JDK/JRE release 1.4.x or higher, however it is possible to configure Joram
+      with JDK/JRE release 1.2 and 1.3.</p>
+    </s2>
+
+    <s2 name="What platforms will Joram run on?">
+      <p>Joram is developed on Linux and Windows. As the client and server components are written in Java,
+      it is platform-neutral.</p>
+    </s2>
+    
+    <s2 name="Where can I find help?">
+    <p>JORAM is supported both commercially and as an open-source project.<br></br>
+    For general questions please join our <a href="mailto:joram@ow2.org">mailing list</a> or contact
+    the development team at <a href="mailto:joram-team@ow2.org">joram-team@ow2.org</a>.</p>
+		<p>For commercial support see our <a href="../support.html">Support</a> page for information or
+		check the detailed description of
+    <a href="http://www.scalagent.com/spip.php?article41">ScalAgent D.T. professional services</a> on JORAM.</p>    
+    </s2>
+    
+    <s2 name="How to get help?">
+    <p>Before you report a problem you might want to read the FAQ.<br></br>
+		Whenever you are reporting a problem please be sure to include as much information as possible:</p><ul>
+      <li>Which version of Joram,</li>
+      <li>What platform of Java,</li>
+      <li>Any particular software or configuration being used.</li>
+      <li>Stack traces generally really help!</li>
+      <li>Log output can be useful too; generally enabling DEBUG logging can help.</li>
+      <li>Your code and configuration files are often useful.</li>
+    </ul>
+    <p>We can help you faster if you provide us a test that demonstrates your issue.</p>
+    </s2>
+
+    <s2 name="How can I get the source code from subversion?">
+    <p>You can browse SVN directly via the web use this
+    <a href="http://websvn.ow2.org/listing.php?repname=joram">link</a>.</p>
+    <p>To check out from SVN:</p><ul>
+      <li>Make sure you have SVN (subversion) installed,</li>
+      <li><code>svn checkout svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram</code>,</li>
+    </ul>
+		<p>Only project developers can commit to the SVN tree. Additionnals informations about svn
+		are available <a href="http://forge.ow2.org/plugins/scmsvn/index.php?group_id=4">here</a>.</p>
+		</s2>
+    
+    <s2 name="How do I compile from the source?">
+    <p>Change to root directory then launch maven through <code>mvn install</code> command.</p>
+		<p>Additionnals informations are available in <a href="../doc/starting.html">Getting Started</a> page.</p>
+		</s2>
+    
+    <s2 name="How do I get involved in the Joram project?">
+    <p>Any input or personal view for improving and/or developing JORAM is welcome.
+    JORAM, as an open source project, also welcomes external contributions.
+    If you are interested <a href="mailto:joram-team@ow2.org">contact us</a> or check the
+    <a href="dev/corner.html">developer's corner</a> page.</p>
+    <p>Welcome aboard! We love contributions - here are some suggestions for what you can work on:</p><ul>
+      <li>packaging for other operating systems,</li>
+      <li>integration with messaging systems,</li>
+      <li>integration with management systems,</li>
+      <li>improvements to the client or server parts, and work towards other clients,</li>
+      <li>.. and so on!</li>
+    </ul>
+    <p>We're happy to hear from anyone who wants to get involved or is curious about the project.</p>
+    </s2>
+
+    <s2 name="What are the components versions embedded in Joram?">
+    <p>A file named versions in the SVN lib directory list the different versions used in the current release.
+    Since 4.2.0 a copy of this file is shipped in the lib directory of each packaged version.</p>
+    </s2>
+      
+    <s2 name="How should I interpret Joram's version numbering?">
+    <p>Joram is versioned with the scheme major.minor.patch.</p><ul>
+      <li>major: This number indicates the major version of the software, it is only changed
+      for significant evolutions of the software.</li>
+      <li>minor: A change in this number indicates new or significantly altered features.</li>
+      <li>patch: This number changes for small changes such as bug-fixes.</li>
+    </ul>
+    <p>A protocol identifier is also available, it indicates the compatibility between two
+    versions.</p>
+    </s2>
+    
+    <s2 name="What jars do I need?">
+    <p>The minimal list of bundles to start a Joram server is monolog.jar, a3-common.jar, a3-rt.jar,
+    jcup.jar, joram-shared.jar, joram-mom-core.jar and a3-osgi.jar. If you use the shipped JNDI service
+    it is also necessary to add jndi-shared.jar and jndi-server.jar bundles. This represents less than
+    one megabytes.</p>
+    <p>A set of possible OSGi configuration is provided with the samples in <code>samples/config</code>
+    directory.</p>
+    <p>To start a Joram/JMS client you need monolog.jar, jcup.jar, joram-shared.jar, joram-client-jms.jar
+    and a JMS API jar geronimo-jms_1.1_spec.jar for example. If you want to use the shipped JNDI service
+    it is also necessary to add jndi-client.jar and jndi-shared.jar.</p>
+		</s2>
+    
+    <s2 name="How can I start a Joram server?">
+    <p>In order to start a Joram server you just need to execute the AgentServer class with a correct
+    a3servers.xml configuration file.</p><ul>
+    <li><code>java -cp .. fr.dyade.aaa.agent.AgentServer 0 ./s0</code></li>
+    </ul>
+    <p>Ant tasks, Windows and Linux shell scripts are available with the samples.</p>
+    <p>Additionnals informations are available in the <a href="../doc/starting.html">Getting started</a>
+    or <a href="../tutorials.html">Tutorials</a> pages. We advise you to look at the
+    <a href="../doc/Joram-en.pdf">user's guide</a>.</p>
+		</s2>
+
+      <s2 name="Submit a question or problem?">
+      <p>Please join our <a href="mailto:joram@ow2.org">mailing-list</a>. We'd like to hear from you.</p>
+      </s2>
+    </s1>
+
+</body>
+</document>

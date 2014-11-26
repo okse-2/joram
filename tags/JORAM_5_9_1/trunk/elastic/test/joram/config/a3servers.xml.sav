@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<config>
+  <domain name="D1" network="fr.dyade.aaa.agent.PoolNetwork"/>
+	
+  <property name="Transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
+  <property name="Transaction.NbLogFile" value="64"/>
+  <property name="Transaction.MaxLogFileSize" value="16"/>
+
+  <server id="0" name="P1" hostname="10.39.43.95">
+    <network domain="D1" port="16050"/>
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
+             args="root root"/>
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
+             args="16010"/>
+    <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
+  </server>
+
+  <server id="1" name="W1" hostname="10.39.58.146">
+    <network domain="D1" port="16051"/>
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
+             args="root root"/>
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
+             args="16011"/>
+  </server>
+
+  <server id="2" name="W2" hostname="10.39.51.245">
+    <network domain="D1" port="16052"/>
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
+             args="root root"/>
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
+             args="16012"/>
+  </server>
+  <server id="3" name="P3" hostname="10.39.4.163">
+    <network domain="D1" port="16053"/>
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
+             args="root root"/>
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" 
+             args="16013"/>
+  </server>
+</config>

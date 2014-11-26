@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Documentation</title>
+    <filename>index.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+
+    <s1 name="JORAM manuals">
+      <s2 name="Installation and Users Guide">
+    
+      <p>The JORAM documentation is packaged as a single PDF document.</p>
+      <p>It is well known by the JORAM team that this documentation is not
+      sufficient and sometimes vague or unclear. Do not hesitate to provide
+      any comment or feedback that could help us improving this doc. Of course, 
+      any contribution is welcome ;-).</p>
+
+			<p>The documentation of the last release is accessible <a href="Joram-en.pdf">here</a>,
+			additionnals document are available:</p>
+      <ul>
+        <li>Guide of the <a href="../current/doc/Joram-5.4-JNDI-en.pdf">JNDI implementation</a>.</li>
+        <li>Guide of the <a href="../current/doc/Joram-JBoss-en.pdf">Joram - JBoss integration</a>.</li>
+        <li>Guide of the <a href="../current/doc/Joram-WebLogic-en.pdf">Joram - WebLogic integration</a>.</li>
+      </ul>
+      
+			<p>Since 4.1 the documentation can be downloaded <a href="../download/index.html">in the download area</a>.
+			<br></br>The Old documentation (before 4.1 version) is still accessible <a href="old-documentation.html">here</a>.</p>
+			</s2>
+			
+			<s2 name="Joram Tutorials">
+      <p>A growing set of <a href="tutorials.html">tutorials</a> are now available.</p>
+			</s2>
+			
+      <s2 name="API documentation">
+      <ul>
+        <li>the complete project documentation:  <a href="../current/javadoc/">Joram javadoc</a>.</li>
+        <li>A detailed documentation of the client part of Joram generated with Doxygen is available <a href="../current/joramdox/html/index.html">here</a>.</li>
+		<li>Browsing the <a href="../current/xoramdox/html/index.html">Xoram 1.3.0/52 apidoc</a>.</li>
+      </ul>
+      <p>The JavaDoc of the version in development is generated each day at 00:00 AM CEST, it is available at:
+	    <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/JavaDoc/target/apidocs/index.html">here</a>.</p>
+      </s2>
+    </s1>
+
+    <s1 name="Other documentation">
+      <s2 name="ICAR (in French only)">
+      <p>ICAR is a series of summer schools on Middleware and Distributed Applications:</p>
+      <ul>
+      <li>The latest <a href="ICAR/ICAR06.pdf">JORAM slides show</a> presented at ICAR 2006 (Aug. 28-Sep. 1, 2006).</li>
+      <li>The <a href="ICAR/ICAR03.pdf">JORAM slides show</a> presented at ICAR 2003.</li>
+      <li>A <a href="ICAR/book-icar2006.pdf">book</a> based on the contents of the 2006 school is on line which includes a
+      <a href="ICAR/book-icar2006-joram.pdf">chapter</a> about Joram.</li>
+      </ul>
+			</s2>
+			
+      <s2 name="ScalAgent Distributed Technologies">
+      <p><a href="http://www.scalagent.com">ScalAgent</a> is the provider of the open-source platform on top of which
+      JORAM's MOM is built, and proposes complementary information and showcases involving JORAM.</p>
+      <p>White papers about JORAM are available, in
+         <a href="http://www.scalagent.com/pages/fr/datasheet/040322-joram-whitepaper-fr.pdf">French</a> and in
+         <a href="http://www.scalagent.com/pages/en/datasheet/040322-joram-whitepaper-en.pdf">English</a>.</p>
+			</s2>
+			
+      <s2 name="JMS related pages and documentation">
+      <ul>
+        <li>JMS home: <a href="http://java.sun.com/products/jms/">
+            http://java.sun.com/products/jms/</a></li>
+        <li>JMS tutorial: 
+            <a href="http://java.sun.com/products/jms/tutorial/index.html">
+            http://java.sun.com/products/jms/tutorial/index.html</a></li>
+      </ul>
+      <ul>
+        <li>IBM developerWork article introducing JMS: <a href="http://www-106.ibm.com/developerworks/java/library/j-pj2ee5/">"Enterprise messaging with JMS"</a></li>
+        <li>IBM developerWork article about administration and naming: <a href="http://www-106.ibm.com/developerworks/java/library/j-jmsvendor/">"Implementing vendor-independent JMS solutions"</a></li>
+      </ul>
+			</s2>
+    </s1>
+  </body>
+
+</document> 
