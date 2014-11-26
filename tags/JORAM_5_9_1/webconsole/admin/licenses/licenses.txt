@@ -1,8 +1,0 @@
-- pax web : Apache License, Version 2.0
-- felix : Apache License, Version 2.0
-- gwt : Apache License, Version 2.0
-- gwt-log : Apache License, Version 2.0
-- smartgwt : LGPLv3
-- gwt-visualization : Apache License, Version 2.0
-- Joram : LGPLv2.1
-- easybeans : LGPLv2.1

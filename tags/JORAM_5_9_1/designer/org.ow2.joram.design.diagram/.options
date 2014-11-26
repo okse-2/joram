@@ -1,7 +1,0 @@
-# Tracing options for the org.ow2.joram.design.diagram plug-in
-
-# Common issues
-org.ow2.joram.design.diagram/debug=false
-
-# Visual IDs
-org.ow2.joram.design.diagram/debug/visualID=false
