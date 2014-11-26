@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.ow2.joram</groupId>
     <artifactId>parent</artifactId>
-    <version>5.9.1-SNAPSHOT</version>
+    <version>5.9.1</version>
   </parent>
 
   <build>
@@ -166,6 +166,12 @@
     <dependency>
       <groupId>org.ow2.joram</groupId>
       <artifactId>joram-tools-jasp</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-tools-mqtt</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
