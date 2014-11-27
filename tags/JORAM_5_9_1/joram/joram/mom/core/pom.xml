@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>joram-mom-core</artifactId>
+  <packaging>bundle</packaging>
+  <name>JORAM :: joram :: mom :: core</name>
+  <description>Builds the Joram mom core project.</description>
+
+  <parent>
+    <groupId>org.ow2.joram</groupId>
+    <artifactId>joram-mom</artifactId>
+    <version>5.9.1</version>
+  </parent>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Export-Package>
+              com.scalagent.scheduler,
+              org.objectweb.joram.mom.dest,
+              org.objectweb.joram.mom.messages,
+              org.objectweb.joram.mom.notifications,
+              org.objectweb.joram.mom.proxies,
+              org.objectweb.joram.mom.proxies.tcp,
+              org.objectweb.joram.mom.util</Export-Package>
+            <Import-Package>
+              com.scalagent.jmx,
+              fr.dyade.aaa.agent,
+              fr.dyade.aaa.agent.conf,
+              fr.dyade.aaa.common,
+              fr.dyade.aaa.common.stream,
+              fr.dyade.aaa.util,
+              fr.dyade.aaa.util.management,
+              javax.management;resolution:=optional,
+              javax.management.openmbean;resolution:=optional,
+              javax.net,
+              javax.net.ssl,
+              org.objectweb.joram.shared,
+              org.objectweb.joram.shared.admin,
+              org.objectweb.joram.shared.client,
+              org.objectweb.joram.shared.excepts,
+              org.objectweb.joram.shared.messages,
+              org.objectweb.joram.shared.security,
+              org.objectweb.joram.shared.selectors,
+              org.objectweb.joram.shared.stream,
+              org.objectweb.util.monolog,
+              org.objectweb.util.monolog.api</Import-Package>
+            <DynamicImport-Package>*</DynamicImport-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-shared</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>a3-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

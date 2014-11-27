@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<config>
+  <domain name="D1" network="fr.dyade.aaa.agent.PoolNetwork"/>
+  <property name="D1.SoTimeout" value="1000"/>
+
+  <server id="0" name="S0" hostname="localhost">
+    <network domain="D1" port="16300"/>
+  </server>
+  <server id="1" name="S1" hostname="localhost">
+    <network domain="D1" port="0"/>
+  </server>
+</config>
