@@ -97,7 +97,11 @@ public class ClientTest28 extends TestCase {
 //      } while (subt != 0);
 //      Thread.sleep(5000L);
       
-      Thread.sleep(3*pending);
+      int i = 0;
+      while ((topic.getSubscriptions() !=0 ) && (i++<50)) {
+        Thread.sleep(pending);
+        System.out.println(new Date() + " - Sub: " + topic.getSubscriptions());
+      }
       assertTrue(topic.getSubscriptions()==0);
       // Wait the end of sending.
       Thread.sleep(4*pending);

@@ -52,7 +52,7 @@ public class ClientTest27 extends TestCase {
     try {
       System.out.println("servers start");
       startAgentServer((short)0, new String[]{"-DTransaction.UseLockFile=false"});
-      Thread.sleep(1000);
+      Thread.sleep(2000);
 
       ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
       AdminModule.connect(cf, "root", "root");
@@ -92,7 +92,11 @@ public class ClientTest27 extends TestCase {
       for (int i=0; i<10; i++)
         test(nbmsgs);
       
-      Thread.sleep(2*pending);
+      int i = 0;
+      while ((topic.getSubscriptions() !=0 ) && (i++<50)) {
+        Thread.sleep(pending);
+        System.out.println(new Date() + " - Sub: " + topic.getSubscriptions());
+      }
       assertTrue(topic.getSubscriptions()==0);
 
       AdminModule.disconnect();
