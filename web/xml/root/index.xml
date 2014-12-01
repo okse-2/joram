@@ -57,6 +57,24 @@
     </s1>
    
     <s1 name="Latest News">
+      
+      <s2 name="November 28, 2014: JORAM 5.9.1 release is available.">
+      <p>This release introduces improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Full implementation of JMS 2.0 specification:<ul>
+            <li>Open-source implementation of new API.</li>
+            <li>Implementation of shared subscription.</li>
+          </ul>
+          All functions of the new JMS 2.0 specification are now implemented.
+        </li>
+        <li>An significant work to optimize the performances.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>It is tagged in SVN (JORAM_5_9_1), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+      </s2>
 
       <s2 name="September 18, 2014: CNES workshop - Mobility for operations">
       <p>CNES (the french space agency) has organized a workshop on 18th September about mobility for

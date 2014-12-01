@@ -12,7 +12,37 @@
 
 	<body>
 		
-      <s1 name="October 2, 201: JORAM 5.9.0 release is available.">
+      <s1 name="November 28, 2014: JORAM 5.9.1 release is available.">
+        <p>Joram 5.9.1 is available in the SVN repository with tag JORAM_5_9_1.</p>
+        <s2 name="New features and improvements">
+        <ul>
+        <li>Full implementation of JMS 2.0 specification:<ul>
+            <li>Open-source implementation of new API (JORAM-128).</li>
+            <li>Implementation of shared subscription (JORAM-133).</li>
+          </ul>
+          All functions of the new JMS 2.0 specification are now implemented.
+        </li>
+        <li>Implementation of elastic queues and topics.</li>
+        <li>An significant work to optimize the performances, among other things:<ul>
+            <li>Use of callback to ack some JMS request server-side (JORAM-172, JORAM-179, JORAM-184).</li>
+            <li>Break the monolitic saving of agents (JORAM-166, JORAM-170, JORAM-177).</li>
+            <li>Optimize the marshalling of some resuests (JORAM-180).</li>
+            <li>Optimize the transactionnal backup (JORAM-182).</li>
+          </ul>
+        </li>
+        </ul>
+        </s2>
+
+        <s2 name="Bug fixes">
+        <ul>
+        <li>JORAM-[159-162,201,202]: JMS2.0 TCK compliance.</li>
+        <li>JORAM-163: Handling of grouped requests.</li>
+        <li>JORAM-[198-200]: Behavior of bridge JMS.</li>
+        </ul>
+        </s2>
+    </s1>
+
+      <s1 name="October 2, 2013: JORAM 5.9.0 release is available.">
         <p>Joram 5.9.0 is available in the SVN repository with tag JORAM_5_9_0.</p>
         <s2 name="New features and improvements">
         <ul>
