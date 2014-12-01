@@ -3,14 +3,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>joram-security-jonas</artifactId>
+  <artifactId>joram-tools-mqtt</artifactId>
   <packaging>bundle</packaging>
-  <name>JORAM :: joram :: security :: jonas</name>
-  <description>Builds the Joram security jonas project.</description>
+  <name>JORAM :: joram :: tools :: mqtt</name>
+  <description>Builds the Joram MQTT wrapper.</description>
 
   <parent>
     <groupId>org.ow2.joram</groupId>
-    <artifactId>joram-security</artifactId>
+    <artifactId>joram-tools</artifactId>
     <version>5.9.2-SNAPSHOT</version>
   </parent>
 
@@ -24,7 +24,14 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.objectweb.joram.shared.security.jaas</Export-Package>
+            <Bundle-Activator>com.scalagent.mqtt.osgi.Activator</Bundle-Activator>
+            <Import-Package>
+              fr.dyade.aaa.common,
+              javax.jms,
+              javax.naming,
+              org.objectweb.util.monolog,
+              org.objectweb.util.monolog.api</Import-Package>
+            <DynamicImport-Package>*</DynamicImport-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -33,14 +40,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.ow2.joram</groupId>
-      <artifactId>joram-shared</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jms-2.0-spec</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.objectweb.jonas</groupId>
-      <artifactId>jonas-security</artifactId>
-      <version>5.0-M1</version>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-client-jms</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
+  <modules>
+  </modules>
 </project>
