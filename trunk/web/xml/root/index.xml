@@ -76,6 +76,17 @@
       <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
       </s2>
 
+      <s2 name="October 9 2014: PRESENTATION AT JFSMA14.">
+      <p>ScalAgent DT presents its technology at the <a href="http://jfsma14.lcis.fr/presentation-invitee-a-freyssinet/">22nd JFSMA</a>, a
+      French conference on multi-agent systems at Loriol-sur-Drôme.</p>
+      <p>This <a href="http://jfsma14.lcis.fr/ressources/presentations/Slides_AFreyssinet.pdf">presentation</a> details the technological core
+      of Joram: the distributed execution engine implements a reactor pattern, where agents communicate exclusively through events and react to
+      events atomically. This technology enables ScalAgent&#145;s agents to interact effortlessly, be they located on the same system or on different
+      ones.</p>
+      <p>It is at the core of several of our products, Joram or JoramMQ, the monitoring/control solutions developed for the CNES, or
+      the mediation solution of TagSys RFID.</p>
+      </s2>
+
       <s2 name="September 18, 2014: CNES workshop - Mobility for operations">
       <p>CNES (the french space agency) has organized a workshop on 18th September about mobility for
       operations. The question is to allow remote users to use the services of an operations center from
