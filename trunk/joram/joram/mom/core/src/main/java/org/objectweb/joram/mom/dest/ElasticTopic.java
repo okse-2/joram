@@ -79,6 +79,7 @@ public class ElasticTopic extends Topic {
 	 */
 	private int subId = 0;
 
+	@Override
 	public void setProperties(Properties properties, boolean firstTime) throws Exception {
 		super.setProperties(properties, firstTime);
 		if (properties != null && properties.containsKey("root")) {
@@ -89,6 +90,7 @@ public class ElasticTopic extends Topic {
 	/**
 	 * This method handles the scaling operations.
 	 */
+	@Override
 	public void handleAdminRequestNot(AgentId from, FwdAdminRequestNot not) {
 		AdminRequest adminRequest = not.getRequest();
 
@@ -104,6 +106,7 @@ public class ElasticTopic extends Topic {
 	/**
 	 * 
 	 */
+	@Override
 	public void react(AgentId from, Notification not) throws Exception {
 		if (not instanceof ClientSubscriptionNot) {
 			handleClientSubscriptionNot(from, (ClientSubscriptionNot) not);
@@ -118,10 +121,12 @@ public class ElasticTopic extends Topic {
 
 	/**
 	 * Forward incoming publications to all fathers.
+	 * Also sends to subscibers, if any.
 	 * 
 	 * @param messages
 	 * @param fromCluster
 	 */
+	@Override
 	protected void doClientMessages(AgentId from, ClientMessages not, boolean throwsExceptionOnFullDest) {
 		ClientMessages clientMsgs = preProcess(from, not);
 		if (clientMsgs != null) {
@@ -172,7 +177,7 @@ public class ElasticTopic extends Topic {
 			break;
 		case ScaleRequest.BALANCE:
 			/* Reconnect a given number of subscribers ON THE SAME TOPIC.
-			   param should be: "init_topic:topic_index1;number_of_subscribers1;topic_index1;..." */
+			   param should be: "init_topic:topic_index1;number_of_subscribers1;topic_index2;..." */
 			param = sr.getParameter().split(":");
 			AgentId topic = pool.get(Integer.parseInt(param[0])).id;
 			String[] param1 = param[1].split(";");
@@ -182,7 +187,7 @@ public class ElasticTopic extends Topic {
 				msgs.add(createReconnectionMessage(Integer.parseInt(param1[i])));
 				subs.add(Integer.parseInt(param1[i + 1]));
 			}
-			ReconnectSubscribersNot rsn = 
+			ReconnectSubscribersNot rsn =
 					new ReconnectSubscribersNot(subs, msgs,not);
 			//Destination should do the Admin reply.
 			Channel.sendTo(topic,rsn);
@@ -193,7 +198,7 @@ public class ElasticTopic extends Topic {
 
 		replyToTopic(new AdminReply(true, null),
 				not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-	}	
+	}
 
 	/**
 	 * If root, redirects subscriptions to proper topic.
@@ -203,16 +208,16 @@ public class ElasticTopic extends Topic {
 	 */
 	private void handleClientSubscriptionNot(AgentId from, ClientSubscriptionNot not) {
 		if (!isRoot) {
-			logger.log(BasicLevel.ERROR,"Received subscription!");
+			logger.log(BasicLevel.ERROR, "Received subscription!");
 			return;
 		}
 
 		Message msg = createReconnectionMessage(subId);
 		logger.log(BasicLevel.ERROR,"Redirecting sub to: " + subId + ";" + pool.get(subId).server);
-		
+
 		subId = (subId + 1) % pool.size();
 
-		ReconnectSubscribersNot rsn = 
+		ReconnectSubscribersNot rsn =
 				new ReconnectSubscribersNot(not.getSubName(), msg);
 		Channel.sendTo(from,rsn);
 	}
