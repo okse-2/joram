@@ -41,7 +41,7 @@ public class SubscriberThread extends Thread {
 	ConnectionFactory cf;
 	SubscriberWrapper sw;
 	ListenerWrapper lw;
-	
+
 	boolean end;
 
 	public SubscriberThread(Topic topic, ConnectionFactory cf, SubscriberWrapper sw) {
@@ -60,21 +60,21 @@ public class SubscriberThread extends Thread {
 			MessageConsumer c = sess.createConsumer(topic);
 			c.setMessageListener(lw);
 			cnx.start();
-			
-			System.out.println("(Re)connected to: " + cf);
+
+			//System.out.println("(Re)connected to: " + cf);
 			sw.reconnected();
-			
+
 			while (!end) {
 				Thread.sleep(1000);
 			}
-			
+
 			cnx.close();
-			System.out.println("Disconnected from: " + cf);
+			//System.out.println("Disconnected from: " + cf);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	protected void terminate() {
 		end = true;
 	}

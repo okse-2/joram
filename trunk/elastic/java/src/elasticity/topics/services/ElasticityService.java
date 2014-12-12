@@ -44,25 +44,25 @@ import elasticity.interfaces.Service;
  *
  */
 public class ElasticityService extends Service {
-	
+
 	/** A link to the Joram service. */
 	private JoramService js;
-	
+
 	/** max number of subscribers per topic. */
 	private int max;
-	
+
 	/** min number of topics. */
 	private int min;
-	
+
 	/** Elastic topic, to which admin requests are sent. */
 	private Topic et;
-	
+
 	/** List of topics linked to root. */
 	private ArrayList<Topic> topics = new ArrayList<Topic>();
-	
+
 	/** Last monitored number of subscribers per topic. */
 	private ArrayList<Integer> subs = new ArrayList<Integer>();
-	
+
 	/** Last monitored total number of subscribers. */
 	private int sum;
 
@@ -72,17 +72,17 @@ public class ElasticityService extends Service {
 		//Setting the admin connection once and for all.
 		ConnectionFactory cfa = TcpConnectionFactory.create("localhost",16000);
 		AdminModule.connect(cfa,"root","root");
-		
+
 		//Initializes the service beneath.
 		js = new JoramService();
 		try {
 			js.init(props);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.log(Level.SEVERE,"Error while initializing Amazon Service!");
+			logger.log(Level.SEVERE,"Error while initializing Joram Service!");
 			throw e;
 		}
-		
+
 		//Get the properties
 		min = Integer.parseInt(props.getProperty("init_topics"));
 		max = Integer.parseInt(props.getProperty("max_sub_topic"));
@@ -95,10 +95,10 @@ public class ElasticityService extends Service {
 			subs.add(0);
 		}
 		jndiCtx.close();
-		
+
 		logger.log(Level.INFO,"Initialization completed.");
 	}
-	
+
 	/**
 	 * Monitors the number of client subscriptions per topic.
 	 * Updates both 'subs' and 'sum'.
@@ -107,16 +107,17 @@ public class ElasticityService extends Service {
 	 */
 	public void monitorTopics() throws Exception {
 		sum = 0;
-		String str = "#Subs:";
+		String str = "";
 		for (int i = 0; i < topics.size(); i++) {
 			int s = topics.get(i).getSubscriptions();
 			subs.set(i,s);
 			sum += s;
 			str = str + s + ";";
 		}
+		str = "Subs;" + System.currentTimeMillis() + ";" + str;
 		logger.log(Level.INFO,str);
 	}
-	
+
 	/**
 	 * Balances subscribers over all topics except topic of index s.
 	 * If index is -1, uses all topics.
@@ -129,12 +130,12 @@ public class ElasticityService extends Service {
 		if (topics.isEmpty()) {
 			return;
 		}
-		
+
 		int size = topics.size();
 		if (s != -1) {
 			size--;
 		}
-		
+
 		//Compute the overload and underload of each topic.
 		int avg = sum / size;
 		ArrayList<Integer> more = new ArrayList<Integer>();
@@ -154,7 +155,7 @@ public class ElasticityService extends Service {
 				subs.set(i, avg - subs.get(i));
 			}
 		}
-		
+
 		//Take the extra 'mod' subs into account.
 		int mod = sum % size;
 		for (int i = 0; mod > 0 && i < more.size(); i++) {
@@ -165,7 +166,7 @@ public class ElasticityService extends Service {
 				mod--;
 			}
 		}
-		
+
 		less.addAll(even);
 		for (int i = 0; mod > 0 && i < less.size(); i++) {
 			int b = less.get(i);
@@ -173,14 +174,14 @@ public class ElasticityService extends Service {
 			subs.set(b, y + 1);
 			mod--;
 		}
-		
+
 		//Distribute extra subscribers over underloaded topics.
 		for (int i = 0, j = 0; i < more.size(); i++) {
 			int a = more.get(i);
 			int x = subs.get(a);
-			
+
 			String param = a + ":";
-			for (; x > 0; j++) {
+			while (x > 0) {
 				int b = less.get(j);
 				int y = subs.get(b);
 				if (y > x) {
@@ -190,6 +191,7 @@ public class ElasticityService extends Service {
 				} else {
 					param = param + b + ";" + y + ";";
 					x -= y;
+					j += 1;
 				}
 			}
 			if (!param.equals( a + ":")) {
@@ -198,7 +200,7 @@ public class ElasticityService extends Service {
 			}
 		}
 	}
-	
+
 	/**
 	 * Balances subscribers evenly over all topics.
 	 * 
@@ -207,16 +209,17 @@ public class ElasticityService extends Service {
 	public void balanceSubscribers() throws Exception {
 		balanceSubscribers(-1);
 	}
-	
+
 	/**
 	 * Adds one topic, if necessary.
-	 *  
+	 * 
 	 * @return true, if and only if there has been a scale out.
 	 */
 	public boolean testScaleOut() throws Exception {
-		/*if (sum / topics.size() <= max)
-			return false;*/ 
-		
+		if (sum <= max * topics.size())
+			return false;
+
+		logger.log(Level.INFO,"Adding new topic..");
 		try {
 			Topic t = js.addTopic();
 			topics.add(t);
@@ -225,13 +228,13 @@ public class ElasticityService extends Service {
 			logger.log(Level.SEVERE,"Error while trying to add a topic!");
 			throw e;
 		}
-		
+
 		balanceSubscribers(-1);
-		
+
 		logger.log(Level.INFO,"New topic added successfully.");
 		return true;
 	}
-	
+
 	/**
 	 * Removes the last added topic, if possible.
 	 * 
@@ -239,22 +242,23 @@ public class ElasticityService extends Service {
 	 * @return true, if and only if there has been a scale in.
 	 */
 	public boolean testScaleIn() throws Exception {
-		/*if (sum / topics.size() - 1 >= max || topics.size() == min)
-			return false;*/
-		
-		//Move last topics' subscribers 
+		if (sum > max * (topics.size() - 1) || topics.size() == min)
+			return false;
+
+		logger.log(Level.INFO,"Removing extra topic..");
+		//Move last topics' subscribers
 		balanceSubscribers(topics.size() - 1);
-		
+
 		try {
 			topics.remove(topics.size() - 1);
 			subs.remove(topics.size() - 1);
 			js.removeTopic();
-			
+
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,"Error while removing topic!");
 			throw e;
 		}
-		
+
 		logger.log(Level.INFO,"Removed last added topic!");
 		return true;
 	}

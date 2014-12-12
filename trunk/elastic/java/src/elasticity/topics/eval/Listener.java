@@ -39,7 +39,7 @@ public class Listener implements MessageListener {
 	@Override
 	public void onMessage(Message msg) {
 		try {
-			System.out.println(System.currentTimeMillis() - msg.getJMSTimestamp());
+			System.out.println("" + msg.getJMSTimestamp() + ";"+ (System.currentTimeMillis() - msg.getJMSTimestamp()));
 		} catch (JMSException e) {}
 	}
 }

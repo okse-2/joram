@@ -44,9 +44,6 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
  *
  */
 public class Setup {
-	
-	private static final int SERV_NBR = 2;
-	
 	private static Server[] servers;
 	private static String getServerAddress(int id) {
 		for (Server s : servers) {
@@ -55,42 +52,44 @@ public class Setup {
 		}
 		return null;
 	}
-	
+
 	public static void main(String args[]) throws Exception {
 		System.out.println("[Setup] Started...");
-		
+
+		int size = Integer.parseInt(args[0]) + 1;
+
 		// Connecting the administrator (using TcpProxyService port)
 		ConnectionFactory cfa = TcpConnectionFactory.create("localhost",16000);
 		AdminModule.connect(cfa,"root","root");
 		servers = AdminModule.getServers();
-		
-		Topic[] t = new Topic[SERV_NBR];
-		
+
+		Topic[] t = new Topic[size];
+
 		Context jndiCtx = new InitialContext();
-		for (int i = 0; i < SERV_NBR; i++) {
+		for (int i = 0; i < size; i++) {
 			User.create("anonymous", "anonymous", i);
 			if (i == 0) {
 				Properties props = new Properties();
 				props.setProperty("root","");
-				t[i] = Topic.create(i,"t" + i,"org.objectweb.joram.mom.dest.ElasticTopic",props);
+				t[i] = Topic.create(i,"t" + i,"org.objectweb.joram.mom.dest.ElasticTopic", props);
 			} else {
-				t[i] = Topic.create(i,"t" + i,"org.objectweb.joram.mom.dest.ElasticTopic",null);
+				t[i] = Topic.create(i,"t" + i,"org.objectweb.joram.mom.dest.ElasticTopic", null);
 				t[0].scale(1,t[i].getName() + ";" + getServerAddress(i) + ";" + (16000 + i));
 			}
-			
+
 			t[i].setFreeWriting();
 			t[i].setFreeReading();
-			
+
 			ConnectionFactory cf = TcpConnectionFactory.create(getServerAddress(i), 16000 + i);
 			jndiCtx.bind("t" + i, t[i]);
 			jndiCtx.bind("cf" + i, cf);
-			
-		    System.out.println("[Setup] Topic created..");
+
+			System.out.println("[Setup] Topic created..");
 		}
-		
+
 		jndiCtx.close();
 		AdminModule.disconnect();
-		
+
 		System.out.println("[Setup] Done.");
 	}
 }
