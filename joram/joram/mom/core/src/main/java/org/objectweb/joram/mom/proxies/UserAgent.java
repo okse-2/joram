@@ -580,42 +580,48 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 	  sub = subsTable.get(subName);
 	  sub.browseNewMessages(message);
 	  consM = sub.deliver();
+	  logger.log(BasicLevel.ERROR, "Reconnection message sent.");
 	  try {
 	    setCtx(sub.getContextId());
 	    if (activeCtx.getActivated()) {
 		  doReply(consM);
 	    }
-	  } catch (StateException e) {}
+	  } catch (StateException e) {
+		  logger.log(BasicLevel.ERROR, "Error while sending reconnection message..");
+	  }
 	} else {
 	  // Redirect many subscribers..
-	  ArrayList<Integer> subs = not.getSubs(); 
+	  ArrayList<Integer> subs = not.getSubs();
 	  TopicSubscription tSub = (TopicSubscription) topicsTable.get(from);
 	  int i = 0;
-	  int c = subs.get(i);
+	  int s = subs.get(i);
+	  // message has already been initialized
 	  for (Iterator names = tSub.getNames(); names.hasNext();) {
-	    subName = (String) names.next();
+		subName = (String) names.next();
 	    sub = (ClientSubscription) subsTable.get(subName);
 		if (sub != null && sub.getActive() > 0) {
 		  sub.browseNewMessages(message);
 		  consM = sub.deliver();
+		  logger.log(BasicLevel.ERROR, "");
 		  try {
 			setCtx(sub.getContextId());
 		    if (activeCtx.getActivated()) {
 		      doReply(consM);
 		    }
-		  } catch (StateException e) {}
+		  } catch (StateException e) {
+			  logger.log(BasicLevel.ERROR, "Error while sending reconnection message..\n");
+		  }
 		}
 		
-		c--;
-		if (c == 0)
-		  i++;
-		
-		if (i < subs.size()) {
-		  c = subs.get(i);
-		  message.set(0,new Message((org.objectweb.joram.shared.messages.Message) msgs.get(i)));
-		} else {
-		  break;
-		}
+		if (--s == 0) {
+	      if (++i < subs.size()) {
+		    s = subs.get(i);
+		    message.set(0,
+		      new Message((org.objectweb.joram.shared.messages.Message) msgs.get(i)));
+		  } else {
+			break;
+		  }
+        }
 	  }
 	}
 	
