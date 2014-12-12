@@ -79,7 +79,7 @@ public class ControlLoop {
 		//Begin loop..
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		while(true) {
-			try {
+			/*try {
 				String cmd = br.readLine();
 				if (cmd.equals("monitor")) {
 					es.monitorTopics();
@@ -92,10 +92,10 @@ public class ControlLoop {
 				}
 			} catch (Exception e) {
 				e.printStackTrace(System.out);
-			}
+			}*/
 
-			/*try {
-				wait = period; //- fix;
+			try {
+				wait = period - fix;
 				if (wait > 0) {
 					Thread.sleep(wait);
 				} else {
@@ -124,7 +124,7 @@ public class ControlLoop {
 			}
 			fix = System.currentTimeMillis() - start;
 
-			System.out.println("INFO: " + fix);*/
+			System.out.println("INFO: " + fix);
 		}
-	}	
+	}
 }

@@ -125,6 +125,7 @@ public class AmazonService extends Service {
 				done = true;
 			} catch (Exception e) {
 				logger.log(Level.INFO,"Error while sending RunInstanceRequest, retrying in 1s..." );
+				e.printStackTrace(System.out);
 				Thread.sleep(1000);
 			}
 		}

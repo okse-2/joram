@@ -38,14 +38,14 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
  *
  */
 public class ListenerWrapper implements MessageListener {
-	
+
 	/** Related Subscriber Wrapper. */
 	private SubscriberThread st;
-	
+
 	public ListenerWrapper(SubscriberThread st) {
 		this.st = st;
 	}
-	
+
 	@Override
 	public void onMessage(Message m) {
 		try {
@@ -56,11 +56,11 @@ public class ListenerWrapper implements MessageListener {
 				String tid = m.getStringProperty("reconnect");
 				String server = m.getStringProperty("server");
 				int port = m.getIntProperty("port");
-				
+
 				Topic topic = Topic.createTopic(tid,null);
-				
+
 				ConnectionFactory cf = TcpConnectionFactory.create(server, port);
-				System.out.println("Should reconnect to:" + cf);
+				//System.out.println("Should reconnect to:" + cf);
 				st.sw.reconnect(topic,cf);
 			} else {
 				st.sw.listener.onMessage(m);
