@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -296,18 +296,35 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
     } else {
       cnx = cnxFact.createConnection();
     }
-
-    if (clientID == null) {
-      cnx.setClientID("joramBridge_" + name + "_" + AgentServer.getServerId());
-    } else {
-      cnx.setClientID(clientID);
-    }
     
-    cnx.setExceptionListener(this);
+    try {
+      if (clientID == null) {
+        cnx.setClientID("joramBridge_" + name + "_" + AgentServer.getServerId());
+      } else {
+        cnx.setClientID(clientID);
+      }
 
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "doConnect: cnx=" + cnx);
-    }
+      cnx.setExceptionListener(this);
+
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "doConnect: cnx=" + cnx);
+      }
+    } catch (JMSException exc) {
+      if (logger.isLoggable(BasicLevel.WARN)) {
+        logger.log(BasicLevel.WARN, "Connection failed", exc);
+      }
+      if (cnx != null) {
+        try {
+          cnx.close();
+        } catch (JMSException exc2) {
+          if (logger.isLoggable(BasicLevel.WARN)) {
+            logger.log(BasicLevel.WARN, "Can't close failed connection", exc2);
+          }
+        } finally {
+          cnx = null;
+        }
+      }
+      throw exc;
   }
 
   /**
