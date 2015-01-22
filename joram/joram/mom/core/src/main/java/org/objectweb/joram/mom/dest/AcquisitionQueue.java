@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -205,7 +205,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
       int pending = getPendingMessageCount();
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.ERROR, "AcquisitionQueue.react: " + pause + ", " + diff + ", " + pending);
+        logger.log(BasicLevel.DEBUG, "AcquisitionQueue.react: " + pause + ", " + diff + ", " + pending);
 
       if (!pause && 
           (((diff_max > 0) && (diff >= diff_max)) || 
@@ -218,7 +218,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
       }
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.ERROR, "AcquisitionQueue.react: " + pause + ", " + diff + ", " + pending);
+        logger.log(BasicLevel.DEBUG, "AcquisitionQueue.react: " + pause + ", " + diff + ", " + pending);
     } catch (Throwable t) {
       logger.log(BasicLevel.ERROR, "AcquisitionQueue: error in react.", t);
     }
