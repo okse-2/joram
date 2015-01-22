@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -621,7 +621,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
           cnxPendingTimer = new Integer(value).intValue();
         } else if ("connectingTimer".equals(name)) {
           connectingTimer = new Integer(value).intValue();
-        } if ("asyncSend".equals(name)) {
+        } else if ("asyncSend".equals(name)) {
           asyncSend = new Boolean(value).booleanValue();
         } else if ("txPendingTimer".equals(name)) {
           txPendingTimer = new Integer(value).intValue();
@@ -664,6 +664,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
                      "Could not set FactoryParameters <" + name + ", " + value + ">",
                      new Exception("Unknow parameter: " + name));
         }
+        System.out.println(this);
       } catch (NumberFormatException exc) {
         logger.log(BasicLevel.ERROR,
                    "Could not set FactoryParameters <" + name + ", " + value + ">", exc);
