@@ -83,16 +83,15 @@ public class ClientTest27 extends TestCase {
       for (int i=0; i<10; i++)
         test(nbmsgs);
 
-    int subt = -1;
-    do {
-      Thread.sleep(pending);
-      Subscription[] subs = user.getSubscriptions();
-      int subu = (subs==null)?0:subs.length;
-      subt = topic.getSubscriptions();
-      System.out.println(new Date() + " - Sub: " + subt + ", " + subu);
-    } while (subt != 0);
-
-      Thread.sleep(2*pending);
+      int subt = -1;
+      int i = 0;
+      do {
+        Thread.sleep(pending);
+        Subscription[] subs = user.getSubscriptions();
+        int subu = (subs==null)?0:subs.length;
+        subt = topic.getSubscriptions();
+        System.out.println(new Date() + " - Sub: " + subt + ", " + subu);
+      } while ((subt != 0) && (i++ < 5));
       assertTrue(topic.getSubscriptions()==0);
 
       AdminModule.disconnect();
