@@ -20,7 +20,7 @@ public class BridgeTest15x extends TestCase {
     new BridgeTest15x().run();
   }
 
-  static final int ROUND = 100000;
+  static final int ROUND = 10000;
   static final int bigsize = 1000000;
   
   public void run() {
