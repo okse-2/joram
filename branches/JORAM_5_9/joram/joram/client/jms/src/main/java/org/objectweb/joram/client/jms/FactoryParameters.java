@@ -128,8 +128,8 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
   /**
    * Period in milliseconds between two ping requests sent by the client
    * connection to the server; if the server does not receive any ping
-   * request during more than 2 * cnxPendingTimer, the connection is
-   * considered as dead and processed as required.
+   * request during approximatively more than 3 * cnxPendingTimer, the
+   * connection is considered as dead and processed as required.
    */
   public int cnxPendingTimer = 0;
 
@@ -664,7 +664,6 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
                      "Could not set FactoryParameters <" + name + ", " + value + ">",
                      new Exception("Unknow parameter: " + name));
         }
-        System.out.println(this);
       } catch (NumberFormatException exc) {
         logger.log(BasicLevel.ERROR,
                    "Could not set FactoryParameters <" + name + ", " + value + ">", exc);
