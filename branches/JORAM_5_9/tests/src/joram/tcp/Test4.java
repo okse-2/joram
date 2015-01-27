@@ -112,6 +112,8 @@ public class Test4 extends TestCase {
 
     // Wait for the connection failure detection
     Thread.sleep(5000);
+    if (expectedException == null)
+      Thread.sleep(5000);
     
     assertTrue("onException not called with " + cf, 
         expectedException instanceof javax.jms.JMSException);
