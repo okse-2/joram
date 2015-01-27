@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -120,8 +120,8 @@ public class ReliableTcpClient {
     this.params = params;
     this.reconnect = reconnect;
     if (params.cnxPendingTimer > 0)
-      this.reconnectTimeout = Math.max(2*params.cnxPendingTimer,
-                                       (params.connectingTimer*1000)+params.cnxPendingTimer);
+      this.reconnectTimeout = Math.max(3*params.cnxPendingTimer,
+                                       (params.connectingTimer*1000)+(2*params.cnxPendingTimer));
     addresses = new Vector();
     key = -1;
     this.identity = identity;
@@ -160,6 +160,8 @@ public class ReliableTcpClient {
         endTime += params.connectingTimer * 1000L;
       }
     }
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ReliableTcpClient try during " + (endTime-startTime));
 
     int attemptsC = 0;
     long nextSleep = 100;
@@ -325,6 +327,11 @@ public class ReliableTcpClient {
       os.flush();
 
       int len = StreamUtil.readIntFrom(is);
+
+      long dt = StreamUtil.readLongFrom(is);
+      if (dt > clockSynchroThreshold)
+        logger.log(BasicLevel.WARN, " -> bad clock synchronization between client and server: " + dt);
+
       int res = StreamUtil.readIntFrom(is);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> read res = " + res);
