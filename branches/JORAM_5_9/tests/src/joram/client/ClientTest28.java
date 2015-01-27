@@ -87,21 +87,19 @@ public class ClientTest28 extends TestCase {
       p.destroy();
       
       int subt = -1;
+      int i = 0;
       do {
         Thread.sleep(pending);
         Subscription[] subs = user.getSubscriptions();
         int subu = (subs==null)?0:subs.length;
         subt = topic.getSubscriptions();
         System.out.println(new Date() + " - Sub: " + subt + ", " + subu);
-      } while (subt != 0);
-      Thread.sleep(5000L);
-      
-      Thread.sleep(3*pending);
+      } while ((subt != 0) && (i++ < 5));
       assertTrue(topic.getSubscriptions()==0);
+      
       // Wait the end of sending.
       Thread.sleep(4*pending);
 
-      Thread.sleep(30000L);
       AdminModule.disconnect();
     } catch (Throwable exc) {
       exc.printStackTrace();
