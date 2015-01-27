@@ -46,6 +46,7 @@ public class ClientTest28Listener implements MessageListener {
       ConnectionFactory cf = (ConnectionFactory) jndiCtx.lookup("cf");
       jndiCtx.close();
 
+      ((org.objectweb.joram.client.jms.ConnectionFactory) cf).getParameters().connectingTimer = 0;
       ((org.objectweb.joram.client.jms.ConnectionFactory) cf).getParameters().cnxPendingTimer = ClientTest28.pending;
       Connection cnx = cf.createConnection("anonymous", "anonymous");
       Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
