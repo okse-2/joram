@@ -325,6 +325,7 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
         }
       }
       throw exc;
+    }
   }
 
   /**
