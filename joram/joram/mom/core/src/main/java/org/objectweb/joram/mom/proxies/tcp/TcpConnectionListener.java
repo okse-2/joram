@@ -292,12 +292,12 @@ public class TcpConnectionListener extends Daemon {
       tcpConnection.start();
     } catch (IllegalAccessException exc) {
       if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, "", exc);
+        logger.log(BasicLevel.ERROR, "TcpConnectionListener: close socket", exc);
       sock.close();
       throw exc;
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
+        logger.log(BasicLevel.DEBUG, "TcpConnectionListener: close socket", exc);
       sock.close();
       throw exc;
     }
