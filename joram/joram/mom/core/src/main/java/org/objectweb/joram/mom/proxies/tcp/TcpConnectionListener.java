@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -266,7 +266,7 @@ public class TcpConnectionListener extends Daemon {
           gcn.invoke(proxyId);
         } catch (Exception exc) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "", exc);
+            logger.log(BasicLevel.DEBUG, "TcpConnectionListener: return error", exc);
           StreamUtil.writeTo(1, nos);
           StreamUtil.writeTo(exc.getMessage(), nos);
           nos.send();
@@ -292,12 +292,12 @@ public class TcpConnectionListener extends Daemon {
       tcpConnection.start();
     } catch (IllegalAccessException exc) {
       if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, "", exc);
+        logger.log(BasicLevel.ERROR, "TcpConnectionListener: close socket", exc);
       sock.close();
       throw exc;
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
+        logger.log(BasicLevel.DEBUG, "TcpConnectionListener: close socket", exc);
       sock.close();
       throw exc;
     }
