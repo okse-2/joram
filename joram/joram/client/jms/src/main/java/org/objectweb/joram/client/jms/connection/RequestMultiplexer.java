@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -664,15 +664,15 @@ public class RequestMultiplexer {
           sendRequest(new PingRequest());
         }
       } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "", exc);
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "HeartBeatTask", exc);
       }
     }
 
     public void start() throws Exception {
       Timer timer = getTimer();
       if (timer != null)
-        timer.schedule(this, heartBeat, heartBeat);
+        timer.schedule(this, heartBeat/4, heartBeat/4);
     }
   }
 }
