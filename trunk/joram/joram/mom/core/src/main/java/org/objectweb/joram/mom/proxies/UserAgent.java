@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2014 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
@@ -567,70 +567,70 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
    * @param not
    */
   private void doReact(AgentId from, ReconnectSubscribersNot not) {
-	ClientSubscription sub;
-	ConsumerMessages consM;
-	
-	String subName = not.getSubName();
-	ArrayList msgs = not.getMsgs();
-	List message = new ArrayList();
-	message.add(
-	  new Message((org.objectweb.joram.shared.messages.Message) msgs.get(0)));
-	if (subName != null) {
+    ClientSubscription sub;
+    ConsumerMessages consM;
+
+    String subName = not.getSubName();
+    ArrayList<org.objectweb.joram.shared.messages.Message> msgs = not.getMsgs();
+
+    List<Message> messages = new ArrayList<Message>();
+    messages.add(new Message(msgs.get(0)));
+
+    if (subName != null) {
       // Redirect a specific subscriber.
-	  sub = subsTable.get(subName);
-	  sub.browseNewMessages(message);
-	  consM = sub.deliver();
-	  logger.log(BasicLevel.ERROR, "Reconnection message sent.");
-	  try {
-	    setCtx(sub.getContextId());
-	    if (activeCtx.getActivated()) {
-		  doReply(consM);
-	    }
-	  } catch (StateException e) {
-		  logger.log(BasicLevel.ERROR, "Error while sending reconnection message..");
-	  }
-	} else {
-	  // Redirect many subscribers..
-	  ArrayList<Integer> subs = not.getSubs();
-	  TopicSubscription tSub = (TopicSubscription) topicsTable.get(from);
-	  int i = 0;
-	  int s = subs.get(i);
-	  // message has already been initialized
-	  for (Iterator names = tSub.getNames(); names.hasNext();) {
-		subName = (String) names.next();
-	    sub = (ClientSubscription) subsTable.get(subName);
-		if (sub != null && sub.getActive() > 0) {
-		  sub.browseNewMessages(message);
-		  consM = sub.deliver();
-		  logger.log(BasicLevel.ERROR, "");
-		  try {
-			setCtx(sub.getContextId());
-		    if (activeCtx.getActivated()) {
-		      doReply(consM);
-		    }
-		  } catch (StateException e) {
-			  logger.log(BasicLevel.ERROR, "Error while sending reconnection message..\n");
-		  }
-		}
-		
-		if (--s == 0) {
-	      if (++i < subs.size()) {
-		    s = subs.get(i);
-		    message.set(0,
-		      new Message((org.objectweb.joram.shared.messages.Message) msgs.get(i)));
-		  } else {
-			break;
-		  }
+      sub = subsTable.get(subName);
+      sub.browseNewMessages(messages);
+      consM = sub.deliver();
+      logger.log(BasicLevel.ERROR, "Reconnection message sent.");
+      try {
+        setCtx(sub.getContextId());
+        if (activeCtx.getActivated()) {
+          doReply(consM);
         }
-	  }
-	}
-	
-	// If there is an Admin request to reply to..
-	FwdAdminRequestNot adr = not.getNot();
-	if (adr != null) {
-	  replyToTopic(new AdminReply(true, null),
-	    adr.getReplyTo(), adr.getRequestMsgId(), adr.getReplyMsgId());
-	}
+      } catch (StateException e) {
+        logger.log(BasicLevel.ERROR, "Error while sending reconnection message..");
+      }
+    } else {
+      // Redirect many subscribers..
+      ArrayList<Integer> subs = not.getSubs();
+      TopicSubscription tSub = (TopicSubscription) topicsTable.get(from);
+      int i = 0;
+      int s = subs.get(i);
+      // message has already been initialized
+      for (Iterator names = tSub.getNames(); names.hasNext();) {
+        subName = (String) names.next();
+        sub = (ClientSubscription) subsTable.get(subName);
+        if (sub != null && sub.getActive() > 0) {
+          sub.browseNewMessages(messages);
+          consM = sub.deliver();
+          logger.log(BasicLevel.ERROR, "");
+          try {
+            setCtx(sub.getContextId());
+            if (activeCtx.getActivated()) {
+              doReply(consM);
+            }
+          } catch (StateException e) {
+            logger.log(BasicLevel.ERROR, "Error while sending reconnection message..\n");
+          }
+        }
+
+        if (--s == 0) {
+          if (++i < subs.size()) {
+            s = subs.get(i);
+            messages.set(0, new Message(msgs.get(i)));
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
+    // If there is an Admin request to reply to..
+    FwdAdminRequestNot adr = not.getNot();
+    if (adr != null) {
+      replyToTopic(new AdminReply(true, null),
+                   adr.getReplyTo(), adr.getRequestMsgId(), adr.getReplyMsgId());
+    }
   }
 
   private void doSetPeriod(long period) {
@@ -726,6 +726,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         reactToClientRequest(key.intValue(), request, not);
 
         if (ctx.isClosed()) {
+          logger.log(BasicLevel.WARN, "RequestNot on closed context: " + key);
           // CnxCloseRequest request = (CnxCloseRequest) not.getMessage();
           connections.remove(key);
           HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
@@ -784,36 +785,40 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     if (connections != null) {
       Integer key = new Integer(not.getKey());
-      ConnectionContext ctx = (ConnectionContext) connections.remove(key);
-      connections.remove(key);
-      HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
-      // Normally the task is already cancelled by the task itself.
-      if (hbt != null) hbt.cancel();
+      // The connection may have already been explicitly closed by a CnxCloseRequest.
+      if (connections.containsKey(key)) {
+        reactToClientRequest(not.getKey(), new CnxCloseRequest(), null);
+        ConnectionContext ctx = (ConnectionContext) connections.remove(key);
 
-      reactToClientRequest(not.getKey(), new CnxCloseRequest(), null);
+        HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
+        if (hbt != null) hbt.cancel();
 
-      if (ctx != null) {
-        MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
-                                            + ':' + key + " closed");
-        ctx.pushError(exc);
+        if (ctx != null) {
+          MomException exc = new MomException(MomExceptionReply.HBCloseConnection,
+                                              "Connection " + getId() + ':' + key + " closed");
+          ctx.pushError(exc);
+        }
       }
+      // Remove the clientID
+      clientIDs.remove(key);
     }
   }
 
   private void doReact(CloseConnectionNot not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "CloseConnectionNot2: key=" + not.getKey());
+      logger.log(BasicLevel.DEBUG, "CloseConnectionNot: key=" + not.getKey());
 
     if (connections != null) {
       Integer key = new Integer(not.getKey());
       // The connection may have already been explicitly closed by a CnxCloseRequest.
-      if (connections.remove(key) != null) {
+      if (connections.containsKey(key)) {
         reactToClientRequest(not.getKey(), new CnxCloseRequest(), null);
         connections.remove(key);
+        
         HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
         if (hbt != null) hbt.cancel();
       }
-      //remove the clientID
+      // Remove the clientID
       clientIDs.remove(key);
     }
     // else should not happen:
@@ -972,18 +977,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (logger.isLoggable(BasicLevel.INFO))
           logger.log(BasicLevel.INFO, "HeartBeatTask: close connection");
 
-        Channel.sendTo(userId, (Notification) new CloseConnectionNot(key.intValue()));
+        Channel.sendTo(userId, (Notification) new CloseConnectionNot2(key.intValue()));
         this.cancel();
-
-        // ConnectionContext ctx = (ConnectionContext) connections.remove(key);
-        // heartBeatTasks.remove(key);
-        // reactToClientRequest(key.intValue(), new CnxCloseRequest());
-        //
-        // if (ctx != null) {
-        //   MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
-        // + ':' + key + " closed");
-        // ctx.pushError(exc);
-        // }
       }
     }
 
@@ -1572,8 +1567,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       else if (request instanceof AddClientIDRequest)
         doReact(key, (AddClientIDRequest) request);
       else if (request instanceof org.objectweb.joram.shared.client.PingRequest)
-        // TODO:
-        logger.log(BasicLevel.INFO, this + " - unhandling ping request");
+        // No need to do something, the job is done in RequestNot handling (HBT.touch)
+        logger.log(BasicLevel.DEBUG, this + " - ping request");
       else
         logger.log(BasicLevel.WARN, this + " - unhandling request: " + request);
     } catch (MomException mE) {
@@ -2576,7 +2571,6 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
     // Finally, deleting the context:
     ClientContext cc = contexts.remove(new Integer(key));
-
     cc.delete();
 
     activeCtx = null;
@@ -2696,7 +2690,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AddClientIDRequest  key = " + key + ", clientID = " + req.clientID);
     if (clientIDs.containsValue(req.clientID))
-      throw new Exception("clientID \""+req.clientID + "\" already presente.");
+      throw new Exception("clientID \""+ req.clientID + "\" already active.");
     clientIDs.put(new Integer(key), req.clientID);
     
     AddClientIDReply reply = new AddClientIDReply();
