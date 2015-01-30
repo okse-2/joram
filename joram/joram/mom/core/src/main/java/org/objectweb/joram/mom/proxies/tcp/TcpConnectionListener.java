@@ -173,8 +173,8 @@ public class TcpConnectionListener extends Daemon {
 
     connectionCount++;
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, " -> accept connection from " + inaddr);
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, " -> accept connection from " + inaddr);
 
     try {
       sock.setTcpNoDelay(true);
@@ -190,7 +190,6 @@ public class TcpConnectionListener extends Daemon {
       for (int i = 0; i < 5; i++) {
         if (magic.length == i || magic[i] != MetaData.joramMagic[i] && magic[i] > 0) {
           String errorMsg = "Bad magic number. Client is not compatible with JORAM.";
-          logger.log(BasicLevel.ERROR, errorMsg);
           protocolErrorCount++;
           throw new IllegalAccessException(errorMsg);
         }
@@ -198,7 +197,6 @@ public class TcpConnectionListener extends Daemon {
       if (magic[7] != MetaData.joramMagic[7]) {
         if (magic[7] > 0 && MetaData.joramMagic[7] > 0) {
           String errorMsg = "Bad protocol version number " + magic[7] + " != " + MetaData.joramMagic[7];
-          logger.log(BasicLevel.ERROR, errorMsg);
           protocolErrorCount++;
           throw new IllegalAccessException(errorMsg);
         }
@@ -233,15 +231,18 @@ public class TcpConnectionListener extends Daemon {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> read heartBeat = " + heartBeat);
       }
-
+      
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO, " -> open connection " + identity + "/" + key + " - " + heartBeat);
+      
       GetProxyIdNot gpin = new GetProxyIdNot(identity, inaddr);
       AgentId proxyId;
       try {
         gpin.invoke(AdminTopic.getDefault());
         proxyId = gpin.getProxyId();
       } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "", exc);
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, " -> login failed", exc);
         failedLoginCount++;
         StreamUtil.writeTo(1, nos);
         StreamUtil.writeTo(exc.getMessage(), nos);
@@ -265,8 +266,8 @@ public class TcpConnectionListener extends Daemon {
         try {
           gcn.invoke(proxyId);
         } catch (Exception exc) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "TcpConnectionListener: return error", exc);
+          if (logger.isLoggable(BasicLevel.WARN))
+            logger.log(BasicLevel.WARN, "TcpConnectionListener: reconnection failed", exc);
           StreamUtil.writeTo(1, nos);
           StreamUtil.writeTo(exc.getMessage(), nos);
           nos.send();
@@ -292,12 +293,12 @@ public class TcpConnectionListener extends Daemon {
       tcpConnection.start();
     } catch (IllegalAccessException exc) {
       if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, "TcpConnectionListener: close socket", exc);
+        logger.log(BasicLevel.ERROR, "TcpConnectionListener: close connection", exc);
       sock.close();
       throw exc;
     } catch (IOException exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "TcpConnectionListener: close socket", exc);
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, "TcpConnectionListener: close socket", exc);
       sock.close();
       throw exc;
     }
