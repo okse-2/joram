@@ -68,7 +68,7 @@ public class ReliableTcpClient {
 
   private volatile int status;
 
-  private Vector addresses;
+  private Vector<ServerAddress> addresses;
   /**
    *  True if the client must try to reconnect in case of connection
    * failure. It depends of cnxPendingTimer on a "normal" TCP connection.
@@ -122,7 +122,7 @@ public class ReliableTcpClient {
     if (params.cnxPendingTimer > 0)
       this.reconnectTimeout =  Math.max(3*params.cnxPendingTimer,
                                         (params.connectingTimer*1000)+(2*params.cnxPendingTimer));
-    addresses = new Vector();
+    addresses = new Vector<ServerAddress>();
     key = -1;
     this.identity = identity;
 
@@ -141,8 +141,8 @@ public class ReliableTcpClient {
   }
 
   public synchronized void connect(boolean reconnect) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, 
                  "ReliableTcpClient[" + identity + ',' + key + "].connect(" + reconnect + ')');
 
     if (status != INIT) 
@@ -224,15 +224,17 @@ public class ReliableTcpClient {
         // Trying again!
         nextSleep = nextSleep * 2;
       } else {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-                     " -> close connection " + identity + ',' + key);
-
         // If timer is over, throwing an IllegalStateException:
         long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
-        IllegalStateException jmsExc = new IllegalStateException("Could not connect to JMS server with "
-            + addresses + " after " + attemptsC + " attempts during " + attemptsT
-            + " secs: server is not listening or server protocol version is not compatible with client.");
+        String msg = "Could not connect to JMS server with " + addresses + " after " + attemptsC +
+            " attempts during " + attemptsT + " secs.\n" +
+            "Server is not listening or server protocol version is not compatible with client.";
+        IllegalStateException jmsExc = new IllegalStateException(msg);
+        
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN,
+                     " -> Could not connect to JMS server " + identity + ',' + key, jmsExc);
+
         throw jmsExc;
       }
     }
@@ -451,8 +453,8 @@ public class ReliableTcpClient {
   }
 
   public synchronized void close() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, 
                  "ReliableTcpClient[" + identity + ',' + key + "].close()");
     if (status != CLOSE) {
       setStatus(CLOSE);
