@@ -650,8 +650,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   }
 
   private void doReact(CloseConnectionNot2 not) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "CloseConnectionNot2: key=" + not.getKey());
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "CloseConnectionNot2: key=" + not.getKey());
 
     if (connections != null) {
       Integer key = new Integer(not.getKey());
@@ -669,14 +669,14 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           ctx.pushError(exc);
         }
       }
-      // Remove the clientID
+      // Remove the clientID (normally done in handling of CnxCloseRequest - see above)
       clientIDs.remove(key);
     }
   }
 
   private void doReact(CloseConnectionNot not) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "CloseConnectionNot: key=" + not.getKey());
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "CloseConnectionNot: key=" + not.getKey());
 
     if (connections != null) {
       Integer key = new Integer(not.getKey());
@@ -688,7 +688,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
         if (hbt != null) hbt.cancel();
       }
-      // Remove the clientID
+      // Remove the clientID (normally done in handling of CnxCloseRequest - see above)
       clientIDs.remove(key);
     }
     // else should not happen:
@@ -844,21 +844,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
 
       long date = System.currentTimeMillis();
       if ((date - lastRequestDate) > timeout) {
-        if (logger.isLoggable(BasicLevel.INFO))
-          logger.log(BasicLevel.INFO, "HeartBeatTask: close connection");
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "HeartBeatTask: close connection - key=" + key);
 
-        Channel.sendTo(userId, (Notification) new CloseConnectionNot2(key.intValue())); /// TODO: XXX
+        Channel.sendTo(userId, (Notification) new CloseConnectionNot2(key.intValue()));
         this.cancel();
-
-        // ConnectionContext ctx = (ConnectionContext) connections.remove(key);
-        // heartBeatTasks.remove(key);
-        // reactToClientRequest(key.intValue(), new CnxCloseRequest());
-        //
-        // if (ctx != null) {
-//          MomException exc = new MomException(MomExceptionReply.HBCloseConnection, "Connection " + getId()
-        // + ':' + key + " closed");
-        // ctx.pushError(exc);
-        // }
       }
     }
 

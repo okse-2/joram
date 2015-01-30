@@ -657,8 +657,8 @@ public class RequestMultiplexer {
           sendRequest(new PingRequest());
         }
       } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "", exc);
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "HeartBeatTask", exc);
       }
     }
 
