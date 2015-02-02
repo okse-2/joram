@@ -28,6 +28,27 @@
     <antcall target="tests.noperf.all" />
   </target>
 
+  <target name="tests.specific"
+          description=" --> ">
+    <antcall target="tests.base"/>
+  	<antcall target="tests.alias"/>
+    <antcall target="tests.recovery"/>
+    <antcall target="tests.admin"/>
+    <antcall target="tests.client"/>
+    <antcall target="tests.connection"/>
+    <antcall target="tests.local"/>
+    <antcall target="tests.dursub"/>
+    <antcall target="tests.tcp"/>
+    <antcall target="tests.noreg"/>
+    <antcall target="tests.xa"/>
+    <antcall target="tests.bridge.jms.new"/>
+    <antcall target="tests.jca"/>
+    <antcall target="tests.dmq"/>
+    <antcall target="tests.ttl"/>
+    <antcall target="tests.sub"/>
+    <antcall target="tests.distribution"/>
+  </target>
+ 
   <target name="tests.noperf.all"
           description=" --> launch all no perf joram tests">
     <antcall target="tests.base"/>
@@ -468,6 +489,7 @@
     <antcall target="bridge.jms.test13x"/>
     <antcall target="bridge.jms.test14x"/>
   	<antcall target="bridge.jms.test15x"/>
+  	<antcall target="bridge.jms.test17x"/>
   </target>
 
   <target name="tests.schedqueue"
@@ -1351,7 +1373,7 @@
   </target>
 
 	<target name="base.testActivation" depends="init.a3props,compile"
-            description=" --> test connection with or without ConnectionManager activativation.">
+            description=" --> test connection with or without ConnectionManager activation.">
 	  <antcall target="test.run" inheritAll="true">
 	    <param name="transaction" value="fr.dyade.aaa.util.NullTransaction" />
 	    <param name="testid" value="base.testActivation" />
@@ -4234,6 +4256,17 @@
     </antcall>
   </target>
 
+  <target name="noreg.test63" depends="init.a3props,compile"
+          description=" --> ">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.noreg.Test63"/>
+      <param name="testid" value="noreg.test63"/>
+      <param name="jndiconf" value="noreg/jndi.properties"/>
+      <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
   <!-- end noreg -->
 
   <!-- test with bug -->
@@ -4926,6 +4959,16 @@
       <param name="className" value="joram.bridgejms.BridgeTest15x"/>
       <param name="jndiconf" value="bridgejms/jndi15.properties"/>
       <param name="a3conf" value="bridgejms/a3servers15.xml"/>
+    </antcall>
+  </target>
+
+  <target name="bridge.jms.test17x" depends="init.a3props,compile"
+          description=" --> Test the bridge with ClientId issues">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.test17x"/>
+      <param name="className" value="joram.bridgejms.BridgeTest17x"/>
+      <param name="jndiconf" value="bridgejms/jndi.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers.xml"/>
     </antcall>
   </target>
 
