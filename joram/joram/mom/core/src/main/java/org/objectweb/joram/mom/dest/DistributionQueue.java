@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2014 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -211,6 +211,7 @@ public class DistributionQueue extends Queue {
     for (Iterator ite = msgs.iterator(); ite.hasNext();) {
       Message msg = (Message) ite.next();
       try {
+        // TODO (AF): if (!isAsyncDistribution) ..
         distributionModule.processMessage(msg);
         nbMsgsDeliverSinceCreation++;
         ite.remove();
@@ -271,6 +272,8 @@ public class DistributionQueue extends Queue {
           messages.remove(i);
           message.delete();
           
+          nbMsgsDeliverSinceCreation++;
+         
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "DistributionQueue.removeAndDeleteMessages() - removes " + id);
           
