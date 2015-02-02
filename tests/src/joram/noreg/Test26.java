@@ -113,7 +113,7 @@ public class Test26 extends BaseTest {
       // Verify we don't hang connectingTimer delay on close
       long time = System.currentTimeMillis();
       cnx.close();
-      assertTrue(System.currentTimeMillis() - time < fp.connectingTimer * 1000);
+      assertTrue((System.currentTimeMillis() - time) < ((fp.connectingTimer *1000) + (2* fp.cnxPendingTimer)));
       Thread.sleep(2000L);
       assertTrue(excList.excOccurred);
       
