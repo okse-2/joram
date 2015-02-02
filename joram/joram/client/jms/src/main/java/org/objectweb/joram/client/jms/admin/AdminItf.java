@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -214,6 +214,31 @@ public interface AdminItf {
    * @exception AdminException  If the request fails.
    */
   public Hashtable getStatistics(int serverId) throws ConnectException, AdminException;
+  
+  /**
+   * Returns JMX attribute value for the local server.
+   *
+   * @return  Corresponding JMX attribute value for the local server.
+   *          
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   * 
+   * @see #getStatistics(int)
+   */
+  public Hashtable getJMXAttribute(String attname) throws ConnectException, AdminException;
+
+  /**
+   * Returns JMX attribute value for the specified server.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   *
+   * @param serverId Unique identifier of the server.
+   * @return  the statistics for the the specified server.
+   * 
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public Hashtable getJMXAttribute(int serverId, String attname) throws ConnectException, AdminException;
   
   /**
    * Returns the unique identifier of the default dead message queue for the local

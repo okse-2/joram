@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -928,6 +928,14 @@ public class JoramAdmin implements AdminItf, JoramAdminMBean {
 
   public Hashtable getStatistics(int serverId) throws ConnectException, AdminException {
     return wrapper.getStatistics(serverId);
+  }
+  
+  public Hashtable getJMXAttribute(String attname) throws ConnectException, AdminException {
+    return wrapper.getJMXAttribute(attname);
+  }
+  
+  public Hashtable getJMXAttribute(int serverId, String attname) throws ConnectException, AdminException {
+    return wrapper.getJMXAttribute(serverId, attname);
   }
 
   public String[] getServersNames() throws ConnectException, AdminException {
