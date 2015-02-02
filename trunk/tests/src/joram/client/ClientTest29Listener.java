@@ -47,6 +47,7 @@ public class ClientTest29Listener implements MessageListener {
       ConnectionFactory cf = (ConnectionFactory) jndiCtx.lookup("cf");
       jndiCtx.close();
 
+      ((org.objectweb.joram.client.jms.ConnectionFactory) cf).getParameters().connectingTimer = 0;
       ((org.objectweb.joram.client.jms.ConnectionFactory) cf).getParameters().cnxPendingTimer = ClientTest29.pending;
       Connection cnx1 = cf.createConnection("root", "root");
 
