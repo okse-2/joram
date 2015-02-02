@@ -52,7 +52,7 @@ public class ClientTest27 extends TestCase {
     try {
       System.out.println("servers start");
       startAgentServer((short)0, new String[]{"-DTransaction.UseLockFile=false"});
-      Thread.sleep(2000);
+      Thread.sleep(1000);
 
       ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
       AdminModule.connect(cf, "root", "root");
@@ -79,24 +79,19 @@ public class ClientTest27 extends TestCase {
 //        }
 //      };
 //      t.start();
-//      
-//      int subt = -1;
-//      do {
-//        Thread.sleep(pending);
-//        Subscription[] subs = user.getSubscriptions();
-//        int subu = (subs==null)?0:subs.length;
-//        subt = topic.getSubscriptions();
-//        System.out.println(new Date() + " - Sub: " + subt + ", " + subu);
-//      } while (subt != 0);
 
       for (int i=0; i<10; i++)
         test(nbmsgs);
       
+      int subt = -1;
       int i = 0;
-      while ((topic.getSubscriptions() !=0 ) && (i++<50)) {
+      do {
         Thread.sleep(pending);
-        System.out.println(new Date() + " - Sub: " + topic.getSubscriptions());
-      }
+        Subscription[] subs = user.getSubscriptions();
+        int subu = (subs==null)?0:subs.length;
+        subt = topic.getSubscriptions();
+        System.out.println(new Date() + " - Sub: " + subt + ", " + subu);
+      } while ((subt != 0) && (i++ < 5));
       assertTrue(topic.getSubscriptions()==0);
 
       AdminModule.disconnect();

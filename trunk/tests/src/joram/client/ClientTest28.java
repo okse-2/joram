@@ -87,26 +87,20 @@ public class ClientTest28 extends TestCase {
       System.out.println(new Date() + " - destroy process");
       p.destroy();
       
-//      int subt = -1;
-//      do {
-//        Thread.sleep(pending);
-//        Subscription[] subs = user.getSubscriptions();
-//        int subu = (subs==null)?0:subs.length;
-//        subt = topic.getSubscriptions();
-//        System.out.println(new Date() + " - Sub: " + subt + ", " + subu);
-//      } while (subt != 0);
-//      Thread.sleep(5000L);
-      
+      int subt = -1;
       int i = 0;
-      while ((topic.getSubscriptions() !=0 ) && (i++<50)) {
+      do {
         Thread.sleep(pending);
-        System.out.println(new Date() + " - Sub: " + topic.getSubscriptions());
-      }
+        Subscription[] subs = user.getSubscriptions();
+        int subu = (subs==null)?0:subs.length;
+        subt = topic.getSubscriptions();
+        System.out.println(new Date() + " - Sub: " + subt + ", " + subu);
+      } while ((subt != 0) && (i++ < 5));
       assertTrue(topic.getSubscriptions()==0);
+      
       // Wait the end of sending.
       Thread.sleep(4*pending);
-
-      Thread.sleep(30000L);
+      
       AdminModule.disconnect();
     } catch (Throwable exc) {
       exc.printStackTrace();
