@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2014 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -148,6 +148,8 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected final static int SND_DEST_WEIGHTS = 100;
   protected final static int SET_SYNC_EXCEPTION_ON_FULL_DEST = 101;
   protected final static int SCALE_REQUEST = 102;
+  protected final static int MONITOR_GET_JMX_ATTS = 103;
+  protected final static int MONITOR_GET_JMX_ATTS_REP = 104;
 
   protected int classid;
 
@@ -254,7 +256,9 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
     GetDeliveredMessages.class.getName(),
     SendDestinationsWeights.class.getName(),
     SetSyncExceptionOnFullDestRequest.class.getName(),
-    ScaleRequest.class.getName()
+    ScaleRequest.class.getName(),
+    GetJMXAttsRequest.class.getName(),
+    GetJMXAttsReply.class.getName()
   };
   
   protected abstract int getClassId();
