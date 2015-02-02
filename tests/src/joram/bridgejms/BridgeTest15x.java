@@ -42,7 +42,7 @@ public class BridgeTest15x extends TestCase {
     new BridgeTest15x().run();
   }
 
-  static final int ROUND = 100000;
+  static final int ROUND = 10000;
   static final int bigsize = 1000000;
   
   public void run() {
@@ -65,18 +65,18 @@ public class BridgeTest15x extends TestCase {
       admin.localAdmin(cfB, "B");
 
       Connection cnx = cf.createConnection();
-      Forward fwdA = new Forward(cnx, "A");
-      Forward fwdB = new Forward(cnx, "B");
+      Forward15 fwdA = new Forward15(cnx, "A");
+      Forward15 fwdB = new Forward15(cnx, "B");
       cnx.start();
       
       Connection cnxA = cfA.createConnection();
-      Receiver recvA = new Receiver("A", cnxA);
-      Sender sndA = new Sender("A", cnxA);
+      Receiver15 recvA = new Receiver15("A", cnxA);
+      Sender15 sndA = new Sender15("A", cnxA);
       cnxA.start();
       
       Connection cnxB = cfB.createConnection();
-      Receiver recvB = new Receiver("B", cnxB);
-      Sender sndB = new Sender("B", cnxB);
+      Receiver15 recvB = new Receiver15("B", cnxB);
+      Sender15 sndB = new Sender15("B", cnxB);
       cnxB.start();
       
       for (int i=0; i<ROUND; i++) {
@@ -113,14 +113,14 @@ public class BridgeTest15x extends TestCase {
   }
 }
 
-class Forward implements MessageListener {
+class Forward15 implements MessageListener {
   Connection cnx = null;
   Session session = null;
   MessageConsumer cons = null;
   MessageProducer prod = null;
   Queue queue1, queue2;
 
-  Forward(Connection cnx, String client) throws JMSException {
+  Forward15(Connection cnx, String client) throws JMSException {
     this.cnx = cnx;
     session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
@@ -147,14 +147,14 @@ class Forward implements MessageListener {
   }
 }
 
-class Sender {
+class Sender15 {
   String name = null;
   Connection cnx = null;
   Session session = null;
   MessageProducer prod = null;
   Queue queue1;
   
-  Sender(String name, Connection cnx) throws JMSException {
+  Sender15(String name, Connection cnx) throws JMSException {
     this.name = name;
     this.cnx = cnx;
     session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -180,7 +180,7 @@ class Sender {
   }
 }
 
-class Receiver implements MessageListener {
+class Receiver15 implements MessageListener {
   String name = null;
   Connection cnx = null;
   Session session = null;
@@ -189,7 +189,7 @@ class Receiver implements MessageListener {
 
   int cpt = 0;
   
-  Receiver(String name, Connection cnx) throws JMSException {
+  Receiver15(String name, Connection cnx) throws JMSException {
     this.name = name + '#';
     this.cnx = cnx;
     session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
