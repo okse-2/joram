@@ -194,31 +194,37 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
    * @return the number of messages acquired by the acquisition handler.
    */
   public final long getAcquiredMsgCount() {
-    return AcquisitionModule.getCount();
+    if (acquisitionModule != null)
+      return acquisitionModule.getCount();
+    return 0L;
   }
 
   private transient long acquisitionNotNb = 0;
   
   public void react(AgentId from, Notification not) throws Exception {
     try {
-      long diff = AcquisitionModule.getCount() - acquisitionNotNb;
+      long diff = getAcquiredMsgCount() - acquisitionNotNb;
       int pending = getPendingMessageCount();
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "AcquisitionQueue.react: " + pause + ", " + diff + ", " + pending);
+        logger.log(BasicLevel.DEBUG,
+                   "AcquisitionQueue.react: " + pause + ", " + diff + ", " + pending);
 
       if (!pause && 
           (((diff_max > 0) && (diff >= diff_max)) || 
            ((pending_max > 0) && (pending >= pending_max)))) {
+        if (logger.isLoggable(BasicLevel.INFO))
+          logger.log(BasicLevel.INFO, "AcquisitionQueue.react: stopHandler " + diff + '/' + pending);
+
         stopHandler(properties);
         pause = true;
-      } else if (pause && (diff <= diff_min) && (pending <= pending_min)){
+      } else if (pause && (diff <= diff_min) && (pending <= pending_min)) {
+        if (logger.isLoggable(BasicLevel.INFO))
+          logger.log(BasicLevel.INFO, "AcquisitionQueue.react: startHandler " + diff + '/' + pending);
+
         startHandler(properties);
         pause = false;
       }
-
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "AcquisitionQueue.react: " + pause + ", " + diff + ", " + pending);
     } catch (Throwable t) {
       logger.log(BasicLevel.ERROR, "AcquisitionQueue: error in react.", t);
     }
