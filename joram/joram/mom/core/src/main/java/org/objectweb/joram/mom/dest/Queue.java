@@ -51,7 +51,6 @@ import org.objectweb.joram.mom.notifications.QueueMsgReply;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
-import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.mom.util.QueueDeliveryTimeTask;
@@ -392,9 +391,25 @@ public class Queue extends Destination implements QueueMBean {
     }
     return 0;
   }
+  
+  protected long nbMsgsDeniedSinceCreation = 0;
+  
+  /**
+   * Returns the number of messages denied since creation time of this
+   * destination.
+   *
+   * @return the number of messages delivered since creation time.
+   */
+  public final long getNbMsgsDeniedSinceCreation() {
+    return nbMsgsDeniedSinceCreation;
+  }
+
+  public final long getNbMsgsDeliverSinceCreation() {
+    return nbMsgsDeliverSinceCreation - nbMsgsDeniedSinceCreation;
+  }
 
   public final long getNbMsgsReceiveSinceCreation() {
-    return nbMsgsSentToDMQSinceCreation + nbMsgsDeliverSinceCreation + getPendingMessageCount();
+    return nbMsgsSentToDMQSinceCreation + nbMsgsDeliverSinceCreation + getPendingMessageCount() - nbMsgsDeniedSinceCreation;
   }
 
   /** nb Max of Message store in queue (-1 no limit). */
@@ -717,11 +732,11 @@ public class Queue extends Destination implements QueueMBean {
             && queueDelivery.getContextId() == not.getClientContext()) {
           
           // The deliveryTable is saved outside the Queue agent
-          /*
-          // state change, so save.
-          setSave();
-          */
+          //          // state change, so save.
+          //          setSave();
           
+          nbMsgsDeniedSinceCreation += 1;
+
           iterator.remove();
           if (not.isRedelivered())
             message.setRedelivered();
@@ -766,6 +781,8 @@ public class Queue extends Destination implements QueueMBean {
       }
       
       message = queueDelivery.getMessage();
+      
+      nbMsgsDeniedSinceCreation += 1;
 
       if (not.isRedelivered())
         message.setRedelivered();
@@ -1791,6 +1808,7 @@ public class Queue extends Destination implements QueueMBean {
   public int getEncodedSize() throws Exception {
     int encodedSize = super.getEncodedSize();
     encodedSize += INT_ENCODED_SIZE * 3;
+    encodedSize += LONG_ENCODED_SIZE;
     for (ReceiveRequest request : requests) {
       encodedSize += request.getEncodedSize();
     }
@@ -1800,6 +1818,7 @@ public class Queue extends Destination implements QueueMBean {
   public void encode(Encoder encoder) throws Exception {
     super.encode(encoder);
     encoder.encodeUnsignedInt(nbMaxMsg);
+    encoder.encodeUnsignedLong(nbMsgsDeniedSinceCreation);
     encoder.encodeUnsignedInt(priority);
     encoder.encodeUnsignedInt(requests.size());
     for (ReceiveRequest request : requests) {
@@ -1810,6 +1829,7 @@ public class Queue extends Destination implements QueueMBean {
   public void decode(Decoder decoder) throws Exception {
     super.decode(decoder);
     nbMaxMsg = decoder.decodeUnsignedInt();
+    nbMsgsDeniedSinceCreation = decoder.decodeUnsignedLong();
     priority = decoder.decodeUnsignedInt();
     int requestsSize = decoder.decodeUnsignedInt();
     requests = new Vector<ReceiveRequest>(requestsSize);
