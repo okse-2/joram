@@ -4972,6 +4972,16 @@
     </antcall>
   </target>
 
+  <target name="bridge.jms.test18x" depends="init.a3props,compile"
+          description=" --> Test issue with flow regulation using AcquisitionQueue">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.test18x"/>
+      <param name="className" value="joram.bridgejms.BridgeTest18x"/>
+      <param name="jndiconf" value="bridgejms/jndi.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers.xml"/>
+    </antcall>
+  </target>
+
   <target name="bridge.jms.testX" depends="init.a3props,compile"
           description=" --> ">
     <antcall target="test.run" inheritAll="true">
