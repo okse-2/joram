@@ -596,8 +596,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         reactToClientRequest(key.intValue(), request);
 
         if (ctx.isClosed()) {
-          logger.log(BasicLevel.WARN,"RequestNot on closed context: " + key);
-          // CnxCloseRequest request = (CnxCloseRequest) not.getMessage();
+          if (!(request instanceof CnxCloseRequest))
+            logger.log(BasicLevel.WARN,"RequestNot on closed context: " + key);
+
           connections.remove(key);
           HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
           if (hbt != null) hbt.cancel();
