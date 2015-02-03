@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -134,9 +134,6 @@ public class AcquisitionModule implements ReliableTransmitter {
 
   /** The task used to launch a new acquisition. */
   private AcquisitionTask acquisitionTask;
-  
-  /** The number of transmitted messages */
-  private static volatile long transmitCounter = 0;
 
   /**
    * Tells if acquisition is done on-demand using the acquisition task or with a
@@ -226,13 +223,16 @@ public class AcquisitionModule implements ReliableTransmitter {
     this.expiration = expiration;
   }
   
+  /** The number of transmitted messages */
+  private volatile long transmitCounter = 0;
+
   /**
    * Returns the number of transmitted messages
    * Be careful this counter is reseted at each time the server starts.
    * 
    * @return the number of transmitted messages
    */
-  public static long getCount(){
+  public long getCount(){
   	return transmitCounter;
   }
 
