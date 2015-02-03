@@ -298,7 +298,7 @@ public class TcpConnectionListener extends Daemon {
       throw exc;
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "TcpConnectionListener: close connection", exc);
+        logger.log(BasicLevel.WARN, "TcpConnectionListener: close socket", exc);
       sock.close();
       throw exc;
     }
