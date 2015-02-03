@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -101,6 +101,14 @@ public interface QueueMBean extends DestinationMBean {
    * @return The number of messages delivered.
    */
   int getDeliveredMessageCount();
+  
+  /**
+   * Returns the number of messages denied since creation time of this
+   * destination.
+   *
+   * @return the number of messages delivered since creation time.
+   */
+  long getNbMsgsDeniedSinceCreation();
 
   /**
    * Returns the maximum number of message for the destination.
