@@ -109,7 +109,7 @@ public class JMSAcquisitionQueue {
    * Administration method creating and deploying a JMS acquisition queue on a given server.
    * <p>
    * A set of properties is used to configure the distribution destination:<ul>
-   * <li>period – .</li>
+   * <li>period.</li>
    * <li>acquisition.period - The period between two acquisitions, default is 0 (no periodic acquisition).</li>
    * <li>persistent - Tells if produced messages will be persistent, default is true (JMS default).</li>
    * <li>expiration - Tells the life expectancy of produced messages, default is 0 (JMS default time to live).</li>
