@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,7 +23,6 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -376,7 +375,7 @@ public class Queue extends Destination implements QueueMBean {
 //      return queue.getPendingMessageCount();
 //    }
 //  }
-  
+
   /** Table holding the delivered messages before acknowledgment. */
   protected transient Map deliveredMsgs;
 
@@ -684,7 +683,7 @@ public class Queue extends Destination implements QueueMBean {
 
     if (! ids.hasMoreElements()) {
       // If the deny request is empty, the denying is a contextual one: it
-      // requests the denying of all the messages consumed by the denier in
+      // requests the denying of all the messages consumed by the client in
       // the denying context:
       for (Iterator entries = deliveredMsgs.entrySet().iterator(); entries.hasNext();) {
         // Browsing the delivered messages:
@@ -696,14 +695,18 @@ public class Queue extends Destination implements QueueMBean {
         consId = (AgentId) consumers.get(msgId);
         consCtx = ((Integer) contexts.get(msgId)).intValue();
 
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> deny msg " + msgId + "(consId = " + consId + ')');
-
         // If the current message has been consumed by the denier in the same
         // context: denying it.
         if (consId.equals(from) && consCtx == not.getClientContext()) {
           // state change, so save.
           setSave();
+
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, " -> deny msg " + msgId + "(consId = " + consId + ')');
+
+          // The message is no longer delivered
+          nbMsgsDeliverSinceCreation -= 1;
+          
           consumers.remove(msgId);
           contexts.remove(msgId);
           entries.remove();
@@ -744,10 +747,13 @@ public class Queue extends Destination implements QueueMBean {
       // the message from the queue - and in that case it also sends an
       // individual denying.
       if (message == null) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, " -> already denied message " + msgId);
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, " -> already denied message " + msgId);
         break;
       }
+
+      // The message is no longer delivered
+      nbMsgsDeliverSinceCreation -= 1;
 
       if (not.isRedelivered())
         message.setRedelivered();
