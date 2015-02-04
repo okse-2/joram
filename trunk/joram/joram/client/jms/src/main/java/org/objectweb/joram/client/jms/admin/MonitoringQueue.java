@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -146,8 +146,7 @@ public class MonitoringQueue {
                              Properties props) throws ConnectException, AdminException {
     if (props == null)
       props = new Properties();
-    if (!props.containsKey("acquisition.className"))
-      props.setProperty("acquisition.className", JMXAcquisition);
+    props.setProperty("acquisition.className", JMXAcquisition);
     Queue queue = Queue.create(serverId, name, Queue.ACQUISITION_QUEUE, props);
     return queue;
   }
