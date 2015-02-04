@@ -88,8 +88,10 @@ public class BridgeTest18x extends TestCase implements MessageListener {
         Properties prop1 = new Properties();
         prop1.setProperty("jms.ConnectionUpdatePeriod", "1000");
         prop1.setProperty("period", "1000");
-        prop1.setProperty("acquisition.max_msg", "20");
-        prop1.setProperty("acquisition.min_msg", "10");
+        prop1.setProperty("acquisition.max_msg", "1");
+        prop1.setProperty("acquisition.min_msg", "0");
+        prop1.setProperty("acquisition.max_pnd", "50");
+        prop1.setProperty("acquisition.min_pnd", "10");
         
         // Creating a Queue bridge on server 0:
         Queue joramInQueue1 = JMSAcquisitionQueue.create(0, "joramInQueue1", "foreignQueue1", prop1);
@@ -101,8 +103,10 @@ public class BridgeTest18x extends TestCase implements MessageListener {
         Properties prop2 = new Properties();
         prop2.setProperty("jms.ConnectionUpdatePeriod", "1000");
         prop2.setProperty("period", "1000");
-        prop2.setProperty("acquisition.max_msg", "20");
-        prop2.setProperty("acquisition.min_msg", "10");
+        prop2.setProperty("acquisition.max_msg", "10");
+        prop2.setProperty("acquisition.min_msg", "5");
+        prop1.setProperty("acquisition.max_pnd", "20");
+        prop1.setProperty("acquisition.min_pnd", "5");
         
         // Creating a Queue bridge on server 0:
         Queue joramInQueue2 = JMSAcquisitionQueue.create(0, "joramInQueue2", "foreignQueue2", prop2);
@@ -155,8 +159,11 @@ public class BridgeTest18x extends TestCase implements MessageListener {
         foreignProd2.send(msg2);
       }
       
-      Thread.sleep(120000);
-      
+      for (int i=0; i<60; i++)
+        if (nbmsg != 20000)
+          Thread.sleep(2000);
+        else
+          break;
       assertTrue(nbmsg == 20000);
 
       foreignCnx.close();
