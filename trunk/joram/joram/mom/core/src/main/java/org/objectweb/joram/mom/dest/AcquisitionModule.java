@@ -472,9 +472,9 @@ public class AcquisitionModule implements ReliableTransmitter {
    */
   public void transmit(Message message, String messageId) {
     if (message != null) {
-    	transmitCounter ++;
       Channel.sendTo(destination.getId(),
                      new AcquisitionNot(new ClientMessages(-1, -1, message), message.persistent, messageId));
+    	transmitCounter ++;
     }
   }
 
@@ -494,9 +494,9 @@ public class AcquisitionModule implements ReliableTransmitter {
    */
   public void transmit(List messages, boolean persistent) {
     if (messages != null && messages.size() > 0) {
-    	transmitCounter ++;
       Channel.sendTo(destination.getId(),
                      new AcquisitionNot(new ClientMessages(-1, -1, messages), persistent, null));
+    	transmitCounter ++;
     }
   }
 
