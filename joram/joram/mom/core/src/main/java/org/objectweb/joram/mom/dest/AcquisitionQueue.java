@@ -149,16 +149,27 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
   public void setProperties(Properties properties, boolean firstTime) throws Exception {
     super.setProperties(properties, firstTime);
 
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AcquisitionQueue.setProperties prop = " + properties);
-    }
+    
     this.properties = properties;
     
     diff_max = Long.parseLong(properties.getProperty(ACQ_QUEUE_MAX_MSG, String.valueOf(diff_max)));
     diff_min = Long.parseLong(properties.getProperty(ACQ_QUEUE_MIN_MSG, String.valueOf(diff_min)));
+    if (diff_max < 2) diff_max = 2;
+    if (diff_min >= diff_max) diff_min = diff_max -2;
+    if (diff_min < 0) diff_min = 0;
+    
     pending_max = Long.parseLong(properties.getProperty(ACQ_QUEUE_MAX_PND, String.valueOf(pending_max)));
     pending_min = Long.parseLong(properties.getProperty(ACQ_QUEUE_MIN_PND, String.valueOf(pending_min)));
-
+    if (pending_max < 2) pending_max = 2;
+    if (pending_min >= pending_max) pending_min = pending_max -2;
+    if (pending_min < 0) pending_min = 0;
+    
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO,
+                 "AcquisitionQueue.setProperties -> " + diff_min + '/' + diff_max  + ", " + pending_min + '/' + pending_max);
+    
     // Acquisition class name can only be set the first time.
     if (firstTime) {
       if (properties != null) {
@@ -204,6 +215,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
   public void react(AgentId from, Notification not) throws Exception {
     try {
       long diff = getAcquiredMsgCount() - acquisitionNotNb;
+      if (not instanceof AcquisitionNot) diff -= 1;
       int pending = getPendingMessageCount();
 
       if (logger.isLoggable(BasicLevel.DEBUG))
