@@ -85,31 +85,28 @@ public class BridgeTest18x extends TestCase implements MessageListener {
         jndiCtx.rebind("foreignCF", foreignCF);
       
         // Setting the bridge properties
-        Properties prop1 = new Properties();
-        prop1.setProperty("jms.ConnectionUpdatePeriod", "1000");
-        prop1.setProperty("period", "1000");
-        prop1.setProperty("acquisition.max_msg", "1");
-        prop1.setProperty("acquisition.min_msg", "0");
-        prop1.setProperty("acquisition.max_pnd", "50");
-        prop1.setProperty("acquisition.min_pnd", "10");
+        Properties props = new Properties();
+        props.setProperty("jms.ConnectionUpdatePeriod", "1000");
+        props.setProperty("period", "1000");
+        props.setProperty("acquisition.max_msg", "1");
+        props.setProperty("acquisition.min_msg", "0");
+        props.setProperty("acquisition.max_pnd", "50");
+        props.setProperty("acquisition.min_pnd", "10");
         
         // Creating a Queue bridge on server 0:
-        Queue joramInQueue1 = JMSAcquisitionQueue.create(0, "joramInQueue1", "foreignQueue1", prop1);
+        Queue joramInQueue1 = JMSAcquisitionQueue.create(0, "joramInQueue1", "foreignQueue1", props);
         joramInQueue1.setFreeReading();
         joramInQueue1.setFreeWriting();
         System.out.println("joramInQueue1 = " + joramInQueue1);
 
         // Setting the bridge properties
-        Properties prop2 = new Properties();
-        prop2.setProperty("jms.ConnectionUpdatePeriod", "1000");
-        prop2.setProperty("period", "1000");
-        prop2.setProperty("acquisition.max_msg", "10");
-        prop2.setProperty("acquisition.min_msg", "5");
-        prop1.setProperty("acquisition.max_pnd", "20");
-        prop1.setProperty("acquisition.min_pnd", "5");
+        props.setProperty("acquisition.max_msg", "10");
+        props.setProperty("acquisition.min_msg", "5");
+        props.setProperty("acquisition.max_pnd", "20");
+        props.setProperty("acquisition.min_pnd", "5");
         
         // Creating a Queue bridge on server 0:
-        Queue joramInQueue2 = JMSAcquisitionQueue.create(0, "joramInQueue2", "foreignQueue2", prop2);
+        Queue joramInQueue2 = JMSAcquisitionQueue.create(0, "joramInQueue2", "foreignQueue2", props);
         joramInQueue2.setFreeReading();
         joramInQueue2.setFreeWriting();
         System.out.println("joramInQueue2 = " + joramInQueue2);
