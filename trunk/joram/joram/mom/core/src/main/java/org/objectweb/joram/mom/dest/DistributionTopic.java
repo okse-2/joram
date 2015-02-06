@@ -155,9 +155,9 @@ public class DistributionTopic extends Topic {
    * @see Destination#preProcess(AgentId, ClientMessages)
    */
   public ClientMessages preProcess(AgentId from, ClientMessages cm) {
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "DistributionTopic. preProcess(" + from + ", " + cm + ')');
-    }
+
     List msgs = cm.getMessages();
     // This method return null so the counter will not be updated in processMessage method
     nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + msgs.size();
