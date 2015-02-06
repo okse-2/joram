@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2012 ScalAgent Distributed Technologies
+ * Copyright (C)  2012 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -75,6 +75,7 @@ public class BridgeTest8x extends TestCase {
         System.out.println("async=" + async);
 
         javax.jms.ConnectionFactory joramCF = TcpConnectionFactory.create("localhost", 16010);
+        ((org.objectweb.joram.client.jms.ConnectionFactory) joramCF).getParameters().connectingTimer = 0;
 
         AdminModule.connect(joramCF, "root", "root");
         javax.naming.Context jndiCtx = new javax.naming.InitialContext();
@@ -89,6 +90,7 @@ public class BridgeTest8x extends TestCase {
         System.out.println("foreign queue = " + foreignQueue);
 
         javax.jms.ConnectionFactory foreignCF = TcpConnectionFactory.create("localhost", 16011);
+        ((org.objectweb.joram.client.jms.ConnectionFactory) foreignCF).getParameters().connectingTimer = 0;
 
         // bind foreign destination and connectionFactory
         jndiCtx.rebind("foreignQueue", foreignQueue);
@@ -176,7 +178,7 @@ public class BridgeTest8x extends TestCase {
         msgOut.setText("Message sent during stop, number " + i);
         System.out.println("send msg = " + msgOut.getText());
         joramProd.send(msgOut);
-        Thread.sleep(500);
+        Thread.sleep(100);
       }
 
       startAgentServer((short)1, new String[]{"-DTransaction.UseLockFile=false"});
@@ -184,7 +186,7 @@ public class BridgeTest8x extends TestCase {
       Thread.sleep(5000);
 
       for (int i = 0; i < nbMsgDuringStop; i++) { 
-        msgIn=(TextMessage) joramCons.receive(5000);
+        msgIn=(TextMessage) joramCons.receive(60000);
         if (msgIn != null) {
           nbmsg += 1;
         } else {
