@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -839,6 +839,10 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
       Identity identity = request.getIdentity();
       String name = identity.getUserName();
 
+      if ((name == null) || name.equals(""))
+        // Should never happened as there is test client side
+        throw new RequestException("User cannot have a null or empty name.");
+      
       AgentId proxId = (AgentId) proxiesTable.get(name);
       String info;
 
@@ -1855,6 +1859,9 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
    * {@inheritDoc}
    */
   public void createUser(String user, String passwd, int serverId, String identityClassName) throws Exception {
+    if ((user == null) || user.equals(""))
+      throw new RequestException("User name can not be null or empty");
+
     Identity identity = null;
     try {
       identity = (Identity) Class.forName(identityClassName).newInstance();

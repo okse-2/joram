@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2015 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -85,7 +85,11 @@ public class JoramHelper {
   public final static void createUser(String userName, String userPass) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "JoramHelper.createUser(" + userName + ')');
+    
     try {
+      if ((userName == null) || userName.equals(""))
+        throw new RequestException("User name can not be null or empty");
+
       SimpleIdentity identity = new SimpleIdentity();
       identity.setIdentity(userName, userPass);
       AdminTopic.CreateUserAndSave(new CreateUserRequest(identity, AgentServer.getServerId(), null), null, "-1");
