@@ -1012,6 +1012,9 @@ public class AdminWrapper implements AdminItf {
                          int serverId,
                          String identityClassName,
                          Properties prop) throws ConnectException, AdminException {
+    if ((name == null) || name.equals(""))
+      throw new AdminException("User name can not be null or empty");
+    
     Identity identity = createIdentity(name, password, identityClassName);
     AdminReply reply = doRequest(new CreateUserRequest(identity, serverId, prop));
     User user = new User(name, ((CreateUserReply) reply).getProxId());
@@ -1035,7 +1038,8 @@ public class AdminWrapper implements AdminItf {
     Identity identity = null;
     try {
       identity = (Identity) Class.forName(identityClassName).newInstance();
-      if (passwd != null) identity.setIdentity(user, passwd);
+      if (passwd != null)
+        identity.setIdentity(user, passwd);
       else
         identity.setUserName(user);
     } catch (Exception e) {

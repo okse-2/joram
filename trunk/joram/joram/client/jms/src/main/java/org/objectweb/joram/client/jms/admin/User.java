@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -291,6 +291,9 @@ public class User extends AdministeredObject implements UserMBean {
                             int serverId,
                             String identityClassName,
                             Properties prop) throws ConnectException, AdminException {
+    if ((name == null) || name.equals(""))
+      throw new AdminException("User name can not be null or empty");
+    
     Identity identity = createIdentity(name, password, identityClassName);
 
     User user = new User(name);
