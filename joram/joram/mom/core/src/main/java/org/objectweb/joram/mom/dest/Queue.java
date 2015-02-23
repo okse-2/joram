@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,12 +23,13 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
@@ -43,17 +44,17 @@ import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
 import org.objectweb.joram.mom.notifications.BrowseReply;
 import org.objectweb.joram.mom.notifications.BrowseRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.QueueDeliveryTimeNot;
 import org.objectweb.joram.mom.notifications.DenyRequest;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
-import org.objectweb.joram.mom.notifications.QueueDeliveryTimeNot;
 import org.objectweb.joram.mom.notifications.QueueMsgReply;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
-import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.mom.util.QueueDeliveryTimeTask;
+import org.objectweb.joram.mom.util.JoramHelper;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.admin.AdminReply;
@@ -95,6 +96,7 @@ import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.encoding.Decoder;
 import fr.dyade.aaa.common.encoding.Encodable;
 import fr.dyade.aaa.common.encoding.EncodableFactory;
+import fr.dyade.aaa.common.encoding.EncodableHelper;
 import fr.dyade.aaa.common.encoding.Encoder;
 
 /**
@@ -106,9 +108,6 @@ public class Queue extends Destination implements QueueMBean {
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(Queue.class.getName());
-  
-  public static final String DELIVERY_TABLE_PREFIX = "DT_";
-  public static final String ARRIVAL_STATE_PREFIX = "AS_";
 
   /** Static value holding the default DMQ identifier for a server. */
   static AgentId defaultDMQId = null;
@@ -156,11 +155,14 @@ public class Queue extends Destination implements QueueMBean {
   /** Common priority value. */
   private int priority; 
 
-  /** Table keeping the message deliveries */
-  protected transient QueueDeliveryTable deliveryTable;
+  /** Table keeping the messages' consumers identifiers. */
+  protected Map consumers = new Hashtable();
+
+  /** Table keeping the messages' consumers contexts. */
+  protected Map contexts = new Hashtable();
 
   /** Counter of messages arrivals. */
-  protected transient QueueArrivalState arrivalState;
+  protected long arrivalsCounter = 0;
 
   /** List holding the requests before reply or expiry. */
   protected List<ReceiveRequest> requests = new Vector();
@@ -218,12 +220,6 @@ public class Queue extends Destination implements QueueMBean {
         Channel.sendTo(from, new ExceptionReply(req, exc));
       }
     }
-  }
-  
-  protected void agentSave() throws IOException {
-    super.agentSave();
-    arrivalState.save();
-    deliveryTable.save();
   }
 
   /**
@@ -380,36 +376,23 @@ public class Queue extends Destination implements QueueMBean {
 //    }
 //  }
 
+  /** Table holding the delivered messages before acknowledgment. */
+  protected transient Map deliveredMsgs;
+
   /**
    * Returns the number of messages delivered and waiting for acknowledge.
    *
    * @return The number of messages delivered.
    */
   public final int getDeliveredMessageCount() {
-    if (deliveryTable != null) {
-      return deliveryTable.size();
+    if (deliveredMsgs != null) {
+      return deliveredMsgs.size();
     }
     return 0;
   }
-  
-  protected long nbMsgsDeniedSinceCreation = 0;
-  
-  /**
-   * Returns the number of messages denied since creation time of this
-   * destination.
-   *
-   * @return the number of messages delivered since creation time.
-   */
-  public final long getNbMsgsDeniedSinceCreation() {
-    return nbMsgsDeniedSinceCreation;
-  }
-
-  public final long getNbMsgsDeliverSinceCreation() {
-    return nbMsgsDeliverSinceCreation - nbMsgsDeniedSinceCreation;
-  }
 
   public final long getNbMsgsReceiveSinceCreation() {
-    return nbMsgsSentToDMQSinceCreation + nbMsgsDeliverSinceCreation + getPendingMessageCount() - nbMsgsDeniedSinceCreation;
+    return nbMsgsSentToDMQSinceCreation + nbMsgsDeliverSinceCreation + getPendingMessageCount();
   }
 
   /** nb Max of Message store in queue (-1 no limit). */
@@ -442,54 +425,43 @@ public class Queue extends Destination implements QueueMBean {
    * 
    * @param firstTime		true when first called by the factory
    */
-  protected void initialize(boolean firstTime) throws Exception {
+  protected void initialize(boolean firstTime) {
     cleanWaitingRequest(System.currentTimeMillis());
 
     receiving = false;
     messages = new Vector();
+    deliveredMsgs = new Hashtable();
     
 //    averageLoadTask = new QueueAverageLoadTask(AgentServer.getTimer(), this);
 
-    String arrivalStateTxName = ARRIVAL_STATE_PREFIX + getId().toString();
-    String deliveryTableTxName = DELIVERY_TABLE_PREFIX + getId().toString();
-    if (firstTime) {
-      arrivalState = new QueueArrivalState(arrivalStateTxName);
-      deliveryTable = new QueueDeliveryTable(deliveryTableTxName);
-      return;
-    } else {
-      arrivalState = QueueArrivalState.load(arrivalStateTxName);
-      deliveryTable = QueueDeliveryTable.load(deliveryTableTxName);
-    }
+    if (firstTime) return;
 
     // Retrieving the persisted messages, if any.
     List persistedMsgs = Message.loadAll(getMsgTxPrefix().toString());
 
     if (persistedMsgs != null) {
       Message persistedMsg;
-      QueueDelivery queueDelivery;
+      AgentId consId;
       
       while (! persistedMsgs.isEmpty()) {
         persistedMsg = (Message) persistedMsgs.remove(0);
-        queueDelivery = deliveryTable.get(persistedMsg.getId());
+        consId = (AgentId) consumers.get(persistedMsg.getId());
 
         try {
-          if (queueDelivery == null) {
+          if (consId == null) {
+            if (!addMessage(persistedMsg, false)) {
+              persistedMsg.delete();
+            }
+          } else if (isLocal(consId)) {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, " -> deny " + persistedMsg.getId());
+            consumers.remove(persistedMsg.getId());
+            contexts.remove(persistedMsg.getId());
             if (!addMessage(persistedMsg, false)) {
               persistedMsg.delete();
             }
           } else {
-            queueDelivery.setMessage(persistedMsg);
-            if (isLocal(queueDelivery.getConsumerId())) {
-              if (logger.isLoggable(BasicLevel.DEBUG))
-                logger
-                    .log(BasicLevel.DEBUG, " -> deny " + persistedMsg.getId());
-              deliveryTable.remove(persistedMsg.getId());
-              if (!addMessage(persistedMsg, false)) {
-                persistedMsg.delete();
-              }
-            } else {
-              queueDelivery.setMessage(persistedMsg);
-            }
+            deliveredMsgs.put(persistedMsg.getId(), persistedMsg);
           }
         } catch (AccessException e) {/*never happens*/}
       }
@@ -593,7 +565,6 @@ public class Queue extends Destination implements QueueMBean {
     not.requester = from;
     not.setExpiration(current);
     if (not.isPersistent()) {
-      // TODO: the requests could be saved externally.
       // state change, so save.
       setSave();
     }
@@ -673,16 +644,15 @@ public class Queue extends Destination implements QueueMBean {
   }
 
   private void acknowledge(String msgId) {
-    QueueDelivery queueDelivery = deliveryTable.remove(msgId);
-    if (queueDelivery != null) {
-      // The DeliveryTable is saved outside the Queue agent
-      /*
-      if (queueDelivery.getMessage().isPersistent()) {
-        // state change, so save.
-        setSave();
-      }*/
-
-      queueDelivery.getMessage().delete();
+    Message msg = (Message) deliveredMsgs.remove(msgId);
+    if ((msg != null) && msg.isPersistent()) {
+      // state change, so save.
+      setSave();
+    }
+    consumers.remove(msgId);
+    contexts.remove(msgId);
+    if (msg != null) {
+      msg.delete();
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Message " + msgId + " acknowledged.");
@@ -707,37 +677,39 @@ public class Queue extends Destination implements QueueMBean {
 
     String msgId;
     Message message;
-    QueueDelivery queueDelivery;
+    AgentId consId;
+    int consCtx;
     DMQManager dmqManager = null;
 
     if (! ids.hasMoreElements()) {
       // If the deny request is empty, the denying is a contextual one: it
-      // requests the denying of all the messages consumed by the denier in
+      // requests the denying of all the messages consumed by the client in
       // the denying context:
-      Iterator<Entry<String, QueueDelivery>> iterator = deliveryTable.iterator();
-      while (iterator.hasNext()) {
+      for (Iterator entries = deliveredMsgs.entrySet().iterator(); entries.hasNext();) {
         // Browsing the delivered messages:
-        Entry<String, QueueDelivery> entry = iterator.next();
+        Map.Entry entry = (Map.Entry) entries.next();
 
-        msgId = entry.getKey();
-        queueDelivery = entry.getValue();
-        message = queueDelivery.getMessage();
-        
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> deny msg " + msgId + "(consId = " + queueDelivery.getConsumerId() + ')');
+        msgId = (String) entry.getKey();
+        message = (Message) entry.getValue();
+
+        consId = (AgentId) consumers.get(msgId);
+        consCtx = ((Integer) contexts.get(msgId)).intValue();
 
         // If the current message has been consumed by the denier in the same
         // context: denying it.
-        if (queueDelivery.getConsumerId().equals(from)
-            && queueDelivery.getContextId() == not.getClientContext()) {
-          
-          // The deliveryTable is saved outside the Queue agent
-          //          // state change, so save.
-          //          setSave();
-          
-          nbMsgsDeniedSinceCreation += 1;
+        if (consId.equals(from) && consCtx == not.getClientContext()) {
+          // state change, so save.
+          setSave();
 
-          iterator.remove();
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, " -> deny msg " + msgId + "(consId = " + consId + ')');
+
+          // The message is no longer delivered
+          nbMsgsDeliverSinceCreation -= 1;
+          
+          consumers.remove(msgId);
+          contexts.remove(msgId);
+          entries.remove();
           if (not.isRedelivered())
             message.setRedelivered();
           else
@@ -767,22 +739,21 @@ public class Queue extends Destination implements QueueMBean {
     // For a non empty request, browsing the denied messages:
     for (ids = not.getIds(); ids.hasMoreElements();) {
       msgId = (String) ids.nextElement();
-      queueDelivery = deliveryTable.remove(msgId);
+      message = (Message) deliveredMsgs.remove(msgId);
 
       // Message may have already been denied. For example, a proxy may deny
       // a message twice, first when detecting a connection failure - and
       // in that case it sends a contextual denying -, then when receiving 
       // the message from the queue - and in that case it also sends an
       // individual denying.
-      if (queueDelivery == null) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, " -> already denied message " + msgId);
+      if (message == null) {
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, " -> already denied message " + msgId);
         break;
       }
-      
-      message = queueDelivery.getMessage();
-      
-      nbMsgsDeniedSinceCreation += 1;
+
+      // The message is no longer delivered
+      nbMsgsDeliverSinceCreation -= 1;
 
       if (not.isRedelivered())
         message.setRedelivered();
@@ -795,6 +766,8 @@ public class Queue extends Destination implements QueueMBean {
 
       // state change, so save.
       setSave();
+      consumers.remove(msgId);
+      contexts.remove(msgId);
 
       // If message considered as undeliverable, adding it
       // to the list of dead messages:
@@ -1095,11 +1068,9 @@ public class Queue extends Destination implements QueueMBean {
         if (sharedMsg.deliveryTime > currentTime) {
           scheduleDeliveryTimeMessage(sharedMsg, throwsExceptionOnFullDest);
         } else {
-          msg.order = arrivalState.getAndIncrementArrivalCount(msg.isPersistent());
+          msg.order = arrivalsCounter++;
           storeMessage(msg, throwsExceptionOnFullDest);
-          
-          // ArrivalState is saved outside the Queue agent
-          // if (msg.isPersistent()) setSave();
+          if (msg.isPersistent()) setSave();
         }
       }
     }
@@ -1142,11 +1113,9 @@ public class Queue extends Destination implements QueueMBean {
     if (not.msg == null) return;
     org.objectweb.joram.shared.messages.Message sharedMsg = not.msg;
     Message msg = new Message(sharedMsg);
-    msg.order = arrivalState.getAndIncrementArrivalCount(msg.isPersistent());
+    msg.order = arrivalsCounter++;
     storeMessage(msg, not.throwsExceptionOnFullDest);
-    
-    // ArrivalState is saved outside the Queue agent
-    // if (msg.isPersistent()) setSave();
+    if (msg.isPersistent()) setSave();
     
     // Launching a delivery sequence:
     deliverMessages(0);
@@ -1176,31 +1145,26 @@ public class Queue extends Destination implements QueueMBean {
       return;
 
     String msgId;
-    QueueDelivery queueDelivery;
     Message message;
     AgentId consId;
     DMQManager dmqManager = null;
-    
-    Iterator<Entry<String, QueueDelivery>> iterator = deliveryTable.iterator();
-    while (iterator.hasNext()) {
-      // Browsing the delivered messages:
-      Entry<String, QueueDelivery> entry = iterator.next();
+    for (Iterator entries = deliveredMsgs.entrySet().iterator(); entries.hasNext();) {
+      Map.Entry entry = (Map.Entry) entries.next();
 
-      msgId = entry.getKey();
-      queueDelivery = entry.getValue();
-      message = queueDelivery.getMessage();
+      msgId = (String) entry.getKey();
+      message = (Message) entry.getValue();
 
+      consId = (AgentId) consumers.get(msgId);
       // Delivered message has been delivered to the deleted client:
       // denying it.
-      if (queueDelivery.getConsumerId().equals(client)) {
-        iterator.remove();
+      if (consId.equals(client)) {
+        entries.remove();
         message.setRedelivered();
 
-        // The deliveryTable is saved outside the Queue agent
-        /*
         // state change, so save.
-        setSave();*/
-        deliveryTable.remove(msgId);
+        setSave();
+        consumers.remove(msgId);
+        contexts.remove(msgId);
 
         // If message considered as undeliverable, adding it to the
         // list of dead messages:
@@ -1295,7 +1259,7 @@ public class Queue extends Destination implements QueueMBean {
    * @param throwsExceptionOnFullDest true, can throws an exception on sending message on full destination
    * @throws AccessException
    */
-  protected final void storeMessage(Message msg, boolean throwsExceptionOnFullDest) throws AccessException {
+  protected final synchronized void storeMessage(Message msg, boolean throwsExceptionOnFullDest) throws AccessException {
     if (addMessage(msg, throwsExceptionOnFullDest)) {
       if (msg.isPersistent()) {
         // Persisting the message.
@@ -1315,7 +1279,7 @@ public class Queue extends Destination implements QueueMBean {
    * @param throwsExceptionOnFullDest true, can throws an exception on sending message on full destination
    * @throws AccessException
    */
-  protected final void storeMessageHeader(Message message,  boolean throwsExceptionOnFullDest) throws AccessException {
+  protected final synchronized void storeMessageHeader(Message message,  boolean throwsExceptionOnFullDest) throws AccessException {
     if (addMessage(message, throwsExceptionOnFullDest)) {
       // Persisting the message.
       message.saveHeader();
@@ -1350,9 +1314,9 @@ public class Queue extends Destination implements QueueMBean {
    * @return true if the message has been added. false if the queue is full.
    * @throws AccessException If syncExceptionOnFullDest and the queue isFull
    */
-  protected final boolean addMessage(Message message, boolean throwsExceptionOnFullDest) throws AccessException {
+  protected final synchronized boolean addMessage(Message message, boolean throwsExceptionOnFullDest) throws AccessException {
 
-    if (nbMaxMsg > -1 && nbMaxMsg <= (messages.size() + deliveryTable.size())) {
+    if (nbMaxMsg > -1 && nbMaxMsg <= (messages.size() + deliveredMsgs.size())) {
       
       if (throwsExceptionOnFullDest && isSyncExceptionOnFullDest()) {
         if (logger.isLoggable(BasicLevel.INFO))
@@ -1638,9 +1602,10 @@ public class Queue extends Destination implements QueueMBean {
         notMsg.addMessage(message.getFullMessage());
         if (!notRec.getAutoAck()) {
           // putting the message in the delivered messages table:
-          QueueDelivery queueDelivery = new QueueDelivery(notRec.requester,
-              notRec.getClientContext(), message);
-          deliveryTable.put(message.getId(), queueDelivery);
+          consumers.put(message.getId(), notRec.requester);
+          contexts.put(message.getId(),
+                       new Integer(notRec.getClientContext()));
+          deliveredMsgs.put(message.getId(), message);
           messages.remove(message);
         }
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -1653,12 +1618,10 @@ public class Queue extends Destination implements QueueMBean {
         notMsg.setPersistent(false);
       }
 
-      // The deliveryTable is saved outside the Queue agent.
-      /*
       if (notMsg.isPersistent() && !notRec.getAutoAck()) {
         // state change, so save.
         setSave();
-      }*/
+      }
 
       // Next request:
       if (notMsg.getSize() > 0) {
@@ -1724,7 +1687,7 @@ public class Queue extends Destination implements QueueMBean {
       // Storing each received message:
       for (Iterator msgs = clientMsgs.getMessages().iterator(); msgs.hasNext();) {
         msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
-        msg.order = arrivalState.getAndIncrementArrivalCount(msg.isPersistent());
+        msg.order = arrivalsCounter++;
         
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Queue.addClientMessage() -> " + msg.getId() + ',' + msg.order);
@@ -1807,8 +1770,22 @@ public class Queue extends Destination implements QueueMBean {
   
   public int getEncodedSize() throws Exception {
     int encodedSize = super.getEncodedSize();
-    encodedSize += INT_ENCODED_SIZE * 3;
     encodedSize += LONG_ENCODED_SIZE;
+    encodedSize += INT_ENCODED_SIZE;
+    Iterator<Entry<String, AgentId>> consumerIterator = consumers.entrySet().iterator();
+    while (consumerIterator.hasNext()) {
+      Entry<String, AgentId> consumer = consumerIterator.next();
+      encodedSize += EncodableHelper.getStringEncodedSize(consumer.getKey());
+      encodedSize += consumer.getValue().getEncodedSize();
+    }
+    encodedSize += INT_ENCODED_SIZE;
+    Iterator<Entry<String, Integer>> contextIterator = contexts.entrySet().iterator();
+    while (contextIterator.hasNext()) {
+      Entry<String, Integer> context = contextIterator.next();
+      encodedSize += EncodableHelper.getStringEncodedSize(context.getKey());
+      encodedSize += INT_ENCODED_SIZE;
+    }
+    encodedSize += INT_ENCODED_SIZE * 3;
     for (ReceiveRequest request : requests) {
       encodedSize += request.getEncodedSize();
     }
@@ -1817,8 +1794,22 @@ public class Queue extends Destination implements QueueMBean {
   
   public void encode(Encoder encoder) throws Exception {
     super.encode(encoder);
+    encoder.encodeUnsignedLong(arrivalsCounter);
+    encoder.encodeUnsignedInt(consumers.size());
+    Iterator<Entry<String, AgentId>> consumerIterator = consumers.entrySet().iterator();
+    while (consumerIterator.hasNext()) {
+      Entry<String, AgentId> consumer = consumerIterator.next();
+      encoder.encodeString(consumer.getKey());
+      consumer.getValue().encode(encoder);
+    }
+    encoder.encodeUnsignedInt(contexts.size());
+    Iterator<Entry<String, Integer>> contextIterator = contexts.entrySet().iterator();
+    while (contextIterator.hasNext()) {
+      Entry<String, Integer> context = contextIterator.next();
+      encoder.encodeString(context.getKey());
+      encoder.encodeUnsignedInt(context.getValue());
+    }
     encoder.encodeUnsignedInt(nbMaxMsg);
-    encoder.encodeUnsignedLong(nbMsgsDeniedSinceCreation);
     encoder.encodeUnsignedInt(priority);
     encoder.encodeUnsignedInt(requests.size());
     for (ReceiveRequest request : requests) {
@@ -1828,8 +1819,23 @@ public class Queue extends Destination implements QueueMBean {
 
   public void decode(Decoder decoder) throws Exception {
     super.decode(decoder);
+    arrivalsCounter = decoder.decodeUnsignedLong();
+    int consumersSize = decoder.decodeUnsignedInt();
+    consumers = new Hashtable<String, AgentId>(consumersSize);
+    for (int i = 0; i < consumersSize; i++) {
+      String key = decoder.decodeString();
+      AgentId value = new AgentId((short) 0, (short) 0, 0);
+      value.decode(decoder);
+      consumers.put(key, value);
+    }
+    int contextsSize = decoder.decodeUnsignedInt();
+    contexts = new Hashtable<String, Integer>(contextsSize);
+    for (int i = 0; i < contextsSize; i++) {
+      String key = decoder.decodeString();
+      Integer value = decoder.decodeUnsignedInt();
+      contexts.put(key, value);
+    }
     nbMaxMsg = decoder.decodeUnsignedInt();
-    nbMsgsDeniedSinceCreation = decoder.decodeUnsignedLong();
     priority = decoder.decodeUnsignedInt();
     int requestsSize = decoder.decodeUnsignedInt();
     requests = new Vector<ReceiveRequest>(requestsSize);

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 - 2014 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,7 @@ package org.objectweb.joram.mom.dest;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import org.objectweb.joram.shared.messages.Message;
@@ -37,6 +38,10 @@ import fr.dyade.aaa.common.EmptyQueueException;
 import fr.dyade.aaa.common.Queue;
 
 public class DistributionDaemon extends Daemon {
+
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   public static Logger logger = Debug.getLogger(DistributionDaemon.class.getName());
 
   /** Holds the distribution logic. */
@@ -58,122 +63,122 @@ public class DistributionDaemon extends Daemon {
   }
   
   class ComparatorMessage implements Comparator {
-    @Override
-    public int compare(Object o1, Object o2) {
-      if (((Message) o1).id.equals(o2)) return 0;
-      return (o1.hashCode() - o2.hashCode());
-    }
+	  @Override
+	  public int compare(Object o1, Object o2) {
+		  if (((Message) o1).id.equals(o2)) return 0;
+		  return (o1.hashCode() - o2.hashCode());
+	  }
   }
-  
+
   class ComparatorString implements Comparator {
-    @Override
-    public int compare(Object o1, Object o2) {
-      if (o1.equals(o2)) return 0;
-      return (o1.hashCode() - o2.hashCode());
-    }
+	  @Override
+	  public int compare(Object o1, Object o2) {
+		  if (o1.equals(o2)) return 0;
+		  return (o1.hashCode() - o2.hashCode());
+	  }
   }
-  
+
   synchronized boolean isHandling(String id) {
-    if (distributeQueue.search(new ComparatorMessage(), id)) return true;
-    if (ackQueue.search(new ComparatorString(), id)) return true;
-    return false;
+	  if (distributeQueue.search(new ComparatorMessage(), id)) return true;
+	  if (ackQueue.search(new ComparatorString(), id)) return true;
+	  return false;
   }
-  
+
   synchronized void ackMessage(String id) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "DistributionDaemon run: distributeQueue.pop = " + id);
-    
-    // delete the message from the distributeQueue
-    distributeQueue.pop();
-    // add message id to the ackQueue
-    ackQueue.push(id);
-    
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "DistributionDaemon run: ackQueue.push : " + id);    
+	  if (logger.isLoggable(BasicLevel.DEBUG))
+		  logger.log(BasicLevel.DEBUG, "DistributionDaemon run: distributeQueue.pop = " + id);
+
+	  // delete the message from the distributeQueue
+	  distributeQueue.pop();
+	  // add message id to the ackQueue
+	  ackQueue.push(id);
+
+	  if (logger.isLoggable(BasicLevel.DEBUG))
+		  logger.log(BasicLevel.DEBUG, "DistributionDaemon run: ackQueue.push : " + id);    
   }
-  
-	public void run() {
-		if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "DistributionDaemon run()");
-		
-		while (running) {
-      canStop = true;
-      Message msg = null;
-      try {
-      	if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "DistributionDaemon run: distributeQueue.size() = " + distributeQueue.size());
-      	// get the first message
-      	msg = (Message) distributeQueue.get();
-      	
-      	if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "DistributionDaemon run: distributeQueue.get() = " + msg.id);
-      	
-      	// test if this message is deliverable
-      	if (isUndeliverable(msg)) {
-      		if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "DistributionDaemon run: the message " +  msg.id + " is undeliverable.");
-      		// delete the message from the distributeQueue
-      		distributeQueue.pop();
-      		continue;
-      	}
-      	
-      } catch (InterruptedException exc) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "", exc);
-        return;
-      }
+	  
+  public void run() {
+	  if (logger.isLoggable(BasicLevel.DEBUG))
+		  logger.log(BasicLevel.DEBUG, "DistributionDaemon run()");
 
-      canStop = false;
-      // process
-      try {
-      	// distribute the message
-      	distributionHandler.distribute(msg);
-      	ackMessage(msg.id);
+	  while (running) {
+		  canStop = true;
+		  Message msg = null;
+		  try {
+			  if (logger.isLoggable(BasicLevel.DEBUG))
+				  logger.log(BasicLevel.DEBUG, "DistributionDaemon run: distributeQueue.size() = " + distributeQueue.size());
+			  // get the first message
+			  msg = (Message) distributeQueue.get();
 
-      	// transaction delete the message
-      	String txName = txDest.getTxName(msg.id);
-      	if (logger.isLoggable(BasicLevel.DEBUG))
-      		logger.log(BasicLevel.DEBUG, "DistributionDaemon run: txName(" + msg.id + ")=" + txName);
-      	if (txName != null) {
-      		org.objectweb.joram.mom.messages.Message momMsg = new org.objectweb.joram.mom.messages.Message(msg);
-      		momMsg.setTxName(txName);
-      		momMsg.delete();
-      		AgentServer.getTransaction().begin();
-      		AgentServer.getTransaction().commit(true);
-      		if (logger.isLoggable(BasicLevel.DEBUG))
-        		logger.log(BasicLevel.DEBUG, "DistributionDaemon run: " + msg.id + " deleted.");
-      	} else {
+			  if (logger.isLoggable(BasicLevel.DEBUG))
+				  logger.log(BasicLevel.DEBUG, "DistributionDaemon run: distributeQueue.get() = " + msg.id);
+
+			  // test if this message is deliverable
+			  if (isUndeliverable(msg)) {
+				  if (logger.isLoggable(BasicLevel.DEBUG))
+					  logger.log(BasicLevel.DEBUG, "DistributionDaemon run: the message " +  msg.id + " is undeliverable.");
+				  // delete the message from the distributeQueue
+				  distributeQueue.pop();
+				  continue;
+			  }
+
+		  } catch (InterruptedException exc) {
+			  if (logger.isLoggable(BasicLevel.DEBUG))
+				  logger.log(BasicLevel.DEBUG, "", exc);
+			  return;
+		  }
+
+		  canStop = false;
+		  // process
+		  try {
+			  // distribute the message
+			  distributionHandler.distribute(msg);
+			  ackMessage(msg.id);
+
+			  // transaction delete the message
+			  String txName = txDest.getTxName(msg.id);
+			  if (logger.isLoggable(BasicLevel.DEBUG))
+				  logger.log(BasicLevel.DEBUG, "DistributionDaemon run: txName(" + msg.id + ")=" + txName);
+			  if (txName != null) {
+				  org.objectweb.joram.mom.messages.Message momMsg = new org.objectweb.joram.mom.messages.Message(msg);
+				  momMsg.setTxName(txName);
+				  momMsg.delete();
+				  AgentServer.getTransaction().begin();
+				  AgentServer.getTransaction().commit(true);
+				  if (logger.isLoggable(BasicLevel.DEBUG))
+					  logger.log(BasicLevel.DEBUG, "DistributionDaemon run: " + msg.id + " deleted.");
+			  } else {
       	  // The destination is a DistributionTopic.
       		if (logger.isLoggable(BasicLevel.INFO))
             logger.log(BasicLevel.INFO, "DistributionDaemon run: txName == null for msg " + msg.id + " can't be delete.");
-      	}
-      } catch (Exception e) {
-      	if (logger.isLoggable(BasicLevel.WARN))
-          logger.log(BasicLevel.WARN, "DistributionDaemon run()", e);
-      	
-      	if (e instanceof EmptyQueueException) {
-      		continue;
-      	}
-      	
-      	// Increment the delivery count
-      	incDeliveryCount(msg);
-      	
-      	canStop = true;
-      	// the connection is down, wait a wakeup from DistributionQueue or DistributionTopic.
-      	synchronized (this) {
-	        try {
-	        	if (logger.isLoggable(BasicLevel.DEBUG))
-	        		logger.log(BasicLevel.DEBUG, "DistributionDaemon run: wait.");
-	          wait();
-	          if (logger.isLoggable(BasicLevel.DEBUG))
-	        		logger.log(BasicLevel.DEBUG, "DistributionDaemon run: wakeup.");
-          } catch (InterruptedException e1) {
-          	if (logger.isLoggable(BasicLevel.DEBUG))
-          		logger.log(BasicLevel.DEBUG, "DistributionDaemon run wait InterruptedException.");
-          }
-        }
-			}
-    }
+			  }
+		  } catch (Exception e) {
+			  if (logger.isLoggable(BasicLevel.WARN))
+				  logger.log(BasicLevel.WARN, "DistributionDaemon run()", e);
+
+			  if (e instanceof EmptyQueueException) {
+				  continue;
+			  }
+
+			  // Increment the delivery count
+			  incDeliveryCount(msg);
+
+			  canStop = true;
+			  // the connection is down, wait a wakeup from DistributionQueue or DistributionTopic.
+			  synchronized (this) {
+				  try {
+					  if (logger.isLoggable(BasicLevel.DEBUG))
+						  logger.log(BasicLevel.DEBUG, "DistributionDaemon run: wait.");
+					  wait();
+					  if (logger.isLoggable(BasicLevel.DEBUG))
+						  logger.log(BasicLevel.DEBUG, "DistributionDaemon run: wakeup.");
+				  } catch (InterruptedException e1) {
+					  if (logger.isLoggable(BasicLevel.DEBUG))
+						  logger.log(BasicLevel.DEBUG, "DistributionDaemon run wait InterruptedException.");
+				  }
+			  }
+		  }
+	  }
   }
 
 	@Override

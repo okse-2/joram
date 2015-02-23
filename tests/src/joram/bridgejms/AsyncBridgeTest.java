@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 - 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -107,8 +107,6 @@ public class AsyncBridgeTest extends TestCase {
     }
   }
   
-  // The assertion in this test are not absolute, they depend of the speed
-  // of message consumption by the listener :-(.
   public void test(String destName) throws Exception {
     System.out.println("\n\n" + destName + ": Async ON...\n");
 
@@ -135,17 +133,17 @@ public class AsyncBridgeTest extends TestCase {
 
     TextMessage msg = joramSess.createTextMessage();
 
+    assertEquals("The foreign listener count", 0, foreignListener.count);
     for (int i = 0; i < MSG_COUNT; i++) {
       msg.setText("Joram message number " + i);
       System.out.println("send msg = " + msg.getText());
       joramSender.send(msg);
     }
-    assertEquals("The foreign listener count", 0, foreignListener.count);
     
-    if (foreignListener.count < MSG_COUNT) {
-      synchronized (lock) {
-        lock.wait(30000);
-      }
+    if (foreignListener.count < 2*MSG_COUNT) {
+    	synchronized (lock) {
+    		lock.wait(30000);
+    	}
     }
     assertEquals("The foreign listener received", MSG_COUNT, foreignListener.count);
     Thread.sleep(1000);
@@ -162,12 +160,12 @@ public class AsyncBridgeTest extends TestCase {
     AdminModule.disconnect();
     Thread.sleep(1000);
     
+    assertTrue("The foreign listener count expected " + MSG_COUNT  + " but was " + foreignListener.count, MSG_COUNT == foreignListener.count);
     for (int i = MSG_COUNT; i < 2*MSG_COUNT; i++) {
       msg.setText("Joram message number " + i);
       System.out.println("send msg = " + msg.getText());
       joramSender.send(msg);
     }
-    assertFalse("The foreign listener count expected " + MSG_COUNT  + " but was " + foreignListener.count, MSG_COUNT == foreignListener.count);
     
     if (foreignListener.count < 2*MSG_COUNT) {
     	synchronized (lock) {
@@ -188,12 +186,12 @@ public class AsyncBridgeTest extends TestCase {
     AdminModule.disconnect();
     Thread.sleep(1000);
     
+    assertTrue("The foreign listener count expected " + 2*MSG_COUNT  + " but was " + foreignListener.count, 2*MSG_COUNT == foreignListener.count);
     for (int i = 2*MSG_COUNT; i < 3*MSG_COUNT; i++) {
       msg.setText("Joram message number " + i);
       System.out.println("send msg = " + msg.getText());
       joramSender.send(msg);
     }
-    assertTrue("The foreign listener count expected " + 2*MSG_COUNT  + " but was " + foreignListener.count, 2*MSG_COUNT == foreignListener.count);
     
     if (foreignListener.count < 3*MSG_COUNT) {
     	synchronized (lock) {

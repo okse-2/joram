@@ -34,7 +34,6 @@ import javax.jms.TextMessage;
 
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
 
@@ -66,9 +65,9 @@ public class ConnectionClose2 extends TestCase {
   
   public void run() {
     try {
-      startAgentServer((short)0,
-                       new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
-
+      startAgentServer(
+        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      
       AdminModule.connect("localhost", 2560, "root", "root", 60);
 
       org.objectweb.joram.client.jms.admin.User user = org.objectweb.joram.client.jms.admin.User
@@ -78,17 +77,24 @@ public class ConnectionClose2 extends TestCase {
           .create(0);
       queue.setFreeReading();
       queue.setFreeWriting();
-
+      
       dest = queue;
-
-      ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
-      ((TcpConnectionFactory)cf).getParameters().cnxPendingTimer = 500;
-
+      
+      ConnectionFactory cf = 
+        org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
+          "localhost", 2560);
+      ((org.objectweb.joram.client.jms.tcp.TcpConnectionFactory)cf).
+        getParameters().cnxPendingTimer = 500;
+      
       for (int i = 0; i < NB_LOOP; i++) {
         connection = cf.createConnection("anonymous", "anonymous");
+
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
         producer = session.createProducer(dest);
+
         consumer = session.createConsumer(dest);
+
         connection.start();
 
         new Thread() {
@@ -100,7 +106,7 @@ public class ConnectionClose2 extends TestCase {
                 Thread.sleep(50);
               } catch (Exception exc) {
                 assertTrue("unexpected exception: " + exc,
-                           exc instanceof javax.jms.IllegalStateException);
+                    exc instanceof javax.jms.IllegalStateException);
                 break;
               }
             }
@@ -122,7 +128,7 @@ public class ConnectionClose2 extends TestCase {
           }
         }.start();
       }
-
+      
       for (int i=0; i<10; i++) {
         Thread.sleep(1000);
         if (closed) break;

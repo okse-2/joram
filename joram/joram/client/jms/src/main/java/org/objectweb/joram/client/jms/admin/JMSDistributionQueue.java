@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -141,8 +141,10 @@ public class JMSDistributionQueue {
                              Properties props) throws ConnectException, AdminException {
     if (props == null)
       props = new Properties();
-    props.setProperty("distribution.className", JMSDistribution);
-    props.setProperty("jms.DestinationName", dest);
+    if (!props.containsKey("distribution.className"))
+      props.setProperty("distribution.className", JMSDistribution);
+    if (!props.containsKey("jms.DestinationName"))
+      props.setProperty("jms.DestinationName", dest);
     Queue queue = Queue.create(serverId, name, Queue.DISTRIBUTION_QUEUE, props);
     return queue;
   }

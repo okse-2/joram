@@ -36,7 +36,6 @@ import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.Message;
-import org.objectweb.joram.client.jms.MessageProducer;
 import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
@@ -116,12 +115,6 @@ public class RequestMultiplexer {
       // CompletionListener running.
       return false;
     }
-  }
-  
-  public boolean checkCLMessageProducer(Session session, MessageProducer mp) {
-    if (runningCL != null && mp != null)
-      return (checkCLSession(session) && mp.equals(runningCL.messageProducer));
-    return false;
   }
 
   private static Timer timer;

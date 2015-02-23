@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001-2014 ScalAgent Distributed Technologies
+ * Copyright (C)  2001-2003 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,10 +38,10 @@ public class test1 extends TestCase {
   protected void setUp() throws Exception {
     ServerPing = Integer.getInteger("Ping", 0).shortValue();
     ServerPong = Integer.getInteger("Pong", 0).shortValue();
-
+    
     int bounce = Integer.getInteger("bounce", 499).intValue();
 
-    timeout = 5000L + (long) (bounce);
+    timeout = (long) (50000 * bounce);
     timeout = Long.getLong("timeout", timeout).longValue();
 
     Ping ping = new Ping(ServerPing);
@@ -57,7 +57,7 @@ public class test1 extends TestCase {
 
     ping.deploy();
     pong.deploy();
-
+    
     Channel.sendTo(ping.getId(), new Start());
   }
 
@@ -78,11 +78,11 @@ class Start extends Notification {
 
 class Ball extends Notification {
   public int bounce;
-  public byte[] ballast;
+  public int[] ballast;
 
   public Ball(int bounce, int size) {
     this.bounce = bounce;
-    this.ballast = new byte[size];
+    this.ballast = new int[size];
   }
 }
 
@@ -92,16 +92,13 @@ class Ping extends Agent {
   long start;
   long total;
 
-  byte[] ballast;
-
-  final static int X = 1000;
+  final static int X = 10000;
 
   public AgentId pong;
 
   public Ping(short to) {
     super(to);
     test = 5;
-    this.ballast = new byte[1000];
   }
 
   public void react(AgentId from, Notification not) throws Exception {
@@ -112,16 +109,16 @@ class Ping extends Agent {
     } else if (not instanceof Ball) {
       if (((Ball) not).bounce > 0) {
         ((Ball) not).bounce -= 1;
-        sendTo(from, not);
+	sendTo(from, not);
       } else {
-        long stop = System.currentTimeMillis();
-        System.out.println("dT[" + (((test+1)*X)/1000) + "Kb] = " +
-            ((1000000*(stop - start))/(2*(bounce+1))) + "ns");
-        total += (stop - start);
-        if (test >= 0) {
-          sendTo(getId(), new Start());
-        } else {
-          System.out.println("total = " + total + " ms");
+	long stop = System.currentTimeMillis();
+	System.out.println("dT[" + (((test+1)*X*4)/1000) + "Kb] = " +
+                           ((1000*(stop - start))/(2*(bounce+1))) + "us");
+	total += (stop - start);
+	if (test >= 0) {
+	  sendTo(getId(), new Start());
+	} else {
+	  System.out.println("total = " + total + "s");
           TestCase.endTest();
         }
       }
@@ -130,11 +127,8 @@ class Ping extends Agent {
 }
 
 class Pong extends Agent {
-  byte[] ballast;
-
   public Pong(short to) {
     super(to);
-    this.ballast = new byte[1000];
   }
 
   public void react(AgentId from, Notification not) throws Exception {

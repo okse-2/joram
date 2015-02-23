@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,12 +26,7 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
 
-import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
@@ -39,7 +34,7 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import framework.TestCase;
 
 /**
- * Test context cleaning in case of server dead.
+ *
  */
 public class Test63 extends TestCase implements ExceptionListener {
 
@@ -48,7 +43,7 @@ public class Test63 extends TestCase implements ExceptionListener {
   }
 
   JMSException exc = null;
-
+  
   public void run() {
     try {
       startAgentServer((short) 0);
@@ -60,10 +55,6 @@ public class Test63 extends TestCase implements ExceptionListener {
       ((TcpConnectionFactory) cf).getParameters().connectingTimer = 30;
       
       AdminModule.connect(cf, "root", "root");
-      Topic topic = Topic.create(0, "topic");
-      topic.setFreeReading();
-      topic.setFreeWriting();
-
       // Create the anonymous user needed for test
       User.create("anonymous", "anonymous");
       AdminModule.disconnect();
@@ -82,7 +73,7 @@ public class Test63 extends TestCase implements ExceptionListener {
       if (exc == null) Thread.sleep(1000L);
       if (exc == null) Thread.sleep(1000L);
       
-      assertTrue("Connexion should be closed", (exc != null));
+      assertTrue("Connexion should be closed: " + exc, (exc != null));
       assertTrue("Connection should not be reinitialized", (exc instanceof javax.jms.JMSSecurityException));
       exc = null;
       
@@ -90,18 +81,7 @@ public class Test63 extends TestCase implements ExceptionListener {
       cnx2.setClientID("ITSME");
       cnx2.setExceptionListener(this);
       
-      assertTrue("Connexion should be alive: " + exc, (exc == null));
-      
-      Session session2 = cnx2.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageProducer prod2 = session2.createProducer(topic);
-      MessageConsumer cons2 = session2.createConsumer(topic);
-      cnx2.start();
-      
-      Message msg = session2.createMessage();
-      prod2.send(msg);
-      cons2.receive(1000L);
-      
-      assertTrue("Should receive a message", (msg != null));
+      assertTrue("Connexion should be closed", (exc == null));
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);

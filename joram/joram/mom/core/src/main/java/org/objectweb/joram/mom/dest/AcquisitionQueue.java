@@ -159,7 +159,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     if (diff_max < 2) diff_max = 2;
     if (diff_min >= diff_max) diff_min = diff_max -2;
     if (diff_min < 0) diff_min = 0;
-    
+
     pending_max = Long.parseLong(properties.getProperty(ACQ_QUEUE_MAX_PND, String.valueOf(pending_max)));
     pending_min = Long.parseLong(properties.getProperty(ACQ_QUEUE_MIN_PND, String.valueOf(pending_min)));
     if (pending_max < 2) pending_max = 2;
@@ -169,7 +169,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     if (logger.isLoggable(BasicLevel.INFO))
       logger.log(BasicLevel.INFO,
                  "AcquisitionQueue.setProperties -> " + diff_min + '/' + diff_max  + ", " + pending_min + '/' + pending_max);
-    
+
     // Acquisition class name can only be set the first time.
     if (firstTime) {
       if (properties != null) {
@@ -191,7 +191,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     }
   }
 
-  public void initialize(boolean firstTime) throws Exception {
+  public void initialize(boolean firstTime) {
     super.initialize(firstTime);
     if (acquisitionModule == null) {
       acquisitionModule = new AcquisitionModule(this, acquisitionClassName, properties);
@@ -230,7 +230,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
 
         stopHandler(properties);
         pause = true;
-      } else if (pause && (diff <= diff_min) && (pending <= pending_min)){
+      } else if (pause && (diff <= diff_min) && (pending <= pending_min)) {
         if (logger.isLoggable(BasicLevel.INFO))
           logger.log(BasicLevel.INFO, "AcquisitionQueue.react: startHandler " + diff + '/' + pending);
 

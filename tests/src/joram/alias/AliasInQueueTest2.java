@@ -54,7 +54,7 @@ public class AliasInQueueTest2 extends TestCase {
     new AliasInQueueTest2().run();
   }
   
-  int nbmsg = 5000;
+  int nbmsg = 50000;
   
   /*
    * (weight0 < weight1) and (weight0 < weight2)
@@ -69,9 +69,9 @@ public class AliasInQueueTest2 extends TestCase {
 //  int weight2 = 20;
   
   // slightly unbalanced system (low accumulation)
-  int weight0 = 10;
-  int weight1 = 20;
-  int weight2 = 40;
+  int weight0 = 1;
+  int weight1 = 2;
+  int weight2 = 4;
 
   static long start = 0L;
   
@@ -166,13 +166,12 @@ public class AliasInQueueTest2 extends TestCase {
       cnx0.close();
       System.out.println((System.currentTimeMillis() - start) + " - queue1: " + list1.count + ", queue2: " + list2.count);
 
-      int i = 0;
-      int wait = nbmsg * (((weight1 * weight2 *100)/(weight1 + weight2)) - (weight0 *100)) /1000;
-      while (((list1.count + list2.count) != nbmsg) && (i++<50)) {
-        System.out.println("queue1: " + list1.count + ", queue2: " + list2.count);
-        Thread.sleep(wait);
-      }
-
+      int wait = nbmsg * (((weight1 * weight2 *100)/(weight1 + weight2)) - (weight0 *100)) /100;
+      System.out.println(wait);
+      Thread.sleep(wait +5000L);
+      if ((list1.count + list2.count) != nbmsg)
+        Thread.sleep(5000L);
+      
       assertEquals(nbmsg, list1.count + list2.count);
       System.out.println(((weight2 * nbmsg *95)/(weight1 + weight2))/100);
       assertTrue(list1.count > (((weight2 * nbmsg *95)/(weight1 + weight2))/100));

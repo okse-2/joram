@@ -296,35 +296,35 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
     } else {
       cnx = cnxFact.createConnection();
     }
-    
+
     try {
-      if (clientID == null) {
-        cnx.setClientID("joramBridge_" + name + "_" + AgentServer.getServerId());
-      } else {
-        cnx.setClientID(clientID);
-      }
+    	if (clientID == null) {
+    		cnx.setClientID("joramBridge_" + name + "_" + AgentServer.getServerId());
+    	} else {
+    		cnx.setClientID(clientID);
+    	}
 
-      cnx.setExceptionListener(this);
+    	cnx.setExceptionListener(this);
 
-      if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, "doConnect: cnx=" + cnx);
-      }
+    	if (logger.isLoggable(BasicLevel.DEBUG)) {
+    		logger.log(BasicLevel.DEBUG, "doConnect: cnx=" + cnx);
+    	}
     } catch (JMSException exc) {
-      if (logger.isLoggable(BasicLevel.WARN)) {
-        logger.log(BasicLevel.WARN, "Connection failed", exc);
-      }
-      if (cnx != null) {
-        try {
-          cnx.close();
+    	if (logger.isLoggable(BasicLevel.WARN)) {
+    		logger.log(BasicLevel.WARN, "Connection failed", exc);
+    	}
+    	if (cnx != null) {
+    	  try {
+    	    cnx.close();
         } catch (JMSException exc2) {
           if (logger.isLoggable(BasicLevel.WARN)) {
             logger.log(BasicLevel.WARN, "Can't close failed connection", exc2);
           }
-        } finally {
-          cnx = null;
-        }
-      }
-      throw exc;
+    	  } finally {
+    	    cnx = null;
+    	  }
+    	}
+    	throw exc;
     }
   }
 

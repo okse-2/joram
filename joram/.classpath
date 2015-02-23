@@ -20,5 +20,7 @@
 	<classpathentry kind="src" output="samples/classes" path="samples/src/joram"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
+	<classpathentry kind="lib" path="F:/Users/freyssin/Partage/Workspaces/JORAM_5_9/joram/ship/lib/monolog.jar"/>
+	<classpathentry kind="lib" path="F:/Users/freyssin/Partage/Workspaces/JORAM_5_9/joram/ship/bin/felix.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

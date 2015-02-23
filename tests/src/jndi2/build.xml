@@ -125,20 +125,6 @@
     </antcall>
   </target>
 
-  <target name="jndi.perf1" depends="init.test.base"
-          description=" --> Measures JNDI lookup and bind costs with many bindings in a unique context.">
-    <antcall target="client.start" inheritAll="true">
-      <param name="className" value="jndi2.base.Perf1" />
-    </antcall>
-  </target>
-
-  <target name="jndi.perf2" depends="init.test.base"
-          description=" --> Measures JNDI lookup and bind costs with multiples contexts.">
-    <antcall target="client.start" inheritAll="true">
-      <param name="className" value="jndi2.base.Perf2" />
-    </antcall>
-  </target>
-
   <!--
     -  end basic jndi2 test
     -->

@@ -170,7 +170,7 @@ public class DistributionQueue extends Queue {
   	return false;
   }
   
-  public void initialize(boolean firstTime) throws Exception {
+  public void initialize(boolean firstTime) {
     super.initialize(firstTime);
     if (distributionModule == null) {
       distributionModule = new DistributionModule(distributionClassName, properties, firstTime);
@@ -198,43 +198,54 @@ public class DistributionQueue extends Queue {
    * @see Destination#preProcess(AgentId, ClientMessages)
    */
   public ClientMessages preProcess(AgentId from, ClientMessages cm) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "DistributionQueue.preProcess(" + from + ", " + cm + ')');
-
+    }
     if (!batchDistribution && messages.size() > 0) {
-      // we already have an Exception because messages.size>0
-      // so return immediately the new client messages
+    	// we already have an Exception, because messages.size>0
+    	// so return immediately the new client messages
       return cm;
     }
+    
+    List msgs = cm.getMessages();
+    for (Iterator ite = msgs.iterator(); ite.hasNext();) {
+      Message msg = (Message) ite.next();
+      try {
+        distributionModule.processMessage(msg);
+        nbMsgsDeliverSinceCreation++;
+        ite.remove();
+      } catch (Exception exc) {
+      	if (!isAsyncDistribution) {
+      		if (logger.isLoggable(BasicLevel.WARN)) {
+      			logger.log(BasicLevel.WARN, "DistributionQueue.preProcess: distribution error.", exc);
+      		}
+      	} else {
+      	  // Bug fix (JORAM-198): Avoid parallelism access during message serialization (save method).
+      	  // Do nothing, the handling of message is now in post-process.
 
-    if (! isAsyncDistribution) {
-      List msgs = cm.getMessages();
-      for (Iterator ite = msgs.iterator(); ite.hasNext();) {
-        Message msg = (Message) ite.next();
-        try {
-          distributionModule.processMessage(msg);
-          nbMsgsDeliverSinceCreation++;
-          ite.remove();
-        } catch (Exception exc) {
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, "DistributionQueue.preProcess: distribution error.", exc);
-
-          // if we don't do batch distribution, stop on first error
-          if (!batchDistribution)
-            break;
+//      		// a processMessage exception is normal with async mode.
+//      		if (distributionDaemon != null) {
+//      			// use msg.id ?
+//      			distributionDaemon.push(msg);
+//      		} else {
+//      			if (logger.isLoggable(BasicLevel.WARN)) {
+//        			logger.log(BasicLevel.WARN, "DistributionQueue.preProcess: distribution distributionDaemon = null but we are in async distribution mode.", exc);
+//        		}
+//      		}
+      	}
+        // if we don't do batch distribution, stop on first error
+        if (!batchDistribution) {
+          break;
         }
       }
-
-      if (msgs.size() > 0) {
-        return cm;
-      }
-      return null;
-    } else {
-      return cm;
     }
 
+    if (msgs.size() > 0) {
+      return cm;
+    }
+    return null;
   }
-
+  
   private void removeAndDeleteMessages(List ackList) {
     logger.log(BasicLevel.DEBUG,
                "DistributionQueue.wakeUpNot() - Handles AckList: " + ackList);
@@ -260,7 +271,7 @@ public class DistributionQueue extends Queue {
           message.delete();
           
           nbMsgsDeliverSinceCreation++;
-         
+          
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "DistributionQueue.removeAndDeleteMessages() - removes " + id);
           
@@ -276,6 +287,7 @@ public class DistributionQueue extends Queue {
   protected void postProcess(ClientMessages cm) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "DistributionQueue.postProcess(...)");
+
     super.postProcess(cm);
     
     // Bug fix (JORAM-198): Avoid parallelism access during message serialization (save method).
@@ -319,23 +331,23 @@ public class DistributionQueue extends Queue {
    * wake up, and cleans the queue.
    */
   public void wakeUpNot(WakeUpNot not) {
-    if (logger.isLoggable(BasicLevel.DEBUG) && !isAsyncDistribution) {
+  	if (logger.isLoggable(BasicLevel.DEBUG) && !isAsyncDistribution) {
       logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot(" + not + ')');
-    }
-    // Cleans outdated waiting messages
+  	}
+  	// Cleans outdated waiting messages
     super.wakeUpNot(not);
-
+ 
     // delete the ackQueue
     if (distributionDaemon != null) {
-      List ackList = distributionDaemon.getAckList();
-      if (ackList != null) {
+    	List ackList = distributionDaemon.getAckList();
+    	if (ackList != null) {
         // Bug fix (JORAM-74): delete anew the forwarded messages, replacing the call to removeMessages(ackList)
         // by a similar code deleting the related messages. Since the fix of JORAM-198 it should not be longer
         // useful.
         removeAndDeleteMessages(ackList);
-      }
+    	}
     }
-
+    
     for (Iterator ite = messages.iterator(); ite.hasNext();) {
       org.objectweb.joram.mom.messages.Message msg = (org.objectweb.joram.mom.messages.Message) ite.next();
       try {
@@ -345,17 +357,16 @@ public class DistributionQueue extends Queue {
         msg.delete();
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.DEBUG) && !isAsyncDistribution) {
-          logger.log(BasicLevel.DEBUG,
-                     "DistributionQueue.wakeUpNot redelivery number " + msg.getDeliveryCount() + " failed.", exc);
+          logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot redelivery number " + msg.getDeliveryCount()
+              + " failed.", exc);
         } else if (logger.isLoggable(BasicLevel.DEBUG)) {
-          logger.log(BasicLevel.DEBUG,
-                     "DistributionQueue.wakeUpNot redelivery " + msg.getId() + " number " + msg.getDeliveryCount());
+        	logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot redelivery " + msg.getId() + " number " + msg.getDeliveryCount());
         }
-
+        
         // increase the delivery count
         if (distributionDaemon == null)
-          msg.incDeliveryCount();
-
+        	msg.incDeliveryCount();
+        
         // If message considered as undeliverable, add it to the list of dead messages:
         if (isUndeliverable(msg)) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
@@ -369,26 +380,26 @@ public class DistributionQueue extends Queue {
           dmqManager.sendToDMQ();
           continue;
         }
-
+        
         if (distributionDaemon != null) {
-          synchronized (distributionDaemon) {
-            // Wakeup the daemon, because the distributionDaemon can wait 
-            // after a distribution exception
-            distributionDaemon.notify();
-          }
+        	synchronized (distributionDaemon) {
+        		// Wakeup the daemon, because the distributionDaemon can wait 
+        		// after a distribution exception
+        		distributionDaemon.notify();
+        	}
         }
-
+        
         if (logger.isLoggable(BasicLevel.DEBUG) && distributionDaemon != null) {
           logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot distributionDaemon = " + distributionDaemon + 
-                     ", distributionDaemon.isEmpty() = " + distributionDaemon.isEmpty());
+          		", distributionDaemon.isEmpty() = " + distributionDaemon.isEmpty());
         }
-
+        
         if (distributionDaemon != null) {
-          if (!distributionDaemon.isEmpty()) {
-            // needless to push an other message 
-            // because the distributionDaemon can't distribute message now.
-            break;
-          } else {
+        	if (!distributionDaemon.isEmpty()) {
+        		// needless to push an other message 
+        		// because the distributionDaemon can't distribute message now.
+        		break;
+        	} else {
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, "DistributionQueue.wakeUpNot " + msg.getId());
 
@@ -396,9 +407,9 @@ public class DistributionQueue extends Queue {
             // the distributeQueue or the ackedQueue).
             if (! distributionDaemon.isHandling(msg.getId()))
               distributionDaemon.push(msg.getFullMessage());
-          }
+        	}
         }
-
+        
         if (!batchDistribution) {
           break;
         }

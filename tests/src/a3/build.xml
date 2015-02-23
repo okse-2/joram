@@ -1451,15 +1451,6 @@
       <param name="jvmargs" value="-DPing=0 -DPong=0 -Dbounce=499"/>
     </antcall>
   </target>
-	
-  <target name="test1-x.perf" depends="init.a3props,compile">
-    <antcall target="test.run" inheritAll="true">
-      <param name="classname" value="a3.perf.test1"/>
-      <param name="testid" value="1"/>
-      <param name="a3conf" value="perf/a3servers0.xml"/>
-      <param name="jvmargs" value="-DPing=0 -DPong=0 -Dbounce=500000"/>
-    </antcall>
-    </target>
 
   <!-- Distributed -->
   <target name="test1-2.perf" depends="init.a3props,compile">

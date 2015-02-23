@@ -193,7 +193,6 @@ public abstract class Agent implements AgentMBean, Serializable, Encodable {
    * Saves the agent state unless not requested.
    */
   protected final void save() throws IOException {
-    agentSave();
     if (updated) {
       AgentServer.getTransaction().save(this, id.toString());
       if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -205,14 +204,6 @@ public abstract class Agent implements AgentMBean, Serializable, Encodable {
         logmon.log(BasicLevel.DEBUG,
                    "Agent" + id + " [" + name + "] not saved");
     }
-  }
-  
-  /**
-   * Enables the sub-classes to save their state.
-   * @throws IOException if any error occurs
-   */
-  protected void agentSave() throws IOException {
-    // Nothing to save
   }
 
   /**
@@ -767,7 +758,7 @@ public abstract class Agent implements AgentMBean, Serializable, Encodable {
                  this.toString() + ".react(" + from + ", " + not + ")");
      } else {
       logmon.log(BasicLevel.ERROR,
-                 "Unknown notification, " + this.toString() + ".react(" + from + ", " + not + ")");
+                 this.toString() + ".react(" + from + ", " + not + ")");
       sendTo(from, new UnknownNotification(id, not));
     }
   }

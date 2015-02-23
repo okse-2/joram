@@ -126,7 +126,7 @@ public class TcpConnection implements TcpConnectionMBean {
         tcpWriter = new TcpWriter(ioctrl, ctx.getQueue(), this);
         tcpWriter.start();
       }
-      tcpReader = new TcpReader(ioctrl, proxyId, this, closeConnection, ctx);
+      tcpReader = new TcpReader(ioctrl, proxyId, this, closeConnection);
       proxyService.registerConnection(this);
       tcpReader.start();
     } catch (Exception exc) {

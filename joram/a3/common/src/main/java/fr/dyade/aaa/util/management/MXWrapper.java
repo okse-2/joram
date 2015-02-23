@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,11 +18,8 @@
  */
 package fr.dyade.aaa.util.management;
 
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 public final class MXWrapper {
   /**
@@ -87,60 +84,5 @@ public final class MXWrapper {
     if (mxserver != null)
       return mxserver.getAttributeNames(mBean);
     return null;
-  }
-  
-  public static Hashtable dumpAttributes(String[] list) {
-    Hashtable records = new Hashtable();
-
-    for (int i=0; i<list.length; i++) {
-      int idx = list[i].indexOf('(');
-      String name = list[i].substring(0, idx);
-      String atts = list[i].substring(idx+1, list[i].indexOf(')'));
-
-      Set<String> mBeans = null;
-      try {
-        mBeans = MXWrapper.queryNames(name);
-      } catch (Exception exc) {
-        records.put(name + "+" + atts, exc.getMessage());
-        continue;
-      }
-
-      if (mBeans != null) {
-        for (Iterator<String> iterator = mBeans.iterator(); iterator.hasNext();) {
-          String mBean = (String) iterator.next();
-          StringTokenizer st = new StringTokenizer(atts, ",");
-          while (st.hasMoreTokens()) {
-            String token = st.nextToken();
-            if (token.equals("*")) {
-              // Get all mbean's attributes
-              try {
-                List<String> attributes = MXWrapper.getAttributeNames(mBean);
-                if (attributes != null) {
-                  for (int j = 0; j < attributes.size(); j++) {
-                    String attname = (String) attributes.get(j);
-                    try {
-                      records.put(mBean + "+" + attname, MXWrapper.getAttribute(mBean, attname));
-                    } catch (Exception exc) {
-                      records.put(mBean + "+" + attname, exc.getMessage());
-                    }
-                  }
-                }
-              } catch (Exception exc) {
-                records.put(mBean + ";*", exc.getMessage());
-              }
-            } else {
-              // Get the specific attribute
-              String attname = token.trim();
-              try {
-                records.put(mBean + "+" + attname, MXWrapper.getAttribute(mBean, attname));
-              } catch (Exception exc) {
-                records.put(mBean + "+" + attname, exc.getMessage());
-              }
-            }
-          }
-        }
-      }
-    }
-    return records;
   }
 }

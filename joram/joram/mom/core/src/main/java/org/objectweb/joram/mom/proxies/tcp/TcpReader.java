@@ -24,7 +24,6 @@
 package org.objectweb.joram.mom.proxies.tcp;
 
 import org.objectweb.joram.mom.proxies.CloseConnectionNot;
-import org.objectweb.joram.mom.proxies.ConnectionContext;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.ProxyMessage;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
@@ -55,8 +54,6 @@ public class TcpReader extends Daemon {
   private AgentId proxyId;
 
   private boolean closeConnection;
-  
-  private ConnectionContext ctx;
 
   /**
    * Creates a new reader.
@@ -64,14 +61,12 @@ public class TcpReader extends Daemon {
   public TcpReader(IOControl ioctrl,
                    AgentId proxyId,
                    TcpConnection tcpConnection,
-                   boolean closeConnection,
-                   ConnectionContext ctx) {
+                   boolean closeConnection) {
     super("tcpReader." + tcpConnection.getKey(), logger);
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;
     this.tcpConnection = tcpConnection;
     this.closeConnection = closeConnection;
-    this.ctx = ctx;
   }
 
   public void run() {
@@ -87,7 +82,7 @@ public class TcpReader extends Daemon {
         ConnectionManager.sendToProxy(proxyId,
                                       tcpConnection.getKey(),
                                       (AbstractJmsRequest) msg.getObject(), 
-                                      msg, ctx);
+                                      msg);
         canStop = true;
       }
     } catch (Throwable error) {

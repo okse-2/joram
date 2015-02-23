@@ -23,7 +23,6 @@ package org.objectweb.joram.client.jms.connection;
 
 import java.util.ArrayList;
 
-import org.objectweb.joram.client.jms.MessageProducer;
 import org.objectweb.joram.client.jms.Session;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -34,17 +33,15 @@ public class CompletionListener {
   public static Logger logger = Debug.getLogger(CompletionListener.class.getName());
   
   Session session = null;
-  MessageProducer messageProducer = null;
   ArrayList<javax.jms.CompletionListener> listeners = null;
   ArrayList<javax.jms.Message> messages = null;
   
-  public CompletionListener(Session session, MessageProducer messageProducer) {
+  public CompletionListener(Session session) {
     this.session = session;
-    this.messageProducer = messageProducer;
     listeners = new ArrayList<javax.jms.CompletionListener>();
     messages = new ArrayList<javax.jms.Message>();
   }
-
+  
   public void addCompletionListener(javax.jms.CompletionListener listener, javax.jms.Message message) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "addCompletionListener(" + listener + ", " + message + ')');
@@ -92,6 +89,6 @@ public class CompletionListener {
   }
   
   public String toString() {
-    return "CompletionListener (" + session + ", " + messageProducer + ", " + listeners + ", " + messages +')';
+    return "CompletionListener (" + session + ", " + listeners + ", " + messages +')';
   }
 }

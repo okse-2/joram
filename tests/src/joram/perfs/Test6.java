@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2014 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -78,13 +78,9 @@ public class Test6 extends BaseTest {
 
   public void run(){
     try{
-      if (! Boolean.getBoolean("ServerOutside")) {
-        System.out.println("server start");
+      System.out.println("server start");
+      if (! Boolean.getBoolean("ServerOutside"))
         startServer();
-      } else {
-        System.out.println("server outside");
-      }
-      Thread.sleep(5000L);
       writeIntoFile("=================== start new test =================================");
       String baseclass = "joram.perfs.ColocatedBaseTest";
       baseclass = System.getProperty("BaseClass", baseclass);

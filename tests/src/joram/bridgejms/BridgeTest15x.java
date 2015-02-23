@@ -1,25 +1,3 @@
-/*
- * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2015 ScalAgent Distributed Technologies
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or any later version.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA.
- *
- * Initial developer(s): ScalAgent D.T.
- * Contributor(s): 
- */
 package joram.bridgejms;
 
 import javax.jms.Connection;
@@ -65,18 +43,18 @@ public class BridgeTest15x extends TestCase {
       admin.localAdmin(cfB, "B");
 
       Connection cnx = cf.createConnection();
-      Forward15 fwdA = new Forward15(cnx, "A");
-      Forward15 fwdB = new Forward15(cnx, "B");
+      Forward fwdA = new Forward(cnx, "A");
+      Forward fwdB = new Forward(cnx, "B");
       cnx.start();
       
       Connection cnxA = cfA.createConnection();
-      Receiver15 recvA = new Receiver15("A", cnxA);
-      Sender15 sndA = new Sender15("A", cnxA);
+      Receiver recvA = new Receiver("A", cnxA);
+      Sender sndA = new Sender("A", cnxA);
       cnxA.start();
       
       Connection cnxB = cfB.createConnection();
-      Receiver15 recvB = new Receiver15("B", cnxB);
-      Sender15 sndB = new Sender15("B", cnxB);
+      Receiver recvB = new Receiver("B", cnxB);
+      Sender sndB = new Sender("B", cnxB);
       cnxB.start();
       
       for (int i=0; i<ROUND; i++) {
@@ -113,14 +91,14 @@ public class BridgeTest15x extends TestCase {
   }
 }
 
-class Forward15 implements MessageListener {
+class Forward implements MessageListener {
   Connection cnx = null;
   Session session = null;
   MessageConsumer cons = null;
   MessageProducer prod = null;
   Queue queue1, queue2;
 
-  Forward15(Connection cnx, String client) throws JMSException {
+  Forward(Connection cnx, String client) throws JMSException {
     this.cnx = cnx;
     session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
@@ -147,14 +125,14 @@ class Forward15 implements MessageListener {
   }
 }
 
-class Sender15 {
+class Sender {
   String name = null;
   Connection cnx = null;
   Session session = null;
   MessageProducer prod = null;
   Queue queue1;
   
-  Sender15(String name, Connection cnx) throws JMSException {
+  Sender(String name, Connection cnx) throws JMSException {
     this.name = name;
     this.cnx = cnx;
     session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -180,7 +158,7 @@ class Sender15 {
   }
 }
 
-class Receiver15 implements MessageListener {
+class Receiver implements MessageListener {
   String name = null;
   Connection cnx = null;
   Session session = null;
@@ -189,7 +167,7 @@ class Receiver15 implements MessageListener {
 
   int cpt = 0;
   
-  Receiver15(String name, Connection cnx) throws JMSException {
+  Receiver(String name, Connection cnx) throws JMSException {
     this.name = name + '#';
     this.cnx = cnx;
     session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);

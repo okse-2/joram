@@ -40,13 +40,8 @@ import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.messages.MessageJMXWrapper;
 import org.objectweb.joram.mom.util.DMQManager;
-import org.objectweb.joram.mom.util.JoramHelper;
-import org.objectweb.joram.mom.util.MessageIdList;
-import org.objectweb.joram.mom.util.MessageIdListFactory;
-import org.objectweb.joram.mom.util.MessageTable;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.client.ConsumerMessages;
-import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.selectors.Selector;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -56,7 +51,6 @@ import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.encoding.Decoder;
 import fr.dyade.aaa.common.encoding.Encodable;
-import fr.dyade.aaa.common.encoding.EncodableFactory;
 import fr.dyade.aaa.common.encoding.EncodableHelper;
 import fr.dyade.aaa.common.encoding.Encoder;
 
@@ -70,8 +64,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
   private static final long serialVersionUID = 1L;
   
   public static Logger logger = Debug.getLogger(ClientSubscription.class.getName());
-  
-  public static final String MESSAGE_ID_LIST_PREFIX = "MIL_";
   
   /** The proxy's agent identifier. */
   private AgentId proxyId;
@@ -136,11 +128,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
   }
 
   /** Vector of identifiers of the messages to deliver. */
-  private transient MessageIdList messageIds;
+  private List<String> messageIds;
   /** Table of delivered messages identifiers. */
-  private Map<String, String> deliveredIds;
+  private Map deliveredIds;
   /** Table keeping the denied messages identifiers. */
-  private Map<String, Integer> deniedMsgs;
+  private Map deniedMsgs;
 
   /** Identifier of the subscription context. */
   private transient int contextId;
@@ -174,7 +166,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
    * Proxy messages table. Be careful: currently this table is shared between
    * all subscription.
    */
-  private transient MessageTable messagesTable;
+  private transient Map messagesTable;
 
   private transient ProxyAgentItf proxy;
   
@@ -222,8 +214,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
                      AgentId dmqId,
                      int threshold,
                      int nbMaxMsg,
-                     MessageTable messagesTable,
-                     String clientID) throws RequestException {
+                     Map messagesTable,
+                     String clientID) {
     this.proxyId = proxyId;
     this.contextId = contextId;
     this.subRequestId = reqId;
@@ -238,10 +230,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     this.messagesTable = messagesTable;
     this.clientID = clientID;
 
-    // initialized in a separate method
-    messageIds = null;
-    
-    deliveredIds = new Hashtable<String, String>();
+    messageIds = new Vector();
+    deliveredIds = new Hashtable();
     deniedMsgs = new Hashtable();
 
     noFiltering = (! noLocal) && (selector == null || selector.equals(""));
@@ -374,7 +364,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
    * @param persistedMessages  Proxy's persisted messages.
    * @param denyDeliveredMessages Denies already delivered messages.
    */
-  void reinitialize(MessageTable messagesTable, List persistedMessages, boolean denyDeliveredMessages) {
+  void reinitialize(Map messagesTable, List persistedMessages, boolean denyDeliveredMessages) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ClientSubscription[" + this + "].reinitialize()");
     
@@ -396,7 +386,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
         if (message.acksCounter == 1) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, " -> messagesTable.put(" + msgId + ')');
-          messagesTable.put(message);
+          messagesTable.put(msgId, message);
         }
 //          if (message.durableAcksCounter == 1) {
         // if (logger.isLoggable(BasicLevel.DEBUG))
@@ -577,13 +567,13 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
 
         // It's the first delivery, adds the message to the proxy's table
         if (message.acksCounter == 0)
-          messagesTable.put(message);
+          messagesTable.put(msgId, message);
         
         message.acksCounter++;
         if (durable)
           message.durableAcksCounter++;
 
-        messageIds.add(msgId, message.isPersistent());
+        messageIds.add(msgId);
         if (message.isPersistent()) {
           setModified();
         }
@@ -928,8 +918,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
           }
         }
         
-        // TODO: should be able to know whether the message is persistent or not
-        messageIds.add(i, id, true);
+        messageIds.add(i, id);
         if (redelivered)
           deniedMsgs.put(id, new Integer(deliveryAttempts));
       }
@@ -946,11 +935,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
    * deletes those not to be consumed anymore.
    */
   void deleteMessages() {
-    Iterator<String> it = deliveredIds.keySet().iterator();
-    while (it.hasNext()) {
-      // TODO: should be able to know whether the message is persistent or not
-      messageIds.add(it.next(), true);
-    }
+    messageIds.addAll(deliveredIds.keySet());
 
     for (Iterator allMessageIds = messageIds.iterator(); allMessageIds.hasNext();) {
       removeMessage((String) allMessageIds.next());
@@ -984,7 +969,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ClientSubscription.getSubscriptionMessage(" + msgId + ')');
     
-    if (! messageIds.contains(msgId)) {
+    int index = messageIds.indexOf(msgId);
+    if (index < 0) {
       // The message has been delivered
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> message not found");
@@ -1018,13 +1004,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
    * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
    */
   public TabularData getMessages() throws Exception {
-    return MessageJMXWrapper.createTabularDataSupport(messagesTable.getMap(), messageIds);
+    return MessageJMXWrapper.createTabularDataSupport(messagesTable, messageIds);
   }
 
   public List getMessagesView() {
     List messages = new ArrayList();
-    
-    // DF: should be avoided with swap... (check the table type?)
     for (int i = 0; i < messageIds.size(); i++) {
       messages.add(messagesTable.get(messageIds.get(i)));
     }
@@ -1086,8 +1070,13 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     }
   }
 
+  void cleanMessageIds() {
+    messageIds.retainAll(messagesTable.keySet());
+  }
+
   public int getEncodableClassId() {
-    return JoramHelper.CLIENT_SUBSCRIPTION_CLASS_ID;
+    // Not defined
+    return -1;
   }
 
   public int getEncodedSize() throws Exception {
@@ -1109,7 +1098,10 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
       encodedSize += dmqId.getEncodedSize();
     }
     encodedSize += BOOLEAN_ENCODED_SIZE;
-    
+    encodedSize += INT_ENCODED_SIZE;
+    for (String messageId : messageIds) {
+      encodedSize += EncodableHelper.getStringEncodedSize(messageId);
+    }
     encodedSize += EncodableHelper.getStringEncodedSize(name);
     encodedSize += INT_ENCODED_SIZE + LONG_ENCODED_SIZE * 2;
     
@@ -1145,6 +1137,10 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
       dmqId.encode(encoder);
     }
     encoder.encodeBoolean(durable);
+    encoder.encodeUnsignedInt(messageIds.size());
+    for (String messageId : messageIds) {
+      encoder.encodeString(messageId);
+    }
     
     encoder.encodeString(name);
 
@@ -1160,7 +1156,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     }
     encoder.encodeUnsignedInt(threshold);
     topicId.encode(encoder);
-    encoder.encodeNullableString(clientID);
+    encoder.encodeString(clientID);
   }
   
   public void decode(Decoder decoder) throws Exception {
@@ -1185,6 +1181,12 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
       dmqId.decode(decoder);
     }
     durable = decoder.decodeBoolean();
+    int messageIdsSize = decoder.decodeUnsignedInt();
+    messageIds = new Vector<String>(messageIdsSize);
+    for (int i = 0; i < messageIdsSize; i++) {
+      String messageId = decoder.decodeString();
+      messageIds.add(messageId);
+    }
     
     name = decoder.decodeString();
     
@@ -1201,7 +1203,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     threshold = decoder.decodeUnsignedInt();
     topicId = new AgentId((short) 0, (short) 0, 0);
     topicId.decode(decoder);
-    clientID = decoder.decodeNullableString();
+    clientID = decoder.decodeString();
   }
   
   public static String getTransactionPrefix(AgentId proxyId) {
@@ -1221,14 +1223,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     
     try {
       AgentServer.getTransaction().save(this, getTxName());
-      
-      // The method 'save' is called only once per agent reaction.
-      // Calling 'save' several times would not be efficient as
-      // it would encode the message id list several times.
-      
-      messageIds.save();
-    } catch (Exception exc) {
-      logger.log(BasicLevel.ERROR, "ClientSubscription named [" + txName
+    } catch (IOException exc) {
+      logger.log(BasicLevel.ERROR, "ClientContext named [" + txName
           + "] could not be saved", exc);
     }
   }
@@ -1237,17 +1233,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
     if (! durable) return;
     
     AgentServer.getTransaction().delete(getTxName());
-    messageIds.delete();
-  }
-  
-  public void initMessageIds() throws Exception {
-    MessageIdListFactory messageIdListFactory = MessageIdListFactory.newFactory();
-    messageIds = messageIdListFactory.createMessageIdList(MESSAGE_ID_LIST_PREFIX + getTxName());
-  }
-  
-  public void loadMessageIds() throws Exception {
-    MessageIdListFactory messageIdListFactory = MessageIdListFactory.newFactory();
-    messageIds = messageIdListFactory.loadMessageIdList(MESSAGE_ID_LIST_PREFIX + getTxName());
   }
   
   private void setModified() {
@@ -1255,26 +1240,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable, Encod
       modified = true;
       proxy.modifiedSubscription(this);
     }
-  }
-  
-  Map<String, String> getDeliveredIds() {
-    return deliveredIds;
-  }
-
-  Map<String, Integer> getDeniedMsgs() {
-    return deniedMsgs;
-  }
-
-  String getClientID() {
-    return clientID;
-  }
-
-  public static class ClientSubscriptionFactory implements EncodableFactory {
-
-    public Encodable createEncodable() {
-      return new ClientSubscription();
-    }
-
   }
 
 }

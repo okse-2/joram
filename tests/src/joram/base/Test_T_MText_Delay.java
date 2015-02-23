@@ -59,7 +59,7 @@ public class Test_T_MText_Delay extends TestCase implements javax.jms.MessageLis
     try {
       System.out.println("server start");
       startAgentServer((short)0);
-      Thread.sleep(2000L);
+
       admin();
       System.out.println("admin config ok");
 
@@ -112,7 +112,7 @@ public class Test_T_MText_Delay extends TestCase implements javax.jms.MessageLis
     try {
       TextMessage msg = (TextMessage) message;
       System.out.println("msg = " + msg);
-      assertTrue("bad delivery delay", (System.currentTimeMillis() - current) >= deliveryDelay);
+      assertTrue("bad delivery delay", (System.currentTimeMillis() - current) > deliveryDelay);
 
       //test messages
       assertEquals(msg.getJMSMessageID(), msg.getJMSMessageID());

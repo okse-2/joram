@@ -103,15 +103,6 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
   public String getClientID() {
     return clientID;
   }
-  
-  private boolean shared = false;
-  
-  /**
-   * @return true if shared
-   */
-  public boolean isShared() {
-    return shared;
-  }
 
   /** Returns <code>true</code> for asynchronous subscription. */
   public boolean isAsyncSubscription() {
@@ -132,11 +123,9 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
    * @param durable  <code>true</code> for a durable subscription.
    * @param asyncSub  <code>true</code> for a asynchronous subscription request.
    * @param clientID The clientID
-   * @param shared true if the consumer is shared
    */
   public ConsumerSubRequest(String topic, String subName, String selector,
-                            boolean noLocal, boolean durable, boolean asyncSub, 
-                            String clientID, boolean shared) {
+                            boolean noLocal, boolean durable, boolean asyncSub, String clientID) {
     super(topic);
     this.subName = subName;
     this.selector = selector;
@@ -144,7 +133,6 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
     this.durable = durable;
     this.asyncSub = asyncSub;
     this.clientID = clientID;
-    this.shared = shared;
   }
 
   /**
@@ -170,7 +158,6 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
     StreamUtil.writeTo(durable, os);
     StreamUtil.writeTo(asyncSub, os);
     StreamUtil.writeTo(clientID, os);
-    StreamUtil.writeTo(shared, os);
   }
 
   /**
@@ -187,6 +174,5 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
     durable = StreamUtil.readBooleanFrom(is);
     asyncSub = StreamUtil.readBooleanFrom(is);
     clientID = StreamUtil.readStringFrom(is);
-    shared = StreamUtil.readBooleanFrom(is);
   }
 }

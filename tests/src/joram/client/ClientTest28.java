@@ -41,7 +41,6 @@ import framework.TestCase;
 
 /**
  * Test: Test memory leak with subscription and connection closes.
- *  -
  */
 public class ClientTest28 extends TestCase {
   public static void main(String[] args) {
@@ -100,7 +99,7 @@ public class ClientTest28 extends TestCase {
       
       // Wait the end of sending.
       Thread.sleep(4*pending);
-      
+
       AdminModule.disconnect();
     } catch (Throwable exc) {
       exc.printStackTrace();

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -790,38 +790,6 @@ public final class AdminModule {
     return wrapper.getStatistics(serverId);
   }
   
-  /**
-   * Returns JMX attribute value for the local server.
-   *
-   * @return  Corresponding JMX attribute value for the local server.
-   *          
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   * 
-   * @see #getStatistics(int)
-   */
-  public static Hashtable getJMXAttribute(String attname) throws ConnectException, AdminException {
-    return getJMXAttribute(getLocalServerId(), attname);
-  }
-
-  /**
-   * Returns JMX attribute value for the specified server.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   *
-   * @param serverId Unique identifier of the server.
-   * @return  the statistics for the the specified server.
-   * 
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static Hashtable getJMXAttribute(int serverId, String attname) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    return wrapper.getJMXAttribute(serverId, attname);
-  }
-
   /**
    * Returns the default dead message queue for the local server, null if not
    * set.

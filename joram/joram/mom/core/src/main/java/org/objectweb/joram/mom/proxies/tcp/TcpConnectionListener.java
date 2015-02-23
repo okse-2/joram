@@ -231,7 +231,7 @@ public class TcpConnectionListener extends Daemon {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> read heartBeat = " + heartBeat);
       }
-      
+
       if (logger.isLoggable(BasicLevel.INFO))
         logger.log(BasicLevel.INFO, " -> open connection " + identity + "/" + key + " - " + heartBeat);
       

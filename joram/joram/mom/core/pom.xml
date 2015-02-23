@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.ow2.joram</groupId>
     <artifactId>joram-mom</artifactId>
-    <version>5.9.2-SNAPSHOT</version>
+    <version>5.9.1</version>
   </parent>
 
   <build>
@@ -71,11 +71,6 @@
       <groupId>org.ow2.joram</groupId>
       <artifactId>a3-rt</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

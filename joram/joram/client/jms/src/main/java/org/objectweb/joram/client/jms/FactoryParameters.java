@@ -115,8 +115,6 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
    * Duration in seconds during which connecting is attempted (connecting
    * might take time if the server is temporarily not reachable); the 0 value
    * is set for connecting only once and aborting if connecting failed.
-   * <p>
-   * The default value is 30.
    */
   public int connectingTimer = 30;
   /**
@@ -130,7 +128,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
   /**
    * Period in milliseconds between two ping requests sent by the client
    * connection to the server; if the server does not receive any ping
-   * request during approximatively more than 3* cnxPendingTimer, the
+   * request during approximatively more than 3 * cnxPendingTimer, the
    * connection is considered as dead and processed as required.
    */
   public int cnxPendingTimer = 0;

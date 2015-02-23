@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -217,54 +217,43 @@ public class OutboundProducer implements javax.jms.MessageProducer {
   }
 
 
-  /** Delegates the call to the wrapped producer. */
   public void setDeliveryDelay(long deliveryDelay) throws JMSException {
-	  checkValidity();
-	  producer.setDeliveryDelay(deliveryDelay);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
-  /** Delegates the call to the wrapped producer. */
+
   public long getDeliveryDelay() throws JMSException {
-    checkValidity();
-    return producer.getDeliveryDelay();
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
-  /** Delegates the call to the wrapped producer. */
+
   public void send(Message message, CompletionListener completionListener)
 		  throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " send(" + message + ", " + completionListener + ")");
-    checkValidity();
-    producer.send(message, completionListener);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
-  /** Delegates the call to the wrapped producer. */
   public void send(Message message, int deliveryMode, int priority,
 		  long timeToLive, CompletionListener completionListener)
 				  throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " send(" + message + ", " + deliveryMode + ", " + priority + ", " + timeToLive + ", " + completionListener + ")");
-    checkValidity();
-    producer.send(message, deliveryMode, priority, timeToLive, completionListener);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
-  /** Delegates the call to the wrapped producer. */
+
   public void send(Destination destination, Message message,
 		  CompletionListener completionListener) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " send(" + destination + ", " + message + ", " + ", " + completionListener + ")");
-    checkValidity();
-    producer.send(destination, message, completionListener);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
-  /** Delegates the call to the wrapped producer. */
+
   public void send(Destination destination, Message message, int deliveryMode,
 		  int priority, long timeToLive, CompletionListener completionListener)
 				  throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " send(" + destination + ", " + message + ", " + deliveryMode + ", " + priority + ", " + timeToLive + ", " + completionListener + ")");
-
-    checkValidity();
-    producer.send(destination, message, deliveryMode, priority, timeToLive, completionListener);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 }

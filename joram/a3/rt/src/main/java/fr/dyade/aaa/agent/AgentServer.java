@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2014 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -28,13 +28,9 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.StringReader;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.Timer;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -50,7 +46,6 @@ import fr.dyade.aaa.agent.conf.A3CMLProperty;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 import fr.dyade.aaa.common.Configuration;
-import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -152,128 +147,6 @@ public final class AgentServer {
   public final static String ADMIN_DOMAIN = "D0";
   public final static String ADMIN_SERVER = "s0";
 
-  public static final int ENCODABLE_CLASS_ID_AREA = 0x10000;
-  public static final int MESSAGE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 0;
-  
-  static {
-    EncodableFactoryRepository.putFactory(MESSAGE_CLASS_ID, new Message.Factory());
-  }
-
-  /**
-   * Default configuration used if no other configuration is found, by default empty.
-   */
-  public static String defaultConfig = null;
-  
-  /**
-   * Set default configuration for the specified server.
-   */
-  public static void setDefaultConfig(int sid) {
-    setDefaultConfig(sid, null, null, null, -1, -1);
-  }
-  
-  public static void setDefaultConfig(int sid, String host, String adminuid, String adminpwd, int joram, int jndi) {
-    setDefaultConfig(sid, host, adminuid, adminpwd, joram, jndi, null);
-  }
-  
-  /**
-   *  Name of property allowing to configure the administrator user name when using the
-   * default server configuration, by default "root". This Configuration is automatically
-   * generated at first starting if no XML configuration file is found.
-   * <p>
-   *  Be careful, this configuration is normally used only for the initial starting of the
-   * server, the configuration is then atomically maintained in the persistence directory.
-   * <p>
-   *  This property can only be fixed from <code>java</code> launching command.
-   */
-  public final static String CFG_ADMINUID_PROPERTY = "fr.dyade.aaa.agent.A3CONF_ADMINUID";
-  
-  /**
-   *  Name of property allowing to configure the administrator password when using the
-   * default server configuration, by default it is the same that the administrator user
-   * name. This Configuration is automatically generated at first starting if no XML
-   * configuration file is found.
-   * <p>
-   *  Be careful, this configuration is normally used only for the initial starting of the
-   * server, the configuration is then atomically maintained in the persistence directory.
-   * <p>
-   *  This property can only be fixed from <code>java</code> launching command.
-   */
-  public final static String CFG_ADMINPWD_PROPERTY = "fr.dyade.aaa.agent.A3CONF_ADMINPWD";
-  
-  /**
-   *  Name of property allowing to configure the listening port of the JMS server when
-   * using the default server configuration, by default 16010. This Configuration is
-   * automatically generated at first starting if no XML configuration file is found.
-   * <p>
-   *  Be careful, this configuration is normally used only for the initial starting of the
-   * server, the configuration is then atomically maintained in the persistence directory.
-   * <p>
-   *  This property can only be fixed from <code>java</code> launching command.
-   */
-  public final static String CFG_JMS_PORT_PROPERTY = "fr.dyade.aaa.agent.A3CONF_JMS_PORT";
-  
-  /**
-   *  Name of property allowing to configure the listening port of the JNDI server when
-   * using the default server configuration, by default 16400. This Configuration is
-   * automatically generated at first starting if no XML configuration file is found.
-   * <p>
-   *  Be careful, this configuration is normally used only for the initial starting of the
-   * server, the configuration is then atomically maintained in the persistence directory.
-   * <p>
-   *  This property can only be fixed from <code>java</code> launching command.
-   */
-  public final static String CFG_JNDI_PORT_PROPERTY = "fr.dyade.aaa.agent.A3CONF_JNDI_PORT";
-
-  public static void setDefaultConfig(int sid,
-                                      String host,
-                                      String adminuid, String adminpwd,
-                                      int joram, int jndi, Properties props) {
-    StringBuffer strbuf = new StringBuffer();
-
-    if (host == null) {
-      try {
-        host = InetAddress.getLocalHost().getHostName();
-      } catch (UnknownHostException e) {
-        host = "localhost";
-      }
-    }
-    if (adminuid == null) {
-      adminuid = System.getProperty(AgentServer.CFG_ADMINUID_PROPERTY, "root");
-    }
-    if (adminpwd == null) {
-      adminpwd = System.getProperty(AgentServer.CFG_ADMINPWD_PROPERTY, adminuid);
-    }
-    if (joram <= 0) {
-      joram = Integer.getInteger(AgentServer.CFG_JMS_PORT_PROPERTY, 16010);
-    }
-    if (jndi <= 0) {
-      jndi = Integer.getInteger(AgentServer.CFG_JNDI_PORT_PROPERTY, 16400);
-    }
-
-    strbuf.append(
-        "<config>\n");
-    if (props != null) {
-      for (Enumeration e = props.keys(); e.hasMoreElements();) {
-        String key = (String) e.nextElement();
-        strbuf.append("<property name=\"").append(key).append("\" value=\"").append(props.getProperty(key)).append("\"/>\n");
-      }
-    }
-    strbuf.append(
-        "<property name=\"Transaction\" value=\"fr.dyade.aaa.ext.NGTransaction\"/>\n" +
-        "<server id=\"").append(sid).append("\" name=\"S").append(sid).append("\" hostname=\"").append(host).append("\">\n" +
-        "<service class=\"org.objectweb.joram.mom.proxies.ConnectionManager\" args=\"").append(adminuid).append(' ').append(adminpwd).append("\"/>\n" +
-        "<service class=\"org.objectweb.joram.mom.proxies.tcp.TcpProxyService\" args=\"").append(joram).append("\"/>\n" +
-        "<service class=\"fr.dyade.aaa.jndi2.server.JndiServer\" args=\"").append(jndi).append("\"/>\n" +
-        "</server>\n" +
-        "</config>\n");
-    
-    defaultConfig = strbuf.toString();
-  }
-  
-  public static void setDefaultConfig(String config) {
-    defaultConfig = config;
-  }
-
   private static short serverId = NULL_ID;
 
   private static Logger logmon = null;
@@ -359,7 +232,7 @@ public final class AgentServer {
   public static AgentEngine getEngine() {
     return engine;
   }
-
+  
   public static boolean isEngineThread() {
     return engine.isEngineThread();
   }
@@ -892,16 +765,13 @@ public final class AgentServer {
     return desc;
   }
 
-  private static void initServices(A3CMLServer server, ServerDesc desc) throws Exception {
+  private static void initServices(A3CMLServer server, ServerDesc desc) {
     if (server.services != null) {
       ServiceDesc services[]  = new ServiceDesc[server.services.size()];
       int idx = 0;
       for (Enumeration<A3CMLService> x = server.services.elements(); x.hasMoreElements();) {
         A3CMLService service = x.nextElement();
         services[idx++] = new ServiceDesc(service.classname, service.args);
-        
-        // Need to load the service classes in order to register the Encodable factories
-        Class.forName(service.classname);
       }
       desc.services = services;
     }
@@ -1092,10 +962,6 @@ public final class AgentServer {
     else
       logmon.log(BasicLevel.WARN, getName() + ", init()");
 
-    // Fix a Joram configuration as default.
-    if (defaultConfig == null)
-      setDefaultConfig(sid);
-    
     synchronized(status) {
       if (status.value == Status.STOPPED) {
         logmon.log(BasicLevel.DEBUG, getName() + ", reset configuration");
@@ -1171,7 +1037,7 @@ public final class AgentServer {
         try {
           a3config = A3CMLConfig.load();
         } catch (Exception exc) {
-          logmon.log(BasicLevel.WARN, getName() + ", config not found", exc);
+          logmon.log(BasicLevel.WARN, getName() + ", config not found");
         }
       }
 
@@ -1179,38 +1045,25 @@ public final class AgentServer {
         //  Try to load an initial configuration (serialized or XML), or
         // generates a default one in case of failure.
         try {
-          // Try to load a serialized configuration file directly in the filesystem.
-          // TODO (AF): Is it used ? During Mediation deployment ?
           a3config = A3CMLConfig.getConfig(DEFAULT_SER_CFG_FILE);
         } catch (Exception exc) {
-          logmon.log(BasicLevel.INFO, getName() + ", serialized a3cmlconfig not found", exc);
+          logmon.log(BasicLevel.WARN, getName() + ", serialized a3cmlconfig not found");
         }
-        
+
         if (a3config == null) {
-          // Try to found an existing XML configuration file, then parse it.
+          // Try to found XML configuration file, then parse it.
           try {
             a3config = A3CML.getXMLConfig();
           } catch (Exception exc) {
-            logmon.log(BasicLevel.WARN, getName() + ", XML configuration not found", exc);
-          }
-        }
-
-        if ((a3config == null) && (defaultConfig != null)) {
-          // Try to parse default XML configuration.
-          try {
-            logmon.log(BasicLevel.WARN, "Start AgentServer with configuration: \n" + defaultConfig);
-            a3config = A3CML.getConfig(new StringReader(defaultConfig));
-          } catch (Exception exc) {
-            logmon.log(BasicLevel.ERROR, getName() + ", bad default XML configuration", exc);
+            logmon.log(BasicLevel.WARN, getName() + ", XML configuration file not found");
           }
         }
 
         if (a3config == null) {
-          // Last, Generate A3CMLConfig base.
-          // TODO (AF): Is it used ? During Mediation deployment ?
+          // 3rd, Generate A3CMLConfig base.
           logmon.log(BasicLevel.WARN, "Generate default configuration");
           A3CMLDomain d = new A3CMLDomain(ADMIN_DOMAIN, SimpleNetwork.class.getName());
-          A3CMLServer s = new A3CMLServer((short) sid, ADMIN_SERVER, "localhost");
+          A3CMLServer s = new A3CMLServer((short) 0, ADMIN_SERVER, "localhost");
           s.networks.addElement(new A3CMLNetwork(ADMIN_DOMAIN, 27300));
           d.addServer(s);
           a3config = new A3CMLConfig();
@@ -1446,14 +1299,6 @@ public final class AgentServer {
       // Commit all changes.
       transaction.begin();
       transaction.commit(true);
-      
-//      Properties props = new Properties();
-//      props.setProperty("Joram#" + serverId + ":type=Destination,name=queue",
-//                        "ProducerLoad,ConsumerLoad,NbMsgsReceiveSinceCreation,NbMsgsDeliverSinceCreation,PendingMessageCount,ReceivedFromCluster,SentToCluster");
-//      logmon.log(BasicLevel.FATAL, getName() + " try to initialize FileMonitoringTimerTask");
-//      FileMonitoringTimerTask fmtt = new FileMonitoringTimerTask(timer, 1000L, props, "server" + serverId + ".csv");
-//      logmon.log(BasicLevel.FATAL, getName() + " initialize FileMonitoringTimerTask Ok");
-
     } catch (Exception exc) {
       logmon.log(BasicLevel.ERROR, getName() + "Cannot start", exc);
       synchronized(status) {
