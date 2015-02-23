@@ -1,0 +1,256 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE project [
+    <!ENTITY common SYSTEM "../common.xml">
+]>
+
+<project default="tests.all.osgi" basedir=".">
+  <!-- Includes generic stuff -->
+  &common;
+
+  <target name="init.src">
+    <!-- Tests specific sources set -->
+    <patternset id="specific">
+      <include name="jndi2/**/*.java" />
+    </patternset>
+  </target>
+  
+  <target name="tests.all.osgi"
+          description=" --> launch all jndi2 tests">
+    <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
+    <antcall target="tests.all"/>
+  </target>
+
+  <target name="tests.all"
+          description=" --> launch all jndi2 tests">
+    <antcall target="tests.base" />
+    <antcall target="tests.distributed">
+    	<param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+    </antcall>
+    <antcall target="tests.nocoupling">
+    	<param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+    </antcall>
+  </target>
+
+  <target name="tests.base"
+          description=" --> launch all jndi base tests">
+    <antcall target="jndi.test1" />
+    <antcall target="jndi.test2" />
+  </target>
+
+  <target name="tests.distributed"
+          description=" --> launch all jndi distributed tests">
+    <antcall target="test.dtb" />
+    <antcall target="test.dtb2" />
+    <antcall target="test.dtb3" />
+    <antcall target="test.dtb4" />
+    <antcall target="test.dtb5" />
+    <antcall target="test.dtb6" />
+    <antcall target="test.dtb.crash" />
+  </target>
+
+  <target name="tests.nocoupling"
+          description=" --> launch all jndi loose couplig tests">
+    <antcall target="nocoupling.test1" />
+    <antcall target="nocoupling.test2" />
+    <antcall target="nocoupling.test3" />
+    <antcall target="nocoupling.test4" />
+    <antcall target="nocoupling.test5" />
+  </target>
+
+
+  <!--  ************ init and start ************ -->
+	
+  <target name="init.a3props">
+    <!-- Theses default properties can be overidden by param defines
+      -  in specific target.
+     -->
+    <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
+    <property name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+  </target>
+
+  <target name="init.test" depends="init,init.a3props">
+    <delete dir="${test.dir}" />
+    <mkdir dir="${test.dir}" />
+    <copy file="${a3conf}" tofile="${test.dir}/a3servers.xml" />
+  	
+    <replace file="${test.dir}/a3servers.xml"
+             token="@engine@" value="${engine}"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@transaction@" value="${transaction}"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@network@" value="${network}"/>
+
+    <copy file="a3debug.cfg" tofile="${test.dir}/a3debug.cfg" />
+    
+    <copy file="config.properties" todir="${test.dir}"/>
+    <property name="bundle.dir" location="${ship.dir}/bundle" />
+    <replace file="${test.dir}/config.properties" token="@BUNDLE_DIR@" value="${bundle.dir}" />
+    <replace file="${test.dir}/config.properties" token="\" value="/" />
+    <replace file="${test.dir}/config.properties" token="@@@" value="\" />
+  </target>
+
+  <target name="client.start">
+    <java classname="${className}" failonerror="no" fork="yes" dir="${test.dir}">
+      <classpath path="${project.class.path}" />
+      <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -Dframework.TestCase.TestId=0 -Dframework.TestCase.OutFile=${report.file} ${jvmargs}" />
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+      <arg line="${arg}" />
+    </java>
+  </target>
+
+  <!--
+    -  start basic jndi2 test
+    -->
+
+  <target name="init.test.base" depends="init,compile">
+    <antcall target="init.test" inheritAll="true">
+      <param name="a3conf" value="base/a3servers.xml"/>
+    </antcall>
+  </target>
+
+  <!-- jndi2 test -->
+  <target name="jndi.test1" depends="init.test.base"
+          description=" --> test bind and unbind">
+    <antcall target="client.start" inheritAll="true">
+      <param name="className" value="jndi2.base.Test1" />
+    </antcall>
+  </target>
+
+  <target name="jndi.test2" depends="init.test.base"
+          description=" --> check exception when bind without create subcontext">
+    <antcall target="client.start" inheritAll="true">
+      <param name="className" value="jndi2.base.Test2" />
+    </antcall>
+  </target>
+
+  <!--
+    -  end basic jndi2 test
+    -->
+
+  <!--
+    -  start distributed jndi2 test
+    -->
+
+  <target name="init.test.distributed" depends="init,compile">
+    <antcall target="init.test" inheritAll="true">
+      <param name="a3conf" value="distributed/a3servers.xml"/>
+    </antcall>
+  </target>
+
+  <target name="test.dtb" depends="init.test.distributed"
+          description=" --> Test using createSubcontext">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0" />
+      <param name="className" value="jndi2.distributed.JndiTest" />
+    </antcall>
+  </target>
+
+  <target name="test.dtb2" depends="init.test.distributed"
+          description=" --> Test createSubcontext method with multiple server">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0" />
+      <param name="className" value="jndi2.distributed.JndiTest2" />
+    </antcall>
+  </target>
+
+  <target name="test.dtb3" depends="init.test.distributed"
+          description=" --> check create invalid subcontext throw a NameNotFoundException">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0" />
+      <param name="className" value="jndi2.distributed.JndiTest3" />
+    </antcall>
+  </target>
+
+  <target name="test.dtb4" depends="init.test.distributed"
+          description=" --> Test lookup after restart server">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0" />
+      <param name="className" value="jndi2.distributed.JndiTest4" />
+    </antcall>
+  </target>
+
+  <target name="test.dtb5" depends="init.test.distributed"
+          description=" --> Test suggested by Nigel Rantor">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0" />
+      <param name="className" value="jndi2.distributed.JndiTest5" />
+    </antcall>
+  </target>
+
+  <target name="test.dtb6" depends="init.test.distributed"
+          description=" --> Test suggested by CS use-case">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0" />
+      <param name="className" value="jndi2.distributed.JndiTest6" />
+    </antcall>
+  </target>
+
+  <target name="test.dtb.crash" depends="init.test.distributed"
+          description=" --> Check that the jndi still working after the recovery">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0" />
+      <param name="className" value="jndi2.distributed.JndiCrashTest" />
+    </antcall>
+  </target>
+
+  <!--
+    -  end distributed jndi2 test
+    -->
+
+  <!--
+    -  start test jndi2 with loose coupling
+    -->
+
+  <target name="init.test.nocoupling" depends="init,compile">
+    <antcall target="init.test" inheritAll="true">
+      <param name="a3conf" value="nocoupling/a3servers.xml"/>
+    </antcall>
+  </target>
+
+  <target name="nocoupling.test1" depends="init.test.nocoupling"
+          description=" --> Simple test : bind, rebind, createsubcontext, ... with 2 servers ">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0" />
+      <param name="className" value="jndi2.nocoupling.JndiTest1" />
+    </antcall>
+  </target>
+
+  <target name="nocoupling.test2" depends="init.test.nocoupling"
+          description=" --> test update jndi config when start a new server">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0" />
+      <param name="className" value="jndi2.nocoupling.JndiTest2" />
+    </antcall>
+  </target>
+
+  <target name="nocoupling.test3" depends="init.test.nocoupling"
+          description=" --> test jndi config when start a slave server without master">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0" />
+      <param name="className" value="jndi2.nocoupling.JndiTest3" />
+    </antcall>
+  </target>
+
+  <target name="nocoupling.test4" depends="init.test.nocoupling"
+          description=" --> test jndi config when start a slave server without master">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0"/>
+      <param name="className" value="jndi2.nocoupling.JndiTest4"/>
+    </antcall>
+  </target>
+
+  <target name="nocoupling.test5" depends="init.test.nocoupling"
+          description=" --> test jndi config when start a slave server without master">
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0"/>
+      <param name="className" value="jndi2.nocoupling.JndiTest5"/>
+    </antcall>
+  </target>
+
+  <!--
+    -  end test jndi2 with loose coupling
+    -->
+
+</project>

@@ -1,0 +1,117 @@
+<!-- BE CAREFUL
+  -  This file is included in build files in sub-directory: a3, jndi, jms,
+  -  joram, etc. In particular the init.src target is defined in the including
+  -  build file, it defines the set of sources to compile.
+  -->
+
+<target name="init" depends="init.src">
+
+  <!-- Initialize the environment properties, use ${env.name} -->
+  <property environment="env"/>
+
+  <!-- Get the user defined properties from file -->
+  <property file="../build.properties"/>
+
+  <!-- Detect unix or cygwin unix emulation on windows-->
+  <condition property="unix">
+    <os family="unix"/>
+  </condition>
+
+  <!-- Detect Windows familly OS -->
+  <condition property="windows">
+    <os family="windows"/>
+  </condition>
+
+  <!-- Initialize the directory structure properties -->
+  <property name="src.dir" location=".."/>
+  <property name="obj.dir" location="../../classes"/>
+  <property name="ship.dir" location="../../ship"/>
+  <property name="lib.dir" location="${ship.dir}/lib"/>
+  <property name="test.dir" location="../../run"/>
+  <property name="testlib.dir" location="../../lib"/>
+  <property name="felix.dir" location="${ship.dir}/bin"/>
+  <property name="bundle.dir" location="${ship.dir}/bundle"/>
+  <property name="bin.dir" location="${ship.dir}/bin"/>
+  <!-- creates the directory when no file has been extracted -->
+  <mkdir dir="${testlib.dir}"/>
+
+  <property name="report.file" location="./report.txt"/>
+
+  <!-- Project classpath needed for execution -->
+  <path id="project.class.path">
+    <pathelement path="${java.class.path}/"/>
+    <pathelement path="${test.dir}"/>
+    <fileset dir="${lib.dir}">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${testlib.dir}">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${bundle.dir}">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${bin.dir}">
+      <include name="*.jar"/>
+    </fileset>
+    <pathelement path="${obj.dir}"/>
+  </path>
+  
+  <!-- Default SCAdmin class : "framework.SCAdminClassic" or "framework.SCAdminOSGi" -->
+  <!-- property name="SCAdminClass" value="framework.SCAdminClassic" /-->
+  <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
+  <property name="isOSGi" value="true"/>
+  
+  <!-- Creates the felix directory. This is useful if the JORAM OSGi
+    shipment has not been done to avoid a build error when defining
+    felix.class.path property. -->
+  <mkdir dir="${felix.dir}"/>
+  <path id="felix.class.path">
+    <pathelement path="${java.class.path}/"/>
+    <fileset dir="${felix.dir}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <property name="project.class.path" refid="project.class.path"/>
+  <property name="felix.class.path" refid="felix.class.path"/>
+</target>
+
+<target name="clean" depends="init"
+  description=" --> Clean all generated files">
+  <delete quiet="true" dir="${obj.dir}"/>
+  <delete quiet="true" dir="${test.dir}"/>
+  <!--   <delete quiet="true" dir="${testlib.dir}"/>  -->
+  <delete quiet="true" file="${report.file}"/>
+</target>
+
+<!-- Prepare compilation phase -->
+<target name="prepare" depends="init"
+  description=" --> Create the directory structure">
+  <mkdir dir="${obj.dir}"/>
+</target>
+
+<target name="compile" depends="prepare"
+  description=" --> Compile all tests">
+  <javac srcdir="${src.dir}" destdir="${obj.dir}"
+         debug="${debug}"
+         optimize="${optimize}"
+         deprecation="${deprecation}"
+         nowarn="${nowarn}"
+         verbose="${verbose}"
+         includeantruntime="false">
+    <classpath refid="project.class.path"/>
+    <include name="framework/*.java"/>
+    <include name="utils/*.java"/>
+    <patternset refid="specific"/>
+    <compilerarg value="-g"/>
+    <!--<compilerarg value="-Xlint:unchecked"/>-->
+  </javac>
+</target>
+
+  
+<target name="check.report.file" depends="compile">
+  <java classname="framework.CheckReportFile" failonerror="true" fork="true" maxmemory="256m" dir="${test.dir}">
+    <classpath path="${project.class.path}"/>
+    <jvmarg line="-Dframework.TestCase.OutFile=${report.file} ${jvmargs}"/>
+  </java>
+</target>
