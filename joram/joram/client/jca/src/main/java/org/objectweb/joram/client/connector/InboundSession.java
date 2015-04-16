@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -171,8 +171,11 @@ class InboundSession implements javax.jms.ServerSession,
         if (endpoint != null) endpoint.release();
       } catch (Exception e) {
         // ignore the exception
+        if (logger.isLoggable(BasicLevel.INFO))
+          logger.log(BasicLevel.INFO, "endpoint.release: ", e);
       }
-      throw new java.lang.IllegalStateException("Could not get endpoint instance: " + exc);
+      logger.log(BasicLevel.ERROR, "InboundSession.onMessage: ", exc);
+      throw new java.lang.IllegalStateException("Could not get endpoint instance: ", exc);
     }
   }
 }
