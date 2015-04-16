@@ -444,8 +444,9 @@ public class AcquisitionModule implements ReliableTransmitter {
    * Closes the handler.
    */
   public void close() {
-    if (isDaemon && running) {
-      ((AcquisitionDaemon) acquisitionHandler).stop();
+    if (isDaemon) {
+      if (running)
+        ((AcquisitionDaemon) acquisitionHandler).stop();
       running = false;
     } else {
       if (acquisitionTask != null) {
