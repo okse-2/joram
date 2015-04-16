@@ -171,8 +171,11 @@ class InboundSession implements javax.jms.ServerSession,
         if (endpoint != null) endpoint.release();
       } catch (Exception e) {
         // ignore the exception
+        if (logger.isLoggable(BasicLevel.INFO))
+          logger.log(BasicLevel.INFO, "endpoint.release: ", e);
       }
-      throw new java.lang.IllegalStateException("Could not get endpoint instance: " + exc);
+      logger.log(BasicLevel.ERROR, "InboundSession.onMessage: ", exc);
+      throw new java.lang.IllegalStateException("Could not get endpoint instance: ", exc);
     }
   }
 }
