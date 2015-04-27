@@ -114,6 +114,8 @@ public class Topic extends Destination implements TopicMBean {
   /** Internal boolean used for tagging local sendings. */
   protected transient boolean alreadySentLocally;
 
+  protected long nbMsgsReceiveSinceCreation = 0;
+
   public Topic() {
   }
 
@@ -639,7 +641,7 @@ public class Topic extends Destination implements TopicMBean {
     List deliverables;
     Message message;
 
-    nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + messages.size();
+    nbMsgsReceiveSinceCreation += messages.size();
     
     // interceptors process
     if (interceptorsAvailable()) {

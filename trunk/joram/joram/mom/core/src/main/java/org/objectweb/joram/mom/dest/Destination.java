@@ -340,7 +340,6 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
    */
   public long creationDate = System.currentTimeMillis();
 
-  protected long nbMsgsReceiveSinceCreation = 0;
   protected long nbMsgsDeliverSinceCreation = 0;
   protected long nbMsgsSentToDMQSinceCreation = 0;
 
@@ -875,7 +874,6 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     out.writeObject(clients);    
     out.writeObject(dmqId);
     out.writeLong(creationDate);
-    out.writeLong(nbMsgsReceiveSinceCreation);
     out.writeLong(nbMsgsDeliverSinceCreation);
     out.writeLong(nbMsgsSentToDMQSinceCreation);
     out.writeLong(period);
@@ -892,7 +890,6 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     dmqId = (AgentId)in.readObject();
     strbuf = new StringBuffer();
     creationDate = in.readLong();
-    nbMsgsReceiveSinceCreation = in.readLong();
     nbMsgsDeliverSinceCreation = in.readLong();
     nbMsgsSentToDMQSinceCreation = in.readLong();
     period = in.readLong();
@@ -1366,7 +1363,6 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       dmqId.encode(encoder);
     }
     encoder.encodeUnsignedLong(creationDate);
-    encoder.encodeUnsignedLong(nbMsgsReceiveSinceCreation);
     encoder.encodeUnsignedLong(nbMsgsDeliverSinceCreation);
     encoder.encodeUnsignedLong(nbMsgsSentToDMQSinceCreation);
     encoder.encodeUnsignedLong(period);
@@ -1405,7 +1401,6 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       dmqId.decode(decoder);
     }
     creationDate = decoder.decodeUnsignedLong();
-    nbMsgsReceiveSinceCreation = decoder.decodeUnsignedLong();
     nbMsgsDeliverSinceCreation = decoder.decodeUnsignedLong();
     nbMsgsSentToDMQSinceCreation = decoder.decodeUnsignedLong();
     period = decoder.decodeUnsignedLong();
