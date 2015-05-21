@@ -128,8 +128,9 @@ public class BridgeTest17x extends TestCase {
       }
       Thread.sleep(10000);
       
-      // L'objectif du test est de vérifier que les connexions ne s'empilent pas dans le
-      // serveur.
+      // L'objectif du test est de verifier que les connexions ne s'empilent pas dans le
+      // serveur (queue d'acquisition JMX, appel d'une methode statique au travers de l'admin
+      // ou ajout d'une methode d'admin permettant d'interogger un parametre JMX)
 
       try{
         AdminModule.connect(centralCF, "root", "root");
