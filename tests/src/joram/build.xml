@@ -64,7 +64,7 @@
     <antcall target="tests.reconf"/>
     <antcall target="tests.noreg"/>
     <antcall target="tests.xa"/>
-    <antcall target="tests.bridge.jms"/>
+    <antcall target="tests.bridge.jms.new"/>
     <antcall target="tests.bridge.amqp"/>
     <antcall target="tests.schedqueue"/>
     <antcall target="tests.clusterTopic"/>
@@ -489,6 +489,8 @@
     <antcall target="bridge.jms.test13x"/>
     <antcall target="bridge.jms.test14x"/>
   	<antcall target="bridge.jms.test15x"/>
+  	<antcall target="bridge.jms.test15x2"/>
+  	<antcall target="bridge.jms.test15x3"/>
   	<antcall target="bridge.jms.test17x"/>
   </target>
 
@@ -4957,6 +4959,26 @@
     <antcall target="test.run" inheritAll="true">
       <param name="testid" value="bridge.jms.test15x"/>
       <param name="className" value="joram.bridgejms.BridgeTest15x"/>
+      <param name="jndiconf" value="bridgejms/jndi15.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers15.xml"/>
+    </antcall>
+  </target>
+
+  <target name="bridge.jms.test15x2" depends="init.a3props,compile"
+          description=" --> Test the bridge with specific architecture">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.test15x2"/>
+      <param name="className" value="joram.bridgejms.BridgeTest15x2"/>
+      <param name="jndiconf" value="bridgejms/jndi15.properties"/>
+      <param name="a3conf" value="bridgejms/a3servers15.xml"/>
+    </antcall>
+  </target>
+
+  <target name="bridge.jms.test15x3" depends="init.a3props,compile"
+          description=" --> Test the bridge with specific architecture">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.jms.test15x3"/>
+      <param name="className" value="joram.bridgejms.BridgeTest15x3"/>
       <param name="jndiconf" value="bridgejms/jndi15.properties"/>
       <param name="a3conf" value="bridgejms/a3servers15.xml"/>
     </antcall>

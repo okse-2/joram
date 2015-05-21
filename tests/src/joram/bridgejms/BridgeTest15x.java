@@ -15,6 +15,10 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
 
+/**
+ *  Test the JMS bridge with a specific architecture using 2 separate flows with distribution
+ * and acquisition destinations (see the architecture description in Test15x-Archi.jpg).
+ */
 public class BridgeTest15x extends TestCase {
   public static void main(String[] args) {
     new BridgeTest15x().run();
