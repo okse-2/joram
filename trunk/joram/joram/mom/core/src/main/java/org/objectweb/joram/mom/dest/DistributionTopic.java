@@ -106,7 +106,7 @@ public class DistributionTopic extends Topic {
       
       if (distributionDaemon == null && isAsyncDistribution) {
     		// start distributionDaemon
-    		distributionDaemon = new DistributionDaemon(distributionModule.getDistributionHandler(), getName(), this);
+    		distributionDaemon = new DistributionDaemon(distributionModule.getDistributionHandler(), getAgentId(), getName(), this);
     		distributionDaemon.start();
     	} else if (distributionDaemon != null && !isAsyncDistribution) {
     		// stop distributionDaemon
@@ -135,7 +135,7 @@ public class DistributionTopic extends Topic {
     if (properties != null)
     	isAsyncDistribution = isAsyncDistribution(properties);
     if (distributionDaemon == null && isAsyncDistribution) {
-    	distributionDaemon = new DistributionDaemon(distributionModule.getDistributionHandler(), getName(), this);
+    	distributionDaemon = new DistributionDaemon(distributionModule.getDistributionHandler(), getAgentId(), getName(), this);
     	distributionDaemon.start();
     }
   }
@@ -199,8 +199,7 @@ public class DistributionTopic extends Topic {
     if (distributionDaemon != null) {
     	if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "DistributionTopic postProcess(...)");
-    	List ackList = distributionDaemon.getAckList();
-    	nbMsgsDeliverSinceCreation += ackList.size();
+      distributionDaemon.cleanAckList();
     }
   }
   
@@ -216,8 +215,7 @@ public class DistributionTopic extends Topic {
 
   	// delete the ackQueue
   	if (distributionDaemon != null) {
-  		List ackList = distributionDaemon.getAckList();
-      nbMsgsDeliverSinceCreation += ackList.size();
+      distributionDaemon.cleanAckList();
   	}
 
   	if (distributionDaemon != null) {
