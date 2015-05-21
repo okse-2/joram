@@ -145,7 +145,11 @@ public class AliasInQueueTest1 extends TestCase {
       }
       cnx0.close();
 
-      Thread.sleep(2000L);
+      int nbtry = 0;
+      while (((list1.count + list2.count) != nbmsg) && (nbtry < 30)) {
+        Thread.sleep(1000L); nbtry += 1;
+      }
+
       if ((list1.count + list2.count) != nbmsg)
       	Thread.sleep(2000L);
       
