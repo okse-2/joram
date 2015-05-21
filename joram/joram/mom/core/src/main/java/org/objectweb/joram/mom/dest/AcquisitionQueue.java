@@ -196,6 +196,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     if (acquisitionModule == null) {
       acquisitionModule = new AcquisitionModule(this, acquisitionClassName, properties);
     }
+    logmsg.log(BasicLevel.DEBUG, getName() + "initialize with lastMessageId=" + lastMessageId);
   }
   
   /**
@@ -318,6 +319,8 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     if (lastMessageId != null && lastMessageId.equals(not.getId())) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Message already received, drop the message " + not);
+      if (logmsg.isLoggable(BasicLevel.WARN))
+        logmsg.log(BasicLevel.WARN, getName() + ": drops already received message " + not.getId());
       return;
     }
     lastMessageId = not.getId();
