@@ -36,6 +36,7 @@ import javax.jms.DeliveryMode;
 //import javax.naming.Context;
 //import javax.naming.InitialContext;
 
+
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
@@ -165,18 +166,16 @@ public class AliasInQueueTest2 extends TestCase {
       }
       cnx0.close();
       System.out.println((System.currentTimeMillis() - start) + " - queue1: " + list1.count + ", queue2: " + list2.count);
-
-      int wait = nbmsg * (((weight1 * weight2 *100)/(weight1 + weight2)) - (weight0 *100)) /100;
-      System.out.println(wait);
-      Thread.sleep(wait +5000L);
-      if ((list1.count + list2.count) != nbmsg)
-        Thread.sleep(5000L);
       
-      assertEquals(nbmsg, list1.count + list2.count);
-      System.out.println(((weight2 * nbmsg *95)/(weight1 + weight2))/100);
-      assertTrue(list1.count > (((weight2 * nbmsg *95)/(weight1 + weight2))/100));
-      System.out.println(((weight2 * nbmsg *105)/(weight1 + weight2))/100);
-      assertTrue(list1.count < (((weight2 * nbmsg *105)/(weight1 + weight2))/100));
+      int nbtry = 0;
+      while (((list1.count + list2.count) != nbmsg) && (nbtry < 60)) {
+        Thread.sleep(1000L); nbtry += 1;
+      }
+      
+      assertEquals("Should received all messages", nbmsg, list1.count + list2.count);
+      System.out.println(" -> [" + ((weight2 * nbmsg *90)/(weight1 + weight2))/100 + " - " + ((weight2 * nbmsg *110)/(weight1 + weight2))/100 + "]");
+      assertTrue("Queue1 >> Queue2", list1.count > (((weight2 * nbmsg *90)/(weight1 + weight2))/100));
+      assertTrue("Queue2 >> Queue1", list1.count < (((weight2 * nbmsg *110)/(weight1 + weight2))/100));
 
       System.out.println((System.currentTimeMillis() - start) + " - queue1: " + list1.count + ", queue2: " + list2.count);
       cnx1.close();      
