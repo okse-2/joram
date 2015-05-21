@@ -145,10 +145,9 @@ public class AliasInQueueTest1 extends TestCase {
       }
       cnx0.close();
 
-      int i = 0;
-      while (((list1.count + list2.count) != nbmsg) && (i++<50)) {
-        System.out.println("queue1: " + list1.count + ", queue2: " + list2.count);
-        Thread.sleep(1000L);
+      int nbtry = 0;
+      while (((list1.count + list2.count) != nbmsg) && (nbtry < 50)) {
+        Thread.sleep(1000L); nbtry += 1;
       }
       
       assertEquals(nbmsg, list1.count + list2.count);
