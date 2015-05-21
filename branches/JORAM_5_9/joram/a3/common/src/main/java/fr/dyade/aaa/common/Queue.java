@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -188,4 +188,15 @@ public class Queue implements Serializable {
     return elements.size();
   }
 
+  /**
+   * Returns a stringified form of the queue.
+   */
+  public synchronized String list() {
+    if (elements.isEmpty()) return "";
+    
+    StringBuffer strbuf = new StringBuffer();
+    for (int i=0; i<elements.size(); i++)
+      strbuf.append(elements.get(i)).append(',');
+    return strbuf.toString();
+  }
 }
