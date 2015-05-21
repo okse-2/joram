@@ -108,6 +108,7 @@ public class Queue extends Destination implements QueueMBean {
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(Queue.class.getName());
+  public static Logger logmsg = Debug.getLogger(Queue.class.getName() + ".TraceMsg");
 
   /** Static value holding the default DMQ identifier for a server. */
   static AgentId defaultDMQId = null;
@@ -391,7 +392,7 @@ public class Queue extends Destination implements QueueMBean {
     return 0;
   }
 
-  public final long getNbMsgsReceiveSinceCreation() {
+  public long getNbMsgsReceiveSinceCreation() {
     return nbMsgsSentToDMQSinceCreation + nbMsgsDeliverSinceCreation + getPendingMessageCount();
   }
 
@@ -447,6 +448,9 @@ public class Queue extends Destination implements QueueMBean {
         persistedMsg = (Message) persistedMsgs.remove(0);
         consId = (AgentId) consumers.get(persistedMsg.getId());
 
+        if (logmsg.isLoggable(BasicLevel.INFO))
+          logmsg.log(BasicLevel.INFO, getName() + ": retrieves message " + persistedMsg.getId());
+
         try {
           if (consId == null) {
             if (!addMessage(persistedMsg, false)) {
@@ -498,7 +502,10 @@ public class Queue extends Destination implements QueueMBean {
     // Cleaning the possibly expired messages.
     DMQManager dmqManager = cleanPendingMessage(current);
     // If needed, sending the dead messages to the DMQ:
-    if (dmqManager != null) dmqManager.sendToDMQ();
+    if (dmqManager != null) {
+      setSave();
+      dmqManager.sendToDMQ();
+    }
 
     long prod = getNbMsgsReceiveSinceCreation();
     long cons = getNbMsgsDeliverSinceCreation();
@@ -644,6 +651,9 @@ public class Queue extends Destination implements QueueMBean {
   }
 
   private void acknowledge(String msgId) {
+    if (logmsg.isLoggable(BasicLevel.INFO))
+      logmsg.log(BasicLevel.INFO, getName() + ": acknowledges message " + msgId);
+    
     Message msg = (Message) deliveredMsgs.remove(msgId);
     if ((msg != null) && msg.isPersistent()) {
       // state change, so save.
@@ -656,9 +666,9 @@ public class Queue extends Destination implements QueueMBean {
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Message " + msgId + " acknowledged.");
-    } else if (logger.isLoggable(BasicLevel.WARN)) {
-      logger.log(BasicLevel.WARN,
-                 "Message " + msgId + " not found for acknowledgement.");
+    } else if ((logger.isLoggable(BasicLevel.WARN) || logmsg.isLoggable(BasicLevel.WARN))) {
+      logger.log(BasicLevel.WARN, "Message " + msgId + " not found for acknowledgement.");
+      logmsg.log(BasicLevel.WARN, getName() + ": message " + msgId + " not found for acknowledgement.");
     }
   }
 
@@ -732,7 +742,9 @@ public class Queue extends Destination implements QueueMBean {
 
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "Message " + msgId + " denied.");
-        }
+          if (logmsg.isLoggable(BasicLevel.INFO))
+            logmsg.log(BasicLevel.INFO, getName() + ": denies message " + msgId);
+       }
       }
     }
 
@@ -749,6 +761,8 @@ public class Queue extends Destination implements QueueMBean {
       if (message == null) {
         if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN, " -> already denied message " + msgId);
+        if (logmsg.isLoggable(BasicLevel.WARN))
+          logmsg.log(BasicLevel.WARN, getName() + ": already denied message " + msgId);
         break;
       }
 
@@ -763,6 +777,8 @@ public class Queue extends Destination implements QueueMBean {
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> deny " + msgId);
+      if (logmsg.isLoggable(BasicLevel.INFO))
+        logmsg.log(BasicLevel.INFO, getName() + ": denies message " + msgId);
 
       // state change, so save.
       setSave();
@@ -1261,6 +1277,9 @@ public class Queue extends Destination implements QueueMBean {
    */
   protected final synchronized void storeMessage(Message msg, boolean throwsExceptionOnFullDest) throws AccessException {
     if (addMessage(msg, throwsExceptionOnFullDest)) {
+      if (logmsg.isLoggable(BasicLevel.INFO))
+        logmsg.log(BasicLevel.INFO, getName() + ": adds new message " + msg.getId() + ", " + msg.order);
+      
       if (msg.isPersistent()) {
         // Persisting the message.
         setMsgTxName(msg);
@@ -1593,8 +1612,7 @@ public class Queue extends Destination implements QueueMBean {
       lsMessages = getMessages(notRec.getMessageCount(), notRec.getSelector(), notRec.getAutoAck());
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Queue.deliverMessages: notRec.getAutoAck() = " + notRec.getAutoAck()
-            + ", lsMessages = " + lsMessages);
+        logger.log(BasicLevel.DEBUG, "Queue.deliverMessages: notRec.getAutoAck() = " + notRec.getAutoAck() + ", lsMessages = " + lsMessages);
 
       Iterator itMessages = lsMessages.iterator();
       while (itMessages.hasNext()) {
@@ -1610,8 +1628,10 @@ public class Queue extends Destination implements QueueMBean {
         }
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG,
-                     "Message " + message.getId() + " to " + notRec.requester +
-                     " as reply to " + notRec.getRequestId());
+                     "Message " + message.getId() + " to " + notRec.requester + " as reply to " + notRec.getRequestId());
+        if (logmsg.isLoggable(BasicLevel.INFO))
+          logmsg.log(BasicLevel.INFO,
+                     getName() + ": delivers message " + message.getId()  + " to " + notRec.requester + " / " + notRec.getRequestId());
       }
 
       if (isLocal(notRec.requester)) {
@@ -1744,13 +1764,6 @@ public class Queue extends Destination implements QueueMBean {
                                 MessageErrorConstants.EXPIRED);
     }
     dmqManager.sendToDMQ();
-  }
-
-	public String getTxName(String msgId) {
-		Message momMsg = getMomMessage(msgId);
-		if (momMsg != null)
-			return momMsg.getTxName();
-	  return null;
   }
 
 	// Get flow Control related informations.
