@@ -1,0 +1,2097 @@
+###############################################################################
+# 2013/01/14 | Joram 5.8.1 tag.
+###############################################################################
++==============================================================================
+| 2013/01/14 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Adds specialized destinations.
+Javadoc and comment enhancements.
++==============================================================================
+| 2013/01/08 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+JORAM-69 : use only one timer by process for all connections.
++==============================================================================
+| 2012/12/21 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+JORAM-99: unregister the OutboundConnection mbean created by ManagedConnectionImpl.getConnection(null,null).
+JORAM-99: close the joram session in close method.
+Add and use mode constants.
+JORAM-101: add syncExceptionOnFull attribute on Queue description.
++==============================================================================
+| 2012/12/07 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+JORAM-62: add the sendActivity to avoid a connection close on SO_TIMEOUT.
++==============================================================================
+| 2012/11/29 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Adds new Joram-Spring capabilities.
++==============================================================================
+| 2012/11/22 | Thibaut Guinoiseau - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Corrects a bug on subscription names for the cmd joram:mom:list
++==============================================================================
+| 2012/11/29 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Changes the bundle activator to A3ServiceActivator
+Simplification of XML configAdmin files for the user.
+Adds ALIAS_QUEUE constant in Destination class.
++==============================================================================
+| 2012/11/15 | Thibaut Guinoiseau - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+[JIRA JORM-91]Improve joram:mom:delete : can delete destination by only specifying
+"destination" (or "dest") instead of "queue" or "topic" (those still work)
++==============================================================================
+| 2012/11/12 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Bug fixes (JORAM-68, JORAM-84 and JORAM-87):
+ - The period of HeartBeatTask is now correctly fixed.
+ - The context cleaning is done during a reaction of the corresponding user agent.
+ - The HeartBeatTask is canceled when the connection is closed.
+###############################################################################
+# 2012/10/23 | Joram 5.8.0 tag.
+###############################################################################
+Adds specific factories for specialized destination:
+ - Mail acquisition and distribution destinations.	 
+ - FTP queue.
+ - Monitoring queue and topic.
+ - Collector queue and topic.
+ - SchedulerQueue.
+ - JMS and AMQP bridges.
+These factories can be used either through the administration API or the XML
+configuration scripts.
++------------+-----------------------------------------------------------------
+Fix a potential NPE when declaring a bridge destination without properties.	
++------------+-----------------------------------------------------------------
+Allows to disable the regulation mechanism between the acquisition handler and
+the queue.
++------------+-----------------------------------------------------------------
+Bug fix (JORAM-80): Bytes, Stream and Map messages are now correctly handled by
+the JMS bridge.
++------------+-----------------------------------------------------------------
+Bug fix (JORAM-77): Messages whose field is positioned JMSReplyTo are not
+correctly retransmitted by the JMS bridge acquisition. Additionally this patch
+fixes two problems in the JMSAcquisition class:
+ - Sessions are now transacted which allows the use of commit / rollack.
+ - Errors are correctly handled by the message listener.	 
++------------+-----------------------------------------------------------------
+Bug fix (JORAM-74): Fix a synchronization issue in the bridge daemon, avoid
+duplication of message during connection recovery.
++------------+-----------------------------------------------------------------
+Bug fix (JORAM-75): Bad handling of connections in the JCA connector, some
+connections are not correctly freed.
++------------+-----------------------------------------------------------------
+JMS Bridge connection pool: Fix issues when defining a connection without name
+or with an already defined name (JORAM-70, JORAM-71).
++------------+-----------------------------------------------------------------	 
+Adds specific ConnectionFactory elements (generic ones are now deprecated).
+These factories can be used either through the administration API or the XML
+configuration scripts.
++------------+-----------------------------------------------------------------	 
+Extends the MBean handling the connections for JMS bridge (JORAM-64).	 
++------------+-----------------------------------------------------------------	 
+Avoids exceeding the limit of the number of characters for the identifier of a
+persistent object in MySQL Transaction component.	 
++------------+-----------------------------------------------------------------	 
+JORAM-28: suppress the deprecated HA mode.
++------------+-----------------------------------------------------------------	 
+JORAM-61: Avoid a possible ConcurrentModificationException when restarting a
+server with active subscription during a crash.
++------------+-----------------------------------------------------------------	 
+JORAM-32: Directly throw an exception for the user when sending a message on
+a full local queue. 
++------------+-----------------------------------------------------------------	 
+JORAM-29: removed the useless SOAP connector.
++------------+-----------------------------------------------------------------	 
+JORAM-34: add flow control on acquisition queue.
++------------+-----------------------------------------------------------------	 
+JORAM-52: add the INDIVIDUAL_ACKNOWLEDGE mode, this is a new Joram feature.	 
++------------+-----------------------------------------------------------------	 
+Improves the precision of the time counter for engine and agent (JORAM-55).
+Adds method to reset reactTime and commitTime (JORAM-40).
++------------+-----------------------------------------------------------------	 
+Bug fix (JORAM-59): Previously a message denied and then correctly consumed by
+the customer could be reissued after stopping and restarting the server.
++------------+-----------------------------------------------------------------	 
+Performance enhancement in NGTransaction: inherits the 'create' attribute from
+a previous operation recorded in the log.	 
++------------+-----------------------------------------------------------------	 
+JORAM-41: Right handling of redelivered attribute.
++------------+-----------------------------------------------------------------	 
+JORAM-33 : Add the possibility to disable the mechanism of pre-requesting of
+the messages in a listener mode. (queueMessageReadMax =0)
++------------+-----------------------------------------------------------------	 
+JORAM-47: Allows to fix factory parameters in OSGi configuration.
++------------+-----------------------------------------------------------------	 
+Allows to use any queue as DMQ in XML script (JORAM-37).	 
++------------+-----------------------------------------------------------------	 
+Allows to fix any factory parameters in XML configuration scripts (JORAM-46).	 
++------------+-----------------------------------------------------------------	 
+JORAM-43: Adds a specific logger allowing to trace message sending and receiving.
++------------+-----------------------------------------------------------------	 
+Bug fix (JORAM-44): Enable the interception mechanism with implicit receipt
+mode.
++------------+-----------------------------------------------------------------	 
+Avoids a possible NPE during a reaction to an AgentCreatRequest (JORAM-39).
++------------+-----------------------------------------------------------------	 
+Bug fix (JORAM-35): correct handling of message's priority during serialization.
++------------+-----------------------------------------------------------------	 
+Refactoring of the JCA resource adapter allowing to deploy many resource adapter
+in an application server and including a new configuration mechanism.
++------------+-----------------------------------------------------------------	 
+Bug fix (JORAM-30): avoid potential loss of messages by an AMQP bridge during
+server shutdown. The persistent properties of acquisitionNot is now depending
+of the messages included.	 
++------------+-----------------------------------------------------------------	 
+Bug fix (JORAM-16): Allow the reconnection of the JMS bridge detecting a
+connection issue even if the remote JMS provider do not thrown an exception on
+ExceptionListener.	 
++------------+-----------------------------------------------------------------	 
+Bug fix (JORAM-23): Avoids starvation of listener when using flow control.
+Previously after reactivation of the subscription the supply of the listener's
+queue is resumed only if new messages comes from topic.
+Changes to limiting the number of messages per request between the subscription
+and the listener after restarting of a subscription (JORAM-22).	 
++------------+-----------------------------------------------------------------	 
+Fix a memory leak (JORAM-20): no longer create a new logging topic for each
+created daemon.
++------------+-----------------------------------------------------------------	 
+Bug fix in NGTransaction rebuild of the memory transaction log.	 
+Fix a bad behavior (JORAM-18) allowing the proliferation of unused log files.	 
++------------+-----------------------------------------------------------------	 
+Potential bug fix if convertJMSMessage is called with a null message.	 
++------------+-----------------------------------------------------------------	 
+Allows the configuration of the JMS bridge connection service:
+ - Add JMSBridgeConnection element to add a bridge connection to a JMS server
+ through the XML cpnfiguration scripts.
+ - Add addJMSBridgeConnection and deleteJMSBridgeConnection methods to add or
+ delete a bridge connection to a JMS server.
+Use URLs to describes each JMS connection. 
++------------+-----------------------------------------------------------------	 
+Until now a message to an unknown server was simply destroyed. Now when the
+sender is identified an error message is sent to the corresponding agent.
+This patch fixes the problems JORAM-12 and JORAM-14.	 
++------------+-----------------------------------------------------------------	 
+Allows the configuration of the AMQP bridge connection service:
+ - Add AMQPBridgeConnection element to add a bridge connection to a AMQP server
+ through the XML cpnfiguration scripts. 
+ - Add addAMQPBridgeConnection and deleteAMQPBridgeConnection methods to add or
+ delete a bridge connection to a AMQP server.
+Use URLs to describes each AMQP connection. 
++------------+-----------------------------------------------------------------	 
+JORAM-10 : Fix possible NPE during server stop with JMS Bridge.
++------------+-----------------------------------------------------------------	 
+JORAM-9 : Fix FileNotFoundException using raconfig tools.	 
++------------+-----------------------------------------------------------------	 
+JORAM-3 : Fix a NullPointerException on server restart after a crash during
+XA transactions.
+###############################################################################
+# 2011/09/14 | Joram 5.7.0 tag.
+###############################################################################
++==============================================================================
+| 2011/09/12 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Allows to get/set DMQ settings individually for user susbcriptions.
++==============================================================================
+| 2011/08/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Handling of persistent properties at Transaction level.
+ Enhancements in NGTransaction component.
++==============================================================================
+| 2011/08/05 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add new AliasQueue destination: this queue forwards messages to another Joram
+destination, holding messages when the destination is unreachable and pinging
+it to forward accumulated messages when link is restored.
+ +==============================================================================
+| 2011/08/02 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ New version of the JMS acquisition/distribution bridge, mimicking the AMQP
+bridge:
+- New JMSConnectionService handling connections to the foreign JMS servers
+- Acquisition and distribution destinations can use all these connections or a
+subset of them using "jms.Routing" property.
+- XA has been removed
+###############################################################################
+# 2011/07/13 | Joram 5.6.0 tag.
+###############################################################################
++==============================================================================
+| 2011/07/12 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds persistence to distribution queues for messages that can't be
+distributed. The queue tries to send the messages regularly.
++==============================================================================
+| 2011/07/11 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix possible NPE in JMS module for acquisition and distribution JMS bridge
+destinations.
++==============================================================================
+| 2011/07/04 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ New JoramHelper component allowing static administration from server side.
++==============================================================================
+| 2011/06/22 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix a potential issue in PoolNetwork when a connection is initiated by a bad
+component (the incoming component still connected).
++==============================================================================
+| 2011/06/22 | Willy Malvault - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds root mechanism to create 'alias' destinations based on acquisition and
+distribution destinations.
++==============================================================================
+| 2011/06/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds a persistence mechanism for AMQP connections pool (AMQP acquisition and
+distribution destinations).
++==============================================================================
+| 2011/06/08 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds samples configurations for Derby and NGT Transaction components.
+ Adds samples configurations and clients for HttpNetwork Network components.
+ Updates performance sample.
++==============================================================================
+| 2011/05/30 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix NPE in AMQP distribution destination when amqp.Routing property is not
+correctly set.
++==============================================================================
+| 2011/05/04 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds deployment plans for JOnAS.
++==============================================================================
+| 2011/04/18 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Removes optional header table in messages.
++==============================================================================
+| 2011/04/04 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Evolves AMQP acquisition and distribution destinations.
++==============================================================================
+| 2011/03/25 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Allows invocation of static administration method from Joram AdminModule.
++==============================================================================
+| 2011/03/18 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix: do not schedule a task when updating properties on AcquisitionModule.
++==============================================================================
+| 2011/03/14 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Creates all needed directory for persistence.
++==============================================================================
+| 2011/03/14 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Various changes on JCA connector to enable Joram to be started as a JOnAS OSGi
+service.
+###############################################################################
+# 2011/03/11 | Joram 5.5.0 tag.
+###############################################################################
++==============================================================================
+| 2011/03/07 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Improve NetServerOut daemon.
++==============================================================================
+| 2011/03/03 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Use JoramDestinationName instead of JMSDestinationName in message property for
+the interceptors.
+ Fix: avoid possible NPE in AMQP acquisition module.
++==============================================================================
+| 2011/03/03 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Initial revision of AMQP acquisition / distribution destinations.
++==============================================================================
+| 2011/02/28 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Harmonize exception handling between acquisition and distribution modules.
++==============================================================================
+| 2011/02/22 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Changes about JMS interceptors handling.
+ Allows to deactivate the default syncOnWrite mechanism on persistence
+handling.
+ Allows to configure the thread priority of Engine through the threadPriority
+Engine's property.
++==============================================================================
+| 2011/01/20 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Allows to set properties at user creation.
+ Allows to add/replace/remove interceptors through administration commands.
+ Allows to start/stop acquisition handlers.
++==============================================================================
+| 2011/01/17 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Software architecture changes: adds an extension package.
+ Migrates NGTransaction from util to ext package.
+ Fix minor issues in agent profiling.
++==============================================================================
+| 2011/01/07 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix: Add 'stopping' boolean to avoid losing one useless second when stopping
+the JNDI server.
++==============================================================================
+| 2010/12/24 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds generic administration command.
+ Adds interceptors on users and destinations.
++==============================================================================
+| 2010/12/08 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds the ability to add and remove notification listeners on the MX server.
+ Fix initialization in Debug module.
++==============================================================================
+| 2010/12/17 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix outdated samples scripts.
++==============================================================================
+| 2010/12/06 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add automatic reconnection in Joram adapter.
++==============================================================================
+| 2010/12/03 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Create a Helper to ease the creation of well formed messages.
++==============================================================================
+| 2010/11/30 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Clustering enhancements:
+ - rework administration
+ - harmonize behaviors and notifications exchanges between queues and topics
+ - allow transitive closure of clusters
+ - add specific MBeans
+ - fix various problems
++==============================================================================
+| 2010/11/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Merge destination and user proxy agents with their implementation, update the
+corresponding MBeans.
+###############################################################################
+# 2010/10/25 | Joram 5.4.0 tag.
+###############################################################################
++==============================================================================
+| 2010/10/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in the JMS bridge, previously the use of receiveNoWait could cause a
+NPE in server and a client infinite wait.
+ Adds profiling attributes about number of reactions and CPU and I/O time
+consumption.
++==============================================================================
+| 2010/10/18 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Defines JCA artifacts for Joram adapter.
++==============================================================================
+| 2010/09/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Client blocking if sending a message with a TTL to a local destination
+(A possible cause of this problem can be a bad clock synchronization).
+In case of local interaction between the proxy and the destination the
+ClientMessage is sent in non persistent mode and the client should be notify
+after the destination reaction. Before this patch if TTL are set the CM could
+be deleted and the client is blocked, so we remove the expiration date on the
+CM in case of local sending.
++==============================================================================
+| 2010/09/24 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix bug when deleting a user: user was partially removed when deletion is not
+allowed.
+ Change admin MBean name: user's name is used instead of 'JoramAdminProxy'.
++==============================================================================
+| 2010/09/23 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Use of OSGi based Joram server in the samples.
+ Bug fix in FTP collector.
++==============================================================================
+| 2010/09/20 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add STOMP proxy allowing Joram access through STOMP protocol.
++==============================================================================
+| 2010/09/17 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix a bug in administration of cluster destination through XML scripts (the
+administration wrapper was not set at creation so there is an error during next
+operations).
++==============================================================================
+| 2010/08/25 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ The call to System.runFinalization in AgentServer.stop method seems to cause
+deadlock with JOnAS. Normally this call is no longer needed so we remove it.
++==============================================================================
+| 2010/08/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fixes minor issues and removes unused code.
+ Javadoc enhancements.
++==============================================================================
+| 2010/08/03 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Transaction: Adds FileRepository.useRandomAccessFile property allowing the
+optional  use of RandomAccessFile or FileOutputStream. This option offers better
+performance with some filesystems.
+ Potential bug fix in AgentId.equals with null.
+ Adds statistics about messages waiting in MessageConsumer components.
+ Allows to create or retrieve destinations through Session.create[Queue|Topic].
+ Numerous changes in administration, reducing the number of message types and
+avoiding useless indirection in request and reply.
+###############################################################################
+# 2010/07/21 | Joram 5.3.3 tag.
+###############################################################################
++==============================================================================
+| 2010/07/19 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ OSGi enhancements.
+###############################################################################
+# 2010/07/13 | Joram 5.3.2 tag.
+###############################################################################
++==============================================================================
+| 2010/06/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Design of an extension framework for JMS destinations. In a first time it
+defines 2 destinations for acquisition (create JMS message from external data)
+and distribution (create external data from JMS message) and a simple interface
+to implement for acquisition and distribution modules.
+ Implementation of modules are provided to replace Collector, Mail, Monitoring
+and JMS bridge destinations.
++==============================================================================
+| 2010/06/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ First release of Jorams' configuration designer.
++==============================================================================
+| 2010/06/22 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ maven migration
+###############################################################################
+# 2010/05/05 | Joram 5.3.1 tag.
+###############################################################################
++==============================================================================
+| 2010/05/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Potential bug fix in heart-beat handling. Previously an exception in
+HeartBeatTask.start method caused an Engine stop.
+ Changes configuration properties naming for NGTransaction.
++==============================================================================
+| 2010/05/04 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Lock in memory some destinations using Timer.
++==============================================================================
+| 2010/05/04 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix about destination using Timer. The Timer tasks are now handled
+depending of the agent life-cycle, creation in agentInitialize and termination
+in agentFinalize.
++==============================================================================
+| 2010/05/04 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Potential bug fix avoiding deadlock in AdminModule.stopServer of local server.
++==============================================================================
+| 2010/04/21 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Consideration of interceptors for the managed connection factories.
++==============================================================================
+| 2010/04/08 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fixes in JMS bridge:
+ - XAResource variables are now transient.
+ - Now a configuration parameter is used to enable XAConnection instead of
+ checking ConnectionFactory interfaces.
++==============================================================================
+| 2010/03/16 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Reworked PoolNetwork to have one Sender by NetSession. This leads to the
+suppression of nbMaxFreeSender and nbMaxResetTries properties and fixes various
+sync issues.
+ Furthermore, SoftReferences are used in the PoolNetwork to avoid memory errors
+when messages accumulate in the network.
++==============================================================================
+| 2010/03/03 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Following Joram OSGi properties can now be defined in config.properties file:
+- fr.dyade.aaa.agent.AgentServer.id
+- fr.dyade.aaa.agent.AgentServer.clusterid
+- fr.dyade.aaa.agent.AgentServer.storage
+###############################################################################
+# 2010/02/11 | Joram 5.3.0 tag.
+###############################################################################
++==============================================================================
+| 2010/02/11 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ add pom for OSGi bundles.
++==============================================================================
+| 2010/02/04 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix a bug in PoolNetwork when using nbMaxCnx.
++==============================================================================
+| 2010/01/25 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Update Joram security:
+ - modify Identity.check method in order to check through the trusted class.
+ - remove unused method getCredential, getSubject.
+ - use common.Configuration class instead System one to get properties.
++==============================================================================
+| 2009/11/20 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Destination consideration of the update by JMX for the period.
+ Properties implements Serializable
++==============================================================================
+| 2009/11/12 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ All ScalAgent timer replaced by java timer.
+ ClusterQueue :
+ - Add a better ordering messages in cluster queue.
+ - Bug fix in join cluster queue.
+ PoolNetwork : 
+  Fix a possible incomplete closure of PoolSender, and possible NPE.
++==============================================================================
+| 2009/11/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ The Destination.getStatistics method now returns all the convertible JMX
+attributes of this destination (depending of the real type of the destination).
++==============================================================================
+| 2009/11/03 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Implements either implicit (periodic) or explicit behavior for monitoring
+topics. Implements monitoring queue and factorizes common behavior in an
+helper class.
++==============================================================================
+| 2009/10/30 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix a potential issue using clustered destination:
+ - no longer access directly type attribute (now private attribute of the
+ Destination class).
+ - implements getType method in ClusterDestination allowing a correct value of
+ destination type in message after sending.
++==============================================================================
+| 2009/10/26 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: the destination identifier checking generates an exception with
+clustered destination. No longer use directly agentId attribute.
++==============================================================================
+| 2009/10/26 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix infinite recursion in GetProxyIdNot.toString(StringBuffer) method.
+###############################################################################
+# 2009/10/23 | Joram 5.2.6 tag.
+###############################################################################
++==============================================================================
+| 2009/10/21 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Extended JMX monitoring for connections: show the number of connections
+created since server start and show the number of failed connection creations.
++==============================================================================
+| 2009/10/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Removes JMXRIHttpService class, no longer used, depends of JMXRITools.jar.
+ Adds a MonitoringTimerTask to the AgentServer class allowing the periodic
+monitoring of the server's attributes.
+ Adds JMX MBean interface to MonitoringTopic and MonitoringTimerTask classes.
+ Removes unused jars in ship/lib: jndi, jmxri, jmxtools.
++==============================================================================
+| 2009/10/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds JMX control of monitored attributes in MonitoringTopic, allows to view,
+add and remove attributes.
++==============================================================================
+| 2009/10/13 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Implements a pool of connections through a dedicated ConnectionFactory.
++==============================================================================
+| 2009/10/08 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: avoid concurrent connections in AdminModule static administration
+component.
+ Bug fix: no longer deserializes two times the adminMessage.
++==============================================================================
+| 2009/10/02 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds NGTransaction component.
+ Verify clock synchronization between client and server at connection time,
+updates the protocol version to 5.3.
+ Adds interceptors mechanism.
+ Bug fix in Joram administration: setting the time-out to abort request now
+works (either through setter method or environment property).
+ 1st version of MonitoringTimerTask.
+ Update common.xml to compile Joram with JDK1.5 (needed for NGTransaction).
++==============================================================================
+| 2009/09/21 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in Engine: no longer set NbMaxAgents to Integer.MAX_VALUE with
+NullTransaction component. This number is incremented with the number of fixed
+agents and becomes negative, then it produces strange behavior in the garbage.
++==============================================================================
+| 2009/09/16 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in Scheduler: no longer use recursion to serialize the ScheduleItem
+list (It can produce stack overflow with big number of items).
+###############################################################################
+# 2009/09/08 | Joram 5.2.5 tag.
+###############################################################################
++==============================================================================
+| 2009/09/04 | Adriana Danes - Bull S.A. 
++------------+-----------------------------------------------------------------
+ Bug fix in Joram Adapter: Avoid a NPE when stopping an application with 2 MDBs
+'sharing' a same destination.
++==============================================================================
+| 2009/08/24 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Improves transaction component:
+ - Extends the Transaction interface and extracts a generic common part to all
+ transactions implementation: class AbstractTransaction.
+ - Shares Operation and OperationKey classes.
+ - 1st implementation of optimized transaction component: NGTransaction.
+ Improves Joram's messages storage, uses Transaction.Create operations and
+avoid copy for the body.
++==============================================================================
+| 2009/08/07 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in the SchedulerQueue, reinitializes the scheduler object in order to
+allow a clean restart.
++==============================================================================
+| 2009/07/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix a bug with HA servers: the administration connection still block at
+initialisation. In adminTopicImpl use the clusterId to get the A3CML server's
+structure. This fix allow to get information about the local server but a
+similar problem remain about eventual other HA servers.
++==============================================================================
+| 2009/06/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ In order to avoid MOM malfunctioning verify that the destination identifier
+is valid when setting a DMQ.
+ Resets the deliveryCount attribute when sending a message.
+ In the isUndeliverable method of QueueImpl and ProxyImpl now verify that
+the number of delivery attempts is not greater or equals to the threshold
+(previously strict equality).
++==============================================================================
+| 2009/06/16 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Potential bug fix in AgentId.fromString if the incoming string is empty.
+ 1st version of a component (JoramAdminConnect) allowing the administration
+of Joram through a JMX console. It uses JoramAdmin MBean component to handle
+remote servers.
+ Adds toString method in Queue and Topic administered objects (previously
+defined in Destination superclass).
+ Adds location (server unique identifier) in administered objects MBean name.
+ No longer register MBean of administered objects in AdminWrapper (done by
+JoramAdapter or JoramAdmin JMX component).
++==============================================================================
+| 2009/06/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Improved JMX monitoring for mail destinations.
++==============================================================================
+| 2009/06/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Enhances messages view from queue and subscription in JMX console.
+ Bug fix: Avoid to see all messages related to any user's subscription.
+ Bug fix: Avoid NPE if default DMQ is reseted (set to null).
++==============================================================================
+| 2009/06/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds agent identifier in MBean name (different agents can have the same name).
+ Extends JoramAdapter MBean: getServersIds, getServersNames, etc.
++==============================================================================
+| 2009/06/09 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Javadoc enhancements adn fixes.
++==============================================================================
+| 2009/06/05 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Administration interactions with a wrong user don't hang anymore and an
+understandable response is returned.
+###############################################################################
+# 2009/06/04 | Joram 5.2.4 tag.
+###############################################################################
++==============================================================================
+| 2009/06/04 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in JoramSaxWrapper: Using a LocalConnection in XML script starts the
+connection before to create the AdminWrapper (avoid a deadlock).
++==============================================================================
+| 2009/05/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: A ClassCastException occurs in XAContext.addSendings during
+XAResourceMngr.end call. The real type of vector element is not a JMS message
+but the shared structure used in the protocol.
++==============================================================================
+| 2009/05/29 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds ResolverRepository and Resolver classes in order to allow packaging of
+Joram in multiples bundles.
++==============================================================================
+| 2009/05/19 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: a deadlock could occur in PoolNetwork on a failing network.
+ Avoid lengthy connection close operation if connection is broken and factory
+parameter 'connectingTimer' was set.
++==============================================================================
+| 2009/05/18 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Removes unused classes: Platform administration scripts and AgentAdmin.
+ Fix potential NPE with HttpNetwork defined without any server.
+ Improve Joram administration connection and server stop, trying to avoid
+ConnectException.
+###############################################################################
+# 2009/05/14 | Joram 5.2.3 tag.
+###############################################################################
++==============================================================================
+| 2009/05/13 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in DefaultConnectionManager class: Avoid class cast exception in
+allocateConnection method (objects returned by create methods are in fact
+AbstractConnectionFactory).
+ JoramAdapter: Removes stack trace printing when XML configuration file is not
+found.
+ Bug fix: If the internal AdminWrapper object is closed the AdminModule static
+one is used.
++==============================================================================
+| 2009/05/13 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix initialization of collector destination.
++==============================================================================
+| 2009/05/12 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fixes in AgentServer initialization: Initializes the transaction component
+before the configuration reading and reads the configuration through the
+transaction (otherwise modifications in the transaction log could not be read).
+ Bug fixes in HttpNetwork reconfiguration: In ServerConfigHelper.addServer
+replaces test to add the server to the MessageConsumer (use hops rather than
+gateway attribute, gateway is defined for 'client' servers of HttpNetwork
+domains).
++==============================================================================
+| 2009/04/24 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Improves Strings utility class.
+ JoramAdmin.cfg file is no longer supported.
+ Fix logging level to DEBUG for unregisterMBean.
++==============================================================================
+| 2009/04/23 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Use ServerSocketFactory class.
++==============================================================================
+| 2009/04/17 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Changes logger naming pattern, no longer use JoramTracing class.
+ Handles reflection errors in JoramSaxWrapper during connection factories
+creation.
+###############################################################################
+# 2009/04/16 | Joram 5.2.2 tag.
+###############################################################################
++==============================================================================
+| 2009/04/16 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Removes undesirable static reference to SocketFactory14 in SocketFactory.
+ Avoid infinite loop in SocketFactory creation if default class is unavailable.
+ Adds ServerSocketFactory facility.
++==============================================================================
+| 2009/04/07 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Use a global configuration object to get all joram specific properties.
+ No longer modify the system properties.
++==============================================================================
+| 2009/03/31 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds JMX monitoring for connections. Additionally, a server can now be
+deactivated to avoid creation of new connections.
++==============================================================================
+| 2009/03/30 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adapts Joram's bundles to OSGi 4.1 specification.
+ Use of Felix 1.4.1.
+ Fit to the new administration API of Joram.
++==============================================================================
+| 2009/03/25 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Change administration software architecture:
+ - AdminRequestor objects to manage administration requests over a Joram
+ connection,
+ - AdminWrapper objects to perform administration actions to a Joram server,
+ - AdminModule for compatibility reasons (static administration interface),
+ - JoramAdmin for JMX administration.
+ Allows pending message observation in queue mbean (Shared MessageJMXWrapper
+with subscriptions.
++==============================================================================
+| 2009/03/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds default hostname (localhost) and port (16010) properties in connection
+factories. Use these properties for ConnectionFactory.create method with no
+parameter.
++==============================================================================
+| 2009/03/09 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Merges unified, queue and topic connection factories.
+ Queue and topic connection factories are now deprecated.
+###############################################################################
+# 2009/03/04 | Joram 5.2.1 tag.
+###############################################################################
++==============================================================================
+| 2009/02/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds a magic number to identify Joram version's protocol.
+ Improves the Identity serialization in order to allow dynamic handling of
+identities.
++==============================================================================
+| 2009/02/24 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix potential error fixing the acknowledge mode in JoramAdapter.
++==============================================================================
+| 2009/01/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix potential NPE in JoramAdapter.endpointActivation method during the
+destination creation.
++==============================================================================
+| 2008/12/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix potential problems with unknown servers in case of dynamic reconfiguration
+(adding and removing servers).
+ Adds JGroups.MCastAddr property.
++==============================================================================
+| 2008/11/28 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix a potential bug in JNDI: declare TcpRequestNot non persistent to avoid
+ a swap-out (This notification contains a socket and cannot be serialized).
++==============================================================================
+| 2008/11/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: No longer generates an error message when a contextual class loader
+ is needed for ObjectMessage.getObject.
++==============================================================================
+| 2008/11/27 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Using SimpleNetwork could lead to message loss in some rare cases.
++==============================================================================
+| 2008/11/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ No longer get full message in administration method when only header or
+ properties are required.
++==============================================================================
+| 2008/10/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in DestinationImpl: returns all defined rights for MBean.
++==============================================================================
+| 2008/10/22 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ New architecture for the Scheduler (remove the agent dependencies):
+ - modify the scheduler queue.
+ - add cron sample.
++==============================================================================
+| 2008/10/20 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add a Collector destination allowing to gather data and spread it through JMS
+messages.
+ Provides a new CLDC kJoram component:
+ - remove the old SOAP kjoram code (kjoram, kjndi and ksoap packages in
+   com.scalagent).
+ - move the new kJoram code in joram/kjoram project.
++==============================================================================
+| 2008/10/13 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ New architecture for authentication capability:
+ - set by default user/password authentication (SimpleIdentity).
+ - add JAAS authentication based on JOnAS remoteLoginModule (JonasIdentity).
++==============================================================================
+| 2008/10/13 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Correctly handle null value for outLocalAddress in FactoryParameters.
++==============================================================================
+| 2008/10/02 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: always call onException on closed connection (DemultiplexerDaemon).
+ +==============================================================================
+| 2008/09/30 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix logging level for errors during JMX registering in Queue and Topic client
+objects.
++==============================================================================
+| 2008/09/29 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ - RequestMultiplexer: cancel timer on connect exception.
+###############################################################################
+# 2008/09/16 | Joram 5.1.0 tag.
+###############################################################################
++==============================================================================
+| 2008/09/11 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ - shared.Message : changes serialVersionUID value.
++==============================================================================
+| 2008/09/11 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ - New MonitoringTopic: a special topic used to monitor any parameter accessible
+ with JMX.
+ - SoftReference can be used for messages waiting on the JORAM server using
+ org.objectweb.joram.mom.messages.SWAPALLOWED property.
+ - Bug fix: Message blocked in one queue of a cluster queue after visiting
+ others.
+ - Bug fix: nbMaxCnx now adjust dynamically to the number of servers in
+ PoolNetwork if not fixed.
+ - Various bug fixes.
++==============================================================================
+| 2008/09/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in PoolNetwork: avoid deadlock with low value of flow-control.
++==============================================================================
+| 2008/09/03 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Restarting of the UDPNetwork error.
++==============================================================================
+| 2008/08/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in RA: avoid a thread leak during the cleaning of invalid connections.
++==============================================================================
+| 2008/08/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Bug fix: correctly set topicActivationThreshold and topicPassivationThreshold
+attributes in Joram JMS Session.
+2. Adds compression and flow control in PoolNetwork.
++==============================================================================
+| 2008/08/06 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Changed message error properties. JMS_JORAM_ERRORCOUNT, JMS_JORAM_ERRORCAUSE_X
+ and JMS_JORAM_ERRORCODE_X are now used instead of old JMS_JORAM_DELETEDDEST,
+ JMS_JORAM_NOTWRITABLE, JMS_JORAM_EXPIRED, JMS_JORAM_UNDELIVERABLE.
++==============================================================================
+| 2008/08/06 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. PoolNetwork:
+  - Add parallelism to send message (PoolSender).
+  - modify active sessions
+  - synchronize open and close sessions
+  - fix set nbMaxCnx.
+  - add number of buffering messages (Sender in PoolNetwork)
+2. Network:
+  - log setProperties.
++==============================================================================
+| 2008/07/04 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ DMQ now behaves like a standard queue. This allows DMQ chaining.
+###############################################################################
+# 2008/04/24 | Joram 5.0.9 tag.
+###############################################################################
++==============================================================================
+| 2008/04/23 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+----------------------------------------------------------------
+ Bug fix: ConsumerDaemon can not start immediately after finish.
++==============================================================================
+| 2008/04/22 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add a Network component over UDP.
++==============================================================================
+| 2008/04/21 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Engine: Fix a potential bug with a malformed message (should never happened).
+2. Debug: Improve internal PrivateLogger class in order to allow level handling.
+3. Report minor modifications from SADT base.
++==============================================================================
+| 2008/04/18 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+----------------------------------------------------------------
+1. AdminTopicImpl:
+  - change visibility of doProcess(CreateUser and SetRight).
+  - add creatDestination method.
+2. Destination and UserAgent:
+  - Bug fix: jmx register (osgi used).
+3. ConfigController
+  - Add envProperties.
+  - Allows NBDaemon reconfiguration with HTTPNetwork (report from SADT base).
+4. Network:
+  - Define a setProperties method allowing overloading in subclasses.
++==============================================================================
+| 2008/04/14 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Joram administration:
+   - Remove static public access to AdminTopicImpl object.
+   - Change way to retrieve AdminTopic id.
+2. NTransaction:
+   - Bug fix: no longer call System.exit on fatal error during initialization.
+3. JNDI:
+   - Bug fix: no longer throw an Error in case of fatal error. Rather throw a
+   NamingException to allow the engine running.
+4. HttpNetwork: Factorizes the code allowing to close the connections.
+5. Javadoc enhancement:
+6. Logging enhancement.
++==============================================================================
+| 2008/03/28 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Add JMX MBean for JNDI.
+2. Finish implementation of changeOwner (JMX used).
++==============================================================================
+| 2008/03/03 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+HA: In collocated mode, if haURL is set, the adapter start 
+    in HATcp mode instead HALocal mode.
+Bug fix: jgroups disconnect, test channel before send. 
+###############################################################################
+# 2008/02/14 | Joram 5.0.8 tag.
+###############################################################################
++==============================================================================
+| 2008/02/04 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Joram reconfiguration:
+   - Bug fix when adding/removing a server in a PoolNetwork domain.
+   - Allows to specify the network component when adding a domain.
+   - Stop then start the domain when adding or removing a server.
+   - Bug fix on stop/start for SimpleNetwork and PoolNetwork components.
+2. Clustered destinations:
+   - Bug fix in creation of clustered destinations with XML script: adds a
+     configure op�rations in order to fix rights.
+   - Bug fix: implements setFreeReading and setFreeWriting operations for
+     clustered destinations.
++==============================================================================
+| 2008/02/07 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Add HADistributedJndiServer.
+2. JoramSaxWrapper: add HA connect for admin module.
+3. Add HA jndi sample.
+4. Bug fix: HAEngine commit.
+   ReplicationManager test servers in InitJndiServerNot react.
+5. Modify JMXServer to use Joram RA in BEA Weblogic.
++==============================================================================
+| 2008/01/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: restart topic cluster error.
++==============================================================================
+| 2008/01/10 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds forwarding of the expired messages to the DMQ within the networks,
+instead of simple deletion.
++==============================================================================
+| 2008/01/07 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add jndi2/hascn.
+ Bug fix : HA.
+###############################################################################
+# 2007/12/19 | Joram 5.0.7 tag.
+###############################################################################
++==============================================================================
+| 2007/12/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Joram TCP connection:
+   - Use SocketFactory to solve compatibility issues.
+   - Adds multiple TCP parameters in FactoryParameters : TcpNoDelay, SoLinger
+     and SoTimeOut.
+   - Allows binding for local socket through outLocalAddress and outLocalPort
+     attributes in FactoryParameters.
+2. JNDI TCP connection:
+   - Use SocketFactory to solve compatibility issues.
+3. Network components
+   - Use SocketFactory to solve compatibility issues.
+   - Allows binding for socket through inLocalAddress, outLocalAddress and
+     outLocalPort properties.
+   - Adds specific MBeans for PoolNetwork monitoring.
++==============================================================================
+| 2007/12/06 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: avoid "IllegalStateException: Timer has been cancelled" during
+restart. 
++==============================================================================
+| 2007/12/10 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add asynchronous subscription request.
++==============================================================================
+| 2007/11/27 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add handling of TTL and priority of the JMS messages in the Notifications
+  (ClientMessages and TopicMsgsReply). Expired messages are no more transmitted
+  by the network.
+ JMX enhancement: ClientSubscriptionMBean added
+ Various bug fixes in Queue and DeadMQueue when counting received/delivered
+  messages
++==============================================================================
+| 2007/11/05 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add MySQLDBTransaction and DerbyDBTransaction (DBTransaction is made abstract)
++==============================================================================
+| 2007/10/05 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: in selector 
+   identifier [NOT] IN (string-literal1, string-literal2,...)
++==============================================================================
+| 2007/10/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: handling of HA connection factories through JNDI. ObjectFactory
+needs a default empty constructor.
++==============================================================================
+| 2007/10/02 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Synchronization issue in Connection with id generation. Now use an
+AtomicCounter class.
++==============================================================================
+| 2007/09/28 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Removes NPE during getThreshold if threshold is not set.
+ AbstractJmsMessage: Fix try/finally to avoid NPE hiding.
++==============================================================================
+| 2007/09/26 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ add serialVersionUID.
+###############################################################################
+# 2007/09/25 | Joram 5.0.6 tag.
+###############################################################################
++==============================================================================
+| 2007/09/22 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in SimpleNetwork reconnection after a long failure of the remote node.
++==============================================================================
+| 2007/09/20 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Allows default configuration for DMQ and threshold in XML scripts.
++==============================================================================
+| 2007/08/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Removes ':' characters in message id created by the AdminTopic.
+The ':' character is forbidden by Windows file system and it leads to
+persistancy fault.
+###############################################################################
+# 2007/08/07 | Joram 5.0.5 tag.
+###############################################################################
++==============================================================================
+| 2007/08/03 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: test null value in code method for Soap encoding.
++==============================================================================
+| 2007/07/31 | Badolle fabien - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+  Bug fix:  AddServerRequest : duplication in readFrom of domainName
++==============================================================================
+| 2007/07/31 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ AgentServer.ServerStopper thread is no longer a daemon in order to allow the
+termination process finalization.
+ Bug fix: tests null return from QueueImpl.getClientMessages in
+ClusterQueueImpl.getClientMessages method.
++==============================================================================
+| 2007/07/31 | Badolle fabien - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+  Bug fix: initialization of connection parameter in XoramAdmin
++==============================================================================
+| 2007/07/31 | Badolle fabien - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Bug fix: after close connection, all temporary topic was not delete. 
+(using Enumeration of a vector, and delete elements of this vector)
+Replace getTempDestinations in ClientContext.
++==============================================================================
+| 2007/07/25 | Badolle fabien - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+  Add perf tests in Xoram. Add admin in existing test
++==============================================================================
+| 2007/07/12 | Guillaume Sauthier - Bull S.A.S 
++------------+-----------------------------------------------------------------
+ add maven install and deploy.
++==============================================================================
+| 2007/07/12 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Implements the Xoram Administration.
++==============================================================================
+| 2007/07/11 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ - Implement Externalizable and Streamable for Administration instead 
+   of Serializable.
+ - Bug fix: delete destination.
+###############################################################################
+# 2007/07/10 | Joram 5.0.4 tag.
+###############################################################################
++==============================================================================
+| 2007/07/10 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: remove many deliver messages (same messages) in Message Driven Bean.
+ AdministeredObject implements Serializable (need by destination Queue and
+ Topic).
++==============================================================================
+| 2007/06/28 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Implements Serializable interface in AdministeredObjetcs in order to fit the 
+JNDI specification.
+###############################################################################
+# 2007/03/27 | Joram 5.0.3 tag.
+###############################################################################
++==============================================================================
+| 2007/06/27 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Re-architecture DeadMessageQueue MBean.
++==============================================================================
+| 2007/06/25 | Fabien Badolle - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ bug fix : jndi : loose coupling
+ add more test
+ xoram : add framework test 
++==============================================================================
+| 2007/06/22 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Bug fix: set cluster right.
+==============================================================================
+| 2007/06/21 | Fabien Badolle - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+  Bug fix: QueueImpl :  checkDelivery was call with wrong signature 
+==============================================================================
+| 2007/06/04 | Fabien Badolle - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+  add several test (in joram/test/src)
+==============================================================================
+| 2007/06/04 | Fabien Badolle - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+  (JNDI) Modification of context's contrainst : loose coupling
++==============================================================================
+| 2007/05/02 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: The Queue agent was not stored after receiving a message,then the
+arrival counter is not correct after a reload. 
++==============================================================================
+| 2007/05/02 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ New architecture for JMS bridge.
+ Add XA transaction handling for JMS bridge.
+ Bug fix: in Joram XA Transaction handling.
++==============================================================================
+| 2007/04/20 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: scn createSubcontext, JoramAdapter ClassCast with ClusterQueue, ...
+==============================================================================
+| 2007/04/19 | Fabien Badolle - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Correction of problem during the replication of subscriptions.
+ Modification of the readBag and writeBag methods in the class ProxyImpl
++==============================================================================
+| 2007/04/12 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ New architecture for Joram destinations and Implementations.
+ Bug fixes.
+###############################################################################
+# 2007/03/27 | Joram 5.0.2 tag.
+###############################################################################
++==============================================================================
+| 2007/03/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Use an AbstractConnectionFactory factorizing code between connections
+factories.
+ Use of inheritance and reflection for generic handling of JNDI references.
+ Adds clustering facilities in administered objects: connection factories and
+destinations.
+###############################################################################
+# 2007/03/05 | Joram 4.3.25 tag.
+###############################################################################
++==============================================================================
+| 2007/03/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Minor fix, NTransaction.setMaxLogMemorySize use Mb rather than Kb.
++==============================================================================
+| 2007/02/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Avoid useless socket creation on connection error (HttpNetwork component).
++==============================================================================
+| 2007/01/30 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in handling of byte array as object.
++==============================================================================
+| 2007/01/22 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Allow to fix SO_TIMEOUT on StreamNetwork.
++==============================================================================
+| 2007/01/12 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fixes in JMS message handling:
+ -1- Avoid NPE if message's body is null.
+ -2- Catch NPE in Session.run to avoid MDB blocking.
++==============================================================================
+| 2007/01/11 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fixes in acknowledge handling of HttpNetwork.
+###############################################################################
+# 2006/11/23 | Joram 4.3.24 tag.
+###############################################################################
++==============================================================================
+| 2006/10/23 | Helene Joanin - Bull S.A.
++------------+-----------------------------------------------------------------
+ toString and hashcode opttimization in Connection object.
++==============================================================================
+| 2006/11/23 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Allows to asynchronously garbage the Transaction log file.
++==============================================================================
+| 2006/11/23 | Daniel Patterson -  
++------------+-----------------------------------------------------------------
+ Fixes compatibilty issues with other JMS provider: allow to set JMSDestination
+with non Joram destination, and to convert messages with 'JMS_' properties.
++==============================================================================
+| 2006/11/22 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fixes: really remove messages on disk in clear and deleteMessage methods.
+Previously the messages come back after server retart.
+###############################################################################
+# 2006/11/17 | Joram 4.3.23 tag.
+###############################################################################
++==============================================================================
+| 2006/11/17 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Enhancements in mail destinations.
+ Adds a mail sample.
++==============================================================================
+| 2006/11/14 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fixes in SimpleNetwork. A synchronization issue may result in a message
+lost in case of network failures.
++==============================================================================
+| 2006/11/07 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+  Adds periodic cleaning task for subscriptions.
+###############################################################################
+# 2006/10/24 | Joram 4.3.22 tag.
+###############################################################################
++==============================================================================
+| 2006/10/24 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Take in account topicAckBufferMax parameter in MessageConsumerListener.
++==============================================================================
+| 2006/10/23 | Benoit Pelletier - Bull S.A.
++------------+-----------------------------------------------------------------
+ Fix Jonas Bug#306288: Avoid NPE if the LogWriter of JCA connector is null.
++==============================================================================
+| 2006/10/12 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds DeadMQueue.create methods allowing to internally name the queue. It
+fixes an issue with Jonas. 
++==============================================================================
+| 2006/09/22 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Apply a patch from Mark Anderson to add a timeout in Requestor.request.
+###############################################################################
+# 2006/09/21 | Joram 4.3.21 tag.
+###############################################################################
++==============================================================================
+| 2006/09/21 | Benoit Pelletier - Bull S.A. 
++------------+-----------------------------------------------------------------
+ Fix Jonas Bug#305882: Get readers and writers in toXml method.
++==============================================================================
+| 2006/09/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds new specific destinations: MailQueue, MailTopic and FTPQueue.
+ Changes log level for Channel.post if server is unknow: Error -> Warn.
++==============================================================================
+| 2006/09/19 | Philippe Coq - Bull S.A. 
++------------+-----------------------------------------------------------------
+ Fix: No longer removes durable subscription on consumer close (MDB undeploy).
++==============================================================================
+| 2006/09/18 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix: Avoid NPE on Session.unsubscribe with null subscription name.
++==============================================================================
+| 2006/09/06 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in ObjectMessage: ClassLoader.loadClass seems no longer work
+with JDK1.6.
++==============================================================================
+| 2006/09/06 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+1- Fix bugs:
+ - Warning "Context is closed or broken" 
+   because of connection closed twice (ReliableConnectionContext.getRequest())
+ - jonas bug 306110: Nullpointer in RequestMultiplexer.cleanup()
+2- Add setters in ClusterQueueImpl (mom.dest).
+3- Change log levels in ProxImpl.
+###############################################################################
+# 2005/08/03 | Joram 4.3.20 tag.
+###############################################################################
++==============================================================================
+| 2006/07/31 | Benoit Pelletier - Bull S.A.
++------------+-----------------------------------------------------------------
+ Allows activation of HA mode with Joram RA.
+ Dynamic loading of configuration file through the MBean.
+ Bug fix: handling of exception in MDB onMessage method (bug JOnAS #305389).
+###############################################################################
+# 2005/07/11 | Joram 4.3.19 tag.
+###############################################################################
++==============================================================================
+| 2006/06/27 | Benoit Pelletier - Bull S.A.
++------------+-----------------------------------------------------------------
+ Adds XML export facilities for Joram's destinations.
++==============================================================================
+| 2006/06/22 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: due to a bad merge since 4.3.12 a simple socket was created
+rather than a SSL one.
++==============================================================================
+| 2006/06/16 | Benoit Pelletier - Bull S.A.
++------------+-----------------------------------------------------------------
+ RAConfig: Adds a temporary directory to extract files in RAR.
+           Fix bug in JDK1.5 about XML generation.
++==============================================================================
+| 2006/06/16 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+Fix bugs in:
+1- Connection.createDurableConnectionConsumer()
+2- Daemon.isCurrentThread()
++==============================================================================
+| 2006/06/14 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Changes the creation and initialization process for destination in order
+to obtain more genericity and configuration.
+ Adds periodic cleaning task for queue (shared by ClusterQueue).
++==============================================================================
+| 2006/06/07 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+1- Connector: enable to set the ack mode, maxMessages (ActivationSpecImpl).
+2- Connector: fix a bug in the session pool management (InboundConsumer) 
+              when the pool size is not limited: sessions were not released 
+              after being used.
+              Also changed the way it works: now it uses the pool also in the 
+              unlimited case.
+3- Connector: enable to set the queueMessageReadMax, topicAckBufferMax,
+              topicPassivationThreshold, topicActivationThreshold,
+              asyncSend, multiThreadSync, multiThreadSyncDelay (JoramAdapter).
+4- Merge the standard JMS listener (MessageConsumerListener) and the
+   ASF listener (ConnectionConsumer): new classes SingleSessionConsumer and
+   MultiSessionConsumer.
+5- RequestMultiplexer: set the name of the demultiplexer daemon with
+   the connection and user proxy ids.
+6- ConsumerUnsetListRequest becomes asynchronous.
+7- Fix bug for grouped requests in asyncSend case (RequestBuffer, DestinationImpl).
++==============================================================================
+| 2006/05/29 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Admin tool: set the internal name of the destinations
++==============================================================================
+| 2006/05/24 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+1- Fix bug in Session and MessageConsumer: 
+   Concurrent receive and close on a MessageConsumer leads to a deadlock.
+2- Fix bug in ReliableTcpClient.send(): reconnection not done.
+3- Fix bug in HAEngine: remove AgentFactory from the HAStateReply
+   (the agent factory was initialized several times leading to a JMX exception)
+4- Fix bug in Scheduler: don't react to DriverDone 
+   (the scheduler stops when restarting an agent server)
+5- Fix bug in SchedulerQueueImpl: accepts non-scheduled messages
+6- Fix Bug in Session: make commit atomical.
+7- Optimizes scheduler queue: remove the property SCHEDULED (and the save)
+   from the class SchedulerQueueImpl
+8- Enables a distributed Jndi server to recover from a persistent storage loss.
+9- Implements the feature 'multiThreadSync'
+10- Implements the feature 'topicActivationThreshold'
+11- Implements toReference(), toHashtable() and fromHashtable() into
+    FactoryParameters
+12- Implements the feature 'topicAckBufferMax'
+13- Merges the feature 'lazyAck' and DUPS_OK_ACKNOWLEDGE
+14- Implements the feature 'queueMessageReadMax'
+15- Fix bug in HALocalConnection (connect)
+16- Implements the feature 'multiCnxSync'
+17- Improve the connection management in UserAgent (remove duplicated code)
+18- CloseCnxReply is sent by the ProxyImpl (and not by UserAgent)
+19- Remove the useless calls to setNoSave() in UserAgent
+20- Fix bug in QueueImpl (grouped receive)
+21- Fix persistency in ProxyImpl, ClientSubscription and ClientContext
+22- Changes Notification.toString() signature
+23- Fix Session.commit() atomicity.
+24- Implements the 'asyncSend' feature
++==============================================================================
+| 2006/05/12 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Optimize proxy's behavior with durable subscription (do not save message that
+will be delivered to a non durable even if it exists durable).
+###############################################################################
+# 2005/05/09 | Joram 4.3.18 tag.
+###############################################################################
++==============================================================================
+| 2006/05/09 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Changes NTransaction architecture to expose a Repository interface; then
+implements a File and DB repository (using Derby).
+ Implements a DBTransaction (using Derby).
+ Fix: allows the AgentServer to restart after a bad start. Allows the JCA
+connector to be undeployed then redeployed.
+ Implements multi-threading in HttpNetwork server part.
+###############################################################################
+# 2005/04/12 | Joram 4.3.17 tag.
+###############################################################################
++==============================================================================
+| 2006/04/12 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+Bug fix: run onException in a separate thread to avoid deadlock in
+connector onException method (synchronized).
+###############################################################################
+# 2005/04/11 | Joram 4.3.16 tag.
+###############################################################################
++==============================================================================
+| 2006/04/10 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+1- Fix bugs in RequestMultiplexer: 
+   a- call local close() first and then the connection close().
+   b- don't reschedule the heart beat task (forbidden by java.util.Timer)
+2- Fix bug in ReliableTcpClient: send() reconnects only if reconnect true.
+   If an error is raised, close the client.
+###############################################################################
+# 2005/03/06 | Joram 4.3.15 tag.
+###############################################################################
++==============================================================================
+| 2006/04/06 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+1- Fix bug in org.objectweb.joram.mom.proxies.tcp.TcpReader (canStop not
+   properly assigned -> InterruptedIOException raised when stopping Joram)
+2- Fix synchronization of close() in Connection, Session and MessageConsumer
+   (org.objectweb.joram.client.jms): instantiate closer in constructor.
+   org.objectweb.joram.client.jms.connection.RequestMultiplexer is also 
+   fixed in order to prevent deadlock between concurrent call to 
+   Connection.close()
+3- Fix bug in org.objectweb.joram.client.jms.MessageConsumerListener: sending
+   ConsumerUnsetListRequest is useless for a Topic and raises an 
+   InvalidDestinationException.
+   Comment the request reaction in ProxyImpl.
++==============================================================================
+| 2006/04/03 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Report a configuration feature in JNDI: Allow to set SO_TIMEOUT TCP parameter
+on the client's socket throught fr.dyade.aaa.jndi2.socketTimeOut (by default
+0 for an infinite timeout).
+ Fix a potential deadlock in acknowledge handling between client and server
+reader anad writer thread.
++==============================================================================
+| 2006/03/28 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+Fix bug in fr.dyade.aaa.util.ReliableTcpConnection (deadlock with server)
+###############################################################################
+# 2005/03/14 | Joram 4.3.14 tag.
+###############################################################################
++==============================================================================
+| 2006/03/14 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Adds SchedulerQueue.
+ Adds exiration time for notifications.
+ Many improvments in network architecture.
++==============================================================================
+| 2006/03/11 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Adds markup "deletedDest" in proxy before forwarding messages
+to DeadMessageQueue if any.
+ Bug fix: Removes expiration time before storing message in DMQ.
+###############################################################################
+# 2005/03/06 | Joram 4.3.13 tag.
+###############################################################################
++==============================================================================
+| 2006/02/28 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Adds LGPL and Notice files in ship.
+ Adds manifest with version in jars.
+ Bug fix: Throw DestinationException on sending even if the connection is
+not started.
++==============================================================================
+| 2006/02/27 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Moves round-robin connection algorithm (for HA) from SimpleNetwork to
+StreamNetwork (now shared for all networks).
++==============================================================================
+| 2006/02/14 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Improvment about Heart-Beat: time during the client try to reconnect, and
+the server keep the context.
+ Fix in MessageConsumer closing (method doClose).
++==============================================================================
+| 2006/02/13 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes in JNDI:
+- Channel deadlock if problem during deserialization of request.
+- Unknown agent on race condition at starting.
++==============================================================================
+| 2006/02/10 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Best cleaning and stop of Joram's connection.
+ Adds RegisterDestNot handling.
+ Allows stop and reset of server.
++==============================================================================
+| 2006/01/30 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: retrieves cnxPendingTimer and txPendingTimer ConnectionFactory's
+parameters through JNDI.
++==============================================================================
+| 2006/01/24 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Best cleaning of expired request and messages.
+###############################################################################
+# 2005/01/19 | Joram 4.3.12 tag.
+###############################################################################
++==============================================================================
+| 2006/01/17 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Report unknown destination to message producer, either throw an
+exception if the destination is local, or call the exception listener if any.
++==============================================================================
+| 2006/01/10 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Avoid OutOfRange exception (DestinationPanel.setDestination) in
+administration GUI.
+ Adds the handling of queueMsgCount property in J2EE environment.
++==============================================================================
+| 2006/01/06 | Alex Porras - MediaOcean
++------------+-----------------------------------------------------------------
+ Allows to bind Joram to a single IP address in multi-homed host. An optional
+IP address can be passed in argument of the Joram TCP or SSL service.
++==============================================================================
+| 2005/12/12 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix: Correct the Ant target for SSL sample.
++==============================================================================
+| 2005/12/07 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Allows multiples 'client' in an Http(s)Network, the unique 'listen' server
+routes messages between 'client' servers.
++==============================================================================
+| 2005/11/18 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Adds the HttpsNetwork component.
++==============================================================================
+| 2005/11/15 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Adds a timeout property for jndi2 connection: its default value is 0, and its
+name fr.dyade.aaa.jndi2.client.SimpleNamingConnection.timeout.
++==============================================================================
+| 2005/11/09 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Avoid to load then store all messages contained in a queue at
+startup.
++==============================================================================
+| 2005/11/04 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Soap serialization problem with Message, NPE if mapBody is null.
+###############################################################################
+# 2005/11/07 | Joram 4.3.11 tag.
+###############################################################################
++==============================================================================
+| 2005/11/07 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Add sample for new administration xml file (classic, cluster and DMQ).
+ Add methode to update joram-admin.cfg and joramAdmin.xml in connector/utils
+ (used by JOnAS).
+###############################################################################
+# 2005/10/25 | Joram 4.3.10 tag.
+###############################################################################
++==============================================================================
+| 2005/11/03 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Avoid endless retry during connection in non HA mode.
+ Adds PoolNetwork in default shipment.
++==============================================================================
+| 2005/11/02 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ New administration xml file for Joram (joramAdmin.dtd/xml).
+ Provide creation, deployment and bind of destination, connectionFactory 
+ and user.
++==============================================================================
+| 2005/10/25 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: don't throw NPE iin getMessageListener if none is set.
+###############################################################################
+# 2005/10/25 | Joram 4.3.9 tag.
+###############################################################################
++==============================================================================
+| 2005/10/25 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Due to the '#' removal in message identifier, the nolocal property
+was no longer working. Change the filtering of message identifier in
+ClientSubscription.
+###############################################################################
+# 2005/10/13 | Joram 4.3.8 tag.
+###############################################################################
++==============================================================================
+| 2005/10/20 | Benoit Pelletier - Bull S.A.
++------------+-----------------------------------------------------------------
+ Bug fixes: set serverName and serverPort variables to specific value, in
+order to retrieve connections in pool.
++==============================================================================
+| 2005/10/20 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Automatically process provider major and minor Version.
+ Use default version number from build.properties.
++==============================================================================
+| 2005/10/18 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Soap serialization problem with MapMessage.
+###############################################################################
+# 2005/10/13 | Joram 4.3.7 tag.
+###############################################################################
++==============================================================================
+| 2005/10/13 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: avoid NullPointerException in case of acknowledgment of an
+inexistent message.
+ Bug fixes: avoid sharing of message structure between different messages in
+MOM; clone the MessagePersistent and correctly set the message field.
+ Removes '#' character in Message unique identifier.
+###############################################################################
+# 2005/10/05 | Joram 4.3.6 tag.
+###############################################################################
++==============================================================================
+| 2005/10/05 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Removes readMessage in QueueMBean in order to cut out dependancy to
+the JMS API. Replaces it by getMessageDigest, getMessageHeader and
+getMessageProperties.
++==============================================================================
+| 2005/10/03 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Adds resetPropertiesRO method to Message class.
+ Fix MaxNumberOfWorks default value to 10.
++==============================================================================
+| 2005/09/30 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: Memory leak in Joram adpater. With maxWorks parameter set to 0
+(no limit) the pool is not used, InboundSessions are alwaye created, inserted in the pool and never garbaged.
+###############################################################################
+# 2005/09/19 | Joram 4.3.5 tag.
+###############################################################################
++==============================================================================
+| 2005/09/10 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Use the ExceptionListener if any in case of connection problem.
+ Bug fixes.
++==============================================================================
+| 2005/08/22 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: set reliableClass property in getReference.
+###############################################################################
+# 2005/08/03 | Joram 4.3.4 tag.
+###############################################################################
++==============================================================================
+| 2005/08/03 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes (appear with collocated).
+  -clone message before send.
+  -set read only message after receive
+###############################################################################
+# 2005/06/24 | Joram 4.3.2 tag.
+###############################################################################
++==============================================================================
+| 2005/06/17 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes in HA.
+  -add readBag and writeBag methods in joram.mom.proxies.ClientSubscrition
+  -reconnect set endTime to MaxValue if cnxPendingTimer=0
++==============================================================================
+| 2005/06/14 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ add sample HA.
++==============================================================================
+| 2005/06/07 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Performence improvement:
+   Optimize management of transient message.
+   Save Message and Agent only if it is necessary.
++==============================================================================
+| 2005/06/07 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Update javagroups-all to jgroups-all.
+ add commons-logging-api.jar.
++==============================================================================
+| 2005/05/19 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Add feature Nb max message in destination, and add statistic.
+ JMX improvment:
+  - client side: manage Queue, Topic, User, Admin, ...
+  - replace in connector Local... and Remote... MBean by JoramAdapteMBean.
+  - server side: statistic, ...
+  - ship: move com.scalagent.jmx and fr.dyade.aaa.util.management 
+    in joram-shared.jar.
++==============================================================================
+| 2005/05/19 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ fix bug in DestinationImpl sendToDMQ method.
++==============================================================================
+| 2005/04/08 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Move management package from fr.dyade.aaa.agent to fr.dyade.aaa.util.
+###############################################################################
+# 2005/06/02 | Joram 4.3.1 tag.
+###############################################################################
++==============================================================================
+| 2005/06/02 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes and optimizations: NTransaction behavior with big messages.
+ Optimizations: Engine, stamp saving for non persistent messages.
+ NTransaction: Adds comments and JavaDoc. Adds statistics.
+               Allow to not use lockfile.
++==============================================================================
+| 2005/05/27 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ no optimization (lazy ack)
++==============================================================================
+| 2005/05/19 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ fix bug in DestinationImpl sendToDMQ method.
+###############################################################################
+# 2005/05/10 | Joram 4.3.0 tag.
+###############################################################################
++==============================================================================
+| 2005/05/10 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: NTransaction.getList now parses the log.
++==============================================================================
+| 2005/05/09 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Performance optimizations
+ Zero conf server
++==============================================================================
+| 2005/05/09 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ New feature: SoftReference Messages allowing swap out.
+   Possibility to send large messages.
+   Destinations can store more and more messages. 
+   The messages are not pin in memory.
+ Change message persistance module.
++==============================================================================
+| 2005/05/04 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ New feature: SSL for client-server communications.
+###############################################################################
+# 2005/05/04 | Joram 4.2.3 tag.
+###############################################################################
++==============================================================================
+| 2005/05/04 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix bug in ClientSubscription: Avoid multiples denies.
++==============================================================================
+| 2005/05/03 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix bug in MessageConsumerListener: Avoid messages buffering in queue mode.
++==============================================================================
+| 2005/04/22 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix bug in Message.convertJMSMessage :
+ not throw an JMSException if optional header (JMSX) are set in a non Joram
+ message, just ignore.
+###############################################################################
+# 2005/04/22 | Joram 4.2.2 tag.
+###############################################################################
++==============================================================================
+| 2005/04/22 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix bug in Session setTransacted (deadlock) come from TX SUSPEND.
+ add Joram version in start of JoramAdapter.
+###############################################################################
+# 2005/04/19 | Joram 4.2.1 tag.
+###############################################################################
++==============================================================================
+| 2005/04/19 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix bug in XAResourceMngr (deadlock).
++==============================================================================
+| 2005/04/15 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ change traces in connector and add project name "joram" in build.xml
++==============================================================================
+| 2005/04/08 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Adds JGroups library in shipping.
++==============================================================================
+| 2005/04/08 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Soap encode/decode.
+###############################################################################
+# 2005/03/31 | Joram 4.2.0 release.
+###############################################################################
++==============================================================================
+| 2005/03/31 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: regression in TCK, null testing.
++==============================================================================
+| 2005/03/22 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Adds jmxri.jar in classpath for samples/bin scripts.
++==============================================================================
+| 2005/03/22 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix in HttpNetwork allowing the usage of a (non HTTP 1.1) proxy.
++==============================================================================
+| 2005/03/22 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Admin GUI
+ - Null pointer in popup listener
++==============================================================================
+| 2005/03/21 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Joram client
+ - Deadlock between message listener and concurrent close.
+ - Methods getMetaData from Connection and receiveNoWait from MessageConsumer 
+   throw an IllegalStateException if a connection failure occured 
+   (e.g. TCP failure).
+ Bug fix: Admin GUI
+ - Closing the "abort dialog" aborts the running operation.
+###############################################################################
+# 2005/03/11 | Joram 4.2.0 RC2 release.
+###############################################################################
++==============================================================================
+| 2005/03/04 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Add util to configure the joram adatder resource.
+ create new jar joram-config.jar and joram-raconfig.jar.
+ modify ship.adapter, ship.remoteadapter and ship.jonasadapter.
+ update jonas-ra.xml.
++==============================================================================
+| 2005/02/28 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix, call server.moveToFirst(SocketAddress) until find the good socket 
+ (juste for cluster use).
++==============================================================================
+| 2005/02/24 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ A destination is typed by a string, e.g. "queue.dmq" for a dead message queue.
+ This string is defined both in the class of the "stub" destination object 
+ from the client side and the class of the runtime destination instance from 
+ the server side.
++==============================================================================
+| 2005/02/18 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: no longer initialize 'Bag' agent in setState (HATransactionEngine).
+ JMX improvment:
+        - Servers list and status in SCServer.
+        - Right management in Joram's destinations.
++==============================================================================
+| 2005/02/14 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: HA.
+ Test cluster.properties.size() in the cluster configuration phase, 
+ in AgentServer.java
+ Replace serverCluster by server in a3config.dtd and
+ update sample a3config.dtd.
++==============================================================================
+| 2005/02/18 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Many improvments and bug-fixes in NGNetwork.
++==============================================================================
+| 2005/02/04 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ selector : add joramSelector directory in org/objectweb/joram/shared/selector
+ read joramselector.doc (HowTo generate the joram selector)
++==============================================================================
+| 2005/02/03 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: selector.
+ Encoded string literals as UNICODE.
++==============================================================================
+| 2005/01/28 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Joram client: fix automatic reconnection policy.
+ Administration module: new operations to read/delete messages from 
+subscriptions and queues.
++==============================================================================
+| 2005/01/15 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: JNDI connection closure.
+ Administration GUI: platform dynamic configuration.
++==============================================================================
+| 2005/01/05 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ JDK1.5 compatibility.
+ JMX enhancements.
+###############################################################################
+# 2005/01/10 | Joram 4.2.0 RC1 release.
+###############################################################################
++==============================================================================
+| 2005/01/10 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: topic subscriber not registered (class Session in client/jms).
++==============================================================================
+| 2005/01/07 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Dynamic configuration: Add/Remove Server/domain.
++==============================================================================
+| 2005/01/05 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Provides High-Avaibility version of ScalAgent server, Joram client and
+server.Use JGroups to provide active replication of ScalAgent server (Engine
+and Network synchronization).
+ Architecture and performances improvments in Engine and Network (not
+compatible with previous protocol version).
+ JMS message improvment, numerous bug fixes.
+###############################################################################
+# 2005/01/04 | Joram 4.1.5 release.
+###############################################################################
++==============================================================================
+| 2005/01/04 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Dynamic logging configuration.
++==============================================================================
+| 2004/12/03 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ JDK1.5 compatibility.
+ Adds JMX management: server, engine, network, agent...
+ Transaction: Factorize definition in interface, allows to release a
+non-commited transaction
+ Adds configuration of connection in ra-remote.xml.
+###############################################################################
+# 2004/12/21 | Joram 4.1.4 release.
+###############################################################################
++==============================================================================
+| 2004/12/21 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: invalid mesage removal in ClientSubscription.
+ Code cleaning.
++==============================================================================
+| 2004/12/21 | Nicolas Tachker - Bull S.A.
++------------+-----------------------------------------------------------------
+ add configuration of connectingTimer, cnxPendingTimer and txPendingTimer
+in the connector.
++==============================================================================
+| 2004/12/13 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Defines provider metadata in a unique class.
+ Set default transaction manager NTransaction in the connector.
+ Bug fixes in UserAgent.
+###############################################################################
+# 2004/11/08 | Joram 4.1.3 release.
+###############################################################################
++==============================================================================
+| 2004/11/24 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ JoramAdapter : remove scn:com/ prefix when we register a destination.
+###############################################################################
+# 2004/11/08 | Joram 4.1.2 release.
+###############################################################################
++==============================================================================
+| 2004/11/08 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Changes in TCP connection to improve performances. Be careful, the protocol
+is incompatible with previous versions.
++==============================================================================
+| 2004/11/04 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix bug (NullPointerException) in  OutboundConnectionFactory.java,
+cxManager can be null.
+ Throws a StateException in setCtx(int key) if key <0 (ProxyImpl.java).
++==============================================================================
+| 2004/10/18 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Corrects mistakes in ra.xml and ra-remote.xml files.
+        - Removes empty (and useless) <icon></icon> tags.
+        - Remove spaces and eof lines in the <xxx-class> tags and
+        <xxx-interface> tags.
+###############################################################################
+# 2004/10/13 | Joram 4.1.1 release.
+###############################################################################
++==============================================================================
+| 2004/10/11 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Allows to fix inFlow value through ConnectionManager.inFlow property.
++==============================================================================
+| 2004/10/08 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Allows change of default identity through JoramDfltLogin and
+JoramDfltPassword properties.
+ Changes network architecture:
+	- reconnection after persistancy failure,
+	- suppression of unused components: clock, update, etc.
+==============================================================================
+| 2004/10/01 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Majors changes in network architecture:
+        - Removes old unused components.
+        - Adds PoolNetwork component (beta).
+        - Allows connection of reseted (or non persistent) server.
+        - Numerous fixes. 
+ Allows swap out of messages in message consumer (MessageVector impl.).
++==============================================================================
+| 2004/09/29 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes in RA descriptors.
+ Uses of JAXP classes and interfaces (xerces no more needed).
++==============================================================================
+| 2004/09/22 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes in TCP client/server connection.
++==============================================================================
+| 2004/09/15 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Minor fixes in ship and releases processus.
+###############################################################################
+# 2004/09/13 | Joram 4.1.0 release.
+###############################################################################
+
