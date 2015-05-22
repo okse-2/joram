@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -916,6 +916,8 @@ class Engine implements Runnable, AgentEngine, EngineMBean {
     msg.source = AgentServer.getServerId();
     msg.dest = AgentServer.getServerId();
     msg.stamp = ++stamp;
+    if (stamp == Integer.MAX_VALUE)
+      stamp = 0;
   }
 
   /**
