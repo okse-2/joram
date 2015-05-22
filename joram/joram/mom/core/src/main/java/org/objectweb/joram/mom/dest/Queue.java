@@ -106,7 +106,7 @@ public class Queue extends Destination implements QueueMBean {
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(Queue.class.getName());
-  public static Logger logmsg = Debug.getLogger(Queue.class.getName() + ".TraceMsg");
+  public static Logger logmsg = Debug.getLogger(Queue.class.getName() + ".Message");
   
   public static final String DELIVERY_TABLE_PREFIX = "DT_";
   public static final String ARRIVAL_STATE_PREFIX = "AS_";
