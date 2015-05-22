@@ -146,9 +146,12 @@ public class AliasInQueueTest1 extends TestCase {
       cnx0.close();
 
       int nbtry = 0;
-      while (((list1.count + list2.count) != nbmsg) && (nbtry < 50)) {
+      while (((list1.count + list2.count) != nbmsg) && (nbtry < 30)) {
         Thread.sleep(1000L); nbtry += 1;
       }
+
+      if ((list1.count + list2.count) != nbmsg)
+      	Thread.sleep(2000L);
       
       assertEquals(nbmsg, list1.count + list2.count);
       assertEquals((weight1 * nbmsg)/(weight1 + weigth2), list1.count);
@@ -180,7 +183,6 @@ public class AliasInQueueTest1 extends TestCase {
     public void onMessage(Message msg) {
       try {
         if ((count%1000)== 999) System.out.println(name + ':' + (count+1));
-        //      System.out.println(name + ':' + ((TextMessage) msg).getText());
         count += 1;
       } catch (Exception exc) {
         exc.printStackTrace();

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.dest.AdminTopic.DestinationDesc;
 import org.objectweb.joram.mom.notifications.ClientMessages;
@@ -143,9 +142,6 @@ public class SynchronousAgent extends Agent {
   public synchronized boolean createUser(short serverId, String userName, 
       String password, String identityClass, Properties props)
       throws Exception {
-    if ((userName == null) || userName.equals(""))
-      throw new Exception("User name can not be null or empty");
-
     //Set identity
     Identity identity = (Identity) (identityClass==null?
         SimpleIdentity.class.newInstance():

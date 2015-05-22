@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -76,8 +76,6 @@ import org.objectweb.joram.shared.admin.GetDestinationsReply;
 import org.objectweb.joram.shared.admin.GetDestinationsRequest;
 import org.objectweb.joram.shared.admin.GetDomainNames;
 import org.objectweb.joram.shared.admin.GetDomainNamesRep;
-import org.objectweb.joram.shared.admin.GetJMXAttsReply;
-import org.objectweb.joram.shared.admin.GetJMXAttsRequest;
 import org.objectweb.joram.shared.admin.GetLocalServer;
 import org.objectweb.joram.shared.admin.GetLocalServerRep;
 import org.objectweb.joram.shared.admin.GetRightsReply;
@@ -117,7 +115,6 @@ import fr.dyade.aaa.agent.conf.A3CMLConfig;
 import fr.dyade.aaa.agent.conf.A3CMLDomain;
 import fr.dyade.aaa.agent.conf.A3CMLNetwork;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
-import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * The <code>AdminTopic</code> class implements the administration topic
@@ -622,10 +619,6 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
         doProcess((UserAdminRequest) request, replyTo, msgId);
       else if (request instanceof AdminCommandRequest)
         doProcess((AdminCommandRequest) request, replyTo, msgId);
-      else if (request instanceof GetJMXAttsRequest)
-        doProcess((GetJMXAttsRequest) request, replyTo, msgId);
-      else
-        throw new MomException("Unknow administration request type: " + request.getClass().getName());
     } catch (UnknownServerException exc) {
       // Caught when a target server is invalid.
       info = strbuf.append("Request [").append(request.getClass().getName())
@@ -839,10 +832,6 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
       Identity identity = request.getIdentity();
       String name = identity.getUserName();
 
-      if ((name == null) || name.equals(""))
-        // Should never happened as there is test client side
-        throw new RequestException("User cannot have a null or empty name.");
-      
       AgentId proxId = (AgentId) proxiesTable.get(name);
       String info;
 
@@ -1269,8 +1258,8 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   }
 
   /**
-   * Processes a <code>Monitor_GetStat</code> request or forwards it to its target
-   * destination if needed.
+   * Processes a <code>Monitor_GetStat</code> request by
+   * forwarding it to its target destination, if local.
    */
   private void doProcess(GetStatsRequest request, AgentId replyTo, String msgId) {
     AgentId destId = AgentId.fromString(request.getDest());
@@ -1282,26 +1271,6 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
       stats.put("AverageLoad5", new Float(AgentServer.getEngineAverageLoad5()));
       stats.put("AverageLoad15", new Float(AgentServer.getEngineAverageLoad15()));
       GetStatsReply reply = new GetStatsReply(stats);
-      distributeReply(replyTo, msgId, reply);
-    } else {
-      forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
-    }
-  }
-
-  /**
-   * Processes a <code>Monitor_GetJMXAtts</code> request or forwards it to its target
-   * destination if needed.
-   */
-  private void doProcess(GetJMXAttsRequest request, AgentId replyTo, String msgId) {
-    AgentId destId = AgentId.fromString(request.getDest());
-
-    if (destId.isNullId()) {
-      logger.log(BasicLevel.FATAL, "GetJMXAttsRequest -> " + request.attributes);
-      // Get attribute list from request
-      String[] atts = request.getAttributes();
-      Hashtable stats = MXWrapper.dumpAttributes(atts);
-      GetJMXAttsReply reply = new GetJMXAttsReply(stats);
-      logger.log(BasicLevel.FATAL, "GetJMXAttsRequest -> " + stats);
       distributeReply(replyTo, msgId, reply);
     } else {
       forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
@@ -1859,9 +1828,6 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
    * {@inheritDoc}
    */
   public void createUser(String user, String passwd, int serverId, String identityClassName) throws Exception {
-    if ((user == null) || user.equals(""))
-      throw new RequestException("User name can not be null or empty");
-
     Identity identity = null;
     try {
       identity = (Identity) Class.forName(identityClassName).newInstance();

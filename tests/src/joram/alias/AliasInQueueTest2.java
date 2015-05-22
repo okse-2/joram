@@ -36,6 +36,7 @@ import javax.jms.DeliveryMode;
 //import javax.naming.Context;
 //import javax.naming.InitialContext;
 
+
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
@@ -54,7 +55,7 @@ public class AliasInQueueTest2 extends TestCase {
     new AliasInQueueTest2().run();
   }
   
-  int nbmsg = 5000;
+  int nbmsg = 50000;
   
   /*
    * (weight0 < weight1) and (weight0 < weight2)
@@ -69,9 +70,9 @@ public class AliasInQueueTest2 extends TestCase {
 //  int weight2 = 20;
   
   // slightly unbalanced system (low accumulation)
-  int weight0 = 10;
-  int weight1 = 20;
-  int weight2 = 40;
+  int weight0 = 1;
+  int weight1 = 2;
+  int weight2 = 4;
 
   static long start = 0L;
   
@@ -165,7 +166,7 @@ public class AliasInQueueTest2 extends TestCase {
       }
       cnx0.close();
       System.out.println((System.currentTimeMillis() - start) + " - queue1: " + list1.count + ", queue2: " + list2.count);
-
+      
       int nbtry = 0;
       while (((list1.count + list2.count) != nbmsg) && (nbtry < 60)) {
         Thread.sleep(1000L); nbtry += 1;

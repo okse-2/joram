@@ -37,6 +37,7 @@ import fr.dyade.aaa.common.encoding.Encodable;
 import fr.dyade.aaa.common.encoding.EncodableHelper;
 import fr.dyade.aaa.common.encoding.Encoder;
 
+
 public final class StreamUtil {
   // Per-thread buffer for conversion
   private static ThreadLocal perThreadBuffer = new ThreadLocal() {

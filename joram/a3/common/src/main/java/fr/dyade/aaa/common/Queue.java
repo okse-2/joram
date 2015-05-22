@@ -53,7 +53,7 @@ public class Queue implements Serializable {
     }
     return false;
   }
-  
+
   /**
    * <code>true</code> if a producer called the <code>stop()</code>
    * method.

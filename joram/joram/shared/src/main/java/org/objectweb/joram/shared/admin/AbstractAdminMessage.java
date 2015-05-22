@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,12 +22,15 @@
  */
 package org.objectweb.joram.shared.admin;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.OutputStream;
+import java.util.Hashtable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -147,9 +150,6 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected final static int MONITOR_GET_DELIVERED_MESSAGES = 99;
   protected final static int SND_DEST_WEIGHTS = 100;
   protected final static int SET_SYNC_EXCEPTION_ON_FULL_DEST = 101;
-  protected final static int SCALE_REQUEST = 102;
-  protected final static int MONITOR_GET_JMX_ATTS = 103;
-  protected final static int MONITOR_GET_JMX_ATTS_REP = 104;
 
   protected int classid;
 
@@ -255,10 +255,7 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
     DelRemoteDestination.class.getName(),
     GetDeliveredMessages.class.getName(),
     SendDestinationsWeights.class.getName(),
-    SetSyncExceptionOnFullDestRequest.class.getName(),
-    ScaleRequest.class.getName(),
-    GetJMXAttsRequest.class.getName(),
-    GetJMXAttsReply.class.getName()
+    SetSyncExceptionOnFullDestRequest.class.getName()
   };
   
   protected abstract int getClassId();

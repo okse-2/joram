@@ -92,7 +92,7 @@ public class JMSBridgeQueue extends Queue {
    * 
    * @param firstTime   true when first called by the factory
    */
-  public void initialize(boolean firstTime) throws Exception {
+  public void initialize(boolean firstTime) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
 
@@ -271,7 +271,7 @@ public class JMSBridgeQueue extends Queue {
     Message message;
     for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
       message = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
-      message.order = arrivalState.getAndIncrementArrivalCount(message.isPersistent());
+      message.order = arrivalsCounter++;
 
       outTable.put(message.getId(), message);
 

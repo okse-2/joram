@@ -72,12 +72,10 @@ public class Container extends Agent {
   public void agentInitialize(boolean firstTime) throws Exception {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, "\n\nJndiServer[" + getId() + "].agentInitialize(" + firstTime + ')');
-    super.agentInitialize(firstTime);
     lifeCycleListener.agentInitialize(firstTime);
   }
   
   public void agentFinalize(boolean lastTime) {
-    super.agentFinalize(lastTime);
     lifeCycleListener.agentFinalize(lastTime);
   }
 

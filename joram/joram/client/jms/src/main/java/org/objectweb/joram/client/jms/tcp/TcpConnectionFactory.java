@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2014 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -54,14 +54,12 @@ public class TcpConnectionFactory extends ConnectionFactory {
 
   /**
    * Constructs a <code>TcpConnectionFactory</code> instance.
-   * By default the connectingTimer property is set to 60 seconds.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
   private TcpConnectionFactory(String host, int port) {
     super(host, port);
-    params.connectingTimer = 60;
   }
 
   /**

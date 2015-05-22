@@ -738,7 +738,7 @@ public class A3CMLConfig implements Serializable {
     try {
       classLoader = A3CMLConfig.class.getClassLoader();
       if (classLoader != null) {
-        Log.logger.log(BasicLevel.INFO,
+        Log.logger.log(BasicLevel.WARN,
                        "Trying to find [" + path + "] using " +
                        classLoader + " class loader.");
         is = classLoader.getResourceAsStream(path);
@@ -751,7 +751,7 @@ public class A3CMLConfig implements Serializable {
     }
     if (is == null) {
       // Last ditch attempt: get the resource from the system class path.
-      Log.logger.log(BasicLevel.INFO,
+      Log.logger.log(BasicLevel.WARN,
                      "Trying to find serialized config using ClassLoader.getSystemResource().");
       is = ClassLoader.getSystemResourceAsStream(path);
     }
@@ -761,7 +761,7 @@ public class A3CMLConfig implements Serializable {
     }
 
     if (a3config == null) {
-      Log.logger.log(BasicLevel.INFO,
+      Log.logger.log(BasicLevel.WARN,
                      "Unable to find configuration file: " + path);
       throw new IOException("Unable to find configuration file: " + path);
     }

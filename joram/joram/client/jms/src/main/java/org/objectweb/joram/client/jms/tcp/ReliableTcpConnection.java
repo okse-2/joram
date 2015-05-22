@@ -113,8 +113,8 @@ public class ReliableTcpConnection {
   }
 
   public void init(Socket sock) throws IOException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ReliableTcpConnection.init()");
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "ReliableTcpConnection.init()");
     synchronized (this) {
       if (getStatus() != INIT) 
         throw new IOException("Already connected");
@@ -321,8 +321,8 @@ public class ReliableTcpConnection {
   }
   
   public void close() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ReliableTcpConnection.close()");
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "ReliableTcpConnection.close()");
     if (getStatus() == INIT) 
       return;
 // Remove for SSL (bis.close() ==> lock)

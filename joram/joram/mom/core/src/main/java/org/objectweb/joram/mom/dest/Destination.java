@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2014 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2013 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -80,7 +80,6 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.CallbackNotification;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
@@ -188,7 +187,7 @@ public abstract class Destination extends Agent implements DestinationMBean {
    * 
    * @param firstTime true when first called by the factory
    */
-  protected abstract void initialize(boolean firstTime) throws Exception;
+  protected abstract void initialize(boolean firstTime);
 
   /**
    * Finalizes the agent before it is garbaged.
@@ -239,17 +238,13 @@ public abstract class Destination extends Agent implements DestinationMBean {
 
     // set agent no save (this is the default).
     setNoSave();
-    
-    CallbackNotification callbackNotification = null;
 
     try {
       if (not instanceof GetRightsRequestNot)
         getRights(from, (GetRightsRequestNot) not);
-      else if (not instanceof ClientMessages) {
-        ClientMessages clientMessages = (ClientMessages) not;
-        callbackNotification = clientMessages;
-        clientMessages(from, clientMessages);
-      } else if (not instanceof UnknownAgent)
+      else if (not instanceof ClientMessages)
+        clientMessages(from, (ClientMessages) not);
+      else if (not instanceof UnknownAgent)
         unknownAgent(from, (UnknownAgent) not);
       else if (not instanceof RequestGroupNot)
         requestGroupNot(from, (RequestGroupNot) not);
@@ -284,9 +279,7 @@ public abstract class Destination extends Agent implements DestinationMBean {
       // MOM Exceptions are sent to the requester.
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, this + ".react()", exc);
-      if (callbackNotification != null) {
-        callbackNotification.failed(exc); 
-      } 
+
       AbstractRequestNot req = (AbstractRequestNot) not;
       Channel.sendTo(from, new ExceptionReply(req, exc));
     } catch (UnknownNotificationException exc) {
@@ -340,6 +333,7 @@ public abstract class Destination extends Agent implements DestinationMBean {
    */
   public long creationDate = System.currentTimeMillis();
 
+  protected long nbMsgsReceiveSinceCreation = 0;
   protected long nbMsgsDeliverSinceCreation = 0;
   protected long nbMsgsSentToDMQSinceCreation = 0;
 
@@ -688,14 +682,13 @@ public abstract class Destination extends Agent implements DestinationMBean {
       throw new AccessException("WRITE right not granted");
     }
 
-    // TODO: remove 'from'
     doClientMessages(from, not, true);
 
     // For topic performance we must send reply after process ClientMessage. It results
     // in a best flow-control of sender allowing the handling of forwarded messages before
     // sender freeing.
     
-    if (!not.isPersistent() && !not.getAsyncSend() && !not.hasCallback()) {
+    if (!not.isPersistent() && !not.getAsyncSend()) {
       forward(from, new SendReplyNot(not.getClientContext(), not.getRequestId()));
     }
   }
@@ -874,6 +867,7 @@ public abstract class Destination extends Agent implements DestinationMBean {
     out.writeObject(clients);    
     out.writeObject(dmqId);
     out.writeLong(creationDate);
+    out.writeLong(nbMsgsReceiveSinceCreation);
     out.writeLong(nbMsgsDeliverSinceCreation);
     out.writeLong(nbMsgsSentToDMQSinceCreation);
     out.writeLong(period);
@@ -890,6 +884,7 @@ public abstract class Destination extends Agent implements DestinationMBean {
     dmqId = (AgentId)in.readObject();
     strbuf = new StringBuffer();
     creationDate = in.readLong();
+    nbMsgsReceiveSinceCreation = in.readLong();
     nbMsgsDeliverSinceCreation = in.readLong();
     nbMsgsSentToDMQSinceCreation = in.readLong();
     period = in.readLong();
@@ -1363,6 +1358,7 @@ public abstract class Destination extends Agent implements DestinationMBean {
       dmqId.encode(encoder);
     }
     encoder.encodeUnsignedLong(creationDate);
+    encoder.encodeUnsignedLong(nbMsgsReceiveSinceCreation);
     encoder.encodeUnsignedLong(nbMsgsDeliverSinceCreation);
     encoder.encodeUnsignedLong(nbMsgsSentToDMQSinceCreation);
     encoder.encodeUnsignedLong(period);
@@ -1401,6 +1397,7 @@ public abstract class Destination extends Agent implements DestinationMBean {
       dmqId.decode(decoder);
     }
     creationDate = decoder.decodeUnsignedLong();
+    nbMsgsReceiveSinceCreation = decoder.decodeUnsignedLong();
     nbMsgsDeliverSinceCreation = decoder.decodeUnsignedLong();
     nbMsgsSentToDMQSinceCreation = decoder.decodeUnsignedLong();
     period = decoder.decodeUnsignedLong();

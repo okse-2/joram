@@ -122,7 +122,7 @@ public class BridgeTest9x extends TestCase {
     }
   }
 
-  final static long timeout = 50L;
+  final static long timeout = 5L;
   
   void test(final int msgs) throws Exception {
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();  

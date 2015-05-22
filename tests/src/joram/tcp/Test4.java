@@ -114,7 +114,7 @@ public class Test4 extends TestCase {
     Thread.sleep(5000);
     if (expectedException == null)
       Thread.sleep(5000);
-
+    
     assertTrue("onException not called with " + cf, 
         expectedException instanceof javax.jms.JMSException);
     

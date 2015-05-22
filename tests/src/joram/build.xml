@@ -15,11 +15,23 @@
       <exclude name="joram/studycase/**/*.java"/>
     </patternset>
   </target>
-	
+
+  <target name="tests.all"
+           description=" --> launch all joram tests">
+    <ant dir="." antfile="build.xml" target="tests.noperf.all"/>
+    <ant dir="." antfile="build.xml" target="tests.perf"/>
+  </target>
+
+  <target name="tests.noperf.all.osgi">
+    <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
+    <property name="isOSGi" value="true"/>
+    <antcall target="tests.noperf.all" />
+  </target>
+
   <target name="tests.specific"
           description=" --> ">
     <antcall target="tests.base"/>
-    <antcall target="tests.alias"/>
+  	<antcall target="tests.alias"/>
     <antcall target="tests.recovery"/>
     <antcall target="tests.admin"/>
     <antcall target="tests.client"/>
@@ -35,25 +47,12 @@
     <antcall target="tests.ttl"/>
     <antcall target="tests.sub"/>
     <antcall target="tests.distribution"/>
-    <antcall target="tests.jms2"/>
   </target>
-
-  <target name="tests.all"
-           description=" --> launch all joram tests">
-    <ant dir="." antfile="build.xml" target="tests.noperf.all"/>
-    <ant dir="." antfile="build.xml" target="tests.perf"/>
-  </target>
-
-  <target name="tests.noperf.all.osgi">
-    <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
-    <property name="isOSGi" value="true"/>
-    <antcall target="tests.noperf.all" />
-  </target>
-
+ 
   <target name="tests.noperf.all"
           description=" --> launch all no perf joram tests">
     <antcall target="tests.base"/>
-    <antcall target="tests.alias"/>
+  	<antcall target="tests.alias"/>
     <antcall target="tests.recovery"/>
     <antcall target="tests.dist"/>
     <antcall target="tests.admin"/>
@@ -80,7 +79,6 @@
     <antcall target="tests.collector"/>
     <antcall target="tests.interceptors"/>
     <antcall target="tests.distribution"/>
-  	<antcall target="tests.jms2"/>
   </target>
 
   <target name="custom.tests.bamboo"
@@ -112,7 +110,6 @@
     <antcall target="tests.collector"/>
     <antcall target="tests.interceptors"/>
     <antcall target="tests.distribution"/>
-  	<antcall target="tests.jms2"/>
   </target>
 
   <target name="custom.tests.vtest"
@@ -144,7 +141,6 @@
     <antcall target="tests.collector"/>
     <antcall target="tests.interceptors"/>
     <antcall target="tests.distribution"/>
-  	<antcall target="tests.jms2"/>
   </target>
 
   <target name="tests.base"
@@ -265,7 +261,7 @@
     <antcall target="client.test8"/>
     <antcall target="client.test13"/>
     <antcall target="client.test18"/>
-  	<antcall target="client.topic"/>
+    <antcall target="client.topic"/>
     <antcall target="client.topic2"/>
     <antcall target="client.qrmax"/>
     <antcall target="client.mcun"/>
@@ -493,14 +489,11 @@
     <antcall target="bridge.jms.test13x"/>
     <antcall target="bridge.jms.test14x"/>
   	<antcall target="bridge.jms.test15x"/>
-    <antcall target="bridge.jms.test15x2"/>
-    <antcall target="bridge.jms.test15x3"/>
-    <antcall target="bridge.jms.test16x"/>
-    <antcall target="bridge.jms.test17x"/>
-    <antcall target="bridge.jms.test18x"/>
-    <antcall target="bridge.jms.test19x"/>
+  	<antcall target="bridge.jms.test15x2"/>
+  	<antcall target="bridge.jms.test15x3"/>
+  	<antcall target="bridge.jms.test17x"/>
   </target>
-	
+
   <target name="tests.schedqueue"
           description=" --> launch all schedqueue tests">
     <antcall target="schedqueue.test1"/>
@@ -641,10 +634,7 @@
     -->
   <target name="init.test">
     <!-- Initialization of the run directory -->
-  	<move file="${test.dir}" todir="${test.dir}.old" overwrite="true" force="true" failonerror="false" performGCOnFailedDelete="true"/>
-    <delete dir="${test.dir}.old" failonerror="false" performGCOnFailedDelete="true"/>
-  	<delete dir="${test.dir}" failonerror="false" performGCOnFailedDelete="true"/>    
-  	<sleep seconds="2"/>
+    <delete dir="${test.dir}"/>
     <mkdir dir="${test.dir}"/>
 
     <copy file="config.properties" todir="${test.dir}"/>
@@ -1825,7 +1815,6 @@
     </antcall>
   </target>
 
-	<!--This test don't test anything (no asset about memory leak) and it never terminates -->
   <target name="client.topic" depends="init.a3props,compile"
           description=" --> send 100000 messages ans receive it,  test memory leak">
     <antcall target="init.test" inheritAll="true">
@@ -3007,103 +2996,6 @@
     </antcall>
   </target>
 
-  <target name="perf.test6-1.3b" depends="init.test6props,compile"
-          description=" --> queue statistics: transient=false, colocated=false, transacted=false">
-  <antcall target="init.test" inheritAll="true">
-			<param name="jndiconf" value="perfs/jndi.properties"/>
-			<param name="a3conf" value="perfs/a3servers1.xml"/>
-  </antcall>
-
-  <parallel>
-    <antcall target="perf.test6-xx" inheritAll="true">
-      <param name="className" value="joram.perfs.Test6"/>
-      <param name="testid" value="perf.test6-1.3"/>
-      <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
-      <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
-      <param name="MsgTransient" value="false"/>
-      <param name="Transacted" value="false"/>
-      <param name="ServerOutside" value="false"/>
-    </antcall>
-
-    <antcall target="perf.test6-xx" inheritAll="true">
-      <param name="className" value="joram.perfs.Test6"/>
-      <param name="testid" value="perf.test6-1.3"/>
-      <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
-      <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
-      <param name="MsgTransient" value="false"/>
-      <param name="Transacted" value="false"/>
-      <param name="ServerOutside" value="true"/>
-    </antcall>
-
-    <antcall target="perf.test6-xx" inheritAll="true">
-      <param name="className" value="joram.perfs.Test6"/>
-      <param name="testid" value="perf.test6-1.3"/>
-      <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
-      <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
-      <param name="MsgTransient" value="false"/>
-      <param name="Transacted" value="false"/>
-      <param name="ServerOutside" value="true"/>
-    </antcall>
-
-    <antcall target="perf.test6-xx" inheritAll="true">
-      <param name="className" value="joram.perfs.Test6"/>
-      <param name="testid" value="perf.test6-1.3"/>
-      <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
-      <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
-      <param name="MsgTransient" value="false"/>
-      <param name="Transacted" value="false"/>
-      <param name="ServerOutside" value="true"/>
-    </antcall>
-
-    <antcall target="perf.test6-xx" inheritAll="true">
-      <param name="className" value="joram.perfs.Test6"/>
-      <param name="testid" value="perf.test6-1.3"/>
-      <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
-      <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
-      <param name="MsgTransient" value="false"/>
-      <param name="Transacted" value="false"/>
-      <param name="ServerOutside" value="true"/>
-    </antcall>
-  </parallel>
-  </target>
-
-  <target name="perf.test6-xx" depends="init.test6props">
-    <antcall target="test.start" inheritAll="true">
-      <param name="className" value="joram.perfs.Test6"/>
-      <param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DServerOutside=${ServerOutside} -DisByteMsg=${isByteMsg} -DnoAckedQueue=${noAckedQueue} -DcompressedMinSize=${compressedMinSize} -DTransaction.SyncOnWrite=${SyncOnWrite} -DNTLogFileSize=32 -DNTLogMemorySize=4096 -DDestination=${Destination} -DBaseClass=${BaseClass} -DdupsOk=${dupsOk} -DqueueMessageReadMax=${queueMessageReadMax} -DtopicAckBufferMax=${topicAckBufferMax} -DimplicitAck=${implicitAck} -DMsgTransient=${MsgTransient} -DSubDurable=${SubDurable} -DTransacted=${Transacted} -DNbRound=${NbRound} -DNbMsgPerRound=${NbMsgPerRound} -DNbSender=${NbProdCons} -DNbReceiver=${NbProdCons} -DNbDestination=${NbProdCons} -DMsgSize=${MsgSize}"/>
-    </antcall>
-  </target>
-
-  <target name="perf.test6-1.3ssl" depends="init.test6props,compile"
-          description=" --> ">
-    <antcall target="init.test" inheritAll="true">
-			<param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="a3conf" value="perfs/a3servers_ssl.xml"/>
-    </antcall>
-
-    <antcall target="perf.test6-ssl" inheritAll="true">
-			<param name="className" value="joram.perfs.Test6"/>
-      <param name="testid" value="perf.test6-1.3"/>
-      <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
-      <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
-      <param name="MsgTransient" value="false"/>
-      <param name="Transacted" value="false"/>
-      <param name="ServerOutside" value="false"/>
-    </antcall>
-  </target>
-
-	<target name="perf.test6-ssl" depends="init.test6props"
-          description=" --> test with ssl conection">
-		<copy file="perfs/joram_ks" todir="${test.dir}"/>
-    <antcall target="test.start" inheritAll="true">
-      <param name="className" value="joram.perfs.Test6"/>
-      <param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="jvmargs" value="-DServerOutside=${ServerOutside} -DWithSSL=true -Dorg.objectweb.joram.keystore=${test.dir}/joram_ks -Dorg.objectweb.joram.keystorepass=jorampass -DisByteMsg=${isByteMsg} -DnoAckedQueue=${noAckedQueue} -DcompressedMinSize=${compressedMinSize} -DTransaction.SyncOnWrite=${SyncOnWrite} -DNTLogFileSize=32 -DNTLogMemorySize=4096 -DDestination=${Destination} -DBaseClass=${BaseClass} -DdupsOk=${dupsOk} -DqueueMessageReadMax=${queueMessageReadMax} -DtopicAckBufferMax=${topicAckBufferMax} -DimplicitAck=${implicitAck} -DMsgTransient=${MsgTransient} -DSubDurable=${SubDurable} -DTransacted=${Transacted} -DNbRound=${NbRound} -DNbMsgPerRound=${NbMsgPerRound} -DNbSender=${NbProdCons} -DNbReceiver=${NbProdCons} -DNbDestination=${NbProdCons} -DMsgSize=${MsgSize}"/>
-    </antcall>
-	</target>
-
   <target name="perf.test6-1.4"
           description=" --> queue statistics: transient=true, colocated=false, transacted=false">
     <antcall target="perf.test6-x" inheritAll="true">
@@ -3405,7 +3297,7 @@
       <param name="testid" value="M-1.1"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-      <param name="multiThreadSync" value="false"/>
+      <param name="multiThreadSync" value="true"/>
     </antcall>
   </target>
 
@@ -3414,7 +3306,7 @@
       <param name="testid" value="M-1.2"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
-      <param name="multiThreadSync" value="false"/>
+      <param name="multiThreadSync" value="true"/>
     </antcall>
   </target>
 
@@ -3431,7 +3323,7 @@
       <param name="testid" value="M-2.1"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-      <param name="multiThreadSync" value="false"/>
+      <param name="multiThreadSync" value="true"/>
     </antcall>
   </target>
 
@@ -3440,7 +3332,7 @@
       <param name="testid" value="M-2.2"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
-      <param name="multiThreadSync" value="false"/>
+      <param name="multiThreadSync" value="true"/>
     </antcall>
   </target>
 
@@ -3486,19 +3378,19 @@
 
   <target name="init.test6Mprops">
     <property name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
-    <property name="transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
-    <property name="SyncOnWrite" value="true" />
+    <property name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
+    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
     <property name="MsgTransient" value="false"/>
     <property name="SubDurable" value="true"/>
     <property name="Transacted" value="false"/>
-    <property name="NbRound" value="25"/>
-    <property name="NbMsgPerRound" value="1000"/>
-    <property name="NbSender" value="10"/>
+    <property name="NbRound" value="10"/>
+    <property name="NbMsgPerRound" value="100"/>
+    <property name="NbSender" value="20"/>
     <property name="NbReceiver" value="1"/>
-    <property name="MsgSize" value="256"/>
+    <property name="MsgSize" value="25"/>
     <property name="dupsOk" value="false"/>
-    <property name="queueMessageReadMax" value="50"/>
+    <property name="queueMessageReadMax" value="100"/>
     <property name="topicAckBufferMax" value="100"/>
     <property name="multiThreadSyncDelay" value="1"/>
     <property name="multiCnx" value="false"/>
@@ -3511,7 +3403,6 @@
       <param name="a3conf" value="perfs/a3servers5.xml"/>
       <param name="jvmargs"
              value="-DBaseClass=${BaseClass}
-                    -DTransaction.SyncOnWrite=${SyncOnWrite}
                     -DDestination=${Destination}
                     -DTransacted=${Transacted} 
                     -DNbSender=${NbSender} -DNbReceiver=${NbReceiver} 
@@ -4555,7 +4446,7 @@
       <param name="className" value="joram.bridgejms.BridgeTest3"/>
       <param name="jndiconf" value="bridgejms/jndi.properties"/>
       <param name="a3conf" value="bridgejms/a3servers1.xml"/>
-      <param name="jvmargs" value="-Dasync=true"/> <!-- needed to test the correct behavior -->
+        <param name="jvmargs" value="-Dasync=true"/> <!-- needed to test the correct behavior -->
       <param name="jvmadminArgs" value=""/>
     </antcall>
   </target>
@@ -4568,7 +4459,7 @@
       <param name="className" value="joram.bridgejms.BridgeTest3"/>
       <param name="jndiconf" value="bridgejms/jndi.properties"/>
       <param name="a3conf" value="bridgejms/a3servers1.xml"/>
-      <param name="jvmargs" value="-Dasync=true"/> <!-- needed to test the correct behavior -->
+        <param name="jvmargs" value="-Dasync=true"/> <!-- needed to test the correct behavior -->
       <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
     </antcall>
   </target>
@@ -5064,7 +4955,7 @@
   </target>
 
   <target name="bridge.jms.test15x" depends="init.a3props,compile"
-          description=" --> Test the bridge with specific architecture (DistributionQueue)">
+          description=" --> Test the bridge with specific architecture">
     <antcall target="test.run" inheritAll="true">
       <param name="testid" value="bridge.jms.test15x"/>
       <param name="className" value="joram.bridgejms.BridgeTest15x"/>
@@ -5074,7 +4965,7 @@
   </target>
 
   <target name="bridge.jms.test15x2" depends="init.a3props,compile"
-          description=" --> Test the bridge with specific architecture (DistributionQueue)">
+          description=" --> Test the bridge with specific architecture">
     <antcall target="test.run" inheritAll="true">
       <param name="testid" value="bridge.jms.test15x2"/>
       <param name="className" value="joram.bridgejms.BridgeTest15x2"/>
@@ -5084,7 +4975,7 @@
   </target>
 
   <target name="bridge.jms.test15x3" depends="init.a3props,compile"
-          description=" --> Test the bridge with specific architecture (DistributionQueue)">
+          description=" --> Test the bridge with specific architecture">
     <antcall target="test.run" inheritAll="true">
       <param name="testid" value="bridge.jms.test15x3"/>
       <param name="className" value="joram.bridgejms.BridgeTest15x3"/>
@@ -5093,18 +4984,8 @@
     </antcall>
   </target>
 
-  <target name="bridge.jms.test16x" depends="init.a3props,compile"
-          description=" --> Test the bridge with specific architecture (DistributionTopic)">
-    <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="bridge.jms.test16x"/>
-      <param name="className" value="joram.bridgejms.BridgeTest16x"/>
-      <param name="jndiconf" value="bridgejms/jndi.properties"/>
-      <param name="a3conf" value="bridgejms/a3servers15.xml"/>
-    </antcall>
-  </target>
-
   <target name="bridge.jms.test17x" depends="init.a3props,compile"
-          description=" --> Test connection issue with ClientID">
+          description=" --> Test the bridge with ClientId issues">
     <antcall target="test.run" inheritAll="true">
       <param name="testid" value="bridge.jms.test17x"/>
       <param name="className" value="joram.bridgejms.BridgeTest17x"/>
@@ -5118,16 +4999,6 @@
     <antcall target="test.run" inheritAll="true">
       <param name="testid" value="bridge.jms.test18x"/>
       <param name="className" value="joram.bridgejms.BridgeTest18x"/>
-      <param name="jndiconf" value="bridgejms/jndi.properties"/>
-      <param name="a3conf" value="bridgejms/a3servers.xml"/>
-    </antcall>
-  </target>
-
-  <target name="bridge.jms.test19x" depends="init.a3props,compile"
-          description=" --> Test issue with flow regulation using AcquisitionTopic">
-    <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="bridge.jms.test19x"/>
-      <param name="className" value="joram.bridgejms.BridgeTest19x"/>
       <param name="jndiconf" value="bridgejms/jndi.properties"/>
       <param name="a3conf" value="bridgejms/a3servers.xml"/>
     </antcall>
@@ -6772,7 +6643,8 @@
   </target>
 	
 	<!-- Test the JMS2 compliance -->
-  <target name="tests.jms2" description=" --> JMS2 compliance">
+	
+  <target name="jms2" description=" --> JMS2 compliance">
     <antcall target="jms2.test1"/>
     <antcall target="jms2.test2"/>
     <antcall target="jms2.test3"/>
@@ -6782,11 +6654,6 @@
     <!-- antcall target="jms2.test7"/ -->
     <antcall target="jms2.test8"/>
     <!-- antcall target="jms2.test9"/ -->
-    <antcall target="jms2.test10"/>
-    <antcall target="jms2.test11"/>
-    <antcall target="jms2.test12"/>
-  	<antcall target="jms2.sharedTest1"/>
-  	<antcall target="jms2.sharedTest2"/>
   </target>
 
   <target name="jms2.test1" depends="init.a3props,compile"
@@ -6940,58 +6807,6 @@
       <param name="className" value="joram.jms2.Test12"/>
       <param name="jndiconf" value="jms2/jndi.properties"/>
       <param name="a3conf" value="jms2/a3servers.xml"/>
-      <param name="jvmargs" value=""/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-	
-  <target name="jms2.sharedTest1" depends="init.a3props,compile"
-          description=" --> Test shared consumer">
-    <antcall target="test.run" inheritAll="true">
-      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
-      <param name="testid" value="jms2.sharedTest1"/>
-      <param name="className" value="joram.jms2.TestSharedConsumer1"/>
-      <param name="jndiconf" value="jms2/jndi.properties"/>
-      <param name="a3conf" value="jms2/a3servers.xml"/>
-      <param name="jvmargs" value=""/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="jms2.sharedTest2" depends="init.a3props,compile"
-          description=" --> Test shared consumer">
-    <antcall target="test.run" inheritAll="true">
-      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
-      <param name="testid" value="jms2.sharedTest2"/>
-      <param name="className" value="joram.jms2.TestSharedConsumer2"/>
-      <param name="jndiconf" value="jms2/jndi.properties"/>
-      <param name="a3conf" value="jms2/a3servers.xml"/>
-      <param name="jvmargs" value=""/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-	
-  <target name="medical.test1" depends="compile"
-          description=" --> Medical use-case">
-    <delete dir="${test.dir}" failonerror="false" performGCOnFailedDelete="true"/>
-    <mkdir dir="${test.dir}"/>
-    <copy file="medical/a3debug.cfg" tofile="${test.dir}/a3debug.cfg"/>
-    <antcall target="test.start" inheritAll="true">
-      <param name="testid" value="medical.test1"/>
-      <param name="className" value="joram.medical.Test1"/>
-      <param name="jvmargs" value=""/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-
-  <target name="medical.test2" depends="compile"
-          description=" --> Medical use-case">
-    <delete dir="${test.dir}" failonerror="false" performGCOnFailedDelete="true"/>
-    <mkdir dir="${test.dir}"/>
-    <copy file="medical/a3debug.cfg" tofile="${test.dir}/a3debug.cfg"/>
-    <antcall target="test.start" inheritAll="true">
-      <param name="testid" value="medical.test2"/>
-      <param name="className" value="joram.medical.Test2"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>

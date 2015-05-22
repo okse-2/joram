@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -109,7 +109,7 @@ public class JMSAcquisitionQueue {
    * Administration method creating and deploying a JMS acquisition queue on a given server.
    * <p>
    * A set of properties is used to configure the distribution destination:<ul>
-   * <li>period – .</li>
+   * <li>period.</li>
    * <li>acquisition.period - The period between two acquisitions, default is 0 (no periodic acquisition).</li>
    * <li>persistent - Tells if produced messages will be persistent, default is true (JMS default).</li>
    * <li>expiration - Tells the life expectancy of produced messages, default is 0 (JMS default time to live).</li>
@@ -151,8 +151,10 @@ public class JMSAcquisitionQueue {
                              Properties props) throws ConnectException, AdminException {
     if (props == null)
       props = new Properties();
-    props.setProperty("acquisition.className", JMSAcquisition);
-    props.setProperty("jms.DestinationName", dest);
+    if (!props.containsKey("acquisition.className"))
+      props.setProperty("acquisition.className", JMSAcquisition);
+    if (!props.containsKey("jms.DestinationName"))
+      props.setProperty("jms.DestinationName", dest);
     Queue queue = Queue.create(serverId, name, Queue.ACQUISITION_QUEUE, props);
     return queue;
   }

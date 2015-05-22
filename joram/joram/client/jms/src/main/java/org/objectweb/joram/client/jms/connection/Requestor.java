@@ -62,11 +62,9 @@ public class Requestor implements ReplyListener, ErrorListener {
     public static final int DONE = 2;
 
     public static final int CLOSE = 3;
-    
-    public static final int STOP = 4;
 
     private static final String[] names = {
-      "INIT", "RUN", "DONE", "CLOSE", "STOP"};
+      "INIT", "RUN", "DONE", "CLOSE"};
 
     public static String toString(int status) {
       return names[status];
@@ -88,7 +86,7 @@ public class Requestor implements ReplyListener, ErrorListener {
   private int requestId;
 
   private int status;
-  
+
   public Requestor(RequestMultiplexer mtpx) {
     this.mtpx = mtpx;
     init();
@@ -140,42 +138,15 @@ public class Requestor implements ReplyListener, ErrorListener {
    */
   public synchronized AbstractJmsReply request(AbstractJmsRequest request, long timeout, CompletionListener completionListener) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Requestor.request(" + request + ',' + timeout + ',' + completionListener + "), status = " + Status.toString(status));
+      logger.log(BasicLevel.DEBUG, "Requestor.request(" + request + ',' + timeout + ')');
 
-    long sleep = timeout;
-    
     if (status != Status.INIT) {
       if (status == Status.CLOSE) return null;
-
+      
       // AF: It seems to be bad correction to the lack of reinitialisation of this
       // requestor from a previous use with a completion listener.
-      if (completionListener == null && status != Status.STOP) 
+      if (completionListener == null) 
         throw new javax.jms.IllegalStateException("Requestor already used");
-    }
-    
-    if (status == Status.STOP) {
-      long time = System.currentTimeMillis();
-      try {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> request STOP wait");
-        wait(sleep);
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> request STOP awake");
-      } catch (InterruptedException exc) {
-        if (logger.isLoggable(BasicLevel.WARN))
-          logger.log(BasicLevel.WARN, exc);
-        return null;
-      }
-      
-      if (sleep > 0) {
-        time = System.currentTimeMillis() - time;
-        if (time >= sleep)
-          return null; 
-        else 
-          sleep = sleep - time;
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "new timeout = " + sleep);
-      }
     }
     
     mtpx.sendRequest(request, this, completionListener);
@@ -190,12 +161,12 @@ public class Requestor implements ReplyListener, ErrorListener {
       init(); // The requestor is no longer used.
       return null;
     }
-
+    
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, " -> request #" + requestId + " wait");
     
     try {
-      wait(sleep);
+      wait(timeout);
     } catch (InterruptedException exc) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, exc);
@@ -211,12 +182,6 @@ public class Requestor implements ReplyListener, ErrorListener {
         // Abort the request.
         mtpx.abortRequest(requestId);
         return null;
-      } else if (status == Status.INIT) {
-        // Means that the wait ended with a notify from start method .
-        // Abort the request.
-        mtpx.abortRequest(requestId);
-        // re-send a synchronous request
-        return request(request, sleep, completionListener);
       } else if (status == Status.CLOSE) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> deny " + reply);
@@ -308,20 +273,5 @@ public class Requestor implements ReplyListener, ErrorListener {
       setStatus(Status.CLOSE);
     }
     // Else idempotent.
-  }
-  
-  public synchronized void start() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Requestor.start()");
-    if (status == Status.STOP) {
-      setStatus(Status.INIT);
-      notify();
-    }
-  }
-  
-  public void stop() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Requestor.stop()");
-    setStatus(Status.STOP);
   }
 }

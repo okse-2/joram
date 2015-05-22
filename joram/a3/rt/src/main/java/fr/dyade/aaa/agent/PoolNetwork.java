@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2008 CSSI
  *
  * This library is free software; you can redistribute it and/or
@@ -133,8 +133,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     return activeSessions.size();
   }
     
-  public final long minIdleTimeout = 1000L;
-  
   /**
    *  Defines in milliseconds the maximum idle period permitted before reseting
    * the connection.
@@ -246,7 +244,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     
     IdleTimeout = AgentServer.getLong("PoolNetwork.IdleTimeout", IdleTimeout).longValue();
     IdleTimeout = AgentServer.getLong(domain + ".IdleTimeout", IdleTimeout).longValue();
-    if (IdleTimeout < minIdleTimeout) IdleTimeout = minIdleTimeout;
+    if (IdleTimeout < 1000L) IdleTimeout = 5000L;
     
     defaultMaxMessageInFlow = AgentServer.getInteger("PoolNetwork.maxMessageInFlow", defaultMaxMessageInFlow).intValue();
     defaultMaxMessageInFlow = AgentServer.getInteger(domain + ".maxMessageInFlow", defaultMaxMessageInFlow).intValue();

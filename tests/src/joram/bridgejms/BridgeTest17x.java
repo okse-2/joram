@@ -22,10 +22,7 @@
  */
 package joram.bridgejms;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
@@ -126,31 +123,12 @@ public class BridgeTest17x extends TestCase {
       }catch(Exception exc){
         exc.printStackTrace();
       }
-      Thread.sleep(10000);
+      Thread.sleep(30000);
       
       // L'objectif du test est de verifier que les connexions ne s'empilent pas dans le
       // serveur (queue d'acquisition JMX, appel d'une methode statique au travers de l'admin
       // ou ajout d'une methode d'admin permettant d'interogger un parametre JMX)
 
-      try{
-        AdminModule.connect(centralCF, "root", "root");
-        Hashtable stats = AdminModule.getJMXAttribute("Joram#1:type=Connection,mode=tcp(InitiatedConnectionCount,RunningConnectionsCount)");
-        AdminModule.disconnect();
-        Integer x1 = (Integer) stats.get("Joram#1:mode=tcp,type=Connection+RunningConnectionsCount"); // -> 3
-        assertTrue("RunningConnectionsCount should be 3", x1.intValue() == 3);
-        Integer x2 = (Integer) stats.get("Joram#1:mode=tcp,type=Connection+InitiatedConnectionCount"); // -> 4
-        assertTrue("InitiatedConnectionCount should be 4", x2.intValue() == 4);
-
-        Set<String>  atts = stats.keySet();
-        for (String att : atts) {
-          System.out.println(att + " -> " + stats.get(att));
-        }
-        System.out.println("Admin#1 closed.");
-      }catch(Exception exc){
-        exc.printStackTrace();
-      }
-
-      
       centralCnx.close();
       
       // Verify that now the configuration works
@@ -205,7 +183,7 @@ public class BridgeTest17x extends TestCase {
 
       System.out.println("message received");
       
-      Thread.sleep(120000);
+      Thread.sleep(1000);
 
       joramCnx.close();
     } catch (Throwable exc) {

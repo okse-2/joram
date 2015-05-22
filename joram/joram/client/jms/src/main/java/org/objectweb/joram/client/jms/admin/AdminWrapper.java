@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 - 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2013 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -48,8 +48,6 @@ import org.objectweb.joram.shared.admin.CreateUserRequest;
 import org.objectweb.joram.shared.admin.GetConfigRequest;
 import org.objectweb.joram.shared.admin.GetDomainNames;
 import org.objectweb.joram.shared.admin.GetDomainNamesRep;
-import org.objectweb.joram.shared.admin.GetJMXAttsReply;
-import org.objectweb.joram.shared.admin.GetJMXAttsRequest;
 import org.objectweb.joram.shared.admin.GetLocalServer;
 import org.objectweb.joram.shared.admin.GetLocalServerRep;
 import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
@@ -319,7 +317,7 @@ public class AdminWrapper implements AdminItf {
   }
 
   /**
-   * Returns statistics for the specified server.
+   * Returns statistics for the the specified server.
    * <p>
    * The request fails if the target server does not belong to the platform.
    *
@@ -335,37 +333,7 @@ public class AdminWrapper implements AdminItf {
     return  reply.getStats();
   }
 
-  /**
-   * Returns JMX attribute value for the local server.
-   *
-   * @return  Corresponding JMX attribute value for the local server.
-   *          
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   * 
-   * @see #getStatistics(int)
-   */
-  public final Hashtable getJMXAttribute(String attname) throws ConnectException, AdminException {
-    return getJMXAttribute(getLocalServerId(), attname);
-  }
-
-  /**
-   * Returns JMX attribute value for the specified server.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   *
-   * @param serverId Unique identifier of the server.
-   * @return  the statistics for the the specified server.
-   * 
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public final Hashtable getJMXAttribute(int serverId, String attname) throws ConnectException, AdminException {
-    GetJMXAttsRequest request = new GetJMXAttsRequest(DestinationConstants.getNullId(serverId), attname);
-    GetJMXAttsReply reply = (GetJMXAttsReply) doRequest(request);
-    return  reply.getStats();
-  }
- 
+  
   /**
    * Returns the unique identifier of the default dead message queue for the local
    * server, null if not set.
@@ -1012,9 +980,6 @@ public class AdminWrapper implements AdminItf {
                          int serverId,
                          String identityClassName,
                          Properties prop) throws ConnectException, AdminException {
-    if ((name == null) || name.equals(""))
-      throw new AdminException("User name can not be null or empty");
-    
     Identity identity = createIdentity(name, password, identityClassName);
     AdminReply reply = doRequest(new CreateUserRequest(identity, serverId, prop));
     User user = new User(name, ((CreateUserReply) reply).getProxId());
@@ -1038,8 +1003,7 @@ public class AdminWrapper implements AdminItf {
     Identity identity = null;
     try {
       identity = (Identity) Class.forName(identityClassName).newInstance();
-      if (passwd != null)
-        identity.setIdentity(user, passwd);
+      if (passwd != null) identity.setIdentity(user, passwd);
       else
         identity.setUserName(user);
     } catch (Exception e) {

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -374,21 +374,13 @@ public class OutboundConnection implements Connection, OutboundConnectionMBean {
   }
 
   public Session createSession(int sessionMode) throws JMSException {
-    if (sessionMode == Session.SESSION_TRANSACTED) {
-      return createSession(true, Session.SESSION_TRANSACTED);
-    } else if(sessionMode == Session.CLIENT_ACKNOWLEDGE || 
-        sessionMode == Session.AUTO_ACKNOWLEDGE || 
-        sessionMode == Session.DUPS_OK_ACKNOWLEDGE) {
-      return createSession(false, sessionMode);
-    } else {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Unrecognised sessionMode given as parameter: " + sessionMode);
-      throw new JMSException("Error occured in session creation");
-    }
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
   public Session createSession() throws JMSException {
-    return createSession(false, Session.AUTO_ACKNOWLEDGE);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
   public ConnectionConsumer createSharedConnectionConsumer(Topic topic,

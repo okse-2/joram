@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -155,34 +155,36 @@ public class DistributionTopic extends Topic {
    * @see Destination#preProcess(AgentId, ClientMessages)
    */
   public ClientMessages preProcess(AgentId from, ClientMessages cm) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "DistributionTopic. preProcess(" + from + ", " + cm + ')');
-
+    }
     List msgs = cm.getMessages();
-    // This method return null so the counter will not be updated in processMessage method
-    nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + msgs.size();
-
     DMQManager dmqManager = null;
     for (int i = 0; i < msgs.size(); i++) {
       Message msg = (Message) msgs.get(i);
       try {
-        if (isAsyncDistribution) {
-          if (distributionDaemon != null) {
-            distributionDaemon.push(msg);
-          } else {
-            throw new Exception("distribution distributionDaemon is null");
-          }
-        } else {
-          distributionModule.processMessage(msg);
-          nbMsgsDeliverSinceCreation++;
-        }
+        distributionModule.processMessage(msg);
+        nbMsgsDeliverSinceCreation++;
       } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, "DistributionTopic: error during distribution.", exc);
-
-        if (dmqManager == null)
+      	if (!isAsyncDistribution) {
+      		if (logger.isLoggable(BasicLevel.WARN)) {
+      			logger.log(BasicLevel.WARN, "DistributionTopic: distribution error.", exc);
+      		}
+      	} else {
+      		// a processMessage exception is normal with async mode.
+      		if (distributionDaemon != null) {
+      			// use msg.id ?
+      			distributionDaemon.push(msg);
+      		} else {
+      			if (logger.isLoggable(BasicLevel.WARN)) {
+      				logger.log(BasicLevel.WARN, "DistributionTopic.preProcess: distribution distributionDaemon = null but we are in async distribution mode.", exc);
+      			}
+      		}
+      	}
+        
+        if (dmqManager == null) {
           dmqManager = new DMQManager(cm.getDMQId(), getDMQAgentId(), getId());
-
+        }
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(msg, MessageErrorConstants.UNDELIVERABLE);
       }
@@ -199,7 +201,7 @@ public class DistributionTopic extends Topic {
     if (distributionDaemon != null) {
     	if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "DistributionTopic postProcess(...)");
-      distributionDaemon.cleanAckList();
+    	distributionDaemon.cleanAckList();
     }
   }
   

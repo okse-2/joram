@@ -23,9 +23,6 @@ package fr.dyade.aaa.agent;
 
 import java.io.IOException;
 
-import fr.dyade.aaa.common.encoding.EncodableFactory;
-import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
-
 /**
  * Context enabling an <code>AgentEngine</code> implemented in
  * another package to invoke operations that cannot be accessed 
@@ -35,9 +32,6 @@ import fr.dyade.aaa.common.encoding.EncodableFactoryRepository;
  * the agent server security would be broken.
  */
 class AgentEngineContextImpl implements AgentEngineContext {
-  
-  private static EncodableFactory messageFactory = EncodableFactoryRepository
-      .getFactory(AgentServer.MESSAGE_CLASS_ID);
   
   /**
    * Package constructor not accessible from outside this package.
@@ -143,15 +137,7 @@ class AgentEngineContextImpl implements AgentEngineContext {
    * @return
    */
   public Message createMessage(AgentId from, AgentId to, Notification not) {
-    Message msg = (Message) messageFactory.createEncodable();
-    msg.from = from;
-    msg.to = to;
-    if (not != null) {
-      msg.not = not;
-      msg.not.detached = not.detached;
-      msg.not.messageId = not.messageId;
-    }
-    return msg;
+    return Message.alloc(from, to, not);
   }
   
   /**

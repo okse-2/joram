@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 - 2015 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -67,14 +67,6 @@ public class JoramHelper {
   public static final int MESSAGE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 0;
   public static final int QUEUE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 1;
   public static final int USER_AGENT_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 2;
-  public static final int CLIENT_SUBSCRIPTION_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 3;
-  public static final int CLIENT_CONTEXT_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 4;
-  public static final int MESSAGE_ID_LIST_IMPL_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 5;
-  public static final int USER_AGENT_ARRIVAL_STATE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 6;
-  public static final int QUEUE_DELIVERY_TABLE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 7;
-  public static final int QUEUE_ARRIVAL_STATE_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 8;
-  public static final int TOPIC_FWD_NOT_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 9;
-  public static final int CLIENT_MESSAGES_CLASS_ID = ENCODABLE_CLASS_ID_AREA + 10;
   
   /**
    * Create user.
@@ -85,11 +77,7 @@ public class JoramHelper {
   public final static void createUser(String userName, String userPass) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "JoramHelper.createUser(" + userName + ')');
-    
     try {
-      if ((userName == null) || userName.equals(""))
-        throw new RequestException("User name can not be null or empty");
-
       SimpleIdentity identity = new SimpleIdentity();
       identity.setIdentity(userName, userPass);
       AdminTopic.CreateUserAndSave(new CreateUserRequest(identity, AgentServer.getServerId(), null), null, "-1");

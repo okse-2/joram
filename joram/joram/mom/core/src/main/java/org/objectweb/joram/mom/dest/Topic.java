@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2014 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -40,7 +40,6 @@ import org.objectweb.joram.mom.notifications.ClusterJoinNot;
 import org.objectweb.joram.mom.notifications.ClusterRemoveNot;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
-import org.objectweb.joram.mom.notifications.ClientSubscriptionNot;
 import org.objectweb.joram.mom.notifications.SubscribeReply;
 import org.objectweb.joram.mom.notifications.SubscribeRequest;
 import org.objectweb.joram.mom.notifications.TopicForwardNot;
@@ -114,8 +113,6 @@ public class Topic extends Destination implements TopicMBean {
   /** Internal boolean used for tagging local sendings. */
   protected transient boolean alreadySentLocally;
 
-  protected long nbMsgsReceiveSinceCreation = 0;
-
   public Topic() {
   }
 
@@ -154,9 +151,7 @@ public class Topic extends Destination implements TopicMBean {
         unsubscribeRequest(from);
       else if (not instanceof TopicForwardNot)
         topicForwardNot(from, (TopicForwardNot) not);
-      else if (not instanceof ClientSubscriptionNot) {
-        // Do nothing, this notification is only handled by ElasticTopic.
-      } else
+      else
         super.react(from, not);
     } catch (MomException exc) {
       // MOM exceptions are sent to the requester.
@@ -502,10 +497,10 @@ public class Topic extends Destination implements TopicMBean {
     ClientMessages clientMsgs = preProcess(from, not);
     if (clientMsgs != null) {
       // Forwarding the messages to the father or the cluster fellows, if any:
-      forwardMessages(from, clientMsgs, fromCluster);
+      forwardMessages(clientMsgs, fromCluster);
 
       // Processing the messages:
-      processMessages(from, clientMsgs);
+      processMessages(clientMsgs);
 
       postProcess(clientMsgs);
     }
@@ -569,60 +564,17 @@ public class Topic extends Destination implements TopicMBean {
    * Actually forwards a list of messages to the father or the cluster
    * fellows, if any.
    */
-  protected void forwardMessages(AgentId from, ClientMessages messages) {
-    forwardMessages(from, messages, false);
-  }
-  
-  protected TopicForwardNot createTopicForward(AgentId destId, ClientMessages messages, boolean fromCluster) {
-    TopicForwardNot topicForwardNot = new TopicForwardNot(messages, fromCluster);
-    if (destId.getTo() == AgentServer.getServerId()) {
-      // Local destination
-      // The initial notification may be persistent (e.g. if remote).
-      // In that case the forward needs to be persistent too.
-      topicForwardNot.setPersistent(messages.isPersistent());
-      
-      // Pass the callback in any cases (transient or persistent)
-      // in order to provide flow control.
-      messages.passCallback(topicForwardNot);
-    } else {
-      // Remote destination
-      // The initial notification may be persistent.
-      // In that case the forward needs to be persistent too.
-      boolean persistent = messages.isPersistent();
-      
-      if (!persistent) {
-        // Check if there is a persistent message to transmit.
-        // In that case, the forward needs to be persistent.
-        List<Message> msgList = messages.getMessages();
-        for (Message msg : msgList) {
-          if (msg.persistent) {
-            persistent = true;
-            break;
-          }
-        }
-      }
-      topicForwardNot.setPersistent(persistent);
-      
-      // Pass the callback in any cases (transient or persistent)
-      // in order to provide flow control with the network.
-      messages.passCallback(topicForwardNot);
-    }
-    return topicForwardNot;
+  protected void forwardMessages(ClientMessages messages) {
+    forwardMessages(messages, false);
   }
 
-  protected void forwardMessages(AgentId from, ClientMessages messages, boolean fromCluster) {
+  private void forwardMessages(ClientMessages messages, boolean fromCluster) {
     if (!fromCluster) {
-      if (friends != null && friends.size() > 1) {
-        for (Iterator e = friends.iterator(); e.hasNext();) {
-          AgentId id = (AgentId) e.next();
-          if (!id.equals(getId()))
-            forward(id, createTopicForward(id, messages, true));
-        }
-      }
+      sendToCluster(new TopicForwardNot(messages, true));
     }
-    
-    if (fatherId != null && !fatherId.equals(from)) {
-      forward(fatherId, createTopicForward(fatherId, messages, false));
+    if (fatherId != null) {
+      forward(fatherId, new TopicForwardNot(messages, false));
+
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Messages forwarded to father " + fatherId.toString());
     }
@@ -633,7 +585,7 @@ public class Topic extends Destination implements TopicMBean {
    * valid subscriptions by sending a <code>TopicMsgsReply</code> notification
    * to the valid subscribers.
    */
-  protected void processMessages(AgentId from, ClientMessages not) {
+  protected void processMessages(ClientMessages not) {
     List messages = not.getMessages();
     AgentId subscriber;
     boolean local;
@@ -641,7 +593,7 @@ public class Topic extends Destination implements TopicMBean {
     List deliverables;
     Message message;
 
-    nbMsgsReceiveSinceCreation += messages.size();
+    nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + messages.size();
     
     // interceptors process
     if (interceptorsAvailable()) {
@@ -728,14 +680,7 @@ public class Topic extends Destination implements TopicMBean {
       if (! deliverables.isEmpty()) {
         TopicMsgsReply topicMsgsReply = new TopicMsgsReply(deliverables);
         topicMsgsReply.setPersistent(persistent);
-        
-        // Set the callback in any cases: local and remote
-        // Remotely, the callback provides flow control.
-        // Locally, the callback provides flow control and
-        // reliability for persistent messages.
-        not.passCallback(topicMsgsReply);
-
-        setDmq(topicMsgsReply);
+        setDmq(topicMsgsReply); 
         forward(subscriber, topicMsgsReply);
         nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation + deliverables.size();
       }

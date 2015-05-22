@@ -82,7 +82,7 @@ public class ClientTest27 extends TestCase {
 
       for (int i=0; i<10; i++)
         test(nbmsgs);
-      
+
       int subt = -1;
       int i = 0;
       do {

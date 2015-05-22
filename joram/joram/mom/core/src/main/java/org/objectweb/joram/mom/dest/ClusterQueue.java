@@ -171,7 +171,7 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
    * 
    * @param firstTime   true when first called by the factory
    */
-  public void initialize(boolean firstTime) throws Exception {
+  public void initialize(boolean firstTime) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
     
@@ -349,7 +349,7 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     // Storing each received message:
     for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
       msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
-      msg.order = arrivalState.getAndIncrementArrivalCount(msg.isPersistent());
+      msg.order = arrivalsCounter++;
       storeMsgIdInTimeTable(msg.getId(),
                             new Long(date));
       //storeMsgIdInVisitTable(msg.getIdentifier(), destId);

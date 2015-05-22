@@ -54,6 +54,7 @@ public class SingleSessionConsumer extends MessageConsumerListener {
     sess = session;
   }
   
+  
   public void pushMessages(ConsumerMessages cm) throws JMSException {
     sess.pushMessages(this, cm);
   }
@@ -61,10 +62,5 @@ public class SingleSessionConsumer extends MessageConsumerListener {
   public void onMessage(Message msg, MessageListener listener, int ackMode) 
     throws JMSException {
     throw new Error("Invalid call");
-  }
-
-  @Override
-  protected boolean checkSessionThread() {
-    return sess.checkThread();
   }
 }

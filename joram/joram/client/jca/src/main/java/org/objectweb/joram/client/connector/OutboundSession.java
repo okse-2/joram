@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -451,67 +451,40 @@ public class OutboundSession implements javax.jms.Session {
     return "Outbound [" + sess.toString() + "]@" + hashCode();
   }
 
-  /**
-   * Delegates the call to the wrapped JMS session.
-   */
   public MessageConsumer createSharedConsumer(Topic topic,
 		  String sharedSubscriptionName) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createSharedConsumer(" + topic + ", " + sharedSubscriptionName + ")");
-    checkValidity();
-    return new OutboundConsumer(sess.createSharedConsumer(topic, sharedSubscriptionName), this);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
   public MessageConsumer createSharedConsumer(Topic topic,
 		  String sharedSubscriptionName, String messageSelector)
 				  throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createSharedConsumer(" + topic + ", " + sharedSubscriptionName + ", " + messageSelector + ")");
-    checkValidity();
-    return new OutboundConsumer(sess.createSharedConsumer(topic, sharedSubscriptionName, messageSelector), this);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
-  /**
-   * Delegates the call to the wrapped JMS session.
-   */
   public MessageConsumer createDurableConsumer(Topic topic, String name)
 		  throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createDurableConsumer(" + topic + ", " + name + ")");
-    checkValidity();
-    return new OutboundConsumer(sess.createDurableConsumer(topic, name), this);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
-  /**
-   * Delegates the call to the wrapped JMS session.
-   */
   public MessageConsumer createDurableConsumer(Topic topic, String name,
 		  String messageSelector, boolean noLocal) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createDurableConsumer(" + topic + ", " + name + ", " + messageSelector + ", " + noLocal + ")");
-    checkValidity();
-    return new OutboundConsumer(sess.createDurableConsumer(topic, name, messageSelector, noLocal), this);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
-  /**
-   * Delegates the call to the wrapped JMS session.
-   */
   public MessageConsumer createSharedDurableConsumer(Topic topic, String name)
 		  throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createSharedDurableConsumer(" + topic + ", " + name + ")");
-    checkValidity();
-    return new OutboundConsumer(sess.createSharedDurableConsumer(topic, name), this);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 
-  /**
-   * Delegates the call to the wrapped JMS session.
-   */
   public MessageConsumer createSharedDurableConsumer(Topic topic, String name,
 		  String messageSelector) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + " createSharedDurableConsumer(" + topic + ", " + name + ", " + messageSelector + ")");
-    checkValidity();
-    return new OutboundConsumer(sess.createSharedDurableConsumer(topic, name, messageSelector), this);
+	  //TODO
+	  throw new JMSException("not yet implemented.");
   }
 }

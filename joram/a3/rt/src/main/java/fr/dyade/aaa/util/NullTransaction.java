@@ -207,13 +207,4 @@ public final class NullTransaction extends BaseTransaction implements NullTransa
   public boolean containsOperations() {
     return false;
   }
-  
-  /**
-   * Returns the number of operations to be committed.
-   * @return the number of operations to be committed.
-   */
-  public int getOperationCount() {
-    return 0;
-  }
-  
 }
