@@ -108,7 +108,7 @@ public class Queue extends Destination implements QueueMBean {
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(Queue.class.getName());
-  public static Logger logmsg = Debug.getLogger(Queue.class.getName() + ".TraceMsg");
+  public static Logger logmsg = Debug.getLogger(Queue.class.getName() + ".Message");
 
   /** Static value holding the default DMQ identifier for a server. */
   static AgentId defaultDMQId = null;
