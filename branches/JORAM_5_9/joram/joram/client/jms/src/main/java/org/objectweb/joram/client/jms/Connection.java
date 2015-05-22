@@ -902,30 +902,33 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
    *
    * @exception IllegalStateException  If the connection is closed or broken.
    */
-  public synchronized void start() throws JMSException {
+  public void start() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, stringImage + ".start()"); 
     checkClosed();
     
-    // Ignoring the call if the connection is started:
-    if (status == Status.START)
-      return;
+    synchronized (this) {
+      // Ignoring the call if the connection is started:
+      if (status == Status.START)
+        return;
+    }
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": starting..."); 
+      logger.log(BasicLevel.DEBUG, "--- " + this + ": starting..."); 
 
-    // Starting the sessions:
-
+    // Starting the sessions: free the connection lock to avoid deadlock with external
+    // client threads.
     for (int i = 0; i < sessions.size(); i++) {
       Session session = (Session) sessions.elementAt(i);
       session.start();
     }
 
-    // Sending a start request to the server:
-    mtpx.sendRequest(new CnxStartRequest());
+    synchronized (this) {
+      // Sending a start request to the server:
+      mtpx.sendRequest(new CnxStartRequest());
 
-    setStatus(Status.START);
+      setStatus(Status.START);
+    }
     lockClientId();
   }
 
@@ -950,6 +953,7 @@ public class Connection implements javax.jms.Connection, ConnectionMBean {
     checkClosed();
 
     synchronized (this) {
+      // Ignoring the call if the connection is stopped:
       if (status == Status.STOP)
         return;
     }
