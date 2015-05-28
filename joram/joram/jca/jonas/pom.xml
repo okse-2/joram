@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.ow2.joram</groupId>
     <artifactId>joram-jca</artifactId>
-		<version>5.9.2-SNAPSHOT</version>
+		<version>5.10.0</version>
   </parent>
 
 </project>

@@ -246,7 +246,6 @@ public class DistributionQueue extends Queue {
       for (Iterator ite = msgs.iterator(); ite.hasNext();) {
         // Bug fix JORAM-232: now counts received messages.
         nbMsgsReceiveSinceCreation++;
-        
         Message msg = (Message) ite.next();
         try {
           distributionModule.processMessage(msg);
@@ -330,9 +329,6 @@ public class DistributionQueue extends Queue {
       List msgs = cm.getMessages();
 
       for (Iterator ite = msgs.iterator(); ite.hasNext();) {
-        // Bug fix JORAM-232: now counts received messages.
-        nbMsgsReceiveSinceCreation++;
-
         Message msg = (Message) ite.next();
 
         // a processMessage exception is normal with async mode.
