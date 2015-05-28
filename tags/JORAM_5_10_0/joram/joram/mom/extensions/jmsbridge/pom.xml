@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>joram-mom-extensions-jmsbridge</artifactId>
+  <packaging>bundle</packaging>
+  <name>JORAM :: joram :: mom :: extensions :: jmsbridge</name>
+  <description>Builds the Joram jmsbridge extension project.</description>
+
+  <parent>
+    <groupId>org.ow2.joram</groupId>
+    <artifactId>joram-mom-extensions</artifactId>
+    <version>5.10.0</version>
+  </parent>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Import-Package>
+              fr.dyade.aaa.agent,
+              fr.dyade.aaa.common,
+              javax.jms,
+              javax.naming,
+              javax.transaction.xa,
+              org.objectweb.joram.mom.dest,
+              org.objectweb.joram.mom.messages,
+              org.objectweb.joram.mom.notifications,
+              org.objectweb.joram.mom.util,
+              org.objectweb.joram.shared,
+              org.objectweb.joram.shared.excepts,
+              org.objectweb.joram.shared.messages,
+              org.objectweb.joram.shared.selectors,
+              org.objectweb.util.monolog,
+              org.objectweb.util.monolog.api</Import-Package>
+            <Export-Package>org.objectweb.joram.mom.dest.jmsbridge,org.objectweb.joram.mom.dest.jms</Export-Package>
+            <DynamicImport-Package>*</DynamicImport-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jms-2.0-spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-mom-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-client-jms</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+</project>
