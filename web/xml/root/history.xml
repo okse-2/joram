@@ -12,6 +12,45 @@
 
   <body>
     <s1 name="JORAM History">
+    
+    <s2 name="May 28, 2015: JORAM 5.10.0 release is available.">
+      <p>This release introduces improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Improvements and fixes in the Acquisition and Distribution destinations.</li>
+        <li>Adds a particular logger allowing to follow the messages flows with a limited amount of traces.</li>
+        <li>Avoids a potential deadlock during Connection.start method.</li>
+        <li>Add a counter for denied messages in Queue, no longer count twice denied messages in nbMsgsDeliverSinceCreation
+        and nbMsgsReceiveSinceCreation counters.</li>
+        <li>Implements an administration method allowing to dump a list of JMX attributes from destination.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>It is tagged in SVN (JORAM_5_10_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+    </s2>
+		
+     <s2 name="May 28, 2015: JORAM 5.9.1.2 release is available.">
+        <p>Joram 5.9.1.2 is available in the SVN repository with tag JORAM_5_9_1_2.</p>
+        <p>The complete list of changes can be viewed either in
+        <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+     </s2>
+      
+    <s2 name="May, 2015:  MQTT V3.1.1 implementation on top of Joram.">
+      <p>The MQTT plugin implemented by <a href="http://www.scalagent.com">ScalAgent D.T.</a> is now fully compliant with the last version 3.1.1 of the
+      MQTT protocol, this plugin is integrated with <a href="http://mqtt.jorammq.com">JoramMQ Entreprise</a> and is available for evaluation.</p>
+      <p>An intensive performance evaluation campaign demonstrates the stability and scalability of the middleware, under stress conditions including a
+      very high throughput of messages and an extremely large number of clients.</p>
+      <p>Find all détails of this study in the white paper to download:
+      <a href="http://www.scalagent.com/IMG/pdf/JoramMQ_MQTT_white_paper-v1-2.pdf">JoramMQ_MQTT_white_paper</a></p>
+    </s2>
+		
+     <s2 name="February 23, 2015: JORAM 5.9.1.1 release is available.">
+        <p>Joram 5.9.1.1 is available in the SVN repository with tag JORAM_5_9_1_1.</p>
+        <p>The complete list of changes can be viewed either in
+        <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+     </s2>
+
       <s2 name="November 28, 2014: JORAM 5.9.1 release is available.">
       <p>This release introduces improvements and bug fixes, essentially:</p>
       <ul>
@@ -28,6 +67,50 @@
       <p>It is tagged in SVN (JORAM_5_9_1), the complete list of changes can be viewed either in
       <a href="dev/versions.html">code updates</a> or in
       <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+      </s2>
+
+      <s2 name="October 9 2014: PRESENTATION AT JFSMA14.">
+      <p>ScalAgent DT presents its technology at the <a href="http://jfsma14.lcis.fr/presentation-invitee-a-freyssinet/">22nd JFSMA</a>, a
+      French conference on multi-agent systems at Loriol-sur-Drôme.</p>
+      <p>This <a href="http://jfsma14.lcis.fr/ressources/presentations/Slides_AFreyssinet.pdf">presentation</a> details the technological core
+      of Joram: the distributed execution engine implements a reactor pattern, where agents communicate exclusively through events and react to
+      events atomically. This technology enables ScalAgent&#145;s agents to interact effortlessly, be they located on the same system or on different
+      ones.</p>
+      <p>It is at the core of several of our products, Joram or JoramMQ, the monitoring/control solutions developed for the CNES, or
+      the mediation solution of TagSys RFID.</p>
+      </s2>
+
+      <s2 name="September 18, 2014: CNES workshop - Mobility for operations">
+      <p>CNES (the french space agency) has organized a workshop on 18th September about mobility for
+      operations. The question is to allow remote users to use the services of an operations center from
+      Internet. This could be for controlling a satellite, or for managing scientific on-board instruments.
+      The topic covers also cooperative missions which involve several agencies and other entities.</p>
+      <p>David Féliot will be there for <a href="http://www.scalagent.com">ScalAgent D.T.</a> to present the
+      interest of the MQTT technology in this context, and the value of the MQTT implementation in JoramMQ
+      Entreprise.</p>
+      </s2>
+
+      <s2 name="September, 2014:  MQTT implementation on top of Joram.">
+      <p><a href="http://www.scalagent.com">ScalAgent D.T.</a> has implemented the version 3.1 of the
+      MQTT protocol integrated with JoramMQ Entreprise. An intensive performance evaluation campain demonstrates
+      the stability and scalability of the middleware, under stress conditions including a very high throuput
+      of messages and an extremely large number of clients.</p>
+      <p>Find all détails of this study in the white paper to download:
+      <a href="http://www.scalagent.com/IMG/pdf/JoramMQ_MQTT_white_paper-v1-2.pdf">JoramMQ_MQTT_white_paper</a></p>
+      </s2>
+
+      <s2 name="February 19, 2014: Eclipse IoT Day Grenoble 2014 conference, France.">
+      <p><a href="www.scalagent.com">ScalAgent D.T.</a>) is currently implementing version 3.1 of
+      the MQTT protocol. This work is to be presented by David Féliot at the
+      <a href="http://wiki.eclipse.org/Eclipse_IoT_Day_Grenoble_2014">Eclipse IoT Day Grenoble 2014 conference</a>,
+      organised by Eclipse at Grenoble on the 19th of february 2014.</p>
+      <p>David's presentation will be available on the <a href="http://mqtt.jorammq.com/">ScalAgent's MQTT</a> web
+      page after the conference.</p>
+      </s2>
+
+      <s2 name="November 13, 2013: OW2 Annual Conference, Paris, France.">
+      <p>Serge Lacourte, CEO of ScalAgent DT, participates to a panel at the annual OW2 conference
+	  on the subject : Benefits and challenges of integrating open source components.</p>
       </s2>
 
       <s2 name="October 2, 2013: JORAM 5.9.0 release is available.">

@@ -11,7 +11,24 @@
   </properties>
 
 	<body>
+     <s1 name="May 28, 2015: JORAM 5.10.0 release is available.">
+        <p>Joram 5.10.0 is available in the SVN repository with tag JORAM_5_10_0.</p>
+        <p>The complete list of changes can be viewed either in
+        <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+     </s1>
 		
+      <s1 name="May 28, 2015: JORAM 5.9.1.2 release is available.">
+        <p>Joram 5.9.1.2 is available in the SVN repository with tag JORAM_5_9_1_2.</p>
+        <p>The complete list of changes can be viewed either in
+        <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+     </s1>
+     
+      <s1 name="February 23, 2015: JORAM 5.9.1.1 release is available.">
+        <p>Joram 5.9.1.1 is available in the SVN repository with tag JORAM_5_9_1_1.</p>
+        <p>The complete list of changes can be viewed either in
+        <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+     </s1>
+
       <s1 name="November 28, 2014: JORAM 5.9.1 release is available.">
         <p>Joram 5.9.1 is available in the SVN repository with tag JORAM_5_9_1.</p>
         <s2 name="New features and improvements">
@@ -26,7 +43,7 @@
         <li>An significant work to optimize the performances, among other things:<ul>
             <li>Use of callback to ack some JMS request server-side (JORAM-172, JORAM-179, JORAM-184).</li>
             <li>Break the monolitic saving of agents (JORAM-166, JORAM-170, JORAM-177).</li>
-            <li>Optimize the marshalling of some resuests (JORAM-180).</li>
+            <li>Optimize the marshalling of some requests (JORAM-180).</li>
             <li>Optimize the transactionnal backup (JORAM-182).</li>
           </ul>
         </li>
@@ -40,7 +57,7 @@
         <li>JORAM-[198-200]: Behavior of bridge JMS.</li>
         </ul>
         </s2>
-    </s1>
+      </s1>
 
       <s1 name="October 2, 2013: JORAM 5.9.0 release is available.">
         <p>Joram 5.9.0 is available in the SVN repository with tag JORAM_5_9_0.</p>
