@@ -297,6 +297,46 @@
     	<arg line="topic"/>
     </java>
   </target>
+	
+  <!-- Runs the JMS2 consumer client for queue -->
+  <target name="jms2_consumer_queue" depends="simple_init"
+    description="--> Starts a Consumer client">
+    <java classname="jms2.Consumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="queue"/>
+    </java>
+  </target>
+
+  <!-- Runs the JMS2 producer client for queue -->
+  <target name="jms2_producer_queue" depends="simple_init"
+    description="--> Starts a Producer client">
+    <java classname="jms2.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="queue"/>
+    </java>
+  </target>
+
+  <!-- Runs the JMS2 consumer client for topic -->
+  <target name="jms2_consumer_topic" depends="simple_init"
+    description="--> Starts a Consumer client">
+    <java classname="jms2.Consumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="topic"/>
+    </java>
+  </target>
+
+  <!-- Runs the JMS2 producer client for topic -->
+  <target name="jms2_producer_topic" depends="simple_init"
+    description="--> Starts a Producer client">
+    <java classname="jms2.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="topic"/>
+    </java>
+  </target>
 
   <!-- Runs the classic browser client -->
   <target name="browser" depends="simple_init"
