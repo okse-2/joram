@@ -6,11 +6,9 @@ import javax.jms.JMSContext;
 import javax.jms.CompletionListener;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
-import javax.jms.JMSConsumer;
 import javax.jms.JMSException;
 import javax.jms.JMSProducer;
 import javax.jms.Message;
-import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 public class Producer implements CompletionListener{
@@ -35,9 +33,7 @@ public class Producer implements CompletionListener{
     }
     
     Thread.sleep(1000L);
-    
     context.close();
-    System.exit(0);
   }
   
   @Override
