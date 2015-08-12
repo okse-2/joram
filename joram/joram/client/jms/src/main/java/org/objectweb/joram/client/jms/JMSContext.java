@@ -349,6 +349,8 @@ public class JMSContext implements javax.jms.JMSContext {
     } catch (JMSException e) {
       throw new JMSRuntimeException("Unable to close context", e.getMessage(), e);
     }
+    
+    // TODO (AF): May be we have to set session and connection to null.
   }
 
   public void acknowledge() {
@@ -816,7 +818,7 @@ public class JMSContext implements javax.jms.JMSContext {
 }
 
 class ContextConnection {
-  private int counter = 1;
+  private int counter = 0;
   private boolean autoStart = true;
   private org.objectweb.joram.client.jms.Connection connection = null;
   private boolean lockClientID = false;
@@ -830,6 +832,8 @@ class ContextConnection {
   }
 
   public synchronized Session createSession() throws JMSException {
+    if (connection == null) throw new JMSException("Underlying connection is closed");
+    
     try {
       return (Session) connection.createSession();
     } finally {
@@ -838,6 +842,8 @@ class ContextConnection {
   }
 
   synchronized Session createSession(int mode) throws JMSException {
+    if (connection == null) throw new JMSException("Underlying connection is closed");
+    
     try {
       return (Session) connection.createSession(mode);
     } finally {
@@ -846,12 +852,20 @@ class ContextConnection {
   }
   
   synchronized void close() throws JMSException {
+    if (connection == null) throw new JMSException("Underlying connection is closed");
+
     if (--counter <= 0)
-      connection.close();
+      try {
+        connection.close();
+      } finally {
+        connection = null;
+      }
   }
   
   public void start() {
     try {
+      if (connection == null) throw new JMSException("Underlying connection is closed");
+
       connection.start();
     } catch (JMSException e) {
       throw new JMSRuntimeException("Cannot start connection", e.getMessage(), e);
@@ -860,6 +874,8 @@ class ContextConnection {
 
   public void stop() {
     try {
+      if (connection == null) throw new JMSException("Underlying connection is closed");
+
       connection.stop();
     } catch (IllegalStateException e) {
       throw new IllegalStateRuntimeException("Unable to close context", e.getMessage(), e);
@@ -870,6 +886,8 @@ class ContextConnection {
 
   public ConnectionMetaData getMetaData() {
     try {
+      if (connection == null) throw new JMSException("Underlying connection is closed");
+
       return connection.getMetaData();
     } catch (JMSException e) {
       throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
@@ -878,6 +896,8 @@ class ContextConnection {
 
   public ExceptionListener getExceptionListener() {
     try {
+      if (connection == null) throw new JMSException("Underlying connection is closed");
+
       return connection.getExceptionListener();
     } catch (JMSException e) {
       throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
@@ -886,6 +906,8 @@ class ContextConnection {
 
   public void setExceptionListener(ExceptionListener listener) {
     try {
+      if (connection == null) throw new JMSException("Underlying connection is closed");
+
       connection.setExceptionListener(listener);
     } catch (JMSException e) {
       throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
@@ -894,6 +916,8 @@ class ContextConnection {
 
   public String getClientID() {
     try {
+      if (connection == null) throw new JMSException("Underlying connection is closed");
+
       return connection.getClientID();
     } catch (JMSException e) {
       throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
@@ -904,6 +928,8 @@ class ContextConnection {
     try {
       if (lockClientID)
         throw new IllegalStateException("ClientID is already set by the provider.");
+      if (connection == null) throw new JMSException("Underlying connection is closed");
+
       connection.setClientID(clientID);
       lockClientID = true;
     } catch (InvalidClientIDException e) {
