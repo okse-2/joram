@@ -29,6 +29,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.jndi2.impl.Trace;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  *  Class of a JNDI centralized server. This agent may be accessed either by
@@ -95,13 +97,25 @@ public class JndiServer {
       container.deploy();
     }
 
+    try {
+      MXWrapper.registerMBean(tcpServer, "JNDI", "service=tcp");
+    } catch (Exception exc) {
+      Trace.logger.log(BasicLevel.WARN, " JNDI server jmx failed", exc);
+    }
+
     tcpServer.start();
   }
-
+  
   /**
    * Stops the <code>JndiServer</code> service.
    */ 
   public static void stopService() {
+    try {
+      MXWrapper.unregisterMBean("JNDI", "service=tcp");
+    } catch (Exception exc) {
+      Trace.logger.log(BasicLevel.WARN, "JNDI server jmx failed", exc);
+    }
+
     tcpServer.stop();
   }
   

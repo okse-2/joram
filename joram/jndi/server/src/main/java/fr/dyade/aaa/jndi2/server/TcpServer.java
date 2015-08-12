@@ -33,7 +33,7 @@ import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.common.Daemon;
 
-public class TcpServer {
+public class TcpServer implements TcpServerMBean {
 
   private volatile ServerSocket listen;
 
@@ -50,6 +50,24 @@ public class TcpServer {
       monitors[i].setDaemon(true);
       monitors[i].setThreadGroup(AgentServer.getThreadGroup());
     }
+  }
+  
+  /**
+   * Gets the number of threads of the pool.
+   * 
+   * @return the number of threads of the pool.
+   */
+  public int getPoolSize() {
+    return monitors.length;
+  }
+  
+  /**
+   * Gets the listen port of the server.
+   * 
+   * @return the listen port of the server.
+   */
+  public int getListenPort() {
+    return listen.getLocalPort();
   }
   
   public final void start() {
