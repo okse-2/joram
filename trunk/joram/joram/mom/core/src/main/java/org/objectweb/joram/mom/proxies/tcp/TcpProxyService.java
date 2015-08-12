@@ -372,8 +372,12 @@ public class TcpProxyService implements TcpProxyServiceMBean {
     return connectionListeners.length;
   }
 
+  public int getListenPort() {
+    return port;
+  }
+  
   public String getServerAddress() {
-    return address.toString();
+    return address;
   }
 
   public int getFailedLoginCount() {
