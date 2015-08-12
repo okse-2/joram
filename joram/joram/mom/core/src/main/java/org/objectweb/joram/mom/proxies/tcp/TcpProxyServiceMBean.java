@@ -27,7 +27,13 @@ import org.objectweb.joram.mom.proxies.ConnectionManagerMBean;
  * Adds JMX monitoring for tcp connections.
  */
 public interface TcpProxyServiceMBean extends ConnectionManagerMBean {
-
+  /**
+   * Gets the listen port of the server.
+   * 
+   * @return the listen port of the server.
+   */
+  public int getListenPort();
+  
   /**
    * Gets the socket address of the server.
    * 
