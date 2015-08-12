@@ -1,16 +1,12 @@
 package jms2;
 
-import java.util.Enumeration;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.jms.JMSContext;
-import javax.jms.CompletionListener;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSException;
-import javax.jms.JMSProducer;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
@@ -32,8 +28,6 @@ public class Consumer implements MessageListener {
     System.in.read();
     context.close();
     System.out.println("Consumer closed.");
-
-    System.exit(0);
   }
   
   @Override
