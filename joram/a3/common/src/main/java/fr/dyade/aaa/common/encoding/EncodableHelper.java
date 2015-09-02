@@ -65,6 +65,15 @@ public class EncodableHelper {
     return res;
   }
   
+  public static final int getNullableByteArrayEncodedSize(byte[] byteArray,
+      int length) {
+    int res = Encodable.BYTE_ENCODED_SIZE;
+    if (byteArray != null) {
+      res += Encodable.INT_ENCODED_SIZE + length;
+    }
+    return res;
+  }
+  
   public static int getEncodedSize(Properties properties) throws Exception {
     int res = Encodable.INT_ENCODED_SIZE;
     Set<Entry<Object, Object>> entries = properties.entrySet();

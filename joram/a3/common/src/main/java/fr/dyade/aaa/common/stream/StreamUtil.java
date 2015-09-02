@@ -344,6 +344,24 @@ public final class StreamUtil {
       os.write(tab);
     }    
   }
+  
+  /**
+   * This  method allows to write byte array to the output stream.
+   *
+   * @param tab the byte array to write
+   * @param os  the stream to write the object to
+   */
+  public static void writeTo(byte[] tab, int offset, int length, OutputStream os)
+      throws IOException {
+    if (tab == null) {
+      writeTo(-1, os);
+    } else if (length == 0) {
+      writeTo(0, os);
+    } else {
+      writeTo(tab.length, os);
+      os.write(tab, offset, length);
+    }
+  }
 
   /**
    * This method allows to restore a byte array from the input stream.
