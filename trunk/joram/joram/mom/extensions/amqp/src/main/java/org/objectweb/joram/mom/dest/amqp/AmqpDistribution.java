@@ -193,7 +193,7 @@ public class AmqpDistribution implements DistributionHandler {
         if (logger.isLoggable(BasicLevel.DEBUG)) {
           logger.log(BasicLevel.DEBUG, "Sending message on " + cnxName);
         }
-        chan.basicPublish("", amqpQueue, props, message.body);
+        chan.basicPublish("", amqpQueue, props, message.getBody());
         channels.get(cnxName); // Access the used connection to update the LRU map
         return;
       } catch (IOException exc) {
