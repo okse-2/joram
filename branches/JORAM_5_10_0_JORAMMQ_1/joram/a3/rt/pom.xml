@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>a3-rt</artifactId>
+  <packaging>bundle</packaging>
+  <name>JORAM :: a3 :: rt</name>
+  <description>Builds the Joram a3 rt project.</description>
+
+  <parent>
+    <groupId>org.ow2.joram</groupId>
+    <artifactId>a3</artifactId>
+    <version>5.11.0-SNAPSHOT</version>
+  </parent>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Export-Package>com.scalagent.txlog,fr.dyade.aaa.agent,fr.dyade.aaa.agent.conf,fr.dyade.aaa.util,fr.dyade.aaa.ext</Export-Package>
+            <Import-Package>com.scalagent.jmx,
+              fr.dyade.aaa.common,
+              fr.dyade.aaa.common.encoding,
+              fr.dyade.aaa.common.monitoring,
+              fr.dyade.aaa.common.net,
+              fr.dyade.aaa.util.management,
+              org.objectweb.util.monolog,
+              org.objectweb.util.monolog.api</Import-Package>
+              <DynamicImport-Package>*</DynamicImport-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>a3-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
+    <!-- Used for MySqlDBRepository. -->
+    <dependency>
+      <groupId>commons-dbcp</groupId>
+      <artifactId>commons-dbcp</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
+</project>

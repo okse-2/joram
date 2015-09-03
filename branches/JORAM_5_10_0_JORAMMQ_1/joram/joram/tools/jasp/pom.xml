@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>joram-tools-jasp</artifactId>
+  <packaging>bundle</packaging>
+  <name>JORAM :: joram :: tools :: jasp</name>
+  <description>Builds the Joram jasp project.</description>
+
+  <parent>
+    <groupId>org.ow2.joram</groupId>
+    <artifactId>joram-tools</artifactId>
+    <version>5.11.0-SNAPSHOT</version>
+  </parent>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-Activator>org.objectweb.joram.tools.jasp.osgi.Activator</Bundle-Activator>
+            <Embed-Dependency>stompconnect|commons-logging;scope=compile|runtime;inline=true</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Import-Package>
+              fr.dyade.aaa.common,
+              javax.jms,
+              javax.naming,
+              javax.transaction.xa,
+              org.objectweb.util.monolog,
+              org.objectweb.util.monolog.api</Import-Package>
+            <DynamicImport-Package>*</DynamicImport-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-jms-2.0-spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-client-jms</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.codehaus.stomp</groupId>
+    	<artifactId>stompconnect</artifactId>
+    </dependency>
+  </dependencies>
+  
+  <repositories>
+    <repository>
+      <id>central</id>
+      <url>http://repo.maven.apache.org/maven2</url>
+    </repository>
+  </repositories>
+</project>

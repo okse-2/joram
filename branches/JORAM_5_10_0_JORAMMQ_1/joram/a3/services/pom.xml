@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>a3-services</artifactId>
+  <packaging>bundle</packaging>
+  <name>JORAM :: a3 :: services</name>
+  <description>Builds the Joram a3 services project.</description>
+
+  <parent>
+    <groupId>org.ow2.joram</groupId>
+    <artifactId>a3</artifactId>
+    <version>5.11.0-SNAPSHOT</version>
+  </parent>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-Activator>fr.dyade.aaa.agent.services.A3ServiceActivator</Bundle-Activator>
+            <Export-Package>fr.dyade.aaa.agent.services</Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>a3-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.util.substitution</groupId>
+      <artifactId>substitution</artifactId>
+    </dependency>
+  </dependencies>
+</project>
