@@ -39,8 +39,8 @@ public class QueueWorker implements Runnable {
   public ConcurrentLinkedQueue<ProxyMessage> queue = new ConcurrentLinkedQueue<ProxyMessage>();
   public boolean running;
 
-  public TcpConnection tcpConnection;
-  public IOControl ioctrl;
+  public ProxyMessageSender sender;
+  //public IOControl ioctrl;
 
   private void handleMessage(ProxyMessage msg) throws Exception {
     if ((msg.getObject() instanceof MomExceptionReply) &&
@@ -50,11 +50,11 @@ public class QueueWorker implements Runnable {
       // (see UserAgent)
       new Thread(new Runnable() {
         public void run() {            
-          tcpConnection.close();
+        	sender.close();
         }
       }).start();
     } else {
-      ioctrl.send(msg);
+    	sender.send(msg);
     }
   }
 
@@ -78,4 +78,23 @@ public class QueueWorker implements Runnable {
         logger.log(BasicLevel.DEBUG, e);
     }
   } 
+  
+  public void send(ProxyMessage msg) {
+    synchronized (queue) {
+      queue.offer(msg);
+      if (! running) {
+        running = true;
+        try {
+          if (! sender.isExecutor()) {
+            sender.send(msg);
+            running = false;
+          } else {
+            sender.execute(this);
+          }
+        } catch (Exception e) {
+          logger.log(BasicLevel.ERROR, "", e);
+        }
+      }
+    }
+  }
 }

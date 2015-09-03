@@ -22,6 +22,8 @@ package org.objectweb.joram.mom.proxies.tcp;
 
 import java.util.Date;
 
+import org.objectweb.joram.mom.proxies.ProxyMessage;
+import org.objectweb.joram.mom.proxies.ProxyMessageSender;
 import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -41,7 +43,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * @see TcpProxyService
  * @see TcpConnectionListener
  */
-public class TcpConnection implements TcpConnectionMBean {
+public class TcpConnection implements TcpConnectionMBean, ProxyMessageSender {
   /** logger */
   public static Logger logger = Debug.getLogger(TcpConnection.class.getName());
 
@@ -120,8 +122,9 @@ public class TcpConnection implements TcpConnectionMBean {
     try {
       if (ctx.isNoAckedQueue()) {
         ioctrl.setNoAckedQueue(ctx.isNoAckedQueue());
-        ctx.getQueueWorker().ioctrl = ioctrl;
-        ctx.getQueueWorker().tcpConnection= this;
+        //ctx.getQueueWorker().ioctrl = ioctrl;
+        // ctx.getQueueWorker().tcpConnection= this;
+        ctx.getQueueWorker().sender = this;
       } else {
         tcpWriter = new TcpWriter(ioctrl, ctx.getQueue(), this);
         tcpWriter.start();
@@ -186,5 +189,17 @@ public class TcpConnection implements TcpConnectionMBean {
   }
   public int getReaderQueueSize() {
     return ioctrl.getreceiveQueueSize();
+  }
+  
+  public void send(ProxyMessage msg) throws Exception {
+    ioctrl.send(msg);
+  }
+
+  public boolean isExecutor() {
+    return TcpProxyService.executorService != null;
+  }
+
+  public void execute(Runnable runnable) {
+    TcpProxyService.executorService.execute(runnable);
   }
 }

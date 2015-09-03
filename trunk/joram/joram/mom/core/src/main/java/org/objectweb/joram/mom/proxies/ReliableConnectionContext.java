@@ -24,7 +24,6 @@ package org.objectweb.joram.mom.proxies;
 
 import java.io.Serializable;
 
-import org.objectweb.joram.mom.proxies.tcp.TcpProxyService;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
@@ -99,6 +98,8 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
   }
 
   private void add(ProxyMessage msg) {
+    queueWorker.send(msg);
+    /*
     synchronized (queueWorker.queue) {
       queueWorker.queue.offer(msg);
       if (! queueWorker.running) {
@@ -114,7 +115,7 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
           logger.log(BasicLevel.ERROR, e);
         }
       }
-    }
+    }*/
   }
   
   public QueueWorker getQueueWorker() {
