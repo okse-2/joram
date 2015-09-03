@@ -526,7 +526,11 @@ public final class Message implements Serializable, MessageView, Encodable {
     out.writeBoolean(soft);
 
     msg.writeHeaderTo(out);
-    StreamUtil.writeTo(msg.body, out);
+    if (msg.bodyLength < 0) {
+      StreamUtil.writeTo(msg.body, out);
+    } else {
+      StreamUtil.writeTo(msg.body, msg.bodyOffset, msg.bodyLength, out);
+    }
   }
 
   /**
@@ -542,6 +546,10 @@ public final class Message implements Serializable, MessageView, Encodable {
     msg = new org.objectweb.joram.shared.messages.Message();
     msg.readHeaderFrom(in);
     msg.body = StreamUtil.readByteArrayFrom(in);
+    msg.bodyOffset = 0;
+    if (msg.body != null) {
+      msg.bodyLength = msg.body.length;
+    }
   }
 
   public String getText() {
