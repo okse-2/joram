@@ -42,13 +42,13 @@
 			<s2 name="General">
 
 				<p>
-					JORAM fully supports <strong>JMS 1.1</strong> and <strong>Java EE 5</strong> with support
-					for transient, persistent, transactional and XA messaging (JORAM provide a fully functional
-					XAResource implementation, JORAM sessions can then be enlisted in any JTA transaction acording
-					to the normal JTA semantics).
+					JORAM fully supports <strong>JMS 1.1</strong>, <strong>JMS 2.0</strong> and <strong>Java EE</strong>
+					with support for transient, persistent, transactional and XA messaging (JORAM provide a fully functional
+					XAResource implementation, JORAM sessions can then be enlisted in any JTA transaction according to the
+					normal JTA semantics).
 				</p>
 				<p>
-					All the features described in the JMS 1.1 specification are provided by JORAM.
+					All the features described in the JMS 1.1 and JMS 2.0specification are provided by JORAM.
 				</p>
 				<p>
 					JORAM is an <strong>open-source</strong> software component released under the
@@ -78,7 +78,7 @@
 				JORAM provides a fully functional JCA adaptor that can be used in any JEE compliant application
 				server to integrate JORAM so it can be used for consuming messages via Message Driven Beans (MDBs),
 				or for sending messages in Enterprise JavaBeans or servlets.<br></br>
-				JORAM can easily be installed as the JMS provider of any JCA compliant Application Server. Bu default,
+				JORAM can easily be installed as the JMS provider of any JCA compliant Application Server. By default,
 				JORAM is embedded in JOnAS Application Server.<br></br>
 				Simple instructions are provided in the distribution showing you how to do this with popular Application Server.
 				</p>

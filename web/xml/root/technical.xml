@@ -25,8 +25,9 @@
   	<tr>
 	    <td align="center"></td>
 	    <td align="left">
-	      <p>JORAM has been made available for download since May 2000.<br></br>
-        As a standalone software, JORAM has been downloaded more than 100,000 times.</p>
+	    	<p><strong>JORAM</strong> is an open source Java implementation of JMS (Java Message Service) API specification.</p>
+	    	<p>JORAM is a mature project started in 1999, it is released under the LGPL license since May 2000.<br></br>It provides
+	    	a production ready distributed MOM already used within many critical operational applications.</p>
 	    </td>
 	  </tr>
     </table>
@@ -43,7 +44,7 @@
 
       <s2 name="Specification">
 
-        <p>JORAM provides full support to <strong>JMS 1.1</strong>:</p>
+        <p>JORAM provides full support to <strong>JMS 1.1</strong> and <strong>JMS 2.0</strong>:</p>
         <ul>
           <li>Unified interfaces for the Point-to-Point (PTP) and
             Publish/Subscribe (Pub/Sub) messaging models</li>
@@ -51,13 +52,12 @@
             Pub/Sub interfaces</li>
           <li>Full backward compatibility with JMS 1.0.2b compliant
             applications</li>
-          <li>Local, TCP and SOAP (HTTP/XML) client-server communication
-              protocols</li>
+          <li>Local, TCP, SSL and SOAP (HTTP/XML) client-server communication protocols</li>
           <li>Message persistence and guarantee of delivery</li>
           <li>Hierarchical topics</li>
           <li>Message selection</li>
           <li>Message prioritization</li>
-          <li>A JCA 1.5 Resource Adapter</li>
+          <li>A JCA Resource Adapter</li>
         </ul>
         
         <p>JORAM also includes the following extra-features:</p>
