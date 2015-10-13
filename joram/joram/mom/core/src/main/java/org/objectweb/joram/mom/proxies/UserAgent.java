@@ -1107,7 +1107,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
   private void initialize(boolean firstTime) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "--- " + this + " (re)initializing...");
-
+    
     topicsTable = new Hashtable();
     
     if (firstTime) {
@@ -1126,6 +1126,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     Transaction tx = AgentServer.getTransaction();
     String[] persistedClientNames = tx.getList(ClientContext.getTransactionPrefix(getId()));
     for (int i = 0; i < persistedClientNames.length; i++) {
+      logger.log(BasicLevel.INFO, "ClientContext named [" + persistedClientNames[i] + "] loaded");
+      
       try {
         ClientContext cc = (ClientContext) tx.load(persistedClientNames[i]);
         cc.txName = persistedClientNames[i];
@@ -1133,13 +1135,15 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         cc.setProxyAgent(this);
         contexts.put(cc.getId(), cc);
       } catch (Exception exc) {
-        logger.log(BasicLevel.ERROR, "ClientContext named [" + persistedClientNames[i]
-            + "] could not be loaded", exc);
+        logger.log(BasicLevel.ERROR, 
+                   "ClientContext named [" + persistedClientNames[i] + "] could not be loaded", exc);
       }
     }
 
     String[] persistedSubscriptionNames = tx.getList(ClientSubscription.getTransactionPrefix(getId()));
     for (int i = 0; i < persistedSubscriptionNames.length; i++) {
+      logger.log(BasicLevel.INFO, "ClientSubscription named [" + persistedSubscriptionNames[i] + "] loaded");
+
       try {
         ClientSubscription cs = (ClientSubscription) tx.load(persistedSubscriptionNames[i]);
         cs.txName = persistedSubscriptionNames[i];
@@ -1151,8 +1155,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         
         subsTable.put(cs.getName(), cs);
       } catch (Exception exc) {
-        logger.log(BasicLevel.ERROR, "ClientSubscription named [" + persistedSubscriptionNames[i]
-            + "] could not be loaded", exc);
+        logger.log(BasicLevel.ERROR,
+                   "ClientSubscription named [" + persistedSubscriptionNames[i] + "] could not be loaded", exc);
       }
     }
 
@@ -1177,7 +1181,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
       activeCtx = (ClientContext) ctxs.next();
       activeCtx.setProxyAgent(this);
       ctxs.remove();
-
+      
       // Denying the non acknowledged messages:
       for (Iterator queueIds = activeCtx.getDeliveringQueues(); queueIds.hasNext();) {
         destId = (AgentId) queueIds.next();
@@ -1217,6 +1221,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Deletes temporary destination " + destId.toString());
       }
+      
+      // destroy the context
+      logger.log(BasicLevel.INFO, "ClientContext named [" + activeCtx.txName + "] deleted");
+      activeCtx.delete();
     }
 
     // Retrieving the subscriptions' messages.
@@ -1229,18 +1237,16 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     }
 
     // Browsing the pre-crash subscriptions:
-    Map.Entry subEntry;
-    ClientSubscription cSub;
     List topics = new ArrayList();
-    TopicSubscription tSub;
     for (Iterator subs = subsTable.entrySet().iterator(); subs.hasNext();) {
-      subEntry = (Map.Entry) subs.next();
-      cSub = (ClientSubscription) subEntry.getValue();
+      Map.Entry subEntry = (Map.Entry) subs.next();
+      ClientSubscription cSub = (ClientSubscription) subEntry.getValue();
       destId = cSub.getTopicId();
       if (!topics.contains(destId))
         topics.add(destId);
       // Deleting the non durable subscriptions.
       if (!cSub.getDurable()) {
+        // TODO (AF): Normally the non durable subscription are not saved (see ClientSubscription).
         subs.remove();
         try {
           MXWrapper.unregisterMBean(getSubMBeanName((String) subEntry.getKey()));
@@ -1248,9 +1254,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
         }
-      }
+        // TODO (AF): we should remove it using cSub.delete() but it is useless as it is impossible.
+      } else {
       // Reinitializing the durable ones.
-      else {
         cSub.setProxyAgent(this);
         cSub.reinitialize(messagesTable, messages, true);
         try {
@@ -1259,7 +1265,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "  - Could not register ClientSubscriptionMbean", e1);
         }
-        tSub = (TopicSubscription) topicsTable.get(destId);
+        TopicSubscription tSub = (TopicSubscription) topicsTable.get(destId);
         if (tSub == null) {
           tSub = new TopicSubscription();
           topicsTable.put(destId, tSub);
