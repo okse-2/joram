@@ -988,6 +988,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
     Transaction tx = AgentServer.getTransaction();
     String[] persistedClientNames = tx.getList(ClientContext.getTransactionPrefix(getId()));
     for (int i = 0; i < persistedClientNames.length; i++) {
+      logger.log(BasicLevel.INFO, "ClientContext named [" + persistedClientNames[i] + "] loaded");
+      
       try {
         ClientContext cc = (ClientContext) tx.load(persistedClientNames[i]);
         cc.txName = persistedClientNames[i];
@@ -1075,6 +1077,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Deletes temporary destination " + destId.toString());
       }
+      
+      // destroy the context
+      logger.log(BasicLevel.INFO, "ClientContext named [" + activeCtx.txName + "] deleted");
+      activeCtx.delete();
     }
 
     // Retrieving the subscriptions' messages.
@@ -1099,6 +1105,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
         topics.add(destId);
       // Deleting the non durable subscriptions.
       if (!cSub.getDurable()) {
+        // TODO (AF): Normally the non durable subscription are not saved (see ClientSubscription).
         subs.remove();
         try {
           MXWrapper.unregisterMBean(getSubMBeanName((String) subEntry.getKey()));
@@ -1106,6 +1113,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, ProxyAgent
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "  - Problem when unregistering ClientSubscriptionMbean", e1);
         }
+        // TODO (AF): we should remove it using cSub.delete() but it is useless as it is impossible.
       }
       // Reinitializing the durable ones.
       else {
