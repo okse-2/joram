@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<config>
+  <property name="Transaction.UseLockFile" value="false" />
+  <property name="Engine" value="fr.dyade.aaa.agent.Engine" />
+  <property name="Transaction" value="fr.dyade.aaa.util.NullTransaction" />
+  <domain name="D0" network="fr.dyade.aaa.agent.SimpleNetwork" />
+
+  <server id="0" name="S0" hostname="localhost">
+    <network domain="D0" port="27300" />
+    <property name="fr.dyade.aaa.util.ReliableTcpConnection.windowSize"
+      value="100" />
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="7890" />
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
+      args="root root" />
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService"
+      args="2560" />
+    <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400" />
+  </server>
+
+  <server id="1" name="S1" hostname="localhost">
+    <network domain="D0" port="27301" />
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
+      args="root root" />
+  </server>
+
+</config>

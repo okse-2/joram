@@ -1,0 +1,15 @@
+.listLink {
+	font-size: 0.7em;
+	color: black;
+}
+
+.listLinkHover {
+	font-size: 0.7em;
+	text-decoration: underline;
+	color: black;
+}
+
+.title1 {
+	font-size:1.3em;
+	font-weight: bold;
+}

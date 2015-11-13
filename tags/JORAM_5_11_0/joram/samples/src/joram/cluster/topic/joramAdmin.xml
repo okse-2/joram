@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<!--
+  - Copyright (C) 2000 - 2012 ScalAgent Distributed Technologies
+  - 
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or any later version.
+  - 
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  - 
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+  - USA.
+-->
+
+<JoramAdmin>
+  
+  <TcpAdminModule host="localhost" port="16010" name="root" password="root">
+    <property name="connectingTimer" value="60"/>
+  </TcpAdminModule>
+
+  <InitialContext>
+    <property name="java.naming.factory.initial" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
+    <property name="java.naming.factory.host" value="localhost"/>
+    <property name="java.naming.factory.port" value="16400"/>
+  </InitialContext>
+  
+  <TcpConnectionFactory name="cf0" host="localhost" port="16010">
+    <jndi name="cf0"/>
+  </TcpConnectionFactory>
+
+  <TcpConnectionFactory name="cf1" host="localhost" port="16011">
+    <jndi name="cf1"/>
+  </TcpConnectionFactory>
+
+  <TcpConnectionFactory name="cf2" host="localhost" port="16012">
+    <jndi name="cf2"/>
+  </TcpConnectionFactory>
+
+  <ClusterCF>
+    <ClusterElement name="cf0" location="server0"/>
+    <ClusterElement name="cf1" location="server1"/>
+    <ClusterElement name="cf2" location="server2"/>
+    <jndi name="clusterCF"/>
+  </ClusterCF>
+
+  <User name="anonymous" password="anonymous" serverId="0"/>
+  <User name="anonymous" password="anonymous" serverId="1"/>
+  <User name="anonymous" password="anonymous" serverId="2"/>
+  
+  <Topic name="topic0" serverId="0">
+    <jndi name="topic0"/>
+  </Topic>
+  <Topic name="topic1" serverId="1">
+    <jndi name="topic1"/>
+  </Topic>
+  <Topic name="topic2" serverId="2">
+    <jndi name="topic2"/>
+  </Topic>
+
+  <ClusterTopic>
+    <ClusterElement name="topic0" location="server0"/>
+    <ClusterElement name="topic1" location="server1"/>
+    <ClusterElement name="topic2" location="server2"/>
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="clusterTopic"/>
+  </ClusterTopic>
+  
+</JoramAdmin>

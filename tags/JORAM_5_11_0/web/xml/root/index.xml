@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Home Page</title>
+    <filename>index.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
+
+    <table border="0" width="100%">
+  	<tr>
+	  <td align="left" rowspan="2">
+	      <img src="images/joram.png" alt="JORAM Logo" height="140" width="300" border="0" hspace="2"/>
+      </td>
+	  <td align="right"><script type="text/javascript" src="http://www.ohloh.net/p/4238/widgets/project_thin_badge.js"></script></td>
+	</tr>
+  	<tr>
+	  <td align="left">
+	    <p><strong>JORAM</strong> is an open source Java implementation of JMS (Java Message Service) API specification.</p>
+	    <p>JORAM is a mature project started in 1999, it is released under the LGPL license since May 2000.<br></br>It provides
+	    a production ready distributed MOM already used within many critical operational applications.</p>
+	  </td>
+	</tr>
+    </table>
+    
+    </s1>
+    
+    <s1 name="Introduction">
+      
+      <p><strong>JORAM</strong> incorporates a 100% pure Java implementation of <strong>JMS API</strong>
+   	  specification.<br></br>
+      It provides access to a really distributed MOM (Message Oriented Middleware), built on top of the
+      <a href="http://www.scalagent.com/">ScalAgent D.T.</a> <strong>AAA</strong> or <strong>A3</strong>
+      agents based platform:</p>
+     <ul>
+        <li><a href="http://www.scalagent.com/en/jorammq-33/technology-36/overview-42">Overview</a>.</li>  
+        <li><a href="http://www.scalagent.com/en/jorammq-33/technology-36/scalagent-platform">ScalAgent agents based platform</a>.</li>
+        <li><a href="http://www.scalagent.com/en/jorammq-33/technology-36/joram-an-agent-based-jms-platform">JORAM an agent based JMS implementation</a>.</li>
+      </ul>
+      
+      <p>Joram is now designed with an OSGi<sup>TM</sup> based services architecture to provide a dynamically adaptable
+      messaging server:</p>
+      <ul>
+        <li>The Joram server can be launched as a set of OSGi bundles (it is always possible to launch the server as
+        a classic Java program).</li>
+        <li>Additional services can be started, stopped, reconfigured: Command line interface, Web console, etc.</li>
+      </ul>
+
+	  <p>Joram can carry many plugins (AMQP, MQTT, Stomp, etc.) and become a multi-protocol gateway.</p>
+	  
+      <p>Stable versions of JORAM are JMS 1.1 and 2.0 compliant. Moreover embedded in a JEE server, JORAM has passed
+      all tests concerning JMS certification in the Java EE certification TCK.</p>
+      <p>Professional Support and training are available from
+      <a href="http://www.scalagent.com/en/joram-33/services-35/support">Scalagent D.T.</a>.</p>
+ 
+    </s1>
+   
+    <s1 name="Latest News">
+      <s2 name="September, 2015:  JoramMQ/MQTT scales up to 750.000 concurrent connections on a simple VM.">
+      <p>At the request of a user we conducted a study on the stability of JoramMQ / MQTT under stress conditions
+      including a very high throughput of messages and an extremely large number of clients.</p>
+      <p>The goal of this benchmark is to demonstrate the vertical scalability of the JoramMQ server using a simple VM.
+      The VM used during the tests was a 4 VCPU with 16Gb running CentOS7.1 with no Linux kernel recompilation. Under these
+      conditions JoramMQ/MQTT has successfully handled 750,000 concurrent connections.</p>
+      <p>The MQTT 3.1.1 plugin implemented by <a href="http://www.scalagent.com">ScalAgent D.T.</a> is integrated with
+      <a href="http://mqtt.jorammq.com">JoramMQ Entreprise</a> and is available for evaluation.</p>
+      <p>Details of this experience are available on request: <a href="mailto:contact@scalagent.com">contact@scalagent.com</a>.</p>
+      </s2>
+
+      <s2 name="May 28, 2015: JORAM 5.10.0 release is available.">
+      <p>This release introduces improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Improvements and fixes in the Acquisition and Distribution destinations.</li>
+        <li>Adds a particular logger allowing to follow the messages flows with a limited amount of traces.</li>
+        <li>Avoids a potential deadlock during Connection.start method.</li>
+        <li>Add a counter for denied messages in Queue, no longer count twice denied messages in nbMsgsDeliverSinceCreation
+        and nbMsgsReceiveSinceCreation counters.</li>
+        <li>Implements an administration method allowing to dump a list of JMX attributes from destination.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>It is tagged in SVN (JORAM_5_10_0), the complete list of changes can be viewed either in
+       <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+      </s2>
+      
+      <s2 name="May, 2015:  MQTT V3.1.1 implementation on top of Joram.">
+      <p>The MQTT plugin implemented by <a href="http://www.scalagent.com">ScalAgent D.T.</a> is now fully compliant with the last version 3.1.1 of the
+      MQTT protocol, this plugin is integrated with <a href="http://mqtt.jorammq.com">JoramMQ Entreprise</a> and is available for evaluation.</p>
+      <p>An intensive performance evaluation campaign demonstrates the stability and scalability of the middleware, under stress conditions including a
+      very high throughput of messages and an extremely large number of clients.</p>
+      <p>Find all détails of this study in the white paper to download:
+      <a href="http://www.scalagent.com/IMG/pdf/JoramMQ_MQTT_white_paper-v1-2.pdf">JoramMQ_MQTT_white_paper</a></p>
+      </s2>
+		
+     <s2 name="May 28, 2015: JORAM 5.9.1.2 release is available.">
+        <p>Joram 5.9.1.2 is available in the SVN repository with tag JORAM_5_9_1_2.</p>
+        <p>The complete list of changes can be viewed either in
+        <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+     </s2>
+      
+      <s2 name="November 28, 2014: JORAM 5.9.1 release is available.">
+      <p>This release introduces improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Full implementation of JMS 2.0 specification:<ul>
+            <li>Open-source implementation of new API.</li>
+            <li>Implementation of shared subscription.</li>
+          </ul>
+          All functions of the new JMS 2.0 specification are now implemented.
+        </li>
+        <li>An significant work to optimize the performances.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>It is tagged in SVN (JORAM_5_9_1), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+      </s2>
+
+      <s2 name="October 9 2014: PRESENTATION AT JFSMA14.">
+      <p>ScalAgent DT presents its technology at the <a href="http://jfsma14.lcis.fr/presentation-invitee-a-freyssinet/">22nd JFSMA</a>, a
+      French conference on multi-agent systems at Loriol-sur-Drôme.</p>
+      <p>This <a href="http://jfsma14.lcis.fr/ressources/presentations/Slides_AFreyssinet.pdf">presentation</a> details the technological core
+      of Joram: the distributed execution engine implements a reactor pattern, where agents communicate exclusively through events and react to
+      events atomically. This technology enables ScalAgent&#145;s agents to interact effortlessly, be they located on the same system or on different
+      ones.</p>
+      <p>It is at the core of several of our products, Joram or JoramMQ, the monitoring/control solutions developed for the CNES, or
+      the mediation solution of TagSys RFID.</p>
+      </s2>
+
+      <s2 name="September 18, 2014: CNES workshop - Mobility for operations">
+      <p>CNES (the french space agency) has organized a workshop on 18th September about mobility for
+      operations. The question is to allow remote users to use the services of an operations center from
+      Internet. This could be for controlling a satellite, or for managing scientific on-board instruments.
+      The topic covers also cooperative missions which involve several agencies and other entities.</p>
+      <p>David Féliot will be there for <a href="http://www.scalagent.com">ScalAgent D.T.</a> to present the
+      interest of the MQTT technology in this context, and the value of the MQTT implementation in JoramMQ
+      Entreprise.</p>
+      </s2>
+
+      <s2 name="September, 2014:  MQTT implementation on top of Joram.">
+      <p><a href="http://www.scalagent.com">ScalAgent D.T.</a> has implemented the version 3.1 of the
+      MQTT protocol integrated with JoramMQ Entreprise. An intensive performance evaluation campain demonstrates
+      the stability and scalability of the middleware, under stress conditions including a very high throuput
+      of messages and an extremely large number of clients.</p>
+      <p>Find all détails of this study in the white paper to download:
+      <a href="http://www.scalagent.com/IMG/pdf/JoramMQ_MQTT_white_paper-v1-2.pdf">JoramMQ_MQTT_white_paper</a></p>
+      </s2>
+
+      <s2 name="February 19, 2014: Eclipse IoT Day Grenoble 2014 conference, France.">
+      <p><a href="www.scalagent.com">ScalAgent D.T.</a>) is currently implementing version 3.1 of
+      the MQTT protocol. This work is to be presented by David Féliot at the
+      <a href="http://wiki.eclipse.org/Eclipse_IoT_Day_Grenoble_2014">Eclipse IoT Day Grenoble 2014 conference</a>,
+      organised by Eclipse at Grenoble on the 19th of february 2014.</p>
+      <p>David's presentation will be available on the <a href="http://mqtt.jorammq.com/">ScalAgent's MQTT</a> web
+      page after the conference.</p>
+      </s2>
+
+      <s2 name="November 13, 2013: OW2 Annual Conference, Paris, France.">
+      <p>Serge Lacourte, CEO of ScalAgent DT, participates to a panel at the annual OW2 conference
+	  on the subject : Benefits and challenges of integrating open source components.</p>
+      </s2>
+      
+      <s2 name="April 17, 2013: Have fun using Joram on Raspberry PI with Java 8.">
+      <p>Joram requires very few resources to run, this simple tutorial shows how to launch
+      a Joram server on a Raspberry PI and test it.</p>
+      <ul>
+        <li>First you need a <a href="http://www.raspberrypi.org/">Raspberry PI</a> with Java 8, you can
+        find documentation instructions to setup JDK 8 on a Raspberry Pi device
+        <a href="http://jdk8.java.net/fxarmpreview/javafx-arm-developer-preview.html">here</a>.
+        </li>
+        <li>Second download a <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/Releases/release/target/joram-release-5.9.1-SNAPSHOT.zip">snapshot</a>
+        of Joram's distribution, then unzip it on your Raspberry PI.
+        </li>
+        <li>Third, follow the tutorial instructions : <a href="doc/tutorials/raspberry/raspberry.htm">here</a>.</li>
+      </ul>
+      </s2>
+      
+      <s2 name="October 24, 2012: Optimal JORAM performance reports.">
+      <p>The <a href="http://www.scalagent.com/en/mqperf-69/produits-70/presentation-370">MQPerf</a> service
+      helps you to understand the behavior of your application using Joram, and enables you to find out Joram
+      optimal performances on your own system, without paying the necessary cost in terms of skill development
+      and work load.</p>
+       
+      <p><a href="http://www.scalagent.com/en/mqperf-69/produits-70/presentation-370">MQPerf</a> is very easy to
+      execute, it requires only 5 mns of your time to get a free performance report. Please have a look at this
+      service at  <a href="http://www.scalagent.com/en/mqperf-69/produits-70/presentation-370">ScalAgent D.T.</a>,
+      test it as much as you want and let us know how you like it. You may also use our new
+      <a href="http://www.scalagent.com/forum/">forum</a>, dedicated to MQPerf, for any question about this
+      service.</p>
+      </s2>
+
+      <s2 name="October 23, 2012: JORAM 5.8.0 release is available.">
+      <p>This release introduces many improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>
+          Refactoring of the JCA resource adapter allowing to deploy many resource adapter
+          in an application server. This enhanced JCA connector includes a new configuration
+          mechanism allowing user friendly configuration.
+        </li>
+        <li>Enhancements of the JMS bridge.</li>
+        <li>Enhancements of the AMQP bridge.</li>
+        <li>Adds an individual acknowledge mode in addition to JMS specification.</li>
+        <li>Joram's MBeans extension.</li>
+        <li>Adds a specific logger allowing to trace message sending and receiving client side.</li>
+        <li>
+          Adds specific ConnectionFactory elements, these factories can be used either
+          through the administration API or the XML configuration scripts. Factory parameters
+          can now be defined in XML configuration scripts.
+        </li>
+        <li>
+          Adds specific factories for specialized destination:<ul>
+            <li>Mail acquisition and distribution destinations.</li>
+            <li>FTP queue.</li>
+            <li>Monitoring queue and topic.</li>
+            <li>Collector queue and topic.</li>
+            <li>SchedulerQueue.</li>
+            <li>JMS and AMQP bridges.</li>
+          </ul>
+          These factories can be used either through the administration API or the XML
+          configuration scripts.
+        </li>
+        <li>
+          Allows the configuration of the JMS and AMQP bridge connection services:<ul>
+            <li>Add elements to define either an AMQP or JMS bridge connection to a Joram server
+            through the XML cpnfiguration scripts.</li>
+            <li>Add methods to add or delete either an AMQP or JMS bridge connection to a Joram
+            server through the administration API.</li>
+          </ul>
+		  Use URLs to describes each connection factory. 
+        </li>
+        <li>Fix LGPL license removing unapropriate ASF.</li>
+        <li>A Xoram component (C/C++ client API), corrected and updated.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>It is tagged in SVN (JORAM_5_8_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+
+      <s2 name="October 10, 2011: 2 new tutorials are available.">
+      <p>Two short tutorials are available in the <a href="doc/tutorials.html">tutorial</a> section. The first
+      shows the use of the web administration console of Joram and the second allows benchmarking of Joram.</p>
+      </s2>
+    
+      <s2 name="October 03, 2011: JORAM JMX/JMS Connector tutorial is available.">
+      <p>A short tutorial demonstrating the use of JORAM JMX/JMS connector is available in the
+      <a href="doc/tutorials.html">tutorial</a> section.</p>
+      </s2>
+
+      <s2 name="July 13, 2011: JORAM/AMQP 1.0 is released">
+      <p>Joram team is proud to announce the final version of the implementation of the specification AMQP v0.9.1.
+      This version successfully passed interoperability testing with RabbitMQ and QPID, it is available in Maven
+      reprository.</p>
+      </s2>
+
+      <s2 name="May 18, 2010: JORAM Architecture Designer plugin 1.0.0 is available">
+      <p>The first official release of Joram Architecture Designer plugin for Eclipse is available
+      for <a href="http://joram.ow2.org/download/index.html">download</a> (package JORAM_DESIGNER at
+      the end of the page). A brief PDF installation guide is available for download.</p>
+      <p>As described in the <a href="http://joram.ow2.org/doc/tutorials.html">tutorial</a> the designer
+      allows to graphically build a Joram distributed architecture. It produces <code>a3servers.xml</code>
+      and <code>joramAdmin.xml</code> configuration files. Now, it allows to automatically deploy the
+      designed configuration using <a href="http://fdf.gforge.inria.fr/">DeployWare</a>.</p>
+      <p>This release is tagged in SVN (JORAM_DESIGNER_1_0_0).</p>
+      </s2>
+
+      <s2 name="May 10, 2010: JORAM in OW2 Open Source Cloudware Initiative.">
+      <p>Last week, OW2 Consortium members Bull, Orange and INRIA had announced the OW2 Open Source Cloudware Initiative
+      at the Solutions Datacenter Management and Cloud Computing trade show in Paris. The bedrock of the OSC Initiative
+      includes the following open source OW2 projects: CLIF, Entropy, JASMINe, JOnAS, and <strong>JORAM</strong> to provide
+      the capability for on-demand JavaEE autonomic server provisioning according to demand fluctuations and ProActive for
+      complementary heterogeneous capacity management.</p>
+      <p>See the Cloudware Initiative Press Release in
+      <a href="http://www.ow2.org/xwiki/bin/download/Cloud/WebHome/OW2CloudInitiative%2DPR%2Dlong%2DenV3.6.pdf">English</a> and in
+      <a href="http://www.ow2.org/xwiki/bin/download/Cloud/WebHome/OW2CloudInitiative%2DPR%2Dlong%2Dfrv3.6.pdf">French</a></p>
+      </s2>
+    
+      <s2 name="March 09, 2010: Joram successfully passes performance and scalability tests for SM&amp;C.">
+      <p>The CNES implementation of a new generation of Spacecraft Monitoring and Control system (CCSDS SM&amp;C stantard)
+      foresee to use Joram as underlying communication middleware. Performance and scalability tests have been conducted
+      successfully to validate this future usage of Joram.</p>
+      <p>Credits to HP &amp; <a href="http://www.oxalya.com">Oxalya</a> and their Minalogic partnership for their support
+      in granting access to the 'virtual nodes' cluster.</p>
+      </s2>
+      
+      <s2 name="January 25, 2010: joram-commits@ow2.org">
+      <p>A new mailing-list is now available, it allows to follow all the modifications on the Joram's SVN.</p>
+      <p>You can subscribe at <a href="http://mail.ow2.org/wws/arc/joram-commits">joram-commits@ow2.org</a>.</p>
+      </s2>
+            
+	  <s2 name="December 2nd and 3rd, 2009: JORAM Training Session, Grenoble, France">
+	      <p>A two-day training session about JORAM is scheduled in Grenoble; it will be delivered in french language.</p>
+	      <p>The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
+	      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component
+	      within a global distributed solution. It includes a significant part of  experimentations and case studies based on
+	      real-world application scenarios.</p>
+	      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. We
+	      offer to share our expertise through a training session aiming at providing the key knowledge to use and deploy a JORAM
+	      system that fits your own requirements. This two-day session details the design principles of JORAM and describes the
+	      best practices that will enable to take advantage of its advanced properties for complex networked environments.</p>
+	      <p>Detailed information about this training session is available online
+	      <a href="http://www.scalagent.com/spip.php?article314 ">(PDF, in french only)</a></p>
+      </s2>
+
+      <s2 name="January 18, 2006">
+        <p>JORAM is acknowledged as the best open source MOM implementation, according to
+        <a href="http://java.sys-con.com/node/171304">JDJ's readers</a>, challenging
+        proprietary products from IBM, Sun and TIBCO.</p>
+      </s2>
+
+      <subtitle><a href="history.html">All the News</a></subtitle>
+    </s1>
+
+  </body>
+</document>
