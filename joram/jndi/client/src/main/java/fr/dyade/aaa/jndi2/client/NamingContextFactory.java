@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2015 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -20,6 +20,7 @@
  *
  * Initial developer(s): Sofiane Chibani
  * Contributor(s): ScalAgent Distributed Technologies
+ *                 Pierrick Rassat
  */
 package fr.dyade.aaa.jndi2.client;
 
@@ -129,11 +130,9 @@ public class NamingContextFactory implements InitialContextFactory {
 
         port = Integer.parseInt(portStr);
       }
-
-      SimpleNamingConnection namingConnection = new SimpleNamingConnection(host, port, env);
-      namingConnection.init(host, port, env);
-
-      return namingConnection;
+      
+      return new SimpleNamingConnection(host, port, env);
+      
     } catch (NumberFormatException e) {
       NamingException nx = new NamingException();
       nx.setRootCause(e);
