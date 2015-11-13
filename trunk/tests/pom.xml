@@ -17,7 +17,7 @@
   </parent>
 
   <properties>
-    <joram.version>5.11.0-SNAPSHOT</joram.version>
+    <joram.version>5.12.0-SNAPSHOT</joram.version>
   </properties>
   
   <build>
