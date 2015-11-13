@@ -10,7 +10,7 @@
 	<parent>
     <groupId>org.ow2.joram</groupId>  
 		<artifactId>joram-client</artifactId>
-		<version>5.11.0-SNAPSHOT</version>
+		<version>5.11.0</version>
   </parent>
 
   <build>
