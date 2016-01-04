@@ -62,6 +62,20 @@
     </s1>
    
     <s1 name="Latest News">
+      <s2 name="November 13, 2015: JORAM 5.11.0 release is available.">
+      <p>This release introduces improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Close the underlying connection with the last JMSContext (JORAM-238).</li>
+        <li>Removes JMS context from disk after restart (JORAM-243).</li>
+        <li>Adds attributes to JMS and JNDI TCP connection MBean (JORAM-239, JORAM-240).</li>
+        <li>Network and persistence optimizations (JORAM-241, JORAM-242).</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>It is tagged in SVN (JORAM_5_11_0), the complete list of changes can be viewed either in
+       <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+      </s2>
+    
       <s2 name="September, 2015:  JoramMQ/MQTT scales up to 750.000 concurrent connections on a simple VM.">
       <p>At the request of a user we conducted a study on the stability of JoramMQ / MQTT under stress conditions
       including a very high throughput of messages and an extremely large number of clients.</p>
