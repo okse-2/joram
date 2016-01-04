@@ -11,6 +11,24 @@
   </properties>
 
 	<body>
+	 <s1 name="November 13, 2015: JORAM 5.11.0 release is available.">
+        <p>Joram 5.11.0 is available in the SVN repository with tag JORAM_5_11_0.</p>
+        <s2 name="New features and improvements">
+        <ul>
+        	<li>Adds attributes to JMS and JNDI TCP connection MBean (JORAM-239, JORAM-240).</li>
+        	<li>Network and persistence optimizations (JORAM-241, JORAM-242).</li>
+        </ul>
+        </s2>
+        <s2 name="Bug fixes">
+        <ul>
+        	<li>Close the underlying connection with the last JMSContext (JORAM-238).</li>
+        	<li>Removes JMS context from disk after restart (JORAM-243).</li>
+        </ul>
+        </s2>
+        <p>The complete list of changes can be viewed either in
+        <a href="http://websvn.ow2.org/log.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2F&amp;isdir=1&amp;">SVN history</a>.</p>
+     </s1>
+	
      <s1 name="May 28, 2015: JORAM 5.10.0 release is available.">
         <p>Joram 5.10.0 is available in the SVN repository with tag JORAM_5_10_0.</p>
         <p>The complete list of changes can be viewed either in
