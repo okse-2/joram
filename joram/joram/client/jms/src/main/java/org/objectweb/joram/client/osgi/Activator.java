@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2016 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,11 +21,15 @@
  */
 package org.objectweb.joram.client.osgi;
 
+import javax.naming.spi.ObjectFactory;
+
+import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.JoramAdminConnect;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 import fr.dyade.aaa.common.Debug;
 
@@ -37,6 +41,8 @@ import fr.dyade.aaa.common.Debug;
 public class Activator implements BundleActivator {
   
   public static final Logger logmon = Debug.getLogger(Activator.class.getName());
+  
+  public static final String ADMIN_XML_PATH = "joram.adminXML";
   
   private JoramAdminConnect joramAdminConnect;
   private DestinationMSF destMSF = null;
@@ -84,6 +90,23 @@ public class Activator implements BundleActivator {
   	sfq = new ServiceFtpQueue(context);
   	salq = new ServiceAliasQueue(context);
   	sadmin = new ServiceAdmin(context);
+  	
+  	ClassLoader myClassLoader = getClass().getClassLoader();
+  	ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
+  	try {
+  	  Thread.currentThread().setContextClassLoader(myClassLoader);
+  	  String adminXmlFile = context.getProperty(ADMIN_XML_PATH);
+  	  if (adminXmlFile != null) {
+  	    ServiceReference<ObjectFactory> ref = context.getServiceReference(javax.naming.spi.ObjectFactory.class);
+  	    if (ref == null) {
+  	      if (logmon.isLoggable(BasicLevel.ERROR))
+  	        logmon.log(BasicLevel.ERROR, "No ServiceReference for javax.naming.spi.ObjectFactory, start jndi client bundle to use jndi.");
+  	    }
+  	    AdminModule.executeXMLAdmin(adminXmlFile);
+  	  }
+  	} finally {
+  	  Thread.currentThread().setContextClassLoader(originalContextClassLoader);
+  	}
   }
 
   /* (non-Javadoc)

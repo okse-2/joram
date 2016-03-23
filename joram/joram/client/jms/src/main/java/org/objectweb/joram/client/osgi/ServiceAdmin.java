@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2013 - 2016 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -116,7 +116,7 @@ public class ServiceAdmin implements ManagedServiceFactory {
     registration = this.bundleContext.registerService(
     		ManagedServiceFactory.class.getName(),
         this,
-        props);
+        (Dictionary)props);
     wrappers = new HashMap<String, AdminItf>();
     connections = new HashMap<String, Connection>();
   }
@@ -232,7 +232,7 @@ public class ServiceAdmin implements ManagedServiceFactory {
 	      registration =  bundleContext.registerService(
 	          AdminItf.class.getName(),
 	          wrapper,
-	          props);
+	          (Dictionary)props);
 
 	      if (logmon.isLoggable(BasicLevel.DEBUG))
 	        logmon.log(BasicLevel.DEBUG, "doUpdated registration =  " + registration);

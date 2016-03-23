@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2016 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -27,6 +27,7 @@ package org.objectweb.joram.client.connector;
 import java.io.FileNotFoundException;
 import java.net.ConnectException;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.Properties;
 
 import javax.jms.Connection;
@@ -510,7 +511,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
       		registration =  Activator.context.registerService(
       				AdminItf.class.getName(),
       				wrapper,
-      				props);
+      				(Dictionary) props);
       		if (logger.isLoggable(BasicLevel.DEBUG))
       			logger.log(BasicLevel.DEBUG, "Bundle context " + Activator.context + " registerService AdminWrapper " + getName());
       	}
