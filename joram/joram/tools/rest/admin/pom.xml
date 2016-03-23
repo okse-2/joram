@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>joram-tools-rest-admin</artifactId>
+	<packaging>bundle</packaging>
+	<name>JORAM :: joram :: tools :: mqtt :: admin</name>
+	<description>Builds the Joram REST admin</description>
+
+	<parent>
+		<groupId>org.ow2.joram</groupId>
+		<artifactId>joram-tools-rest</artifactId>
+		<version>5.12.0-SNAPSHOT</version>
+	</parent>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>${maven.bundle.plugin.version}</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Activator>org.objectweb.joram.tools.rest.admin.Activator</Bundle-Activator>
+						<Import-Package>
+							fr.dyade.aaa.common,
+							javax.jms,
+							javax.naming,
+							org.objectweb.util.monolog,
+							org.objectweb.util.monolog.api,
+							org.eclipse.jetty.server</Import-Package>
+							<!-- TODO remove DynamicImport-Package -->
+						<DynamicImport-Package>*</DynamicImport-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.ow2.spec.ee</groupId>
+			<artifactId>ow2-jms-2.0-spec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.joram</groupId>
+			<artifactId>joram-client-jms</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>jndi-client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+		</dependency>
+		<dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
+		
+
+	</dependencies>
+</project>
