@@ -51,6 +51,10 @@ public class Activator implements BundleActivator {
   public void start(BundleContext bundleContext) throws Exception {
     this.context = bundleContext;
     ServiceReference<HttpService> reference = bundleContext.getServiceReference(HttpService.class);
+    if (reference == null) {
+      logger.log(BasicLevel.ERROR, "rest.jms.Activator ServiceReference<HttpService> = null");
+      throw new Exception("rest.jms.Activator ServiceReference<HttpService> = null");
+    }
     httpService = bundleContext.getService(reference);
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "rest.jms.activator httpService = " + httpService);
