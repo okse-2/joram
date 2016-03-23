@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 - 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - 2016 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -303,12 +303,12 @@ public abstract class ServiceDestination {
            reg = bundleContext.registerService(
                javax.jms.Queue.class.getName(),
                dest,
-               props);
+               (Dictionary)props);
          else
            reg = bundleContext.registerService(
                javax.jms.Topic.class.getName(),
                dest,
-               props);
+               (Dictionary)props);
          
          registrations.put(pid, reg);
   		 

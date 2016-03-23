@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 - 2016 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -94,7 +94,7 @@ public class ServiceSchedulerQueue extends ServiceDestination implements Managed
     registration = bundleContext.registerService(
     		ManagedServiceFactory.class.getName(),
         this,
-        props);
+        (Dictionary)props);
   }
    
   public void doStop() {

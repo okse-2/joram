@@ -52,7 +52,7 @@
       <version>${project.version}</version>
       <exclusions>
         <exclusion>
-          <artifactId>org.osgi</artifactId>
+          <artifactId>org.osgi.core</artifactId>
           <groupId>org.osgi</groupId>
         </exclusion>
       </exclusions>

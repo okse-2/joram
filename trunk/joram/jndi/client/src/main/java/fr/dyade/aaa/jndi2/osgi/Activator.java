@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2013 ScalAgent Distributed Technologies
+ * Copyright (C) 2013 - 2016 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
  */
 package fr.dyade.aaa.jndi2.osgi;
 
+import java.util.Dictionary;
 import java.util.Properties;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -54,7 +55,7 @@ public class Activator implements BundleActivator {
     registration = context.registerService(
         javax.naming.spi.ObjectFactory.class.getName(),
         new scnURLContextFactory(),
-        props);
+        (Dictionary)props);
   }
 
   public void stop(BundleContext context) throws Exception {

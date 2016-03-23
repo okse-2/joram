@@ -180,19 +180,19 @@
     <jftp.version>1.52</jftp.version>
     <ow2-jms-2.0-spec.version>1.0.0</ow2-jms-2.0-spec.version>
     <ow2-jta-1.1-spec.version>1.0.13</ow2-jta-1.1-spec.version>
-    <osgi.compendium.version>4.2.0</osgi.compendium.version>
-    <org.osgi.version>3.0.0</org.osgi.version>
+    <osgi.compendium.version>5.0.0</osgi.compendium.version>
+    <org.osgi.core.version>6.0.0</org.osgi.core.version>
     <activation.version>1.1.1</activation.version>
     <commons-dbcp.version>1.2.2</commons-dbcp.version>
     <mysql-connector-java.version>5.1.6</mysql-connector-java.version>
     <connector.version>1.0.3</connector.version>
-    <felix.main.version>4.2.0</felix.main.version>
+    <felix.main.version>5.4.0</felix.main.version>
     <felix.shell.version>1.4.2</felix.shell.version>
     <felix.remote.version>1.1.2</felix.remote.version>
     <felix.tui.version>1.4.1</felix.tui.version>
-    <felix.gogo.runtime.version>0.10.0</felix.gogo.runtime.version>
-    <felix.gogo.command.version>0.12.0</felix.gogo.command.version>
-    <felix.gogo.shell.version>0.10.0</felix.gogo.shell.version>
+    <felix.gogo.runtime.version>0.16.2</felix.gogo.runtime.version>
+    <felix.gogo.command.version>0.16.0</felix.gogo.command.version>
+    <felix.gogo.shell.version>0.12.0</felix.gogo.shell.version>
     <maven.bundle.plugin.version>2.3.7</maven.bundle.plugin.version>
     <!-- to prevent [WARNING] Using platform encoding -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -232,8 +232,8 @@
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
-        <artifactId>org.osgi</artifactId>
-        <version>${org.osgi.version}</version>
+        <artifactId>org.osgi.core</artifactId>
+        <version>${org.osgi.core.version}</version>
         <type>jar</type>
       </dependency>
       <dependency>
@@ -327,7 +327,7 @@
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi</artifactId>
+      <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
