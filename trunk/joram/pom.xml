@@ -200,6 +200,10 @@
     <commons-io.version>1.4</commons-io.version>
     <ow2-util-substitution.version>2.0.0</ow2-util-substitution.version>
     <junit.version>4.6</junit.version>
+    <jersey.version>2.22.1</jersey.version>
+    <jetty.version>8.1.16.v20140903</jetty.version>
+    <gson.version>2.5</gson.version>
+    <geronimo-servlet_3.0_spec.version>1.0</geronimo-servlet_3.0_spec.version>
   </properties>
 
   <organization>
@@ -316,6 +320,46 @@
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-servlet_3.0_spec</artifactId>
+        <version>${geronimo-servlet_3.0_spec.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-server</artifactId>
+       <version>${jersey.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jersey.containers</groupId>
+        <artifactId>jersey-container-jdk-http</artifactId>
+        <version>${jersey.version}</version>
+      </dependency>
+    	<dependency>
+    		<groupId>org.glassfish.jersey.containers</groupId>
+    		<artifactId>jersey-container-servlet-core</artifactId>
+    		<version>${jersey.version}</version>
+	    </dependency>
+    	<dependency>
+    		<groupId>org.eclipse.jetty</groupId>
+    		<artifactId>jetty-server</artifactId>
+    		<version>${jetty.version}</version>
+    	</dependency>
+    	<dependency>
+    		<groupId>org.eclipse.jetty</groupId>
+    		<artifactId>jetty-servlet</artifactId>
+    		<version>${jetty.version}</version>
+    	</dependency>
+    	<dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-continuation</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+    	<dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>${gson.version}</version>
+    </dependency>
     </dependencies>
   </dependencyManagement>
 
