@@ -83,7 +83,7 @@
           failonerror="no" fork="yes"
           dir="${run.dir}/server${sid}">
       <classpath path="${felix.class.path}"/>
-      <jvmarg line="-Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=${sid} -Dcom.sun.management.jmxremote -DTransaction.SyncOnWrite=false"/>
+      <jvmarg line="-server -Xmx2G -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,address=5000,suspend=n -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=${sid} -Dcom.sun.management.jmxremote -DTransaction.SyncOnWrite=false"/>
       <!-- jvmarg line="-server -Xmx1500m -Xincgc -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=${sid} -Dcom.sun.management.jmxremote"/ -->
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
@@ -106,6 +106,16 @@
       <param name="sid" value="0"/>
       <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
       <param name="osgi.conf" value="${conf.dir}/config.properties"/>
+    </antcall>
+  </target>
+  
+  <!-- Start REST and a single server in NullTransaction mode -->
+  <target name="rest_server" depends="init"
+          description="--> Starts a single server in non-persistent mode and REST">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+      <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
+      <param name="osgi.conf" value="${conf.dir}/config_rest.properties"/>
     </antcall>
   </target>
 	
