@@ -170,6 +170,24 @@
       <type>jar</type>
     </dependency>
     <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-tools-rest-admin</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-tools-rest-jms</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-tools-rest-jmx</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
       <version>${felix.shell.version}</version>
@@ -236,7 +254,7 @@
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
-     <dependency>
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
       <type>jar</type>
@@ -260,5 +278,50 @@
       <groupId>org.ow2.util.substitution</groupId>
       <artifactId>substitution</artifactId>
     </dependency>
+    
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-servlet_3.0_spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-continuation</artifactId>
+    </dependency>
+    <!-- This two artifacts are intended to register HTTPService (OSGi) -->
+    <!-- removed when updating jetty -->
+    <dependency>
+      <groupId>org.eclipse.equinox.http</groupId>
+      <artifactId>servlet</artifactId>
+      <version>1.0.0-v20070606</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.equinox.http</groupId>
+      <artifactId>jetty</artifactId>
+      <version>3.0.100</version>
+    </dependency>
   </dependencies>
+  
+  <!-- This repository is needed to the jetty 3.0.100 artifact -->
+  <repositories>
+    <repository>
+      <id>jabylon</id>
+      <url>http://www.jabylon.org/maven/</url>
+    </repository>
+  </repositories>
 </project>
