@@ -37,6 +37,9 @@
         <include>org.ow2.joram:joram-mom-extensions-collector</include>
         <include>org.ow2.joram:joram-mom-extensions-scheduler</include>
         <include>org.ow2.joram:joram-tools-jasp</include>
+        <include>org.ow2.joram:joram-tools-rest-admin</include>
+        <include>org.ow2.joram:joram-tools-rest-jms</include>
+        <include>org.ow2.joram:joram-tools-rest-jmx</include>
         <include>org.apache.felix:org.apache.felix.shell</include>
         <include>org.apache.felix:org.apache.felix.shell.remote</include>
         <include>org.apache.felix:org.apache.felix.shell.tui</include>
@@ -49,7 +52,22 @@
         <include>org.ow2.joram:shell-jndi</include>
         <include>org.ow2.joram:shell-a3</include>
         <include>org.ow2.util.substitution:substitution</include>
+        <include>org.glassfish.jersey.core:jersey-server</include>
+        <include>org.glassfish.jersey.containers:jersey-container-servlet-core</include>
+        <include>org.eclipse.jetty:jetty-server</include>
+        <include>org.eclipse.jetty:jetty-servlet</include>
+        <include>org.apache.geronimo.specs:geronimo-servlet_3.0_spec</include>
+        <include>org.eclipse.jetty:jetty-continuation</include>
+        <include>org.eclipse.equinox.http:jetty</include>
+        <include>org.eclipse.equinox.http:servlet</include>
       </includes>
+      <excludes>
+        <exclude>org.codehaus.stomp:stompconnect</exclude>
+        <exclude>org.apache.felix:org.apache.felix.bundlerepository</exclude>
+        <exclude>com.rabbitmq:amqp-client</exclude>
+        <exclude>org.objectweb.joram:jftp</exclude>
+      </excludes>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>false</unpack>
     </dependencySet>
