@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>joram-tools-rest-jmx</artifactId>
 	<packaging>bundle</packaging>
-	<name>JORAM :: joram :: tools :: mqtt :: jmx</name>
+	<name>JORAM :: joram :: tools :: rest :: jmx</name>
 	<description>Builds the Joram REST JMX.</description>
 
 	<parent>

@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>joram-tools-rest-jms</artifactId>
 	<packaging>bundle</packaging>
-	<name>JORAM :: joram :: tools :: mqtt :: jms</name>
+	<name>JORAM :: joram :: tools :: rest :: jms</name>
 	<description>Builds the Joram REST JMS.</description>
 
 	<parent>

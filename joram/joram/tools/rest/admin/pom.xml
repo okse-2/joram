@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>joram-tools-rest-admin</artifactId>
 	<packaging>bundle</packaging>
-	<name>JORAM :: joram :: tools :: mqtt :: admin</name>
+	<name>JORAM :: joram :: tools :: rest :: admin</name>
 	<description>Builds the Joram REST admin</description>
 
 	<parent>
@@ -75,7 +75,5 @@
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
     </dependency>
-		
-
 	</dependencies>
 </project>
