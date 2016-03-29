@@ -71,4 +71,4 @@ if $cygwin; then
 fi
 
 echo "== Launching a non persistent server#0 with SSLTcpProxyService =="
-cd $SERVER_RUN_DIR; exec "${JAVA_HOME}"/bin/java -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote -Dorg.objectweb.joram.keystore=$JORAM_KS -Dorg.objectweb.joram.keystorepass=jorampass -classpath $CLASSPATH org.apache.felix.main.Main
+cd $SERVER_RUN_DIR; exec "${JAVA_HOME}"/bin/java -Dgosh.args=--nointeractive -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote -Dorg.objectweb.joram.keystore=$JORAM_KS -Dorg.objectweb.joram.keystorepass=jorampass -classpath $CLASSPATH org.apache.felix.main.Main

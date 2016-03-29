@@ -81,4 +81,4 @@ if $cygwin; then
 fi
 
 echo "== Launching a persistent server#$1 =="
-cd $SERVER_RUN_DIR; exec "${JAVA_HOME}"/bin/java  -Dosgi.shell.telnet.port=1600$1 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -Dfr.dyade.aaa.agent.AgentServer.id=$1 -classpath $CLASSPATH org.apache.felix.main.Main
+cd $SERVER_RUN_DIR; exec "${JAVA_HOME}"/bin/java  -Dgosh.args=--nointeractive -Dosgi.shell.telnet.port=1600$1 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -Dfr.dyade.aaa.agent.AgentServer.id=$1 -classpath $CLASSPATH org.apache.felix.main.Main

@@ -39,7 +39,7 @@ copy %CONFIG_DIR%\config.properties %SERVER_RUN_DIR%\config.properties
 set PATH=%JAVA_HOME%\bin;%PATH%
 
 echo == Launching a non persistent server#0 ==
-start /D %SERVER_RUN_DIR% java -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote -classpath %CLASSPATH% org.apache.felix.main.Main
+start /D %SERVER_RUN_DIR% java -Dgosh.args=--nointeractive -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote -classpath %CLASSPATH% org.apache.felix.main.Main
 goto end
 :nokHome
 echo The JORAM_HOME environment variable is not defined correctly
