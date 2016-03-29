@@ -41,7 +41,7 @@ copy %CONFIG_DIR%\config.properties %SERVER_RUN_DIR%\config.properties
 set PATH=%JAVA_HOME%\bin;%PATH%
 
 echo == Launching a persistent server#%1 ==
-start /D %SERVER_RUN_DIR% java -Dosgi.shell.telnet.port=1600%1 -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=%1 -Dcom.sun.management.jmxremote -classpath %CLASSPATH% org.apache.felix.main.Main
+start /D %SERVER_RUN_DIR% java -Dgosh.args=--nointeractive -Dosgi.shell.telnet.port=1600%1 -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=%1 -Dcom.sun.management.jmxremote -classpath %CLASSPATH% org.apache.felix.main.Main
 goto end
 :nokHome
 echo The JORAM_HOME environment variable is not defined correctly
