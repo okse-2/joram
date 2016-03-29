@@ -36,6 +36,7 @@
     <antcall target="tests.sub"/>
     <antcall target="tests.distribution"/>
     <antcall target="tests.jms2"/>
+    <antcall target="tests.rest"/>
   </target>
 
   <target name="tests.all"
@@ -81,6 +82,7 @@
     <antcall target="tests.interceptors"/>
     <antcall target="tests.distribution"/>
   	<antcall target="tests.jms2"/>
+    <antcall target="tests.rest"/>
   </target>
 
   <target name="custom.tests.bamboo"
@@ -90,15 +92,18 @@
     <antcall target="tests.base"/>
   	<antcall target="tests.alias"/>
     <antcall target="tests.recovery"/>
+    <antcall target="tests.dist"/>
     <antcall target="tests.admin"/>
     <antcall target="tests.client"/>
     <antcall target="tests.connection"/>
     <antcall target="tests.local"/>
     <antcall target="tests.dursub"/>
     <antcall target="tests.tcp"/>
+    <antcall target="tests.reconf"/>
     <antcall target="tests.noreg"/>
     <antcall target="tests.xa"/>
-    <antcall target="tests.bridge.new"/>
+    <antcall target="tests.bridge.jms.new"/>
+    <antcall target="tests.bridge.amqp"/>
     <antcall target="tests.schedqueue"/>
     <antcall target="tests.clusterTopic"/>
     <antcall target="tests.clusterQueue"/>
@@ -113,6 +118,7 @@
     <antcall target="tests.interceptors"/>
     <antcall target="tests.distribution"/>
   	<antcall target="tests.jms2"/>
+    <antcall target="tests.rest"/>
   </target>
 
   <target name="custom.tests.vtest"
@@ -145,6 +151,7 @@
     <antcall target="tests.interceptors"/>
     <antcall target="tests.distribution"/>
   	<antcall target="tests.jms2"/>
+    <antcall target="tests.rest"/>
   </target>
 
   <target name="tests.base"
@@ -6996,5 +7003,143 @@
       <param name="args" value=""/>
     </antcall>
   </target>
-
+  
+  <!-- REST -->
+  <target name="tests.rest"
+          description=" --> launch all REST tests">
+    <antcall target="rest.client1"/>
+    <antcall target="rest.client2"/>
+    <antcall target="rest.client3"/>
+    <antcall target="rest.client4"/>
+    <antcall target="rest.client5"/>
+    <antcall target="rest.client6"/>
+    <antcall target="rest.client7"/>
+    <antcall target="rest.client8"/>
+  </target>
+  
+  <target name="init.rest" depends="init.a3props,compile"
+              description=" --> init REST">
+      <antcall target="init.test" inheritAll="true">
+        <param name="jndiconf" value="rest/jndi.properties"/>
+        <param name="a3conf" value="rest/a3servers.xml"/>
+      </antcall>
+      <mkdir dir="${test.dir}"/>
+      <copy file="rest/joramAdmin.xml" tofile="${test.dir}/joramAdmin.xml" overwrite="true"/>
+      <copy file="rest/joram_ks" tofile="${test.dir}/joram_ks" overwrite="true"/>
+      <copy file="rest/config.properties" tofile="${test.dir}/config.properties" overwrite="true"/>
+      <replace file="${test.dir}/config.properties" token="@BUNDLE_DIR@" value="${bundle.dir}" />
+      <replace file="${test.dir}/config.properties" token="\" value="/" />
+      <replace file="${test.dir}/config.properties" token="@BACK_SLACH@" value="\" />
+  </target>
+    
+  <target name="rest.client1" depends="init.rest"
+            description=" --> REST test lookup, create prod/cons send and receive TextMessage Queue">
+    <antcall target="test.start" inheritAll="true">
+      <param name="testid" value="rest.client1"/>
+      <param name="className" value="joram.rest.ClientRESTTextMessage"/>
+      <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+      <param name="isOSGi" value="true"/>
+      <param name="jndiconf" value="jndi.properties"/>
+      <param name="a3conf" value="a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="rest.client2" depends="init.rest"
+            description=" --> REST test create prod/cons send and receive BytesMessage">
+    <antcall target="test.start" inheritAll="true">
+      <param name="testid" value="rest.client2"/>
+      <param name="className" value="joram.rest.ClientRESTBytesMessage"/>
+      <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+      <param name="isOSGi" value="true"/>
+      <param name="jndiconf" value="jndi.properties"/>
+      <param name="a3conf" value="a3servers.xml"/>
+    </antcall>
+  </target>
+  
+  <target name="rest.client3" depends="init.rest"
+            description=" --> REST test create prod/cons send and receive MapMessage">
+    <antcall target="test.start" inheritAll="true">
+      <param name="testid" value="rest.client3"/>
+      <param name="className" value="joram.rest.ClientRESTMapMessage"/>
+      <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+      <param name="isOSGi" value="true"/>
+      <param name="jndiconf" value="jndi.properties"/>
+      <param name="a3conf" value="a3servers.xml"/>
+    </antcall>
+  </target>
+  
+  <target name="rest.client4" depends="init.rest"
+            description=" --> REST test create prod/cons send and receive Message with selector">
+    <antcall target="test.start" inheritAll="true">
+      <param name="testid" value="rest.client4"/>
+      <param name="className" value="joram.rest.ClientRESTSelector"/>
+      <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+      <param name="isOSGi" value="true"/>
+      <param name="jndiconf" value="jndi.properties"/>
+      <param name="a3conf" value="a3servers.xml"/>
+    </antcall>
+  </target>
+  
+  <target name="rest.client5" depends="init.rest"
+            description=" REST test lookup, create prod/cons send and receive TextMessage Topic">
+    <antcall target="test.start" inheritAll="true">
+      <param name="testid" value="rest.client5"/>
+      <param name="className" value="joram.rest.ClientRESTTopic"/>
+      <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+      <param name="isOSGi" value="true"/>
+      <param name="jndiconf" value="jndi.properties"/>
+      <param name="a3conf" value="a3servers.xml"/>
+    </antcall>
+  </target>
+  
+  <target name="rest.client6" depends="init.rest"
+            description=" --> REST test admin">
+    <antcall target="test.start" inheritAll="true">
+      <param name="testid" value="rest.client6"/>
+      <param name="className" value="joram.rest.AdminREST"/>
+      <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+      <param name="isOSGi" value="true"/>
+      <param name="jndiconf" value="jndi.properties"/>
+      <param name="a3conf" value="a3servers.xml"/>
+    </antcall>
+  </target>
+  
+  <target name="rest.client7" depends="init.rest"
+            description=" --> REST test https">
+    <copy file="rest/jssecacerts" tofile="${test.dir}/jssecacerts" overwrite="true"/>
+    <antcall target="test.start" inheritAll="true">
+      <param name="testid" value="rest.client7"/>
+      <param name="className" value="joram.rest.ClientRESTSSL"/>
+      <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+      <param name="isOSGi" value="true"/>
+      <param name="jndiconf" value="jndi.properties"/>
+      <param name="a3conf" value="a3servers.xml"/>
+    </antcall>
+  </target>
+  
+  <target name="rest.client8" depends="init.rest"
+            description=" --> REST test JMX">
+    <antcall target="test.start" inheritAll="true">
+      <param name="testid" value="rest.client8"/>
+      <param name="className" value="joram.rest.JmxREST"/>
+      <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+      <param name="isOSGi" value="true"/>
+      <param name="jndiconf" value="jndi.properties"/>
+      <param name="a3conf" value="a3servers.xml"/>
+    </antcall>
+  </target>
+  
+  <target name="rest.client9" depends="init.rest"
+            description=" --> REST test TextMessage perf">
+    <antcall target="test.start" inheritAll="true">
+      <param name="testid" value="rest.client9"/>
+      <param name="className" value="joram.rest.ClientRESTTextPerf"/>
+      <param name="SCAdminClass" value="framework.SCAdminOSGi"/>
+      <param name="isOSGi" value="true"/>
+      <param name="jndiconf" value="jndi.properties"/>
+      <param name="a3conf" value="a3servers.xml"/>
+      <param name="args" value="100 1000 100 false"/>
+    </antcall>
+  </target>
 </project>
