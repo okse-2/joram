@@ -140,7 +140,7 @@ public class ClientRESTMapMessage extends TestCase {
       exc.printStackTrace();
       error(exc);
     } finally {
-      killAgentServer((short)0);
+      stopAgentServer((short)0);
       endTest(); 
     }
   }
