@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.ow2.joram</groupId>
     <artifactId>joram</artifactId>
-		<version>5.11.0</version>
+		<version>5.11.0-okse</version>
 	</parent>
 
   <profiles>

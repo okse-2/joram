@@ -9,7 +9,7 @@
   <parent>
    <groupId>org.ow2.joram</groupId>
    <artifactId>shell</artifactId>
-   <version>5.11.0</version>
+   <version>5.11.0-okse</version>
   </parent>
   
 	<build>

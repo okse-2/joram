@@ -6,7 +6,7 @@
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
   <!-- version : major.minor.build -->
-  <version>5.11.0</version>
+  <version>5.11.0-okse</version>
   <name>JORAM</name>
   <url>http://maven.apache.org</url>
   <description>Builds the Joram project.</description>
