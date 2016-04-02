@@ -37,6 +37,7 @@ import org.ow2.joram.mom.amqp.marshalling.AMQP;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.Transaction;
+import org.ow2.joram.mom.amqp.messages.MessageReceived;
 
 /**
  * AMQP service used to open the server socket and start the connection
@@ -207,6 +208,7 @@ public class AMQPService {
    * TCP connections.
    */
   public static Vector<AMQPConnectionListener> connectionListeners;
+  private static Vector<AMQPMessageListener> messageListeners;
   
   /**
    * @throws IOException 
@@ -216,6 +218,7 @@ public class AMQPService {
     connectionListeners = new Vector<AMQPConnectionListener>();
     AMQPConnectionListener cnxListener = new AMQPConnectionListener(serverSocket, heartbeat);
     connectionListeners.add(cnxListener);
+    messageListeners = new Vector<>();
   }
 
   protected void start() {
@@ -252,5 +255,16 @@ public class AMQPService {
   
   public static void removeConnectionListener(AMQPConnectionListener cnxListener) {
     connectionListeners.remove(cnxListener);
+  }
+
+  public static void addMessageListener(AMQPMessageListener messageListener) {
+    messageListeners.add(messageListener);
+  }
+
+  public static void notifyMessageReceived(MessageReceived messageReceived) {
+    for (int i = 0; i < messageListeners.size(); i++) {
+      AMQPMessageListener messageListener = messageListeners.get(i);
+      messageListener.onMessageReceived(messageReceived);
+    }
   }
 }

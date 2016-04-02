@@ -52,6 +52,7 @@ import org.ow2.joram.mom.amqp.marshalling.AbstractMarshallingMethod;
 import org.ow2.joram.mom.amqp.marshalling.Frame;
 import org.ow2.joram.mom.amqp.marshalling.LongStringHelper;
 import org.ow2.joram.mom.amqp.marshalling.MarshallingHeader;
+import org.ow2.joram.mom.amqp.messages.MessageReceived;
 import org.ow2.joram.mom.amqp.structures.Deliver;
 import org.ow2.joram.mom.amqp.structures.GetResponse;
 import org.ow2.joram.mom.amqp.structures.Returned;
@@ -533,6 +534,11 @@ public class AMQPConnectionListener extends Daemon {
       }
       boolean finished = publishRequest.appendBody(body);
       if (finished) {
+        MessageReceived messageReceived = new MessageReceived(
+                publishRequest.getBody(), publishRequest.getPublish().routingKey,
+                sock.getInetAddress().getHostAddress(), sock.getPort()
+        );
+        AMQPService.notifyMessageReceived(messageReceived);
         sendToProxy(publishRequest);
         removePublishRequest(channelNumber);
       }
