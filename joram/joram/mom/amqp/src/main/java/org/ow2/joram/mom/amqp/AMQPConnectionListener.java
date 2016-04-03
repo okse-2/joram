@@ -513,7 +513,9 @@ public class AMQPConnectionListener extends Daemon {
       logger.log(BasicLevel.DEBUG, "=== Header = " + header.getBasicProperties());
 
     if (header.getBodySize() == 0) {
-      sendToProxy(publishRequest);
+      if(AMQPService.isPublishing()) {
+        sendToProxy(publishRequest);
+      }
       removePublishRequest(channelNumber);
     }
   }
@@ -539,7 +541,9 @@ public class AMQPConnectionListener extends Daemon {
                 sock.getInetAddress().getHostAddress(), sock.getPort()
         );
         AMQPService.notifyMessageReceived(messageReceived);
-        sendToProxy(publishRequest);
+        if(AMQPService.isPublishing()) {
+          sendToProxy(publishRequest);
+        }
         removePublishRequest(channelNumber);
       }
     }

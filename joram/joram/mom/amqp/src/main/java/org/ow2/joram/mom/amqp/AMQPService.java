@@ -89,6 +89,8 @@ public class AMQPService {
     return address;
   }
 
+  private static boolean publish = true;
+
   /**
    * Initializes the TCP entry point by creating a server socket listening
    * to the specified port.
@@ -219,6 +221,14 @@ public class AMQPService {
     AMQPConnectionListener cnxListener = new AMQPConnectionListener(serverSocket, heartbeat);
     connectionListeners.add(cnxListener);
     messageListeners = new Vector<>();
+  }
+
+  public static boolean isPublishing() {
+    return publish;
+  }
+
+  public static void setPublishing(boolean sendMessages) {
+    AMQPService.publish = sendMessages;
   }
 
   protected void start() {
