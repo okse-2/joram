@@ -277,4 +277,9 @@ public class AMQPService {
       messageListener.onMessageReceived(messageReceived);
     }
   }
+
+  public static void internalPublish(String exchange, String routingKey, byte[] message) {
+    AMQPConnectionListener cnxListener = connectionListeners.firstElement();
+    cnxListener.internalPublish(exchange, routingKey, message);
+  }
 }

@@ -33,6 +33,7 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
@@ -753,7 +754,19 @@ public class AMQPConnectionListener extends Daemon {
     closeProxy();
     AMQPService.removeConnectionListener(this);
   }
-  
+
+  public void internalPublish(String exchange, String routingKey, byte[] message) {
+    Random random = new Random();
+    PublishRequest publishRequest = createPublishRequest(random.nextInt());
+    AMQP.Basic.Publish publish = new AMQP.Basic.Publish(0, exchange, routingKey, false, false);
+    publishRequest.setPublish(publish);
+    AMQP.Basic.BasicProperties header = new AMQP.Basic.BasicProperties();
+    publishRequest.setHeader(header, message.length);
+    publishRequest.appendBody(message);
+    sendToProxy(publishRequest);
+    removePublishRequest(publishRequest.channel);
+  }
+
   final class NetServerOut extends Daemon {
 
     private OutputStream os = null;
