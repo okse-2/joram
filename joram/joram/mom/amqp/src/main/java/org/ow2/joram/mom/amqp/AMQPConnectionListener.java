@@ -53,6 +53,8 @@ import org.ow2.joram.mom.amqp.marshalling.AbstractMarshallingMethod;
 import org.ow2.joram.mom.amqp.marshalling.Frame;
 import org.ow2.joram.mom.amqp.marshalling.LongStringHelper;
 import org.ow2.joram.mom.amqp.marshalling.MarshallingHeader;
+import org.ow2.joram.mom.amqp.messages.AbstractConnectMessage;
+import org.ow2.joram.mom.amqp.messages.ConnectMessage;
 import org.ow2.joram.mom.amqp.messages.MessageReceived;
 import org.ow2.joram.mom.amqp.structures.Deliver;
 import org.ow2.joram.mom.amqp.structures.GetResponse;
@@ -334,6 +336,7 @@ public class AMQPConnectionListener extends Daemon {
         case AMQP.Connection.Open.INDEX:
           AMQP.Connection.Open open = (AMQP.Connection.Open) method;
           sendMethodToPeer(new AMQP.Connection.OpenOk(open.virtualHost), channelNumber);
+          sendConnectedNotification();
           break;
 
         default:
@@ -463,6 +466,14 @@ public class AMQPConnectionListener extends Daemon {
     } catch (ConnectionException exc) {
       connectionException(exc.getCode(), exc.getMessage(), method.getClassId(), method.getMethodId());
     }
+  }
+
+  private void sendConnectedNotification() {
+    ConnectMessage connectMessage = new ConnectMessage(
+            sock.getInetAddress().getHostAddress(), sock.getPort(),
+            null
+    );
+    AMQPService.notifyClientConnected(connectMessage);
   }
 
   private void tuneConnectionParameters(AMQP.Connection.TuneOk tuneOk) throws SyntaxErrorException {

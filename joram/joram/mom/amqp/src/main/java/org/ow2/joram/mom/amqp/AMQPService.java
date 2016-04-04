@@ -37,7 +37,7 @@ import org.ow2.joram.mom.amqp.marshalling.AMQP;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.Transaction;
-import org.ow2.joram.mom.amqp.messages.MessageReceived;
+import org.ow2.joram.mom.amqp.messages.*;
 
 /**
  * AMQP service used to open the server socket and start the connection
@@ -275,6 +275,34 @@ public class AMQPService {
     for (int i = 0; i < messageListeners.size(); i++) {
       AMQPMessageListener messageListener = messageListeners.get(i);
       messageListener.onMessageReceived(messageReceived);
+    }
+  }
+
+  public static void notifyClientConnected(ConnectMessage connectMessage) {
+    for (int i = 0; i < messageListeners.size(); i++) {
+      AMQPMessageListener messageListener = messageListeners.get(i);
+      messageListener.onConnect(connectMessage);
+    }
+  }
+
+  public static void notifyClientDisconnected(DisconnectMessage disconnectMessage) {
+    for (int i = 0; i < messageListeners.size(); i++) {
+      AMQPMessageListener messageListener = messageListeners.get(i);
+      messageListener.onDisconnect(disconnectMessage);
+    }
+  }
+
+  public static void notifySubscribed(SubscribeMessage subscribeMessage) {
+    for (int i = 0; i < messageListeners.size(); i++) {
+      AMQPMessageListener messageListener = messageListeners.get(i);
+      messageListener.onSubscribe(subscribeMessage);
+    }
+  }
+
+  public static void notifyClientDisconnected(UnsubscribeMessage unsubscribeMessage) {
+    for (int i = 0; i < messageListeners.size(); i++) {
+      AMQPMessageListener messageListener = messageListeners.get(i);
+      messageListener.onUnsubscribe(unsubscribeMessage);
     }
   }
 
