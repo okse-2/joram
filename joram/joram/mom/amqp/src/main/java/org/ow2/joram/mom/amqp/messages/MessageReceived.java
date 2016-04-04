@@ -5,11 +5,13 @@ public class MessageReceived {
     private final byte[] body;
     private final String host;
     private final int port;
-    private String topic;
+    private final String routingKey;
+    private String exchange;
 
-    public MessageReceived(byte[] body, String topic, String host, int port) {
+    public MessageReceived(String exchange, String routingKey, byte[] body, String host, int port) {
         this.body = body;
-        this.topic = topic;
+        this.exchange = exchange;
+        this.routingKey = routingKey;
         this.host = host;
         this.port = port;
     }
@@ -18,8 +20,12 @@ public class MessageReceived {
         return body;
     }
 
-    public String getTopic() {
-        return topic;
+    public String getExchange() {
+        return exchange;
+    }
+
+    public String getRoutingKey() {
+        return routingKey;
     }
 
     public String getHost() {

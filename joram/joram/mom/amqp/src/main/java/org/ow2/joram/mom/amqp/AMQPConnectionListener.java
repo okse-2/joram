@@ -537,7 +537,7 @@ public class AMQPConnectionListener extends Daemon {
       boolean finished = publishRequest.appendBody(body);
       if (finished) {
         MessageReceived messageReceived = new MessageReceived(
-                publishRequest.getBody(), publishRequest.getPublish().routingKey,
+                publishRequest.getPublish().exchange, "", publishRequest.getBody(),
                 sock.getInetAddress().getHostAddress(), sock.getPort()
         );
         AMQPService.notifyMessageReceived(messageReceived);
