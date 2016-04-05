@@ -53,10 +53,7 @@ import org.ow2.joram.mom.amqp.marshalling.AbstractMarshallingMethod;
 import org.ow2.joram.mom.amqp.marshalling.Frame;
 import org.ow2.joram.mom.amqp.marshalling.LongStringHelper;
 import org.ow2.joram.mom.amqp.marshalling.MarshallingHeader;
-import org.ow2.joram.mom.amqp.messages.ConnectMessage;
-import org.ow2.joram.mom.amqp.messages.MessageReceived;
-import org.ow2.joram.mom.amqp.messages.SubscribeMessage;
-import org.ow2.joram.mom.amqp.messages.UnsubscribeMessage;
+import org.ow2.joram.mom.amqp.messages.*;
 import org.ow2.joram.mom.amqp.structures.Deliver;
 import org.ow2.joram.mom.amqp.structures.GetResponse;
 import org.ow2.joram.mom.amqp.structures.Returned;
@@ -487,6 +484,14 @@ public class AMQPConnectionListener extends Daemon {
     AMQPService.notifyClientConnected(connectMessage);
   }
 
+  private void sendDisconnectedNotification() {
+    DisconnectMessage disconnectMessage = new DisconnectMessage(
+            getHost(), sock.getPort(),
+            null
+    );
+    AMQPService.notifyClientDisconnected(disconnectMessage);
+  }
+
   private void sendSubscribedNotification(AMQP.Queue.Bind bindMethod) {
     SubscribeMessage subscribeMessage = new SubscribeMessage(
             bindMethod.exchange, "", getHost(), sock.getPort()
@@ -792,6 +797,7 @@ public class AMQPConnectionListener extends Daemon {
   protected void close() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AMQPConnectionListener.close()");
+    sendDisconnectedNotification();
     closeProxy();
     AMQPService.removeConnectionListener(this);
   }
