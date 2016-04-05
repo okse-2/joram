@@ -315,7 +315,13 @@ public class AMQPService {
   }
 
   public static void internalPublish(String exchange, String routingKey, byte[] message) {
-    AMQPConnectionListener cnxListener = connectionListeners.firstElement();
-    cnxListener.internalPublish(exchange, routingKey, message);
+    // Iterate backwards until an open connection listener is found
+    for(int i = connectionListeners.size() - 1; i >= 0; i--) {
+      AMQPConnectionListener cnxListener = connectionListeners.get(i);
+      if(cnxListener.isRunning()) {
+        cnxListener.internalPublish(exchange, routingKey, message);
+        return;
+      }
+    }
   }
 }
