@@ -53,9 +53,10 @@ import org.ow2.joram.mom.amqp.marshalling.AbstractMarshallingMethod;
 import org.ow2.joram.mom.amqp.marshalling.Frame;
 import org.ow2.joram.mom.amqp.marshalling.LongStringHelper;
 import org.ow2.joram.mom.amqp.marshalling.MarshallingHeader;
-import org.ow2.joram.mom.amqp.messages.AbstractConnectMessage;
 import org.ow2.joram.mom.amqp.messages.ConnectMessage;
 import org.ow2.joram.mom.amqp.messages.MessageReceived;
+import org.ow2.joram.mom.amqp.messages.SubscribeMessage;
+import org.ow2.joram.mom.amqp.messages.UnsubscribeMessage;
 import org.ow2.joram.mom.amqp.structures.Deliver;
 import org.ow2.joram.mom.amqp.structures.GetResponse;
 import org.ow2.joram.mom.amqp.structures.Returned;
@@ -407,6 +408,12 @@ public class AMQPConnectionListener extends Daemon {
           throw new ChannelErrorException("Channel not opened.");
         }
         sendToProxy(method);
+        if(method instanceof AMQP.Queue.Bind) {
+          sendSubscribedNotification((AMQP.Queue.Bind) method);
+        }
+        else if(method instanceof AMQP.Queue.Unbind) {
+          sendUnsubscribedNotification((AMQP.Queue.Unbind) method);
+        }
         break;
 
       /******************************************************
@@ -468,13 +475,40 @@ public class AMQPConnectionListener extends Daemon {
     }
   }
 
+  private String getHost() {
+    return sock.getInetAddress().getHostAddress();
+  }
+
   private void sendConnectedNotification() {
     ConnectMessage connectMessage = new ConnectMessage(
-            sock.getInetAddress().getHostAddress(), sock.getPort(),
+            getHost(), sock.getPort(),
             null
     );
     AMQPService.notifyClientConnected(connectMessage);
   }
+
+  private void sendSubscribedNotification(AMQP.Queue.Bind bindMethod) {
+    SubscribeMessage subscribeMessage = new SubscribeMessage(
+            bindMethod.exchange, "", getHost(), sock.getPort()
+    );
+    AMQPService.notifySubscribed(subscribeMessage);
+  }
+
+  private void sendUnsubscribedNotification(AMQP.Queue.Unbind bindMethod) {
+    UnsubscribeMessage unsubscribeMessage = new UnsubscribeMessage(
+            bindMethod.exchange, "", getHost(), sock.getPort()
+    );
+    AMQPService.notifyUnsubscribed(unsubscribeMessage);
+  }
+
+  private void sendMessageNotification(PublishRequest publishRequest) {
+    MessageReceived messageReceived = new MessageReceived(
+            publishRequest.getPublish().exchange, "", publishRequest.getBody(),
+            getHost(), sock.getPort()
+    );
+    AMQPService.notifyMessageReceived(messageReceived);
+  }
+
 
   private void tuneConnectionParameters(AMQP.Connection.TuneOk tuneOk) throws SyntaxErrorException {
     if (tuneOk.frameMax < 0) {
@@ -548,11 +582,7 @@ public class AMQPConnectionListener extends Daemon {
       }
       boolean finished = publishRequest.appendBody(body);
       if (finished) {
-        MessageReceived messageReceived = new MessageReceived(
-                publishRequest.getPublish().exchange, "", publishRequest.getBody(),
-                sock.getInetAddress().getHostAddress(), sock.getPort()
-        );
-        AMQPService.notifyMessageReceived(messageReceived);
+        sendMessageNotification(publishRequest);
         if(AMQPService.isPublishing()) {
           sendToProxy(publishRequest);
         }

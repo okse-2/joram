@@ -299,6 +299,14 @@ public class AMQPService {
     }
   }
 
+  public static void notifyUnsubscribed(UnsubscribeMessage unsubscribeMessage) {
+    for (int i = 0; i < messageListeners.size(); i++) {
+      AMQPMessageListener messageListener = messageListeners.get(i);
+      messageListener.onUnsubscribe(unsubscribeMessage);
+    }
+  }
+
+
   public static void notifyClientDisconnected(UnsubscribeMessage unsubscribeMessage) {
     for (int i = 0; i < messageListeners.size(); i++) {
       AMQPMessageListener messageListener = messageListeners.get(i);
