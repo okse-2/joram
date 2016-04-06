@@ -797,21 +797,25 @@ public class AMQPConnectionListener extends Daemon {
   protected void close() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AMQPConnectionListener.close()");
-    sendDisconnectedNotification();
+    if(isRunning()) {
+      sendDisconnectedNotification();
+    }
     closeProxy();
     AMQPService.removeConnectionListener(this);
   }
 
   public void internalPublish(String exchange, String routingKey, byte[] message) {
-    Random random = new Random();
-    PublishRequest publishRequest = createPublishRequest(random.nextInt());
+    PublishRequest publishRequest = new PublishRequest();
+
     AMQP.Basic.Publish publish = new AMQP.Basic.Publish(0, exchange, routingKey, false, false);
     publishRequest.setPublish(publish);
+
     AMQP.Basic.BasicProperties header = new AMQP.Basic.BasicProperties();
     publishRequest.setHeader(header, message.length);
+
     publishRequest.appendBody(message);
+
     sendToProxy(publishRequest);
-    removePublishRequest(publishRequest.channel);
   }
 
   final class NetServerOut extends Daemon {
