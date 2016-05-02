@@ -797,7 +797,7 @@ public class AMQPConnectionListener extends Daemon {
   protected void close() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AMQPConnectionListener.close()");
-    if(isRunning()) {
+    if(sock != null && isRunning()) {
       sendDisconnectedNotification();
     }
     closeProxy();
